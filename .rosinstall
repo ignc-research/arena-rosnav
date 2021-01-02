@@ -1,0 +1,19 @@
+- git:
+    local-name: ../forks/flatland
+    uri: https://github.com/FranklinBF/flatland.git
+    version: arena_flatland
+
+#- git:
+#    local-name: ../forks/navigation
+#    uri: https://github.com/ros-planning/navigation.git
+#    version: melodic-devel
+
+#- git:
+#    local-name: ../forks/geometry2
+#    uri: https://github.com/ros/geometry2.git
+#    version: melodic-devel
+
+- git:
+    local-name: ../forks/stable-baselines
+    uri: https://github.com/hill-a/stable-baselines.git
+    version: master

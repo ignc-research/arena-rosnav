@@ -1,0 +1,139 @@
+# Myrobot
+bodies:
+- name: base_footprint
+  enabled: true
+  pose: [0,0,0]
+  type: dynamic
+  color: [1,1,1,1]
+  linear_damping: 0
+  angular_damping: 0
+  footprints:
+    - type: circle
+      radius: 0.5
+      center: [0.0,0.0]
+      layers: ["all"]
+      collision: true
+      density: 1
+      friction: 0.1
+      restitution: 0
+      sensor: false
+
+- name: rear_wheel
+  enabled: true
+  pose: [0,0,0]
+  type: dynamic
+  footprints:
+    - type: polygon
+      points: [[-0.05, -0.05], [-0.05, 0.05], [0.05, 0.05], [0.05, -0.05]]
+      density: 1
+      sensor: true
+
+- name: left_wheel
+  footprints:
+    - type: polygon
+      points: [[-.125, -0.05], [-.125, 0.05], [.125, 0.05], [.125, -0.05]]
+      density: 1
+      sensor: true
+
+- name: right_wheel
+  footprints:
+    - type: polygon
+      points: [[-.125, -0.05], [-.125, 0.05], [.125, 0.05], [.125, -0.05]]
+      density: 1
+      sensor: true
+
+- name: laser_mount
+  pose: [0, 0, 0] 
+  type: dynamic  
+  color: [1, 0, 0, 0.75] 
+  footprints:
+    - type: polygon  # Laser model
+      sensor: true
+      points: [[.025, -.025], [.025, 0.025], [-.025, 0.025], [-.025, -0.025]]
+      density: 1
+
+
+joints:
+  - type: revolute
+    name: rear_wheel_revolute
+    enabled: true
+    collide_connected: false
+    limits: [0,0]
+    bodies: 
+      - name: rear_wheel
+        anchor: [0, 0]
+      - name: base_footprint
+        anchor: [-0.45,0.0]
+
+  - type: weld
+    name: left_wheel_weld
+    frequency: 0
+    damping: 0
+    bodies:
+      - name: left_wheel
+        anchor: [0,0]
+      - name: base_footprint
+        anchor: [0,-0.45]
+  
+  - type: weld
+    name: right_wheel_weld
+    frequency: 0
+    damping: 0
+    bodies:
+      - name: right_wheel
+        anchor: [0,0]
+      - name: base_footprint
+        anchor: [0,0.45]
+  
+  - type: weld
+    name: laser_mount_weld
+    frequency: 0
+    damping: 0
+    bodies:
+      - name: laser_mount
+        anchor: [0,0]
+      - name: base_footprint
+        anchor: [0.1,0]
+
+
+plugins:
+  - type: DiffDrive 
+    name: myrobot_drive 
+    body: base_footprint
+    odom_frame_id: odom
+    odom_pub: odom  # topic odom is published on
+    pub_rate: 10
+    # odom_pose_noise: [0.0005,0.0005,0.0001]
+    #odom_twist_noise: [0.001,0.001,0.001]
+    # odom_pose_covariance: [0.00, 0.01, 0.02, 0.03, 0.04, 0.05, 
+    #                         0.06, 0.07, 0.08, 0.09, 0.10, 0.11, 
+    #                         0.12, 0.13, 0.14, 0.15, 0.16, 0.17, 
+    #                         0.18, 0.19, 0.20, 0.21, 0.22, 0.23, 
+    #                         0.24, 0.25, 0.26, 0.27, 0.28, 0.29, 
+    #                         0.30, 0.31, 0.32, 0.33, 0.34, 0.35]
+  
+  - type: Laser
+    name: laser
+    frame: laser_mount
+    topic: scan
+    body: laser_mount
+    broadcast_tf: false
+    origin: [0.0, 0.0, 0.0]
+    range: 10
+    # angle: {min: -3.14159265359, max: 3.14159265359, increment: 0.05235987755}
+    angle: {min: -3.14159265359, max: 3.14159265359, increment: 0.06981317007}
+    noise_std_dev: 0.015
+    update_rate: 10
+    layers: ["all"]
+
+  - type: ModelTfPublisher
+    name: tf_publisher
+    publish_tf_world: false
+    # exclude: ["approx_footprint"]
+  
+  # - type: ConstVelocity
+  #   name: const_velocity
+  #   body: base_footprint
+  #   vel_x: 1
+  #   vel_y: 1
+  #   omega: 0.3

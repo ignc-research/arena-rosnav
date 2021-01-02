@@ -1,0 +1,25 @@
+# A cylindar that walks back and forth
+bodies:
+  - name: waker
+    pose: [0, 0, 0] 
+    type: dynamic  
+    color: [1, 1, 1, 0.75] 
+    footprints:
+      - type: circle
+        radius: 0.5
+        center: [-1, 0.0]
+        density: 1
+        # layers: ["2d"]
+plugins:
+  - type: Tween
+    name: Tween 
+    body: waker
+    delta: [5, 3, 3.141592]
+    duration: 30.0
+    mode: yoyo
+    easing: quadraticInOut
+  
+  - type: ModelTfPublisher
+    name: tf_publisher
+    publish_tf_world: false
+    # exclude: ["approx_footprint"]
