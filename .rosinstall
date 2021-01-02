@@ -17,3 +17,8 @@
     local-name: ../forks/stable-baselines
     uri: https://github.com/hill-a/stable-baselines.git
     version: master
+
+- git:
+    local-name: ../forks/stable-baselines
+    uri: https://github.com/DLR-RM/stable-baselines3.git
+    version: master
