@@ -1,0 +1,19 @@
+
+<launch>
+  <arg name="global_frame_id"/>
+  <arg name="odom_frame_id"/>
+  <arg name="base_frame_id" />
+  <arg name="odom_ground_truth"/>
+
+<!-- send fake static transform map_to_odom, which will be used to get localization from odom to map -->
+<node pkg="tf2_ros" type="static_transform_publisher" name="map_to_odom_tfpublisher" args="0 0 0 0 0 0 $(arg global_frame_id) $(arg odom_frame_id)"/>
+
+<!-- fake localization node, which will now not be used to send location topic -->
+<!-- <node pkg="flatland_fake_localization" type="fake_localization" name="fake_localization" output="screen">
+  <param name="global_frame_id" value="$(arg global_frame_id)"/>
+  <param name="odom_frame_id" value="$(arg odom_frame_id)"/>
+  <param name="base_frame_id" value="$(arg base_frame_id)"/>
+  <param name="base_pose_ground_truth" value="$(arg odom_ground_truth)"/>
+</node> -->
+
+</launch>

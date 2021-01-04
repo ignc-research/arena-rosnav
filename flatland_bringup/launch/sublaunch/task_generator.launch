@@ -1,0 +1,8 @@
+
+<launch>
+
+    <!--  ************** task generator  ***************  -->
+    <node pkg="task_generator" name="task_generator_node" type="task_generator_node.py" output="screen"> 
+    </node>
+
+</launch>

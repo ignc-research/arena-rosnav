@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(plan_visualization)
+project(flatland_local_planner_drl)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -7,13 +7,16 @@ project(plan_visualization)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(Eigen3 REQUIRED)
 find_package(catkin REQUIRED COMPONENTS
-  roscpp
-  sensor_msgs
   geometry_msgs
   nav_msgs
-  std_msgs
+  roscpp
+  rospy
+  sensor_msgs
+  tf2
+  tf2_geometry_msgs
+  tf2_ros
+  flatland_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -23,7 +26,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
 ## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
-# catkin_python_setup()
+catkin_python_setup()
 
 ################################################
 ## Declare ROS messages, services and actions ##
@@ -73,7 +76,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate added messages and services with any dependencies listed here
 # generate_messages(
 #   DEPENDENCIES
-#   geometry_msgs#   nav_msgs#   sensor_msgs#   std_msgs
+#   geometry_msgs#   nav_msgs#   sensor_msgs#   tf2_geometry_msgs
 # )
 
 ################################################
@@ -106,9 +109,9 @@ find_package(catkin REQUIRED COMPONENTS
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-  INCLUDE_DIRS include
-  LIBRARIES plan_visualization
-  CATKIN_DEPENDS sensor_msgs geometry_msgs nav_msgs std_msgs roscpp 
+#  INCLUDE_DIRS include
+#  LIBRARIES flatland_local_planner_drl
+#    CATKIN_DEPENDS geometry_msgs nav_msgs roscpp rospy sensor_msgs tf2 tf2_geometry_msgs tf2_ros
 #  DEPENDS system_lib
 )
 
@@ -119,16 +122,15 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-  include
+# include
+  scripts
   ${catkin_INCLUDE_DIRS}
-  
-  ${EIGEN3_INCLUDE_DIR}
 )
 
 ## Declare a C++ library
-add_library(plan_visualization
- src/planning_visualization.cpp
-)
+# add_library(${PROJECT_NAME}
+#   src/${PROJECT_NAME}/flatland_local_planner_drl.cpp
+# )
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -138,7 +140,7 @@ add_library(plan_visualization
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/plan_visualization_node.cpp)
+# add_executable(${PROJECT_NAME}_node src/flatland_local_planner_drl_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -151,9 +153,9 @@ add_library(plan_visualization
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(plan_visualization
-  ${catkin_LIBRARIES}
-)
+# target_link_libraries(${PROJECT_NAME}_node
+#   ${catkin_LIBRARIES}
+# )
 
 #############
 ## Install ##
@@ -164,10 +166,10 @@ target_link_libraries(plan_visualization
 
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
-# catkin_install_python(PROGRAMS
-#   scripts/my_python_script
-#   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
+catkin_install_python(PROGRAMS
+#    scripts/env/flatland_gym_env.py
+   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
 ## Mark executables for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_executables.html
@@ -202,7 +204,7 @@ target_link_libraries(plan_visualization
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_plan_visualization.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_flatland_local_planner_drl.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()

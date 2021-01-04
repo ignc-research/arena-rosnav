@@ -1,0 +1,15 @@
+<launch>
+
+  <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen" clear_params="true">
+    <!-- <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS" /> -->
+    <rosparam file="$(find flatland_bringup)/config/config_movebase/costmap_common_params.yaml" command="load" ns="global_costmap" />
+    <rosparam file="$(find flatland_bringup)/config/config_movebase/costmap_common_params.yaml" command="load" ns="local_costmap" />
+    <rosparam file="$(find flatland_bringup)/config/config_movebase/costmap_local_params.yaml" command="load" />
+    <rosparam file="$(find flatland_bringup)/config/config_movebase/costmap_global_params.yaml" command="load" />
+
+    <rosparam file="$(find flatland_bringup)/config/config_movebase/move_base_params.yaml" command="load" />
+    <rosparam file="$(find flatland_bringup)/config/config_movebase/global_planner_params.yaml" command="load" />
+    <rosparam file="$(find flatland_bringup)/config/config_movebase/local_planner_dwa_params.yaml" command="load" />
+  </node>
+  
+</launch>
