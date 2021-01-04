@@ -17,9 +17,9 @@ Train DRL agents on ROS compatible simulations for autonomous navigation in high
 
 ## Installation
 0. Standard ROS setup (Code has been tested with ROS-melodic on Ubuntu 18.04) with catkin_ws
-Install ROS Melodic
+Install ROS Melodic following the steps from ros wiki:
 ```
-webpage
+http://wiki.ros.org/melodic/Installation/Ubuntu
 ```
 Install additional ros pkgs 
 ```
@@ -128,18 +128,51 @@ rosrun plan_local_drl flatland_gym_env.py
 ````
 
 
-### Structure of the packges
-1. flatland bringup: final launch file
+## Structure of the project
+1. Bringup: 
+   1. Configs (configs with parameters
+   2. Launchfiles
+   3. RVIZfiles
 2. nav: 
-   1. plan_global
+   1. plan_global (move base)
    2. plan_local
-   3. plan_manage
-   4. plan_manage_move_base
-   5. plan_msgs
-3. simulator_setup
+      1. training-based
+         1. DRL
+            1. scripts
+               1. training
+               2. testing
+            2. rl_agent
+               1. envs
+               2. utils (reward collector, state collector, action collector , ..)
+            3. models (neural networks and policies stable baselines)    
+         2. Immitation Learning
+            1. scripts
+               1. dataset_gen
+               2. training
+               3. testing
+            2. weights
+         3. weights
+      2. other-planners 
+         1. cadrl
+         2. mcl
+         3. ...
+   3. plan_manager
+      1. waypoint-generators
+   4. plan_localization
+   5. plan_manager_move_base
+   6. plan_msgs
+3. simulator
    1. maps
-   2. obstacles
-   3. robot
+   2. models
+      1. robot
+      2. obstacles
+   3. scripts
+      1. behavior_modeling
+      2. heatmap_gen
 4. task_generator
+   1. scripts
 5. utils
    1. rviz_plugin
+   2. pluggins
+6. evaluation
+   1. scripts
