@@ -11,15 +11,21 @@ Train DRL agents on ROS compatible simulations for autonomous navigation in high
 
 * Setup to train a local planner with reinforcement learning approaches from [stable baselines](https://github.com/hill-a/stable-baselines)
 
-* Training in a simulator fusion of [Flatland](https://github.com/avidbots/flatland) and [pedsim_ros](https://github.com/srl-freiburg/pedsim_ros)
+* Training in simulator [Flatland](https://github.com/avidbots/flatland) in train mode
 
-* Local planner has been trained on static and dynamic obstacles: [video](https://www.youtube.com/watch?v=nHvpO0hVnAg)
+* Local planner has been trained on static and dynamic obstacles with highly dynamic tasks
 
-* Combination with arena2d levels for highly randomized training and better generalization
+* Implementation of intermediate planner classes to combine local DRL with global map-based planning of ROS Navigation stack
+
+* Integration of other obstacle avoidance approaches in ROS 
+
+* Testing a variety of planners (learning based and classic) within specific scenarios in test mode
+
+* Modular structure for extension of new functionalities and approaches
 
 ### Documentation ###
 * How to use flatland: http://flatland-simulator.readthedocs.io
-* 
+* Full documentation and system design is released this week
 
 ## Installation
 0. Standard ROS setup (Code has been tested with ROS-melodic on Ubuntu 18.04) with catkin_ws
