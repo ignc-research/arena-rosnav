@@ -19,7 +19,7 @@ Train DRL agents on ROS compatible simulations for autonomous navigation in high
 
 ### Documentation ###
 * How to use flatland: http://flatland-simulator.readthedocs.io
-* 
+* Full documentation is released this week
 
 ## Installation
 0. Standard ROS setup (Code has been tested with ROS-melodic on Ubuntu 18.04) with catkin_ws
