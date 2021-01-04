@@ -292,6 +292,7 @@ class ObstaclesManager:
                 filter(r.match, self.obstacle_name_list))
             for n in to_be_removed_obstacles_names:
                 self.remove_obstacle(n)
+            self.obstacle_name_list = list(set(self.obstacle_name_list)-set(to_be_removed_obstacles_names))
         else:
             # it possible that in flatland there are still obstacles remaining when we create an instance of
             # this class.

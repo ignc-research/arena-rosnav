@@ -11,20 +11,24 @@ Panels:
         - /MarkerArray3
         - /MarkerArray4
         - /MarkerArray5/Namespaces1
+        - /MarkerArray18
+        - /MarkerArray19
+        - /MarkerArray20
+        - /MarkerArray21
+        - /MarkerArray22
         - /Path1
         - /PoseArray1
         - /Marker2
         - /Marker3
         - /Marker4
       Splitter Ratio: 0.6526610255241394
-    Tree Height: 797
+    Tree Height: 791
   - Class: rviz/Selection
     Name: Selection
   - Class: rviz/Tool Properties
     Expanded:
       - /2D Pose Estimate1
       - /2D Nav Goal1
-      - /3D Nav Goal1
     Name: Tool Properties
     Splitter Ratio: 0.4285709857940674
   - Class: rviz/Views
@@ -200,16 +204,6 @@ Visualization Manager:
       Unreliable: false
       Use Timestamp: false
       Value: true
-    - Alpha: 0.699999988079071
-      Class: rviz/Map
-      Color Scheme: costmap
-      Draw Behind: false
-      Enabled: true
-      Name: Local_costmap
-      Topic: /move_base/local_costmap/costmap
-      Unreliable: false
-      Use Timestamp: false
-      Value: true
     - Alpha: 1
       Buffer Length: 1
       Class: rviz/Path
@@ -316,6 +310,16 @@ Visualization Manager:
       Shape: Arrow
       Topic: /move_base_simple/goal
       Unreliable: false
+      Value: true
+    - Alpha: 0.699999988079071
+      Class: rviz/Map
+      Color Scheme: costmap
+      Draw Behind: false
+      Enabled: true
+      Name: Local_costmap
+      Topic: /move_base/local_costmap/costmap
+      Unreliable: false
+      Use Timestamp: false
       Value: true
     - Class: rviz/Marker
       Enabled: true
@@ -529,7 +533,23 @@ Visualization Manager:
       Value: true
     - Class: rviz/MarkerArray
       Enabled: true
-      Marker Topic: /flatland_server/debug/model/stat_obj_16
+      Marker Topic: /flatland_server/debug/model/obstacles_static_random_01
+      Name: MarkerArray
+      Namespaces:
+        "": true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /flatland_server/debug/model/obstacles_static_random_00
+      Name: MarkerArray
+      Namespaces:
+        "": true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /flatland_server/debug/model/obstacles_dynamic_random_02
       Name: MarkerArray
       Namespaces:
         {}
@@ -537,7 +557,7 @@ Visualization Manager:
       Value: true
     - Class: rviz/MarkerArray
       Enabled: true
-      Marker Topic: /flatland_server/debug/model/stat_obj_17
+      Marker Topic: /flatland_server/debug/model/obstacles_dynamic_random_01
       Name: MarkerArray
       Namespaces:
         {}
@@ -545,26 +565,10 @@ Visualization Manager:
       Value: true
     - Class: rviz/MarkerArray
       Enabled: true
-      Marker Topic: /flatland_server/debug/model/stat_obj_18
+      Marker Topic: /flatland_server/debug/model/obstacles_dynamic_random_00
       Name: MarkerArray
       Namespaces:
-        {}
-      Queue Size: 100
-      Value: true
-    - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /flatland_server/debug/model/stat_obj_19
-      Name: MarkerArray
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: true
-    - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /flatland_server/debug/model/stat_obj_20
-      Name: MarkerArray
-      Namespaces:
-        {}
+        "": true
       Queue Size: 100
       Value: true
     - Alpha: 1
@@ -611,7 +615,7 @@ Visualization Manager:
       Marker Topic: /planning_vis/goal
       Name: Marker
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/Marker
@@ -652,10 +656,11 @@ Visualization Manager:
     - Class: flatland_viz/SpawnModel
     - Class: rviz_plugins/Goal3DTool
       Topic: goal
+    - Class: rviz_plugins/TaskGenerator
   Value: true
   Views:
     Current:
-      Angle: -8.01500129699707
+      Angle: -8.400005340576172
       Class: rviz/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
@@ -665,7 +670,7 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 38.54548263549805
+      Scale: 22.721052169799805
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
       X: 0.35665392875671387
@@ -687,5 +692,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1920
-  X: 82
-  Y: 60
+  X: 0
+  Y: 31

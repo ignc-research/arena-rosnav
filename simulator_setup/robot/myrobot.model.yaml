@@ -33,7 +33,7 @@ plugins:
     range: 3
     angle: {min: -3.12413936, max: 3.14159265359, increment: 0.01745}
     noise_std_dev: 0.015
-    # update_rate: 10
+    update_rate: 10
 
 
   - type: ModelTfPublisher

@@ -12,64 +12,13 @@ Train DRL agents on ROS compatible simulations for autonomous navigation in high
 ### Documentation ###
 * How to use flatland: http://flatland-simulator.readthedocs.io
 * 
+### create workspace & clone
 
-
-## Installation
-0. Standard ROS setup (Code has been tested with ROS-melodic on Ubuntu 18.04) with catkin_ws
-```
-sudo apt-get update && sudo apt-get install -y \
-libqt4-dev \
-libopencv-dev \
-liblua5.2-dev \
-screen \
-ros-melodic-tf2-geometry-msgs \
-ros-melodic-navigation \
-ros-melodic-rviz 
-```
-
-1. Create a catkin workspace & clone this repo into it
 ````
-mkdir -p catkin_ws/src
-cd catkin_ws && catkin_make -DPYTHON_EXECUTABLE=/usr/bin/python3
-cd src
-git clone https://github.com/ignc-research/arena-rosnav
-cd arena-rosnav
+mkdir -P catkin_ws/src
+cd catkin_ws/src
+git clone https://github.com/FranklinBF/navigation_flatland.git
 ````
-
-2. Copy Install file and install forks
-````
-rosws update
-```` 
-
-3. Install virtual environment and wrapper (as root or admin!) on your local pc (without conda activated) to be able to use python3 with ros
-```
-sudo pip3 install --upgrade pip
-sudo pip3 install virtualenv
-sudo pip3 install virtualenvwrapper
-which virtualenv   # should output /usr/local/bin/virtualenv  
-```
-
-      
-4. Create venv folder inside hom directory
-```
-cd $HOME
-mkdir python_env   # create a venv folder in your home directory 
-```
-
-Add this into your .bashrc/.zshrc :
-```
-echo "export WORKON_HOME=/home/linh/python_env   #path to your venv folder
-export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python3   #path to your python3 
-export VIRTUALENVWRAPPER_VIRTUALENV=/usr/local/bin/virtualenv
-source /usr/local/bin/virtualenvwrapper.sh
-source ~/.zsh" >> ~/.zshrc
-```
-Create a new venv
-```
-mkvirtualenv --python=python3.6 rosnav
-workon arena-flatland-py3
-```
-
 
 ### install forks
 ````
@@ -82,12 +31,30 @@ rosws update
 go to catkin_ws
 catkin_make
 ````
+### geometry2
+The official ros only support python2. In order to make the $tf$ work in python3, its necessary to compile it with python3. We provided a script to automately this this
+and do some additional configurations for the convenience . You can simply run it with 
+````bash
+./geometry2_install.sh
+After that you can try to import tf in python3 and no error is supposed to be shown up.
+````
+
 
 ### quick start simulation env and launch
 ````
 roslaunch flatland_bringup start_flatland.launch  train_mode:=false
 ````
-
+### quick test with the training 
+In one terminnal
+```bash
+roslaunch flatland_bringup start_flatland.launch  train_mode:=true
+```
+In another terminal
+```
+roscd plan_local_drl
+python scripts/training/training_example.py
+```
+Hint: During 2021-01-05 and 2021-01-10, plan_local_drl package is still under the development, which means the api of the class could be drastically changed. Sorry about the inconvinience!
 
 ###  start plan manager with FSM
 ````

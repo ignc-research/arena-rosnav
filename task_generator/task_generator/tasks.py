@@ -2,6 +2,7 @@ import os
 from abc import ABC, abstractmethod
 from threading import Condition, Lock
 import rospy
+import rospkg
 from nav_msgs.msg import OccupancyGrid
 from nav_msgs.srv import GetMap
 from geometry_msgs.msg import Pose2D
@@ -19,10 +20,9 @@ class ABSTask(ABC):
         self.obstacles_manager = obstacles_manager
         self.robot_manager = robot_manager
         self._service_client_get_map = rospy.ServiceProxy("static_map", GetMap)
-
+        self._map_lock = Lock()
         rospy.Subscriber("map", OccupancyGrid, self._update_map)
         # a mutex keep the map is not unchanged during reset task.
-        self._map_lock = Lock()
 
     @abstractmethod
     def reset(self):
@@ -39,6 +39,9 @@ class ABSTask(ABC):
 class RandomTask(ABSTask):
     """ Evertime the start position and end position of the robot is reset.
     """
+
+    def __init__(self, obstacles_manager: ObstaclesManager, robot_manager: RobotManager):
+        super().__init__(obstacles_manager, robot_manager)
 
     def reset(self):
         """[summary]
@@ -106,7 +109,6 @@ class ManualTask(ABSTask):
 
 
 def get_predefined_task():
-    import rospkg
 
     # check is it on traininig mode or test mode. if it's on training mode
     # flatland will provide an service called 'step_world' to change the simulation time
@@ -122,10 +124,10 @@ def get_predefined_task():
         # This is kind of hacky. the services provided by flatland may take a couple of step to complete
         # the configuration including the map service.
         steps = 400
-        step_word = rospy.ServiceProxy(
+        step_world = rospy.ServiceProxy(
             'step_world', StepWorld, persistent=True)
         for _ in range(steps):
-            step_word()
+            step_world()
 
     # get the map
     service_client_get_map = rospy.ServiceProxy("static_map", GetMap)
@@ -140,7 +142,7 @@ def get_predefined_task():
     obstacles_manager = ObstaclesManager(map_response.map, TRAINING_MODE)
     # only generate 3 static obstaticles
     # obstacles_manager.register_obstacles(3, os.path.join(
-        # models_folder_path, "obstacles", 'random.model.yaml'), 'static')
+    # models_folder_path, "obstacles", 'random.model.yaml'), 'static')
     # generate 5 static or dynamic obstaticles
     obstacles_manager.register_random_obstacles(5)
 

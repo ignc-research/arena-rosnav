@@ -1,16 +1,25 @@
+
+import os
 from stable_baselines3 import A2C
 from rl_agent.envs.flatland_gym_env import FlatlandEnv
 from task_generator.tasks import get_predefined_task
 import rospy
-task = get_predefined_task()
-env = FlatlandEnv(task)
+import rospkg
 
 rospy.init_node("test")
+task = get_predefined_task()
+models_folder_path = rospkg.RosPack().get_path('simulator_setup')
+plan_local_drl_folder_path = rospkg.RosPack().get_path('plan_local_drl')
+
+
+env = FlatlandEnv(task,os.path.join(models_folder_path,'robot','myrobot.model.yaml'),
+                    os.path.join(plan_local_drl_folder_path,'configs','default_settings.yaml'),True,
+                  )
 model = A2C('MlpPolicy', env, verbose=1)
 import time
 
 s = time.time()
-model.learn(total_timesteps=1000)
+model.learn(total_timesteps=3000)
 print("steps per second: {}".format(1000/(time.time()-s)))
 # obs = env.reset()
 # for i in range(1000):
@@ -19,3 +28,4 @@ print("steps per second: {}".format(1000/(time.time()-s)))
 #     env.render()
 #     if done:
 #       obs = env.reset()
+

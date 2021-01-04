@@ -51,7 +51,7 @@ Goal3DTool::Goal3DTool()
 void Goal3DTool::onInitialize()
 {
   Pose3DTool::onInitialize();
-  setName( "3D Nav Goal" );
+  setName( "Flatland Nav Goal" );
   updateTopic();
 }
 
@@ -62,7 +62,7 @@ void Goal3DTool::updateTopic()
 
 void Goal3DTool::onPoseSet(double x, double y, double z, double theta)
 {
-  ROS_WARN("3D Goal Set");
+  ROS_WARN("Flatland Goal Set");
   std::string fixed_frame = context_->getFixedFrame().toStdString();
   tf::Quaternion quat;
   quat.setRPY(0.0, 0.0, theta);

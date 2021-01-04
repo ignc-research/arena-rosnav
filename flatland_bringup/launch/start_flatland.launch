@@ -19,7 +19,7 @@
 
   <arg name="world_path"   default="$(find simulator_setup)/maps/map1/map.world.yaml"/>
   <arg name="update_rate" default="1000.0"/>
-  <arg name="step_size" default="0.005"/>
+  <arg name="step_size" default="0.1"/>
   <arg name="show_viz" default="true"/>
   <arg name="viz_pub_rate" default="30.0"/>
   <arg name="use_rviz" default="true"/>  
@@ -96,5 +96,8 @@
   <node name="flatland_rviz" pkg="rviz" type="rviz" output="screen" args="-d $(find flatland_bringup)/rviz/nav.rviz"/>
 </group>
 
+<!--  ************** task generator  ***************  -->
+<node pkg="task_generator" name="task_generator_node" type="task_generator_node.py" output="screen"> 
+</node>
 
 </launch>

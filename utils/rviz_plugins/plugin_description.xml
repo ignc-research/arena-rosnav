@@ -26,5 +26,12 @@
     <description>
       Display of multiple -inf +inf probabilistic occupancy grid map
     </description>
+  </class>
+  <class name="rviz_plugins/TaskGenerator"
+         type="rviz::TaskTool"
+         base_class_type="rviz::Tool">
+    <description>
+      Generate Task
+    </description>
   </class>  
 </library>
