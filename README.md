@@ -9,37 +9,88 @@ Train DRL agents on ROS compatible simulations for autonomous navigation in high
 
 * Local planner has been trained on static and dynamic obstacles: [video](https://www.youtube.com/watch?v=nHvpO0hVnAg)
 
+* Combination with arena2d levels for highly randomized training and better generalization
+
 ### Documentation ###
 * How to use flatland: http://flatland-simulator.readthedocs.io
 * 
-### create workspace & clone
 
-````
-mkdir -P catkin_ws/src
-cd catkin_ws/src
-git clone https://github.com/FranklinBF/navigation_flatland.git
-````
+## Installation
+0. Standard ROS setup (Code has been tested with ROS-melodic on Ubuntu 18.04) with catkin_ws
+Install ROS Melodic
+```
+webpage
+```
+Install additional ros pkgs 
+```
+sudo apt-get update && sudo apt-get install -y \
+libqt4-dev \
+libopencv-dev \
+liblua5.2-dev \
+screen \
+python3-catkin-pkg-modules \
+python3-rospkg-modules \
+python3-empy
+```
 
-### install forks
+1. Create a catkin_ws and clone this repo into your catkin_ws 
 ````
-cd nav_in_flatland
-rosws update
-````
-
-### catkin_make
-````
-go to catkin_ws
-catkin_make
-````
-### geometry2
-The official ros only support python2. In order to make the $tf$ work in python3, its necessary to compile it with python3. We provided a script to automately this this
-and do some additional configurations for the convenience . You can simply run it with 
-````bash
+cd $HOME
+mkdir -p catkin_ws/src && cd catkin_ws/src
+git clone https://github.com/ignc-research/arena-rosnav
+cd arena-rosnav && rosws update
 ./geometry2_install.sh
-After that you can try to import tf in python3 and no error is supposed to be shown up.
+source $HOME/.zshrc
+cd ../.. 
+catkin_make -DPYTHON_EXECUTABLE=/usr/bin/python3
+source devel/setup.zsh
 ````
+2. To be able to use python3 with ROS, you need an virtual environment. We recommend using venv. Install virtual environment and wrapper (as root or admin! with sudo) on your local pc (without conda activated, deactivate conda env. if you have one active)
+```
+sudo pip3 install --upgrade pip
+sudo pip3 install virtualenv
+sudo pip3 install virtualenvwrapper
+which virtualenv   # should output /usr/local/bin/virtualenv  
+```
+      
+3. Create venv folder inside your home directory
+```
+cd $HOME
+mkdir python_env   # create a venv folder in your home directory 
+```
 
+4. Add exports into your .zshrc (if you use bash change the last line to bashrc instead of zshrc):
+```
+echo "export WORKON_HOME=/home/linh/python_env   #path to your venv folder
+export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python3   #path to your python3 
+export VIRTUALENVWRAPPER_VIRTUALENV=/usr/local/bin/virtualenv
+source /usr/local/bin/virtualenvwrapper.sh" >> ~/.zshrc
+```
+5. Create a new venv
+```
+mkvirtualenv --python=python3.6 rosnav
+workon rosnav
+```
 
+6. Install packages inside your venv (venv always activated!):
+```
+pip install --extra-index-url https://rospypi.github.io/simple/ rospy rosbag tf tf2_ros --ignore-installed
+pip install pyyaml catkin_pkg netifaces
+```     
+
+Install stable_baselines3 for training DRL into your venv (venv always activated!)
+```
+cd $HOME/catkin_ws/src/forks/stable-baselines3
+pip install -e .
+```
+
+## Usage
+Before you test out the packages, always source your setup.zsh /setup.bash inside your catkin workspace also source your $HOME/.zshrc:
+```
+cd $HOME/catkin_ws
+source devel/setup.zsh
+source $HOME/.zshrc
+```
 ### quick start simulation env and launch
 ````
 roslaunch flatland_bringup start_flatland.launch  train_mode:=false
@@ -61,12 +112,14 @@ Hint: During 2021-01-05 and 2021-01-10, plan_local_drl package is still under th
 rosrun plan_manage plan_manager_node
 ````
 
-### [optional]use task generator to spawn random obstacles
+### use task generator to spawn random obstacles
 ````
-rosrun task_generator task_generator.py 
+roslaunch flatland_bringup start_flatland.launch  train_mode:=false
+rosrun task_generator task_generator_node.py 
 ````
+Now you can manually generate new tasks using the Pluggin inside RVIZ "Generate Task". You should set a "Flatland Goal" with the button and afterwards a "2D navigation goal". Afterwards the robot will automatically move once you spawn a new tasks by clicking the "Generate Task" button.
 
-### [optional]use flatland_gym_env
+### use flatland_gym_env
 ````
 roslaunch flatland_bringup start_flatland.launch  train_mode:=true
 
