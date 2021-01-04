@@ -1,5 +1,11 @@
 # arena-rosnav
 
+<p align="center">
+  <img width="300" height="300" src="/img/f1taskgen.gif">
+	<img width="300" height="300" src="/img/1training.gif">
+</p>
+
+
 # What is this repository for?
 Train DRL agents on ROS compatible simulations for autonomous navigation in highly dynamic environments. Test state of the art local and global planners in ROS environments both in simulation and on real hardware. Following features are included:
 
