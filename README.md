@@ -1,7 +1,7 @@
 # nav_in_flatland
 
 # What is this repository for?
-Train DRL agents on ROS compatible simulations for autonomous navigation in highly dynamic environments. Flatland-DRL integration is based on Ronja Gueldenring's repo: drl_local_planner_ros_stable_baselines. Following features are included:
+Train DRL agents on ROS compatible simulations for autonomous navigation in highly dynamic environments. Test state of the art local and global planners in ROS environments both in simulation and on real hardware. Following features are included:
 
 * Setup to train a local planner with reinforcement learning approaches from [stable baselines](https://github.com/hill-a/stable-baselines)
 
