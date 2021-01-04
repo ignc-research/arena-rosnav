@@ -1,4 +1,4 @@
-# nav_in_flatland
+# arena-rosnav
 
 # What is this repository for?
 Train DRL agents on ROS compatible simulations for autonomous navigation in highly dynamic environments. Test state of the art local and global planners in ROS environments both in simulation and on real hardware. Following features are included:
