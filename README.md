@@ -103,41 +103,52 @@ cd $HOME/catkin_ws
 source devel/setup.zsh
 source $HOME/.zshrc
 ```
-### quick start simulation env and launch
+
+### Quick start
+###### start simulation env & plan manager
 ````
-roslaunch flatland_bringup start_flatland.launch  train_mode:=false
+roslaunch arena_bringup start_arena_flatland.launch  train_mode:=false
 ````
-### quick test with the training 
-In one terminnal
+start_flatland.launch will start several other sublaunch files and some neccesary ros packages:
+   1. **start simulator node**: start flatland, load robot model
+   2. **start map server node**: load map, which will provide occupancy grid used for mapping functions later
+   3. **start fake localization**: which will provide static tf map_to_odom, in order to have localization of the robot.
+   4. **start task generator node**: which provide task generation service for rviz_plugin(Generate Task)
+   5. **start plan manager node**: provide manager for robot state estimation, mapping, global planner and local planner,  which is the key for navigation framework. The move_base is contained, because currently we need its global_planner and mapping functions, later they won't be needed.
+   6. **/train_mode/**: 
+   * if true, the simulator(flatland) will provide a *step_world service* and the simulator will update its simulation when he receives a *step_world service request*.
+   * if true, the plan manager will generate subgoal topic always as goal(global goal) topic.
+   * if false, you can also use move_base action triggered by rviz_plugin button *2D Navigation Goal*. 
+
+###### test DRL training
+
+* In one terminnal
+
 ```bash
-roslaunch flatland_bringup start_flatland.launch  train_mode:=true
+roslaunch arena_bringup start_arena_flatland.launch  train_mode:=true
 ```
-In another terminal
+* In another terminal
+
 ```
-roscd flatland_local_planner_drl 
+workon rosnav
+roscd arena_local_planner_drl
 python scripts/training/training_example.py
 ```
-Hint: During 2021-01-05 and 2021-01-10, plan_local_drl package is still under the development, which means the api of the class could be drastically changed. Sorry about the inconvinience!
+first **activate your python3 env**, which contains libaraies stable_baseline3, geometry2
+then python run the script.
 
-###  start plan manager with FSM
-````
-rosrun plan_manage plan_manager_node
-````
+Hint: During 2021-01-05 and 2021-01-10, arena_local_planner_drl package is still under the development, which means the api of the class could be drastically changed. Sorry about the inconvinience!
 
-### use task generator to spawn random obstacles
-````
-roslaunch flatland_bringup start_flatland.launch  train_mode:=false
-rosrun task_generator task_generator_node.py 
-````
-Now you can manually generate new tasks using the Pluggin inside RVIZ "Generate Task". You should set a "Flatland Goal" with the button and afterwards a "2D navigation goal". Afterwards the robot will automatically move once you spawn a new tasks by clicking the "Generate Task" button.
 
-### use flatland_gym_env
-````
-roslaunch flatland_bringup start_flatland.launch  train_mode:=true
+###### Rviz plugins:
+   <p align="center">
+      <img width="600" height="480" src="img/rviz_plugin_intro.png">
+   </p>
 
-rosrun plan_local_drl flatland_gym_env.py
-
-````
+   1. 2D Nav Goal: triggers move_base action
+   2. Spawn Model: load a new model.yaml to flatland simulator
+   3. Arena Nav Goal: set (global) goal for arena navigation
+   4. Generate Task: change task, which changes the position of obstacles and set a new goal for arena navigation
 
 
 ## Structure of the project
