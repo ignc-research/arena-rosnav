@@ -195,7 +195,7 @@ rosrun plan_local_drl flatland_gym_env.py
 ### 5. Navigation framework
 
 <p align="center">
-  <img width="500" height="300" src="/plan_manager.png">
+  <img width="500" height="300" src="img/plan_manager.png">
 </p>
 
 #### **arena_navigation**
@@ -303,8 +303,8 @@ To be added...
 
 ### 8. DRL Local planner(Training and Testing)
 <p align="center">
-  <img width="400" height="300" src="/local_planner.png">
-  <img width="400" height="300" src="/synchronization.png">
+  <img width="400" height="300" src="img/local_planner.png">
+  <img width="400" height="300" src="img/synchronization.png">
 </p>
 
 ##### Communication:
