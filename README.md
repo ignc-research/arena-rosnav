@@ -108,6 +108,7 @@ source devel/setup.zsh
 ````
 
 * Install ros geometry2 from source(compiled with python3) 
+
 The official ros only support tf2 with python2. In order to make the $tf$ work in python3, its necessary to compile it with python3. We provided a script to automately this this
 and do some additional configurations for the convenience . You can simply run it with 
 ```bash
