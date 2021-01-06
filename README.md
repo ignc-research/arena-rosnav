@@ -6,7 +6,7 @@
 </p>
 
 
-# What is this repository for?
+## 0. What is this repository for?
 Train DRL agents on ROS compatible simulations for autonomous navigation in highly dynamic environments. Flatland-DRL integration is inspired by Ronja Gueldenring's work: [drl_local_planner_ros_stable_baselines](https://github.com/RGring/drl_local_planner_ros_stable_baselines.git). Test state of the art local and global planners in ROS environments both in simulation and on real hardware. Following features are included:
 
 * Setup to train a local planner with reinforcement learning approaches from [stable baselines3](https://github.com/DLR-RM/stable-baselines3.git)
@@ -86,7 +86,7 @@ pip install --extra-index-url https://rospypi.github.io/simple/ rospy rosbag tf 
 pip install pyyaml catkin_pkg netifaces
 ```     
 
-Install stable_baselines3 for training DRL into your venv (venv always activated!)
+* Install stable_baselines3 for training DRL into your venv (venv always activated!)
 ```
 pip install stable-baselines3
 ```
@@ -124,7 +124,7 @@ source devel/setup.zsh
 source $HOME/.zshrc
 ```
 
-#### 2.1. [Quick start]start simulation env & plan manager
+#### 2.1. [Quick start] start simulation env & plan manager
 ````
 roslaunch arena_bringup start_arena_flatland.launch  train_mode:=false
 ````
@@ -139,7 +139,7 @@ start_flatland.launch will start several other sublaunch files and some neccesar
    * if true, the plan manager will generate subgoal topic always as goal(global goal) topic.
    * if false, you can also use move_base action triggered by rviz_plugin button *2D Navigation Goal*. 
 
-#### 2.2 [Quick start]test DRL training
+#### 2.2. [Quick start] test DRL training
 
 * In one terminnal
 
