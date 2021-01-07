@@ -6,7 +6,8 @@
     <arg name="base_frame_id"    />
     
     <!-- move_base plan manager: which provide basic global planner and cost map -->
-    <include file="$(find arena_bringup)/launch/sublaunch/move_base.launch"/>
+    <arg name="local_planner" default="cadrl"/>
+    <include file="$(find arena_bringup)/launch/sublaunch/move_base/move_base_$(arg local_planner).launch"/>
 
     <!-- arena_plan_manager -->
     <node pkg="arena_plan_manager" name="plan_manager" type="plan_manager_node" output="screen">
