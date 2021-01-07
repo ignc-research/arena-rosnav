@@ -51,7 +51,7 @@ python3-catkin-pkg-modules \
 python3-rospkg-modules \
 python3-empy \
 python3-setuptools
-ros-melodic-navigation \
+ros-melodic-navigation 
 
 ```
 
