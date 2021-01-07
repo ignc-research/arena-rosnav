@@ -30,23 +30,29 @@ Train DRL agents on ROS compatible simulations for autonomous navigation in high
 
 ## 1. Installation
 #### 1.1. Standard ROS setup
-(Code has been tested with ROS-melodic on Ubuntu 18.04)
+(Code has been tested with ROS-melodic on Ubuntu 18.04 and Python 3.6)
 
 * Install ROS Melodic following the steps from ros wiki:
 ```
 http://wiki.ros.org/melodic/Installation/Ubuntu
 ```
 
-* Install additional ros pkgs 
+* Install additional pkgs 
 ```
 sudo apt-get update && sudo apt-get install -y \
 libqt4-dev \
 libopencv-dev \
 liblua5.2-dev \
 screen \
+python3.6 \
+python3.6-dev \
+libpython3.6-dev \
 python3-catkin-pkg-modules \
 python3-rospkg-modules \
-python3-empy
+python3-empy \
+python3-setuptools
+ros-melodic-navigation \
+
 ```
 
 #### 1.2. Prepare virtual environment & install python packages
