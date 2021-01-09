@@ -61,6 +61,7 @@ private:
     RobotStatePtr start_state_;      // start state
     RobotStatePtr end_state_;        // goal state
     ros::Time start_time_;
+    ros::Time subgoal_start_time_;
 
     
     /* ROS utils */
