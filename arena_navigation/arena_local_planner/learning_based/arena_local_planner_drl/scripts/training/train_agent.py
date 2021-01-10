@@ -1,4 +1,6 @@
+import os
 import rospy
+from datetime import datetime
 
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv
@@ -11,7 +13,7 @@ from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl
 from task_generator.task_generator.tasks import get_predefined_task
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.scripts.custom_policy import *
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.rl_agent.envs.flatland_gym_env import FlatlandEnv
-from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.tools.train_agent_utils import *
+
 
 ###HYPERPARAMETER###
 gamma = 0.99
@@ -26,12 +28,39 @@ noptepochs = 4
 cliprange = 0.2
 ####################
 
+def get_agent_name(args):
+    """ get agent name to save/load
+
+    Example names:
+    "MLP_B_64-64_P_32-32_V_32-32_relu_2021_01_07__10_32"
+    "DRL_LOCAL_PLANNER_2021_01_08__7_14"
+
+    """
+    START_TIME = datetime.now().strftime("%Y_%m_%d__%H_%M")
+
+    if args.custom_mlp:
+        return "MLP_B_" + args.body + "_P_" + args.pi + "_V_" + args.vf + "_" + args.relu + "_" + START_TIME
+    else:
+        if args.load is not None:
+            return args.load
+        return args.agent + "_" + START_TIME
+
+
+def get_paths(agent_name: str):
+    """ function to generate the agent specific paths """
+    PATHS = dict()
+    PATHS['model']
+    PATHS['tb']
+    PATHS['eval']
+
+    return PATHS
+
 
 if __name__ == "__main__":
     args, _ = parse_training_args()
 
-    AGENT_NAME = agent_name(args)
-    PATHS = get_paths(AGENT_NAME)
+    AGENT_NAME = get_agent_name(args)
+    #PATHS = get_paths(AGENT_NAME)
 
     if args.n is None:
         n_timesteps = 60000
@@ -53,7 +82,7 @@ if __name__ == "__main__":
 
 
     if args.custom_mlp:
-
+        # custom mlp flag
         model = PPO("MlpPolicy", env, policy_kwargs = dict(net_arch = args.net_arch, activation_fn = get_act_fn(args.act_fn)), 
                     verbose = 0, gamma = gamma, n_steps = n_steps, ent_coef = ent_coef, 
                     learning_rate = learning_rate, vf_coef = vf_coef, max_grad_norm = max_grad_norm, gae_lambda = lam, 
