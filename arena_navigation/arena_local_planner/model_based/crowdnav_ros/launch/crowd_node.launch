@@ -1,0 +1,30 @@
+<launch>
+	<arg name="tb3_speed" default="0.3"/>
+    <!-- Launch neural net ros wrapper -->
+    <node pkg="crowdnav_ros" type="crowd_node_tb3.py" name="crowd_node" output="screen" ns="/crowd">
+        
+        <!-- Publications -->
+        <remap from="~other_vels" to="other_vels"/>
+        <remap from="~nn_cmd_vel" to="/cmd_vel"/>
+        <remap from="~pose_marker" to="pose_marker"/>
+        <remap from="~path_marker" to="path_marker"/>
+        <remap from="~goal_path_marker" to="goal_path_marker"/>
+        <remap from="~agent_marker" to="other_agents_marker"/>
+        <remap from="~agent_markers" to="other_agents_markers"/>
+        
+        <!-- Subscriptions -->
+        <remap from="~pose" to="/odom"/>
+        <remap from="~velocity" to="velocity"/>
+        <remap from="~safe_actions" to="local_path_finder/safe_actions"/>
+        <remap from="~planner_mode" to="planner_fsm/mode"/>
+        <remap from="~goal" to="/goal"/>
+        <remap from="~subgoal" to="/plan_manager/subgoal"/>
+        <remap from="~clusters" to="/obst_odom"/>
+        <remap from="~peds" to="ped_manager/ped_recent"/>
+        
+        <!-- Parameters -->
+        <param name="~tb3_speed" value="$(arg tb3_speed)"/>
+
+    </node>
+
+</launch>
