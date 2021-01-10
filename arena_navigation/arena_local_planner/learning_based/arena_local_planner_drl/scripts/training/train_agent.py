@@ -11,6 +11,7 @@ from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl
 from task_generator.task_generator.tasks import get_predefined_task
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.scripts.custom_policy import *
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.rl_agent.envs.flatland_gym_env import FlatlandEnv
+from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.tools.train_agent_utils import *
 
 ###HYPERPARAMETER###
 gamma = 0.99
@@ -29,6 +30,9 @@ cliprange = 0.2
 if __name__ == "__main__":
     args, _ = parse_training_args()
 
+    AGENT_NAME = agent_name(args)
+    PATHS = get_paths(AGENT_NAME)
+
     if args.n is None:
         n_timesteps = 60000
     else:
@@ -41,56 +45,47 @@ if __name__ == "__main__":
     ROBOT_AS_PATH = rospkg.RosPack().get_path('arena_local_planner_drl')
     yaml_ROBOT_SETTING_PATH = os.path.join(ROBOT_SETTING_PATH, 'robot', 'myrobot.model.yaml')
     yaml_ROBOT_AS_PATH = os.path.join(ROBOT_AS_PATH, 'configs', 'default_settings.yaml')
-    
+
+    print("________ STARTING TRAINING WITH:  %s ________" % AGENT_NAME)
+
     n_envs = 1
     env = DummyVecEnv([lambda: FlatlandEnv(task, yaml_ROBOT_SETTING_PATH, yaml_ROBOT_AS_PATH, True)] * n_envs)
 
-    # check which mode
+
     if args.custom_mlp:
-        print(args.net_arch)
-        print(args.act_fn)
-        #TODO: check if model already exists, load
+
         model = PPO("MlpPolicy", env, policy_kwargs = dict(net_arch = args.net_arch, activation_fn = get_act_fn(args.act_fn)), 
                     verbose = 0, gamma = gamma, n_steps = n_steps, ent_coef = ent_coef, 
                     learning_rate = learning_rate, vf_coef = vf_coef, max_grad_norm = max_grad_norm, gae_lambda = lam, 
                     batch_size = nminibatches, n_epochs = noptepochs, clip_range = cliprange)
     else:
-        #TODO: check if model already exists, load
-        
-        if args.agent == "MLP_ARENA2D":
-            model = PPO(MLP_ARENA2D_POLICY, env, verbose = 0, gamma = gamma, n_steps = n_steps, ent_coef = ent_coef, 
-                    learning_rate = learning_rate, vf_coef = vf_coef, max_grad_norm = max_grad_norm, gae_lambda = lam, 
-                    batch_size = nminibatches, n_epochs = noptepochs, clip_range = cliprange)
+        if args.load is not None:
+            # load flag
+            raise NotImplementedError("agent loading by name not implemented yet")
+        else:
+            # agent flag
+            if args.agent == "MLP_ARENA2D":
+                model = PPO(MLP_ARENA2D_POLICY, env, verbose = 0, gamma = gamma, n_steps = n_steps, ent_coef = ent_coef, 
+                        learning_rate = learning_rate, vf_coef = vf_coef, max_grad_norm = max_grad_norm, gae_lambda = lam, 
+                        batch_size = nminibatches, n_epochs = noptepochs, clip_range = cliprange)
 
-        elif args.agent == "DRL_LOCAL_PLANNER" or args.agent == "CNN_NAVREP":
+            elif args.agent == "DRL_LOCAL_PLANNER" or args.agent == "CNN_NAVREP":
 
-            if args.agent == "DRL_LOCAL_PLANNER":
-                policy_kwargs = policy_kwargs_drl_local_planner
-            else:
-                policy_kwargs = policy_kwargs_navrep
+                if args.agent == "DRL_LOCAL_PLANNER":
+                    policy_kwargs = policy_kwargs_drl_local_planner
+                else:
+                    policy_kwargs = policy_kwargs_navrep
 
-            model = PPO("CnnPolicy", env, policy_kwargs = policy_kwargs, 
-                gamma = gamma, n_steps = n_steps, ent_coef = ent_coef, learning_rate = learning_rate, vf_coef = vf_coef, 
-                max_grad_norm = max_grad_norm, gae_lambda = lam, batch_size = nminibatches, n_epochs = noptepochs, 
-                clip_range = cliprange, verbose = 1)
+                model = PPO("CnnPolicy", env, policy_kwargs = policy_kwargs, 
+                    gamma = gamma, n_steps = n_steps, ent_coef = ent_coef, learning_rate = learning_rate, vf_coef = vf_coef, 
+                    max_grad_norm = max_grad_norm, gae_lambda = lam, batch_size = nminibatches, n_epochs = noptepochs, 
+                    clip_range = cliprange, verbose = 1)
 
-        elif args.agent == "CUSTOM":
-            raise NotImplementedError("training with custom network not implemented yet")
 
     model.learn(total_timesteps = n_timesteps)
 
 
 """
-    n_envs = 1
-    env = DummyVecEnv([lambda: FlatlandEnv(task, yaml_ROBOT_SETTING_PATH, yaml_ROBOT_AS_PATH, True)] * n_envs)
-
-    #policy_kwargs_navrep['features_extractor_kwargs']['laser_num_beams'] = get_laser_num_beams(yaml_ROBOT_SETTING_PATH)
-    model = PPO("CnnPolicy", env, policy_kwargs = policy_kwargs_drl_local_planner, 
-                gamma = gamma, n_steps = n_steps, ent_coef = ent_coef, learning_rate = learning_rate, vf_coef = vf_coef, 
-                max_grad_norm = max_grad_norm, gae_lambda = lam, batch_size = nminibatches, n_epochs = noptepochs, 
-                clip_range = cliprange, verbose = 1)
-    import time
-
     s = time.time()
     model.learn(total_timesteps = 3000)
     print("steps per second: {}".format(1000 / (time.time() - s)))

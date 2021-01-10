@@ -6,27 +6,29 @@ import torch as th
 def training_args(parser):
     """ program arguments training script """
     parser.add_argument('--no-gpu', action='store_true', help='disables gpu for training')
-    parser.add_argument('--agent', type=str, default='drl_local_planner',
-                        choices=['MLP_ARENA2D', 'DRL_LOCAL_PLANNER', 'CNN_NAVREP', 'CUSTOM'],
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument('--agent', type=str,
+                        choices=['MLP_ARENA2D', 'DRL_LOCAL_PLANNER', 'CNN_NAVREP'],
                         help='predefined agent to train')
-    parser.add_argument('--custom-mlp', action='store_true', help='enables training with custom multilayer perceptron '
-                                                                  '(architecture according input arguments)')
+    group.add_argument('--custom-mlp', action='store_true', help='enables training with custom multilayer perceptron')
+    group.add_argument('--load', type=str, metavar="[agent name]", help='agent to be loaded for training')
     parser.add_argument('--n', type=int, help='timesteps in total to be generated for training')
 
 
 def custom_mlp_args(parser):
     """ arguments for the custom mlp mode """
-    parser.add_argument('--body', type=str, default="", metavar="'{num}-{num}-...'",
-                        help="[custom mlp] architecture of the shared latent network, "
-                             "each number representing the number of neurons per layer")
-    parser.add_argument('--pi', type=str, default="", metavar="'{num}-{num}-...'",
-                        help="[custom mlp] architecture of the latent policy network, "
-                             "each number representing the number of neurons per layer")
-    parser.add_argument('--vf', type=str, default="", metavar="'{num}-{num}-...'",
-                        help="[custom mlp] architecture of the latent value network, "
-                             "each number representing the number of neurons per layer")
-    parser.add_argument('--act_fn', type=str, default="relu", choices=['relu', 'sigmoid', 'tanh'],
-                        help="[custom mlp] activation function to be applied after each hidden layer")
+    custom_mlp_args = parser.add_argument_group('custom mlp args', 'architecture arguments for the custom mlp')
+    custom_mlp_args.add_argument('--body', type=str, default="", metavar="'{num}-{num}-...'",
+                                help="architecture of the shared latent network, "
+                                "each number representing the number of neurons per layer")
+    custom_mlp_args.add_argument('--pi', type=str, default="", metavar="'{num}-{num}-...'",
+                                help="architecture of the latent policy network, "
+                                "each number representing the number of neurons per layer")
+    custom_mlp_args.add_argument('--vf', type=str, default="", metavar="'{num}-{num}-...'",
+                                help="architecture of the latent value network, "
+                                "each number representing the number of neurons per layer")
+    custom_mlp_args.add_argument('--act_fn', type=str, default="relu", choices=['relu', 'sigmoid', 'tanh'],
+                                help="activation function to be applied after each hidden layer")
 
 
 def process_training_args(parsed_args):
