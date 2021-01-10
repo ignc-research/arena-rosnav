@@ -94,7 +94,7 @@ if __name__ == "__main__":
     else:
         if args.load is not None:
             # load flag
-            model = PPO.load(os.path.join(PATHS.get('model'), AGENT_NAME))
+            model = PPO.load(os.path.join(PATHS.get('model'), AGENT_NAME), env)
         else:
             # agent flag
             if args.agent == "MLP_ARENA2D":
