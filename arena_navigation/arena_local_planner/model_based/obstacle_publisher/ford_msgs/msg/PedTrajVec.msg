@@ -1,1 +1,0 @@
-ford_msgs/PedTraj[] ped_traj_vec
