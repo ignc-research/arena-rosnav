@@ -3,7 +3,8 @@
   <param name="use_sim_time" value="true"/>
   
   <arg name="local_planner"   default="teb"/>
-  <arg name="train_mode"      default="true"/>
+  <arg name="rviz_file"   default="nav_LP"/>
+  <arg name="train_mode"      default="false"/>
   <param name="train_mode" value="$(arg train_mode)"/>
 
   <arg name="map_file" default="map1"/>
@@ -27,13 +28,13 @@
     <arg name="viz_pub_rate"    default="30.0"/>
     <arg name="use_rviz"        default="true"/>  
     <arg name="train_mode"      value="$(arg train_mode)"/>
+    <arg name="rviz_file"       value="$(arg rviz_file)"/>
   </include>
 
   <!-- map server-->
   <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_path)">
    <param name="frame_id" value="$(arg global_frame_id)"/>
   </node>
-
   
   <!-- use fake localization-->
   <include file="$(find arena_bringup)/launch/sublaunch/fake_localization.launch">
@@ -43,9 +44,8 @@
     <arg name="odom_ground_truth" default="$(arg odom_ground_truth)"/>
   </include>
 
-  <!-- start task_generator node-->
-  <include file="$(find arena_bringup)/launch/sublaunch/task_generator.launch"/>
-
+  <!-- start task_generator node
+  <include file="$(find arena_bringup)/launch/sublaunch/task_generator.launch"/>-->
 
   <!-- start plan manager-->
   <include file="$(find arena_bringup)/launch/sublaunch/plan_manager.launch">

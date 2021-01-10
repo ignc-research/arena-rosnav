@@ -1,29 +1,35 @@
 #!/usr/bin/env python
 
 import rospy
-import sys
-from std_msgs.msg import Float32, ColorRGBA, Int32, String
-from geometry_msgs.msg import PoseStamped, Twist, Vector3, Point
-from ford_msgs.msg import PedTrajVec, NNActions, PlannerMode, Clusters
-from visualization_msgs.msg import Marker, MarkerArray
+# import sys
+# from std_msgs.msg import Float32, ColorRGBA, Int32, String
+# from geometry_msgs.msg import PoseStamped, Twist, Vector3, Point
+# from ford_msgs.msg import PedTrajVec, NNActions, PlannerMode, Clusters
+# from visualization_msgs.msg import Marker, MarkerArray
 
-import numpy as np
-import numpy.matlib
-import pickle
-from matplotlib import cm
-import matplotlib.pyplot as plt
-import copy
-import os
-import time
-import random
-import math
+# import numpy as np
+# import numpy.matlib
+# import pickle
+# from matplotlib import cm
+# import matplotlib.pyplot as plt
+# import copy
+# import os
+# import time
+# import random
+# import math
 
-import rospkg
+# import rospkg
+# from nav_msgs.msg import Odometry, Path
 
-import network
-import agent
-import util
-from nav_msgs.msg import Odometry, Path
+import configparser
+import torch
+import gym
+
+from crowd_nav.policy.cadrl import CADRL
+from crowd_nav.policy.lstm_rl import LstmRL
+from crowd_nav.policy.sarl import SARL
+from crowd_sim.envs.utils.robot import Robot
+
 
 PED_RADIUS = 0.3
 # angle_1 - angle_2
@@ -121,7 +127,7 @@ class NN_tb3():
         self.goal.header = msg.header
 
         # reset subgoals
-        print "new goal: "+str([self.goal.pose.position.x,self.goal.pose.position.y]) 
+        print("new goal: "+str([self.goal.pose.position.x,self.goal.pose.position.y])) 
 
     def cbSubGoal(self,msg):
         self.sub_goal.x = msg.pose.position.x
@@ -257,15 +263,6 @@ class NN_tb3():
         self.desired_position.pose.position.x = self.pose.pose.position.x + 1*action[0]*np.cos(action[1])
         self.desired_position.pose.position.y = self.pose.pose.position.y + 1*action[0]*np.sin(action[1])
 
-        # twist = Twist()
-        # twist.linear.x = action[0]
-        # yaw_error = action[1] - self.psi
-        # if yaw_error > np.pi:
-        #     yaw_error -= 2*np.pi
-        # if yaw_error < -np.pi:
-        #     yaw_error += 2*np.pi
-        # twist.angular.z = 2*yaw_error
-
     def find_vmax(self, d_min, heading_diff):
         # Calculate maximum linear velocity, as a function of error in
         # heading and clear space in front of the vehicle
@@ -319,7 +316,7 @@ class NN_tb3():
             return
 
         elif self.operation_mode.mode == self.operation_mode.SPIN_IN_PLACE:
-            print 'Spinning in place.'
+            print('Spinning in place.')
             self.stop_moving_flag = False
             angle_to_goal = np.arctan2(self.global_goal.pose.position.y - self.pose.pose.position.y, \
                 self.global_goal.pose.position.x - self.pose.pose.position.x) 
@@ -333,7 +330,7 @@ class NN_tb3():
                 self.pub_twist.publish(twist)
                 # print twist
             else:
-                print 'Done spinning in place'
+                print('Done spinning in place')
                 self.operation_mode.mode = self.operation_mode.NN
                 # self.new_global_goal_received = False
             return
@@ -394,7 +391,7 @@ class NN_tb3():
             action[1] = util.wrap(turn_amount + self.psi)
         if host_agent.dist_to_goal < 0.3:
             # current goal, reached, increment for next goal
-            print "===============\ngoal reached: "+str([goal_x, goal_y])
+            print("===============\ngoal reached: "+str([goal_x, goal_y]))
             self.stop_moving_flag = True
             self.new_global_goal_received = False
             self.stop_moving()
@@ -410,129 +407,8 @@ class NN_tb3():
         self.goal.pose.position.x = subgoal[0]
         self.goal.pose.position.y = subgoal[1]
 
-    def visualize_subgoal(self,subgoal, subgoal_options=None):
-        markers = MarkerArray()
 
-        # Display GREEN DOT at NN subgoal
-        marker = Marker()
-        marker.header.stamp = rospy.Time.now()
-        marker.header.frame_id = 'map'
-        marker.ns = 'subgoal'
-        marker.id = 0
-        marker.type = marker.CYLINDER
-        marker.action = marker.ADD
-        marker.pose.position.x = subgoal[0]
-        marker.pose.position.y = subgoal[1]
-        marker.scale = Vector3(x=0.2,y=0.2,z=0)
-        marker.color = ColorRGBA(r=0.0,g=0.0,b=0.0,a=1.0)
-        marker.lifetime = rospy.Duration(2.0)
-        self.pub_goal_path_marker.publish(marker)
-
-        if subgoal_options is not None:
-            for i in xrange(len(subgoal_options)):
-                marker = Marker()
-                marker.header.stamp = rospy.Time.now()
-                marker.header.frame_id = 'map'
-                marker.ns = 'subgoal'
-                marker.id = i+1
-                # marker.type = marker.CUBE
-                marker.type = marker.CYLINDER
-                marker.action = marker.ADD
-                marker.pose.position.x = subgoal_options[i][0]
-                marker.pose.position.y = subgoal_options[i][1]
-                marker.scale = Vector3(x=0.2,y=0.2,z=0.2)
-                marker.color = ColorRGBA(r=0.0,g=0.0,b=255,a=1.0)
-                marker.lifetime = rospy.Duration(1.0)
-                self.pub_goal_path_marker.publish(marker)
-
-    def visualize_pose(self,pos,orientation):
-        # Yellow Box for Vehicle
-        marker = Marker()
-        marker.header.stamp = rospy.Time.now()
-        marker.header.frame_id = 'map'
-        marker.ns = 'agent'
-        marker.id = 0
-        marker.type = marker.CUBE
-        marker.action = marker.ADD
-        marker.pose.position = pos
-        marker.pose.orientation = orientation
-        marker.scale = Vector3(x=0.7,y=0.42,z=1)
-        marker.color = ColorRGBA(r=1.0,g=1.0,a=1.0)
-        marker.lifetime = rospy.Duration(1.0)
-        self.pub_pose_marker.publish(marker)
-
-        # Red track for trajectory over time
-        marker = Marker()
-        marker.header.stamp = rospy.Time.now()
-        marker.header.frame_id = 'map'
-        marker.ns = 'agent'
-        marker.id = self.num_poses
-        marker.type = marker.CUBE
-        marker.action = marker.ADD
-        marker.pose.position = pos
-        marker.pose.orientation = orientation
-        marker.scale = Vector3(x=0.2,y=0.2,z=0.2)
-        marker.color = ColorRGBA(r=1.0,a=1.0)
-        marker.lifetime = rospy.Duration(10.0)
-        self.pub_pose_marker.publish(marker)
-
-        # print marker
-
-    def visualize_other_agents(self,xs,ys,radii,labels):
-        markers = MarkerArray()
-        for i in range(len(xs)):
-            # Orange box for other agent
-            marker = Marker()
-            marker.header.stamp = rospy.Time.now()
-            marker.header.frame_id = 'map'
-            marker.ns = 'other_agent'
-            marker.id = labels[i]
-            marker.type = marker.CYLINDER
-            marker.action = marker.ADD
-            marker.pose.position.x = xs[i]
-            marker.pose.position.y = ys[i]
-            # marker.pose.orientation = orientation
-            marker.scale = Vector3(x=2*radii[i],y=2*radii[i],z=1)
-            marker.color = ColorRGBA(r=1.0,g=0.4,a=1.0)
-            marker.lifetime = rospy.Duration(0.1)
-            markers.markers.append(marker)
-
-        self.pub_agent_markers.publish(markers)
-        # print markers
-
-    def visualize_action(self, use_d_min):
-        # Display BLUE ARROW from current position to NN desired position
-        marker = Marker()
-        marker.header.stamp = rospy.Time.now()
-        marker.header.frame_id = 'map'
-        marker.ns = 'path_arrow'
-        marker.id = 0
-        marker.type = marker.ARROW
-        marker.action = marker.ADD
-        marker.points.append(self.pose.pose.position)
-        marker.points.append(self.desired_position.pose.position)
-        marker.scale = Vector3(x=0.1,y=0.2,z=0.2)
-        marker.color = ColorRGBA(b=1.0,a=1.0)
-        marker.lifetime = rospy.Duration(0.5)
-        self.pub_goal_path_marker.publish(marker)
-
-        # Display BLUE DOT at NN desired position
-        marker = Marker()
-        marker.header.stamp = rospy.Time.now()
-        marker.header.frame_id = 'map'
-        marker.ns = 'path_trail'
-        marker.id = self.num_poses
-        marker.type = marker.CUBE
-        marker.action = marker.ADD
-        marker.pose.position = copy.deepcopy(self.desired_position.pose.position)
-        marker.scale = Vector3(x=0.2,y=0.2,z=0.2)
-        marker.color = ColorRGBA(b=1.0,a=0.1)
-        marker.lifetime = rospy.Duration(100)
-        if self.desired_action[0] == 0.0:
-            marker.pose.position.x += 2.0*np.cos(self.desired_action[1])
-            marker.pose.position.y += 2.0*np.sin(self.desired_action[1])
-        self.pub_goal_path_marker.publish(marker)
-        # print marker
+  
 
     def on_shutdown(self):
         rospy.loginfo("[%s] Shutting down." %(self.node_name))
@@ -540,26 +416,31 @@ class NN_tb3():
         rospy.loginfo("Stopped %s's velocity." %(self.veh_name))
 
 def run():
-    file_dir = os.path.dirname(os.path.realpath(__file__))
-    plt.rcParams.update({'font.size': 18})
-    rospack = rospkg.RosPack()
+    device = 'cpu'
+    phase = 'test'
+    test_case = 1
 
-    a = network.Actions()
-    actions = a.actions
-    num_actions = a.num_actions
-    nn = network.NetworkVP_rnn(network.Config.DEVICE, 'network', num_actions)
-    nn.simple_load(rospack.get_path('cadrl_ros')+'/checkpoints/network_01900000')
+    env_config_file = 'crowd_nav/data/output/env.config'             #path beginging without slash
+    policy_config_file = 'crowd_nav/data/output/policy.config'
+    model_weights = 'crowd_nav/data/output/rl_model.pth'
 
-    rospy.init_node('nn_tb3',anonymous=False)
-    veh_name = 'tb3_01'
-    pref_speed = rospy.get_param("~tb3_speed")
-    veh_data = {'goal':np.zeros((2,)),'radius':0.5,'pref_speed':pref_speed,'kw':10.0,'kp':1.0,'name':'tb3_01'}
+    # select policy
+    policy = CADRL()     #{SARL(),CADRL(),LstmRL()}
+    policy_config = configparser.RawConfigParser()
+    policy_config.read(policy_config_file)
+    policy.configure(policy_config)
+    policy.get_model().load_state_dict(torch.load(model_weights))
+    policy.set_device(device)
+    policy.set_phase(phase)
+  
+    rospy.init_node('crowdnav_tb3',anonymous=False)
+    print('==================================\ncrowdnav node started')
 
-    print '==================================\ncadrl node started'
-    print "tb3 speed:", pref_speed, "\n=================================="
 
-    nn_tb3 = NN_tb3(veh_name, veh_data, nn, actions)
-    rospy.on_shutdown(nn_tb3.on_shutdown)
+
+
+    # nn_tb3 = NN_tb3(veh_name, veh_data, nn, actions)
+    # rospy.on_shutdown(nn_tb3.on_shutdown)
 
     rospy.spin()
 

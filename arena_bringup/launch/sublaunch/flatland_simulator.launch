@@ -8,6 +8,7 @@
   <arg name="show_viz" />
   <arg name="viz_pub_rate"/>
   <arg name="use_rviz"/>  
+  <arg name="rviz_file" default="nav_LP"/>  
   <arg name="train_mode"/>
   <env name="ROSCONSOLE_FORMAT" value="[${severity} ${time} ${logger}]: ${message}" />
 
@@ -42,7 +43,7 @@
 
   <!--  ************** rviz  ***************  -->
   <group if="$(arg use_rviz)">
-    <node name="flatland_rviz" pkg="rviz" type="rviz" output="screen" args="-d $(find arena_bringup)/rviz/nav.rviz"/>
+    <node name="flatland_rviz" pkg="rviz" type="rviz" output="screen" args="-d $(find arena_bringup)/rviz/$(arg rviz_file).rviz"/>
   </group>    
 
 </launch>
