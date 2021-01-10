@@ -3,7 +3,7 @@
   <param name="use_sim_time" value="true"/>
   
   <arg name="local_planner"   default="teb"/>
-  <arg name="rviz_file"   default="nav_LP"/>
+  <arg name="rviz_file"   default="nav"/>
   <arg name="train_mode"      default="false"/>
   <param name="train_mode" value="$(arg train_mode)"/>
 
@@ -50,8 +50,8 @@
     <arg name="odom_ground_truth" default="$(arg odom_ground_truth)"/>
   </include>
 
-  <!-- start task_generator node
-  <include file="$(find arena_bringup)/launch/sublaunch/task_generator.launch"/>-->
+  start task_generator node
+  <include file="$(find arena_bringup)/launch/sublaunch/task_generator.launch"/>
 
   <!-- start plan manager-->
   <include file="$(find arena_bringup)/launch/sublaunch/plan_manager.launch">
