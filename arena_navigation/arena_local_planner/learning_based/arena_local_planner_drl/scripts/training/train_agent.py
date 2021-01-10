@@ -49,18 +49,18 @@ if __name__ == "__main__":
     if args.custom_mlp:
         print(args.net_arch)
         print(args.act_fn)
-        # check if model already exists, load
-        model = PPO("MlpPolicy", env, policy_kwargs=dict(net_arch=args.net_arch, activation_fn=get_act_fn(args.act_fn)),
-                    verbose=0, gamma=gamma, n_steps=n_steps, ent_coef=ent_coef,
-                    learning_rate=learning_rate, vf_coef=vf_coef, max_grad_norm=max_grad_norm, gae_lambda=lam,
-                    batch_size=nminibatches, n_epochs=noptepochs, clip_range=cliprange)
+        #TODO: check if model already exists, load
+        model = PPO("MlpPolicy", env, policy_kwargs = dict(net_arch = args.net_arch, activation_fn = get_act_fn(args.act_fn)), 
+                    verbose = 0, gamma = gamma, n_steps = n_steps, ent_coef = ent_coef, 
+                    learning_rate = learning_rate, vf_coef = vf_coef, max_grad_norm = max_grad_norm, gae_lambda = lam, 
+                    batch_size = nminibatches, n_epochs = noptepochs, clip_range = cliprange)
     else:
-        # check if model already exists, load
+        #TODO: check if model already exists, load
         
         if args.agent == "MLP_ARENA2D":
-            model = PPO(MLP_ARENA2D_POLICY, env, verbose=0, gamma=gamma, n_steps=n_steps, ent_coef=ent_coef,
-                    learning_rate=learning_rate, vf_coef=vf_coef, max_grad_norm=max_grad_norm, gae_lambda=lam,
-                    batch_size=nminibatches, n_epochs=noptepochs, clip_range=cliprange)
+            model = PPO(MLP_ARENA2D_POLICY, env, verbose = 0, gamma = gamma, n_steps = n_steps, ent_coef = ent_coef, 
+                    learning_rate = learning_rate, vf_coef = vf_coef, max_grad_norm = max_grad_norm, gae_lambda = lam, 
+                    batch_size = nminibatches, n_epochs = noptepochs, clip_range = cliprange)
 
         elif args.agent == "DRL_LOCAL_PLANNER" or args.agent == "CNN_NAVREP":
 
@@ -69,12 +69,15 @@ if __name__ == "__main__":
             else:
                 policy_kwargs = policy_kwargs_navrep
 
-            model = PPO("CnnPolicy", env, policy_kwargs=policy_kwargs,
-                gamma=gamma, n_steps=n_steps, ent_coef=ent_coef, learning_rate=learning_rate, vf_coef=vf_coef,
-                max_grad_norm=max_grad_norm, gae_lambda=lam, batch_size=nminibatches, n_epochs=noptepochs,
-                clip_range=cliprange, verbose=1)
+            model = PPO("CnnPolicy", env, policy_kwargs = policy_kwargs, 
+                gamma = gamma, n_steps = n_steps, ent_coef = ent_coef, learning_rate = learning_rate, vf_coef = vf_coef, 
+                max_grad_norm = max_grad_norm, gae_lambda = lam, batch_size = nminibatches, n_epochs = noptepochs, 
+                clip_range = cliprange, verbose = 1)
 
-    model.learn(total_timesteps=n_timesteps)
+        elif args.agent == "CUSTOM":
+            raise NotImplementedError("training with custom network not implemented yet")
+
+    model.learn(total_timesteps = n_timesteps)
 
 
 """
@@ -82,18 +85,18 @@ if __name__ == "__main__":
     env = DummyVecEnv([lambda: FlatlandEnv(task, yaml_ROBOT_SETTING_PATH, yaml_ROBOT_AS_PATH, True)] * n_envs)
 
     #policy_kwargs_navrep['features_extractor_kwargs']['laser_num_beams'] = get_laser_num_beams(yaml_ROBOT_SETTING_PATH)
-    model = PPO("CnnPolicy", env, policy_kwargs=policy_kwargs_drl_local_planner,
-                gamma=gamma, n_steps=n_steps, ent_coef=ent_coef, learning_rate=learning_rate, vf_coef=vf_coef,
-                max_grad_norm=max_grad_norm, gae_lambda=lam, batch_size=nminibatches, n_epochs=noptepochs,
-                clip_range=cliprange, verbose=1)
+    model = PPO("CnnPolicy", env, policy_kwargs = policy_kwargs_drl_local_planner, 
+                gamma = gamma, n_steps = n_steps, ent_coef = ent_coef, learning_rate = learning_rate, vf_coef = vf_coef, 
+                max_grad_norm = max_grad_norm, gae_lambda = lam, batch_size = nminibatches, n_epochs = noptepochs, 
+                clip_range = cliprange, verbose = 1)
     import time
 
     s = time.time()
-    model.learn(total_timesteps=3000)
+    model.learn(total_timesteps = 3000)
     print("steps per second: {}".format(1000 / (time.time() - s)))
     # obs = env.reset()
     # for i in range(1000):
-    #     action, _state = model.predict(obs, deterministic=True)
+    #     action, _state = model.predict(obs, deterministic = True)
     #     obs, reward, done, info = env.step(action)
     #     env.render()
     #     if done:
