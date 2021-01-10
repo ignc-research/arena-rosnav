@@ -48,10 +48,19 @@ def get_agent_name(args):
 
 def get_paths(agent_name: str):
     """ function to generate the agent specific paths """
+    DIR = rospkg.RosPack().get_path('arena_local_planner_drl')
+
     PATHS = dict()
-    PATHS['model']
-    PATHS['tb']
-    PATHS['eval']
+    PATHS['model'] = os.path.join(DIR, 'agents', agent_name)
+    PATHS['tb'] = os.path.join(DIR, 'training_logs', agent_name)
+    PATHS['eval'] = ""
+    PATHS['robot_setting'] = os.path.join(rospkg.RosPack().get_path('simulator_setup'), 'robot', 'myrobot.model.yaml')
+    PATHS['robot_as'] = os.path.join(rospkg.RosPack().get_path('arena_local_planner_drl'), 'configs', 'default_settings.yaml')
+    
+    if not os.path.exists(PATHS.get('model')):
+        os.makedirs(PATHS.get('model'))
+    if not os.path.exists(PATHS.get('tb')):
+        os.makedirs(PATHS.get('tb'))
 
     return PATHS
 
@@ -59,47 +68,41 @@ def get_paths(agent_name: str):
 if __name__ == "__main__":
     args, _ = parse_training_args()
 
+    rospy.init_node("train_node")
+
     AGENT_NAME = get_agent_name(args)
-    #PATHS = get_paths(AGENT_NAME)
+    PATHS = get_paths(AGENT_NAME)
 
     if args.n is None:
-        n_timesteps = 60000
+        n_timesteps = 6000
     else:
         n_timesteps = args.n
-    
-    rospy.init_node("train_node")
-    task = get_predefined_task()
-
-    ROBOT_SETTING_PATH = rospkg.RosPack().get_path('simulator_setup')
-    ROBOT_AS_PATH = rospkg.RosPack().get_path('arena_local_planner_drl')
-    yaml_ROBOT_SETTING_PATH = os.path.join(ROBOT_SETTING_PATH, 'robot', 'myrobot.model.yaml')
-    yaml_ROBOT_AS_PATH = os.path.join(ROBOT_AS_PATH, 'configs', 'default_settings.yaml')
 
     print("________ STARTING TRAINING WITH:  %s ________" % AGENT_NAME)
 
     n_envs = 1
-    env = DummyVecEnv([lambda: FlatlandEnv(task, yaml_ROBOT_SETTING_PATH, yaml_ROBOT_AS_PATH, True)] * n_envs)
+    task = get_predefined_task()
+    env = DummyVecEnv([lambda: FlatlandEnv(task, PATHS.get('robot_setting'), PATHS.get('robot_as'), True)] * n_envs)
 
 
     if args.custom_mlp:
         # custom mlp flag
         model = PPO("MlpPolicy", env, policy_kwargs = dict(net_arch = args.net_arch, activation_fn = get_act_fn(args.act_fn)), 
-                    verbose = 0, gamma = gamma, n_steps = n_steps, ent_coef = ent_coef, 
-                    learning_rate = learning_rate, vf_coef = vf_coef, max_grad_norm = max_grad_norm, gae_lambda = lam, 
-                    batch_size = nminibatches, n_epochs = noptepochs, clip_range = cliprange)
+                    gamma = gamma, n_steps = n_steps, ent_coef = ent_coef, learning_rate = learning_rate, vf_coef = vf_coef, 
+                    max_grad_norm = max_grad_norm, gae_lambda = lam, batch_size = nminibatches, n_epochs = noptepochs, clip_range = cliprange, 
+                    tensorboard_log=PATHS.get('tb'), verbose = 1)
     else:
         if args.load is not None:
             # load flag
-            raise NotImplementedError("agent loading by name not implemented yet")
+            model = PPO.load(os.path.join(PATHS.get('model'), AGENT_NAME))
         else:
             # agent flag
             if args.agent == "MLP_ARENA2D":
-                model = PPO(MLP_ARENA2D_POLICY, env, verbose = 0, gamma = gamma, n_steps = n_steps, ent_coef = ent_coef, 
+                model = PPO(MLP_ARENA2D_POLICY, env, gamma = gamma, n_steps = n_steps, ent_coef = ent_coef, 
                         learning_rate = learning_rate, vf_coef = vf_coef, max_grad_norm = max_grad_norm, gae_lambda = lam, 
-                        batch_size = nminibatches, n_epochs = noptepochs, clip_range = cliprange)
+                        batch_size = nminibatches, n_epochs = noptepochs, clip_range = cliprange, tensorboard_log=PATHS.get('tb'), verbose = 1)
 
             elif args.agent == "DRL_LOCAL_PLANNER" or args.agent == "CNN_NAVREP":
-
                 if args.agent == "DRL_LOCAL_PLANNER":
                     policy_kwargs = policy_kwargs_drl_local_planner
                 else:
@@ -108,11 +111,11 @@ if __name__ == "__main__":
                 model = PPO("CnnPolicy", env, policy_kwargs = policy_kwargs, 
                     gamma = gamma, n_steps = n_steps, ent_coef = ent_coef, learning_rate = learning_rate, vf_coef = vf_coef, 
                     max_grad_norm = max_grad_norm, gae_lambda = lam, batch_size = nminibatches, n_epochs = noptepochs, 
-                    clip_range = cliprange, verbose = 1)
+                    clip_range = cliprange, tensorboard_log=PATHS.get('tb'), verbose = 1)
 
 
-    model.learn(total_timesteps = n_timesteps)
-
+    model.learn(total_timesteps = n_timesteps, reset_num_timesteps=True)
+    model.save(os.path.join(PATHS.get('model'), AGENT_NAME))
 
 """
     s = time.time()
