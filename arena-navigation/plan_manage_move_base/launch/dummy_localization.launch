@@ -1,9 +1,0 @@
-<launch>
-	<!-- <arg name="ns"/>  -->
-	<!-- odom frame == map frame-->
-	<node pkg="tf" type="static_transform_publisher" name="robot_local" args="0 0 0 0 0 0 map odom 50">
-		<!-- <remap from="/tf" to="/$(arg ns)/tf"/>
-		<remap from="/clock" to="/$(arg ns)/clock"/> -->
-	</node>
-
-</launch>
