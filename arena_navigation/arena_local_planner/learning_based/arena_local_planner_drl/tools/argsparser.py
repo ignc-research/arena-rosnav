@@ -13,6 +13,7 @@ def training_args(parser):
     group.add_argument('--custom-mlp', action='store_true', help='enables training with custom multilayer perceptron')
     group.add_argument('--load', type=str, metavar="[agent name]", help='agent to be loaded for training')
     parser.add_argument('--n', type=int, help='timesteps in total to be generated for training')
+    parser.add_argument('--tb', action='store_true', help='enables tensorboard logging')
 
 
 def custom_mlp_args(parser):
