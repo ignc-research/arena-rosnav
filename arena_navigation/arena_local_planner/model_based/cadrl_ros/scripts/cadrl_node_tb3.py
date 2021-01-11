@@ -121,7 +121,7 @@ class NN_tb3():
         self.goal.header = msg.header
 
         # reset subgoals
-        print "new goal: "+str([self.goal.pose.position.x,self.goal.pose.position.y]) 
+        print("new goal: "+str([self.goal.pose.position.x,self.goal.pose.position.y])) 
 
     def cbSubGoal(self,msg):
         self.sub_goal.x = msg.pose.position.x
@@ -321,7 +321,7 @@ class NN_tb3():
             return
 
         elif self.operation_mode.mode == self.operation_mode.SPIN_IN_PLACE:
-            print 'Spinning in place.'
+            print('Spinning in place.')
             self.stop_moving_flag = False
             angle_to_goal = np.arctan2(self.global_goal.pose.position.y - self.pose.pose.position.y, \
                 self.global_goal.pose.position.x - self.pose.pose.position.x) 
@@ -335,7 +335,7 @@ class NN_tb3():
                 self.pub_twist.publish(twist)
                 # print twist
             else:
-                print 'Done spinning in place'
+                print('Done spinning in place')
                 self.operation_mode.mode = self.operation_mode.NN
                 # self.new_global_goal_received = False
             return
@@ -396,7 +396,7 @@ class NN_tb3():
             action[1] = util.wrap(turn_amount + self.psi)
         if host_agent.dist_to_goal < 0.3:
             # current goal, reached, increment for next goal
-            print "===============\ngoal reached: "+str([goal_x, goal_y])
+            print("===============\ngoal reached: "+str([goal_x, goal_y]))
             self.stop_moving_flag = True
             self.new_global_goal_received = False
             self.stop_moving()
@@ -561,8 +561,8 @@ def run():
     pref_speed = rospy.get_param("~tb3_speed")
     veh_data = {'goal':np.zeros((2,)),'radius':0.5,'pref_speed':pref_speed,'kw':10.0,'kp':1.0,'name':'tb3_01'}
 
-    print '==================================\ncadrl node started'
-    print "tb3 speed:", pref_speed, "\n=================================="
+    print('==================================\ncadrl node started')
+    print("tb3 speed:", pref_speed, "\n==================================")
 
     nn_tb3 = NN_tb3(veh_name, veh_data, nn, actions)
     rospy.on_shutdown(nn_tb3.on_shutdown)
