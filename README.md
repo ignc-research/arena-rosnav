@@ -26,6 +26,7 @@ Train DRL agents on ROS compatible simulations for autonomous navigation in high
 ### Documentation & References
 * How to use flatland: http://flatland-simulator.readthedocs.io
 * ros navigation stack: http://wiki.ros.org/navigation
+* pedsim(will be integrated): https://github.com/srl-freiburg/pedsim_ros
 * Full documentation and system design is released this week
 
 ## 1. Installation
