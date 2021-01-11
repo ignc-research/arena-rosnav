@@ -26,6 +26,7 @@ Train DRL agents on ROS compatible simulations for autonomous navigation in high
 ### Documentation & References
 * How to use flatland: http://flatland-simulator.readthedocs.io
 * ros navigation stack: http://wiki.ros.org/navigation
+* pedsim(will be integrated): https://github.com/srl-freiburg/pedsim_ros
 * Full documentation and system design is released this week
 
 ## 1. Installation
@@ -147,10 +148,12 @@ start_flatland.launch will start several other sublaunch files and some neccesar
    * if false, you can also use move_base action triggered by rviz_plugin button *2D Navigation Goal*. 
 
 #### 2.2. [Quick start] test DRL training
+Export turtlebot model for simulation 
 
-* In one terminnal
+* In one terminnal, export turtlebot model and start simulation
 
 ```bash
+export TURTLEBOT3_MODEL=${TB3_MODEL}
 roslaunch arena_bringup start_arena_flatland.launch  train_mode:=true
 ```
 * In another terminal
@@ -164,6 +167,23 @@ first **activate your python3 env**, which contains libaraies stable_baseline3, 
 then python run the script.
 
 Hint: During 2021-01-05 and 2021-01-10, arena_local_planner_drl package is still under the development, which means the api of the class could be drastically changed. Sorry about the inconvinience!
+
+### Test the task generator
+
+* In one terminnal, export turtlebot model and start simulation
+
+```bash
+export TURTLEBOT3_MODEL=${TB3_MODEL}
+roslaunch arena_bringup start_arena_flatland.launch  train_mode:=true
+```
+* In another terminal, run the task generator node
+
+```
+source your devel/setup.zsh(bash)
+workon rosnav
+rosrun task generator task_generator_node.py
+```
+Now you can click on the generate task button in rviz to generator a new random task (random obstacles and goal is published to /goal). It will automatically navigate to that goal, once you start one of our local planners, which are triggered by a new /goal.
 
 
 #### 2.3. Rviz plugins:
@@ -198,6 +218,9 @@ Hint: During 2021-01-05 and 2021-01-10, arena_local_planner_drl package is still
    3. global_planner
    4. local_planner
       1. learning_based
+      	1.drl
+	2.il
+	3.trained-models
       2. model_based
    5. plan_manager
    6. plan_msgs
