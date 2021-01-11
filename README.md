@@ -1,7 +1,6 @@
 # arena-rosnav
 
 <p align="center">
-  <img width="300" height="300" src="/img/dynamic1.gif">
 	<img width="300" height="300" src="/img/1training.gif">
 </p>
 

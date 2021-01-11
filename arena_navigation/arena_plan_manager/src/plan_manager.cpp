@@ -166,9 +166,11 @@ void PlanManager::execFSMCallback(const ros::TimerEvent& e) {
       dist_to_subgoal=(cur_state_->pose2d-planner_collector_->subgoal_state_->pose2d).norm();
       
       // timeout: avoid task too much time 
-      double timeout;
-      timeout=1000;
-      double time_cost=ros::Time::now().toSec()-start_time_.toSec();
+      double timeout_goal,timeout_subgoal;
+      timeout_goal=60*5;
+      timeout_subgoal=60*1;
+      double time_cost_goal=ros::Time::now().toSec()-start_time_.toSec();
+      double time_cost_subgoal=ros::Time::now().toSec()-subgoal_start_time_.toSec();
       
       // tolerance goal, torlerance subgoal
       double tolerance_goal=0.5;
@@ -184,16 +186,24 @@ void PlanManager::execFSMCallback(const ros::TimerEvent& e) {
       }
 
       // check if timeout
-      if(time_cost>timeout){
+      if(time_cost_goal>timeout_goal){
         have_goal_=false;
         cout<<"failed to goal"<<endl;
         changeFSMExecState(WAIT_GOAL, "FSM");
+        return;
+      }
+      // check if timeout subgoal
+      if(time_cost_subgoal>timeout_subgoal){
+        cout<<"subgoal has been published for"<<time_cost_subgoal<<"sec"<<endl;
+        cout<<"subgoal timeout"<<endl;
+        changeFSMExecState(REPLAN_MID, "FSM");
         return;
       }
       
       // check if need mid_horizon replan 
       if(dist_to_subgoal>2 || dist_to_subgoal<0.2){
         if(cur_state_->vel2d.norm()>0.1){
+          // if the robot stay, then won't replan mid
           changeFSMExecState(REPLAN_MID, "FSM");
         }
       }else{
@@ -225,6 +235,8 @@ void PlanManager::execFSMCallback(const ros::TimerEvent& e) {
         // success: publish new subgoal & going to state EXEC_LOCAL
         subgoal_pub_.publish(planner_collector_->subgoal_);
         visualization_->drawSubgoal(planner_collector_->subgoal_, 0.3, Eigen::Vector4d(0, 0, 0, 1.0));
+        // reset subgoal start time(be used for timeout criterion)
+        subgoal_start_time_=ros::Time::now();
         cout<<"MID_REPLAN Success"<<endl;
 
         

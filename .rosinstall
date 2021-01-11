@@ -13,9 +13,9 @@
 #    uri: https://github.com/ros/geometry2.git
 #    version: melodic-devel
 
-- git:
-    local-name: ../forks/stable-baselines3
-    uri: https://github.com/DLR-RM/stable-baselines3.git
-    version: master
+#- git:
+#    local-name: ../forks/stable-baselines3
+#    uri: https://github.com/DLR-RM/stable-baselines3.git
+#    version: master
 
 
