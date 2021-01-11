@@ -1,4 +1,6 @@
 import os
+import datetime
+
 
 def write_hyperparameters_to_file(agent_name: str, PATHS: dict, robot, gamma, n_steps, ent_coef, learning_rate, vf_coef, max_grad_norm, gae_lambda, batch_size, n_epochs, clip_range):
     """ function to document hyperparameters in the model's directory """
@@ -32,14 +34,17 @@ def update_total_timesteps_in_file(timesteps: int, PATHS: dict):
         
         # extracts number from the last line and converts it to int
         # total_timesteps has to be in the last line!
-        current_total_timesteps = int(''.join(list(filter(str.isdigit, parameters[len(parameters)-1]))))
-        current_total_timesteps += timesteps
+        if "total_timesteps" in parameters[len(parameters)-1]:
+            current_total_timesteps = int(''.join(list(filter(str.isdigit, parameters[len(parameters)-1]))))
+            current_total_timesteps += timesteps
 
-        parameters = parameters[:-1]
-        parameters.append("total_timesteps = %d" % current_total_timesteps)
+            parameters = parameters[:-1]
+            parameters.append("total_timesteps = %d" % current_total_timesteps)
 
-        with open(doc_location, "w") as file:
-            file.write("".join(parameters))
+            with open(doc_location, "w") as file:
+                file.write("".join(parameters))
+        else:
+            print("Parameter 'total_timesteps' not in last line of 'hyperparameter.txt!'")
     else:
         print("Found no 'hyperparameters.txt' in model directory (%s) !" % PATHS.get('model'))
 

@@ -100,29 +100,30 @@ if __name__ == "__main__":
                     gamma = gamma, n_steps = n_steps, ent_coef = ent_coef, learning_rate = learning_rate, vf_coef = vf_coef, 
                     max_grad_norm = max_grad_norm, gae_lambda = gae_lambda, batch_size = batch_size, n_epochs = n_epochs, clip_range = clip_range, 
                     tensorboard_log = PATHS.get('tb'), verbose = 1)
-    else:
-        if args.load is None:
-            # agent flag
-            if args.agent == "MLP_ARENA2D":
+                    
+    elif args.agent is not None:
+        # agent flag
+        if args.agent == "MLP_ARENA2D":
                 model = PPO(MLP_ARENA2D_POLICY, env, gamma = gamma, n_steps = n_steps, ent_coef = ent_coef, 
                         learning_rate = learning_rate, vf_coef = vf_coef, max_grad_norm = max_grad_norm, gae_lambda = gae_lambda, 
                         batch_size = batch_size, n_epochs = n_epochs, clip_range = clip_range, tensorboard_log = PATHS.get('tb'), verbose = 1)
 
-            elif args.agent == "DRL_LOCAL_PLANNER" or args.agent == "CNN_NAVREP":
-                if args.agent == "DRL_LOCAL_PLANNER":
-                    policy_kwargs = policy_kwargs_drl_local_planner
-                else:
-                    policy_kwargs = policy_kwargs_navrep
+        elif args.agent == "DRL_LOCAL_PLANNER" or args.agent == "CNN_NAVREP":
+            if args.agent == "DRL_LOCAL_PLANNER":
+                policy_kwargs = policy_kwargs_drl_local_planner
+            else:
+                policy_kwargs = policy_kwargs_navrep
+            model = PPO("CnnPolicy", env, policy_kwargs = policy_kwargs, 
+                gamma = gamma, n_steps = n_steps, ent_coef = ent_coef, learning_rate = learning_rate, vf_coef = vf_coef, 
+                max_grad_norm = max_grad_norm, gae_lambda = gae_lambda, batch_size = batch_size, n_epochs = n_epochs, 
+                clip_range = clip_range, tensorboard_log = PATHS.get('tb'), verbose = 1)
 
-                model = PPO("CnnPolicy", env, policy_kwargs = policy_kwargs, 
-                    gamma = gamma, n_steps = n_steps, ent_coef = ent_coef, learning_rate = learning_rate, vf_coef = vf_coef, 
-                    max_grad_norm = max_grad_norm, gae_lambda = gae_lambda, batch_size = batch_size, n_epochs = n_epochs, 
-                    clip_range = clip_range, tensorboard_log = PATHS.get('tb'), verbose = 1)
-        else:
-            # load flag
-            print_hyperparameters_from_file(AGENT_NAME, PATHS)
-            model = PPO.load(os.path.join(PATHS.get('model'), AGENT_NAME), env)
+    elif args.load is not None:
+        # load flag
+        print_hyperparameters_from_file(AGENT_NAME, PATHS)
+        model = PPO.load(os.path.join(PATHS.get('model'), AGENT_NAME), env)
 
+        
     # start training
     model.learn(total_timesteps = n_timesteps, reset_num_timesteps = False)
     model.save(os.path.join(PATHS.get('model'), AGENT_NAME))
