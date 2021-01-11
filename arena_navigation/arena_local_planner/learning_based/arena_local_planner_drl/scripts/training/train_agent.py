@@ -15,7 +15,6 @@ from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.tools.argsparser import parse_training_args, get_act_fn
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.tools.train_agent_utils import *
 
-
 ###HYPERPARAMETER###
 robot = "myrobot"
 gamma = 0.99
@@ -31,7 +30,7 @@ clip_range = 0.2
 ####################
 
 def get_agent_name(args):
-    """ get agent name to save/load
+    """ get agent name to save/load to/from file system
 
     Example names:
     "MLP_B_64-64_P_32-32_V_32-32_relu_2021_01_07__10_32"
@@ -45,11 +44,12 @@ def get_agent_name(args):
     else:
         if args.load is None:
             return args.agent + "_" + START_TIME
+
         return args.load
 
 
 def get_paths(agent_name: str):
-    """ function to generate the agent specific paths """
+    """ function to generate agent specific paths """
     DIR = rospkg.RosPack().get_path('arena_local_planner_drl')
 
     PATHS = dict()
@@ -69,6 +69,7 @@ def get_paths(agent_name: str):
             os.makedirs(PATHS.get('tb'))
     else:
         PATHS['tb'] = None
+
     return PATHS
 
 
@@ -77,6 +78,7 @@ if __name__ == "__main__":
 
     rospy.init_node("train_node")
 
+    # generate agent name and model specific paths
     AGENT_NAME = get_agent_name(args)
     print("________ STARTING TRAINING WITH:  %s ________" % AGENT_NAME)
     PATHS = get_paths(AGENT_NAME)
@@ -86,11 +88,12 @@ if __name__ == "__main__":
     else:
         n_timesteps = args.n
 
+    # instantiate gym environment
     n_envs = 1
     task = get_predefined_task()
     env = DummyVecEnv([lambda: FlatlandEnv(task, PATHS.get('robot_setting'), PATHS.get('robot_as'), True)] * n_envs)
 
-
+    # determine mode
     if args.custom_mlp:
         # custom mlp flag
         model = PPO("MlpPolicy", env, policy_kwargs = dict(net_arch = args.net_arch, activation_fn = get_act_fn(args.act_fn)), 
@@ -120,10 +123,11 @@ if __name__ == "__main__":
             print_hyperparameters_from_file(AGENT_NAME, PATHS)
             model = PPO.load(os.path.join(PATHS.get('model'), AGENT_NAME), env)
 
-
+    # start training
     model.learn(total_timesteps = n_timesteps, reset_num_timesteps = False)
     model.save(os.path.join(PATHS.get('model'), AGENT_NAME))
 
+    # update the timesteps the model has trained in total
     update_total_timesteps_in_file(n_timesteps, PATHS)
     print("training done and model saved!")
     

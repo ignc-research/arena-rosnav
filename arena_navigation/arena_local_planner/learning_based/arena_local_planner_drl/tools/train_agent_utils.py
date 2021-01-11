@@ -18,6 +18,7 @@ def write_hyperparameters_to_file(agent_name: str, PATHS: dict, robot, gamma, n_
         f.write("batch_size = %d \n" % batch_size)
         f.write("n_epochs = %d \n" % n_epochs)
         f.write("clip_range = %f \n" % clip_range)
+        # total_timesteps has to be in the last line!
         f.write("total_timesteps = %d" % 0)
 
 
@@ -30,6 +31,7 @@ def update_total_timesteps_in_file(timesteps: int, PATHS: dict):
             parameters = file.readlines()
         
         # extracts number from the last line and converts it to int
+        # total_timesteps has to be in the last line!
         current_total_timesteps = int(''.join(list(filter(str.isdigit, parameters[len(parameters)-1]))))
         current_total_timesteps += timesteps
 

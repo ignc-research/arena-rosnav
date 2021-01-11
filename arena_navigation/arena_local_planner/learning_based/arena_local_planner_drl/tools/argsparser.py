@@ -86,8 +86,10 @@ def print_args(args):
     print("--------------------------------\n")
 
 
-""" CUSTOM MLP HELPER FUNCTIONS """
+### CUSTOM MLP ARGS HELPER FUNCTIONS ###
+
 def get_net_arch(args: argparse.Namespace):
+    """ function to convert input args into valid syntax for the PPO """
     body = parse_string(args.body)
     policy = parse_string(args.pi)
     value = parse_string(args.vf)
@@ -95,6 +97,14 @@ def get_net_arch(args: argparse.Namespace):
 
 
 def parse_string(string: str):
+    """ function to convert a string into a int list 
+    
+    Example:
+
+    Input: parse_string("64-64") 
+    Output: [64, 64]
+
+    """
     string_arr = string.split("-")
     int_list = []
     for string in string_arr:
@@ -106,6 +116,7 @@ def parse_string(string: str):
 
 
 def get_act_fn(act_fn_string: str):
+    """ function to convert str into pytorch activation function class """
     if act_fn_string == "relu":
         return th.nn.ReLU
     elif act_fn_string == "sigmoid":
