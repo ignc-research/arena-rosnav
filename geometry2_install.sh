@@ -22,7 +22,7 @@ catkin_make -DPYTHON_EXECUTABLE=${PYTHON3_EXEC} -DPYTHON_INCLUDE_DIR=${PYTHON3_I
 if [ $? -eq 0 ] ; then
     echo " done!"
     package_path="$(cd devel/lib/python3/dist-packages && pwd)"
-    rc_info="if [ -z TMUX ] ; then\n\t export PYTHONPATH=${package_path}:\${PYTHONPATH}\nfi"
+    rc_info="export PYTHONPATH=${package_path}:\${PYTHONPATH}\n"
     if echo $SHELL | grep zsh > /dev/null
     then
         echo -e "$rc_info" >> ~/.zshrc
