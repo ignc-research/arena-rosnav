@@ -6,8 +6,9 @@
   <param name="train_mode" value="$(arg train_mode)"/>
 
   
-  <arg name="map_path"        default="$(find simulator_setup)/maps/map1/map.yaml"/>
-  <arg name="world_path"      default="$(find simulator_setup)/maps/map1/map.world.yaml"/>
+  <arg name="map_file" default="map_empty"/>
+  <arg name="map_path"        default="$(find simulator_setup)/maps/$(arg map_file)/map.yaml"/>
+  <arg name="world_path"      default="$(find simulator_setup)/maps/$(arg map_file)/map.world.yaml"/>
 
   <arg name="global_frame_id"   value="map"/>
   <arg name="odom_frame_id"     value="odom"/>
