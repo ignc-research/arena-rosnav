@@ -1,7 +1,7 @@
 import os
 
 def write_hyperparameters_to_file(agent_name: str, PATHS: dict, robot, gamma, n_steps, ent_coef, learning_rate, vf_coef, max_grad_norm, gae_lambda, batch_size, n_epochs, clip_range):
-    """ function to document hyperparameters in model directory """
+    """ function to document hyperparameters in the model's directory """
     doc_location = os.path.join(PATHS.get('model'), "hyperparameters.txt")
 
     with open(doc_location, "w+") as f:
@@ -22,7 +22,7 @@ def write_hyperparameters_to_file(agent_name: str, PATHS: dict, robot, gamma, n_
 
 
 def update_total_timesteps_in_file(timesteps: int, PATHS: dict):
-    """ function to update number of total timesteps in the file """
+    """ function to update number of total timesteps in the file containing the hyperparameters """
     doc_location = os.path.join(PATHS.get('model'), "hyperparameters.txt")
 
     if os.path.isfile(doc_location):
@@ -43,6 +43,7 @@ def update_total_timesteps_in_file(timesteps: int, PATHS: dict):
 
 
 def print_hyperparameters_from_file(agent_name: str, PATHS: dict):
+    """ function to print hyperparameters from agent-specific hyperparameter file """
     doc_location = os.path.join(PATHS.get('model'), "hyperparameters.txt")
 
     if os.path.isfile(doc_location):
