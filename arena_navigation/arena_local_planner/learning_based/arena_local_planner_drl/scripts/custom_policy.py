@@ -124,7 +124,7 @@ class DRL_LOCAL_PLANNER(BaseFeaturesExtractor):
         self.cnn = nn.Sequential(
             nn.Conv1d(1, 32, 5, 2),
             nn.ReLU(),
-            nn.Conv1d(32, 64, 3, 2),
+            nn.Conv1d(32, 32, 3, 2),
             nn.ReLU(),
             nn.Flatten(),
         )
@@ -171,7 +171,7 @@ policy_kwargs_drl_local_planner = dict(features_extractor_class=DRL_LOCAL_PLANNE
 
 class CNN_NAVREP(BaseFeaturesExtractor):
     """
-    Custom Convolutional Neural Network to serve as feature extractor ahead of the policy and value head.
+    Custom Convolutional Neural Network (Nature CNN) to serve as feature extractor ahead of the policy and value head.
     Architecture was taken as reference from: https://github.com/ethz-asl/navrep
 
     :param observation_space: (gym.Space)
