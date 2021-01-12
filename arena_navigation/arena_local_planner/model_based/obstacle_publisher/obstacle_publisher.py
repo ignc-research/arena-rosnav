@@ -8,7 +8,7 @@ from geometry_msgs.msg import  Point, Twist
 from std_msgs.msg import ColorRGBA
 from ford_msgs.msg import Clusters
 
-
+import copy
 
 
 class odom_msg():
@@ -18,17 +18,46 @@ class odom_msg():
         self.sub_pose = rospy.Subscriber('/odom',Odometry,self.cbPose)
         self.pub_obst_odom = rospy.Publisher('/obst_odom',Clusters,queue_size=1)
         # static
-        self.sub_pose = rospy.Subscriber('/flatland_server/debug/layer/static',MarkerArray,self.getStaticMap)
+        # self.sub_pose = rospy.Subscriber('/flatland_server/debug/layer/static',MarkerArray,self.getStaticMap)
         
 
         self.obstacles = {}
         self.num_obst = 0
         self.cluster = Clusters()
         self.add_obst = True
-
+        # obst vel
         self.vel = Twist()
-        self.vel.angular.z = 0.1
-        self.vel.linear.x = 0.12
+        self.vel.angular.z = 0.3
+        self.vel.linear.x = 0.1
+        self.radius = 0.5
+        # static map
+        self.static_map_obst = Clusters()
+
+
+        self.pub_timer = rospy.Timer(rospy.Duration(0.1),self.pubOdom)
+
+    def pubOdom(self,event):
+        self.pub_obst_odom.publish(self.cluster)
+        self.add_obst = True
+        # self.cluster = Clusters()
+        self.cluster = copy.deepcopy(self.static_map_obst)
+        # print len(self.cluster.mean_points)
+
+
+    def appendMapObst(self,x,y,r):
+            tmp_point = Point()
+            tmp_point.x = x
+            tmp_point.y = y
+            tmp_point.z = r
+            
+            tmp_vel = Twist().linear
+
+            self.static_map_obst.mean_points.append(tmp_point)
+            self.static_map_obst.velocities.append(tmp_vel)
+            self.static_map_obst.labels.append(len(self.static_map_obst.labels)+1)
+            self.static_map_obst.counts.append(1)
+
+
 
     def pubVel(self, topic, twist):
         pub_vel = rospy.Publisher(topic,Twist,queue_size=1)
@@ -41,11 +70,10 @@ class odom_msg():
 
     def cbPose(self, msg):
 
-        
+
         # get all topics
         topics = rospy.get_published_topics()
         obst_ns = "myrobot_model" 
-        # obst_ns = "/obstacle_"
 
         obst_topics = []
         # filter topics with ns (obst)
@@ -60,27 +88,34 @@ class odom_msg():
                 v_topic = topic.replace("odometry/ground_truth", "cmd_vel")
                 # publish velocity to move obstacles
                 self.pubVel(v_topic,self.vel)
-                rospy.sleep(0.2)
+                # rospy.sleep(0.2)
                 
 
 
         self.add_obst = False
         # reset cluster
-        self.cluster = Clusters()
+        # self.cluster = Clusters()
+        
+        # print len(self.cluster.mean_points)
         # fill cluster with obstacle odom
         for i in self.obstacles:
             tmp_point = Point()
             tmp_point.x = self.obstacles[i].pose.pose.position.x 
             tmp_point.y = self.obstacles[i].pose.pose.position.y 
-            
+            tmp_point.z = self.radius
+
             tmp_vel = self.obstacles[i].twist.twist.linear
+            
+            # print type(tmp_vel.z)
 
             self.cluster.mean_points.append(tmp_point)
             self.cluster.velocities.append(tmp_vel)
             self.cluster.labels.append(self.obstacles[i].header.seq)
+            self.cluster.counts.append(0)
+
        
-        self.pub_obst_odom.publish(self.cluster)
-        self.add_obst = True
+        # print(len(self.cluster.mean_points))
+
     	
         if self.num_obst != len(self.obstacles):
             self.num_obst = len(self.obstacles)
@@ -90,12 +125,49 @@ class odom_msg():
                 print(t)
 
         
-    def getStaticMap(self, msg):
-        print(type(msg.markers[0]))
+    # def getStaticMap(self, msg):
+    #     print(type(msg.markers[0]))
 
 def run():
     rospy.init_node('tb3_obstacles',anonymous=False)
     tb3_obst = odom_msg()
+    # create static map 
+    # 1
+    tb3_obst.appendMapObst(24.5,15.53,1.2)
+    tb3_obst.appendMapObst(24.3,17.7,1.2)
+    # 2
+    tb3_obst.appendMapObst(19.8,11.63,0.7)
+    tb3_obst.appendMapObst(18.2,11.63,0.7)
+    tb3_obst.appendMapObst(16.5,11.63,0.7)
+    tb3_obst.appendMapObst(14.8,11.63,0.7)
+    # 3
+    tb3_obst.appendMapObst(20,2.6,1.3)
+    tb3_obst.appendMapObst(18.4,1.34,1)
+    tb3_obst.appendMapObst(19,-0.19,1)
+    # 4
+    tb3_obst.appendMapObst(16.5,18.5,0.7)
+    tb3_obst.appendMapObst(14.4,18,0.8)
+    tb3_obst.appendMapObst(12,17.7,1.2)
+    # 5
+    tb3_obst.appendMapObst(14,6,1.7)
+    # 6
+    tb3_obst.appendMapObst(12.2,-1.2,1.3)
+    tb3_obst.appendMapObst(9.22,-1.2,1.3)
+    # 7
+    tb3_obst.appendMapObst(0.74,14.3,1.7)
+    tb3_obst.appendMapObst(4.4,14.3,1.7)
+    # 8
+    tb3_obst.appendMapObst(3.6,6.4,1.3)
+    tb3_obst.appendMapObst(3.6,3.6,1.3)
+    # 9
+    tb3_obst.appendMapObst(0,-2.67,1)
+    # 10
+    tb3_obst.appendMapObst(-4.2,9.36,1)
+    tb3_obst.appendMapObst(-3.8,7.2,1)
+    tb3_obst.appendMapObst(-3.84,5.17,1)
+    tb3_obst.appendMapObst(-4.23,3.277,1)
+
+
     rospy.spin()
 
 

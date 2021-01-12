@@ -121,7 +121,7 @@ class NN_tb3():
         self.goal.header = msg.header
 
         # reset subgoals
-        print "new goal: "+str([self.goal.pose.position.x,self.goal.pose.position.y]) 
+        print("new goal: "+str([self.goal.pose.position.x,self.goal.pose.position.y])) 
 
     def cbSubGoal(self,msg):
         self.sub_goal.x = msg.pose.position.x
@@ -218,7 +218,7 @@ class NN_tb3():
         other_agents = []
 
 
-        xs = []; ys = []; radii = []; labels = []
+        xs = []; ys = []; radii = []; labels = []; static_map = []
         num_clusters = len(msg.labels)
         # print(num_clusters)
         for i in range(num_clusters):
@@ -230,10 +230,12 @@ class NN_tb3():
             # upper_r = np.linalg.norm(np.array([msg.mean_points[i].x-msg.max_points[i].x, msg.mean_points[i].y-msg.max_points[i].y]))
             # inflation_factor = 1.5
             # radius = max(PED_RADIUS, inflation_factor * max(upper_r, lower_r))
-            radius = self.obst_rad
+            
+            radius = msg.mean_points[i].z
 
 
-            xs.append(x); ys.append(y); radii.append(radius); labels.append(index)
+
+            xs.append(x); ys.append(y); radii.append(radius); labels.append(index); static_map.append(msg.counts[i])
             # self.visualize_other_agent(x,y,radius,msg.labels[i])
             # helper fields
             heading_angle = np.arctan2(v_y, v_x)
@@ -244,7 +246,7 @@ class NN_tb3():
             if pref_speed < 0.2:
                 pref_speed = 0; v_x = 0; v_y = 0
             other_agents.append(agent.Agent(x, y, goal_x, goal_y, radius, pref_speed, heading_angle, index))
-        self.visualize_other_agents(xs, ys, radii, labels)
+        self.visualize_other_agents(xs, ys, radii, labels,static_map)
         self.other_agents_state = other_agents
 
     def stop_moving(self):
@@ -319,7 +321,7 @@ class NN_tb3():
             return
 
         elif self.operation_mode.mode == self.operation_mode.SPIN_IN_PLACE:
-            print 'Spinning in place.'
+            print('Spinning in place.')
             self.stop_moving_flag = False
             angle_to_goal = np.arctan2(self.global_goal.pose.position.y - self.pose.pose.position.y, \
                 self.global_goal.pose.position.x - self.pose.pose.position.x) 
@@ -333,7 +335,7 @@ class NN_tb3():
                 self.pub_twist.publish(twist)
                 # print twist
             else:
-                print 'Done spinning in place'
+                print('Done spinning in place')
                 self.operation_mode.mode = self.operation_mode.NN
                 # self.new_global_goal_received = False
             return
@@ -394,7 +396,7 @@ class NN_tb3():
             action[1] = util.wrap(turn_amount + self.psi)
         if host_agent.dist_to_goal < 0.3:
             # current goal, reached, increment for next goal
-            print "===============\ngoal reached: "+str([goal_x, goal_y])
+            print("===============\ngoal reached: "+str([goal_x, goal_y]))
             self.stop_moving_flag = True
             self.new_global_goal_received = False
             self.stop_moving()
@@ -478,7 +480,7 @@ class NN_tb3():
 
         # print marker
 
-    def visualize_other_agents(self,xs,ys,radii,labels):
+    def visualize_other_agents(self,xs,ys,radii,labels,sm):
         markers = MarkerArray()
         for i in range(len(xs)):
             # Orange box for other agent
@@ -493,8 +495,12 @@ class NN_tb3():
             marker.pose.position.y = ys[i]
             # marker.pose.orientation = orientation
             marker.scale = Vector3(x=2*radii[i],y=2*radii[i],z=1)
-            marker.color = ColorRGBA(r=1.0,g=0.4,a=1.0)
-            marker.lifetime = rospy.Duration(0.1)
+            if sm[i] == 1:
+                # print sm
+                marker.color = ColorRGBA(r=0.5,g=0.4,a=1.0)
+            else:
+                marker.color = ColorRGBA(r=1.0,g=0.4,a=1.0)
+            marker.lifetime = rospy.Duration(0.5)
             markers.markers.append(marker)
 
         self.pub_agent_markers.publish(markers)
@@ -513,7 +519,7 @@ class NN_tb3():
         marker.points.append(self.desired_position.pose.position)
         marker.scale = Vector3(x=0.1,y=0.2,z=0.2)
         marker.color = ColorRGBA(b=1.0,a=1.0)
-        marker.lifetime = rospy.Duration(0.5)
+        marker.lifetime = rospy.Duration(0.1)
         self.pub_goal_path_marker.publish(marker)
 
         # Display BLUE DOT at NN desired position
@@ -525,7 +531,7 @@ class NN_tb3():
         marker.type = marker.CUBE
         marker.action = marker.ADD
         marker.pose.position = copy.deepcopy(self.desired_position.pose.position)
-        marker.scale = Vector3(x=0.2,y=0.2,z=0.2)
+        marker.scale = Vector3(x=0.2,y=0.2,z=0.4)
         marker.color = ColorRGBA(b=1.0,a=0.1)
         marker.lifetime = rospy.Duration(100)
         if self.desired_action[0] == 0.0:
@@ -555,8 +561,8 @@ def run():
     pref_speed = rospy.get_param("~tb3_speed")
     veh_data = {'goal':np.zeros((2,)),'radius':0.5,'pref_speed':pref_speed,'kw':10.0,'kp':1.0,'name':'tb3_01'}
 
-    print '==================================\ncadrl node started'
-    print "tb3 speed:", pref_speed, "\n=================================="
+    print('==================================\ncadrl node started')
+    print("tb3 speed:", pref_speed, "\n==================================")
 
     nn_tb3 = NN_tb3(veh_name, veh_data, nn, actions)
     rospy.on_shutdown(nn_tb3.on_shutdown)
