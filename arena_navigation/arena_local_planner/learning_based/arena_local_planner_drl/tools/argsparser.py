@@ -39,9 +39,8 @@ def process_training_args(parsed_args):
     if parsed_args.custom_mlp:
         setattr(parsed_args, 'net_arch', get_net_arch(parsed_args))
         delattr(parsed_args, 'agent')
+        delattr(parsed_args, 'load')
     else:
-        if parsed_args.load is not None:
-            delattr(parsed_args, 'agent')
         if parsed_args.body is not "" or parsed_args.pi is not "" or parsed_args.vf is not "":
             print("[custom mlp] arguments will be ignored..")
         delattr(parsed_args, 'body')

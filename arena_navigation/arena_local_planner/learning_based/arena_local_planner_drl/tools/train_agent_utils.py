@@ -2,7 +2,8 @@ import os
 import datetime
 
 
-def write_hyperparameters_to_file(agent_name: str, PATHS: dict, robot, gamma, n_steps, ent_coef, learning_rate, vf_coef, max_grad_norm, gae_lambda, batch_size, n_epochs, clip_range):
+def write_hyperparameters_to_file(agent_name: str, PATHS: dict, robot, gamma, n_steps, ent_coef, learning_rate, vf_coef, max_grad_norm, gae_lambda, batch_size, 
+                                  n_epochs, clip_range, discrete_action_space):
     """ function to document hyperparameters in the model's directory """
     doc_location = os.path.join(PATHS.get('model'), "hyperparameters.txt")
 
@@ -20,6 +21,7 @@ def write_hyperparameters_to_file(agent_name: str, PATHS: dict, robot, gamma, n_
         f.write("batch_size = %d \n" % batch_size)
         f.write("n_epochs = %d \n" % n_epochs)
         f.write("clip_range = %f \n" % clip_range)
+        f.write("discrete_action_space = %r \n" % discrete_action_space)
         # total_timesteps has to be in the last line!
         f.write("total_timesteps = %d" % 0)
 
@@ -62,3 +64,5 @@ def print_hyperparameters_from_file(agent_name: str, PATHS: dict):
         for line in parameters[2:]:
             print(line)
         print("--------------------------------\n\n")
+    else:
+        print("Warning: found no 'hyperparameter.txt' in %s" % PATHS.get('model'))
