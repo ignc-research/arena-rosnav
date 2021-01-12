@@ -1,5 +1,14 @@
 #!/usr/bin/env python
+# ros
 import rospy
+from geometry_msgs.msg import PoseStamped, Twist, Vector3
+from nav_msgs.msg import Odometry
+from sensor_msgs.msg import LaserScan
+# viz
+from visualization_msgs.msg import Marker, MarkerArray
+from std_msgs.msg import ColorRGBA
+# arena 
+import math
 import gru
 from torch.nn.utils.rnn import pack_sequence
 import torch
@@ -9,23 +18,34 @@ class NN_tb3():
     def __init__(self):
 
         #parameters
-        self.NUM_ACTIONS = 5
-        self.num_observations=74
-        self.SEQ_LENGTH=64
-        self.SEQ_LENGTH_MAX=300
-
         self.episode_idx=0
         self.last_action=-1
-        self.tensor_state_buffer = torch.zeros(self.SEQ_LENGTH_MAX, self.num_observations,dtype=torch.float)
-      
-        # self.control_timer = rospy.Timer(rospy.Duration(0.01),self.cbControl)
-        self.nn_timer = rospy.Timer(rospy.Duration(0.1),self.cbComputeActionGA3C)
+        self.last_value=0
+        self.distance = 0
 
+        #
+        self.psi = 0
+        self.phi = 0
+        self.global_goal = PoseStamped()
+        self.goal = PoseStamped()
+        self.sub_goal = Vector3()
+        self.scan = LaserScan()
+        # subs
+        self.sub_pose = rospy.Subscriber('/odom',Odometry,self.cbPose)
+        self.sub_global_goal = rospy.Subscriber('/goal',PoseStamped, self.cbGlobalGoal)
+        self.sub_subgoal = rospy.Subscriber('/plan_manager/subgoal',PoseStamped, self.cbSubGoal)
+        self.sub_subgoal = rospy.Subscriber('/scan',LaserScan, self.cbScan)
+        # pubs
+        self.pub_pose_marker = rospy.Publisher('/arena_pose',Marker,queue_size=1)
+        self.pub_twist = rospy.Publisher('/cmd_vel',Twist,queue_size=1) 
+
+        self.nn_timer = rospy.Timer(rospy.Duration(0.1),self.calculateAction)
+
+
+    def cbScan(self,msg):
+        self.scan = msg
     def cbGlobalGoal(self,msg):
-        self.stop_moving_flag = True
-        self.new_global_goal_received = True
         self.global_goal = msg
-        self.operation_mode.mode = self.operation_mode.SPIN_IN_PLACE
         self.goal.pose.position.x = msg.pose.position.x
         self.goal.pose.position.y = msg.pose.position.y
         self.goal.header = msg.header
@@ -43,137 +63,135 @@ class NN_tb3():
         self.operation_mode.mode = self.operation_mode.NN
 
     def cbPose(self, msg):
-        self.cbVel(msg)
-        self.num_poses += 1
         q = msg.pose.pose.orientation
+        # p = msg.pose.pose.position
+        g = self.global_goal.pose.orientation
+        self.phi = np.arctan2(2.0*(g.w*g.z + g.x*g.y), 1-2*(g.y*g.y+g.z*g.z))
+        # p = self.global_goal
         self.psi = np.arctan2(2.0*(q.w*q.z + q.x*q.y), 1-2*(q.y*q.y+q.z*q.z)) # bounded by [-pi, pi]
+        # self.phi = np.arctan2(2.0*(p.w*p.z + p.x*p.y), 1-2*(p.y*p.y+p.z*p.z))
+
         self.pose = msg.pose
-        self.visualize_pose(msg.pose.pose.position,msg.pose.pose.orientation)
+        # self.visualize_pose(msg.pose.pose.position,msg.pose.pose.orientation)
 
-    def cbVel(self, msg):
-        self.vel = msg.twist.twist.linear
+    def goalReached(self):
+        curr_pos = self.pose.pose.position
+        goal = self.global_goal.pose.position
+        # check dist to goal
+        dist = np.array([curr_pos.x-goal.x,curr_pos.y-curr_pos.y])
+        self.distance = np.linalg.norm(dist)
 
-    def update_action(self, action):
-        # print 'update action'
-        self.desired_action = action
-        self.desired_position.pose.position.x = self.pose.pose.position.x + 1*action[0]*np.cos(action[1])
-        self.desired_position.pose.position.y = self.pose.pose.position.y + 1*action[0]*np.sin(action[1])
-    
-    def step(self,observation, h, net):
-        # passing observation through net
-        q = None
-        self.tensor_state_buffer[self.episode_idx] = torch.FloatTensor(observation);
-        if self.episode_idx > self.SEQ_LENGTH-1:
-            start_index= self.episode_idx-(self.SEQ_LENGTH-1)
-            L=self.SEQ_LENGTH
+        # how far ?
+        if self.distance > 0.3:
+            return False
         else:
-            start_index = 0
-            L=self.episode_idx+1
-        state_v=[torch.narrow(self.tensor_state_buffer, dim=0, start=start_index, length=L)]
-        t=pack_sequence(state_v, enforce_sorted=False)
-        q,_ = net(t,h)
-        q=q.view(-1,self.NUM_ACTIONS)
-        # select action with max q value
-        _, act_v = torch.max(q, dim=1)
-        action = int(act_v.item())
-        last_action = action
-        return action
+            return True
 
-    def cbControl(self, event):
+    def stop_moving(self):
+        twist = Twist()
+        # print(twist)
+        self.pub_twist.publish(twist)
 
-        if self.goal.header.stamp == rospy.Time(0) or self.stop_moving_flag and not self.new_global_goal_received:
-            self.stop_moving()
-            return
-        elif self.operation_mode.mode==self.operation_mode.NN:
-            desired_yaw = self.desired_action[1]
-            yaw_error = desired_yaw - self.psi
-            if abs(yaw_error) > np.pi:
-                yaw_error -= np.sign(yaw_error)*2*np.pi
+    def cbComputeActionArena(self, event):         
+        if not self.goalReached():   
+            # Input
+            # pack goal position relative to robot
+            angle = self.psi     #in rad
+            distance = 0    #in meter
 
-            gain = 1.3 # canon: 2
-            vw = gain*yaw_error
+            #  laser samples
+            sample2 = np.asanyarray(self.scan.ranges)
+            sample2[np.isnan(sample2)] = 0
+            sample2=sample2.tolist()
+            print(sample2)
+            # self.goalReached()
 
-            use_d_min = True
-            if False: # canon: True
-                # use_d_min = True
-                # print "vmax:", self.find_vmax(self.d_min,yaw_error)
-                vx = min(self.desired_action[0], self.find_vmax(self.d_min,yaw_error))
-            else:
-                vx = self.desired_action[0]
-      
-            twist = Twist()
-            twist.angular.z = vw
-            twist.linear.x = vx
-            self.pub_twist.publish(twist)
-            self.visualize_action(use_d_min)
-            return
+            sample=np.zeros([72,]).tolist()
+            obervation_input=[angle]+[distance]+sample
 
-        elif self.operation_mode.mode == self.operation_mode.SPIN_IN_PLACE:
-            print('Spinning in place.')
-            self.stop_moving_flag = False
-            angle_to_goal = np.arctan2(self.global_goal.pose.position.y - self.pose.pose.position.y, \
-                self.global_goal.pose.position.x - self.pose.pose.position.x) 
-            global_yaw_error = self.psi - angle_to_goal
-            if abs(global_yaw_error) > 0.5:
-                vx = 0.0
-                vw = 1.0
-                twist = Twist()
-                twist.angular.z = vw
-                twist.linear.x = vx
-                self.pub_twist.publish(twist)
-                # print twist
-            else:
-                print('Done spinning in place')
-                self.operation_mode.mode = self.operation_mode.NN
-                # self.new_global_goal_received = False
-            return
+
+            #load NN
+            model_name="dqn_agent_best_72_gru.dat"
+            net = gru.GRUModel(self.num_observations, self.NUM_ACTIONS)
+            net.train(False)# set training mode to false to deactivate dropout layer
+
+            h = net.init_hidden(1).data
+            net.load_state_dict(torch.load(model_name, map_location=torch.device('cpu')));
+
+            ##output NN
+            prediction=self.step(obervation_input, h, net)
+            print(prediction)
         else:
+            print("stop moving")
             self.stop_moving()
-            return
 
-    def cbComputeActionGA3C(self, event):            
-        # Input
-        # pack goal position relative to robot
-        angle = 0      #in rad
-        distance = 0    #in meter
+    def calculateAction(self,event):
+        if not self.goalReached():
+            #parameters
+            NUM_ACTIONS = 5
+            num_observations=364
+            BATCH_SIZE = 64
+            SEQ_LENGTH=64
+            SEQ_LENGTH_MAX=300
+            tensor_state_buffer = torch.zeros(SEQ_LENGTH_MAX, num_observations,dtype=torch.float)
+                
+            # Input
+            # pack goal position relative to robot
+            angle = self.psi-self.phi      #in rad
+            angle = math.degrees(angle)
+            #lidarscan (laser)
+            sample = np.asanyarray(self.scan.ranges)
+            sample[np.isnan(sample)] = 0
+            sample=sample.tolist()
+            # sample=np.zeros([360,]).tolist()
+            # print(angle)
+            # print(self.distance)
+            obervation_input=[self.last_value]+[self.last_action]+[angle]+[self.distance]+sample
 
-        #  laser samples
-        ##lidarscan
-        ##hier the length of lidascan is 72 or 360,which would be noticed on the name of the model.
+            #load NN
+            model_name="dqn_agent_best_360_gru.dat"
+            net = gru.GRUModel(num_observations, NUM_ACTIONS)
+            net.train(False)# set training mode to false to deactivate dropout layer
 
-        sample=np.zeros([72,]).tolist()
-        obervation_input=[angle]+[distance]+sample
+            h = net.init_hidden(1).data
+            net.load_state_dict(torch.load(model_name, map_location=torch.device('cpu')))
 
+            ##output NN
+            q = None
+            tensor_state_buffer[self.episode_idx] = torch.FloatTensor(obervation_input);
+            if self.episode_idx > SEQ_LENGTH-1:
+                start_index= self.episode_idx-(SEQ_LENGTH-1)
+                L=SEQ_LENGTH
+            else:
+                start_index = 0
+                L=self.episode_idx+1
+            state_v=[torch.narrow(tensor_state_buffer, dim=0, start=start_index, length=L)]
+            t=pack_sequence(state_v, enforce_sorted=False)
+            q,_ = net(t,h)
+            q=q.view(-1,NUM_ACTIONS)
+            
+            # select action with max q value
+            _, act_v = torch.max(q, dim=1)
+            action = int(act_v.item())
+            # print(q)
+            self.last_value = q[0][action]
+            self.last_action = action
+            self.performAction(action)
+        else:
+            print("stop moving")
+            self.stop_moving()
 
-        #load NN
-        model_name="dqn_agent_best_72_gru.dat"
-        net = gru.GRUModel(self.num_observations, self.NUM_ACTIONS)
-        net.train(False)# set training mode to false to deactivate dropout layer
+    def performAction(self, action):
+        actionLib = {0: [0.2,0],1: [0.15,0.75],2: [0.15,-0.75],3: [0.0,1.5],4: [0.0,-1.5]}
+        # print(action)
+        twist = Twist()
+        # print(actionLib[action][0])
+        twist.linear.x = actionLib[action][0]
+        twist.angular.z = actionLib[action][1]
+   
+        # print(twist)
+        self.pub_twist.publish(twist)
 
-        h = net.init_hidden(1).data
-        net.load_state_dict(torch.load(model_name, map_location=torch.device('cpu')));
-
-        ##output NN
-        prediction=self.step(obervation_input, h, net)
-        print(prediction)
-
-        # if host_agent.dist_to_goal < 2.0: # and self.percentComplete>=0.9:
-        #     # print "somewhat close to goal"
-        #     pref_speed = max(min(kp_v * (host_agent.dist_to_goal-0.1), pref_speed), 0.0)
-        #     action[0] = min(raw_action[0], pref_speed)
-        #     turn_amount = max(min(kp_r * (host_agent.dist_to_goal-0.1), 1.0), 0.0) * raw_action[1]
-        #     action[1] = util.wrap(turn_amount + self.psi)
-        # if host_agent.dist_to_goal < 0.3:
-        #     # current goal, reached, increment for next goal
-        #     print("===============\ngoal reached: "+str([goal_x, goal_y]))
-        #     self.stop_moving_flag = True
-        #     self.new_global_goal_received = False
-        #     self.stop_moving()
-        #     # self.goal_idx += 1
-        # else:
-        #     self.stop_moving_flag = False
-
-        # self.update_action(action)
 
     def update_subgoal(self,subgoal):
         self.goal.pose.position.x = subgoal[0]
