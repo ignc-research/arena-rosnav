@@ -152,8 +152,7 @@ Export turtlebot model for simulation
 * In one terminnal, export turtlebot model and start simulation
 
 ```bash
-export TURTLEBOT3_MODEL=${TB3_MODEL}
-roslaunch arena_bringup start_arena_flatland.launch  train_mode:=true
+roslaunch arena_bringup start_arena_flatland.launch  train_mode:=true 	use_viz:=true  task_mode=random
 ```
 * In another terminal
 
@@ -169,20 +168,18 @@ Hint: During 2021-01-05 and 2021-01-10, arena_local_planner_drl package is still
 
 ### Test the task generator
 
-* In one terminnal, export turtlebot model and start simulation
+* In one terminal, start simulation. You can specify the following parameters: 
+
+   * train_mode:=<true, false>
+   * use_viz:=<true, false>
+   * local_planner:=<teb,dwa,mpc,cadrl,arena2d>
+   * task_mode:=<random, manual, scenario>
 
 ```bash
 export TURTLEBOT3_MODEL=${TB3_MODEL}
-roslaunch arena_bringup start_arena_flatland.launch  train_mode:=true
+roslaunch arena_bringup start_arena_flatland.launch  train_mode:=true  use_viz:=true   task_mode:=random
 ```
-* In another terminal, run the task generator node
-
-```
-source your devel/setup.zsh(bash)
-workon rosnav
-rosrun task generator task_generator_node.py
-```
-Now you can click on the generate task button in rviz to generator a new random task (random obstacles and goal is published to /goal). It will automatically navigate to that goal, once you start one of our local planners, which are triggered by a new /goal.
+Now you can click on the generate task button in rviz to generator a new random task (random obstacles and goal is published to /goal). It will automatically navigate to that goal, once you start one of our local planners, which are triggered by a new /goal. If you starte with task_mode "manual" you can specify your goal using the specify Flatland Navigation goal (using normal 2D navigation goal will trigger the move_base planner, thus only works with teb and dwa)
 
 
 #### 2.3. Rviz plugins:
