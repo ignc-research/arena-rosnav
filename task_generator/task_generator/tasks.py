@@ -108,7 +108,9 @@ class ManualTask(ABSTask):
         self._manual_goal_con.notify()
 
 
-def get_predefined_task():
+def get_predefined_task(mode):
+
+    #TODO extend get_predefined_task(mode="string") such that user can choose between task, if mode is 
 
     # check is it on traininig mode or test mode. if it's on training mode
     # flatland will provide an service called 'step_world' to change the simulation time
@@ -148,5 +150,12 @@ def get_predefined_task():
 
     # TODO In the future more Task will be supported and the code unrelated to
     # Tasks will be moved to other classes or functions.
-    task = RandomTask(obstacles_manager, robot_manager)
+    if mode == "random":
+        task = RandomTask(obstacles_manager, robot_manager)
+        print("random tasks requested")
+    if mode == "manual":
+        task = ManualTask(obstacles_manager, robot_manager)
+        print("manual tasks requested")
+    #task = RandomTask(obstacles_manager, robot_manager)    
+
     return task
