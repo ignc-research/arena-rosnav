@@ -1,7 +1,6 @@
 # arena-rosnav
 
 <p align="center">
-  <img width="300" height="300" src="/img/dynamic1.gif">
 	<img width="300" height="300" src="/img/1training.gif">
 </p>
 
@@ -51,9 +50,9 @@ libpython3.6-dev \
 python3-catkin-pkg-modules \
 python3-rospkg-modules \
 python3-empy \
-python3-setuptools
-ros-melodic-navigation 
-
+python3-setuptools \
+ros-melodic-navigation \ 
+ros-melodic-teb-local-planner \
 ```
 
 #### 1.2. Prepare virtual environment & install python packages

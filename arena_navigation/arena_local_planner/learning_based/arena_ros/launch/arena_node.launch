@@ -1,19 +1,7 @@
 <launch>
-	
-    <!-- move base -->
-    <arg name="model" default="burger"/>
-    <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
-        <rosparam file="$(find conventional)/config/costmap_common_params_$(arg model).yaml" command="load" ns="global_costmap" />
-        <rosparam file="$(find conventional)/config/costmap_common_params_$(arg model).yaml" command="load" ns="local_costmap" />   
-        <rosparam file="$(find conventional)/config/local_costmap_params.yaml" command="load" />
-        <rosparam file="$(find conventional)/config/global_costmap_params.yaml" command="load" />
-    </node>
-    
-    
-    <arg name="tb3_speed" default="0.3"/>
-    <arg name="file" default="cadrl_node_tb3.py"/>
+	<arg name="tb3_speed" default="0.3"/>
     <!-- Launch neural net ros wrapper -->
-    <node pkg="cadrl_ros" type="cadrl_node_tb3.py" name="cadrl_node" output="screen" ns="/cadrl">
+    <node pkg="arena_ros" type="arena_node_tb3.py" name="arena_node" output="screen" ns="/arena">
         
         <!-- Publications -->
         <remap from="~other_vels" to="other_vels"/>
