@@ -17,13 +17,8 @@ import numpy as np
 class NN_tb3():
     def __init__(self):
 
-        #parameters
-        self.episode_idx=0
-        self.last_action=-1
-        self.last_value=0
+        # 
         self.distance = 0
-
-        #
         self.desired_action = 0
         self.psi = 0
         self.deg_phi = 0
@@ -98,7 +93,20 @@ class NN_tb3():
 
     def cbControl(self,event):
         self.performAction(self.desired_action)
+        return
 
+
+    def countNan(self,data):
+        n=0
+        for i in data:
+            if np.isnan(i):
+                n += 1
+            else:
+                print(n)
+                return n
+        print(n)
+        return n
+            
     def cbComputeActionArena(self,event):
         if not self.goalReached():
             NUM_ACTIONS = 5
@@ -107,19 +115,22 @@ class NN_tb3():
             SEQ_LENGTH_MAX=300
             # input
             # pack goal position relative to robot
-            angle = self.deg_phi     #in degree
-            distance = self.distance    #in meter
-            # print(angle)
-            # print(self.distance)
+            angle = self.deg_phi    
+            distance = self.distance   
             #lidarscan
             sample = np.asanyarray(self.scan.ranges)
-            sample[np.isnan(sample)] = 1
+            # print(np.count_nonzero(~np.isnan(sample)))
+            # print(self.countNan(sample))
+            sample[np.isnan(sample)] = 3.5
             sample=sample.tolist()
-            # print(sample)
-         
+            print(len(sample))
+
+            # print("===============================")
+            
             sample=np.ones([360,]).tolist()
             # print(sample)
-            observation=[angle]+[distance]+sample
+
+            observation=[distance]+[angle]+sample
             #load NN
             model_name="dqn_agent_best_fc_l2.dat"
             net = fc.FC_DQN(num_observations, NUM_ACTIONS)
@@ -145,27 +156,27 @@ class NN_tb3():
     def performAction(self, action):
 
         # action_space = {0: [0.2,0],1: [0.15,0.75],2: [0.15,-0.75],3: [0.0,1.5],4: [0.0,-1.5]}
-        action_space = {0: [0.3,0], 1: [0.3,0.1], 2: [0.3,-0.1], 3: [0.0,0.5], 4: [0.0,-0.5]}
+        action_space = {0: [0.2,0], 1: [0.15,0.1], 2: [0.15,-0.1], 3: [0.0,0.75], 4: [0.0,-0.75]}
         # print(action)
         twist = Twist()
+        # twist.linear.x = action_space[action][0]
+        # twist.angular.z = action_space[action][1]
+        
         if not self.goalReached():
             # print(actionLib[action][0])
             twist.linear.x = action_space[action][0]
             # if rotate only
             if action_space[action][0]==0:
                 twist.angular.z = action_space[action][1]
-            # otherewise checl if angle error big enough
+            # otherewise check if angle error big enough
             elif abs(self.deg_phi)>5: 
                 twist.angular.z = action_space[action][1]
             # print(self.deg_phi)
-            print("action: "+str(action_space[action]))
-            print("twist: "+str([twist.linear.x, twist.angular.z]))
+        print("action "+str(action)+": "+str(action_space[action]))
+        print("twist: "+str([twist.linear.x, twist.angular.z]))
+        # print((sample))
         self.pub_twist.publish(twist)
 
-
-    def update_subgoal(self,subgoal):
-        self.goal.pose.position.x = subgoal[0]
-        self.goal.pose.position.y = subgoal[1]
 
     def visualize_subgoal(self,subgoal, subgoal_options=None):
         markers = MarkerArray()
