@@ -20,13 +20,13 @@ def training_args(parser):
 def custom_mlp_args(parser):
     """ arguments for the custom mlp mode """
     custom_mlp_args = parser.add_argument_group('custom mlp args', 'architecture arguments for the custom mlp')
-    custom_mlp_args.add_argument('--body', type=str, default="", metavar="'{num}-{num}-...'",
+    custom_mlp_args.add_argument('--body', type=str, default="", metavar="{num}-{num}-...",
                                 help="architecture of the shared latent network, "
                                 "each number representing the number of neurons per layer")
-    custom_mlp_args.add_argument('--pi', type=str, default="", metavar="'{num}-{num}-...'",
+    custom_mlp_args.add_argument('--pi', type=str, default="", metavar="{num}-{num}-...",
                                 help="architecture of the latent policy network, "
                                 "each number representing the number of neurons per layer")
-    custom_mlp_args.add_argument('--vf', type=str, default="", metavar="'{num}-{num}-...'",
+    custom_mlp_args.add_argument('--vf', type=str, default="", metavar="{num}-{num}-...",
                                 help="architecture of the latent value network, "
                                 "each number representing the number of neurons per layer")
     custom_mlp_args.add_argument('--act_fn', type=str, default="relu", choices=['relu', 'sigmoid', 'tanh'],

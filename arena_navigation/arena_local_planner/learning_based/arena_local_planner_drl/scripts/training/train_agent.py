@@ -152,12 +152,12 @@ if __name__ == "__main__":
 
     # instantiate gym environment
     n_envs = 1
-    task = get_predefined_task()
+    task = get_predefined_task("random")
     env = DummyVecEnv([lambda: FlatlandEnv(task, PATHS.get('robot_setting'), PATHS.get('robot_as'), discrete_action_space)] * n_envs)
    
     # instantiate eval environment
     eval_env = Monitor(FlatlandEnv(task, PATHS.get('robot_setting'), PATHS.get('robot_as'), discrete_action_space), PATHS.get('eval'))
-    eval_env = EvalCallback(eval_env, n_eval_episodes=5, eval_freq=100, log_path=PATHS.get('eval'), best_model_save_path=PATHS.get('model'), deterministic=True)
+    eval_env = EvalCallback(eval_env, n_eval_episodes=10, eval_freq=250, log_path=PATHS.get('eval'), best_model_save_path=PATHS.get('model'), deterministic=True)
                             
 
     # determine mode
