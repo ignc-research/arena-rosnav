@@ -1,59 +1,52 @@
 import os
+import datetime
+import json
 
-def write_hyperparameters_to_file(agent_name: str, PATHS: dict, robot, gamma, n_steps, ent_coef, learning_rate, vf_coef, max_grad_norm, gae_lambda, batch_size, n_epochs, clip_range):
-    """ function to document hyperparameters in the model's directory """
-    doc_location = os.path.join(PATHS.get('model'), "hyperparameters.txt")
+def write_hyperparameters_json(hyperparams: object, PATHS: dict):
+    doc_location = os.path.join(PATHS.get('model'), "hyperparameters.json")
 
-    with open(doc_location, "w+") as f:
-        f.write("'%s'\n" % agent_name)
-        f.write("_____________________________________\n")
-        f.write("robot = %s \n" % robot)
-        f.write("gamma = %f \n" % gamma)
-        f.write("n_steps = %d \n" % n_steps)
-        f.write("ent_coef = %f \n" % ent_coef)
-        f.write("learning_rate = %f \n" % learning_rate)
-        f.write("vf_coef = %f \n" % vf_coef)
-        f.write("max_grad_norm = %f \n" % max_grad_norm)
-        f.write("gae_lambda = %f \n" % gae_lambda)
-        f.write("batch_size = %d \n" % batch_size)
-        f.write("n_epochs = %d \n" % n_epochs)
-        f.write("clip_range = %f \n" % clip_range)
-        # total_timesteps has to be in the last line!
-        f.write("total_timesteps = %d" % 0)
+    with open(doc_location, "w", encoding='utf-8') as target:
+        json.dump(hyperparams.__dict__, target, ensure_ascii=False, indent=4)
 
 
-def update_total_timesteps_in_file(timesteps: int, PATHS: dict):
-    """ function to update number of total timesteps in the file containing the hyperparameters """
-    doc_location = os.path.join(PATHS.get('model'), "hyperparameters.txt")
+def update_total_timesteps_json(timesteps: int, PATHS:dict):
+    doc_location = os.path.join(PATHS.get('model'), "hyperparameters.json")
 
     if os.path.isfile(doc_location):
         with open(doc_location, "r") as file:
-            parameters = file.readlines()
-        
-        # extracts number from the last line and converts it to int
-        # total_timesteps has to be in the last line!
-        current_total_timesteps = int(''.join(list(filter(str.isdigit, parameters[len(parameters)-1]))))
-        current_total_timesteps += timesteps
-
-        parameters = parameters[:-1]
-        parameters.append("total_timesteps = %d" % current_total_timesteps)
-
-        with open(doc_location, "w") as file:
-            file.write("".join(parameters))
+            hyperparams = json.load(file)
+        try:
+            curr_timesteps = int(hyperparams['n_timesteps']) + timesteps
+            hyperparams['n_timesteps'] = curr_timesteps
+        except Exception:
+            print("Parameter 'total_timesteps' not found or not of type Integer in 'hyperparameter.json'!")
+        else:
+            with open(doc_location, "w", encoding='utf-8') as target:
+                json.dump(hyperparams, target, ensure_ascii=False, indent=4)
     else:
-        print("Found no 'hyperparameters.txt' in model directory (%s) !" % PATHS.get('model'))
+        print("Found no 'hyperparameters.json' in model directory (%s) !" % PATHS.get('model'))
 
 
-def print_hyperparameters_from_file(agent_name: str, PATHS: dict):
-    """ function to print hyperparameters from agent-specific hyperparameter file """
-    doc_location = os.path.join(PATHS.get('model'), "hyperparameters.txt")
+def print_hyperparameters_json(hyperparams_obj: object, PATHS:dict):
+    doc_location = os.path.join(PATHS.get('model'), "hyperparameters.json")
 
     if os.path.isfile(doc_location):
         with open(doc_location, "r") as file:
-            parameters = file.readlines()
-        
+            hyperparams = json.load(file)
+
+        if not check_hyperparam_format(hyperparams_obj, hyperparams):
+            raise AssertionError("'hyperparameters.json' in %s has wrong format!" % PATHS.get('model'))
+
         print("\n--------------------------------")
         print("         HYPERPARAMETERS         \n")
-        for line in parameters[2:]:
-            print(line)
+        for param, param_val in hyperparams.items():
+            print(f"{param}:    {param_val}")
         print("--------------------------------\n\n")
+    else:
+        print("Warning: found no 'hyperparameter.json' in %s" % PATHS.get('model'))
+
+
+def check_hyperparam_format(hyperparams_obj: object, loaded_hyperparams: dict):
+    if set(hyperparams_obj.__dict__.keys()) == set(loaded_hyperparams.keys()):
+        return True
+    return False
