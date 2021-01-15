@@ -10,7 +10,10 @@ from std_srvs.srv import Empty,EmptyResponse
 
 class TaskGenerator:
     def __init__(self):
-        self.task=get_predefined_task()
+        mode = rospy.get_param("task_mode")
+        self.task=get_predefined_task(mode)
+
+        #declare new service task_generator, request are handled in callback task generate
         self.task_service_server= rospy.Service('task_generator', Empty,self.callback_task_generate)
         
     def callback_task_generate(self,req):
