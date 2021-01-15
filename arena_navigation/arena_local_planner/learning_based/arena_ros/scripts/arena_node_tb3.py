@@ -123,11 +123,11 @@ class NN_tb3():
             # print(self.countNan(sample))
             sample[np.isnan(sample)] = 3.5
             sample=sample.tolist()
-            print(len(sample))
+            # print(len(sample))
 
             # print("===============================")
             
-            sample=np.ones([360,]).tolist()
+            # sample=np.ones([360,]).tolist()
             # print(sample)
 
             observation=[distance]+[angle]+sample
@@ -156,22 +156,22 @@ class NN_tb3():
     def performAction(self, action):
 
         # action_space = {0: [0.2,0],1: [0.15,0.75],2: [0.15,-0.75],3: [0.0,1.5],4: [0.0,-1.5]}
-        action_space = {0: [0.2,0], 1: [0.15,0.1], 2: [0.15,-0.1], 3: [0.0,0.75], 4: [0.0,-0.75]}
+        action_space = {0: [0.2,0], 1: [0.15,0.35], 2: [0.15,-0.35], 3: [0.0,0.75], 4: [0.0,-0.75]}
         # print(action)
         twist = Twist()
-        # twist.linear.x = action_space[action][0]
-        # twist.angular.z = action_space[action][1]
+        twist.linear.x = action_space[action][0]
+        twist.angular.z = action_space[action][1]
         
-        if not self.goalReached():
-            # print(actionLib[action][0])
-            twist.linear.x = action_space[action][0]
-            # if rotate only
-            if action_space[action][0]==0:
-                twist.angular.z = action_space[action][1]
-            # otherewise check if angle error big enough
-            elif abs(self.deg_phi)>5: 
-                twist.angular.z = action_space[action][1]
-            # print(self.deg_phi)
+        # if not self.goalReached():
+        #     # print(actionLib[action][0])
+        #     twist.linear.x = action_space[action][0]
+        #     # if rotate only
+        #     if action_space[action][0]==0:
+        #         twist.angular.z = action_space[action][1]
+        #     # otherewise check if angle error big enough
+        #     elif abs(self.deg_phi)>5: 
+        #         twist.angular.z = action_space[action][1]
+
         print("action "+str(action)+": "+str(action_space[action]))
         print("twist: "+str([twist.linear.x, twist.angular.z]))
         # print((sample))
