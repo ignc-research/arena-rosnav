@@ -124,14 +124,30 @@ After that you can try to import tf in python3 and no error is supposed to be sh
 
 
 ## 2. Usage
-Before you test out the packages, always source your setup.zsh /setup.bash inside your catkin workspace also source your $HOME/.zshrc:
+Before you test out the packages, always source your setup.zsh /setup.bash inside your catkin workspace also source your $HOME/.zshrc and activate your venv python3 workspace:
 ```
 cd $HOME/catkin_ws
 source devel/setup.zsh
 source $HOME/.zshrc
+workon rosnav
 ```
 
-#### 2.1. [Quick start] start simulation env & plan manager
+### 2.1 Test the simulation environment and task generator
+
+* In one terminal, start simulation. You can specify the following parameters: 
+
+   * train_mode:=<true, false> 
+   * use_viz:=<true, false> (default true)
+   * local_planner:=<teb,dwa,mpc,cadrl,arena2d> (default dwa)
+   * task_mode:=<random, manual, scenario> (default random)
+   * obs_vel:=<float> # maximum velocity of dynamic obstacles [m/s]. It is recommended to set a max velocity within [0.1,0.7] (default 0.3)
+
+```bash
+roslaunch arena_bringup start_arena_flatland.launch  train_mode:=true  use_viz:=true   task_mode:=random
+```
+Now you can click on the generate task button in rviz to generator a new random task (random obstacles and goal is published to /goal). It will automatically navigate to that goal, once you start one of our local planners, which are triggered by a new /goal. If you starte with task_mode "manual" you can specify your goal using the specify Flatland Navigation goal (using normal 2D navigation goal will trigger the move_base planner, thus only works with teb and dwa)
+
+### 2.2. [Quick start] start simulation env & plan manager
 ````
 roslaunch arena_bringup start_arena_flatland.launch  train_mode:=false
 ````
@@ -146,7 +162,7 @@ start_flatland.launch will start several other sublaunch files and some neccesar
    * if true, the plan manager will generate subgoal topic always as goal(global goal) topic.
    * if false, you can also use move_base action triggered by rviz_plugin button *2D Navigation Goal*. 
 
-#### 2.2. [Quick start] test DRL training
+### 2.3. [Quick start] test DRL training
 Export turtlebot model for simulation 
 
 * In one terminnal, export turtlebot model and start simulation
@@ -168,25 +184,7 @@ then python run the script.
 
 Hint: During 2021-01-05 and 2021-01-10, arena_local_planner_drl package is still under the development, which means the api of the class could be drastically changed. Sorry about the inconvinience!
 
-### Test the task generator
-
-
-* In one terminal, start simulation. You can specify the following parameters: 
-
-   * train_mode:=<true, false>
-   * use_viz:=<true, false>
-   * local_planner:=<teb,dwa,mpc,cadrl,arena2d>
-   * task_mode:=<random, manual, scenario>
-
-```bash
-export TURTLEBOT3_MODEL=${TB3_MODEL}
-roslaunch arena_bringup start_arena_flatland.launch  train_mode:=true  use_viz:=true   task_mode:=random
-```
-Now you can click on the generate task button in rviz to generator a new random task (random obstacles and goal is published to /goal). It will automatically navigate to that goal, once you start one of our local planners, which are triggered by a new /goal. If you starte with task_mode "manual" you can specify your goal using the specify Flatland Navigation goal (using normal 2D navigation goal will trigger the move_base planner, thus only works with teb and dwa)
-
-
-
-#### 2.3. Rviz plugins:
+### 2.4. Rviz plugins:
    <p align="center">
       <img width="600" height="480" src="img/rviz_plugin_intro.png">
    </p>
@@ -219,8 +217,8 @@ Now you can click on the generate task button in rviz to generator a new random 
    4. local_planner
       1. learning_based
       	1.drl
-	2.il
-	3.trained-models
+	      2.immitation_learning
+	      3.trained-models
       2. model_based
    5. plan_manager
    6. plan_msgs
@@ -228,6 +226,7 @@ Now you can click on the generate task button in rviz to generator a new random 
    1. maps
    2. obstacles
    3. robot
+   4. scripts (e.g. behavior modeling, etc.)
 4. task_generator:
 5. utils
    1. rviz_plugin
