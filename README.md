@@ -141,12 +141,19 @@ workon rosnav
    * local_planner:=<teb,dwa,mpc,cadrl,arena2d> (default dwa)
    * task_mode:=<random, manual, scenario> (default random)
    * obs_vel:=<float> # maximum velocity of dynamic obstacles [m/s]. It is recommended to set a max velocity within [0.1,0.7] (default 0.3)
+   * map
 
 ```bash
-roslaunch arena_bringup start_arena_flatland.launch  train_mode:=true  use_viz:=true   task_mode:=random
+roslaunch arena_bringup start_arena_flatland.launch train_mode:=false use_viz:=true local_planner:=mpc map_file:=map1 obs_vel:=0.3
 ```
 Now you can click on the generate task button in rviz to generator a new random task (random obstacles and goal is published to /goal). It will automatically navigate to that goal, once you start one of our local planners, which are triggered by a new /goal. If you starte with task_mode "manual" you can specify your goal using the specify Flatland Navigation goal (using normal 2D navigation goal will trigger the move_base planner, thus only works with teb and dwa)
 
+### Run Arena2D models in Rosnav
+* start simulation as above, then navigate to the folder arena-rosnav/arena_navigation/arena_local_planner/learning_based/arena_ros/scripts/ and execute arena_node_tb3.py
+
+```
+python arena_node_tb3.py
+```
 ### 2.2. [Quick start] start simulation env & plan manager
 ````
 roslaunch arena_bringup start_arena_flatland.launch  train_mode:=false
