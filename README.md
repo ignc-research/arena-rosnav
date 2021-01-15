@@ -122,6 +122,17 @@ and do some additional configurations for the convenience . You can simply run i
 ```
 After that you can try to import tf in python3 and no error is supposed to be shown up.
 
+## Update after developing flatland code
+After changes inside the forks/flatland folder you should do the following steps to fetch the latest version:
+```
+cd arena-rosnav
+rosws update
+```
+pull latest ignc-flatland version 
+```
+cd src/forks/flatland
+git pull
+```
 
 ## 2. Usage
 Before you test out the packages, always source your setup.zsh /setup.bash inside your catkin workspace also source your $HOME/.zshrc and activate your venv python3 workspace:
