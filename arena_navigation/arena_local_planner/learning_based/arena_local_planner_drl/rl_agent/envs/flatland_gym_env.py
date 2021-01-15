@@ -122,12 +122,14 @@ class FlatlandEnv(gym.Env):
         # wait for new observations
         s = time.time()
         merged_obs, obs_dict = self.observation_collector.get_observations()
-        print("get observation: {}".format(time.time()-s))
+        # print("get observation: {}".format(time.time()-s))
 
         # calculate reward
         reward, reward_info = self.reward_calculator.get_reward(
             obs_dict['laser_scan'], obs_dict['goal_in_robot_frame'])
         done = reward_info['is_done']
+
+        print("reward:  {}".format(reward))
         # info
         if not done:
             done = self._steps_curr_episode > self._max_steps_per_episode

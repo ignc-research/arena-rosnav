@@ -2,7 +2,6 @@ import argparse
 import os
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.tools.custom_mlp_args_utils import *
 
-
 def training_args(parser):
     """ program arguments training script """
     parser.add_argument('--no-gpu', action='store_true', help='disables gpu for training')
