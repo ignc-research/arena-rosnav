@@ -12,6 +12,7 @@ from nav_msgs.msg import OccupancyGrid
 from geometry_msgs.msg import Pose2D
 import rospy
 import rospkg
+import shutil
 from .utils import generate_freespace_indices, get_random_pos_on_map
 
 
@@ -20,7 +21,7 @@ class ObstaclesManager:
     A manager class using flatland provided services to spawn, move and delete obstacles.
     """
 
-    def __init__(self, map_: OccupancyGrid,is_training = True):
+    def __init__(self, map_: OccupancyGrid, is_training=True):
 
         # setup proxy to handle  services provided by flatland
         rospy.wait_for_service('move_model', timeout=20)
@@ -35,7 +36,7 @@ class ObstaclesManager:
             'delete_model', DeleteModel, persistent=True)
         self._srv_spawn_model = rospy.ServiceProxy(
             'spawn_model', SpawnModel, persistent=True)
-        #self._srv_sim_step = rospy.ServiceProxy('step_world', StepWorld, persistent=True)
+        # self._srv_sim_step = rospy.ServiceProxy('step_world', StepWorld, persistent=True)
 
         self.update_map(map_)
         self.obstacle_name_list = []
@@ -53,12 +54,13 @@ class ObstaclesManager:
 
         Args:
             num_obstacles (string): the number of the obstacle instance to be created.
-            model_yaml_file_path (string or None): model file path. it must be absolute path! 
-            type_obstacle (string or None): type of the obstacle. it must be 'dynamic' or 'static'. 
+            model_yaml_file_path (string or None): model file path. it must be absolute path!
+            type_obstacle (string or None): type of the obstacle. it must be 'dynamic' or 'static'.
 
 
         Raises:
-            Exception:  Rospy.ServiceException(f" failed to register obstacles")
+            Exception:  Rospy.ServiceException(
+                f" failed to register obstacles")
 
         Returns:
             self.
@@ -106,25 +108,55 @@ class ObstaclesManager:
                 raise rospy.ServiceException(f" failed to register obstacles")
         return self
 
-    def register_random_obstacles(self, num_obstacles: int):
-        """register static or dynamic obstacles with random shape
+    def register_random_obstacles(self, num_obstacles: int, p_dynamic=0.5):
+        """register static or dynamic obstacles.
 
         Args:
-            num_obstacles (int):
+            num_obstacles (int): number of the obstacles
+            p_dynamic(float): the possibility of a obstacle is dynamic
         """
-        # since flatland  can only config the model by parsing the yaml file, we need to create a file for every random obstacle
-        tmp_folder = os.path.join(rospkg.RosPack().get_path(
-            'simulator_setup'), 'tmp_random_obstacles')
-        os.makedirs(tmp_folder, exist_ok=True)
+        num_dynamic_obstalces = int(num_obstacles*p_dynamic)
+        self.register_random_dynamic_obstacles(num_dynamic_obstalces)
+        self.register_random_static_obstacles(
+            num_obstacles-num_dynamic_obstalces)
+        rospy.loginfo(
+            f"Registed {num_dynamic_obstalces} dynamic obstacles and {num_obstacles-num_dynamic_obstalces} static obstacles")
+
+    def register_random_dynamic_obstacles(self, num_obstacles: int, linear_velocity=0.3, angular_velocity_max=math.pi/6, min_obstacle_radius=0.5, max_obstacle_radius=0.5):
+        """register dynamic obstacles with circle shape.
+
+        Args:
+            num_obstacles (int): number of the obstacles.
+            linear_velocity (float, optional):  the contant linear velocity of the dynamic obstacle.
+            angular_velocity_max (float, optional): the maximum angular verlocity of the dynamic obstacle. 
+                When the obstacle's linear velocity is too low(because of the collision),we will apply an 
+                angular verlocity which is sampled from [-angular_velocity_max,angular_velocity_max] to the it to help it better escape from the "freezing" satuation.
+            min_obstacle_radius (float, optional): the minimum radius of the obstacle. Defaults to 0.5.
+            max_obstacle_radius (float, optional): the maximum radius of the obstacle. Defaults to 0.5.
+        """
         for _ in range(num_obstacles):
-            tmp_model_name = 'random.model.yaml'
-            obstacle_type = self.generate_random_static_obstacle_yaml(
-                tmp_folder, tmp_model_name)
-            self.register_obstacles(1, os.path.join(
-                tmp_folder, tmp_model_name), obstacle_type)
-        # remove the tmp folder
-        import shutil
-        shutil.rmtree(tmp_folder)
+            model_path = self._generate_random_obstacle_yaml(
+                True, linear_velocity=linear_velocity, angular_velocity_max=angular_velocity_max,
+                min_obstacle_radius=min_obstacle_radius, max_obstacle_radius=max_obstacle_radius)
+            self.register_obstacles(1, model_path, "dynamic")
+            os.remove(model_path)
+
+    def register_random_static_obstacles(self, num_obstacles: int, num_vertices_min=3, num_vertices_max=6, min_obstacle_radius=0.5, max_obstacle_radius=2):
+        """register static obstacles with polygon shape.
+
+        Args:
+            num_obstacles (int): number of the obstacles.
+            num_vertices_min (int, optional): the minimum number of the vertices . Defaults to 3.
+            num_vertices_max (int, optional): the maximum number of the vertices. Defaults to 6.
+            min_obstacle_radius (float, optional): the minimum radius of the obstacle. Defaults to 0.5.
+            max_obstacle_radius (float, optional): the maximum radius of the obstacle. Defaults to 2.
+        """
+        for _ in range(num_obstacles):
+            num_vertices = random.randint(num_vertices_min, num_vertices_max)
+            model_path = self._generate_random_obstacle_yaml(
+                False, num_vertices=num_vertices, min_obstacle_radius=min_obstacle_radius, max_obstacle_radius=max_obstacle_radius)
+            self.register_obstacles(1, model_path, "static")
+            os.remove(model_path)
 
     def move_obstacle(self, obstacle_name: str, x: float, y: float, theta: float):
         """move the obstacle to a given position
@@ -184,52 +216,68 @@ class ObstaclesManager:
             move_model_request.pose = pos_non_active_obstacle
             self._srv_move_model(move_model_request)
 
-    def generate_random_static_obstacle_yaml(self, folder_path: str, model_name: str = "random.model.yaml"):
-        """generate a flatland model yaml file. The shape of the obstacle is randomly set.
+    def _generate_random_obstacle_yaml(self,
+                                       is_dynamic=False,
+                                       linear_velocity=0.3,
+                                       angular_velocity_max=math.pi/4,
+                                       num_vertices=3,
+                                       min_obstacle_radius=0.5,
+                                       max_obstacle_radius=1.5):
+        """generate a yaml file describing the properties of the obstacle.
+        The dynamic obstacles have the shape of circle,which moves with a constant linear velocity and angular_velocity_max
+
+        and the static obstacles have the shape of polygon.
 
         Args:
-            model_name (str, optional): [description]. Defaults to "random.model.yaml".
-        Return:
-            obstacle_type
+            is_dynamic (bool, optional): a flag to indicate generate dynamic or static obstacle. Defaults to False.
+            linear_velocity (float): the constant linear velocity of the dynamic obstacle. Defaults to 1.5.
+            angular_velocity_max (float): the maximum angular velocity of the dynamic obstacle. Defaults to math.pi/4.
+            num_vertices (int, optional): the number of vetices, only used when generate static obstacle . Defaults to 3.
+            min_obstacle_radius (float, optional): Defaults to 0.5.
+            max_obstacle_radius (float, optional): Defaults to 1.5.
         """
 
-        yaml_path = os.path.join(folder_path, model_name)
+        # since flatland  can only config the model by parsing the yaml file, we need to create a file for every random obstacle
+        tmp_folder_path = os.path.join(rospkg.RosPack().get_path(
+            'simulator_setup'), 'tmp_random_obstacles')
+        os.makedirs(tmp_folder_path, exist_ok=True)
+        tmp_model_name = "random.model.yaml"
+        yaml_path = os.path.join(tmp_folder_path, tmp_model_name)
         # define body
         body = {}
         body["name"] = "random"
         body["pose"] = [0, 0, 0]
-        body["type"] = "dynamic"
+        if is_dynamic:
+            body["type"] = "dynamic"
+        else:
+            body["type"] = "static"
         body["color"] = [1, 0.2, 0.1, 1.0]  # [0.2, 0.8, 0.2, 0.75]
         body["footprints"] = []
 
         # define footprint
         f = {}
-        footprints_shapes = ["circle", "polygon"]
-        obstacle_type = random.choice(footprints_shapes)
-        f["type"] = obstacle_type
-        f["density"] = 0
+        f["density"] = 1
+        f['restitution'] = 1
         f["layers"] = ["all"]
         f["collision"] = 'true'
         f["sensor"] = "false"
-
-        min_obstacle_radius = 0.5
-        max_obstacle_radius = 1.5
-        min_obstacle_vert = 3
-        max_obstacle_vert = 6
-        if f["type"] == "circle":
+        # dynamic obstacles have the shape of circle
+        if is_dynamic:
+            f["type"] = "circle"
             f["radius"] = random.uniform(
                 min_obstacle_radius, max_obstacle_radius)
-        elif f["type"] == "polygon":
+        else:
+            f["type"] = "polygon"
             f["points"] = []
-            random_num_vert = random.randint(
-                min_obstacle_vert, max_obstacle_vert)
-            random_length = random.uniform(
+            # random_num_vert = random.randint(
+            #     min_obstacle_vert, max_obstacle_vert)
+            radius = random.uniform(
                 min_obstacle_radius, max_obstacle_radius)
-            # radius_y=random.uniform(min_obstacle_radius,max_obstacle_radius)
-            for i in range(random_num_vert):
-                angle = 2 * math.pi * (float(i) / float(random_num_vert))
-                vert = [math.cos(angle) * random_length,
-                        math.sin(angle) * random_length]
+
+            for _ in range(num_vertices):
+                angle = 2 * math.pi * random.uniform(0, 1)
+                vert = [math.cos(angle) * radius,
+                        math.sin(angle) * radius]
                 # print(vert)
                 # print(angle)
                 f["points"].append(vert)
@@ -237,32 +285,20 @@ class ObstaclesManager:
         body["footprints"].append(f)
         # define dict_file
         dict_file = {'bodies': [body], "plugins": []}
-        obstacle_type = 'static'
-        # 0.5 possibility the obstacle is dynamic
-        if random.randint(0, 1) == 1:
-            # define plugin tween
-            # tween modes. you can check https://flatland-simulator.readthedocs.io/en/latest/included_plugins/tween.html?highlight=tween for more details
-            tween_modes = ['yoyo', 'once']
-            x_range = (1, 5)
-            y_range = x_range
-            angle_range = (math.pi/4, -math.pi/4)
-            x = random.uniform(x_range[0], x_range[1])
-            y = random.uniform(y_range[0], y_range[1])
-            angle = random.uniform(angle_range[0], angle_range[1])
-
-            tween = {}
-            tween['type'] = 'Tween'
-            tween['name'] = 'Tween Plugin'
-            tween['mode'] = random.choice(tween_modes)
-            tween['delta'] = [x, y, angle]
-            tween['duration'] = 10
-            tween['body'] = 'random'
-            dict_file['plugins'].append(tween)
+        if is_dynamic:
+            # We added new plugin called RandomMove in the flatland repo
+            random_move = {}
+            random_move['type'] = 'RandomMove'
+            random_move['name'] = 'RandomMove Plugin'
+            random_move['linear_velocity'] = linear_velocity
+            random_move['angular_velocity_max'] = angular_velocity_max
+            random_move['body'] = 'random'
+            dict_file['plugins'].append(random_move)
             obstacle_type = 'dynamic'
 
         with open(yaml_path, 'w') as fd:
             yaml.dump(dict_file, fd)
-        return obstacle_type
+        return yaml_path
 
     def remove_obstacle(self, name: str):
         if len(self.obstacle_name_list) != 0:
@@ -292,7 +328,8 @@ class ObstaclesManager:
                 filter(r.match, self.obstacle_name_list))
             for n in to_be_removed_obstacles_names:
                 self.remove_obstacle(n)
-            self.obstacle_name_list = list(set(self.obstacle_name_list)-set(to_be_removed_obstacles_names))
+            self.obstacle_name_list = list(
+                set(self.obstacle_name_list)-set(to_be_removed_obstacles_names))
         else:
             # it possible that in flatland there are still obstacles remaining when we create an instance of
             # this class.

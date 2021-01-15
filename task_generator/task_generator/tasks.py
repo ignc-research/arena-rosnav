@@ -108,9 +108,9 @@ class ManualTask(ABSTask):
         self._manual_goal_con.notify()
 
 
-def get_predefined_task(mode):
+def get_predefined_task(mode="random"):
 
-    #TODO extend get_predefined_task(mode="string") such that user can choose between task, if mode is 
+    # TODO extend get_predefined_task(mode="string") such that user can choose between task, if mode is
 
     # check is it on traininig mode or test mode. if it's on training mode
     # flatland will provide an service called 'step_world' to change the simulation time
@@ -146,7 +146,7 @@ def get_predefined_task(mode):
     # obstacles_manager.register_obstacles(3, os.path.join(
     # models_folder_path, "obstacles", 'random.model.yaml'), 'static')
     # generate 5 static or dynamic obstaticles
-    obstacles_manager.register_random_obstacles(5)
+    obstacles_manager.register_random_obstacles(20, 0.4)
 
     # TODO In the future more Task will be supported and the code unrelated to
     # Tasks will be moved to other classes or functions.
@@ -156,6 +156,6 @@ def get_predefined_task(mode):
     if mode == "manual":
         task = ManualTask(obstacles_manager, robot_manager)
         print("manual tasks requested")
-    #task = RandomTask(obstacles_manager, robot_manager)    
+    #task = RandomTask(obstacles_manager, robot_manager)
 
     return task

@@ -6,6 +6,7 @@ bodies:  # List of named bodies
     footprints:
       - type: circle
         radius: 0.3
+        # radius: 0.116042
         center: [0.0,0.0]
         layers: ["all"]
         collision: true
@@ -30,9 +31,17 @@ plugins:
     body: base_footprint
     broadcast_tf: true
     origin: [0.0, 0.0, 0.0]
-    range: 3
-    angle: {min: -3.12413936, max: 3.14159265359, increment: 0.01745}
-    noise_std_dev: 0.015
+    # range: 3
+    #arena
+    range: 3.5
+    # angle: {min: -3.12413936, max: 3.14159265359, increment: 0.01745}
+    # shifted for arena
+    # angle: {min: 0, max: 6.28319, increment: 0.01745330555}
+    angle: {min: -1.5707963267948966, max: 4.694936014, increment:  0.017453292}
+
+    # noise_std_dev: 0.015
+    # arena
+    noise_std_dev: 0.0
     update_rate: 10
 
 

@@ -1,7 +1,13 @@
 import argparse
 import os
+
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.tools.custom_mlp_args_utils import *
 
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> origin/master
 def training_args(parser):
     """ program arguments training script """
     parser.add_argument('--no-gpu', action='store_true', help='disables gpu for training')
@@ -12,13 +18,16 @@ def training_args(parser):
     group.add_argument('--custom-mlp', action='store_true', help='enables training with custom multilayer perceptron')
     group.add_argument('--load', type=str, metavar="[agent name]", help='agent to be loaded for training')
     parser.add_argument('--n', type=int, help='timesteps in total to be generated for training')
+
     parser.add_argument('-log', '--eval_log', action='store_true', help='enables storage of evaluation data')
+
     parser.add_argument('--tb', action='store_true', help='enables tensorboard logging')
 
 
 def custom_mlp_args(parser):
     """ arguments for the custom mlp mode """
     custom_mlp_args = parser.add_argument_group('custom mlp args', 'architecture arguments for the custom mlp')
+
     custom_mlp_args.add_argument('--body', type=str, default="", metavar="{num}-{num}-...",
                                 help="architecture of the shared latent network, "
                                 "each number representing the number of neurons per layer")
@@ -26,6 +35,7 @@ def custom_mlp_args(parser):
                                 help="architecture of the latent policy network, "
                                 "each number representing the number of neurons per layer")
     custom_mlp_args.add_argument('--vf', type=str, default="", metavar="{num}-{num}-...",
+
                                 help="architecture of the latent value network, "
                                 "each number representing the number of neurons per layer")
     custom_mlp_args.add_argument('--act_fn', type=str, default="relu", choices=['relu', 'sigmoid', 'tanh'],
@@ -39,8 +49,10 @@ def process_training_args(parsed_args):
     if parsed_args.custom_mlp:
         setattr(parsed_args, 'net_arch', get_net_arch(parsed_args))
         delattr(parsed_args, 'agent')
+
         delattr(parsed_args, 'load')
     else:
+
         if parsed_args.body is not "" or parsed_args.pi is not "" or parsed_args.vf is not "":
             print("[custom mlp] arguments will be ignored..")
         delattr(parsed_args, 'body')
@@ -83,3 +95,4 @@ def print_args(args):
     for k in args.__dict__:
         print("- {} : {}".format(k, args.__dict__[k]))
     print("--------------------------------\n")
+
