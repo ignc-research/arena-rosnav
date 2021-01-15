@@ -11,7 +11,9 @@
   <arg name="task_mode"       default="random"/>
   <param name="task_mode"     value="$(arg task_mode)"/>
 
+
   <!-- Map parameters -->
+
   <arg name="map_file"        default="map_empty"/>
   <arg name="map_path"        default="$(find simulator_setup)/maps/$(arg map_file)/map.yaml"/>
   <arg name="world_path"      default="$(find simulator_setup)/maps/$(arg map_file)/map.world.yaml"/>
@@ -33,8 +35,10 @@
  <!-- use simulator and rviz-->
   <include file="$(find arena_bringup)/launch/sublaunch/flatland_simulator.launch">
     <arg name="world_path"      value="$(arg world_path)"/>
-    <arg name="update_rate"     default="200.0"/>
-    <arg name="step_size"       default="0.005"/>
+
+    <arg name="update_rate"     default="50.0"/>
+    <arg name="step_size"       default="0.05"/>
+
     <arg name="show_viz"        default="$(arg use_viz)"/>
 
     <arg name="viz_pub_rate"    default="30.0"/>
