@@ -122,7 +122,7 @@ class ObstaclesManager:
         rospy.loginfo(
             f"Registed {num_dynamic_obstalces} dynamic obstacles and {num_obstacles-num_dynamic_obstalces} static obstacles")
 
-    def register_random_dynamic_obstacles(self, num_obstacles: int, linear_velocity=2, angular_velocity_max=math.pi/6, min_obstacle_radius=0.5, max_obstacle_radius=0.5):
+    def register_random_dynamic_obstacles(self, num_obstacles: int, linear_velocity=0.3, angular_velocity_max=math.pi/6, min_obstacle_radius=0.5, max_obstacle_radius=0.5):
         """register dynamic obstacles with circle shape.
 
         Args:
@@ -218,7 +218,7 @@ class ObstaclesManager:
 
     def _generate_random_obstacle_yaml(self,
                                        is_dynamic=False,
-                                       linear_velocity=1.5,
+                                       linear_velocity=0.3,
                                        angular_velocity_max=math.pi/4,
                                        num_vertices=3,
                                        min_obstacle_radius=0.5,
