@@ -57,10 +57,11 @@ class RewardCalculator():
         if goal_in_robot_frame[0] < self.goal_radius:
             self.curr_reward = reward
             self.info['is_done'] = True
+            self.info['done_reason'] = 2
         else:
             self.info['is_done'] = False
 
-    def _reward_goal_approached(self, goal_in_robot_frame,reward = 1, punishment = 0.1):
+    def _reward_goal_approached(self, goal_in_robot_frame,reward = 1, punishment = 0.01):
         if self.last_goal_dist is not None:
             #goal_in_robot_frame : [rho, theta]
             """
@@ -80,10 +81,11 @@ class RewardCalculator():
             self.curr_reward += reward
         self.last_goal_dist = goal_in_robot_frame[0]
 
-    def _reward_laserscan_general(self,laser_scan, punishment = 15):
+    def _reward_laserscan_general(self,laser_scan, punishment = 10):
         if laser_scan.min()<self.safe_dist:
             self.curr_reward -= punishment
             self.info['is_done'] = True
+            self.info['done_reason'] = 1
     
     
 

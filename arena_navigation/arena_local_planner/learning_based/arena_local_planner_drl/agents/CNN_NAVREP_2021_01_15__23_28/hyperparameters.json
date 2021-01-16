@@ -1,5 +1,5 @@
 {
-    "agent_name": "CNN_NAVREP_2021_01_14__22_31",
+    "agent_name": "CNN_NAVREP_2021_01_15__23_28",
     "robot": "myrobot",
     "gamma": 0.99,
     "n_steps": 128,

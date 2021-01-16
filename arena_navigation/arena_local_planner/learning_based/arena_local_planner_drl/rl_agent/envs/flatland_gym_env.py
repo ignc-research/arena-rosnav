@@ -117,6 +117,11 @@ class FlatlandEnv(gym.Env):
         self.agent_action_pub.publish(action_msg)
 
     def step(self, action):
+        """
+        done_reasons:   0   -   exceeded max steps
+                        1   -   collision with obstacle
+                        2   -   goal reached
+        """
         self._pub_action(action)
         self._steps_curr_episode += 1
         # wait for new observations
@@ -130,10 +135,16 @@ class FlatlandEnv(gym.Env):
         done = reward_info['is_done']
 
         print("reward:  {}".format(reward))
+        
         # info
-        if not done:
-            done = self._steps_curr_episode > self._max_steps_per_episode
         info = {}
+        if done:
+            info['done_reason'] = reward_info['done_reason']
+        else:
+            if self._steps_curr_episode == self._max_steps_per_episode:
+                done = True
+                info['done_reason'] = 0
+
         return merged_obs, reward, done, info
 
     def reset(self):

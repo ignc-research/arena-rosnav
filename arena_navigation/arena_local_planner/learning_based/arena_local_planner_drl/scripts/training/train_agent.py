@@ -16,7 +16,6 @@ from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.tools.custom_mlp_args_utils import *
 
 
-
 ###HYPERPARAMETER###
 robot = "myrobot"
 gamma = 0.99
@@ -29,10 +28,10 @@ gae_lambda = 0.95
 batch_size = 64
 n_epochs = 4
 clip_range = 0.2
-
 reward_fnc = "00"
-discrete_action_space = True
+discrete_action_space = False
 ####################
+
 
 class agent_hyperparams(object):
     """ Class containing agent specific hyperparameters (for documentation purposes)
@@ -77,8 +76,7 @@ class agent_hyperparams(object):
 
 def get_agent_name(args):
     """ Function to get agent name to save to/load from file system
-
-
+    
     Example names:
     "MLP_B_64-64_P_32-32_V_32-32_relu_2021_01_07__10_32"
     "DRL_LOCAL_PLANNER_2021_01_08__7_14"
@@ -88,7 +86,7 @@ def get_agent_name(args):
     START_TIME = dt.now().strftime("%Y_%m_%d__%H_%M")
 
     if args.custom_mlp:
-        return "MLP_B_" + args.body + "_P_" + args.pi + "_V_" + args.vf + "_" + args.relu + "_" + START_TIME
+        return "MLP_B_" + args.body + "_P_" + args.pi + "_V_" + args.vf + "_" + args.act_fn + "_" + START_TIME
     if args.load is None:
         return args.agent + "_" + START_TIME
     return args.load
@@ -111,7 +109,7 @@ def get_paths(agent_name: str, args):
     }
 
     hyperparams = agent_hyperparams(agent_name, robot, gamma, n_steps, ent_coef, learning_rate, vf_coef,max_grad_norm, gae_lambda, batch_size, 
-                                        n_epochs, clip_range, reward_fnc, discrete_action_space)
+                                    n_epochs, clip_range, reward_fnc, discrete_action_space)
 
     # check for mode
     if args.load is None:
@@ -131,7 +129,6 @@ def get_paths(agent_name: str, args):
         PATHS['eval'] = None
     # tensorboard log enabled
     if args.tb:
-
         if not os.path.exists(PATHS.get('tb')):
             os.makedirs(PATHS.get('tb'))
     else:
@@ -147,23 +144,23 @@ if __name__ == "__main__":
 
     # generate agent name and model specific paths
     AGENT_NAME = get_agent_name(args)
-
     print("________ STARTING TRAINING WITH:  %s ________\n" % AGENT_NAME)
     PATHS = get_paths(AGENT_NAME, args)
 
+    # set num of timesteps to be generated 
     if args.n is None:
-        n_timesteps = 6000
+        n_timesteps = 60000000
     else:
         n_timesteps = args.n
 
     # instantiate gym environment
     n_envs = 1
     task = get_predefined_task("random")
-    env = DummyVecEnv([lambda: FlatlandEnv(task, PATHS.get('robot_setting'), PATHS.get('robot_as'), discrete_action_space, goal_radius=1.7, max_steps_per_episode=150)] * n_envs)
+    env = DummyVecEnv([lambda: FlatlandEnv(task, PATHS.get('robot_setting'), PATHS.get('robot_as'), discrete_action_space, goal_radius=1.25, max_steps_per_episode=150)] * n_envs)
    
     # instantiate eval environment
-    eval_env = Monitor(FlatlandEnv(task, PATHS.get('robot_setting'), PATHS.get('robot_as'), discrete_action_space, goal_radius=1.7, max_steps_per_episode=150), PATHS.get('eval'))
-    eval_env = EvalCallback(eval_env, n_eval_episodes=10, eval_freq=5000, log_path=PATHS.get('eval'), best_model_save_path=PATHS.get('model'), deterministic=True)
+    eval_env = Monitor(FlatlandEnv(task, PATHS.get('robot_setting'), PATHS.get('robot_as'), discrete_action_space, goal_radius=1.25, max_steps_per_episode=150), PATHS.get('eval'), info_keywords=("done_reason",))
+    eval_cb = EvalCallback(eval_env, n_eval_episodes=10, eval_freq=5000, log_path=PATHS.get('eval'), best_model_save_path=PATHS.get('model'), deterministic=True)
 
     # determine mode
     if args.custom_mlp:
@@ -173,15 +170,12 @@ if __name__ == "__main__":
                     max_grad_norm = max_grad_norm, gae_lambda = gae_lambda, batch_size = batch_size, n_epochs = n_epochs, clip_range = clip_range, 
                     tensorboard_log = PATHS.get('tb'), verbose = 1)
 
-
     elif args.agent is not None:
         # predefined agent flag
         if args.agent == "MLP_ARENA2D":
-
                 model = PPO(MLP_ARENA2D_POLICY, env, gamma = gamma, n_steps = n_steps, ent_coef = ent_coef, 
                         learning_rate = learning_rate, vf_coef = vf_coef, max_grad_norm = max_grad_norm, gae_lambda = gae_lambda, 
                         batch_size = batch_size, n_epochs = n_epochs, clip_range = clip_range, tensorboard_log = PATHS.get('tb'), verbose = 1)
-
 
         elif args.agent == "DRL_LOCAL_PLANNER" or args.agent == "CNN_NAVREP":
             if args.agent == "DRL_LOCAL_PLANNER":
@@ -202,7 +196,7 @@ if __name__ == "__main__":
             model = PPO.load(os.path.join(PATHS.get('model'), "best_model"), env)
 
     # start training
-    model.learn(total_timesteps = n_timesteps, callback=eval_env, reset_num_timesteps = False)
+    model.learn(total_timesteps = n_timesteps, callback=eval_cb, reset_num_timesteps = False)
     #model.save(os.path.join(PATHS.get('model'), AGENT_NAME))
 
     # update the timesteps the model has trained in total

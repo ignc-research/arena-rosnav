@@ -1,13 +1,9 @@
 import argparse
 import os
 
-from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.tools.custom_mlp_args_utils import *
-
-<<<<<<< HEAD
-=======
+from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.tools.custom_mlp_args_utils import get_net_arch
 
 
->>>>>>> origin/master
 def training_args(parser):
     """ program arguments training script """
     parser.add_argument('--no-gpu', action='store_true', help='disables gpu for training')
@@ -48,11 +44,7 @@ def process_training_args(parsed_args):
         os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
     if parsed_args.custom_mlp:
         setattr(parsed_args, 'net_arch', get_net_arch(parsed_args))
-        delattr(parsed_args, 'agent')
-
-        delattr(parsed_args, 'load')
     else:
-
         if parsed_args.body is not "" or parsed_args.pi is not "" or parsed_args.vf is not "":
             print("[custom mlp] arguments will be ignored..")
         delattr(parsed_args, 'body')
