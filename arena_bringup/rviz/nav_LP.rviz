@@ -13,7 +13,6 @@ Panels:
     Expanded:
       - /2D Pose Estimate1
       - /2D Nav Goal1
-      - /3D Nav Goal1
     Name: Tool Properties
     Splitter Ratio: 0.4285709857940674
   - Class: rviz/Views
@@ -54,18 +53,6 @@ Visualization Manager:
               Value: true
             map:
               Value: true
-            myrobot_model0_base_footprint:
-              Value: true
-            myrobot_model0_laser_link:
-              Value: true
-            myrobot_model1_base_footprint:
-              Value: true
-            myrobot_model1_laser_link:
-              Value: true
-            myrobot_model2_base_footprint:
-              Value: true
-            myrobot_model2_laser_link:
-              Value: true
             odom:
               Value: true
           Marker Scale: 1
@@ -78,15 +65,6 @@ Visualization Manager:
               odom:
                 base_footprint:
                   laser_link:
-                    {}
-                myrobot_model0_base_footprint:
-                  myrobot_model0_laser_link:
-                    {}
-                myrobot_model1_base_footprint:
-                  myrobot_model1_laser_link:
-                    {}
-                myrobot_model2_base_footprint:
-                  myrobot_model2_laser_link:
                     {}
           Update Interval: 0
           Value: true
@@ -322,6 +300,22 @@ Visualization Manager:
           Value: true
       Enabled: true
       Name: Sensors
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /action
+      Name: Marker
+      Namespaces:
+        path_arrow: true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /planning_vis/goal
+      Name: Marker
+      Namespaces:
+        {}
+      Queue Size: 100
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 0; 0; 0
@@ -347,7 +341,7 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Angle: -7.850013732910156
+      Angle: -8.03501033782959
       Class: rviz/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
@@ -357,11 +351,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 28.478878021240234
+      Scale: 56.212257385253906
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
-      X: 12.618724822998047
-      Y: 6.795483589172363
+      X: -0.7678327560424805
+      Y: 2.434774875640869
     Saved: ~
 Window Geometry:
   Displays:

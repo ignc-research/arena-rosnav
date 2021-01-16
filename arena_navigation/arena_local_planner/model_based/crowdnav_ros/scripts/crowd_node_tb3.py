@@ -2,10 +2,10 @@
 
 import rospy
 # import sys
-# from std_msgs.msg import Float32, ColorRGBA, Int32, String
+from std_msgs.msg import ColorRGBA
 from geometry_msgs.msg import PoseStamped, Twist, Vector3, Point
 from ford_msgs.msg import Clusters
-# from visualization_msgs.msg import Marker, MarkerArray
+from visualization_msgs.msg import Marker, MarkerArray
 
 import numpy as np
 # import numpy.matlib
@@ -66,9 +66,9 @@ class NN_tb3():
 
         # # publishers
         self.pub_twist = rospy.Publisher('/cmd_vel',Twist,queue_size=1) 
-        self.pub_pose_marker = rospy.Publisher('',Marker,queue_size=1)
+        # self.pub_pose_marker = rospy.Publisher('',Marker,queue_size=1)
         # self.pub_agent_markers = rospy.Publisher('~agent_markers',MarkerArray,queue_size=1)
-        # self.pub_path_marker = rospy.Publisher('~path_marker',Marker,queue_size=1)
+        self.pub_path_marker = rospy.Publisher('/action',Marker,queue_size=1)
         # self.pub_goal_path_marker = rospy.Publisher('~goal_path_marker',Marker,queue_size=1)
         # # sub
         self.sub_pose = rospy.Subscriber('/odom',Odometry,self.cbPose)
@@ -106,6 +106,7 @@ class NN_tb3():
         q = msg.pose.pose.orientation
         self.psi = np.arctan2(2.0*(q.w*q.z + q.x*q.y), 1-2*(q.y*q.y+q.z*q.z)) # bounded by [-pi, pi]
         self.pose = msg.pose
+        self.visualize_path()
         # self.visualize_pose(msg.pose.pose.position,msg.pose.pose.orientation)
 
     def cbVel(self, msg):
@@ -145,8 +146,11 @@ class NN_tb3():
     def update_action(self, action):
         # print 'update action'
         self.desired_action = action
-        self.desired_position.pose.position.x = self.pose.pose.position.x + 1*action[0]*np.cos(action[1])
-        self.desired_position.pose.position.y = self.pose.pose.position.y + 1*action[0]*np.sin(action[1])
+        # self.desired_position.pose.position.x = self.pose.pose.position.x + 1*action[0]*np.cos(action[1])
+        # self.desired_position.pose.position.y = self.pose.pose.position.y + 1*action[0]*np.sin(action[1])
+        self.desired_position.pose.position.x = self.pose.pose.position.x + (action[0])
+        self.desired_position.pose.position.y = self.pose.pose.position.y + (action[1])
+        # print(action[0])
 
     def cbControl(self, event):
 
@@ -246,42 +250,40 @@ class NN_tb3():
                     
 
 
-        # self.update_action(action)
+        self.update_action(action)
 
     def update_subgoal(self,subgoal):
         self.goal.pose.position.x = subgoal[0]
         self.goal.pose.position.y = subgoal[1]
 
-    def visualize_pose(self,pos,orientation):
-        # Yellow Box for Vehicle
+    def visualize_path(self):
         marker = Marker()
         marker.header.stamp = rospy.Time.now()
         marker.header.frame_id = 'map'
-        marker.ns = 'agent'
+        marker.ns = 'path_arrow'
         marker.id = 0
-        marker.type = marker.CUBE
+        marker.type = marker.ARROW
         marker.action = marker.ADD
-        marker.pose.position = pos
-        marker.pose.orientation = orientation
-        marker.scale = Vector3(x=0.7,y=0.42,z=1)
-        marker.color = ColorRGBA(r=1.0,g=1.0,a=1.0)
-        marker.lifetime = rospy.Duration(1.0)
-        self.pub_pose_marker.publish(marker)
+        marker.points.append(self.pose.pose.position)
+        marker.points.append(self.desired_position.pose.position)
+        marker.scale = Vector3(x=0.1,y=0.2,z=0.2)
+        marker.color = ColorRGBA(b=1.0,a=1.0)
+        marker.lifetime = rospy.Duration(1)
+        self.pub_path_marker.publish(marker)
 
-        # Red track for trajectory over time
-        marker = Marker()
-        marker.header.stamp = rospy.Time.now()
-        marker.header.frame_id = 'map'
-        marker.ns = 'agent'
-        marker.id = self.num_poses
-        marker.type = marker.CUBE
-        marker.action = marker.ADD
-        marker.pose.position = pos
-        marker.pose.orientation = orientation
-        marker.scale = Vector3(x=0.2,y=0.2,z=0.2)
-        marker.color = ColorRGBA(r=1.0,a=1.0)
-        marker.lifetime = rospy.Duration(10.0)
-        self.pub_pose_marker.publish(marker)
+        # # Display BLUE DOT at NN desired position
+        # marker = Marker()
+        # marker.header.stamp = rospy.Time.now()
+        # marker.header.frame_id = 'map'
+        # marker.ns = 'path_trail'
+        # marker.id = self.num_poses
+        # marker.type = marker.CUBE
+        # marker.action = marker.ADD
+        # marker.pose.position = copy.deepcopy(self.pose.pose.position)
+        # marker.scale = Vector3(x=0.2,y=0.2,z=0.2)
+        # marker.color = ColorRGBA(g=0.0,r=0,b=1.0,a=0.3)
+        # marker.lifetime = rospy.Duration(60)
+        # self.pub_path_marker.publish(marker)
 
     def on_shutdown(self):
         rospy.loginfo("[%s] Shutting down.")
@@ -290,7 +292,7 @@ class NN_tb3():
 
 def run():
 
-    policy_name = "lstm"
+    policy_name = "sarl"
 
     device = 'cpu'
     phase = 'test'

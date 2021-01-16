@@ -59,7 +59,6 @@ class NN_tb3():
     def cbPose(self, msg):
         # calculate angle
         v_p = msg.pose.pose.position
-        # v_g = self.global_goal.pose.position
         v_g = self.sub_goal
         v_pg = np.array([v_g.x-v_p.x,v_g.y-v_p.y])
         v_pose = np.array([math.cos(self.psi),math.sin(self.psi)])
@@ -94,18 +93,6 @@ class NN_tb3():
     def cbControl(self,event):
         self.performAction(self.desired_action)
         return
-
-
-    def countNan(self,data):
-        n=0
-        for i in data:
-            if np.isnan(i):
-                n += 1
-            else:
-                print(n)
-                return n
-        print(n)
-        return n
             
     def cbComputeActionArena(self,event):
         if not self.goalReached():
@@ -119,8 +106,6 @@ class NN_tb3():
             distance = self.distance   
             #lidarscan
             sample = np.asanyarray(self.scan.ranges)
-            # print(np.count_nonzero(~np.isnan(sample)))
-            # print(self.countNan(sample))
             sample[np.isnan(sample)] = 3.5
             sample=sample.tolist()
             # print(len(sample))
@@ -155,8 +140,8 @@ class NN_tb3():
 
     def performAction(self, action):
 
-        # action_space = {0: [0.2,0],1: [0.15,0.75],2: [0.15,-0.75],3: [0.0,1.5],4: [0.0,-1.5]}
-        action_space = {0: [0.2,0], 1: [0.15,0.35], 2: [0.15,-0.35], 3: [0.0,0.75], 4: [0.0,-0.75]}
+        action_space = {0: [0.2,0],1: [0.15,0.75],2: [0.15,-0.75],3: [0.0,1.5],4: [0.0,-1.5]}
+        # action_space = {0: [0.2,0], 1: [0.15,0.35], 2: [0.15,-0.35], 3: [0.0,0.75], 4: [0.0,-0.75]}
         # print(action)
         twist = Twist()
         twist.linear.x = action_space[action][0]
