@@ -305,7 +305,7 @@ Visualization Manager:
       Marker Topic: /action
       Name: Marker
       Namespaces:
-        path_arrow: true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/Marker
@@ -341,7 +341,7 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Angle: -8.03501033782959
+      Angle: -7.860009670257568
       Class: rviz/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
@@ -351,11 +351,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 56.212257385253906
+      Scale: 38.30707550048828
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
-      X: -0.7678327560424805
-      Y: 2.434774875640869
+      X: 10.657875061035156
+      Y: 3.9207146167755127
     Saved: ~
 Window Geometry:
   Displays:
