@@ -114,9 +114,11 @@ class ObstaclesManager:
         Args:
             num_obstacles (int): number of the obstacles
             p_dynamic(float): the possibility of a obstacle is dynamic
+            linear_velocity: the maximum linear velocity
         """
         num_dynamic_obstalces = int(num_obstacles*p_dynamic)
-        self.register_random_dynamic_obstacles(num_dynamic_obstalces)
+        max_linear_velocity = rospy.get_param("obs_vel")
+        self.register_random_dynamic_obstacles(num_dynamic_obstalces, max_linear_velocity)
         self.register_random_static_obstacles(
             num_obstacles-num_dynamic_obstalces)
         rospy.loginfo(
@@ -127,7 +129,7 @@ class ObstaclesManager:
 
         Args:
             num_obstacles (int): number of the obstacles.
-            linear_velocity (float, optional):  the contant linear velocity of the dynamic obstacle.
+            linear_velocity (float, optional):  the constant linear velocity of the dynamic obstacle.
             angular_velocity_max (float, optional): the maximum angular verlocity of the dynamic obstacle. 
                 When the obstacle's linear velocity is too low(because of the collision),we will apply an 
                 angular verlocity which is sampled from [-angular_velocity_max,angular_velocity_max] to the it to help it better escape from the "freezing" satuation.

@@ -28,7 +28,9 @@
   <arg name="use_viz"         default="true"/>
   <param name="use_viz"       value="$(arg use_viz)"/>
 
-
+  <!-- Obstacle parameters -->
+  <arg name="obs_vel"       default="0.3"/>
+  <param name="obs_vel"     value="$(arg obs_vel)"/>
 
   <!-- <arg name="scan_topic" default="scan"/> default laser topic in flatland -->
   
