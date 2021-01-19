@@ -83,7 +83,7 @@ class RewardCalculator():
         self.last_goal_dist = goal_in_robot_frame[0]
 
 
-    def _reward_goal_approached2(self, goal_in_robot_frame,reward = 1, punishment = 0.001):
+    def _reward_goal_approached2(self, goal_in_robot_frame,reward = 1, punishment = 0.01):
         if self.last_goal_dist is not None:
             #goal_in_robot_frame : [rho, theta]
 
@@ -95,7 +95,7 @@ class RewardCalculator():
             if (self.last_goal_dist - goal_in_robot_frame[0]) > 0:
                 w = 0.25
             elif (self.last_goal_dist - goal_in_robot_frame[0]) < 0:
-                w = 0.4
+                w = 0.35
             reward = round(w*(self.last_goal_dist - goal_in_robot_frame[0]), 3)
 
             # punishment for not moving
