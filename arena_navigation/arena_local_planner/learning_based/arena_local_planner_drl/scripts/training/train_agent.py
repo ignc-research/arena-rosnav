@@ -108,11 +108,11 @@ if __name__ == "__main__":
 
     # instantiate gym environment
     n_envs = 1
-    task_manager = get_predefined_task(params['task_mode'])
+    task_manager = get_predefined_task(params['task_mode'], params['curr_stage'], PATHS)
     env = DummyVecEnv([lambda: FlatlandEnv(task_manager, PATHS.get('robot_setting'), PATHS.get('robot_as'), params['discrete_action_space'], goal_radius=1.00, max_steps_per_episode=350)] * n_envs)
     
     # instantiate eval environment
-    trainstage_cb = InitiateNewTrainStage(TaskManager=task_manager, TreshholdType="rew", rew_threshold=13.5, StartAt=params['curr_stage'], verbose=1)
+    trainstage_cb = InitiateNewTrainStage(TaskManager=task_manager, TreshholdType="rew", rew_threshold=13.5, task_mode=params['task_mode'], verbose=1)
     eval_env = Monitor(FlatlandEnv(task_manager, PATHS.get('robot_setting'), PATHS.get('robot_as'), params['discrete_action_space'], goal_radius=1.00, max_steps_per_episode=350), PATHS.get('eval'), info_keywords=("done_reason",))
     eval_cb = EvalCallback(eval_env, n_eval_episodes=20, eval_freq=10000, log_path=PATHS.get('eval'), best_model_save_path=PATHS.get('model'), deterministic=True, callback_on_new_best=trainstage_cb)
 

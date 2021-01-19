@@ -9,6 +9,7 @@ from geometry_msgs.msg import Pose2D
 from rospy.exceptions import ROSException
 from .obstacles_manager import ObstaclesManager
 from .robot_manager import RobotManager
+import json
 
 
 class ABSTask(ABC):
@@ -109,26 +110,51 @@ class ManualTask(ABSTask):
 
 
 class StagedRandomTask(RandomTask):
-    def __init__(self, obstacles_manager: ObstaclesManager, robot_manager: RobotManager):
+    def __init__(self, obstacles_manager: ObstaclesManager, robot_manager: RobotManager, start_stage: int = 0, PATHS = None):
         super().__init__(obstacles_manager, robot_manager)
+        self.curr_stage = start_stage
+        self.json_location = os.path.join(PATHS.get('model'), "hyperparameters.json")
+        self._initiate_stage()
+        
+    def next_stage(self):
+        self.curr_stage += 1
+        self._update_curr_stage_json()
+        self._remove_obstacles()
+        self._initiate_stage()
 
-    def initiate_new_stage(self, stage: int = 0):
-        self.obstacles_manager.remove_obstacles()
-        if stage == 0:
+    def _initiate_stage(self):
+        if self.curr_stage == 0:
             self.obstacles_manager.register_random_obstacles(0, 0.0)
-        elif stage == 1:
+        elif self.curr_stage == 1:
             self.obstacles_manager.register_random_obstacles(10, 0.0)
-        elif stage == 2:
+        elif self.curr_stage == 2:
             self.obstacles_manager.register_random_obstacles(20, 0.0)
-        elif stage == 3:
+        elif self.curr_stage == 3:
             self.obstacles_manager.register_random_obstacles(10, 1)
-        elif stage == 4:
+        elif self.curr_stage == 4:
             self.obstacles_manager.register_random_obstacles(20, 0.4)
         else:
             self.obstacles_manager.register_random_obstacles(30, 0.4)
 
+    def _update_curr_stage_json(self):
+        if os.path.isfile(self.json_location):
+            with open(self.json_location, "r") as file:
+                hyperparams = json.load(file)
+            try:
+                hyperparams['curr_stage'] = self.curr_stage
+            except Exception:
+                raise Warning("Parameter 'curr_stage' not found in 'hyperparameters.json'!")
+            else:
+                with open(self.json_location, "w", encoding='utf-8') as target:
+                    json.dump(hyperparams, target, ensure_ascii=False, indent=4)
+        else:
+            raise Warning("File not found %s" % self.json_location)
+    
+    def _remove_obstacles(self):
+        self.obstacles_manager.remove_obstacles()
 
-def get_predefined_task(mode="random"):
+
+def get_predefined_task(mode="random", start_stage: int = 0, PATHS: dict = None):
 
     # TODO extend get_predefined_task(mode="string") such that user can choose between task, if mode is
 
@@ -166,11 +192,7 @@ def get_predefined_task(mode="random"):
     # obstacles_manager.register_obstacles(3, os.path.join(
     # models_folder_path, "obstacles", 'random.model.yaml'), 'static')
     # generate 5 static or dynamic obstaticles
-<<<<<<< HEAD
     # obstacles_manager.register_random_obstacles(20, 0.4)
-=======
-    obstacles_manager.register_random_obstacles(15, 0.4)
->>>>>>> origin/master
 
     # TODO In the future more Task will be supported and the code unrelated to
     # Tasks will be moved to other classes or functions.
@@ -183,7 +205,7 @@ def get_predefined_task(mode="random"):
         task = ManualTask(obstacles_manager, robot_manager)
         print("manual tasks requested")
     if mode == "staged":
-        task = StagedRandomTask(obstacles_manager, robot_manager)
+        task = StagedRandomTask(obstacles_manager, robot_manager, start_stage, PATHS)
     #task = RandomTask(obstacles_manager, robot_manager)
 
     return task
