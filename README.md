@@ -53,6 +53,7 @@ python3-empy \
 python3-setuptools \
 ros-melodic-navigation \ 
 ros-melodic-teb-local-planner \
+ros-melodic-mpc-local-planner \
 ```
 
 #### 1.2. Prepare virtual environment & install python packages
@@ -96,6 +97,11 @@ pip install pyyaml catkin_pkg netifaces pathlib
 ```
 pip install stable-baselines3
 ```
+* Install CADRL dependencies (venv always activated!)
+```
+cd /arena-rosnav/arena_navigation/arena_local_planner/model_based/cadrl_ros
+pip install -r requirements_cadrl.txt
+```
 
 
 #### 1.3. Install arena-rosnav repo
@@ -106,7 +112,8 @@ mkdir -p catkin_ws/src && cd catkin_ws/src
 git clone https://github.com/ignc-research/arena-rosnav
 
 cd arena-rosnav && rosws update
-
+cd ../forks/navigation/mpc_local_planner
+rosdep install mpc_local_planner
 source $HOME/.zshrc
 cd ../.. 
 catkin_make -DPYTHON_EXECUTABLE=/usr/bin/python3
