@@ -53,6 +53,7 @@ python3-empy \
 python3-setuptools \
 ros-melodic-navigation \ 
 ros-melodic-teb-local-planner \
+ros-melodic-mpc-local-planner \
 ```
 
 #### 1.2. Prepare virtual environment & install python packages
