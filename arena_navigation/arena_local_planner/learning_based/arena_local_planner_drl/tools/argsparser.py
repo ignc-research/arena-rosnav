@@ -1,7 +1,7 @@
 import argparse
 import os
 
-from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.tools.custom_mlp_args_utils import get_net_arch
+from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.tools.custom_mlp_utils import get_net_arch
 
 
 def training_args(parser):

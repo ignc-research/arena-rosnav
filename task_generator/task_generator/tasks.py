@@ -108,6 +108,26 @@ class ManualTask(ABSTask):
         self._manual_goal_con.notify()
 
 
+class StagedRandomTask(RandomTask):
+    def __init__(self, obstacles_manager: ObstaclesManager, robot_manager: RobotManager):
+        super().__init__(obstacles_manager, robot_manager)
+
+    def initiate_new_stage(self, stage: int = 0):
+        self.obstacles_manager.remove_obstacles()
+        if stage == 0:
+            self.obstacles_manager.register_random_obstacles(0, 0.0)
+        elif stage == 1:
+            self.obstacles_manager.register_random_obstacles(10, 0.0)
+        elif stage == 2:
+            self.obstacles_manager.register_random_obstacles(20, 0.0)
+        elif stage == 3:
+            self.obstacles_manager.register_random_obstacles(10, 1)
+        elif stage == 4:
+            self.obstacles_manager.register_random_obstacles(20, 0.4)
+        else:
+            self.obstacles_manager.register_random_obstacles(30, 0.4)
+
+
 def get_predefined_task(mode="random"):
 
     # TODO extend get_predefined_task(mode="string") such that user can choose between task, if mode is
@@ -146,16 +166,20 @@ def get_predefined_task(mode="random"):
     # obstacles_manager.register_obstacles(3, os.path.join(
     # models_folder_path, "obstacles", 'random.model.yaml'), 'static')
     # generate 5 static or dynamic obstaticles
-    obstacles_manager.register_random_obstacles(20, 0.4)
+    # obstacles_manager.register_random_obstacles(20, 0.4)
 
     # TODO In the future more Task will be supported and the code unrelated to
     # Tasks will be moved to other classes or functions.
     if mode == "random":
+        obstacles_manager.register_random_obstacles(20, 0.4)
         task = RandomTask(obstacles_manager, robot_manager)
         print("random tasks requested")
     if mode == "manual":
+        obstacles_manager.register_random_obstacles(20, 0.4)
         task = ManualTask(obstacles_manager, robot_manager)
         print("manual tasks requested")
+    if mode == "staged":
+        task = StagedRandomTask(obstacles_manager, robot_manager)
     #task = RandomTask(obstacles_manager, robot_manager)
 
     return task
