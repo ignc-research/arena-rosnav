@@ -47,7 +47,7 @@ class RewardCalculator():
 
     def _cal_reward_rule_00(self, laser_scan: np.ndarray, goal_in_robot_frame: Tuple[float,float],*args,**kwargs):
 
-        self._reward_goal_approached(goal_in_robot_frame)
+        self._reward_goal_approached2(goal_in_robot_frame)
         self._reward_goal_reached(goal_in_robot_frame)
         self._reward_laserscan_general(laser_scan)
     
@@ -61,7 +61,8 @@ class RewardCalculator():
         else:
             self.info['is_done'] = False
 
-    def _reward_goal_approached(self, goal_in_robot_frame,reward = 1, punishment = 0.01):
+
+    def _reward_goal_approached(self, goal_in_robot_frame,reward = 1, punishment = 0.0001):
         if self.last_goal_dist is not None:
             #goal_in_robot_frame : [rho, theta]
             """
@@ -81,13 +82,36 @@ class RewardCalculator():
             self.curr_reward += reward
         self.last_goal_dist = goal_in_robot_frame[0]
 
+
+    def _reward_goal_approached2(self, goal_in_robot_frame,reward = 1, punishment = 0.001):
+        if self.last_goal_dist is not None:
+            #goal_in_robot_frame : [rho, theta]
+
+            # if current goal distance shorter than last one, positive weighted reward - otherwise negative wegihted reward
+            w = 0.25
+            reward = round(w*(self.last_goal_dist - goal_in_robot_frame[0]), 3)
+            
+            # higher negative weight when moving away from goal (to avoid driving unnecessary circles when train in contin. action space)
+            if (self.last_goal_dist - goal_in_robot_frame[0]) > 0:
+                w = 0.25
+            elif (self.last_goal_dist - goal_in_robot_frame[0]) < 0:
+                w = 0.4
+            reward = round(w*(self.last_goal_dist - goal_in_robot_frame[0]), 3)
+
+            # punishment for not moving
+            if self.last_goal_dist == goal_in_robot_frame[0]:
+                reward = -punishment
+            self.curr_reward += reward
+        self.last_goal_dist = goal_in_robot_frame[0]
+
+
     def _reward_laserscan_general(self,laser_scan, punishment = 10):
         if laser_scan.min()<self.safe_dist:
             self.curr_reward -= punishment
             self.info['is_done'] = True
             self.info['done_reason'] = 1
     
-    
+
 
 
         

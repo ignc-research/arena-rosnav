@@ -4,7 +4,7 @@ from task_generator.task_generator.tasks import StagedRandomTask
 class InitiateNewTrainStage(BaseCallback):
     """
     Introduces new training stage when threshhold reached.
-    It must be used with the "EvalCallback".
+    It must be used with "EvalCallback".
 
     :param TaskManager (obj, StagedRandomTask): holds task specific methods and stages
     :param TheshholdType (str): checks threshhold for either percentage of successful episodes (succ_per) or mean reward (rew)
@@ -29,7 +29,9 @@ class InitiateNewTrainStage(BaseCallback):
         
         if self.parent.n_eval_episodes < 10:
             raise Warning("Only %d evaluation episodes considered for threshold monitoring" % self.parent.n_eval_episodes)
+        
 
+        #TODO: access eval episodes to calculate percentage (consider editing EvalCallBack of stablebaselines3)
         if (self.threshhold_type == "rew" and self.parent.best_mean_reward > self.rew_threshold) or (self.threshhold_type == "succ_per" and 99 > self.succ_per_threshold):
             self.curr_stage += 1
             self.task_manager.initiate_new_stage(stage = self.curr_stage)
