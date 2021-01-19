@@ -41,7 +41,7 @@
     <arg name="update_rate"     default="50.0"/>
     <arg name="step_size"       default="0.05"/>
 
-    <arg name="show_viz"        default="$(arg use_viz)"/>
+    <arg name="show_viz"        default="true"/>
 
     <arg name="viz_pub_rate"    default="30.0"/>
     <arg name="use_rviz"        default="$(arg use_viz)"/>  
