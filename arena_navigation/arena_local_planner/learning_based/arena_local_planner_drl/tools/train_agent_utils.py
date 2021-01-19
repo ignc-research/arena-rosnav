@@ -28,7 +28,7 @@ class agent_hyperparams(object):
     :param n_timesteps: The number of timesteps trained on in total.
     """
     def __init__(self, agent_name: str, robot: str, gamma: float, n_steps: int, ent_coef: float, learning_rate: float, vf_coef: float, max_grad_norm: float, gae_lambda: float,
-                 batch_size: int, n_epochs: int, clip_range: float, reward_fnc, discrete_action_space: bool, task_mode: str, curr_stage: int = None, n_timesteps: int = 0):
+                 batch_size: int, n_epochs: int, clip_range: float, reward_fnc, discrete_action_space: bool, task_mode: str, curr_stage: int = 0, n_timesteps: int = 0):
         self.agent_name = agent_name
         self.robot = robot 
         self.gamma = gamma 

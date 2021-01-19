@@ -31,6 +31,7 @@ n_epochs = 4
 clip_range = 0.2
 reward_fnc = "00"
 discrete_action_space = True
+start_stage = 0
 task_mode = "staged"    # custom, random or staged
 ##########################
 
@@ -103,7 +104,7 @@ if __name__ == "__main__":
 
     # initialize hyperparameters (save to/ load from json)
     hyperparams_obj = agent_hyperparams(AGENT_NAME, robot, gamma, n_steps, ent_coef, learning_rate, vf_coef,max_grad_norm, gae_lambda, batch_size, 
-                                    n_epochs, clip_range, reward_fnc, discrete_action_space, task_mode)
+                                    n_epochs, clip_range, reward_fnc, discrete_action_space, task_mode, start_stage)
     params = initialize_hyperparameters(agent_name=AGENT_NAME, PATHS=PATHS, hyperparams_obj=hyperparams_obj, load_target=args.load)
 
     # instantiate gym environment
