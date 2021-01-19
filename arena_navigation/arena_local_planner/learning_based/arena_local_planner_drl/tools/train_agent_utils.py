@@ -23,6 +23,8 @@ class agent_hyperparams(object):
         remaining (from 1 to 0).
     :param reward_fnc: Number of the reward function (defined in ../rl_agent/utils/reward.py)
     :param discrete_action_space: If robot uses discrete action space
+    :param task_mode: Mode tasks will be generated in (custom, random, staged).
+    :param curr_stage: In case of staged training which stage to start with.
     :param n_timesteps: The number of timesteps trained on in total.
     """
     def __init__(self, agent_name: str, robot: str, gamma: float, n_steps: int, ent_coef: float, learning_rate: float, vf_coef: float, max_grad_norm: float, gae_lambda: float,
