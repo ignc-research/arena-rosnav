@@ -119,6 +119,7 @@ class NN_tb3():
             distance = self.distance   
             #lidarscan
             sample = np.asanyarray(self.scan.ranges)
+            #print(sample)
             # print(np.count_nonzero(~np.isnan(sample)))
             # print(self.countNan(sample))
             sample[np.isnan(sample)] = 3.5
