@@ -3,13 +3,15 @@ from abc import ABC, abstractmethod
 from threading import Condition, Lock
 import rospy
 import rospkg
+import json
+import yaml
+
 from nav_msgs.msg import OccupancyGrid
 from nav_msgs.srv import GetMap
 from geometry_msgs.msg import Pose2D
 from rospy.exceptions import ROSException
 from .obstacles_manager import ObstaclesManager
 from .robot_manager import RobotManager
-import json
 
 
 class ABSTask(ABC):
@@ -110,51 +112,63 @@ class ManualTask(ABSTask):
 
 
 class StagedRandomTask(RandomTask):
-    def __init__(self, obstacles_manager: ObstaclesManager, robot_manager: RobotManager, start_stage: int = 0, PATHS = None):
+    def __init__(self, obstacles_manager: ObstaclesManager, robot_manager: RobotManager, start_stage: int = 1, PATHS = None):
         super().__init__(obstacles_manager, robot_manager)
-        self.curr_stage = start_stage
-        self.json_location = os.path.join(PATHS.get('model'), "hyperparameters.json")
+        if not isinstance(start_stage, int):
+            raise ValueError("Given start_stage not an Integer!")
+        self._curr_stage = start_stage
+        self._stages = dict()
+        self._PATHS = PATHS
+        self._read_stages_from_yaml()
+        if self._curr_stage < 1 or self._curr_stage > len(self._stages):
+            raise IndexError("Start stage given for training curriculum out of bounds! Has to be between {1 to %d}!" % len(self._stages))
         self._initiate_stage()
         
     def next_stage(self):
-        self.curr_stage += 1
-        self._update_curr_stage_json()
-        self._remove_obstacles()
-        self._initiate_stage()
+        if self._curr_stage < len(self._stages):
+            self._curr_stage += 1
+            self._update_curr_stage_json()
+            self._remove_obstacles()
+            self._initiate_stage()
 
     def _initiate_stage(self):
-        if self.curr_stage == 0:
-            self.obstacles_manager.register_random_obstacles(0, 0.0)
-        elif self.curr_stage == 1:
-            self.obstacles_manager.register_random_obstacles(10, 0.0)
-        elif self.curr_stage == 2:
-            self.obstacles_manager.register_random_obstacles(20, 0.0)
-        elif self.curr_stage == 3:
-            self.obstacles_manager.register_random_obstacles(10, 1)
-        elif self.curr_stage == 4:
-            self.obstacles_manager.register_random_obstacles(20, 0.4)
+        static_obstacles = self._stages[self._curr_stage]['static']
+        dynamic_obstacles = self._stages[self._curr_stage]['dynamic']
+
+        self.obstacles_manager.register_random_static_obstacles(self._stages[self._curr_stage]['static'])
+        self.obstacles_manager.register_random_dynamic_obstacles(self._stages[self._curr_stage]['dynamic'])
+
+        print("Spawning %d static and %d dynamic obstacles!" % (static_obstacles, dynamic_obstacles))
+
+    def _read_stages_from_yaml(self):
+        file_location = self._PATHS.get('curriculum')
+        if os.path.isfile(file_location):
+            with open(file_location, "r") as file:
+                self._stages = yaml.load(file, Loader=yaml.FullLoader)
+            assert isinstance(self._stages, dict), "'training_curriculum.yaml' has wrong fromat! Has to encode dictionary!"
         else:
-            self.obstacles_manager.register_random_obstacles(30, 0.4)
+            raise FileNotFoundError("Couldn't find 'training_curriculum.yaml' in %s " % self._PATHS.get('curriculum'))
 
     def _update_curr_stage_json(self):
-        if os.path.isfile(self.json_location):
-            with open(self.json_location, "r") as file:
+        file_location =  os.path.join(self._PATHS.get('model'), "hyperparameters.json")
+        if os.path.isfile(file_location):
+            with open(file_location, "r") as file:
                 hyperparams = json.load(file)
             try:
-                hyperparams['curr_stage'] = self.curr_stage
+                hyperparams['curr_stage'] = self._curr_stage
             except Exception:
                 raise Warning("Parameter 'curr_stage' not found in 'hyperparameters.json'!")
             else:
-                with open(self.json_location, "w", encoding='utf-8') as target:
+                with open(file_location, "w", encoding='utf-8') as target:
                     json.dump(hyperparams, target, ensure_ascii=False, indent=4)
         else:
-            raise Warning("File not found %s" % self.json_location)
+            raise Warning("File not found %s" % file_location)
     
     def _remove_obstacles(self):
         self.obstacles_manager.remove_obstacles()
 
 
-def get_predefined_task(mode="random", start_stage: int = 0, PATHS: dict = None):
+def get_predefined_task(mode="random", start_stage: int = 1, PATHS: dict = None):
 
     # TODO extend get_predefined_task(mode="string") such that user can choose between task, if mode is
 
