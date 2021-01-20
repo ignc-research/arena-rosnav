@@ -14,6 +14,13 @@ from torch.nn.utils.rnn import pack_sequence
 import torch
 import numpy as np
 
+# global variables for DQN
+NUM_ACTIONS = 5
+num_observations=364
+SEQ_LENGTH=64
+SEQ_LENGTH_MAX=3000
+DISCOUNT_FACTOR=0.99
+
 class NN_tb3():
     def __init__(self):
 
@@ -26,6 +33,16 @@ class NN_tb3():
         self.goal = PoseStamped()
         self.sub_goal = Vector3()
         self.scan = LaserScan()
+
+        #load NN
+        model_name="dqn_agent_360_gru.dat"
+        self.net = gru.GRUModel(num_observations, NUM_ACTIONS)
+        self.net.to(torch.device('cuda'))
+        self.h = self.net.init_hidden(1).data
+        self.net.train(False)# set training mode to false to deactivate dropout layer
+		if self.model_name != None:	
+            self.net.load_state_dict(torch.load(self.model_name, map_location=torch.device('cuda')))
+        reset()
         # subs
         #self.sub_pose = rospy.Subscriber('/odom',Odometry,self.cbPose)
         #self.sub_global_goal = rospy.Subscriber('/goal',PoseStamped, self.cbGlobalGoal)
@@ -80,6 +97,7 @@ class NN_tb3():
         if self.distance > 0.2:
             return False
         else:
+            reset()
             return True
 
     def stop_moving(self):
@@ -95,6 +113,11 @@ class NN_tb3():
         self.performAction(self.desired_action)
         return
 
+    def reset(self):
+        self.episode_frame=0
+        self.last_action=-1
+        self.last_reward=0.0
+        self.tensor_state_buffer = torch.zeros(SEQ_LENGTH_MAX, num_observations,dtype=torch.float).to(self.device)
 
     def countNan(self,data):
         n=0
@@ -109,10 +132,6 @@ class NN_tb3():
             
     def cbComputeActionArena(self,event):
         if not self.goalReached():
-            NUM_ACTIONS = 5
-            num_observations=362
-            SEQ_LENGTH=64
-            SEQ_LENGTH_MAX=300
             # input           
             # pack goal position relative to robot
             angle = self.deg_phi    
@@ -130,22 +149,29 @@ class NN_tb3():
             # sample=np.ones([360,]).tolist()
             # print(sample)
 
-            observation=[distance]+[angle]+sample
-            #load NN
-            model_name="dqn_agent_best_fc_l2.dat"
-            net = fc.FC_DQN(num_observations, NUM_ACTIONS)
-            net.train(False)# set training mode to false to deactivate dropout layer
+            observation=[last reward, last action, distance, angle]+sample
 
-            net.load_state_dict(torch.load(model_name, map_location=torch.device('cpu')));
 
             ##output NN
             # passing observation through net
-            state_v = torch.FloatTensor([observation]).to('cpu')
-            q_vals_v = net(state_v)
+            #q = None
+            self.tensor_state_buffer[self.episode_frame] = torch.FloatTensor(observation)
+            if self.episode_frame > SEQ_LENGTH-1:
+                start_index= self.episode_frame-(SEQ_LENGTH-1)
+                L=SEQ_LENGTH
+            else:
+                start_index = 0
+                L=self.episode_frame+1
+            state_v=[torch.narrow(self.tensor_state_buffer, dim=0, start=start_index, length=L)]
+            t=pack_sequence(state_v, enforce_sorted=False)
+            q,self.h = self.net(t,self.h)
+            q=q.view(-1,NUM_ACTIONS)
             # select action with max q value
-            _, act_v = torch.max(q_vals_v, dim=1)
+            _, act_v = torch.max(q, dim=1)
             action = int(act_v.item())
+            self.last_action = action
             self.update_action(action)
+            self.episode_frame=self.episode_frame+1
 
         else:
             # print(self.global_goal.pose.position)
