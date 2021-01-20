@@ -77,7 +77,7 @@ class NN_tb3():
 
     def goalReached(self):
         # how far ?
-        if self.distance > 0.3:
+        if self.distance > 0.7:
             return False
         else:
             return True

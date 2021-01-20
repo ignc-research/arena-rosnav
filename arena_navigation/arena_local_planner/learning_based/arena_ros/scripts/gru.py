@@ -7,7 +7,7 @@ embedding_size_first = 128
 #embedding_size_second = 128             #number of nodes in embedding layer of the fc network
 HIDDEN_SHAPE_SECOND = 64
 hidden_dim = 64                          #number of nodes in GRU  
-layer_dim = 2                            #number of gru layers 1 3 5 7
+layer_dim = 1                            #number of gru layers 1 3 5 7
 ##############################
 
 class GRUModel(nn.Module):

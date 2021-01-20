@@ -16,9 +16,9 @@ import numpy as np
 
 # global variables for DQN
 NUM_ACTIONS = 5
-num_observations=364
+num_observations=74
 SEQ_LENGTH=64
-SEQ_LENGTH_MAX=3000
+SEQ_LENGTH_MAX=300000
 DISCOUNT_FACTOR=0.99
 
 class NN_tb3():
@@ -35,25 +35,25 @@ class NN_tb3():
         self.scan = LaserScan()
 
         #load NN
-        model_name="dqn_agent_360_gru.dat"
+        self.model_name="dqn_agent_best_72_64.dat"
         self.net = gru.GRUModel(num_observations, NUM_ACTIONS)
         self.net.to(torch.device('cuda'))
         self.h = self.net.init_hidden(1).data
         self.net.train(False)# set training mode to false to deactivate dropout layer
-		if self.model_name != None:	
+        if self.model_name != None:
             self.net.load_state_dict(torch.load(self.model_name, map_location=torch.device('cuda')))
-        reset()
+        self.reset()
         # subs
-        #self.sub_pose = rospy.Subscriber('/odom',Odometry,self.cbPose)
-        #self.sub_global_goal = rospy.Subscriber('/goal',PoseStamped, self.cbGlobalGoal)
-        #self.sub_subgoal = rospy.Subscriber('/plan_manager/subgoal',PoseStamped, self.cbSubGoal)
-        #self.sub_subgoal = rospy.Subscriber('/scan',LaserScan, self.cbScan)
+        self.sub_pose = rospy.Subscriber('/odom',Odometry,self.cbPose)
+        self.sub_global_goal = rospy.Subscriber('/goal',PoseStamped, self.cbGlobalGoal)
+        self.sub_sub_subgoal = rospy.Subscriber('/plan_manager/subgoal',PoseStamped, self.cbSubGoal)
+        self.sub_subgoal = rospy.Subscriber('/scan',LaserScan, self.cbScan)
         # pubs
         self.pub_pose_marker = rospy.Publisher('/arena_pose',Marker,queue_size=1)
         self.pub_twist = rospy.Publisher('/cmd_vel',Twist,queue_size=1) 
 
-        #self.nn_timer = rospy.Timer(rospy.Duration(0.01),self.cbComputeActionArena)
-        #self.control_timer = rospy.Timer(rospy.Duration(0.1),self.cbControl)
+        self.nn_timer = rospy.Timer(rospy.Duration(0.01),self.cbComputeActionArena)
+        self.control_timer = rospy.Timer(rospy.Duration(0.3),self.cbControl)
 
 
     def cbScan(self,msg):
@@ -94,10 +94,10 @@ class NN_tb3():
 
     def goalReached(self):
         # how far ?
-        if self.distance > 0.2:
+        if self.distance > 0.3:
             return False
         else:
-            reset()
+            self.reset()
             return True
 
     def stop_moving(self):
@@ -117,7 +117,7 @@ class NN_tb3():
         self.episode_frame=0
         self.last_action=-1
         self.last_reward=0.0
-        self.tensor_state_buffer = torch.zeros(SEQ_LENGTH_MAX, num_observations,dtype=torch.float).to(self.device)
+        self.tensor_state_buffer = torch.zeros(SEQ_LENGTH_MAX, num_observations,dtype=torch.float).to(torch.device('cuda'))
 
     def countNan(self,data):
         n=0
@@ -134,24 +134,23 @@ class NN_tb3():
         if not self.goalReached():
             # input           
             # pack goal position relative to robot
-            angle = self.deg_phi    
-            distance = self.distance   
+            self.angle = self.deg_phi    
+            #distance = self.distance   
             #lidarscan
             sample = np.asanyarray(self.scan.ranges)
             # print(np.count_nonzero(~np.isnan(sample)))
             # print(self.countNan(sample))
             sample[np.isnan(sample)] = 3.5
             sample=sample.tolist()
-            # print(len(sample))
+            #print("s",len(sample))
 
             # print("===============================")
             
             # sample=np.ones([360,]).tolist()
             # print(sample)
 
-            observation=[last reward, last action, distance, angle]+sample
-
-
+            observation=[self.distance, self.angle]+sample
+            #print("obser",len(observation))
             ##output NN
             # passing observation through net
             #q = None
@@ -170,6 +169,7 @@ class NN_tb3():
             _, act_v = torch.max(q, dim=1)
             action = int(act_v.item())
             self.last_action = action
+            self.last_reward=q.squeeze()[action]
             self.update_action(action)
             self.episode_frame=self.episode_frame+1
 
@@ -179,11 +179,8 @@ class NN_tb3():
             self.stop_moving()
             return
 
-    def performAction(self, action):
-
-        # action_space = {0: [0.2,0],1: [0.15,0.75],2: [0.15,-0.75],3: [0.0,1.5],4: [0.0,-1.5]}
-        action_space = {0: [0.2,0], 1: [0.15,0.35], 2: [0.15,-0.35], 3: [0.0,0.75], 4: [0.0,-0.75]}
-        # print(action)
+    def performAction(self, action):        
+        action_space = {0: [0.2,0], 1: [0.15,0.35], 2: [0.15,-0.35], 3: [0.0,0.75], 4: [0.0,-0.75]}        
         twist = Twist()
         twist.linear.x = action_space[action][0]
         twist.angular.z = action_space[action][1]
