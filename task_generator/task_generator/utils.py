@@ -5,7 +5,7 @@ import random
 
 
 def generate_freespace_indices(map_: OccupancyGrid) -> tuple:
-    """generate the indices(represented in a tuple) of the freesapce based on the map
+    """generate the indices(represented in a tuple) of the freespace based on the map
 
     Returns:
         indices_y_x(tuple): indices of the non-occupied cells, the first element is the y-axis indices,

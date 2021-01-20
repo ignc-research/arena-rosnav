@@ -8,7 +8,7 @@ from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.callbacks import EvalCallback
 
-from task_generator.task_generator.tasks import get_predefined_task
+from .task_generator.task_generator.tasks import get_predefined_task
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.scripts.custom_policy import *
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.rl_agent.envs.flatland_gym_env import FlatlandEnv
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.tools.argsparser import parse_training_args
