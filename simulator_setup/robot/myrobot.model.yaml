@@ -36,11 +36,10 @@ plugins:
     range: 3.5
     # angle: {min: -3.12413936, max: 3.14159265359, increment: 0.01745}
     # shifted for arena
-    #for fc
-    #angle: {min: -1.5707963267948966, max: 4.694936014, increment:  0.017453292}
-    #angle: {min: -1.570796327, max: 4.694935688, increment:  0.017453292}
-    #for gru
-    angle: {min: -1.570796327, max: 4.694935688, increment:  0.0877}
+    #for fc or trans 360
+    angle: {min: -1.5707963267948966, max: 4.694936014, increment:  0.017453292}
+    #for gru 64
+    # angle: {min: -1.570796327, max: 4.694935688, increment:  0.0877}
 
     # noise_std_dev: 0.015
     # arena
