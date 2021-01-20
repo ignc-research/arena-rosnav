@@ -1,9 +1,8 @@
 # arena-rosnav
 
-<p align="center">
-	<img width="300" height="300" src="/img/rosnav1.gif">
-	<img width="300" height="300" src="/img/rosnav2.gif">
-</p>
+| <img width="400" height="400" src="/img/rosnav1.gif"> | <img width="400" height="400" src="/img/rosnav2.gif"> |
+|:--:| :--:| 
+| *Training Stage* | *Deployment Stage* |
 
 
 ## 0. What is this repository for?
