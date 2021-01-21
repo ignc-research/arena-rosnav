@@ -3,7 +3,7 @@
 from codecs import xmlcharrefreplace_errors
 from logging import error
 
-from task_generator.task_generator_tool.tasks import get_predefined_task
+from tasks import get_predefined_task
 import rospy
 from std_srvs.srv import Empty,EmptyResponse
 
