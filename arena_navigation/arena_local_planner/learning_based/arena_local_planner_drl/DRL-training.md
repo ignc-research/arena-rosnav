@@ -35,21 +35,21 @@ python scripts/training/train_agent.py --agent MLP_ARENA2D
 train_agent.py [agent flag] [agent_name | unique_agent_name | custom mlp params] [optional flag] [optional flag] ...
 ```
 
-| Program call         | Agent flag (mutually exclusive)             | Description   |
-| -------------------- | ------------------------------------------- | ------------- | 
-| ``` train_agent.py```|```--agent``` [*agent_name*] ([see below](#training-with-a-predefined-dnn))     | initializes a predefined network from scratch
-|                      |```--load ``` [*unique_agent_name*] ([see below](#load-a-dnn-for-training))| loads agent to the given name
-|                      |```--custom-mlp```  [_custom mlp params_] ([see below](#training-with-a-custom-mlp))| initializes custom MLP according to given arguments 
+| Program call         | Agent Flag (mutually exclusive)  | Usage                                                           |Description                                         |
+| -------------------- | -------------------------------- |---------------------------------------------------------------- |--------------------------------------------------- | 
+| ``` train_agent.py```|```--agent```                     | [*agent_name*] ([see below](#training-with-a-predefined-dnn))   | initializes a predefined network from scratch
+|                      |```--load ```                     | [*unique_agent_name*] ([see below](#load-a-dnn-for-training))   | loads agent to the given name
+|                      |```--custom-mlp```                | [_custom mlp params_] ([see below](#training-with-a-custom-mlp))| initializes custom MLP according to given arguments 
 
 _Custom Multilayer Perceptron_ parameters will only be considered when ```--custom-mlp``` was set!
-|  Custom mlp flags | Syntax                | Description                                   |
+|  Custom Mlp Flags | Syntax                | Description                                   |
 | ----------------  | ----------------------| ----------------------------------------------|
 |  ```--body ```    | ```{num}-{num}-...``` |architecture of the shared latent network      |
 |  ```--pi```       | ```{num}-{num}-...``` |architecture of the latent policy network      |
 |  ```--vf```       | ```{num}-{num}-...``` |architecture of the latent value network       |
 |  ```--act_fn ```  | ```{relu, sigmoid or tanh}```|activation function to be applied after each hidden layer |
 
-|  Optional flags        | Description                                    |
+|  Optional Flags        | Description                                    |
 | ---------------------- | -----------------------------------------------|
 |  ```--n    {num}```    | timesteps in total to be generated for training|
 |  ```--tb```            | enables tensorboard logging                    |
