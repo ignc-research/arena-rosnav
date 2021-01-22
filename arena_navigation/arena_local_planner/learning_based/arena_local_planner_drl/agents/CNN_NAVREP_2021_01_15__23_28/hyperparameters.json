@@ -11,7 +11,7 @@
     "batch_size": 64,
     "n_epochs": 4,
     "clip_range": 0.2,
-    "reward_fnc": "00",
+    "reward_fnc": "rule_00",
     "discrete_action_space": true,
     "task_mode": "staged",
     "curr_stage": 1,
