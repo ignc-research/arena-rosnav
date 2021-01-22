@@ -17,7 +17,7 @@ from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.tools.staged_train_callback import InitiateNewTrainStage
 
 ##### HYPERPARAMETER #####
-""" (will be used upon initializing new agent) """
+""" will be used upon initializing new agent """
 robot = "myrobot"
 gamma = 0.99
 n_steps = 128
@@ -29,9 +29,9 @@ gae_lambda = 0.95
 batch_size = 64
 n_epochs = 4
 clip_range = 0.2
-reward_fnc = "00"
-discrete_action_space = True
-start_stage = 0
+reward_fnc = "rule_01"
+discrete_action_space = False
+start_stage = 1
 task_mode = "staged"    # custom, random or staged
 ##########################
 
@@ -68,6 +68,7 @@ def get_paths(agent_name: str, args) -> dict:
         'eval' : os.path.join(dir, 'training_logs', 'train_eval_log', agent_name),
         'robot_setting' : os.path.join(rospkg.RosPack().get_path('simulator_setup'), 'robot', robot + '.model.yaml'),
         'robot_as' : os.path.join(rospkg.RosPack().get_path('arena_local_planner_drl'), 'configs', 'default_settings.yaml'),
+        'curriculum' : os.path.join(rospkg.RosPack().get_path('arena_local_planner_drl'), 'configs', 'training_curriculum.yaml')
     }
     # check for mode
     if args.load is None:
@@ -110,11 +111,11 @@ if __name__ == "__main__":
     # instantiate gym environment
     n_envs = 1
     task_manager = get_predefined_task(params['task_mode'], params['curr_stage'], PATHS)
-    env = DummyVecEnv([lambda: FlatlandEnv(task_manager, PATHS.get('robot_setting'), PATHS.get('robot_as'), params['discrete_action_space'], goal_radius=1.00, max_steps_per_episode=350)] * n_envs)
+    env = DummyVecEnv([lambda: FlatlandEnv(task_manager, PATHS.get('robot_setting'), PATHS.get('robot_as'), params['reward_fnc'], params['discrete_action_space'], goal_radius=1.00, max_steps_per_episode=350)] * n_envs)
     
     # instantiate eval environment
     trainstage_cb = InitiateNewTrainStage(TaskManager=task_manager, TreshholdType="rew", rew_threshold=13.5, task_mode=params['task_mode'], verbose=1)
-    eval_env = Monitor(FlatlandEnv(task_manager, PATHS.get('robot_setting'), PATHS.get('robot_as'), params['discrete_action_space'], goal_radius=1.00, max_steps_per_episode=350), PATHS.get('eval'), info_keywords=("done_reason",))
+    eval_env = Monitor(FlatlandEnv(task_manager, PATHS.get('robot_setting'), PATHS.get('robot_as'), params['reward_fnc'], params['discrete_action_space'], goal_radius=1.00, max_steps_per_episode=350), PATHS.get('eval'), info_keywords=("done_reason",))
     eval_cb = EvalCallback(eval_env, n_eval_episodes=20, eval_freq=10000, log_path=PATHS.get('eval'), best_model_save_path=PATHS.get('model'), deterministic=True, callback_on_new_best=trainstage_cb)
 
     # determine mode
@@ -159,7 +160,7 @@ if __name__ == "__main__":
 
     # update the timesteps the model has trained in total
     update_total_timesteps_json(hyperparams_obj, n_timesteps, PATHS)
-    print("training done and model saved!")
+    print("training done!")
     
 """
     s = time.time()
