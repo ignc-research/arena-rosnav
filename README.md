@@ -568,32 +568,32 @@ At present one can chose between two reward functions which can be set at the hy
 
    | Reward Function at timestep t                                     |  
    | ----------------------------------------------------------------- |   
-   | $r^t$ = $r_{s}^t$ + $r_{c}^t$ + $r_{d}^t$ + $r_{p}^t$ + $r_{m}^t$ |
-
+   | <img src="https://bit.ly/2MdUJXp" align="center" border="0" alt="r^t = r_{s}^t + r_{c}^t + r_{d}^t + r_{p}^t + r_{m}^t" width="201" height="28" /> |
+   
    | reward    | description | value |
    | --------- | ----------- | ----- |
-   | $r_{s}^t$ | success reward | 15 if goal is reached, 0 otherwise
-   | $r_{c}^t$ | collision reward | -10 if robot collides, 0 otherwise
-   | $r_{d}^t$ | danger reward | -1 if robot breaks safe distance, 0 otherwise
-   | $r_{p}^t$ | progress reward | last goal distance - current goal distance with weight applied
-   | $r_{m}^t$ | move reward | 0 if robot moves, -0.01 if robot stands still
+   | <img src="https://bit.ly/3pmKoHa" align="center" border="0" alt=" r_{s}^t" width="18" height="26" /> | success reward | <img src="https://bit.ly/2LW8pGO" align="center" border="0" alt="r_{s}^t =\begin{cases}15 & goal \: reached \\0 & otherwise\end{cases} " width="204" height="50" />
+   | <img src="https://bit.ly/3645pit" align="center" border="0" alt=" r_{c}^t" width="18" height="26" /> | collision reward | <img src="https://bit.ly/3c4W4KT" align="center" border="0" alt=" r_{m}^t =\begin{cases}0 & otherwise\\-10 & agent\:collides\end{cases} " width="231" height="50" />
+   | <img src="https://bit.ly/3qLaMeo" align="center" border="0" alt=" r_{d}^t" width="21" height="26" /> | danger reward | <img src="https://bit.ly/362XG46" align="center" border="0" alt="r_{d}^t =\begin{cases}0 & otherwise \\-0.15 & agent\: breaks\: safe\: dist\end{cases} " width="307" height="50" />
+   | <img src="https://bit.ly/3sSepRI" align="center" border="0" alt=" r_{p}^t" width="19" height="28" /> | progress reward | <img src="https://bit.ly/367LfE6" align="center" border="0" alt="r_{p}^t =\begin{cases} w* d^t   &  0 < d_{ag}^{t-1} - d_{ag}^{t}\; or \; 0 > d_{ag}^{t-1} - d_{ag}^{t} \\ 0 & else \end{cases} \\w = 0.25 \\d_{ag}: distance\:agent\:and\:goal " width="389" height="99" />
+   | <img src="https://bit.ly/364H9fX" align="center" border="0" alt=" r_{m}^t" width="24" height="25" /> | move reward | <img src="https://bit.ly/3pci0HI" align="center" border="0" alt=" r_{m}^t =\begin{cases}0 & otherwise\\-0.01 & agent\:stands\:still\end{cases} " width="275" height="50" />
 
    </td>
    <td>
 
    | Reward Function at timestep t                                     |  
    | ----------------------------------------------------------------- |   
-   | $r^t$ = $r_{s}^t$ + $r_{c}^t$ + $r_{d}^t$ + $r_{p}^t$ + $r_{m}^t$ |
-
+   | <img src="https://bit.ly/2MdUJXp" align="center" border="0" alt="r^t = r_{s}^t + r_{c}^t + r_{d}^t + r_{p}^t + r_{m}^t" width="201" height="28" /> |
+   
    | reward    | description | value |
    | --------- | ----------- | ----- |
-   | $r_{s}^t$ | success reward | 15 if goal is reached, 0 otherwise
-   | $r_{c}^t$ | collision reward | -10 if robot collides, 0 otherwise
-   | $r_{d}^t$ | danger reward | -1 if robot breaks safe distance, 0 otherwise
-   | $r_{p}^t$ | progress reward | last goal distance - current goal distance with weight applied (*)
-   | $r_{m}^t$ | move reward | 0 if robot moves, -0.01 if robot stands still
+   | <img src="https://bit.ly/3pmKoHa" align="center" border="0" alt=" r_{s}^t" width="18" height="26" /> | success reward | <img src="https://bit.ly/2LW8pGO" align="center" border="0" alt="r_{s}^t =\begin{cases}15 & goal \: reached \\0 & otherwise\end{cases} " width="204" height="50" />
+   | <img src="https://bit.ly/3645pit" align="center" border="0" alt=" r_{c}^t" width="18" height="26" /> | collision reward | <img src="https://bit.ly/3c4W4KT" align="center" border="0" alt=" r_{m}^t =\begin{cases}0 & otherwise\\-10 & agent\:collides\end{cases} " width="231" height="50" />
+   | <img src="https://bit.ly/3qLaMeo" align="center" border="0" alt=" r_{d}^t" width="21" height="26" /> | danger reward | <img src="https://bit.ly/362XG46" align="center" border="0" alt="r_{d}^t =\begin{cases}0 & otherwise \\-0.15 & agent\: beaks\: safe\: dist\end{cases} " width="307" height="50" />
+   | <img src="https://bit.ly/3sSepRI" align="center" border="0" alt=" r_{p}^t" width="19" height="28" /> | progress reward | <img src="https://bit.ly/2NuPm6U" align="center" border="0" alt="r_{p}^t =\begin{cases} w_{p}* d^t   &  0 < d_{ag}^{t-1} - d_{ag}^{t} \\ w_{n}* d^t   &  0>d_{ag}^{t-1} - d_{ag}^{t} } \\ 0 & else \end{cases} \\w_{p} = 0.25\\ w_{n}=0.4 \\d_{ag}: distance\:agent\:and\:goal \\" width="258" height="151" /> (*)
+   | <img src="https://bit.ly/364H9fX" align="center" border="0" alt=" r_{m}^t" width="24" height="25" /> | move reward | <img src="https://bit.ly/3pci0HI" align="center" border="0" alt=" r_{m}^t =\begin{cases}0 & otherwise\\-0.01 & agent\:stands\:still\end{cases} " width="275" height="50" />
 
-   *higher weight applied if robot drives away from the goal (to avoid driving unneccessary circles) 
+   *higher weight applied if robot drives away from goal (to avoid driving unneccessary circles) 
    </td>
 </tr>
 </table>
