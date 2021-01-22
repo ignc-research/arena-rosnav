@@ -90,7 +90,7 @@ train_agent.py --load MLP_ARENA2D_2021_01_19__03_20
 
 ##### Training with a custom MLP
 
-Instantiating a MLP architecture with an arbitrary number of layers and neurons for training was made as simple as possible by providing the option of using the ```--custom-mlp``` flag. By typing in the flag additional flags for the architecture of latent layers get accessible ([see above](#411-program-arguments)).
+Instantiating a MLP architecture with an arbitrary number of layers and neurons for training was made as simple as possible by providing the option of using the ```--custom-mlp``` flag. By typing in the flag additional flags for the architecture of latent layers get accessible ([see above](#program-arguments)).
 
 e.g. given following architecture:
 ```
@@ -137,12 +137,60 @@ Following hyperparameters can be adapted:
 | clip_range | Clipping parameter, it can be a function of the current progress remaining (from 1 to 0).
 | reward_fnc | Number of the reward function (defined in _../rl_agent/utils/reward.py_)
 | discrete_action_space | If robot uses discrete action space
-| task_mode | Mode tasks will be generated in (custom, random, staged). In custom mode one can place obstacles manually via Rviz. In random mode there's a fixed number of obstacles which are spawned randomly distributed on the map after each episode. In staged mode the training curriculum will be used to spawn obstacles. ([more info](#413-training-curriculum))
+| task_mode | Mode tasks will be generated in (custom, random, staged). In custom mode one can place obstacles manually via Rviz. In random mode there's a fixed number of obstacles which are spawned randomly distributed on the map after each episode. In staged mode the training curriculum will be used to spawn obstacles. ([more info](#training-curriculum))
 | curr_stage | When "staged" training is activated which stage to start the training with.
 
 ([more information on PPO implementation of SB3](https://stable-baselines3.readthedocs.io/en/master/modules/ppo.html))
 
 **Note**: For now further parameters like _max_steps_per_episode_ or _goal_radius_ have to be changed inline (where FlatlandEnv gets instantiated). _n_eval_episodes_ which will take place after _eval_freq_ timesteps can be changed also (where EvalCallback gets instantiated).
+
+#### Reward Functions
+
+The reward functions are defined in
+```
+../arena_local_planner_drl/rl_agent/utils/reward.py
+```
+At present one can chose between two reward functions which can be set at the hyperparameter section of the training script:
+
+  
+<table>
+<tr>
+   <th>rule_00</th> <th>rule_01</th>
+</tr>
+<tr>
+   <td>
+
+   | Reward Function at timestep t                                     |  
+   | ----------------------------------------------------------------- |   
+   | $r^t$ = $r_{s}^t$ + $r_{c}^t$ + $r_{d}^t$ + $r_{p}^t$ + $r_{m}^t$ |
+
+   | reward    | description | value |
+   | --------- | ----------- | ----- |
+   | $r_{s}^t$ | success reward | 15 if goal is reached, 0 otherwise
+   | $r_{c}^t$ | collision reward | -10 if robot collides, 0 otherwise
+   | $r_{d}^t$ | danger reward | -1 if robot breaks safe distance, 0 otherwise
+   | $r_{p}^t$ | progress reward | last goal distance - current goal distance with weight applied
+   | $r_{m}^t$ | move reward | 0 if robot moves, -0.01 if robot stands still
+
+   </td>
+   <td>
+
+   | Reward Function at timestep t                                     |  
+   | ----------------------------------------------------------------- |   
+   | $r^t$ = $r_{s}^t$ + $r_{c}^t$ + $r_{d}^t$ + $r_{p}^t$ + $r_{m}^t$ |
+
+   | reward    | description | value |
+   | --------- | ----------- | ----- |
+   | $r_{s}^t$ | success reward | 15 if goal is reached, 0 otherwise
+   | $r_{c}^t$ | collision reward | -10 if robot collides, 0 otherwise
+   | $r_{d}^t$ | danger reward | -1 if robot breaks safe distance, 0 otherwise
+   | $r_{p}^t$ | progress reward | last goal distance - current goal distance with weight applied (*)
+   | $r_{m}^t$ | move reward | 0 if robot moves, -0.01 if robot stands still
+
+   *higher weight applied if robot drives away from goal (to avoid driving unneccessary circles) 
+   </td>
+</tr>
+</table>
 
 #### Training Curriculum
 
