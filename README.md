@@ -438,7 +438,7 @@ python scripts/training/train_agent.py --agent MLP_ARENA2D
 
 **Generic program call**:
 ```
-train_agent.py [agent flag] [custom mlp params] [optional flag] [optional flag] ...
+train_agent.py [agent flag] [agent_name | unique_agent_name | custom mlp params] [optional flag] [optional flag] ...
 ```
 
 | Program call         | Agent flag (mutually exclusive)             | Description   |
@@ -498,24 +498,24 @@ train_agent.py --load MLP_ARENA2D_2021_01_19__03_20
 
 Instantiating a MLP architecture with an arbitrary number of layers and neurons for training was made as simple as possible by providing the option of using the ```--custom-mlp``` flag. By typing in the flag additional flags for the architecture of latent layers get accessible ([see above](#411-program-arguments)).
 
-e.g. given this architecture
+e.g. given following architecture:
 ```
-                                                           obs
-                                                            |
-                                                          <256>
-                                                            |
-                                                          ReLU
-                                                            |
-                                                          <128>
-                                                            |
-                                                          ReLU
-                                                    /               \
-                                                 <256>             <16>
-                                                   |                 |
-                                                 action            value
+					   obs
+					    |
+					  <256>
+					    |
+					  ReLU
+					    |
+					  <128>
+					    |
+					  ReLU
+				    /               \
+				 <256>             <16>
+				   |                 |
+				 action            value
 ```
 
-following program call must be made:
+program must be invoked as follows:
 ```
 train_agent.py --custom-mlp --body 256-128 --pi 256 --vf 16 --act_fn relu
 ```
