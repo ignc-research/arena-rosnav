@@ -441,21 +441,21 @@ python scripts/training/train_agent.py --agent MLP_ARENA2D
 train_agent.py [agent flag] [custom mlp params] [optional flag] [optional flag] ...
 ```
 
-| Program call         | Agent flag (mutually exclusive)             | Description   |
-| -------------------- | ------------------------------------------- | ------------- | 
-| ``` train_agent.py```|```--agent``` [*agent_name*] ([see below](#training-with-a-predefined-dnn))     | initializes a predefined network from scratch
-|                      |```--load ``` [*unique_agent_name*] ([see below](#load-a-dnn-for-training))| loads agent to the given name
-|                      |```--custom-mlp```  [_custom mlp params_] ([see below](#training-with-a-custom-mlp))| initializes custom MLP according to given arguments 
+| Program call         | Agent Flag (mutually exclusive)  | Usage                                                           |Description                                         |
+| -------------------- | -------------------------------- |---------------------------------------------------------------- |--------------------------------------------------- | 
+| ``` train_agent.py```|```--agent```                     | [*agent_name*] ([see below](#training-with-a-predefined-dnn))   | initializes a predefined network from scratch
+|                      |```--load ```                     | [*unique_agent_name*] ([see below](#load-a-dnn-for-training))   | loads agent to the given name
+|                      |```--custom-mlp```                | [_custom mlp params_] ([see below](#training-with-a-custom-mlp))| initializes custom MLP according to given arguments 
 
 _Custom Multilayer Perceptron_ parameters will only be considered when ```--custom-mlp``` was set!
-|  Custom mlp flags | Syntax                | Description                                   |
+|  Custom Mlp Flags | Syntax                | Description                                   |
 | ----------------  | ----------------------| ----------------------------------------------|
 |  ```--body ```    | ```{num}-{num}-...``` |architecture of the shared latent network      |
 |  ```--pi```       | ```{num}-{num}-...``` |architecture of the latent policy network      |
 |  ```--vf```       | ```{num}-{num}-...``` |architecture of the latent value network       |
 |  ```--act_fn ```  | ```{relu, sigmoid or tanh}```|activation function to be applied after each hidden layer |
 
-|  Optional flags        | Description                                    |
+|  Optional Flags        | Description                                    |
 | ---------------------- | -----------------------------------------------|
 |  ```--n    {num}```    | timesteps in total to be generated for training|
 |  ```--tb```            | enables tensorboard logging                    |
@@ -485,7 +485,7 @@ In order to differentiate between agents with similar architectures but from dif
 
 The name consists of:
 ```
-[architecture]_[year]_[month]__[hour]_[minute]
+[architecture]_[year]_[month]_[day]__[hour]_[minute]
 ```
 
 To load a specific agent you simply use the flag ```--load```, e.g.:
@@ -543,14 +543,63 @@ Following hyperparameters can be adapted:
 | clip_range | Clipping parameter, it can be a function of the current progress remaining (from 1 to 0).
 | reward_fnc | Number of the reward function (defined in _../rl_agent/utils/reward.py_)
 | discrete_action_space | If robot uses discrete action space
-| task_mode | Mode tasks will be generated in (custom, random, staged). In custom mode one can place obstacles manually via Rviz. In random mode there's a fixed number of obstacles which are spawned randomly distributed on the map after each episode. In staged mode the training curriculum will be used to spawn obstacles. ([more info](#413-training-curriculum))
+| task_mode | Mode tasks will be generated in (custom, random, staged). In custom mode one can place obstacles manually via Rviz. In random mode there's a fixed number of obstacles which are spawned randomly distributed on the map after each episode. In staged mode the training curriculum will be used to spawn obstacles. ([more info](#414-training-curriculum))
 | curr_stage | When "staged" training is activated which stage to start the training with.
 
 ([more information on PPO implementation of SB3](https://stable-baselines3.readthedocs.io/en/master/modules/ppo.html))
 
 **Note**: For now further parameters like _max_steps_per_episode_ or _goal_radius_ have to be changed inline (where FlatlandEnv gets instantiated). _n_eval_episodes_ which will take place after _eval_freq_ timesteps can be changed also (where EvalCallback gets instantiated).
 
-#### 4.1.3 Training Curriculum
+#### 4.1.3 Reward Functions
+
+The reward functions are defined in
+```
+../arena_local_planner_drl/rl_agent/utils/reward.py
+```
+At present one can chose between two reward functions which can be set at the hyperparameter section of the training script:
+
+  
+<table>
+<tr>
+   <th>rule_00</th> <th>rule_01</th>
+</tr>
+<tr>
+   <td>
+
+   | Reward Function at timestep t                                     |  
+   | ----------------------------------------------------------------- |   
+   | $r^t$ = $r_{s}^t$ + $r_{c}^t$ + $r_{d}^t$ + $r_{p}^t$ + $r_{m}^t$ |
+
+   | reward    | description | value |
+   | --------- | ----------- | ----- |
+   | $r_{s}^t$ | success reward | 15 if goal is reached, 0 otherwise
+   | $r_{c}^t$ | collision reward | -10 if robot collides, 0 otherwise
+   | $r_{d}^t$ | danger reward | -1 if robot breaks safe distance, 0 otherwise
+   | $r_{p}^t$ | progress reward | last goal distance - current goal distance with weight applied
+   | $r_{m}^t$ | move reward | 0 if robot moves, -0.01 if robot stands still
+
+   </td>
+   <td>
+
+   | Reward Function at timestep t                                     |  
+   | ----------------------------------------------------------------- |   
+   | $r^t$ = $r_{s}^t$ + $r_{c}^t$ + $r_{d}^t$ + $r_{p}^t$ + $r_{m}^t$ |
+
+   | reward    | description | value |
+   | --------- | ----------- | ----- |
+   | $r_{s}^t$ | success reward | 15 if goal is reached, 0 otherwise
+   | $r_{c}^t$ | collision reward | -10 if robot collides, 0 otherwise
+   | $r_{d}^t$ | danger reward | -1 if robot breaks safe distance, 0 otherwise
+   | $r_{p}^t$ | progress reward | last goal distance - current goal distance with weight applied (*)
+   | $r_{m}^t$ | move reward | 0 if robot moves, -0.01 if robot stands still
+
+   *higher weight applied if robot drives away from the goal (to avoid driving unneccessary circles) 
+   </td>
+</tr>
+</table>
+
+
+#### 4.1.4 Training Curriculum
 
 For the purpose of speeding up the training an exemplary training currucilum was implemented. But what exactly is a training curriculum you may ask. We basically divide the training process in difficulty levels, here the so called _stages_, in which the agent will meet an arbitrary number of obstacles depending on its learning progress. Different metrics can be taken into consideration to measure an agents performance.
 
@@ -566,7 +615,7 @@ Exemplary training curriculum:
 | 5               |  10              | 10                 |
 | 6               |  13              | 13                 |
 
-#### 4.1.4 Important Directories
+#### 4.1.5 Important Directories
 
 |Path|Description|
 |-----|-----|
