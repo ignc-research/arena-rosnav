@@ -29,7 +29,7 @@ if [ $? -eq 0 ] ; then
         echo "PYTHONPATH has been updated in your zshrc file."
     elif echo $SHELL | grep bash > /dev/null
     then
-        echo -e "$c_info" >> ~/.bashrc
+        echo -e "$rc_info" >> ~/.bashrc
         echo "PYTHONPATH has been updated in your bashrc file."
     else
         echo "Can't not determin which terminal you are using. Please manualy add the package path ${package_path} to you bashrc or zshrc file later"
