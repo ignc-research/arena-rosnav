@@ -443,9 +443,9 @@ train_agent.py [agent flag] [agent_name | unique_agent_name | custom mlp params]
 
 | Program call         | Agent Flag (mutually exclusive)  | Usage                                                           |Description                                         |
 | -------------------- | -------------------------------- |---------------------------------------------------------------- |--------------------------------------------------- | 
-| ``` train_agent.py```|```--agent```                     | [*agent_name*] ([see below](#training-with-a-predefined-dnn))   | initializes a predefined network from scratch
-|                      |```--load ```                     | [*unique_agent_name*] ([see below](#load-a-dnn-for-training))   | loads agent to the given name
-|                      |```--custom-mlp```                | [_custom mlp params_] ([see below](#training-with-a-custom-mlp))| initializes custom MLP according to given arguments 
+| ``` train_agent.py```|```--agent```                     | *agent_name* ([see below](#training-with-a-predefined-dnn))   | initializes a predefined network from scratch
+|                      |```--load ```                     | *unique_agent_name* ([see below](#load-a-dnn-for-training))   | loads agent to the given name
+|                      |```--custom-mlp```                | _custom mlp params_ ([see below](#training-with-a-custom-mlp))| initializes custom MLP according to given arguments 
 
 _Custom Multilayer Perceptron_ parameters will only be considered when ```--custom-mlp``` was set!
 |  Custom Mlp Flags | Syntax                | Description                                   |
