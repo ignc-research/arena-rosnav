@@ -1,0 +1,70 @@
+# Turtlebot
+
+bodies:  # List of named bodies
+  - name: base
+    pose: [0, 0, 0] 
+    type: dynamic
+    color: [1, 1, 0, 1]
+    footprints:
+      - type: polygon
+        density: 1
+        points: [[1.5, 0], [0.9, 0.7], [-0.9, 0.7], [-0.9, -0.7], [0.9, -0.7]]
+
+  - name: left_wheel
+    pose: [-0.25, 1, 0] 
+    type: dynamic  
+    color: [1, 0, 0, 1]
+    footprints:
+      - type: polygon
+        density: 1
+        points: [[0.75, 0.2], [-0.75, .2], [-0.75, -.2], [0.75, -.2]]
+
+  - name: right_wheel
+    pose: [-0.25, -1, 0]
+    type: dynamic  
+    color: [0, 1, 0, 1]
+    footprints:
+      - type: polygon
+        density: 1
+        points: [[0.75, 0.2], [-0.75, .2], [-0.75, -.2], [0.75, -.2]]
+    
+  - name: antenna
+    pose: [0, 0, 0]
+    type: dynamic
+    color: [1, 1, 1, 1]
+    footprints:
+      - type: circle
+        center: [0, 0]
+        radius: 0.25
+        density: 1
+
+  - name: front_bumper
+    pose: [2, 0, 0]
+    type: dynamic
+    color: [1, 1, 1, 1]
+    footprints:
+      - type: polygon
+        density: 0
+        points: [[0.1, 0.1], [-0.1, 0.1], [-0.1, -0.1], [0.1, -0.1]]
+
+  - name: rear_bumper
+    pose: [-2, 0, 0]
+    type: dynamic
+    color: [1, 1, 1, 1]
+    footprints:
+      - type: polygon
+        density: 0
+        points: [[0.1, 0.1], [-0.1, 0.1], [-0.1, -0.1], [0.1, -0.1]]
+
+plugins:
+  - type: ModelTfPublisher
+    name: model_tf_publisher
+
+joints:
+  - name: weld
+    type: weld
+    bodies: 
+      - name: base
+        anchor: [0, 0]
+      - name: antenna
+        anchor: [0, 0]      

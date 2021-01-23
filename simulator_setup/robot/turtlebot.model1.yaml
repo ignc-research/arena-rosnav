@@ -1,0 +1,44 @@
+# Turtlebot
+
+
+bodies:  # List of named bodies
+  - name: base
+    type: dynamic  
+    footprints:
+      - type: circle
+        radius: 1.777 
+        density: 0
+      - type: polygon
+        density: 982.24
+        points: [[-0.1, 0.1], [-0.1, -0.1], [0.1, -0.1], [0.1, 0.1]]
+
+  - name: left_wheel
+    type: dynamic  
+    footprints:
+      - type: polygon
+        density: 0
+        points: [[-.2, 0.75], [-.2, -.75], [.2, -.75], [.2, .75]]
+
+  - name: right_wheel
+    type: dynamic  
+    footprints:
+      - type: polygon
+        density: 0      
+        points: [[-.2, 0.75], [-.2, -.75], [.2, -.75], [.2, .75]]
+
+joints:
+  - name: wheel_weld_left
+    type: weld
+    bodies:
+      - name: base
+        anchor: [-1, 0]
+      - name: left_wheel
+        anchor: [0, 0]
+
+  - name: wheel_weld_right
+    type: weld
+    bodies:
+      - name: base
+        anchor: [1, 0]
+      - name: right_wheel
+        anchor: [0, 0]
