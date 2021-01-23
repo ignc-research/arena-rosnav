@@ -162,7 +162,7 @@ At present one can chose between two reward functions which can be set at the hy
 
    | Reward Function at timestep t                                     |  
    | ----------------------------------------------------------------- |   
-   | <img src="https://bit.ly/2MdUJXp" align="center" border="0" alt="r^t = r_{s}^t + r_{c}^t + r_{d}^t + r_{p}^t + r_{m}^t" width="201" height="28" /> |
+   | <a href="https://www.codecogs.com/eqnedit.php?latex=r^t&space;=&space;r_{s}^t&space;&plus;&space;r_{c}^t&space;&plus;&space;r_{d}^t&space;&plus;&space;r_{p}^t&space;&plus;&space;r_{m}^t" target="_blank"><img src="https://latex.codecogs.com/png.latex?r^t&space;=&space;r_{s}^t&space;&plus;&space;r_{c}^t&space;&plus;&space;r_{d}^t&space;&plus;&space;r_{p}^t&space;&plus;&space;r_{m}^t" title="r^t = r_{s}^t + r_{c}^t + r_{d}^t + r_{p}^t + r_{m}^t" /></a> |
    
    | reward    | description | value |
    | --------- | ----------- | ----- |
@@ -177,7 +177,7 @@ At present one can chose between two reward functions which can be set at the hy
 
    | Reward Function at timestep t                                     |  
    | ----------------------------------------------------------------- |   
-   | <img src="https://bit.ly/2MdUJXp" align="center" border="0" alt="r^t = r_{s}^t + r_{c}^t + r_{d}^t + r_{p}^t + r_{m}^t" width="201" height="28" /> |
+   | <a href="https://www.codecogs.com/eqnedit.php?latex=r^t&space;=&space;r_{s}^t&space;&plus;&space;r_{c}^t&space;&plus;&space;r_{d}^t&space;&plus;&space;r_{p}^t&space;&plus;&space;r_{m}^t" target="_blank"><img src="https://latex.codecogs.com/png.latex?r^t&space;=&space;r_{s}^t&space;&plus;&space;r_{c}^t&space;&plus;&space;r_{d}^t&space;&plus;&space;r_{p}^t&space;&plus;&space;r_{m}^t" title="r^t = r_{s}^t + r_{c}^t + r_{d}^t + r_{p}^t + r_{m}^t" /></a>|
    
    | reward    | description | value |
    | --------- | ----------- | ----- |
