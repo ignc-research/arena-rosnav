@@ -58,7 +58,7 @@ class NN_tb3():
 
     def cbPose(self, msg):
         # calculate angle
-        v_p = msg.pose.pose.position
+        v_p = msg.pose.pose.position    
         # v_g = self.global_goal.pose.position
         v_g = self.sub_goal
         v_pg = np.array([v_g.x-v_p.x,v_g.y-v_p.y])

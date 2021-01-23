@@ -31,7 +31,7 @@ import numpy as np
 
 
 class ObservationCollector():
-    def __init__(self,num_lidar_beams:int,lidar_range:float):
+    def __init__(self,num_lidar_beams:int,lidar_range:float, num_humans:int):
         """ a class to collect and merge observations
 
         Args:
@@ -42,7 +42,8 @@ class ObservationCollector():
         self.observation_space = ObservationCollector._stack_spaces((
             spaces.Box(low=0, high=lidar_range, shape=(num_lidar_beams,), dtype=np.float32),
             spaces.Box(low=0, high=10, shape=(1,), dtype=np.float32) ,
-            spaces.Box(low=-np.pi, high=np.pi, shape=(1,), dtype=np.float32) 
+            spaces.Box(low=-np.pi, high=np.pi, shape=(1,), dtype=np.float32),
+            spaces.Box(low=0, high=np.PINF, shape=(num_humans,), dtype=np.float32) 
         ))
 
         # flag of new sensor info

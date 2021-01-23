@@ -241,5 +241,5 @@ class RobotManager:
                 self._new_global_path_generated = True
             self._global_path_con.notify()
 
-    def __mean_square_dist_(self, x, y):
+    def _mean_square_dist_(self, x, y):
         return math.sqrt(math.pow(x, 2) + math.pow(y, 2))

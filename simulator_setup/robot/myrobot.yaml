@@ -119,10 +119,12 @@ plugins:
     body: laser_mount
     broadcast_tf: false
     origin: [0.0, 0.0, 0.0]
-    range: 10
+    range: 3.5
     # angle: {min: -3.14159265359, max: 3.14159265359, increment: 0.05235987755}
-    angle: {min: -3.14159265359, max: 3.14159265359, increment: 0.06981317007}
-    noise_std_dev: 0.015
+    #angle: {min: -3.14159265359, max: 3.14159265359, increment: 0.06981317007}
+    #for fc or trans 360
+    angle: {min: -1.5707963267948966, max: 4.694936014, increment:  0.017453292}
+    # noise_std_dev: 0.015
     update_rate: 10
     layers: ["all"]
 
