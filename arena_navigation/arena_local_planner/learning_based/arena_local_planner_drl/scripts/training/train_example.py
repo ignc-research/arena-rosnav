@@ -11,7 +11,7 @@ models_folder_path = rospkg.RosPack().get_path('simulator_setup')
 arena_local_planner_drl_folder_path = rospkg.RosPack().get_path('arena_local_planner_drl')
 
 
-env = FlatlandEnv(task,os.path.join(models_folder_path,'robot','myrobot.model.yaml'),
+env = FlatlandEnv(task,os.path.join(models_folder_path,'robot','turtlebot.model.yaml'),
                     os.path.join(arena_local_planner_drl_folder_path,'configs','default_settings.yaml'),True,
                   )
 model = A2C('MlpPolicy', env, verbose=1)

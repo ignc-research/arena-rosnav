@@ -1,4 +1,13 @@
 #! /usr/bin/env python
+import os, sys
+sys.path.append('/home/junhui/study/Masterarbeit/arenarosnav/test_ws/src/arena_rosnav')
+sys.path.append('/home/junhui/study/Masterarbeit/arenarosnav/test_ws/src/arena_rosnav/arena_navigation')
+sys.path.append('/home/junhui/study/Masterarbeit/arenarosnav/test_ws/src/arena_rosnav/arena_navigation/arena_local_planner')
+sys.path.append('/home/junhui/study/Masterarbeit/arenarosnav/test_ws/src/arena_rosnav/arena_navigation/arena_local_planner/learning_based/')
+sys.path.append('/home/junhui/study/Masterarbeit/arenarosnav/test_ws/src/arena_rosnav/arena_navigation/arena_local_planner/learning_based//arena_local_planner_drl')
+sys.path.append('/home/junhui/study/Masterarbeit/arenarosnav/test_ws/src/arena_rosnav/arena_navigation/arena_local_planner/learning_based//arena_local_planner_drl/scripts')
+sys.path.append('/home/junhui/study/Masterarbeit/arenarosnav/test_ws/src/arena_rosnav/task_generator')
+sys.path.append('/home/junhui/study/Masterarbeit/arenarosnav/test_ws/src/arena_rosnav/task_generator/task_generator')
 
 from codecs import xmlcharrefreplace_errors
 from logging import error
@@ -6,6 +15,7 @@ from logging import error
 from tasks import get_predefined_task
 import rospy
 from std_srvs.srv import Empty,EmptyResponse
+
 
 
 class TaskGenerator:

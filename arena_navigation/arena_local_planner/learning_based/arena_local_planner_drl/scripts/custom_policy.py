@@ -13,7 +13,7 @@ from stable_baselines3.common.torch_layers import BaseFeaturesExtractor
 _RS = 2  # robot state size
 
 ROBOT_SETTING_PATH = rospkg.RosPack().get_path('simulator_setup')
-yaml_ROBOT_SETTING_PATH = os.path.join(ROBOT_SETTING_PATH, 'robot', 'myrobot.model.yaml')
+yaml_ROBOT_SETTING_PATH = os.path.join(ROBOT_SETTING_PATH, 'robot', 'myrobot.yaml')
 
 with open(yaml_ROBOT_SETTING_PATH, 'r') as fd:
     robot_data = yaml.safe_load(fd)

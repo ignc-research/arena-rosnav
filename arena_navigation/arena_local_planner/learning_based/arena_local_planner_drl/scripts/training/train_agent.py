@@ -7,6 +7,7 @@ sys.path.append('/home/junhui/study/Masterarbeit/arenarosnav/test_ws/src/arena_r
 sys.path.append('/home/junhui/study/Masterarbeit/arenarosnav/test_ws/src/arena_rosnav/arena_navigation/arena_local_planner/learning_based//arena_local_planner_drl')
 sys.path.append('/home/junhui/study/Masterarbeit/arenarosnav/test_ws/src/arena_rosnav/arena_navigation/arena_local_planner/learning_based//arena_local_planner_drl/scripts')
 sys.path.append('/home/junhui/study/Masterarbeit/arenarosnav/test_ws/src/arena_rosnav/task_generator')
+sys.path.append('/home/junhui/study/Masterarbeit/arenarosnav/test_ws/src/arena_rosnav/task_generator/task_generator')
 import rospy
 
 from datetime import datetime as dt

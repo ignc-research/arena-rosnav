@@ -7,8 +7,8 @@ from nav_msgs.msg import OccupancyGrid
 from nav_msgs.srv import GetMap
 from geometry_msgs.msg import Pose2D
 from rospy.exceptions import ROSException
-from .obstacles_manager import ObstaclesManager
-from .robot_manager import RobotManager
+from obstacles_manager import ObstaclesManager
+from robot_manager import RobotManager
 import json
 
 

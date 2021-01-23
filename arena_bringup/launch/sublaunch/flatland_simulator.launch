@@ -30,7 +30,7 @@
 
   <node name="spawn_model" pkg="rosservice" type="rosservice"
     args="call --wait /spawn_model &quot;{
-      yaml_path: '$(find simulator_setup)/robot/myrobot.model.yaml',
+      yaml_path: '$(find simulator_setup)/robot/burger.model2.yaml',
       name: 'myrobot',
       ns: '',
       pose: {x: $(arg initial_pose_x), y: $(arg initial_pose_y), theta: $(arg initial_pose_a)}}&quot;"

@@ -12,7 +12,7 @@ from geometry_msgs.msg import Pose2D, PoseWithCovarianceStamped, PoseStamped
 
 from nav_msgs.msg import OccupancyGrid, Path
 
-from .utils import generate_freespace_indices, get_random_pos_on_map
+from utils import generate_freespace_indices, get_random_pos_on_map
 
 
 class RobotManager:

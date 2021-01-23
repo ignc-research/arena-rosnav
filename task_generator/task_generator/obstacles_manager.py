@@ -13,7 +13,7 @@ from geometry_msgs.msg import Pose2D
 import rospy
 import rospkg
 import shutil
-from .utils import generate_freespace_indices, get_random_pos_on_map
+from utils import generate_freespace_indices, get_random_pos_on_map
 
 
 class ObstaclesManager:

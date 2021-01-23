@@ -64,7 +64,7 @@
 
   <!-- start task_generator node -->
   <include file="$(find arena_bringup)/launch/sublaunch/task_generator.launch">
-      <arg name="task_mode"     value="$(arg task_mode)"/>
+    <arg name="task_mode"     value="$(arg task_mode)"/>
   </include>
 
   <!-- start plan manager-->
