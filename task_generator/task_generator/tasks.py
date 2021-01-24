@@ -10,6 +10,7 @@ from rospy.exceptions import ROSException
 from obstacles_manager import ObstaclesManager
 from robot_manager import RobotManager
 import json
+from std_msgs.msg import String
 
 
 class ABSTask(ABC):
@@ -23,6 +24,10 @@ class ABSTask(ABC):
         self._service_client_get_map = rospy.ServiceProxy("static_map", GetMap)
         self._map_lock = Lock()
         rospy.Subscriber("map", OccupancyGrid, self._update_map)
+        #publish the obstacles name
+        # publish obstacles name
+        # self.pub_obstacles_name=rospy.Publisher('/obstacles_name', String, queue_size=1)
+        #self.obstacles_manager.pub_obstacles_name.publish(self.obstacles_manager.obstacle_name_str)
         # a mutex keep the map is not unchanged during reset task.
 
     @abstractmethod
@@ -43,6 +48,8 @@ class RandomTask(ABSTask):
 
     def __init__(self, obstacles_manager: ObstaclesManager, robot_manager: RobotManager):
         super().__init__(obstacles_manager, robot_manager)
+        #publish the obstacles name
+        # self.pub_obstacles_name.publish(self.obstacles_manager.obstacle_name_str)
 
     def reset(self):
         """[summary]
@@ -61,6 +68,8 @@ class RandomTask(ABSTask):
                             (goal_pos.x,
                                 goal_pos.y,
                                 self.robot_manager.ROBOT_RADIUS)])
+                    # publish the obstacles name
+                    # self.pub_obstacles_name.publish(self.obstacles_manager.obstacle_name_str)
                     break
                 except rospy.ServiceException as e:
                     rospy.logwarn(repr(e))
@@ -80,11 +89,15 @@ class ManualTask(ABSTask):
         self._goal = Pose2D()
         self._new_goal_received = False
         self._manual_goal_con = Condition()
+        #publish the obstacles name
+        # self.pub_obstacles_name.publish(self.obstacles_manager.obstacle_name_str)
 
     def reset(self):
         while True:
             with self._map_lock:
                 self.obstacles_manager.reset_pos_obstacles_random()
+                # publish the obstacles name
+                # self.pub_obstacles_name.publish(self.obstacles_manager.obstacle_name_str)
                 self.robot_manager.set_start_pos_random()
                 with self._manual_goal_con:
                     # the user has 60s to set the goal, otherwise all objects will be reset.
@@ -115,6 +128,8 @@ class StagedRandomTask(RandomTask):
         self.curr_stage = start_stage
         self.json_location = os.path.join(PATHS.get('model'), "hyperparameters.json")
         self._initiate_stage()
+        #publish the obstacles name
+        # self.pub_obstacles_name.publish(self.obstacles_manager.obstacle_name_str)
         
     def next_stage(self):
         self.curr_stage += 1

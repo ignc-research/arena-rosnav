@@ -40,6 +40,7 @@ class ObstaclesManager:
 
         self.update_map(map_)
         self.obstacle_name_list = []
+        self.obstacle_name_str=""
         self._obstacle_name_prefix = 'obstacles'
         # remove all existing obstacles generated before create an instance of this class
         self.remove_obstacles()
@@ -77,7 +78,7 @@ class ObstaclesManager:
             for obstacle_name in self.obstacle_name_list)
 
         for instance_idx in range(count_same_type, count_same_type + num_obstacles):
-            max_num_try = 2
+            max_num_try = 10
             i_curr_try = 0
             while i_curr_try < max_num_try:
                 spawn_request = SpawnModelRequest()
@@ -103,9 +104,11 @@ class ObstaclesManager:
                     i_curr_try += 1
                 else:
                     self.obstacle_name_list.append(spawn_request.name)
+                    self.obstacle_name_str=self.obstacle_name_str+","+spawn_request.name
                     break
             if i_curr_try == max_num_try:
                 raise rospy.ServiceException(f" failed to register obstacles")
+        # print(self.obstacle_name_list)
         return self
 
     def register_random_obstacles(self, num_obstacles: int, p_dynamic=0.5):
@@ -121,6 +124,8 @@ class ObstaclesManager:
         self.register_random_dynamic_obstacles(num_dynamic_obstalces, max_linear_velocity)
         self.register_random_static_obstacles(
             num_obstacles-num_dynamic_obstalces)
+        # self.pub_obstacles_name.publish(self.obstacle_name_str)
+        # print(self.obstacle_name_str)
         rospy.loginfo(
             f"Registed {num_dynamic_obstalces} dynamic obstacles and {num_obstacles-num_dynamic_obstalces} static obstacles")
 

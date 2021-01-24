@@ -14,7 +14,7 @@ from logging import error
 
 from tasks import get_predefined_task
 import rospy
-from std_srvs.srv import Empty,EmptyResponse
+from std_srvs.srv import Trigger, TriggerResponse
 
 
 
@@ -24,12 +24,15 @@ class TaskGenerator:
         self.task=get_predefined_task(mode)
 
         #declare new service task_generator, request are handled in callback task generate
-        self.task_service_server= rospy.Service('task_generator', Empty,self.callback_task_generate)
+        self.task_service_server= rospy.Service('task_generator', Trigger,self.callback_task_generate)
         
     def callback_task_generate(self,req):
         print("RESET")
         self.task.reset()
-        return EmptyResponse()
+        return TriggerResponse(
+            success= True,
+            message= self.task.obstacles_manager.obstacle_name_str
+        )
     
         
         

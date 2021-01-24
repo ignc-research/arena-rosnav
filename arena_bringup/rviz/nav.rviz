@@ -337,11 +337,17 @@ Visualization Manager:
         All Enabled: false
         base_footprint:
           Value: true
-        laser_link:
+        laser_mount:
+          Value: true
+        left_wheel:
           Value: true
         map:
           Value: true
         odom:
+          Value: true
+        rear_wheel:
+          Value: true
+        right_wheel:
           Value: true
       Marker Scale: 1
       Name: TF
@@ -352,7 +358,13 @@ Visualization Manager:
         map:
           odom:
             base_footprint:
-              laser_link:
+              laser_mount:
+                {}
+              left_wheel:
+                {}
+              rear_wheel:
+                {}
+              right_wheel:
                 {}
       Update Interval: 0
       Value: true
@@ -608,7 +620,7 @@ Visualization Manager:
       Marker Topic: /planning_vis/goal
       Name: Marker
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/Marker

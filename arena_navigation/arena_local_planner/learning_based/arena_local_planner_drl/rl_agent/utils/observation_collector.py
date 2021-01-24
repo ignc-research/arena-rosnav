@@ -13,7 +13,7 @@ from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Pose2D,PoseStamped, PoseWithCovarianceStamped
 from geometry_msgs.msg import Twist
 from arena_plan_msgs.msg import RobotState,RobotStateStamped
-
+from std_msgs.msg import String
 # services
 from flatland_msgs.srv import StepWorld,StepWorldRequest
 
@@ -31,7 +31,7 @@ import numpy as np
 
 
 class ObservationCollector():
-    def __init__(self,num_lidar_beams:int,lidar_range:float, num_humans:int):
+    def __init__(self,num_lidar_beams:int,lidar_range:float): #, num_humans:int
         """ a class to collect and merge observations
 
         Args:
@@ -43,7 +43,7 @@ class ObservationCollector():
             spaces.Box(low=0, high=lidar_range, shape=(num_lidar_beams,), dtype=np.float32),
             spaces.Box(low=0, high=10, shape=(1,), dtype=np.float32) ,
             spaces.Box(low=-np.pi, high=np.pi, shape=(1,), dtype=np.float32),
-            spaces.Box(low=0, high=np.PINF, shape=(num_humans,), dtype=np.float32) 
+            #spaces.Box(low=0, high=np.PINF, shape=(num_humans,), dtype=np.float32) 
         ))
 
         # flag of new sensor info
@@ -67,6 +67,11 @@ class ObservationCollector():
         #TODO should we synchoronize it with other topics
         self._subgoal_sub = message_filters.Subscriber('plan_manager/subgoal', PoseStamped) #self._subgoal_sub = rospy.Subscriber("subgoal", PoseStamped, self.callback_subgoal)
         self._subgoal_sub.registerCallback(self.callback_subgoal)
+
+        # topic subscriber: human
+        #for 
+        # self._subgoal_sub = message_filters.Subscriber('plan_manager/subgoal', PoseStamped) #self._subgoal_sub = rospy.Subscriber("subgoal", PoseStamped, self.callback_subgoal)
+        # self._subgoal_sub.registerCallback(self.callback_subgoal)
         
         # service clients
         self._service_name_step='step_world'
