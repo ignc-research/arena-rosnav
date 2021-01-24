@@ -40,7 +40,7 @@ Please refer to [Installation.md](docs/Installation.md) for detailed explanation
 
 ### DRL Training
 
-Please refer to [DRL-Training.md](docs/DRL_Training.md) for detailed explanations about agent, policy and training setups.
+Please refer to [DRL-Training.md](docs/DRL-Training.md) for detailed explanations about agent, policy and training setups.
 
 ### 2.1 Test the simulation environment and task generator
 
