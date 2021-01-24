@@ -31,19 +31,20 @@ import numpy as np
 
 
 class ObservationCollector():
-    def __init__(self,num_lidar_beams:int,lidar_range:float, num_humans:int): #
+    def __init__(self,num_lidar_beams:int,lidar_range:float, num_humans:int=8): #
         """ a class to collect and merge observations
 
         Args:
             num_lidar_beams (int): [description]
             lidar_range (float): [description]
+            num_humans(int): max observation number of human, default 8
         """
         # define observation_space
         self.observation_space = ObservationCollector._stack_spaces((
             spaces.Box(low=0, high=lidar_range, shape=(num_lidar_beams,), dtype=np.float32),
             spaces.Box(low=0, high=10, shape=(1,), dtype=np.float32) ,
             spaces.Box(low=-np.pi, high=np.pi, shape=(1,), dtype=np.float32),
-            spaces.Box(low=0, high=np.PINF, shape=(num_humans,), dtype=np.float32)
+            spaces.Box(low=0, high=np.PINF, shape=(num_humans*2,), dtype=np.float32)
         ))
 
         # flag of new sensor info
@@ -72,7 +73,7 @@ class ObservationCollector():
         self._service_name_step='step_world'
         self._sim_step_client = rospy.ServiceProxy(self._service_name_step, StepWorld)
 
-        self._service_task_generator='task_generator_service'
+        self._service_task_generator='task_generator'
         rospy.wait_for_service('task_generator', timeout=20)
         self._task_generator_client = rospy.ServiceProxy(self._service_task_generator, Trigger)
         # call the task_generator to get message of obstacle names
@@ -141,9 +142,8 @@ class ObservationCollector():
         return
 
     def callback_dynamic_obstacles(self,msg_dynamic_obstacle,i:int):
-        self._dynamic_obstacle_postion[i]=self.process_subgoal_msg(msg_dynamic_obstacle)
-        
-    return
+        self._dynamic_obstacle_postion[i]=self.process_subgoal_msg(msg_dynamic_obstacle)        
+        return
         
     def callback_observation_received(self,msg_LaserScan,msg_RobotStateStamped):
         # process sensor msg

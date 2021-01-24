@@ -24,7 +24,7 @@ import time
 class FlatlandEnv(gym.Env):
     """Custom Environment that follows gym interface"""
 
-    def __init__(self, task: ABSTask, robot_yaml_path: str, settings_yaml_path: str, is_action_space_discrete, safe_dist: float = None, goal_radius: float = 0.1, max_steps_per_episode=100):
+    def __init__(self, task: ABSTask, robot_yaml_path: str, settings_yaml_path: str, is_action_space_discrete, safe_dist: float = None,safe_dist_h: float = None, goal_radius: float = 0.1, max_steps_per_episode=100):
         """Default env
         Flatland yaml node check the entries in the yaml file, therefore other robot related parameters cound only be saved in an other file.
         TODO : write an uniform yaml paser node to handel with multiple yaml files.
@@ -53,9 +53,12 @@ class FlatlandEnv(gym.Env):
         # reward calculator
         if safe_dist is None:
             safe_dist = 1.1*self._robot_radius
+        if safe_dist_h is None:
+            safe_dist_h = 0.5
+        
 
         self.reward_calculator = RewardCalculator(
-            safe_dist=1.1*self._robot_radius, goal_radius=goal_radius)
+            safe_dist=safe_dist, safe_dist_h=safe_dist_h, goal_radius=goal_radius)
 
         # action agent publisher
         self.agent_action_pub = rospy.Publisher('cmd_vel', Twist, queue_size=1)
@@ -124,6 +127,7 @@ class FlatlandEnv(gym.Env):
         done_reasons:   0   -   exceeded max steps
                         1   -   collision with obstacle
                         2   -   goal reached
+                        3   -   too close to human
         """
         self._pub_action(action)
         self._steps_curr_episode += 1
@@ -134,7 +138,7 @@ class FlatlandEnv(gym.Env):
 
         # calculate reward
         reward, reward_info = self.reward_calculator.get_reward(
-            obs_dict['laser_scan'], obs_dict['goal_in_robot_frame'])
+            obs_dict['laser_scan'], obs_dict['goal_in_robot_frame'], obs_dict['human_in_robot_frame'])
         done = reward_info['is_done']
 
         print("reward:  {}".format(reward))

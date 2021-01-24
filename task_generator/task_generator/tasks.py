@@ -200,7 +200,7 @@ def get_predefined_task(mode="random", start_stage: int = 0, PATHS: dict = None)
     models_folder_path = rospkg.RosPack().get_path('simulator_setup')
     # robot's yaml file is needed to get its radius.
     robot_manager = RobotManager(map_response.map, os.path.join(
-        models_folder_path, 'robot', "myrobot.yaml"), TRAINING_MODE)
+        models_folder_path, 'robot', "myrobot.model.yaml"), TRAINING_MODE)
 
     obstacles_manager = ObstaclesManager(map_response.map, TRAINING_MODE)
     # only generate 3 static obstaticles

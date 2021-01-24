@@ -4,7 +4,7 @@ import rospy
 from typing import Tuple
 
 class RewardCalculator():
-    def __init__(self, safe_dist:float, goal_radius:float, rule:str = 'rule_00' ):
+    def __init__(self, safe_dist:float, safe_dist_h:float, goal_radius:float, rule:str = 'rule_01' ):
         """A class for calculating reward based various rules.
 
         Args:
@@ -18,7 +18,8 @@ class RewardCalculator():
         self.goal_radius = goal_radius
         self.last_goal_dist = None
         self.safe_dist = safe_dist
-        self._cal_funcs = {'rule_00': RewardCalculator._cal_reward_rule_00}
+        self.safe_dist_h=safe_dist_h
+        self._cal_funcs = {'rule_00': RewardCalculator._cal_reward_rule_00, 'rule_01': RewardCalculator._cal_reward_rule_01}
         self.cal_func = self._cal_funcs[rule]
 
     def reset(self):
@@ -32,27 +33,34 @@ class RewardCalculator():
         self.curr_reward = 0
         self.info = {}
     
-    def get_reward(self, laser_scan:np.ndarray, goal_in_robot_frame: Tuple[float,float], *args, **kwargs):
+    def get_reward(self, laser_scan:np.ndarray, goal_in_robot_frame: Tuple[float,float],  dynamic_obstacles_in_robot_frame:np.ndarray, *args, **kwargs):
         """
 
         Args:
             laser_scan (np.ndarray): 
-            goal_in_robot_frame (Tuple[float,float]: position (rho, theta) of the goal in robot frame (Polar coordinate)  
+            goal_in_robot_frame (Tuple[float,float]: position (rho, theta) of the goal in robot frame (Polar coordinate) 
+            dynamic_obstacles_in_robot_frame(np.ndarray)
         """
 
         self._reset()
-        self.cal_func(self,laser_scan,goal_in_robot_frame,*args,**kwargs)
+        self.cal_func(self,laser_scan,goal_in_robot_frame,dynamic_obstacles_in_robot_frame, *args,**kwargs)
         return self.curr_reward, self.info
 
 
-    def _cal_reward_rule_00(self, laser_scan: np.ndarray, goal_in_robot_frame: Tuple[float,float],*args,**kwargs):
+    def _cal_reward_rule_00(self, laser_scan: np.ndarray, goal_in_robot_frame: Tuple[float,float],dynamic_obstacles_in_robot_frame:np.ndarray, *args,**kwargs):
+
+        self._reward_goal_approached(goal_in_robot_frame)
+        self._reward_goal_reached(goal_in_robot_frame)
+        self._reward_laserscan_general(laser_scan)
+
+    def _cal_reward_rule_01(self, laser_scan: np.ndarray, goal_in_robot_frame: Tuple[float,float], dynamic_obstacles_in_robot_frame:np.ndarray, *args,**kwargs):
 
         self._reward_goal_approached(goal_in_robot_frame)
         self._reward_goal_reached(goal_in_robot_frame)
         self._reward_laserscan_general(laser_scan)
     
 
-    def _reward_goal_reached(self,goal_in_robot_frame, reward = 15):
+    def _reward_goal_reached(self,goal_in_robot_frame, reward = 100):
 
         if goal_in_robot_frame[0] < self.goal_radius:
             self.curr_reward = reward
@@ -61,7 +69,7 @@ class RewardCalculator():
         else:
             self.info['is_done'] = False
 
-    def _reward_goal_approached(self, goal_in_robot_frame,reward = 1, punishment = 0.01):
+    def _reward_goal_approached(self, goal_in_robot_frame,reward = 0.2, punishment = 0.3):
         if self.last_goal_dist is not None:
             #goal_in_robot_frame : [rho, theta]
             """
@@ -81,11 +89,17 @@ class RewardCalculator():
             self.curr_reward += reward
         self.last_goal_dist = goal_in_robot_frame[0]
 
-    def _reward_laserscan_general(self,laser_scan, punishment = 10):
+    def _reward_laserscan_general(self,laser_scan, punishment = 100):
         if laser_scan.min()<self.safe_dist:
             self.curr_reward -= punishment
             self.info['is_done'] = True
             self.info['done_reason'] = 1
+
+    def _reward_human_safety_dist(self, human_in_robot_frame, punishment = 50):
+        if human_in_robot_frame[0].min()<self.safe_dist_h:
+            self.curr_reward -= punishment
+            self.info['is_done'] = True
+            self.info['done_reason'] = 3
     
     
 
