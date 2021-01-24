@@ -5,6 +5,7 @@
 #include <ros/ros.h>
 #include <rviz/tool.h>
 #include <std_srvs/Empty.h>
+#include <std_srvs/Trigger.h>
 
 
 #include <OGRE/OgreEntity.h>

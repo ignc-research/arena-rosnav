@@ -12,16 +12,16 @@ TaskTool::~TaskTool() {
 
 // When the tool is initially loaded, connect to the pause toggle service
 void TaskTool::onInitialize() {
-  task_service_ = nh_.serviceClient<std_srvs::Empty>("task_generator");
+  task_service_ = nh_.serviceClient<std_srvs::Trigger>("task_generator");
   setName("Generate Task");
 }
 
 // Every time the user presses the tool's Rviz toolbar button, call the pause
 // toggle service
 void TaskTool::activate() {
-  std_srvs::Empty empty;
+  std_srvs::Trigger trigger;
 
-  bool success=task_service_.call(empty);
+  bool success=task_service_.call(trigger);
   if(success){
       ROS_INFO("Task Generator:Success");
   }else{

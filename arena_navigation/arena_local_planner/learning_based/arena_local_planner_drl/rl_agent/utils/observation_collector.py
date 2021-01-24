@@ -16,7 +16,7 @@ from arena_plan_msgs.msg import RobotState,RobotStateStamped
 from std_msgs.msg import String
 # services
 from flatland_msgs.srv import StepWorld,StepWorldRequest
-
+from std_srvs.srv import Trigger, TriggerRequest
 
 # message filter
 import message_filters
@@ -31,7 +31,7 @@ import numpy as np
 
 
 class ObservationCollector():
-    def __init__(self,num_lidar_beams:int,lidar_range:float): #, num_humans:int
+    def __init__(self,num_lidar_beams:int,lidar_range:float, num_humans:int): #
         """ a class to collect and merge observations
 
         Args:
@@ -43,7 +43,7 @@ class ObservationCollector():
             spaces.Box(low=0, high=lidar_range, shape=(num_lidar_beams,), dtype=np.float32),
             spaces.Box(low=0, high=10, shape=(1,), dtype=np.float32) ,
             spaces.Box(low=-np.pi, high=np.pi, shape=(1,), dtype=np.float32),
-            #spaces.Box(low=0, high=np.PINF, shape=(num_humans,), dtype=np.float32) 
+            spaces.Box(low=0, high=np.PINF, shape=(num_humans,), dtype=np.float32)
         ))
 
         # flag of new sensor info
@@ -68,16 +68,27 @@ class ObservationCollector():
         self._subgoal_sub = message_filters.Subscriber('plan_manager/subgoal', PoseStamped) #self._subgoal_sub = rospy.Subscriber("subgoal", PoseStamped, self.callback_subgoal)
         self._subgoal_sub.registerCallback(self.callback_subgoal)
 
-        # topic subscriber: human
-        #for 
-        # self._subgoal_sub = message_filters.Subscriber('plan_manager/subgoal', PoseStamped) #self._subgoal_sub = rospy.Subscriber("subgoal", PoseStamped, self.callback_subgoal)
-        # self._subgoal_sub.registerCallback(self.callback_subgoal)
-        
         # service clients
         self._service_name_step='step_world'
         self._sim_step_client = rospy.ServiceProxy(self._service_name_step, StepWorld)
 
-
+        self._service_task_generator='task_generator_service'
+        rospy.wait_for_service('task_generator', timeout=20)
+        self._task_generator_client = rospy.ServiceProxy(self._service_task_generator, Trigger)
+        # call the task_generator to get message of obstacle names
+        self.obstacles_name_req = TriggerRequest()
+        self.obstacles_name =self._task_generator_client(self.obstacles_name_req)
+        self.obstacles_name_str=self.obstacles_name.message
+        self.obstacles_name_list=self.obstacles_name_str.split(',')[1:]
+        # print(self.obstacles_name_str)
+        # topic subscriber: human
+        dynamic_obstacles_list=[i for i in self.obstacles_name_list if i.find('dynamic')!=-1]
+        self._dynamic_obstacle = [None]*len(dynamic_obstacles_list)
+        self._dynamic_obstacle_postion= [Pose2D()]*len(dynamic_obstacles_list)
+        for  i, dynamic_name in enumerate(dynamic_obstacles_list):
+            self._dynamic_obstacle[i] = message_filters.Subscriber('/flatland_server/debug/model/'+dynamic_name, PoseStamped)
+            #TODO temporarily use the same callback of goal, in the future it should have another one which can call more information
+            self._dynamic_obstacle[i].registerCallback(self.callback_dynamic_obstacles) 
     
     def get_observation_space(self):
         return self.observation_space
@@ -99,6 +110,12 @@ class ObservationCollector():
         obs_dict = {}
         obs_dict["laser_scan"] = scan
         obs_dict['goal_in_robot_frame'] = [rho,theta]
+        rho_h, theta_h = [None]*len(self._dynamic_obstacle_postion), [None]*len(self._dynamic_obstacle_postion)
+        for  i, position in enumerate(self._dynamic_obstacle_postion):
+            #TODO temporarily use the same fnc of _get_goal_pose_in_robot_frame
+            rho_h[i], theta_h[i] = ObservationCollector._get_goal_pose_in_robot_frame(position,self._robot_pose)
+            merged_obs = np.hstack([merged_obs, np.array([rho_h[i],theta_h[i]])])
+        obs_dict['human_in_robot_frame'] = np.vstack([np.array(rho_h),np.array(theta_h)])
         return merged_obs, obs_dict
     
     @staticmethod
@@ -122,6 +139,11 @@ class ObservationCollector():
         self._subgoal=self.process_subgoal_msg(msg_Subgoal)
         
         return
+
+    def callback_dynamic_obstacles(self,msg_dynamic_obstacle,i:int):
+        self._dynamic_obstacle_postion[i]=self.process_subgoal_msg(msg_dynamic_obstacle)
+        
+    return
         
     def callback_observation_received(self,msg_LaserScan,msg_RobotStateStamped):
         # process sensor msg
@@ -182,7 +204,7 @@ if __name__ == '__main__':
     rospy.init_node('states', anonymous=True)
     print("start")
 
-    state_collector=ObservationCollector(360,10)
+    state_collector=ObservationCollector(360,10,8)
     i=0
     r=rospy.Rate(100)
     while(i<=1000):
