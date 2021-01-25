@@ -1,8 +1,14 @@
 
 <launch>
-    <arg name="task_mode"/>
+    <arg name="scenerios_json_path" default="$(find arena_bringup)/../simulator_setup/scenerios/example_scenerio.json"/>
+    <arg name="auto_reset" default="true" />
+    <arg name="task_mode" default="ScenerioTask"/>
+    <arg name="delta" default="0.1"/>
     <!--  ************** task generator  ***************  -->
-    <node pkg="task_generator" name="task_generator_node" type="task_generator_node.py" output="screen"> 
+    <node pkg="task_generator" name="task_generator_node" type="task_generator_node.py" output="screen">
+        <param name="scenerios_json_path" value="$(arg scenerios_json_path)"/>
+        <param name="auto_reset" value="$(arg auto_reset )" />
+        <param name="task_mode" value="$(arg task_mode)"/>
+        <param name="delta" value="$(arg delta)"/>
     </node>
-
 </launch>
