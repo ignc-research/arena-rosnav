@@ -1,8 +1,13 @@
-# arena-rosnav
+# Arena-Rosnav
 
-<p align="center">
-	<img width="300" height="300" src="/img/1training.gif">
-</p>
+A flexible, high-performance 2D simulator with configurable agents, multiple sensors, and benchmark scenarios for testing robotic navigation. 
+
+Arena-Rosnav uses Flatland as the core simulator and is a modular high-level library for end-to-end experiments in embodied AI -- defining embodied AI tasks (e.g. navigation, obstacle avoidance, behavior cloning), training agents (via imitation or reinforcement learning, or no learning at all using conventional approaches like DWA, TEB or MPC), and benchmarking their performance on the defined tasks using standard metrics.
+
+
+| <img width="400" height="400" src="/img/rosnav1.gif"> | <img width="400" height="400" src="/img/rosnav2.gif"> |
+|:--:| :--:| 
+| *Training Stage* | *Deployment Stage* |
 
 
 ## 0. What is this repository for?
@@ -29,109 +34,37 @@ Train DRL agents on ROS compatible simulations for autonomous navigation in high
 * Full documentation and system design is released this week
 
 ## 1. Installation
-#### 1.1. Standard ROS setup
-(Code has been tested with ROS-melodic on Ubuntu 18.04 and Python 3.6)
-
-* Install ROS Melodic following the steps from ros wiki:
-```
-http://wiki.ros.org/melodic/Installation/Ubuntu
-```
-
-* Install additional pkgs 
-```
-sudo apt-get update && sudo apt-get install -y \
-libqt4-dev \
-libopencv-dev \
-liblua5.2-dev \
-screen \
-python3.6 \
-python3.6-dev \
-libpython3.6-dev \
-python3-catkin-pkg-modules \
-python3-rospkg-modules \
-python3-empy \
-python3-setuptools \
-ros-melodic-navigation \ 
-ros-melodic-teb-local-planner \
-```
-
-#### 1.2. Prepare virtual environment & install python packages
-To be able to use python3 with ROS, you need an virtual environment. We recommend using virtualenv & virtualenvwrapper. 
-
-* Install virtual environment and wrapper (as root or admin! with sudo) on your local pc (without conda activated. Deactivate conda env, if you have one active)
-```
-sudo pip3 install --upgrade pip
-sudo pip3 install virtualenv
-sudo pip3 install virtualenvwrapper
-which virtualenv   # should output /usr/local/bin/virtualenv  
-```
-
-* Create venv folder inside your home directory
-```
-cd $HOME
-mkdir python_env   # create a venv folder in your home directory 
-```
-
-* Add exports into your .zshrc (if you use bash change the last line to bashrc instead of zshrc):
-```
-echo "export WORKON_HOME=/home/linh/python_env   #path to your venv folder
-export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python3   #path to your python3 
-export VIRTUALENVWRAPPER_VIRTUALENV=/usr/local/bin/virtualenv
-source /usr/local/bin/virtualenvwrapper.sh" >> ~/.zshrc
-```
-
-* Create a new venv
-```
-mkvirtualenv --python=python3.6 rosnav
-workon rosnav
-```
-
-* Install packages inside your venv (venv always activated!):
-```
-pip install --extra-index-url https://rospypi.github.io/simple/ rospy rosbag tf tf2_ros --ignore-installed
-pip install pyyaml catkin_pkg netifaces
-```     
-
-* Install stable_baselines3 for training DRL into your venv (venv always activated!)
-```
-pip install stable-baselines3
-```
-
-
-#### 1.3. Install arena-rosnav repo
-* Create a catkin_ws and clone this repo into your catkin_ws 
-````
-cd $HOME
-mkdir -p catkin_ws/src && cd catkin_ws/src
-git clone https://github.com/ignc-research/arena-rosnav
-
-cd arena-rosnav && rosws update
-
-source $HOME/.zshrc
-cd ../.. 
-catkin_make -DPYTHON_EXECUTABLE=/usr/bin/python3
-source devel/setup.zsh
-````
-
-* Install ros geometry2 from source(compiled with python3) 
-
-The official ros only support tf2 with python2. In order to make the *tf* work in python3, its necessary to compile it with python3. We provided a script to automately install this
-and do some additional configurations for the convenience . You can simply run it with 
-```bash
-./geometry2_install.sh
-```
-After that you can try to import tf in python3 and no error is supposed to be shown up.
-
+Please refer to [Installation.md](docs/Installation.md) for detailed explanations about the installation process.
 
 ## 2. Usage
-Before you test out the packages, always source your setup.zsh /setup.bash inside your catkin workspace also source your $HOME/.zshrc:
-```
-cd $HOME/catkin_ws
-source devel/setup.zsh
-source $HOME/.zshrc
-```
 
-#### 2.1. [Quick start] start simulation env & plan manager
+### DRL Training
+
+Please refer to [DRL-Training.md](docs/DRL-Training.md) for detailed explanations about agent, policy and training setups.
+
+### 2.1 Test the simulation environment and task generator
+
+* In one terminal, start simulation. You can specify the following parameters: 
+
+   * train_mode:=<true, false> 
+   * use_viz:=<true, false> (default true)
+   * local_planner:=<teb,dwa,mpc,cadrl,arena2d> (default dwa)
+   * task_mode:=<random, manual, scenario> (default random)
+   * obs_vel:=<float> # maximum velocity of dynamic obstacles [m/s]. It is recommended to set a max velocity within [0.1,0.7] (default 0.3)
+   * map
+
+```bash
+roslaunch arena_bringup start_arena_flatland.launch train_mode:=false use_viz:=true local_planner:=mpc map_file:=map1 obs_vel:=0.3
+```
+Now you can click on the generate task button in rviz to generator a new random task (random obstacles and goal is published to /goal). It will automatically navigate to that goal, once you start one of our local planners, which are triggered by a new /goal. If you starte with task_mode "manual" you can specify your goal using the specify Flatland Navigation goal (using normal 2D navigation goal will trigger the move_base planner, thus only works with teb and dwa)
+
+### Run Arena2D models in Rosnav
+* start simulation as above, then navigate to the folder arena-rosnav/arena_navigation/arena_local_planner/learning_based/arena_ros/scripts/ and execute arena_node_tb3.py
+
+```
+python arena_node_tb3.py
+```
+### 2.2. [Quick start] start simulation env & plan manager
 ````
 roslaunch arena_bringup start_arena_flatland.launch  train_mode:=false
 ````
@@ -146,7 +79,7 @@ start_flatland.launch will start several other sublaunch files and some neccesar
    * if true, the plan manager will generate subgoal topic always as goal(global goal) topic.
    * if false, you can also use move_base action triggered by rviz_plugin button *2D Navigation Goal*. 
 
-#### 2.2. [Quick start] test DRL training
+### 2.3. [Quick start] test DRL training
 Export turtlebot model for simulation 
 
 * In one terminnal, export turtlebot model and start simulation
@@ -168,25 +101,7 @@ then python run the script.
 
 Hint: During 2021-01-05 and 2021-01-10, arena_local_planner_drl package is still under the development, which means the api of the class could be drastically changed. Sorry about the inconvinience!
 
-### Test the task generator
-
-
-* In one terminal, start simulation. You can specify the following parameters: 
-
-   * train_mode:=<true, false>
-   * use_viz:=<true, false>
-   * local_planner:=<teb,dwa,mpc,cadrl,arena2d>
-   * task_mode:=<random, manual, scenario>
-
-```bash
-export TURTLEBOT3_MODEL=${TB3_MODEL}
-roslaunch arena_bringup start_arena_flatland.launch  train_mode:=true  use_viz:=true   task_mode:=random
-```
-Now you can click on the generate task button in rviz to generator a new random task (random obstacles and goal is published to /goal). It will automatically navigate to that goal, once you start one of our local planners, which are triggered by a new /goal. If you starte with task_mode "manual" you can specify your goal using the specify Flatland Navigation goal (using normal 2D navigation goal will trigger the move_base planner, thus only works with teb and dwa)
-
-
-
-#### 2.3. Rviz plugins:
+### 2.4. Rviz plugins:
    <p align="center">
       <img width="600" height="480" src="img/rviz_plugin_intro.png">
    </p>
@@ -219,8 +134,8 @@ Now you can click on the generate task button in rviz to generator a new random 
    4. local_planner
       1. learning_based
       	1.drl
-	2.il
-	3.trained-models
+	      2.immitation_learning
+	      3.trained-models
       2. model_based
    5. plan_manager
    6. plan_msgs
@@ -228,6 +143,7 @@ Now you can click on the generate task button in rviz to generator a new random 
    1. maps
    2. obstacles
    3. robot
+   4. scripts (e.g. behavior modeling, etc.)
 4. task_generator:
 5. utils
    1. rviz_plugin
@@ -347,7 +263,11 @@ void AfterPhysicsStep(const Timekeeper &timekeeper) ;
 #### 3.4. Task Generator
 To be added...
 
-### 8. DRL Local planner(Training and Testing)
+#### 3.5. Utils
+contains rviz_plugins & planning visulizations needed to be showed in rviz.
+
+
+### 4. DRL Local planner(Training and Testing)
 <p align="center">
   <img width="400" height="300" src="img/local_planner.png">
   <img width="400" height="300" src="img/synchronization.png">
@@ -375,6 +295,223 @@ DRL local planner contains observation collector and we designed a synchronizati
 
 To be added...
 
-#### 3.5. Utils
-contains rviz_plugins & planning visulizations needed to be showed in rviz.
 
+#### 4.1 DRL Agent Training
+
+As a fundament for our Deep Reinforcement Learning approaches [StableBaselines3](https://stable-baselines3.readthedocs.io/en/master/index.html) was used. 
+
+##### Features included so far
+* Simple handling of the training script through program parameters
+* Choose a predefined Deep Neural Network
+* Create your own custom Multilayer Perceptron via program parameters
+* Networks will get trained, evaluated and saved
+* Load your trained agent to continue training
+* Optionally log training and evaluation data
+* Enable and modify training curriculum
+
+
+##### Quick Start
+
+* In one terminnal, start simulation
+
+```bash
+roslaunch arena_bringup start_arena_flatland.launch  train_mode:=true 	use_viz:=true  task_mode=random
+```
+* In another terminal
+
+```bash
+workon rosnav
+roscd arena_local_planner_drl
+python scripts/training/train_agent.py --agent MLP_ARENA2D
+```
+
+
+#### 4.1.1 Program Arguments
+
+**Generic program call**:
+```
+train_agent.py [agent flag] [agent_name | unique_agent_name | custom mlp params] [optional flag] [optional flag] ...
+```
+
+| Program call         | Agent Flag (mutually exclusive)  | Usage                                                           |Description                                         |
+| -------------------- | -------------------------------- |---------------------------------------------------------------- |--------------------------------------------------- | 
+| ``` train_agent.py```|```--agent```                     | *agent_name* ([see below](#training-with-a-predefined-dnn))   | initializes a predefined network from scratch
+|                      |```--load ```                     | *unique_agent_name* ([see below](#load-a-dnn-for-training))   | loads agent to the given name
+|                      |```--custom-mlp```                | _custom mlp params_ ([see below](#training-with-a-custom-mlp))| initializes custom MLP according to given arguments 
+
+_Custom Multilayer Perceptron_ parameters will only be considered when ```--custom-mlp``` was set!
+|  Custom Mlp Flags | Syntax                | Description                                   |
+| ----------------  | ----------------------| ----------------------------------------------|
+|  ```--body ```    | ```{num}-{num}-...``` |architecture of the shared latent network      |
+|  ```--pi```       | ```{num}-{num}-...``` |architecture of the latent policy network      |
+|  ```--vf```       | ```{num}-{num}-...``` |architecture of the latent value network       |
+|  ```--act_fn ```  | ```{relu, sigmoid or tanh}```|activation function to be applied after each hidden layer |
+
+|  Optional Flags        | Description                                    |
+| ---------------------- | -----------------------------------------------|
+|  ```--n    {num}```    | timesteps in total to be generated for training|
+|  ```--tb```            | enables tensorboard logging                    |
+|  ```-log```, ```--eval_log```| enables logging of evaluation episodes   |
+|  ```--no-gpu```        | disables training with GPU                     |
+
+#### Examples
+
+##### Training with a predefined DNN
+
+Currently you can choose between 3 different Deep Neural Networks each of which have been object of research projects:
+
+| Agent name    | Inspired by   | 
+| ------------- | ------------- | 
+| MLP_ARENA2D     | [arena2D](https://github.com/ignc-research/arena2D) | 
+| DRL_LOCAL_PLANNER | [drl_local_planner](https://github.com/RGring/drl_local_planner_ros_stable_baselines)  |
+| CNN_NAVREP | [NavRep](https://github.com/ethz-asl/navrep) | 
+
+e.g. training with the MLP architecture from arena2D:
+```
+train_agent.py --agent MLP_ARENA2D
+```
+
+##### Load a DNN for training
+
+In order to differentiate between agents with similar architectures but from different runs a unique agent name will be generated when using either ```--agent``` or ```--custom-mlp``` mode (when train from scratch).
+
+The name consists of:
+```
+[architecture]_[year]_[month]_[day]__[hour]_[minute]
+```
+
+To load a specific agent you simply use the flag ```--load```, e.g.:
+```
+train_agent.py --load MLP_ARENA2D_2021_01_19__03_20
+```
+**Note**: currently only agents which were trained with PPO given by StableBaselines3 are compatible with the training script. 
+
+##### Training with a custom MLP
+
+Instantiating a MLP architecture with an arbitrary number of layers and neurons for training was made as simple as possible by providing the option of using the ```--custom-mlp``` flag. By typing in the flag additional flags for the architecture of latent layers get accessible ([see above](#411-program-arguments)).
+
+e.g. given following architecture:
+```
+					   obs
+					    |
+					  <256>
+					    |
+					  ReLU
+					    |
+					  <128>
+					    |
+					  ReLU
+				    /               \
+				 <256>             <16>
+				   |                 |
+				 action            value
+```
+
+program must be invoked as follows:
+```
+train_agent.py --custom-mlp --body 256-128 --pi 256 --vf 16 --act_fn relu
+```
+
+#### 4.1.2 Hyperparameters
+
+You can modify the hyperparameters in the upper section of the training script which is located at:
+```
+/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/scripts/training/train_agent.py
+```
+
+Following hyperparameters can be adapted:
+|Parameter|Description|
+|-----|-----|
+| robot | Robot name to load robot specific .yaml file containing its settings. 
+| gamma | Discount factor 
+| n_steps | The number of steps to run for each environment per update
+| ent_coef | Entropy coefficient for the loss calculation
+| learning_rate | The learning rate, it can be a function of the current progress remaining (from 1 to 0)  (i.e. batch size is n_steps * n_env where n_env is number of environment copies running in parallel)
+| vf_coef | Value function coefficient for the loss calculation
+| max_grad_norm | The maximum value for the gradient clipping
+| gae_lambda | Factor for trade-off of bias vs variance for Generalized Advantage Estimator
+| batch_size | Minibatch size
+| n_epochs | Number of epoch when optimizing the surrogate loss
+| clip_range | Clipping parameter, it can be a function of the current progress remaining (from 1 to 0).
+| reward_fnc | Number of the reward function (defined in _../rl_agent/utils/reward.py_)
+| discrete_action_space | If robot uses discrete action space
+| task_mode | Mode tasks will be generated in (custom, random, staged). In custom mode one can place obstacles manually via Rviz. In random mode there's a fixed number of obstacles which are spawned randomly distributed on the map after each episode. In staged mode the training curriculum will be used to spawn obstacles. ([more info](#414-training-curriculum))
+| curr_stage | When "staged" training is activated which stage to start the training with.
+
+([more information on PPO implementation of SB3](https://stable-baselines3.readthedocs.io/en/master/modules/ppo.html))
+
+**Note**: For now further parameters like _max_steps_per_episode_ or _goal_radius_ have to be changed inline (where FlatlandEnv gets instantiated). _n_eval_episodes_ which will take place after _eval_freq_ timesteps can be changed also (where EvalCallback gets instantiated).
+
+#### 4.1.3 Reward Functions
+
+The reward functions are defined in
+```
+../arena_local_planner_drl/rl_agent/utils/reward.py
+```
+At present one can chose between two reward functions which can be set at the hyperparameter section of the training script:
+
+  
+<table>
+<tr>
+   <th>rule_00</th> <th>rule_01</th>
+</tr>
+<tr>
+   <td>
+
+   | Reward Function at timestep t                                     |  
+   | ----------------------------------------------------------------- |   
+   | <img src="https://latex.codecogs.com/gif.latex?r^t&space;=&space;r_{s}^t&space;&plus;&space;r_{c}^t&space;&plus;&space;r_{d}^t&space;&plus;&space;r_{p}^t&space;&plus;&space;r_{m}^t" title="r^t = r_{s}^t + r_{c}^t + r_{d}^t + r_{p}^t + r_{m}^t" /> |
+   
+   | reward    | description | value |
+   | --------- | ----------- | ----- |
+   | <img src="https://latex.codecogs.com/gif.latex?r_{s}^t" title="r_{s}^t" /> | success reward | <img src="https://latex.codecogs.com/gif.latex?r_{s}^t&space;=\begin{cases}15&space;&&space;goal\:reached\\0&space;&&space;otherwise\end{cases}" title="r_{s}^t =\begin{cases}15 & goal\:reached\\0 & otherwise\end{cases}" />
+   | <img src="https://latex.codecogs.com/png.latex?r_{c}^t" title="r_{c}^t"/> | collision reward | <img src="https://latex.codecogs.com/png.latex?r_{c}^t&space;=\begin{cases}0&space;&&space;otherwise\\-10&space;&&space;agent\:collides\end{cases}" title="r_{c}^t =\begin{cases}0 & otherwise\\-10 & agent\:collides\end{cases}" />
+   | <img src="https://latex.codecogs.com/png.latex?r_{d}^t" title="r_{d}^t" />| danger reward | <img src="https://latex.codecogs.com/png.latex?r_{d}^t&space;=\begin{cases}0&space;&&space;otherwise\\-0.15&space;&&space;agent\:oversteps\:safe\:dist\end{cases}" title="r_{d}^t =\begin{cases}0 & otherwise\\-0.15 & agent\:oversteps\:safe\:dist\end{cases}" />
+   |<img src="https://latex.codecogs.com/png.latex?r_{p}^t" title="r_{p}^t" />| progress reward | <img src="https://latex.codecogs.com/png.latex?r_{d}^t&space;=&space;w*d^t,&space;\quad&space;d^t=d_{ag}^{t-1}-d_{ag}^{t}\\&space;w&space;=&space;0.25&space;\quad&space;d_{ag}:agent\:goal&space;\:&space;distance" title="r_{d}^t = w*d^t, \quad d^t=d_{ag}^{t-1}-d_{ag}^{t}\\ w = 0.25 \quad d_{ag}:agent\:goal \: distance" />
+   | <img src="https://latex.codecogs.com/png.latex?r_{m}^t" title="r_{m}^t" /> | move reward | <img src="https://latex.codecogs.com/png.latex?r_{d}^t&space;=\begin{cases}0&space;&&space;otherwise\\-0.01&space;&&space;agent\:stands\:still\end{cases}" title="r_{d}^t =\begin{cases}0 & otherwise\\-0.01 & agent\:stands\:still\end{cases}" />
+
+   </td>
+   <td>
+
+   | Reward Function at timestep t                                     |  
+   | ----------------------------------------------------------------- |   
+   | <img src="https://latex.codecogs.com/png.latex?r^t&space;=&space;r_{s}^t&space;&plus;&space;r_{c}^t&space;&plus;&space;r_{d}^t&space;&plus;&space;r_{p}^t&space;&plus;&space;r_{m}^t" title="r^t = r_{s}^t + r_{c}^t + r_{d}^t + r_{p}^t + r_{m}^t" />|
+   
+   | reward    | description | value |
+   | --------- | ----------- | ----- |
+   | <img src="https://latex.codecogs.com/gif.latex?r_{s}^t" title="r_{s}^t" /> | success reward | <img src="https://latex.codecogs.com/gif.latex?r_{s}^t&space;=\begin{cases}15&space;&&space;goal\:reached\\0&space;&&space;otherwise\end{cases}" title="r_{s}^t =\begin{cases}15 & goal\:reached\\0 & otherwise\end{cases}" />
+   | <img src="https://latex.codecogs.com/png.latex?r_{c}^t" title="r_{c}^t" /> | collision reward |<img src="https://latex.codecogs.com/png.latex?r_{c}^t&space;=\begin{cases}0&space;&&space;otherwise\\-10&space;&&space;agent\:collides\end{cases}" title="r_{c}^t =\begin{cases}0 & otherwise\\-10 & agent\:collides\end{cases}" />
+   | <img src="https://latex.codecogs.com/png.latex?r_{d}^t" title="r_{d}^t" /> | danger reward | <img src="https://latex.codecogs.com/png.latex?r_{d}^t&space;=\begin{cases}0&space;&&space;otherwise\\-0.15&space;&&space;agent\:oversteps\:safe\:dist\end{cases}" title="r_{d}^t =\begin{cases}0 & otherwise\\-0.15 & agent\:oversteps\:safe\:dist\end{cases}" />
+   | <img src="https://latex.codecogs.com/png.latex?r_{p}^t" title="r_{p}^t" />| progress reward | <img src="https://latex.codecogs.com/png.latex?r_{d}^t&space;=\begin{cases}w_{p}*d^t&space;&&space;d^t>=0,\;d^t=d_{ag}^{t-1}-d_{ag}^{t}\\w_{n}*d^t&space;&&space;else\end{cases}\\&space;w_{p}&space;=&space;0.25&space;\quad&space;w_{n}&space;=&space;0.4&space;\quad&space;d_{ag}:agent\:goal&space;\:&space;distance" title="r_{d}^t =\begin{cases}w_{p}*d^t & d^t>=0,\;d^t=d_{ag}^{t-1}-d_{ag}^{t}\\w_{n}*d^t & else\end{cases}\\ w_{p} = 0.25 \quad w_{n} = 0.4 \quad d_{ag}:agent\:goal \: distance" />(*)
+   | <img src="https://latex.codecogs.com/png.latex?r_{m}^t" title="r_{m}^t" />| move reward | <img src="https://latex.codecogs.com/png.latex?r_{d}^t&space;=\begin{cases}0&space;&&space;otherwise\\-0.01&space;&&space;agent\:stands\:still\end{cases}" title="r_{d}^t =\begin{cases}0 & otherwise\\-0.01 & agent\:stands\:still\end{cases}" />
+
+   *_higher weight applied if robot drives away from goal (to avoid driving unneccessary circles)_
+   </td>
+</tr>
+</table>
+
+
+#### 4.1.4 Training Curriculum
+
+For the purpose of speeding up the training an exemplary training currucilum was implemented. But what exactly is a training curriculum you may ask. We basically divide the training process in difficulty levels, here the so called _stages_, in which the agent will meet an arbitrary number of obstacles depending on its learning progress. Different metrics can be taken into consideration to measure an agents performance.
+
+In our implementation a reward threshold or a certain percentage of successful episodes must be reached to trigger the next stage. The statistics of each evaluation run is calculated and considered. Moreover when a new best mean reward was reached the model will be saved automatically.
+
+Exemplary training curriculum:
+| Stage           | Static Obstacles | Dynamic Obstacles  |
+| :-------------: | :--------------: | ------------------ |
+| 1               |  0               | 0                  |
+| 2               |  10              | 0                  |
+| 3               |  20              | 0                  |
+| 4               |  0               | 10                 |
+| 5               |  10              | 10                 |
+| 6               |  13              | 13                 |
+
+#### 4.1.5 Important Directories
+
+|Path|Description|
+|-----|-----|
+|```../arena_local_planner_drl/agents```| models and associated hyperparameters.json will be saved to and loaded from here ([uniquely named directory](#load-a-dnn-for-training)) 
+|```../arena_local_planner_drl/configs```| yaml files containing robots action spaces and the training curriculum
+|```../arena_local_planner_drl/training_logs```| tensorboard logs and evaluation logs
+|```../arena_local_planner_drl/scripts```| python file containing the predefined DNN architectures and the training script
