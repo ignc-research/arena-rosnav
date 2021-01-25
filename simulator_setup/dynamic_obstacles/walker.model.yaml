@@ -1,6 +1,6 @@
 # A cylindar that walks back and forth
 bodies:
-  - name: waker
+  - name: walker
     pose: [0, 0, 0] 
     type: dynamic  
     color: [1, 1, 1, 0.75] 

@@ -14,6 +14,7 @@ from geometry_msgs.msg import Pose2D,PoseStamped, PoseWithCovarianceStamped
 from geometry_msgs.msg import Twist
 from arena_plan_msgs.msg import RobotState,RobotStateStamped
 from std_msgs.msg import String
+from visualization_msgs.msg import Marker, MarkerArray
 # services
 from flatland_msgs.srv import StepWorld,StepWorldRequest
 from std_srvs.srv import Trigger, TriggerRequest
@@ -86,10 +87,11 @@ class ObservationCollector():
         dynamic_obstacles_list=[i for i in self.obstacles_name_list if i.find('dynamic')!=-1]
         self._dynamic_obstacle = [None]*len(dynamic_obstacles_list)
         self._dynamic_obstacle_postion= [Pose2D()]*len(dynamic_obstacles_list)
-        for  i, dynamic_name in enumerate(dynamic_obstacles_list):
-            self._dynamic_obstacle[i] = message_filters.Subscriber('/flatland_server/debug/model/'+dynamic_name, PoseStamped)
+        # print('dynamic',dynamic_obstacles_list)
+        for  self.i, dynamic_name in enumerate(dynamic_obstacles_list):
+            self._dynamic_obstacle[self.i] = message_filters.Subscriber('/flatland_server/debug/model/'+dynamic_name, MarkerArray)
             #TODO temporarily use the same callback of goal, in the future it should have another one which can call more information
-            self._dynamic_obstacle[i].registerCallback(self.callback_dynamic_obstacles) 
+            self._dynamic_obstacle[self.i].registerCallback(self.callback_dynamic_obstacles) 
     
     def get_observation_space(self):
         return self.observation_space
@@ -117,6 +119,7 @@ class ObservationCollector():
             rho_h[i], theta_h[i] = ObservationCollector._get_goal_pose_in_robot_frame(position,self._robot_pose)
             merged_obs = np.hstack([merged_obs, np.array([rho_h[i],theta_h[i]])])
         obs_dict['human_in_robot_frame'] = np.vstack([np.array(rho_h),np.array(theta_h)])
+        print('human_in_robot_frame',np.vstack([np.array(rho_h),np.array(theta_h)]))
         return merged_obs, obs_dict
     
     @staticmethod
@@ -141,8 +144,9 @@ class ObservationCollector():
         
         return
 
-    def callback_dynamic_obstacles(self,msg_dynamic_obstacle,i:int):
-        self._dynamic_obstacle_postion[i]=self.process_subgoal_msg(msg_dynamic_obstacle)        
+    def callback_dynamic_obstacles(self,msg_dynamic_obstacle):
+        # print(len(msg_dynamic_obstacle.markers))
+        self._dynamic_obstacle_postion[self.i]=self.process_subgoal_msg(msg_dynamic_obstacle.markers[0])
         return
         
     def callback_observation_received(self,msg_LaserScan,msg_RobotStateStamped):

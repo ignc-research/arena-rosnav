@@ -40,7 +40,7 @@ n_epochs = 4
 clip_range = 0.2
 reward_fnc = "01"
 discrete_action_space = True
-start_stage = 0
+start_stage = 4
 task_mode = "staged"    # custom, random or staged
 ##########################
 

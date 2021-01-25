@@ -130,7 +130,7 @@ plugins:
 
   - type: ModelTfPublisher
     name: tf_publisher
-    publish_tf_world: false
+    publish_tf_world: true
     # exclude: ["approx_footprint"]
   
   # - type: ConstVelocity

@@ -245,6 +245,7 @@ class ObstaclesManager:
         """
 
         # since flatland  can only config the model by parsing the yaml file, we need to create a file for every random obstacle
+        # yaml_path
         tmp_folder_path = os.path.join(rospkg.RosPack().get_path(
             'simulator_setup'), 'tmp_random_obstacles')
         os.makedirs(tmp_folder_path, exist_ok=True)
@@ -301,11 +302,32 @@ class ObstaclesManager:
             random_move['angular_velocity_max'] = angular_velocity_max
             random_move['body'] = 'random'
             dict_file['plugins'].append(random_move)
+            # tf_publish={}
+            # tf_publish['type']='ModelTfPublisher'
+            # tf_publish['name']='tf_publisher'
+            # tf_publish['publish_tf_world']= False
+            # dict_file['plugins'].append(tf_publish)
             obstacle_type = 'dynamic'
 
         with open(yaml_path, 'w') as fd:
             yaml.dump(dict_file, fd)
         return yaml_path
+
+    # def _get_dynamic_obstacle_configration(self, dynamic_obstacle_yaml_path):
+    #     """get dynamic obstacle info e.g obstacle name, radius, Laser related infomation
+
+    #     Args:
+    #         dynamic_obstacle_yaml_path ([type]): [description]
+    #     """
+    #     # self.ROBOT_NAME = os.path.basename(dynamic_obstacle_yaml_path).split('.')[0]
+    #     with open(dynamic_obstacle_yaml_path, 'r') as f:
+    #         obstacle_data = yaml.safe_load(f)
+    #         # get obstacle radius
+    #         for body in obstacle_data['bodies']:
+    #             if body['name'] == "base_footprint":
+    #                 for footprint in body['footprints']:
+    #                     if footprint['type'] == 'circle':
+    #                         self.OBSTACLE_RADIUS = footprint.setdefault('radius', 0.2)
 
     def remove_obstacle(self, name: str):
         if len(self.obstacle_name_list) != 0:

@@ -52,12 +52,15 @@ class RewardCalculator():
         self._reward_goal_approached(goal_in_robot_frame)
         self._reward_goal_reached(goal_in_robot_frame)
         self._reward_laserscan_general(laser_scan)
+        # print('00')
 
     def _cal_reward_rule_01(self, laser_scan: np.ndarray, goal_in_robot_frame: Tuple[float,float], dynamic_obstacles_in_robot_frame:np.ndarray, *args,**kwargs):
 
         self._reward_goal_approached(goal_in_robot_frame)
         self._reward_goal_reached(goal_in_robot_frame)
-        self._reward_laserscan_general(laser_scan)
+        self._reward_human_safety_dist(dynamic_obstacles_in_robot_frame)
+        # print('01')
+        self._reward_laserscan_general(laser_scan)        
     
 
     def _reward_goal_reached(self,goal_in_robot_frame, reward = 100):

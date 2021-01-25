@@ -1,5 +1,5 @@
 {
-    "agent_name": "MLP_ARENA2D_2021_01_24__20_49",
+    "agent_name": "MLP_ARENA2D_2021_01_26__00_12",
     "robot": "myrobot",
     "gamma": 0.99,
     "n_steps": 128,
@@ -11,9 +11,9 @@
     "batch_size": 64,
     "n_epochs": 4,
     "clip_range": 0.2,
-    "reward_fnc": "00",
+    "reward_fnc": "01",
     "discrete_action_space": true,
     "task_mode": "staged",
-    "curr_stage": 0,
+    "curr_stage": 4,
     "n_timesteps": 0
 }

@@ -61,7 +61,7 @@ class RobotManager:
         self._new_global_path_generated = False
         # a condition variable used for
         self._global_path_con = threading.Condition()
-        self._static_obstacle_name_list = []
+        # self._static_obstacle_name_list = []
 
     def _get_robot_configration(self, robot_yaml_path):
         """get robot info e.g robot name, radius, Laser related infomation
