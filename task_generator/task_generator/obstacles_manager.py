@@ -10,6 +10,8 @@ from flatland_msgs.srv import MoveModel, MoveModelRequest
 from flatland_msgs.srv import StepWorld
 from nav_msgs.msg import OccupancyGrid
 from geometry_msgs.msg import Pose2D
+import numpy as np
+from std_msgs.msg import Empty
 import rospy
 import rospkg
 import shutil
@@ -22,6 +24,15 @@ class ObstaclesManager:
     """
 
     def __init__(self, map_: OccupancyGrid, is_training=True):
+        """
+        Args:
+            map_ (OccupancyGrid):
+            is_training (bool, optional): is it training or testing. Defaults to True.
+            plugin_name: The name of the plugin which is used to control the movement of the obstacles, Currently we use "RandomMove" for training and Tween2 for evaluation.
+                The Plugin Tween2 can move the the obstacle along a trajectory which can be assigned by multiple waypoints with a constant velocity.Defaults to "RandomMove".
+        """
+        # a list of publisher to move the obstacle to the start pos.
+        self._move_all_obstacles_start_pos_pubs = []
 
         # setup proxy to handle  services provided by flatland
         rospy.wait_for_service('move_model', timeout=20)
@@ -40,7 +51,7 @@ class ObstaclesManager:
 
         self.update_map(map_)
         self.obstacle_name_list = []
-        self._obstacle_name_prefix = 'obstacles'
+        self._obstacle_name_prefix = 'obstacle'
         # remove all existing obstacles generated before create an instance of this class
         self.remove_obstacles()
 
@@ -49,14 +60,14 @@ class ObstaclesManager:
         # a tuple stores the indices of the non-occupied spaces. format ((y,....),(x,...)
         self._free_space_indices = generate_freespace_indices(self.map)
 
-    def register_obstacles(self, num_obstacles: int, model_yaml_file_path: str, type_obstacle: str):
-        """register the static obstacles and request flatland to respawn the them.
+    def register_obstacles(self, num_obstacles: int, model_yaml_file_path: str, start_pos: list = []):
+        """register the obstacles defined by a yaml file and request flatland to respawn the them.
 
         Args:
             num_obstacles (string): the number of the obstacle instance to be created.
             model_yaml_file_path (string or None): model file path. it must be absolute path!
-            type_obstacle (string or None): type of the obstacle. it must be 'dynamic' or 'static'.
-
+            start_pos (list)  a three-elementary list of empty list, if it is empty, the obstacle will be moved to the
+                outside of the map.
 
         Raises:
             Exception:  Rospy.ServiceException(
@@ -67,11 +78,10 @@ class ObstaclesManager:
         """
         assert os.path.isabs(
             model_yaml_file_path), "The yaml file path must be absolute path, otherwise flatland can't find it"
-        assert type_obstacle == 'dynamic' or type_obstacle == 'static', 'The type of the obstacle must be dynamic or static'
+
         # the name of the model yaml file have the format {model_name}.model.yaml
-        type_obstacle = self._obstacle_name_prefix+'_'+type_obstacle
         model_name = os.path.basename(model_yaml_file_path).split('.')[0]
-        name_prefix = type_obstacle + '_' + model_name
+        name_prefix = self._obstacle_name_prefix + '_' + model_name
         count_same_type = sum(
             1 if obstacle_name.startswith(name_prefix) else 0
             for obstacle_name in self.obstacle_name_list)
@@ -86,11 +96,17 @@ class ObstaclesManager:
                 spawn_request.ns = rospy.get_namespace()
                 # x, y, theta = get_random_pos_on_map(self._free_space_indices, self.map,)
                 # set the postion of the obstacle out of the map to hidden them
-                x = self.map.info.origin.position.x - 3 * \
-                    self.map.info.resolution * self.map.info.height
-                y = self.map.info.origin.position.y - 3 * \
-                    self.map.info.resolution * self.map.info.width
-                theta = theta = random.uniform(-math.pi, math.pi)
+                if len(start_pos) == 0:
+                    x = self.map.info.origin.position.x - 3 * \
+                        self.map.info.resolution * self.map.info.height
+                    y = self.map.info.origin.position.y - 3 * \
+                        self.map.info.resolution * self.map.info.width
+                    theta = theta = random.uniform(-math.pi, math.pi)
+                else:
+                    assert len(start_pos) == 3
+                    x = start_pos[0]
+                    y = start_pos[1]
+                    theta = start_pos[2]
                 spawn_request.pose.x = x
                 spawn_request.pose.y = y
                 spawn_request.pose.theta = theta
@@ -118,7 +134,8 @@ class ObstaclesManager:
         """
         num_dynamic_obstalces = int(num_obstacles*p_dynamic)
         max_linear_velocity = rospy.get_param("obs_vel")
-        self.register_random_dynamic_obstacles(num_dynamic_obstalces, max_linear_velocity)
+        self.register_random_dynamic_obstacles(
+            num_dynamic_obstalces, max_linear_velocity)
         self.register_random_static_obstacles(
             num_obstacles-num_dynamic_obstalces)
         rospy.loginfo(
@@ -130,8 +147,8 @@ class ObstaclesManager:
         Args:
             num_obstacles (int): number of the obstacles.
             linear_velocity (float, optional):  the constant linear velocity of the dynamic obstacle.
-            angular_velocity_max (float, optional): the maximum angular verlocity of the dynamic obstacle. 
-                When the obstacle's linear velocity is too low(because of the collision),we will apply an 
+            angular_velocity_max (float, optional): the maximum angular verlocity of the dynamic obstacle.
+                When the obstacle's linear velocity is too low(because of the collision),we will apply an
                 angular verlocity which is sampled from [-angular_velocity_max,angular_velocity_max] to the it to help it better escape from the "freezing" satuation.
             min_obstacle_radius (float, optional): the minimum radius of the obstacle. Defaults to 0.5.
             max_obstacle_radius (float, optional): the maximum radius of the obstacle. Defaults to 0.5.
@@ -140,7 +157,7 @@ class ObstaclesManager:
             model_path = self._generate_random_obstacle_yaml(
                 True, linear_velocity=linear_velocity, angular_velocity_max=angular_velocity_max,
                 min_obstacle_radius=min_obstacle_radius, max_obstacle_radius=max_obstacle_radius)
-            self.register_obstacles(1, model_path, "dynamic")
+            self.register_obstacles(1, model_path)
             os.remove(model_path)
 
     def register_random_static_obstacles(self, num_obstacles: int, num_vertices_min=3, num_vertices_max=6, min_obstacle_radius=0.5, max_obstacle_radius=2):
@@ -157,8 +174,50 @@ class ObstaclesManager:
             num_vertices = random.randint(num_vertices_min, num_vertices_max)
             model_path = self._generate_random_obstacle_yaml(
                 False, num_vertices=num_vertices, min_obstacle_radius=min_obstacle_radius, max_obstacle_radius=max_obstacle_radius)
-            self.register_obstacles(1, model_path, "static")
+            self.register_obstacles(1, model_path)
             os.remove(model_path)
+
+    def register_static_obstacle_polygon(self, vertices: np.ndarray):
+        """register static obstacle with polygon shape
+
+        Args:
+            verticies (np.ndarray): a two-dimensional numpy array, each row has two elements
+        """
+        assert vertices.ndim == 2 and vertices.shape[0] >= 3 and vertices.shape[1] == 2
+        model_path, start_pos = self._generate_static_obstacle_polygon_yaml(
+            vertices)
+        self.register_obstacles(1, model_path, start_pos)
+        os.remove(model_path)
+
+    def register_static_obstacle_circle(self,x,y,circle):
+        model_path= self._generate_static_obstacle_circle_yaml(circle)
+        self.register_obstacles(1, model_path, [x,y,0])
+        os.remove(model_path)
+
+    def register_dynamic_obstacle_circle_tween2(self, obstacle_name: str, obstacle_radius: float, linear_velocity: float, start_pos: Pose2D, waypoints: list, is_waypoint_relative: bool = True,  mode: str = "yoyo", trigger_zones: list = []):
+        """register dynamic obstacle with circle shape. The trajectory of the obstacle is defined with the help of the plugin "tween2"
+
+        Args:
+            obstacle_name (str): the name of the obstacle
+            obstacle_radius (float): The radius of the obstacle
+            linear_velocity (float): The linear velocity of the obstacle
+            start_pos (list): 3-elementary list
+            waypoints (list): a list of 3-elementary list
+            is_waypoint_relative (bool, optional): a flag to indicate whether the waypoint is relative to the start_pos or not . Defaults to True.
+            mode (str, optional): [description]. Defaults to "yoyo".
+            trigger_zones (list): a list of 3-elementary, every element (x,y,r) represent a circle zone with the center (x,y) and radius r. if its empty,
+                then the dynamic obstacle will keeping moving once it is spawned. Defaults to True.
+        """
+        model_path, move_to_start_pub = self._generate_dynamic_obstacle_yaml_tween2(
+            obstacle_name, obstacle_radius, linear_velocity, waypoints, is_waypoint_relative,  mode, trigger_zones)
+        self._move_all_obstacles_start_pos_pubs.append(move_to_start_pub)
+        self.register_obstacles(1, model_path, start_pos)
+        os.remove(model_path)
+
+    def move_all_obstacles_to_start_pos_tween2(self):
+        for move_obstacle_start_pos_pub in self._move_all_obstacles_start_pos_pubs:
+            move_obstacle_start_pos_pub.publish(Empty())
+            print("moved ")
 
     def move_obstacle(self, obstacle_name: str, x: float, y: float, theta: float):
         """move the obstacle to a given position
@@ -218,6 +277,144 @@ class ObstaclesManager:
             move_model_request.pose = pos_non_active_obstacle
             self._srv_move_model(move_model_request)
 
+    def _generate_dynamic_obstacle_yaml_tween2(self, obstacle_name: str, obstacle_radius: float, linear_velocity: float, waypoints: list, is_waypoint_relative: bool,  mode: str, trigger_zones: list):
+        """generate a yaml file in which the movement of the obstacle is controller by the plugin tween2
+
+        Args:
+            obstacle_name (str): [description]
+            obstacle_radius (float): [description]
+            linear_velocity (float): [description]
+            is_waypoint_relative (bool): [description]
+            waypoints (list): [description]
+            mode (str, optional): [description]. Defaults to "yoyo".
+            trigger_zones (list): a list of 3-elementary, every element (x,y,r) represent a circle zone with the center (x,y) and radius r. if its empty,
+                then the dynamic obstacle will keeping moving once it is spawned. Defaults to True.
+        Returns:
+            [type]: [description]
+        """
+        for i, way_point in enumerate(waypoints):
+            if len(way_point) != 3:
+                raise ValueError(
+                    f"ways points must a list of 3-elementary list, However the {i}th way_point is {way_point}")
+        tmp_folder_path = os.path.join(rospkg.RosPack().get_path(
+            'simulator_setup'), 'tmp_random_obstacles')
+        os.makedirs(tmp_folder_path, exist_ok=True)
+        tmp_model_name = "dynamic_with_traj.model.yaml"
+        yaml_path = os.path.join(tmp_folder_path, tmp_model_name)
+        # define body
+        body = {}
+        body["name"] = "object_with_traj"
+        body["type"] = "dynamic"
+        body["color"] = [1, 0.2, 0.1, 1.0]
+        body["footprints"] = []
+
+        # define footprint
+        f = {}
+        f["density"] = 1
+        f['restitution'] = 0
+        f["layers"] = ["all"]
+        f["collision"] = 'true'
+        f["sensor"] = "false"
+        # dynamic obstacles have the shape of circle
+        f["type"] = "circle"
+        f["radius"] = obstacle_radius
+
+        body["footprints"].append(f)
+        # define dict_file
+        dict_file = {'bodies': [body], "plugins": []}
+        # We added new plugin called RandomMove in the flatland repo
+        move_with_traj = {}
+        move_with_traj['type'] = 'Tween2'
+        move_with_traj['name'] = 'Tween2 Plugin'
+        move_with_traj['linear_velocity'] = linear_velocity
+        # set the topic name for moving the object to the start point.
+        # we can not use the flatland provided service to move the object, othewise the Tween2 will not work properly.
+        move_with_traj['move_to_start_pos_topic'] = obstacle_name + \
+            '/move_to_start_pos'
+        move_to_start_pos_pub = rospy.Publisher(
+            move_with_traj['move_to_start_pos_topic'], Empty, queue_size=1)
+        move_with_traj['waypoints'] = waypoints
+        move_with_traj['is_waypoint_relative'] = is_waypoint_relative
+        move_with_traj['mode'] = mode
+        move_with_traj['body'] = 'object_with_traj'
+        move_with_traj['trigger_zones'] = trigger_zones
+        move_with_traj['robot_odom_topic'] = 'odom'
+        dict_file['plugins'].append(move_with_traj)
+
+        with open(yaml_path, 'w') as fd:
+            yaml.dump(dict_file, fd)
+        return yaml_path, move_to_start_pos_pub
+
+    def _generate_static_obstacle_polygon_yaml(self, vertices):
+        # since flatland  can only config the model by parsing the yaml file, we need to create a file for every random obstacle
+        tmp_folder_path = os.path.join(rospkg.RosPack().get_path(
+            'simulator_setup'), 'tmp_random_obstacles')
+        os.makedirs(tmp_folder_path, exist_ok=True)
+        tmp_model_name = "polygon_static.model.yaml"
+        yaml_path = os.path.join(tmp_folder_path, tmp_model_name)
+        # define body
+        body = {}
+        body["name"] = "static_object"
+        # calculate center of the obstacle
+        obstacle_center = vertices.mean(axis=0)
+        # convert to local coordinate system
+        vertices = vertices - obstacle_center
+        # convert to x,y,theta
+        obstacle_center = obstacle_center.tolist()
+        obstacle_center.append(0.0)
+
+        body["type"] = "static"
+        body["color"] = [0.2, 0.8, 0.2, 0.75]
+        body["footprints"] = []
+
+        # define footprint
+        f = {}
+        f["density"] = 1
+        f['restitution'] = 0
+        f["layers"] = ["all"]
+        f["collision"] = 'true'
+        f["sensor"] = "false"
+        f["type"] = "polygon"
+        f["points"] = vertices.astype(np.float).tolist()
+
+        body["footprints"].append(f)
+        # define dict_file
+        dict_file = {'bodies': [body]}
+        with open(yaml_path, 'w') as fd:
+            yaml.dump(dict_file, fd)
+        return yaml_path, obstacle_center
+
+    def _generate_static_obstacle_circle_yaml(self,radius):
+        # since flatland  can only config the model by parsing the yaml file, we need to create a file for every random obstacle
+        tmp_folder_path = os.path.join(rospkg.RosPack().get_path(
+            'simulator_setup'), 'tmp_random_obstacles')
+        os.makedirs(tmp_folder_path, exist_ok=True)
+        tmp_model_name = "circle_static.model.yaml"
+        yaml_path = os.path.join(tmp_folder_path, tmp_model_name)
+        # define body
+        body = {}
+        body["name"] = "static_object"
+        body["type"] = "static"
+        body["color"] = [0.2, 0.8, 0.2, 0.75]
+        body["footprints"] = []
+
+        # define footprint
+        f = {}
+        f["density"] = 1
+        f['restitution'] = 0
+        f["layers"] = ["all"]
+        f["collision"] = 'true'
+        f["sensor"] = "false"
+        f["type"] = "circle"
+        f["radius"] = radius
+
+        body["footprints"].append(f)
+        # define dict_file
+        dict_file = {'bodies': [body]}
+        with open(yaml_path, 'w') as fd:
+            yaml.dump(dict_file, fd)
+        return yaml_path
+
     def _generate_random_obstacle_yaml(self,
                                        is_dynamic=False,
                                        linear_velocity=0.3,
@@ -243,7 +440,10 @@ class ObstaclesManager:
         tmp_folder_path = os.path.join(rospkg.RosPack().get_path(
             'simulator_setup'), 'tmp_random_obstacles')
         os.makedirs(tmp_folder_path, exist_ok=True)
-        tmp_model_name = "random.model.yaml"
+        if is_dynamic:
+            tmp_model_name = "random_dynamic.model.yaml"
+        else:
+            tmp_model_name = "random_static.model.yaml"
         yaml_path = os.path.join(tmp_folder_path, tmp_model_name)
         # define body
         body = {}
@@ -296,7 +496,6 @@ class ObstaclesManager:
             random_move['angular_velocity_max'] = angular_velocity_max
             random_move['body'] = 'random'
             dict_file['plugins'].append(random_move)
-            obstacle_type = 'dynamic'
 
         with open(yaml_path, 'w') as fd:
             yaml.dump(dict_file, fd)
