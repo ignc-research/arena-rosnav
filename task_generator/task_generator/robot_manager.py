@@ -114,12 +114,11 @@ class RobotManager:
 
     def set_start_pos_random(self):
         start_pos = Pose2D()
-        start_pos.x, start_pos, start_pos.theta = get_random_pos_on_map(
+        start_pos.x, start_pos.y, start_pos.theta = get_random_pos_on_map(
             self._free_space_indices, self.map, self.ROBOT_RADIUS)
         self.move_robot(start_pos)
 
-    def set_start_pos_goal_pos(self, start_pos: Union[Pose2D, None]
-                               = None, goal_pos: Union[Pose2D, None] = None, min_dist=1):
+    def set_start_pos_goal_pos(self, start_pos: Union[Pose2D, None] = None, goal_pos: Union[Pose2D, None] = None, min_dist=1):
         """set up start position and the goal postion. Path validation checking will be conducted. If it failed, an
         exception will be raised.
 

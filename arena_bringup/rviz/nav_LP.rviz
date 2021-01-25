@@ -53,6 +53,22 @@ Visualization Manager:
               Value: true
             map:
               Value: true
+            myrobot_model1_base_footprint:
+              Value: true
+            myrobot_model1_laser_link:
+              Value: true
+            myrobot_model2_base_footprint:
+              Value: true
+            myrobot_model2_laser_link:
+              Value: true
+            myrobot_model3_base_footprint:
+              Value: true
+            myrobot_model3_laser_link:
+              Value: true
+            myrobot_model4_base_footprint:
+              Value: true
+            myrobot_model4_laser_link:
+              Value: true
             odom:
               Value: true
           Marker Scale: 1
@@ -65,6 +81,18 @@ Visualization Manager:
               odom:
                 base_footprint:
                   laser_link:
+                    {}
+                myrobot_model1_base_footprint:
+                  myrobot_model1_laser_link:
+                    {}
+                myrobot_model2_base_footprint:
+                  myrobot_model2_laser_link:
+                    {}
+                myrobot_model3_base_footprint:
+                  myrobot_model3_laser_link:
+                    {}
+                myrobot_model4_base_footprint:
+                  myrobot_model4_laser_link:
                     {}
           Update Interval: 0
           Value: true
@@ -281,12 +309,12 @@ Visualization Manager:
           Class: rviz/Map
           Color Scheme: costmap
           Draw Behind: false
-          Enabled: true
+          Enabled: false
           Name: Local_costmap
           Topic: /move_base/local_costmap/costmap
           Unreliable: false
           Use Timestamp: false
-          Value: true
+          Value: false
         - Circles color: 170; 0; 0
           Class: Obstacles
           Enabled: true
@@ -341,7 +369,7 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Angle: -7.860009670257568
+      Angle: -7.865009307861328
       Class: rviz/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
@@ -351,11 +379,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 38.30707550048828
+      Scale: 30.900524139404297
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
-      X: 10.657875061035156
-      Y: 3.9207146167755127
+      X: 10.579460144042969
+      Y: 6.853889465332031
     Saved: ~
 Window Geometry:
   Displays:

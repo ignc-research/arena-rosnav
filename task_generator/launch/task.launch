@@ -1,0 +1,18 @@
+<launch>
+	<arg name="level" default="test_1"/>
+    <!-- Launch neural net ros wrapper -->
+    <node pkg="task_generator" type="task_gen_node.py" name="task_gen_node" output="screen" ns="/task_gen">
+        
+        <!-- Publications -->
+        <!-- <remap from="~other_vels" to="other_vels"/> -->
+        
+        <!-- Subscriptions -->
+        <!-- <remap from="~pose" to="/odom"/> -->
+
+        
+        <!-- Parameters -->
+        <!-- <param name="~tb3_speed" value="$(arg tb3_speed)"/> -->
+
+    </node>
+
+</launch>

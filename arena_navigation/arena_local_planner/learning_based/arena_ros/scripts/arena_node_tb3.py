@@ -58,6 +58,8 @@ class NN_tb3():
 
     def cbPose(self, msg):
         # calculate angle
+        q = msg.pose.pose.orientation
+        self.psi = np.arctan2(2.0*(q.w*q.z + q.x*q.y), 1-2*(q.y*q.y+q.z*q.z)) # bounded by [-pi, pi]
         v_p = msg.pose.pose.position
         v_g = self.sub_goal
         v_pg = np.array([v_g.x-v_p.x,v_g.y-v_p.y])
@@ -66,8 +68,7 @@ class NN_tb3():
         self.distance = np.linalg.norm(v_pg)
         self.deg_phi = math.degrees(angle)
         # quaternion
-        q = msg.pose.pose.orientation
-        self.psi = np.arctan2(2.0*(q.w*q.z + q.x*q.y), 1-2*(q.y*q.y+q.z*q.z)) # bounded by [-pi, pi]
+       
         # pose
         self.pose = msg.pose
   

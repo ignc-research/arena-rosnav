@@ -219,7 +219,7 @@ class NN_tb3():
 
 
         xs = []; ys = []; radii = []; labels = []; static_map = []
-        num_clusters = len(msg.labels)
+        num_clusters = len(msg.mean_points)
         # print(num_clusters)
         for i in range(num_clusters):
             index = msg.labels[i]
@@ -235,7 +235,9 @@ class NN_tb3():
 
 
 
-            xs.append(x); ys.append(y); radii.append(radius); labels.append(index); static_map.append(msg.counts[i])
+            xs.append(x); ys.append(y); radii.append(radius); labels.append(index); 
+            # static_map.append(msg.counts[i])
+
             # self.visualize_other_agent(x,y,radius,msg.labels[i])
             # helper fields
             heading_angle = np.arctan2(v_y, v_x)
@@ -246,7 +248,7 @@ class NN_tb3():
             if pref_speed < 0.2:
                 pref_speed = 0; v_x = 0; v_y = 0
             other_agents.append(agent.Agent(x, y, goal_x, goal_y, radius, pref_speed, heading_angle, index))
-        self.visualize_other_agents(xs, ys, radii, labels,static_map)
+        # self.visualize_other_agents(xs, ys, radii, labels,static_map)
         self.other_agents_state = other_agents
 
     def stop_moving(self):
@@ -348,9 +350,7 @@ class NN_tb3():
             # print 'Not in NN mode'
             # print self.operation_mode.mode
             return
-        
-
-
+            
         # construct agent_state
         x = self.pose.pose.position.x; y = self.pose.pose.position.y
         v_x = self.vel.x; v_y = self.vel.y

@@ -35,6 +35,43 @@ class ABSTask(ABC):
             self.obstacles_manager.update_map(map_)
             self.robot_manager.update_map(map_)
 
+class LoadTask(ABSTask):
+    """ Evertime the start position and end position of the robot is reset.
+    """
+
+    def __init__(self, obstacles_manager: ObstaclesManager, robot_manager: RobotManager):
+        super().__init__(obstacles_manager, robot_manager)
+
+    def reset(self):
+        """[summary]
+        """
+        with self._map_lock:
+            max_fail_times = 3
+            fail_times = 0
+            while fail_times < max_fail_times:
+                try:
+                    pose = Pose2D()
+                    pose.x = 0; pose.y = 0
+                    goal = Pose2D()
+                    goal.x = 22; goal.y = -1
+
+
+                    start_pos, goal_pos = self.robot_manager.set_start_pos_goal_pos(pose, goal)
+                    self.obstacles_manager.reset_pos_obstacles_random(
+                        forbidden_zones=[
+                            (start_pos.x,
+                                start_pos.y,
+                                self.robot_manager.ROBOT_RADIUS),
+                            (goal_pos.x,
+                                goal_pos.y,
+                                self.robot_manager.ROBOT_RADIUS)])
+                    break
+                except rospy.ServiceException as e:
+                    rospy.logwarn(repr(e))
+                    fail_times += 1
+            if fail_times == max_fail_times:
+                raise Exception("reset error!")
+
 
 class RandomTask(ABSTask):
     """ Evertime the start position and end position of the robot is reset.
@@ -87,8 +124,7 @@ class ManualTask(ABSTask):
                 self.robot_manager.set_start_pos_random()
                 with self._manual_goal_con:
                     # the user has 60s to set the goal, otherwise all objects will be reset.
-                    self._manual_goal_con.wait_for(
-                        self._new_goal_received, timeout=60)
+                    self._manual_goal_con.wait_for(self._new_goal_received, timeout=60)
                     if not self._new_goal_received:
                         raise Exception(
                             "TimeOut, User does't provide goal position!")
@@ -146,7 +182,7 @@ def get_predefined_task(mode):
     # obstacles_manager.register_obstacles(3, os.path.join(
     # models_folder_path, "obstacles", 'random.model.yaml'), 'static')
     # generate 5 static or dynamic obstaticles
-    obstacles_manager.register_random_obstacles(5)
+    obstacles_manager.register_random_obstacles(1)
 
     # TODO In the future more Task will be supported and the code unrelated to
     # Tasks will be moved to other classes or functions.
@@ -156,6 +192,9 @@ def get_predefined_task(mode):
     if mode == "manual":
         task = ManualTask(obstacles_manager, robot_manager)
         print("manual tasks requested")
+    if mode == "test_1":
+        print("dynamic")
+        task = LoadTask(obstacles_manager, robot_manager)
     #task = RandomTask(obstacles_manager, robot_manager)    
 
     return task

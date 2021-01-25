@@ -10,7 +10,6 @@
         <!-- Subscriptions -->
         <!-- <remap from="~pose" to="/odom"/> -->
 
-        
         <!-- Parameters -->
         <param name="~vx" value="$(arg v_lin)"/>
         <param name="~vz" value="$(arg v_ang)"/>

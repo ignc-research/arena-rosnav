@@ -8,19 +8,8 @@ from ford_msgs.msg import Clusters
 from visualization_msgs.msg import Marker, MarkerArray
 
 import numpy as np
-# import numpy.matlib
-# import pickle
-# from matplotlib import cm
-# import matplotlib.pyplot as plt
-# import copy
-# import os
-# import time
-# import random
-# import math
-
-# import rospkg
+import math
 from nav_msgs.msg import Odometry
-
 import configparser
 import torch
 import gym
@@ -53,6 +42,9 @@ class NN_tb3():
         self.ob = env.reset('test',1)     #intial some parameters from .config file such as time_step,success_reward for other instances
         self.policy = policy
         self.policy.set_env(env) 
+        # for action
+        self.angle2Action = 0
+        self.distance = 0
         # for subscribers
         self.pose = PoseStamped()
         self.vel = Vector3()
@@ -73,7 +65,7 @@ class NN_tb3():
         # # sub
         self.sub_pose = rospy.Subscriber('/odom',Odometry,self.cbPose)
         self.sub_global_goal = rospy.Subscriber('/goal',PoseStamped, self.cbGlobalGoal)
-        # self.sub_subgoal = rospy.Subscriber('~subgoal',PoseStamped, self.cbSubGoal)
+        self.sub_subgoal = rospy.Subscriber('/plan_manager/subgoal',PoseStamped, self.cbSubGoal)
         
         # subgoals
         self.sub_goal = Vector3()
@@ -82,9 +74,17 @@ class NN_tb3():
 
 
         # control timer
-        # self.control_timer = rospy.Timer(rospy.Duration(0.01),self.cbControl)
-        self.nn_timer = rospy.Timer(rospy.Duration(0.3),self.cbComputeActionCrowdNav)
+        self.control_timer = rospy.Timer(rospy.Duration(0.2),self.cbControl)
+        self.nn_timer = rospy.Timer(rospy.Duration(0.01),self.cbComputeActionCrowdNav)
 
+    def update_angle2Action(self):
+        # action vector
+        v_a = np.array([self.desired_position.pose.position.x-self.pose.pose.position.x,self.desired_position.pose.position.y-self.pose.pose.position.y])
+        # pose direction
+        e_dir = np.array([math.cos(self.psi), math.sin(self.psi)])
+        # angle: <v_a, e_dir>
+        self.angle2Action = np.math.atan2(np.linalg.det([v_a,e_dir]),np.dot(v_a,e_dir))
+        
     def cbGlobalGoal(self,msg):
         self.stop_moving_flag = True
         self.new_global_goal_received = True
@@ -97,16 +97,31 @@ class NN_tb3():
         print("new goal: "+str([self.goal.pose.position.x,self.goal.pose.position.y])) 
 
     def cbSubGoal(self,msg):
+        # update subGoal
         self.sub_goal.x = msg.pose.position.x
         self.sub_goal.y = msg.pose.position.y
-        # print "new subgoal: "+str(self.sub_goal)
+     
+
+    def goalReached(self):
+        # check if near to global goal
+        if self.distance > 0.3:
+            return False
+        else:
+            return True
 
     def cbPose(self, msg):
+        # update robot vel (vx,vy)
         self.cbVel(msg)
+        # get pose angle
         q = msg.pose.pose.orientation
         self.psi = np.arctan2(2.0*(q.w*q.z + q.x*q.y), 1-2*(q.y*q.y+q.z*q.z)) # bounded by [-pi, pi]
         self.pose = msg.pose
         self.visualize_path()
+
+        v_p = msg.pose.pose.position
+        v_g = self.sub_goal
+        v_pg = np.array([v_g.x-v_p.x,v_g.y-v_p.y])
+        self.distance = np.linalg.norm(v_pg)
         # self.visualize_pose(msg.pose.pose.position,msg.pose.pose.orientation)
 
     def cbVel(self, msg):
@@ -153,63 +168,26 @@ class NN_tb3():
         # print(action[0])
 
     def cbControl(self, event):
-
-        if self.goal.header.stamp == rospy.Time(0) or self.stop_moving_flag and not self.new_global_goal_received:
-            self.stop_moving()
-            return
-        elif self.operation_mode.mode==self.operation_mode.NN:
-            desired_yaw = self.desired_action[1]
-            yaw_error = desired_yaw - self.psi
-            if abs(yaw_error) > np.pi:
-                yaw_error -= np.sign(yaw_error)*2*np.pi
-
-            gain = 1.3 # canon: 2
-            vw = gain*yaw_error
-
-            use_d_min = True
-            if False: # canon: True
-                # use_d_min = True
-                # print "vmax:", self.find_vmax(self.d_min,yaw_error)
-                vx = min(self.desired_action[0], self.find_vmax(self.d_min,yaw_error))
-            else:
-                vx = self.desired_action[0]
-      
-            twist = Twist()
-            twist.angular.z = vw
-            twist.linear.x = vx
-            self.pub_twist.publish(twist)
-            self.visualize_action(use_d_min)
-            return
-
-        elif self.operation_mode.mode == self.operation_mode.SPIN_IN_PLACE:
-            print('Spinning in place.')
-            self.stop_moving_flag = False
-            angle_to_goal = np.arctan2(self.global_goal.pose.position.y - self.pose.pose.position.y, \
-                self.global_goal.pose.position.x - self.pose.pose.position.x) 
-            global_yaw_error = self.psi - angle_to_goal
-            if abs(global_yaw_error) > 0.5:
-                vx = 0.0
-                vw = 1.0
-                twist = Twist()
-                twist.angular.z = vw
-                twist.linear.x = vx
-                self.pub_twist.publish(twist)
-                # print twist
-            else:
-                print('Done spinning in place')
-                self.operation_mode.mode = self.operation_mode.NN
-                # self.new_global_goal_received = False
-            return
-        else:
-            self.stop_moving()
-            return
-
+ 
+        twist = Twist()
+        if not self.goalReached():
+            if abs(self.angle2Action) > 0.1 and self.angle2Action > 0:
+                twist.angular.z = -0.3
+                print("spinning in place +")
+            elif abs(self.angle2Action) > 0.1 and self.angle2Action < 0:
+                twist.angular.z = 0.3
+                print("spinning in place -")
+            # else:
+            vel = np.array([self.desired_action[0],self.desired_action[1]])
+            twist.linear.x = 0.1*np.linalg.norm(vel)
+        self.pub_twist.publish(twist)
+        
     def cbComputeActionCrowdNav(self, event):
         robot_x = self.pose.pose.position.x
         robot_y = self.pose.pose.position.y
         # goal
-        goal_x = self.global_goal.pose.position.x
-        goal_y = self.global_goal.pose.position.x
+        goal_x = self.sub_goal.x
+        goal_y = self.sub_goal.y
         # velocity
         robot_vx = self.vel.x
         robot_vy = self.vel.y
@@ -244,14 +222,16 @@ class NN_tb3():
         # get action info
         action = self.robot.act(self.ob)
         position = self.robot.get_observable_state()
-        print('\n---------\nrobot position (X,Y):', position.position)
-        print(action)
-        print(theta)
+
+        # print('\n---------\nrobot position (X,Y):', position.position)
+        # print(action)
+        # print(theta)
                     
 
 
         self.update_action(action)
-
+        self.update_angle2Action()
+   
     def update_subgoal(self,subgoal):
         self.goal.pose.position.x = subgoal[0]
         self.goal.pose.position.y = subgoal[1]
@@ -292,7 +272,7 @@ class NN_tb3():
 
 def run():
 
-    policy_name = "sarl"
+    policy_name = "lstm"
 
     device = 'cpu'
     phase = 'test'

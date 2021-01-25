@@ -126,6 +126,7 @@ def run():
     # create static map 
     static_map = rospy.get_param("~usm")
     if static_map:
+        loadcfg(...)
         # 1
         tb3_obst.appendMapObst(24.5,15.53,1.2)
         tb3_obst.appendMapObst(24.3,17.7,1.2)
