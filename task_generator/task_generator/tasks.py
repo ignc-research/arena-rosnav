@@ -405,11 +405,9 @@ def get_predefined_task(mode="random", start_stage: int = 1, PATHS: dict = None)
     # obstacles_manager.register_obstacles(3, os.path.join(
     # models_folder_path, "obstacles", 'random.model.yaml'), 'static')
     # generate 5 static or dynamic obstaticles
-<<<<<<< HEAD
-    obstacles_manager.register_random_obstacles(1)
-=======
+
     # obstacles_manager.register_random_obstacles(20, 0.4)
->>>>>>> origin/master
+
 
     # TODO In the future more Task will be supported and the code unrelated to
     # Tasks will be moved to other classes or functions.
@@ -422,18 +420,12 @@ def get_predefined_task(mode="random", start_stage: int = 1, PATHS: dict = None)
         obstacles_manager.register_random_obstacles(20, 0.4)
         task = ManualTask(obstacles_manager, robot_manager)
         print("manual tasks requested")
-<<<<<<< HEAD
-    if mode == "test_1":
-        print("dynamic")
-        task = LoadTask(obstacles_manager, robot_manager)
-    #task = RandomTask(obstacles_manager, robot_manager)    
 
-=======
     if mode == "staged":
         task = StagedRandomTask(
             obstacles_manager, robot_manager, start_stage, PATHS)
     if mode == "ScenerioTask":
         task = ScenerioTask(obstacles_manager, robot_manager,
                             PATHS['scenerios_json_path'])
->>>>>>> origin/master
+
     return task
