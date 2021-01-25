@@ -71,6 +71,12 @@
                 },
                 "static_obs_2": {
                     "shape": "circle",
+                    "x": 10,
+                    "y": 10,
+                    "radius": 0.2
+                },
+                "static_obs_3": {
+                    "shape": "circle",
                     "x": 4,
                     "y": 5,
                     "radius": 0.2
@@ -91,8 +97,8 @@
             "watchers": {
                 "watcher_1": {
                     "pos": [
-                        1,
-                        1
+                        10,
+                        10
                     ],
                     "range": 5
                 },
