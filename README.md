@@ -10,7 +10,7 @@ Arena-Rosnav uses Flatland as the core simulator and is a modular high-level lib
 | *Training Stage* | *Deployment Stage* |
 
 
-## 0. What is this repository for?
+## What is this repository for?
 Train DRL agents on ROS compatible simulations for autonomous navigation in highly dynamic environments. Flatland-DRL integration is inspired by Ronja Gueldenring's work: [drl_local_planner_ros_stable_baselines](https://github.com/RGring/drl_local_planner_ros_stable_baselines.git). Test state of the art local and global planners in ROS environments both in simulation and on real hardware. Following features are included:
 
 * Setup to train a local planner with reinforcement learning approaches from [stable baselines3](https://github.com/DLR-RM/stable-baselines3.git)
@@ -26,6 +26,12 @@ Train DRL agents on ROS compatible simulations for autonomous navigation in high
 * Testing a variety of planners (learning based and model based) within specific scenarios in test mode
 
 * Modular structure for extension of new functionalities and approaches
+
+
+### Recent Updates
+
+- 26.01.2021: Added Scenario Tasks: generate your own scenario by specifying a scenario.json 
+
 
 ### Documentation & References
 * How to use flatland: http://flatland-simulator.readthedocs.io
