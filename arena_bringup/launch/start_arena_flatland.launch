@@ -5,7 +5,8 @@
   <arg name="local_planner"   default="teb"/>
   <arg name="rviz_file"       default="nav"/>
   <arg name="train_mode"      default="false"/>
-  <param name="train_mode"    value="$(arg train_mode)"/>
+  <!-- <param name="train_mode"    value="$(arg train_mode)"/> -->
+  <arg name="disable_scenario"    default="true"/>
 
 
 
@@ -60,7 +61,7 @@
   </include>
 
   <!-- start task_generator node -->
-  <include file="$(find arena_bringup)/launch/sublaunch/task_generator.launch" unless="$(arg train_mode)">
+  <include file="$(find arena_bringup)/launch/sublaunch/task_generator.launch" unless="$(arg disable_scenario)">
   </include>
 
   <!-- start plan manager-->

@@ -4,8 +4,9 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded:
-        - /Local plan1
-      Splitter Ratio: 0.6526610255241394
+        - /obstacles1/static1
+        - /obstacles1/dynamic1
+      Splitter Ratio: 0.7117646932601929
     Tree Height: 1145
   - Class: rviz/Selection
     Name: Selection
@@ -53,22 +54,6 @@ Visualization Manager:
               Value: true
             map:
               Value: true
-            myrobot_model1_base_footprint:
-              Value: true
-            myrobot_model1_laser_link:
-              Value: true
-            myrobot_model2_base_footprint:
-              Value: true
-            myrobot_model2_laser_link:
-              Value: true
-            myrobot_model3_base_footprint:
-              Value: true
-            myrobot_model3_laser_link:
-              Value: true
-            myrobot_model4_base_footprint:
-              Value: true
-            myrobot_model4_laser_link:
-              Value: true
             odom:
               Value: true
           Marker Scale: 1
@@ -81,18 +66,6 @@ Visualization Manager:
               odom:
                 base_footprint:
                   laser_link:
-                    {}
-                myrobot_model1_base_footprint:
-                  myrobot_model1_laser_link:
-                    {}
-                myrobot_model2_base_footprint:
-                  myrobot_model2_laser_link:
-                    {}
-                myrobot_model3_base_footprint:
-                  myrobot_model3_laser_link:
-                    {}
-                myrobot_model4_base_footprint:
-                  myrobot_model4_laser_link:
                     {}
           Update Interval: 0
           Value: true
@@ -145,12 +118,12 @@ Visualization Manager:
           Class: rviz/Map
           Color Scheme: map
           Draw Behind: false
-          Enabled: false
+          Enabled: true
           Name: Global_costmap
           Topic: /move_base/global_costmap/costmap
           Unreliable: false
           Use Timestamp: false
-          Value: false
+          Value: true
       Enabled: true
       Name: Map
     - Class: rviz/Group
@@ -309,12 +282,12 @@ Visualization Manager:
           Class: rviz/Map
           Color Scheme: costmap
           Draw Behind: false
-          Enabled: false
+          Enabled: true
           Name: Local_costmap
           Topic: /move_base/local_costmap/costmap
           Unreliable: false
           Use Timestamp: false
-          Value: false
+          Value: true
         - Circles color: 170; 0; 0
           Class: Obstacles
           Enabled: true
@@ -341,9 +314,157 @@ Visualization Manager:
       Marker Topic: /planning_vis/goal
       Name: Marker
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
       Value: true
+    - Class: rviz/Group
+      Displays:
+        - Class: rviz/Group
+          Displays:
+            - Class: rviz/MarkerArray
+              Enabled: true
+              Marker Topic: /flatland_server/debug/model/obstacle_circle_static_00
+              Name: MarkerArray
+              Namespaces:
+                "": true
+              Queue Size: 100
+              Value: true
+            - Class: rviz/MarkerArray
+              Enabled: true
+              Marker Topic: /flatland_server/debug/model/obstacle_circle_static_01
+              Name: MarkerArray
+              Namespaces:
+                "": true
+              Queue Size: 100
+              Value: true
+            - Class: rviz/MarkerArray
+              Enabled: true
+              Marker Topic: /flatland_server/debug/model/obstacle_circle_static_02
+              Name: MarkerArray
+              Namespaces:
+                "": true
+              Queue Size: 100
+              Value: true
+            - Class: rviz/MarkerArray
+              Enabled: true
+              Marker Topic: /flatland_server/debug/model/obstacle_circle_static_03
+              Name: MarkerArray
+              Namespaces:
+                "": true
+              Queue Size: 100
+              Value: true
+            - Class: rviz/MarkerArray
+              Enabled: true
+              Marker Topic: /flatland_server/debug/model/obstacle_circle_static_04
+              Name: MarkerArray
+              Namespaces:
+                "": true
+              Queue Size: 100
+              Value: true
+            - Class: rviz/MarkerArray
+              Enabled: true
+              Marker Topic: /flatland_server/debug/model/obstacle_circle_static_05
+              Name: MarkerArray
+              Namespaces:
+                "": true
+              Queue Size: 100
+              Value: true
+            - Class: rviz/MarkerArray
+              Enabled: true
+              Marker Topic: /flatland_server/debug/model/obstacle_circle_static_06
+              Name: MarkerArray
+              Namespaces:
+                "": true
+              Queue Size: 100
+              Value: true
+            - Class: rviz/MarkerArray
+              Enabled: true
+              Marker Topic: /flatland_server/debug/model/obstacle_circle_static_07
+              Name: MarkerArray
+              Namespaces:
+                "": true
+              Queue Size: 100
+              Value: true
+            - Class: rviz/MarkerArray
+              Enabled: true
+              Marker Topic: /flatland_server/debug/model/obstacle_circle_static_08
+              Name: MarkerArray
+              Namespaces:
+                "": true
+              Queue Size: 100
+              Value: true
+            - Class: rviz/MarkerArray
+              Enabled: true
+              Marker Topic: /flatland_server/debug/model/obstacle_circle_static_09
+              Name: MarkerArray
+              Namespaces:
+                "": true
+              Queue Size: 100
+              Value: true
+          Enabled: true
+          Name: static
+        - Class: rviz/Group
+          Displays:
+            - Class: rviz/MarkerArray
+              Enabled: true
+              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_00
+              Name: MarkerArray
+              Namespaces:
+                "": true
+              Queue Size: 100
+              Value: true
+            - Class: rviz/MarkerArray
+              Enabled: true
+              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_01
+              Name: MarkerArray
+              Namespaces:
+                "": true
+              Queue Size: 100
+              Value: true
+            - Class: rviz/MarkerArray
+              Enabled: true
+              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_02
+              Name: MarkerArray
+              Namespaces:
+                "": true
+              Queue Size: 100
+              Value: true
+            - Class: rviz/MarkerArray
+              Enabled: true
+              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_03
+              Name: MarkerArray
+              Namespaces:
+                "": true
+              Queue Size: 100
+              Value: true
+            - Class: rviz/MarkerArray
+              Enabled: true
+              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_04
+              Name: MarkerArray
+              Namespaces:
+                "": true
+              Queue Size: 100
+              Value: true
+            - Class: rviz/MarkerArray
+              Enabled: true
+              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_05
+              Name: MarkerArray
+              Namespaces:
+                "": true
+              Queue Size: 100
+              Value: true
+            - Class: rviz/MarkerArray
+              Enabled: true
+              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_06
+              Name: MarkerArray
+              Namespaces:
+                "": true
+              Queue Size: 100
+              Value: true
+          Enabled: true
+          Name: dynamic
+      Enabled: true
+      Name: obstacles
   Enabled: true
   Global Options:
     Background Color: 0; 0; 0
@@ -379,7 +500,7 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 30.900524139404297
+      Scale: 38.76161575317383
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
       X: 10.579460144042969
@@ -401,5 +522,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1165
-  X: 8
+  X: 1
   Y: 31

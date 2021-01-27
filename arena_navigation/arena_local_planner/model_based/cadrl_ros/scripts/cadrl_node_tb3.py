@@ -105,7 +105,7 @@ class NN_tb3():
         if self.use_clusters:
             self.sub_clusters = rospy.Subscriber('~clusters',Clusters, self.cbClusters)
         else:
-            self.sub_peds = rospy.Subscriber('~peds',PedTrajVec, self.cbPeds)
+            print("no peds")
 
         # control timer
         self.control_timer = rospy.Timer(rospy.Duration(0.01),self.cbControl)
@@ -143,78 +143,8 @@ class NN_tb3():
     def cbVel(self, msg):
         self.vel = msg.twist.twist.linear
 
-    def cbPeds(self, msg):
-        t_start = rospy.Time.now()
-        self.ped_traj_vec = [ped_traj for ped_traj in msg.ped_traj_vec if len(ped_traj.traj) > 0]
-        num_peds = len(self.ped_traj_vec)
-
-        # compute relative position with respect to the tb3
-        rel_dist = np.zeros((num_peds, )) 
-        rel_angle = np.zeros((num_peds, )) 
-        # (rel_dist, angle)
-        for i, ped_traj in enumerate(self.ped_traj_vec):
-            rel_x = ped_traj.traj[-1].pose.x - self.pose.pose.position.x
-            rel_y = ped_traj.traj[-1].pose.y - self.pose.pose.position.y
-            rel_dist[i] = np.linalg.norm(np.array([rel_x, rel_y])) 
-            rel_angle[i] = find_angle_diff(np.arctan2(rel_y, rel_x), self.psi)
-
-        # ignore people in the back of tb3 (60 deg cone)
-        valid_inds = np.where(abs(rel_angle)< 5.0 / 6.0 * np.pi)[0]
-
-        # get the n closest agents
-        self.other_agents_state = []
-        if len(valid_inds) == 0:
-            return
-        else:
-            if len(valid_inds) == 1:
-
-                valid_inds = valid_inds[0]
-                ped_traj_vec = [self.ped_traj_vec[valid_inds]]
-                rel_dist = np.array([rel_dist[valid_inds]])
-            elif len(valid_inds) > 1:
-
-                ped_traj_vec = [self.ped_traj_vec[tt] for tt in valid_inds]
-                rel_dist = rel_dist[valid_inds]
-
-            # sort other agents by rel_dist
-            if len(rel_dist) > self.value_net.num_agents-1:
-                num_neighbors = self.value_net.num_agents-1
-                neighbor_inds = np.argpartition(rel_dist, num_neighbors)[:num_neighbors]
-            else:
-                neighbor_inds = np.arange(len(rel_dist))
-
-            for tt in neighbor_inds:
-                ped_traj = ped_traj_vec[tt]
-                # rel pos, rel vel, size
-                x = ped_traj.traj[-1].pose.x; y = ped_traj.traj[-1].pose.y
-                v_x = ped_traj.traj[-1].velocity.x; v_y = ped_traj.traj[-1].velocity.y
-                radius = PED_RADIUS;turning_dir = 0.0
-                # helper fields
-                heading_angle = np.arctan2(v_y, v_x)
-                pref_speed = np.linalg.norm(np.array([v_x, v_y]))
-                goal_x = x + 5.0; goal_y = y + 5.0
-                
-                # filter speed
-                alpha = 0.2
-                for prev_other_agent_state in self.prev_other_agents_state:
-                    pos_diff = np.linalg.norm(prev_other_agent_state[0:2] - np.array([x,y]))
-                    heading_diff_abs = abs(find_angle_diff(prev_other_agent_state[4], heading_angle))
-                    if pos_diff < 0.5 and heading_diff_abs < np.pi / 4.0:
-                        v_x = alpha * v_x + (1-alpha) * prev_other_agent_state[2]
-                        v_y = alpha * v_y + (1-alpha) * prev_other_agent_state[3]
-
-                        # TODO: find the best match rather than the first match
-                        break
-
-                if pref_speed < 0.2:
-                    pref_speed = 0; v_x = 0; v_y = 0
-                other_agent_state = np.array([x, y, v_x, v_y, heading_angle, pref_speed, \
-                    goal_x, goal_y, radius, turning_dir])
-                self.other_agents_state.append(other_agent_state)
-
-            self.prev_other_agents_state = copy.deepcopy(self.other_agents_state)
-
     def cbClusters(self,msg):
+        # print(msg)
         other_agents = []
 
 
@@ -248,7 +178,7 @@ class NN_tb3():
             if pref_speed < 0.2:
                 pref_speed = 0; v_x = 0; v_y = 0
             other_agents.append(agent.Agent(x, y, goal_x, goal_y, radius, pref_speed, heading_angle, index))
-        # self.visualize_other_agents(xs, ys, radii, labels,static_map)
+        self.visualize_other_agents(xs, ys, radii, labels)
         self.other_agents_state = other_agents
 
     def stop_moving(self):
@@ -480,7 +410,7 @@ class NN_tb3():
 
         # print marker
 
-    def visualize_other_agents(self,xs,ys,radii,labels,sm):
+    def visualize_other_agents(self,xs,ys,radii,labels):
         markers = MarkerArray()
         for i in range(len(xs)):
             # Orange box for other agent
@@ -495,7 +425,7 @@ class NN_tb3():
             marker.pose.position.y = ys[i]
             # marker.pose.orientation = orientation
             marker.scale = Vector3(x=2*radii[i],y=2*radii[i],z=1)
-            if sm[i] == 1:
+            if 2 == 1: # for static map
                 # print sm
                 marker.color = ColorRGBA(r=0.5,g=0.4,a=1.0)
             else:
@@ -504,7 +434,7 @@ class NN_tb3():
             markers.markers.append(marker)
 
         self.pub_agent_markers.publish(markers)
-        # print markers
+        print(markers)
 
     def visualize_action(self, use_d_min):
         # Display BLUE ARROW from current position to NN desired position
