@@ -27,11 +27,13 @@ class sensor():
         self.obstacles_static = {}
 
         self.cluster = Clusters()
+        self.n_obst = 32
 
         # collect static and dynamic obstacles
         self.obst_topics_dyn = []
         self.obst_topics_static = []
         self.get_obstacle_topics()
+        # rospy.Timer(rospy.Duration(2), self.get_obstacle_topics)
 
         self.pub_obst_odom = rospy.Publisher('/obst_odom',Clusters,queue_size=1)
         self.pub_timer = rospy.Timer(rospy.Duration(0.1),self.pub_odom)
@@ -59,46 +61,56 @@ class sensor():
         print("dynamic obstacles:", len(self.obst_topics_dyn))
         for topic in self.obst_topics_dyn:
             print(topic)
-        print("dynamic obstacles:", len(self.obst_topics_static))
+        print("static obstacles:", len(self.obst_topics_static))
         for topic in self.obst_topics_static:
             print(topic)
-
-                   
+              
     def pub_odom(self,event):
         self.update_cluster = False
         self.fill_cluster()
+        # check topics again if missing
+        # if len(self.obstacles_dyn)+len(self.obstacles_static) < self.n_obst:
+        #     print("true: ", len(self.cluster.mean_points) )
+        #     self.get_obstacle_topics()
+          
+
         self.pub_obst_odom.publish(self.cluster)  
         # reset cluster
         self.cluster = Clusters()  
         self.update_cluster = True
 
     def fill_cluster(self):
+        
         for topic in self.obstacles_dyn:
-            tmp_point = Point()
-            tmp_point.x = self.obstacles_dyn[topic][0].x
-            tmp_point.y = self.obstacles_dyn[topic][0].y
-            tmp_point.z = self.obstacles_dyn[topic][1]
+            if topic in self.obstacles_dyn:
+                tmp_point = Point()
+                tmp_point.x = self.obstacles_dyn[topic][0].x
+                tmp_point.y = self.obstacles_dyn[topic][0].y
+                tmp_point.z = self.obstacles_dyn[topic][1]
 
-            tmp_vel = self.obstacles_dyn[topic][2]
-            
-            self.cluster.mean_points.append(tmp_point)
-            self.cluster.velocities.append(tmp_vel)
-            self.cluster.labels.append(self.obstacles_dyn[topic][4])
+                tmp_vel = self.obstacles_dyn[topic][2]
+                
+                self.cluster.mean_points.append(tmp_point)
+                self.cluster.velocities.append(tmp_vel)
+                self.cluster.labels.append(self.obstacles_dyn[topic][4])
 
         # print("=========================================")
+        
         for topic in self.obst_topics_static:
-            tmp_point = Point()
-            tmp_point.x = self.obstacles_static[topic][0].x
-            tmp_point.y = self.obstacles_static[topic][0].y
-            tmp_point.z = self.obstacles_static[topic][1]
+            if topic in self.obstacles_static:
+                tmp_point = Point()
+                tmp_point.x = self.obstacles_static[topic][0].x
+                tmp_point.y = self.obstacles_static[topic][0].y
+                tmp_point.z = self.obstacles_static[topic][1]
 
-            tmp_vel = self.obstacles_static[topic][2]
-            
-            self.cluster.mean_points.append(tmp_point)
-            self.cluster.velocities.append(tmp_vel)
-            self.cluster.labels.append(self.obstacles_static[topic][3])
+                tmp_vel = self.obstacles_static[topic][2]
+                
+                self.cluster.mean_points.append(tmp_point)
+                self.cluster.velocities.append(tmp_vel)
+                self.cluster.labels.append(self.obstacles_static[topic][3])
         
         # print(self.cluster)
+    
     def cb_marker(self, msg, topic):
 
         if self.update_cluster:
@@ -120,30 +132,17 @@ class sensor():
                         v.x = (pos.x-old_pos.x)/dt
                         v.y = (pos.y-old_pos.y)/dt
                     # update dyn obst
-                    label = list(self.obstacles_dyn).index(topic) + 10
+                    # label = list(self.obstacles_dyn).index(topic) + len(self.obst_topics_static)
+                    label = topic.replace("/flatland_server/debug/model/obstacle_dynamic_with_traj_", "")
+                    label = int(label) + len(self.obst_topics_static)
                 self.obstacles_dyn[topic] = [pos, r, v, m.header.stamp,label]
             
             else:
-                # unsub static obst and update
-                
                 if topic in self.obstacles_static:
-                    label = list(self.obstacles_static).index(topic)
+                    # label = list(self.obstacles_static).index(topic)
+                    label = topic.replace("/flatland_server/debug/model/obstacle_circle_static_", "")
+                    label = int(label)
                 self.obstacles_static[topic] = [pos, r, v, label]
-
-                # self.sub_static.unregister()
-            
-          
-           
-
-
-    # def cbPose(self, msg):
-        
-    #     if self.num_obst != len(self.obstacles_dyn):
-    #         self.num_obst = len(self.obstacles_dyn)
-    #         print("========================================")
-    #         print("Number of obstacles: "+str(self.num_obst))
-    #         for t in self.obst_topics:
-    #             print(t)
 
 
 

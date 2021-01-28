@@ -19,7 +19,7 @@
     <rosparam file="$(find conventional)/config/tb3/dwa_local_planner_params_burger.yaml" command="load" />
     <remap from="cmd_vel" to="$(arg cmd_vel_topic)"/>
     <remap from="odom" to="$(arg odom_topic)"/>
-    <param name="DWAPlannerROS/min_vel_x" value="0.0" if="$(arg move_forward_only)" />
+    <!-- <param name="DWAPlannerROS/min_vel_x" value="0.0" if="$(arg move_forward_only)" /> -->
     <param name="controller_frequency" value="5.0" />
 
   </node>

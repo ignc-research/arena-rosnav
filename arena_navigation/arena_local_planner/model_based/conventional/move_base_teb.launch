@@ -5,6 +5,7 @@
   <arg name="cmd_vel_topic" default="/cmd_vel" />
   <arg name="odom_topic" default="odom" />
   <arg name="move_forward_only" default="false"/>
+  <arg name="goal_topic" default="/plan_manager/subgoal"/>
 
  
   <!-- move_base -->
@@ -21,6 +22,7 @@
     <rosparam file="$(find conventional)/config/base_local_planner_params.yaml" command="load" />
     <remap from="cmd_vel" to="$(arg cmd_vel_topic)"/>
     <remap from="odom" to="$(arg odom_topic)"/>
+    <remap from="move_base/goal" to="$(arg odom_topic)"/>
 
 
     <!-- teb -->

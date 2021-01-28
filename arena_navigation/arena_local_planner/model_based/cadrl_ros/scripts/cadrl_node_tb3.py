@@ -148,7 +148,7 @@ class NN_tb3():
         other_agents = []
 
 
-        xs = []; ys = []; radii = []; labels = []; static_map = []
+        xs = []; ys = []; radii = []; labels = []
         num_clusters = len(msg.mean_points)
         # print(num_clusters)
         for i in range(num_clusters):
@@ -158,10 +158,10 @@ class NN_tb3():
             # radius = PED_RADIUS
             # lower_r = np.linalg.norm(np.array([msg.mean_points[i].x-msg.min_points[i].x, msg.mean_points[i].y-msg.min_points[i].y]))
             # upper_r = np.linalg.norm(np.array([msg.mean_points[i].x-msg.max_points[i].x, msg.mean_points[i].y-msg.max_points[i].y]))
-            # inflation_factor = 1.5
+            inflation_factor = 1.5
             # radius = max(PED_RADIUS, inflation_factor * max(upper_r, lower_r))
             
-            radius = msg.mean_points[i].z
+            radius = msg.mean_points[i].z*inflation_factor
 
 
 
@@ -191,14 +191,6 @@ class NN_tb3():
         self.desired_position.pose.position.x = self.pose.pose.position.x + 1*action[0]*np.cos(action[1])
         self.desired_position.pose.position.y = self.pose.pose.position.y + 1*action[0]*np.sin(action[1])
 
-        # twist = Twist()
-        # twist.linear.x = action[0]
-        # yaw_error = action[1] - self.psi
-        # if yaw_error > np.pi:
-        #     yaw_error -= 2*np.pi
-        # if yaw_error < -np.pi:
-        #     yaw_error += 2*np.pi
-        # twist.angular.z = 2*yaw_error
 
     def find_vmax(self, d_min, heading_diff):
         # Calculate maximum linear velocity, as a function of error in
@@ -237,8 +229,8 @@ class NN_tb3():
             gain = 1.3 # canon: 2
             vw = gain*yaw_error
 
-            use_d_min = True
-            if False: # canon: True
+            use_d_min = False
+            if use_d_min: # canon: True
                 # use_d_min = True
                 # print "vmax:", self.find_vmax(self.d_min,yaw_error)
                 vx = min(self.desired_action[0], self.find_vmax(self.d_min,yaw_error))
@@ -318,13 +310,15 @@ class NN_tb3():
         kp_v = 0.5
         kp_r = 1   
 
+        goal_tol = 0.1
+
         if host_agent.dist_to_goal < 2.0: # and self.percentComplete>=0.9:
             # print "somewhat close to goal"
             pref_speed = max(min(kp_v * (host_agent.dist_to_goal-0.1), pref_speed), 0.0)
             action[0] = min(raw_action[0], pref_speed)
             turn_amount = max(min(kp_r * (host_agent.dist_to_goal-0.1), 1.0), 0.0) * raw_action[1]
             action[1] = util.wrap(turn_amount + self.psi)
-        if host_agent.dist_to_goal < 0.3:
+        if host_agent.dist_to_goal < goal_tol:
             # current goal, reached, increment for next goal
             print("===============\ngoal reached: "+str([goal_x, goal_y]))
             self.stop_moving_flag = True
@@ -425,7 +419,7 @@ class NN_tb3():
             marker.pose.position.y = ys[i]
             # marker.pose.orientation = orientation
             marker.scale = Vector3(x=2*radii[i],y=2*radii[i],z=1)
-            if 2 == 1: # for static map
+            if labels[i] <= 23: # for static map
                 # print sm
                 marker.color = ColorRGBA(r=0.5,g=0.4,a=1.0)
             else:
@@ -434,7 +428,6 @@ class NN_tb3():
             markers.markers.append(marker)
 
         self.pub_agent_markers.publish(markers)
-        print(markers)
 
     def visualize_action(self, use_d_min):
         # Display BLUE ARROW from current position to NN desired position
@@ -489,7 +482,7 @@ def run():
     rospy.init_node('nn_tb3',anonymous=False)
     veh_name = 'tb3_01'
     pref_speed = rospy.get_param("~tb3_speed")
-    veh_data = {'goal':np.zeros((2,)),'radius':0.5,'pref_speed':pref_speed,'kw':10.0,'kp':1.0,'name':'tb3_01'}
+    veh_data = {'goal':np.zeros((2,)),'radius':0.3,'pref_speed':pref_speed,'kw':10.0,'kp':1.0,'name':'tb3_01'}
 
     print('==================================\ncadrl node started')
     print("tb3 speed:", pref_speed, "\n==================================")

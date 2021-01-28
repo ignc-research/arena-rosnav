@@ -5,6 +5,7 @@ from visualization_msgs.msg import Marker, MarkerArray
 import numpy as np
 from std_msgs.msg import ColorRGBA
 import copy
+from ford_msgs.msg import Clusters
 
 class RosNav():
     def __init__(self, goal_topic, subgoal_topic):
@@ -28,7 +29,7 @@ class RosNav():
         # action
         self.raw_action = np.zeros((2,))
         # obstacles 
-        self.obstacles_state = []
+        self.obstacles_state = {}
         # viz
         self.num_poses = 0
         # # subscriber
@@ -38,6 +39,48 @@ class RosNav():
         # # publisher
         self.pub_twist = rospy.Publisher('/cmd_vel',Twist,queue_size=1) 
         self.pub_path_marker = rospy.Publisher('/visualizer/path',Marker,queue_size=1)
+        # self.pub_agent_markers = rospy.Publisher('/other_agents_markers',MarkerArray,queue_size=1)
+
+
+        self.use_clusters = False
+        # self.use_clusters = False
+        if self.use_clusters:
+            self.sub_clusters = rospy.Subscriber('/obst_odom',Clusters, self.cbClusters)
+
+    def cbClusters(self,msg):
+            # print(msg)
+            
+
+
+            xs = []; ys = []; radii = []; labels = []; heading_angles = []
+            num_clusters = len(msg.mean_points)
+            # print(num_clusters)
+            for i in range(num_clusters):
+                index = msg.labels[i]
+                x = msg.mean_points[i].x; y = msg.mean_points[i].y
+                v_x = msg.velocities[i].x; v_y = msg.velocities[i].y
+                # radius = PED_RADIUS
+                # lower_r = np.linalg.norm(np.array([msg.mean_points[i].x-msg.min_points[i].x, msg.mean_points[i].y-msg.min_points[i].y]))
+                # upper_r = np.linalg.norm(np.array([msg.mean_points[i].x-msg.max_points[i].x, msg.mean_points[i].y-msg.max_points[i].y]))
+                inflation_factor = 1.5
+                # radius = max(PED_RADIUS, inflation_factor * max(upper_r, lower_r))
+                
+                radius = msg.mean_points[i].z*inflation_factor
+
+                xs.append(x); ys.append(y); radii.append(radius); labels.append(index); 
+                # helper fields
+                heading_angle = np.arctan2(v_y, v_x)
+                heading_angles = heading_angle
+                
+
+            self.obstacles_state["pos"] = msg.mean_points
+            self.obstacles_state["v"] = msg.velocities
+            self.obstacles_state["label"] = labels
+
+            self.visualize_other_agents(xs, ys, radii, labels)
+            # print(self.obstacles_state["v"])
+            print(v_x)
+          
 
     def update_action(self, action):
         # print 'update action'
@@ -114,3 +157,28 @@ class RosNav():
             marker.color = ColorRGBA(g=0.0,r=0,b=1.0,a=0.3)
             marker.lifetime = rospy.Duration(60)
             self.pub_path_marker.publish(marker)
+
+    def visualize_other_agents(self,xs,ys,radii,labels):
+        markers = MarkerArray()
+        for i in range(len(xs)):
+            # Orange box for other agent
+            marker = Marker()
+            marker.header.stamp = rospy.Time.now()
+            marker.header.frame_id = 'map'
+            marker.ns = 'other_agent'
+            marker.id = labels[i]
+            marker.type = marker.CYLINDER
+            marker.action = marker.ADD
+            marker.pose.position.x = xs[i]
+            marker.pose.position.y = ys[i]
+            # marker.pose.orientation = orientation
+            marker.scale = Vector3(x=2*radii[i],y=2*radii[i],z=1)
+            if labels[i] <= 23: # for static map
+                # print sm
+                marker.color = ColorRGBA(r=0.5,g=0.4,a=1.0)
+            else:
+                marker.color = ColorRGBA(r=1.0,g=0.4,a=1.0)
+            marker.lifetime = rospy.Duration(0.5)
+            markers.markers.append(marker)
+
+        self.pub_agent_markers.publish(markers)

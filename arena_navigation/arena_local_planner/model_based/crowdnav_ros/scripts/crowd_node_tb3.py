@@ -221,7 +221,6 @@ class NN_tb3():
         # ************************************ Output ************************************
         # get action info
         action = self.robot.act(self.ob)
-        position = self.robot.get_observable_state()
 
         # print('\n---------\nrobot position (X,Y):', position.position)
         # print(action)
