@@ -1,0 +1,48 @@
+# Round obstacle
+
+bodies:  # List of named bodies
+  - name: foot1
+    pose: [0, 0, 0] 
+    type: dynamic  
+    color: [0.2, 0.8, 0.2, 0.75] 
+    footprints:
+      - type: circle
+        radius: 0.1
+        center: [0.25, 0.4]
+        density: 0
+        layers: ["static"]
+        collision: false
+  - name: foot2
+    pose: [0, 0, 0] 
+    type: dynamic  
+    color: [0.2, 0.8, 0.2, 0.75] 
+    footprints:
+      - type: circle
+        radius: 0.1
+        center: [-0.25, 0.4]
+        density: 0
+        layers: ["static"]
+        collision: false
+  - name: foot3
+    pose: [0, 0, 0] 
+    type: dynamic  
+    color: [0.2, 0.8, 0.2, 0.75] 
+    footprints:
+      - type: circle
+        radius: 0.1
+        center: [-0.25, -0.4]
+        density: 0
+        layers: ["static"]
+        collision: false
+  - name: foot4
+    pose: [0, 0, 0] 
+    type: dynamic  
+    color: [0.2, 0.8, 0.2, 0.75] 
+    footprints:
+      - type: circle
+        radius: 0.1
+        center: [0.25, -0.4]
+        density: 0
+        layers: ["static"]
+        collision: false
+
