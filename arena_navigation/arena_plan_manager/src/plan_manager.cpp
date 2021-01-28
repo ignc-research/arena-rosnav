@@ -201,11 +201,15 @@ void PlanManager::execFSMCallback(const ros::TimerEvent& e) {
       }
       
       // check if need mid_horizon replan 
-      if(dist_to_subgoal>2 || dist_to_subgoal<0.2){
-        if(cur_state_->vel2d.norm()>0.1){
+
+      if(dist_to_subgoal>2 && cur_state_->vel2d.norm()>0.1 ){
           // if the robot stay, then won't replan mid
           changeFSMExecState(REPLAN_MID, "FSM");
-        }
+          return; 
+      }
+      if(dist_to_subgoal<0.2){
+          changeFSMExecState(REPLAN_MID, "FSM");
+          return;
       }else{
         //cout<<"Normal:Exec local"<<endl;
         return;
