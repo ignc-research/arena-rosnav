@@ -13,15 +13,14 @@ def training_args(parser):
     group.add_argument('--custom-mlp', action='store_true', help='enables training with custom multilayer perceptron')
     group.add_argument('--load', type=str, metavar="[agent name]", help='agent to be loaded for training')
     parser.add_argument('--n', type=int, help='timesteps in total to be generated for training')
-
     parser.add_argument('-log', '--eval_log', action='store_true', help='enables storage of evaluation data')
-
     parser.add_argument('--tb', action='store_true', help='enables tensorboard logging')
 
 
 def run_agent_args(parser):
     parser.add_argument('--no-gpu', action='store_true', help='disables gpu for training')
     parser.add_argument('--load', type=str, metavar="[agent name]", help='agent to be loaded for training')
+    parser.add_argument('-s', '--scenario', type=str, metavar="[scenario name]", default='scenario1', help='name of scenario file for deployment')
     parser.add_argument('-v', '--verbose', choices=['0', '1'], default='1')
 
 
