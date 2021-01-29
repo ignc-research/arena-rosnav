@@ -1,6 +1,6 @@
 
 <launch>
-    <arg name="scenerios_json_path" default="$(find arena_bringup)/../simulator_setup/scenerios/scenario1.json"/>
+    <arg name="scenerios_json_path" default="$(find arena_bringup)/../simulator_setup/scenerios/empty_map_obs20.json"/>
     <arg name="auto_reset" default="true" />
     <arg name="task_mode" default="ScenerioTask"/>
     <arg name="delta" default="0.1"/>
