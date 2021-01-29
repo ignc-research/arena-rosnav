@@ -5,9 +5,13 @@ import rospy
 from std_srvs.srv import Empty, EmptyResponse
 from nav_msgs.msg import Odometry
 from task_generator.tasks import get_predefined_task
+from std_msgs.msg import Int16
 
 class TaskGenerator:
     def __init__(self):
+        #
+        self.sr = rospy.Publisher('/scenario_reset', Int16, queue_size=1)
+        self.nr = 0
         mode = rospy.get_param("~task_mode")
         scenerios_json_path = rospy.get_param("~scenerios_json_path")
         paths = {"scenerios_json_path": scenerios_json_path}
@@ -46,6 +50,8 @@ class TaskGenerator:
         rospy.loginfo("".join(["="]*80))
         rospy.loginfo("goal reached and task reset!")
         rospy.loginfo("".join(["="]*80))
+        self.sr.publish(self.nr)
+        self.nr += 1
 
     def check_robot_pos_callback(self, odom_msg: Odometry):
         robot_pos = odom_msg.pose.pose.position
