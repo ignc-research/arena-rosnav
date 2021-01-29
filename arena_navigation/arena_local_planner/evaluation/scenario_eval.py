@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import math
 import rospy
-
+from matplotlib.pyplot import figure
 # 
 class newBag():
     def __init__(self,bag_name):
@@ -24,8 +24,12 @@ class newBag():
         odom_csv = self.bag.message_by_topic("/odom")
         df_odom = pd.read_csv(odom_csv, error_bad_lines=False)
 
-        reset_csv = self.bag.message_by_topic("/scenario_reset")
-        # df_reset = pd.read_csv(reset_csv, error_bad_lines=False)
+        collision_csv = self.bag.message_by_topic("/collision")
+        df_collision = pd.read_csv(collision_csv, error_bad_lines=False)
+        t_col = []
+        for i in range(len(df_collision)): 
+            t_col.append(df_collision.loc[i, "Time"])
+        print("collisions: ",len(t_col))
 
         old_t = 0 
         pose_x = []
@@ -33,20 +37,37 @@ class newBag():
         t = []
         bags = {}
         n = 0
+        n_c = 0
+
         for i in range(len(df_odom)): 
+            current_time = df_odom.loc[i, "Time"]
+
+            # check if respawned
             if abs(df_odom.loc[i, "pose.pose.position.x"]) <= 0.1 and abs(df_odom.loc[i, "pose.pose.position.y"]) <= 0.1:
-                if df_odom.loc[i, "Time"] - old_t > 10:
-                    old_t = df_odom.loc[i, "Time"]
-                    # reset 
+                if current_time - old_t > 10 and i> 100:
+                    old_t = current_time
                     n += 1
-                    bags["run_"+str(n)] = ([pose_x,pose_y,t])
+                    # store the run
+                    bags["run_"+str(n)] = [pose_x,pose_y,t,n_c]
+
+                    # reset 
                     pose_x = []
                     pose_y = []
                     t = []
-            t.append(df_odom.loc[i, "Time"])
+
+            # get trajectory
+            t.append(current_time)
             pose_x.append(df_odom.loc[i, "pose.pose.position.x"])
             pose_y.append(df_odom.loc[i, "pose.pose.position.y"])
+            # check for col
+            if len(t_col) > 0:
+                if current_time >= t_col[0]:
+                    n_c += 1
+                    t_col.pop(0)
+            else:
+                n_c = 0
 
+            
 
         return bags
   
@@ -68,62 +89,64 @@ class newBag():
             pose_y.append(df_odom.loc[i, "pose.pose.position.y"])
         return t, pose_x, pose_y
 
-    def evalPath(self,pose_x, pose_y, t, bags = None):
-        if bags == None:
-            fig, ax = plt.subplots(figsize=(12, 6))
-            # plt.plot(pose_y,pose_x)
-            # plt.show()
-            ax.plot(pose_y,pose_x, color='black', label='Cosine wave')
-            # plt.xlim([-5, 9])
-            # plt.ylim([-3, 7])
-            plt.show()
+    def evalPath(self,clr,bags = None):
+        global ax
+        for run in bags:
+            pose_x = bags[run][0]
+            pose_y = bags[run][1]
 
             x = np.array(pose_x)
-            y = np.array(pose_y)
+            y = -np.array(pose_y)
+            
+            t = bags[run][2]
+            ax.plot(y,x, color=clr, label='Cosine wave')
+            # plt.xlim([-5, 9])
+            # plt.ylim([-3, 7])
+            
+
+
             dist_array = (x[:-1]-x[1:])**2 + (y[:-1]-y[1:])**2
             path_length = np.sum(np.sqrt(dist_array)) 
+            # print(run)
+            # print(len(t))
             duration = t[len(t)-1] - t[0]
             av_vel = path_length/duration
 
+            n_col = bags[run][3]
 
-            return [duration, path_length, av_vel,len(t)]
-        else:
-            fig, ax = plt.subplots(figsize=(6, 12))
-            for run in bags:
-                pose_y
-                pose_x = bags[run][0]
-                pose_y = bags[run][1]
-                t = bags[run][2]
-                ax.plot(pose_y,pose_x, color='black', label='Cosine wave')
-                # plt.xlim([-5, 9])
-                # plt.ylim([-3, 7])
-                
-
-                x = np.array(pose_x)
-                y = np.array(pose_y)
-                dist_array = (x[:-1]-x[1:])**2 + (y[:-1]-y[1:])**2
-                path_length = np.sum(np.sqrt(dist_array)) 
-                duration = t[len(t)-1] - t[0]
-                av_vel = path_length/duration
-
-                print( [duration, path_length, av_vel,len(t)])
-            plt.show()
+            print([duration, path_length, av_vel, n_col, len(t)])
+            break
+        print()
 
 
 def run():
     rospy.init_node('eval',anonymous=False)
     print("node on")
 
-    # bag = newBag("bags/scenarios/arena_scenario_0.bag")
-    bag = newBag("bags/scenarios/cadrl_scenario_0.bag")
-    bags = bag.split_bag()
-    print(len(bags))
-    run = "run_10"
-    x = bags[run][0]
-    y = bags[run][1]
-    t = bags[run][2]
+    bag_arena = newBag("bags/scenarios/arena_scenario_0.bag")
+    bag_cadrl = newBag("bags/scenarios/cadrl_scenario_0.bag")
+    bag_teb = newBag("bags/scenarios/teb_scenario_0.bag")
+    bag_mpc = newBag("bags/scenarios/mpc_scenario_0.bag")
 
-    bag.evalPath(x,y,t,bags)
+    bags_arena = bag_arena.split_bag()
+    bags_cadrl = bag_cadrl.split_bag()
+    bags_teb = bag_teb.split_bag()
+    bags_mpc = bag_mpc.split_bag()
+
+    # print(len(bags))
+    run = "run_10"
+    x = 0#bags[run][0]
+    y = 0#bags[run][1]
+    t = 0#bags[run][2]
+
+    global ax
+    fig, ax = plt.subplots(figsize=(6, 12))
+    bag_arena.evalPath("black",bags_arena)
+    bag_cadrl.evalPath("blue",bags_cadrl)
+    bag_teb.evalPath("red",bags_teb)
+    bag_mpc.evalPath("purple",bags_mpc)
+    plt.show()
+
     # eval = bag.evalPath()
     # print(eval)
 
