@@ -7,14 +7,29 @@ Panels:
         - /Global Options1
         - /RobotModel1
         - /my_robot1
-        - /my_robot1/Namespaces1
         - /MarkerArray2
         - /MarkerArray3
         - /MarkerArray4
+        - /MarkerArray5
         - /MarkerArray5/Namespaces1
+        - /MarkerArray6
+        - /MarkerArray7
+        - /MarkerArray8
+        - /MarkerArray9
+        - /MarkerArray10
+        - /MarkerArray11
+        - /MarkerArray12
+        - /MarkerArray14
+        - /MarkerArray15
+        - /MarkerArray16
+        - /MarkerArray17
+        - /MarkerArray18
         - /MarkerArray19
-        - /Marker4
-      Splitter Ratio: 0.6526610255241394
+        - /MarkerArray20
+        - /MarkerArray21
+        - /MarkerArray22
+        - /Marker3
+      Splitter Ratio: 0.6484751105308533
     Tree Height: 796
   - Class: rviz/Selection
     Name: Selection
@@ -181,12 +196,12 @@ Visualization Manager:
       Class: rviz/Map
       Color Scheme: map
       Draw Behind: true
-      Enabled: true
+      Enabled: false
       Name: Map
       Topic: /map
       Unreliable: false
       Use Timestamp: false
-      Value: true
+      Value: false
     - Alpha: 0.699999988079071
       Class: rviz/Map
       Color Scheme: map
@@ -335,6 +350,8 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: false
+        _base:
+          Value: true
         base_footprint:
           Value: true
         laser_mount:
@@ -356,6 +373,8 @@ Visualization Manager:
       Show Names: true
       Tree:
         map:
+          _base:
+            {}
           odom:
             base_footprint:
               laser_mount:
@@ -385,24 +404,64 @@ Visualization Manager:
       Queue Size: 100
       Value: false
     - Class: rviz/MarkerArray
-      Enabled: true
+      Enabled: false
       Marker Topic: /flatland_server/debug/model/walker_model0
       Name: walker
       Namespaces:
         {}
       Queue Size: 100
-      Value: true
+      Value: false
     - Class: rviz/MarkerArray
-      Enabled: true
+      Enabled: false
       Marker Topic: /flatland_server/debug/model/cleaner1
       Name: cleaner
       Namespaces:
         {}
       Queue Size: 100
-      Value: true
+      Value: false
+    - Class: rviz/MarkerArray
+      Enabled: false
+      Marker Topic: /flatland_server/debug/model/obstacles_static_wagon_00
+      Name: MarkerArray
+      Namespaces:
+        {}
+      Queue Size: 100
+      Value: false
+    - Class: rviz/MarkerArray
+      Enabled: false
+      Marker Topic: /flatland_server/debug/model/obstacles_static_wagon_01
+      Name: MarkerArray
+      Namespaces:
+        {}
+      Queue Size: 111
+      Value: false
+    - Class: rviz/MarkerArray
+      Enabled: false
+      Marker Topic: /flatland_server/debug/model/obstacles_static_wagon_02
+      Name: MarkerArray
+      Namespaces:
+        {}
+      Queue Size: 100
+      Value: false
+    - Class: rviz/MarkerArray
+      Enabled: false
+      Marker Topic: /flatland_server/debug/model/obstacles_static_wagon_03
+      Name: MarkerArray
+      Namespaces:
+        {}
+      Queue Size: 100
+      Value: false
+    - Class: rviz/MarkerArray
+      Enabled: false
+      Marker Topic: /flatland_server/debug/model/obstacles_static_random_04
+      Name: MarkerArray
+      Namespaces:
+        {}
+      Queue Size: 100
+      Value: false
     - Class: rviz/MarkerArray
       Enabled: true
-      Marker Topic: /flatland_server/debug/model/obstacles_static_random_00
+      Marker Topic: /flatland_server/debug/model/obstacles_static_random_05
       Name: MarkerArray
       Namespaces:
         "": true
@@ -410,172 +469,132 @@ Visualization Manager:
       Value: true
     - Class: rviz/MarkerArray
       Enabled: true
-      Marker Topic: /flatland_server/debug/model/obstacles_static_random_01
+      Marker Topic: /flatland_server/debug/model/obstacles_static_random_06
       Name: MarkerArray
       Namespaces:
         "": true
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /flatland_server/debug/model/obstacles_static_random_02
-      Name: MarkerArray
-      Namespaces:
-        "": true
-      Queue Size: 100
-      Value: true
-    - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /flatland_server/debug/model/stat_obj_3
+      Enabled: false
+      Marker Topic: /flatland_server/debug/model/obstacles_static_wagon_07
       Name: MarkerArray
       Namespaces:
         {}
       Queue Size: 100
-      Value: true
+      Value: false
     - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /flatland_server/debug/model/stat_obj_4
+      Enabled: false
+      Marker Topic: /flatland_server/debug/model/obstacles_static_wagon_08
       Name: MarkerArray
       Namespaces:
         {}
       Queue Size: 100
-      Value: true
+      Value: false
     - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /flatland_server/debug/model/stat_obj_5
+      Enabled: false
+      Marker Topic: /flatland_server/debug/model/obstacles_static_wagon_09
       Name: MarkerArray
       Namespaces:
         {}
       Queue Size: 100
-      Value: true
+      Value: false
     - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /flatland_server/debug/model/stat_obj_6
+      Enabled: false
+      Marker Topic: /flatland_server/debug/model/obstacles_static_wagon_10
       Name: MarkerArray
       Namespaces:
         {}
       Queue Size: 100
-      Value: true
+      Value: false
     - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /flatland_server/debug/model/stat_obj_7
+      Enabled: false
+      Marker Topic: /flatland_server/debug/model/obstacles_static_wagon_11
       Name: MarkerArray
       Namespaces:
         {}
       Queue Size: 100
-      Value: true
+      Value: false
     - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /flatland_server/debug/model/stat_obj_8
+      Enabled: false
+      Marker Topic: /flatland_server/debug/model/obstacles_dynamic_person_two_legged_00
       Name: MarkerArray
       Namespaces:
         {}
       Queue Size: 100
-      Value: true
+      Value: false
     - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /flatland_server/debug/model/stat_obj_9
+      Enabled: false
+      Marker Topic: /flatland_server/debug/model/obstacles_dynamic_person_two_legged_01
       Name: MarkerArray
       Namespaces:
         {}
       Queue Size: 100
-      Value: true
+      Value: false
     - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /flatland_server/debug/model/stat_obj_0
+      Enabled: false
+      Marker Topic: /flatland_server/debug/model/obstacles_dynamic_person_two_legged_02
       Name: MarkerArray
       Namespaces:
         {}
       Queue Size: 100
-      Value: true
+      Value: false
     - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /flatland_server/debug/model/stat_obj_10
+      Enabled: false
+      Marker Topic: /flatland_server/debug/model/obstacles_dynamic_person_two_legged_03
       Name: MarkerArray
       Namespaces:
         {}
       Queue Size: 100
-      Value: true
+      Value: false
     - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /flatland_server/debug/model/stat_obj_11
+      Enabled: false
+      Marker Topic: /flatland_server/debug/model/obstacles_dynamic_person_two_legged_04
       Name: MarkerArray
       Namespaces:
         {}
       Queue Size: 100
-      Value: true
+      Value: false
     - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /flatland_server/debug/model/stat_obj_12
+      Enabled: false
+      Marker Topic: /flatland_server/debug/model/obstacles_dynamic_person_two_legged_05
       Name: MarkerArray
       Namespaces:
         {}
       Queue Size: 100
-      Value: true
+      Value: false
     - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /flatland_server/debug/model/stat_obj_13
+      Enabled: false
+      Marker Topic: /flatland_server/debug/model/obstacles_dynamic_person_two_legged_06
       Name: MarkerArray
       Namespaces:
         {}
       Queue Size: 100
-      Value: true
+      Value: false
     - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /flatland_server/debug/model/stat_obj_14
+      Enabled: false
+      Marker Topic: /flatland_server/debug/model/obstacles_dynamic_person_two_legged_07
       Name: MarkerArray
       Namespaces:
         {}
       Queue Size: 100
-      Value: true
+      Value: false
     - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /flatland_server/debug/model/stat_obj_15
+      Enabled: false
+      Marker Topic: /flatland_server/debug/layer/static_3d
       Name: MarkerArray
       Namespaces:
         {}
       Queue Size: 100
-      Value: true
+      Value: false
     - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /flatland_server/debug/model/obstacles_static_random_01
+      Enabled: false
+      Marker Topic: /flatland_server/debug/layer/static
       Name: MarkerArray
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
-      Value: true
-    - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /flatland_server/debug/model/obstacles_static_random_00
-      Name: MarkerArray
-      Namespaces:
-        "": true
-      Queue Size: 100
-      Value: true
-    - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /flatland_server/debug/model/obstacles_dynamic_random_02
-      Name: MarkerArray
-      Namespaces:
-        "": true
-      Queue Size: 100
-      Value: true
-    - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /flatland_server/debug/model/obstacles_dynamic_random_01
-      Name: MarkerArray
-      Namespaces:
-        "": true
-      Queue Size: 100
-      Value: true
-    - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /flatland_server/debug/model/obstacles_dynamic_random_00
-      Name: MarkerArray
-      Namespaces:
-        "": true
-      Queue Size: 100
-      Value: true
+      Value: false
     - Alpha: 1
       Buffer Length: 3
       Class: rviz/Path
@@ -620,7 +639,7 @@ Visualization Manager:
       Marker Topic: /planning_vis/goal
       Name: Marker
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
       Value: true
     - Class: rviz/Marker
@@ -665,7 +684,7 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Angle: -7.840005874633789
+      Angle: -7.8350067138671875
       Class: rviz/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
@@ -675,18 +694,18 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 25.01328468322754
+      Scale: 18.553178787231445
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
-      X: 9.19975471496582
-      Y: 6.586180686950684
+      X: 9.770020484924316
+      Y: 5.4435906410217285
     Saved: ~
 Window Geometry:
   Displays:
     collapsed: false
   Height: 1025
   Hide Left Dock: false
-  Hide Right Dock: false
+  Hide Right Dock: true
   QMainWindow State: 000000ff00000000fd000000040000000000000271000003a7fc0200000005fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000198000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000003d000003a7000000c900ffffff000000010000010f00000270fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000002800000270000000a400fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004a00000003efc0100000002fb0000000800540069006d00650000000000000004a0000002eb00fffffffb0000000800540069006d00650100000000000004500000000000000000000004c6000003a700000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false

@@ -104,11 +104,10 @@ class ObstaclesManager:
                     i_curr_try += 1
                 else:
                     self.obstacle_name_list.append(spawn_request.name)
-                    self.obstacle_name_str=self.obstacle_name_str+","+spawn_request.name
+                    # self.obstacle_name_str=self.obstacle_name_str+","+spawn_request.name
                     break
             if i_curr_try == max_num_try:
                 raise rospy.ServiceException(f" failed to register obstacles")
-        # print(self.obstacle_name_list)
         return self
 
     def register_random_obstacles(self, num_obstacles: int, p_dynamic=0.5):
@@ -124,8 +123,6 @@ class ObstaclesManager:
         self.register_random_dynamic_obstacles(num_dynamic_obstalces, max_linear_velocity)
         self.register_random_static_obstacles(
             num_obstacles-num_dynamic_obstalces)
-        # self.pub_obstacles_name.publish(self.obstacle_name_str)
-        # print(self.obstacle_name_str)
         rospy.loginfo(
             f"Registed {num_dynamic_obstalces} dynamic obstacles and {num_obstacles-num_dynamic_obstalces} static obstacles")
 
@@ -141,12 +138,18 @@ class ObstaclesManager:
             min_obstacle_radius (float, optional): the minimum radius of the obstacle. Defaults to 0.5.
             max_obstacle_radius (float, optional): the maximum radius of the obstacle. Defaults to 0.5.
         """
-        for _ in range(num_obstacles):
-            model_path = self._generate_random_obstacle_yaml(
-                True, linear_velocity=linear_velocity, angular_velocity_max=angular_velocity_max,
-                min_obstacle_radius=min_obstacle_radius, max_obstacle_radius=max_obstacle_radius)
+        for i in range(num_obstacles):
+            self.obstacle_name_str=self.obstacle_name_str+","+f'dynamic_human_{i}'
+            model_path = os.path.join(rospkg.RosPack().get_path(
+            'simulator_setup'), 'dynamic_obstacles/person_two_legged.model.yaml')
+            with open(model_path, 'r') as f:
+                content = yaml.safe_load(f)
+                #update topic name
+                content['plugins'][1]['ground_truth_pub']=f'dynamic_human_{i}'
+            with open(model_path , 'w') as nf:
+                yaml.dump(content, nf)
             self.register_obstacles(1, model_path, "dynamic")
-            os.remove(model_path)
+            # os.remove(model_path)
 
     def register_random_static_obstacles(self, num_obstacles: int, num_vertices_min=3, num_vertices_max=6, min_obstacle_radius=0.5, max_obstacle_radius=2):
         """register static obstacles with polygon shape.
@@ -162,8 +165,10 @@ class ObstaclesManager:
             num_vertices = random.randint(num_vertices_min, num_vertices_max)
             model_path = self._generate_random_obstacle_yaml(
                 False, num_vertices=num_vertices, min_obstacle_radius=min_obstacle_radius, max_obstacle_radius=max_obstacle_radius)
+            # model_path = os.path.join(rospkg.RosPack().get_path(
+            # 'simulator_setup'), 'dynamic_obstacles/random.model.yaml')
             self.register_obstacles(1, model_path, "static")
-            os.remove(model_path)
+            # os.remove(model_path)
 
     def move_obstacle(self, obstacle_name: str, x: float, y: float, theta: float):
         """move the obstacle to a given position
@@ -255,10 +260,7 @@ class ObstaclesManager:
         body = {}
         body["name"] = "random"
         body["pose"] = [0, 0, 0]
-        if is_dynamic:
-            body["type"] = "dynamic"
-        else:
-            body["type"] = "static"
+        body["type"] = "static"
         body["color"] = [1, 0.2, 0.1, 1.0]  # [0.2, 0.8, 0.2, 0.75]
         body["footprints"] = []
 
@@ -270,44 +272,46 @@ class ObstaclesManager:
         f["collision"] = 'true'
         f["sensor"] = "false"
         # dynamic obstacles have the shape of circle
-        if is_dynamic:
-            f["type"] = "circle"
-            f["radius"] = random.uniform(
-                min_obstacle_radius, max_obstacle_radius)
-        else:
-            f["type"] = "polygon"
-            f["points"] = []
+        f["type"] = "polygon"
+        f["points"] = []
             # random_num_vert = random.randint(
             #     min_obstacle_vert, max_obstacle_vert)
-            radius = random.uniform(
-                min_obstacle_radius, max_obstacle_radius)
+        radius = random.uniform(
+            min_obstacle_radius, max_obstacle_radius)
 
-            for _ in range(num_vertices):
-                angle = 2 * math.pi * random.uniform(0, 1)
-                vert = [math.cos(angle) * radius,
-                        math.sin(angle) * radius]
-                # print(vert)
-                # print(angle)
-                f["points"].append(vert)
-
+        for _ in range(num_vertices):
+            angle = 2 * math.pi * random.uniform(0, 1)
+            vert = [math.cos(angle) * radius,
+                    math.sin(angle) * radius]
+            # print(vert)
+            # print(angle)
+            f["points"].append(vert)
         body["footprints"].append(f)
         # define dict_file
         dict_file = {'bodies': [body], "plugins": []}
-        if is_dynamic:
+        # if is_dynamic:
+        #     model_path = os.path.join(rospkg.RosPack().get_path(
+        #     'simulator_setup'), 'dynamic_obstacles/person_two_legged.model.yaml')
+        #     with open(model_path, 'r') as f:
+        #         content = yaml.safe_load(f)
+        #         # get laser_update_rate
+        #         content['plugins'][1]['ground_truth_pub']=''
+                    # if plugin['type'] == 'PosePub':
+                        
             # We added new plugin called RandomMove in the flatland repo
-            random_move = {}
-            random_move['type'] = 'RandomMove'
-            random_move['name'] = 'RandomMove Plugin'
-            random_move['linear_velocity'] = linear_velocity
-            random_move['angular_velocity_max'] = angular_velocity_max
-            random_move['body'] = 'random'
-            dict_file['plugins'].append(random_move)
+            # random_move = {}
+            # random_move['type'] = 'RandomMove'
+            # random_move['name'] = 'RandomMove Plugin'
+            # random_move['linear_velocity'] = linear_velocity
+            # random_move['angular_velocity_max'] = angular_velocity_max
+            # random_move['body'] = 'random'
+            # dict_file['plugins'].append(random_move)
             # tf_publish={}
             # tf_publish['type']='ModelTfPublisher'
             # tf_publish['name']='tf_publisher'
             # tf_publish['publish_tf_world']= False
             # dict_file['plugins'].append(tf_publish)
-            obstacle_type = 'dynamic'
+            # obstacle_type = 'dynamic'
 
         with open(yaml_path, 'w') as fd:
             yaml.dump(dict_file, fd)
@@ -328,6 +332,7 @@ class ObstaclesManager:
     #                 for footprint in body['footprints']:
     #                     if footprint['type'] == 'circle':
     #                         self.OBSTACLE_RADIUS = footprint.setdefault('radius', 0.2)
+
 
     def remove_obstacle(self, name: str):
         if len(self.obstacle_name_list) != 0:

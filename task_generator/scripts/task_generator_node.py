@@ -8,21 +8,15 @@ sys.path.append('/home/junhui/study/Masterarbeit/arenarosnav/test_ws/src/arena_r
 sys.path.append('/home/junhui/study/Masterarbeit/arenarosnav/test_ws/src/arena_rosnav/arena_navigation/arena_local_planner/learning_based//arena_local_planner_drl/scripts')
 sys.path.append('/home/junhui/study/Masterarbeit/arenarosnav/test_ws/src/arena_rosnav/task_generator')
 sys.path.append('/home/junhui/study/Masterarbeit/arenarosnav/test_ws/src/arena_rosnav/task_generator/task_generator')
-
-from codecs import xmlcharrefreplace_errors
-from logging import error
-
 from tasks import get_predefined_task
 import rospy
 from std_srvs.srv import Trigger, TriggerResponse
-
-
-
 class TaskGenerator:
     def __init__(self):
         mode = rospy.get_param("task_mode")
+        # print()
+        # mode='random'
         self.task=get_predefined_task(mode)
-
         #declare new service task_generator, request are handled in callback task generate
         self.task_service_server= rospy.Service('task_generator', Trigger,self.callback_task_generate)
         
@@ -33,30 +27,9 @@ class TaskGenerator:
             success= True,
             message= self.task.obstacles_manager.obstacle_name_str
         )
-    
-        
-        
-
-
 if __name__ == '__main__':
     rospy.init_node('task_generator')
-    task_generator=TaskGenerator()
-    rospy.spin()
-    
-    
-    
-    
-    
-
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-
+    try:
+        task_generator=TaskGenerator()
+    except rospy.ROSInterruptException: pass    
+    rospy.spin()    

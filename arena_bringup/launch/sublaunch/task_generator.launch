@@ -1,8 +1,9 @@
 
-<launch>
-    <arg name="task_mode"/>
-    <!--  ************** task generator  ***************  -->
-    <node pkg="task_generator" name="task_generator_node" type="task_generator_node.py" output="screen"> 
+<launch>   
+    <!--  ************** task generator  ***************  -->    
+    <arg name="task_mode"       default='random'/>
+    <param name="task_mode"     value="$(arg task_mode)"/>
+    <node pkg="task_generator" name="task_generator_node" type="task_generator_node.py" output="screen"  launch-prefix="xterm -e gdb -ex run --args" > 
+        <!-- <param name="task_mode"/> -->         
     </node>
-
 </launch>

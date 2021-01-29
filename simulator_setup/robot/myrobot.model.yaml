@@ -119,7 +119,7 @@ plugins:
     body: laser_mount
     broadcast_tf: false
     origin: [0.0, 0.0, 0.0]
-    range: 3.5
+    range: 20
     # angle: {min: -3.14159265359, max: 3.14159265359, increment: 0.05235987755}
     #angle: {min: -3.14159265359, max: 3.14159265359, increment: 0.06981317007}
     #for fc or trans 360
@@ -131,7 +131,7 @@ plugins:
   - type: ModelTfPublisher
     name: tf_publisher
     publish_tf_world: true
-    # exclude: ["approx_footprint"]
+    exclude: ["rear_wheel", "left_wheel", "right_wheel"]
   
   # - type: ConstVelocity
   #   name: const_velocity
