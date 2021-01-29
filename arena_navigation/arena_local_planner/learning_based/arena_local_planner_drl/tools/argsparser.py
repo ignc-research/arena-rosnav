@@ -4,7 +4,6 @@ import os
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.tools.custom_mlp_args_utils import *
 
 
-
 def training_args(parser):
     """ program arguments training script """
     parser.add_argument('--no-gpu', action='store_true', help='disables gpu for training')
@@ -19,6 +18,11 @@ def training_args(parser):
     parser.add_argument('-log', '--eval_log', action='store_true', help='enables storage of evaluation data')
 
     parser.add_argument('--tb', action='store_true', help='enables tensorboard logging')
+
+
+def run_agent_args(parser):
+    parser.add_argument('--no-gpu', action='store_true', help='disables gpu for training')
+    parser.add_argument('--load', type=str, metavar="[agent name]", help='agent to be loaded for training')
 
 
 def custom_mlp_args(parser):
@@ -45,11 +49,7 @@ def process_training_args(parsed_args):
         os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
     if parsed_args.custom_mlp:
         setattr(parsed_args, 'net_arch', get_net_arch(parsed_args))
-        delattr(parsed_args, 'agent')
-
-        delattr(parsed_args, 'load')
     else:
-
         if parsed_args.body is not "" or parsed_args.pi is not "" or parsed_args.vf is not "":
             print("[custom mlp] arguments will be ignored..")
         delattr(parsed_args, 'body')
@@ -58,10 +58,24 @@ def process_training_args(parsed_args):
         delattr(parsed_args, 'act_fn')
 
 
+def process_run_agent_args(parsed_args):
+    if parsed_args.no_gpu:
+        os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+    if parsed_args.load is None:
+        raise Exception("No agent name was given!")
+
+
 def parse_training_args(args=None, ignore_unknown=False):
     """ parser for training script """
     arg_populate_funcs = [training_args, custom_mlp_args]
     arg_check_funcs = [process_training_args]
+
+    return parse_various_args(args, arg_populate_funcs, arg_check_funcs, ignore_unknown)
+
+
+def parse_run_agent_args(args=None, ignore_unknown=False):
+    arg_populate_funcs = [run_agent_args]
+    arg_check_funcs = [process_run_agent_args]
 
     return parse_various_args(args, arg_populate_funcs, arg_check_funcs, ignore_unknown)
 
