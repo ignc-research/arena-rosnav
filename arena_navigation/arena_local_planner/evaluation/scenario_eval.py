@@ -120,8 +120,7 @@ class newBag():
 
 
 def run():
-    rospy.init_node('eval',anonymous=False)
-    print("node on")
+ 
 
     bag_arena = newBag("bags/scenarios/arena_scenario_0.bag")
     bag_cadrl = newBag("bags/scenarios/cadrl_scenario_0.bag")
@@ -144,9 +143,6 @@ def run():
     # eval = bag.evalPath()
     # print(eval)
 
-
-
-    rospy.spin()
 
 
 if __name__=="__main__":

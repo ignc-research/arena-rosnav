@@ -211,7 +211,7 @@ void PlanManager::execFSMCallback(const ros::TimerEvent& e) {
           changeFSMExecState(REPLAN_MID, "FSM");
           return;
       }else{
-        cout<<"Normal:Exec local"<<cur_state_->vel2d.norm()<<endl;
+        // cout<<"Normal:Exec local"<<cur_state_->vel2d.norm()<<endl;
         return;
       }
 
@@ -241,7 +241,7 @@ void PlanManager::execFSMCallback(const ros::TimerEvent& e) {
         visualization_->drawSubgoal(planner_collector_->subgoal_, 0.3, Eigen::Vector4d(0, 0, 0, 1.0));
         // reset subgoal start time(be used for timeout criterion)
         subgoal_start_time_=ros::Time::now();
-        cout<<"MID_REPLAN Success"<<endl;
+        // cout<<"MID_REPLAN Success"<<endl;
 
         
         changeFSMExecState(EXEC_LOCAL, "FSM");
@@ -259,13 +259,13 @@ void PlanManager::changeFSMExecState(FSM_EXEC_STATE new_state, std::string pos_c
   string state_str[5] = {"INIT", "WAIT_GOAL", "GEN_NEW_GLOBAL", "REPLAN_MID", "EXEC_LOCAL" };
   int    pre_s        = int(exec_state_);
   exec_state_         = new_state;
-  cout << "[" + pos_call + "]: from " + state_str[pre_s] + " to " + state_str[int(new_state)] << endl;
+  // cout << "[" + pos_call + "]: from " + state_str[pre_s] + " to " + state_str[int(new_state)] << endl;
 }
 
 void PlanManager::printFSMExecState() {
   string state_str[5] =  {"INIT", "WAIT_GOAL", "GEN_NEW_GLOBAL", "REPLAN_MID", "EXEC_LOCAL" };
 
-  cout << "[FSM]: state: " + state_str[int(exec_state_)] << endl;
+  // cout << "[FSM]: state: " + state_str[int(exec_state_)] << endl;
 }
 
 

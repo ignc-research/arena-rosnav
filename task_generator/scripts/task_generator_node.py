@@ -6,6 +6,8 @@ from std_srvs.srv import Empty, EmptyResponse
 from nav_msgs.msg import Odometry
 from task_generator.tasks import get_predefined_task
 from std_msgs.msg import Int16
+# for clearing costmap
+import subprocess
 
 class TaskGenerator:
     def __init__(self):
@@ -36,6 +38,13 @@ class TaskGenerator:
             # declare new service task_generator, request are handled in callback task generate
             self.task_generator_srv_ = rospy.Service(
                 'task_generator', Empty, self.reset_srv_callback)
+
+
+    def clear_costmaps(self):
+        bashCommand = "rosservice call /move_base/clear_costmaps"
+        process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
+        output, error = process.communicate()
+        print([output, error])
 
     def reset_srv_callback(self, req):
         rospy.loginfo("Task Generator received task-reset request!")
