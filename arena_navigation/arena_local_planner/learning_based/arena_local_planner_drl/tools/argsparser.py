@@ -3,7 +3,6 @@ import os
 
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.tools.custom_mlp_utils import get_net_arch
 
-
 def training_args(parser):
     """ program arguments training script """
     parser.add_argument('--no-gpu', action='store_true', help='disables gpu for training')
@@ -62,6 +61,8 @@ def process_training_args(parsed_args):
 def process_run_agent_args(parsed_args):
     if parsed_args.no_gpu:
         os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+    if parsed_args.load is None:
+        raise Exception("No agent name was given!")
 
 
 def parse_training_args(args=None, ignore_unknown=False):
