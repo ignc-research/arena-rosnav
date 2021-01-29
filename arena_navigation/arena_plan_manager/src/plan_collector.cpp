@@ -36,7 +36,7 @@ bool PlanCollector::generate_global_plan(RobotState &start_state,RobotState &end
 bool PlanCollector::generate_subgoal(RobotStatePtr cur_state, RobotStatePtr end_state, 
 nav_msgs::Path global_path, double obstacle_info, double sensor_info){
 
-    double look_ahead_distance=1.5;
+    double look_ahead_distance=2;
     double near_goal_distance=1;
     double tolerance=0.5;
     double dist_to_goal=(cur_state->pose2d-end_state->pose2d).norm();

@@ -2,20 +2,20 @@
     "scenerios": [
         {
             "scene_name": "scenario_1",
-            "repeats": 5,
+            "repeats": 20,
             "dynamic_obstacles": {
                 "dynamic_obs_0": {
                     "obstacle_radius": 0.3,
                     "linear_velocity": 0.1,
                     "start_pos": [
                         2,
-                        -1.5,
+                        0,
                         0
                     ],
                     "waypoints": [
                         [
-                            1,
-                            4,
+                            -1,
+                            2,
                             0
                         ]
                     ],
@@ -30,13 +30,13 @@
                     "linear_velocity": 0.1,
                     "start_pos": [
                         4,
-                        6,
+                        0,
                         0
                     ],
                     "waypoints": [
                         [
-                            -1.5,
-                            -4,
+                            0,
+                            -2,
                             0
                         ]
                     ],
@@ -50,14 +50,14 @@
                     "obstacle_radius": 0.3,
                     "linear_velocity": 0.1,
                     "start_pos": [
-                        6.5,
-                        2,
+                        5,
+                        0,
                         0
                     ],
                     "waypoints": [
                         [
-                            -3.5,
-                            2.6,
+                            0,
+                            2,
                             0
                         ]
                     ],
@@ -72,14 +72,14 @@
                     "obstacle_radius": 0.3,
                     "linear_velocity": 0.1,
                     "start_pos": [
-                        9,
-                        5,
+                        6,
+                        0,
                         0
                     ],
                     "waypoints": [
                         [
+                            0,
                             -2,
-                            5,
                             0
                         ]
                     ],
@@ -94,14 +94,14 @@
                     "obstacle_radius": 0.3,
                     "linear_velocity": 0.1,
                     "start_pos": [
-                        13,
-                        10,
+                        8,
+                        0,
                         0
                     ],
                     "waypoints": [
                         [
                             1,
-                            -5,
+                            -2,
                             0
                         ]
                     ],
@@ -123,12 +123,12 @@
             "robot": {
                 "start_pos": [
                     0,
-                    0.0,
-                    0.0
+                    0,
+                    0
                 ],
                 "goal_pos": [
-                    24,
-                    16,
+                    9,
+                    0,
                     0
                 ]
             },
@@ -136,37 +136,37 @@
                 "watcher_0": {
                     "pos": [
                         2,
-                        -1.5
+                        0
                     ],
-                    "range": 2.9
+                    "range": 1.5
                 },
                 "watcher_1": {
                     "pos": [
-                        4,
-                        6
+                        2,
+                        0
                     ],
-                    "range": 5
+                    "range": 2
                 },
                 "watcher_2": {
                     "pos": [
-                        6.5,
-                        2
+                        2,
+                        0
                     ],
-                    "range": 4.5
+                    "range": 3
                 },
                 "watcher_3": {
                     "pos": [
-                        9,
-                        5
+                        2,
+                        0
                     ],
-                    "range": 4.2
+                    "range": 4
                 },
                 "watcher_4": {
                     "pos": [
-                        13,
-                        10
+                        2,
+                        0
                     ],
-                    "range": 3
+                    "range": 5
                 }
             }
         }

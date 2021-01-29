@@ -30,7 +30,7 @@ class NN_tb3():
         self.sub_pose = rospy.Subscriber('/odom',Odometry,self.cbPose)
         self.sub_global_goal = rospy.Subscriber('/goal',PoseStamped, self.cbGlobalGoal)
         self.sub_subgoal = rospy.Subscriber('/plan_manager/subgoal',PoseStamped, self.cbSubGoal)
-        self.sub_subgoal = rospy.Subscriber('/scan',LaserScan, self.cbScan)
+        self.sub_scan = rospy.Subscriber('/scan',LaserScan, self.cbScan)
         # pubs
         self.pub_pose_marker = rospy.Publisher('/arena_pose',Marker,queue_size=1)
         self.pub_twist = rospy.Publisher('/cmd_vel',Twist,queue_size=1) 

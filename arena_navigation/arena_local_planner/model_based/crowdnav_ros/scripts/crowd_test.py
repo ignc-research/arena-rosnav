@@ -66,33 +66,22 @@ class TestNode():
         # print(num_clusters)
         for i in range(num_clusters):
             index = msg.labels[i]
-            if index > 24:
-                x = msg.mean_points[i].x; y = msg.mean_points[i].y
-                v_x = msg.velocities[i].x; v_y = msg.velocities[i].y
-                vx.append(v_x)
-                vy.append(v_y)
-                # radius = PED_RADIUS
-                # lower_r = np.linalg.norm(np.array([msg.mean_points[i].x-msg.min_points[i].x, msg.mean_points[i].y-msg.min_points[i].y]))
-                # upper_r = np.linalg.norm(np.array([msg.mean_points[i].x-msg.max_points[i].x, msg.mean_points[i].y-msg.max_points[i].y]))
-                inflation_factor = 1.5
-                # radius = max(PED_RADIUS, inflation_factor * max(upper_r, lower_r))
-                
-                radius = msg.mean_points[i].z*inflation_factor
-
-                xs.append(x); ys.append(y); radii.append(radius); labels.append(index); 
-                # static_map.append(msg.counts[i])
-
-                # self.visualize_other_agent(x,y,radius,msg.labels[i])
-                # helper fields
-                heading_angle = np.arctan2(v_y, v_x)
-                pref_speed = np.linalg.norm(np.array([v_x, v_y]))
-                goal_x = x + 5.0; goal_y = y + 5.0
-
+            # if index > 24: for static map
+            x = msg.mean_points[i].x; y = msg.mean_points[i].y
+            v_x = msg.velocities[i].x; v_y = msg.velocities[i].y
+            vx.append(v_x)
+            vy.append(v_y)
+            # radius = PED_RADIUS
+            # lower_r = np.linalg.norm(np.array([msg.mean_points[i].x-msg.min_points[i].x, msg.mean_points[i].y-msg.min_points[i].y]))
+            # upper_r = np.linalg.norm(np.array([msg.mean_points[i].x-msg.max_points[i].x, msg.mean_points[i].y-msg.max_points[i].y]))
+            inflation_factor = 1.5
+            # radius = max(PED_RADIUS, inflation_factor * max(upper_r, lower_r))
             
+            radius = msg.mean_points[i].z*inflation_factor
 
-            # if pref_speed < 0.2:
-            #     pref_speed = 0; v_x = 0; v_y = 0
-            # other_agents.append(agent.Agent(x, y, goal_x, goal_y, radius, pref_speed, heading_angle, index))
+            xs.append(x); ys.append(y); radii.append(radius); labels.append(index); 
+            # self.visualize_other_agent(x,y,radius,msg.labels[i])
+
         self.visualize_other_agents(xs, ys, radii, labels)
         self.other_agents_state["pos"] = [xs, ys] 
         self.other_agents_state["v"] = [vx,vy]
@@ -128,8 +117,8 @@ class TestNode():
         if not self.tb3.goalReached():
             # abs(self.angle2Action) > 0.1 and
             vel = np.array([self.tb3.raw_action[0],self.tb3.raw_action[1]])
-            if abs(self.angle2Action) < math.pi/3:
-                twist.linear.x = 0.2*np.linalg.norm(vel)
+            if abs(self.angle2Action) < math.pi/2:
+                twist.linear.x = 0.1*np.linalg.norm(vel)
             else:
                 twist.linear.x = 0.05*np.linalg.norm(vel)
 
@@ -181,9 +170,12 @@ class TestNode():
                 v = self.other_agents_state[prop]
                 for i in range(len(v[0])):
                    obstacle_vx[i] = v[0][i]
-                   obstacle_vy[i] = v[0][i]
+                   obstacle_vy[i] = v[1][i]
         # print(math.sqrt(obstacle_vx[3]**2+obstacle_vy[3]**2))
-        print([obstacle_x[4], obstacle_y[4]])
+        print("------------------------")
+        for i in range(5):
+            print("pos",i,":",obstacle_x[i]," ",obstacle_y[i])
+            print("vel",i,":",obstacle_vx[i]," ",obstacle_vy[i])
         # initial obstacle instances and set value
         for i in range(self.env_config.getint('sim','human_num')):
             self.env.humans[i].set(obstacle_x[i], obstacle_y[i], goal_x,goal_y, obstacle_vx[i], obstacle_vy[i], theta, obstacle_radius)
@@ -246,7 +238,7 @@ def run():
     # rospy.sleep(0.1) # sometimes node isnt recognized
     print('==================================\ncrowd-node started\n==================================')
 
-    policy_name = "sarl"
+    policy_name = "lstm"
 
     device = 'cpu'
     phase = 'test'

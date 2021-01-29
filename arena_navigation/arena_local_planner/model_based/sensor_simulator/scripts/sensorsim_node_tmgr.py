@@ -10,12 +10,14 @@ from ford_msgs.msg import Clusters
 
 import copy
 
+# col
+from scenario_police import police
 
 class sensor():
 
     def __init__(self):
         # tmgr
-
+        rospy.sleep(5)
         # last updated topic
         self.update_cluster = True
 
@@ -94,7 +96,7 @@ class sensor():
                 self.cluster.velocities.append(tmp_vel)
                 self.cluster.labels.append(self.obstacles_dyn[topic][4])
 
-        # print("=========================================")
+        # static
         
         for topic in self.obst_topics_static:
             if topic in self.obstacles_static:
@@ -134,7 +136,7 @@ class sensor():
                     # update dyn obst
                     # label = list(self.obstacles_dyn).index(topic) + len(self.obst_topics_static)
                     label = topic.replace("/flatland_server/debug/model/obstacle_dynamic_with_traj_", "")
-                    label = int(label) + len(self.obst_topics_static)
+                    label = int(label) + len(self.obst_topics_static) + 1
                 self.obstacles_dyn[topic] = [pos, r, v, m.header.stamp,label]
             
             else:
@@ -147,8 +149,9 @@ class sensor():
 
 
 def run():
-    rospy.init_node('tb3_obstacles',anonymous=False)
-    tb3_obst = sensor()
+    rospy.init_node('tb3_sensor_sim',anonymous=False)
+    sensor()
+    police()
     rospy.spin()
 
 

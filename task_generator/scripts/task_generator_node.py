@@ -38,6 +38,7 @@ class TaskGenerator:
         self.task.reset()
         return EmptyResponse()
 
+
     def reset_task(self):
         info = self.task.reset()
         if info is not None:

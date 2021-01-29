@@ -5,15 +5,15 @@
     <!-- use static map -->
     <arg name="usm" default="true"/>
     <!-- Launch neural net ros wrapper -->
-    <node pkg="sensor_simulator" type="sensorsim_node.py" name="sensorsim_node" output="screen" ns="/sensorsim">
+    <node pkg="sensor_simulator" type="sensorsim_node_tmgr.py" name="sensorsim_node" output="screen" ns="/sensorsim">
 
         <!-- Subscriptions -->
         <!-- <remap from="~pose" to="/odom"/> -->
 
         <!-- Parameters -->
-        <param name="~vx" value="$(arg v_lin)"/>
+        <!-- <param name="~vx" value="$(arg v_lin)"/>
         <param name="~vz" value="$(arg v_ang)"/>
-        <param name="~usm" value="$(arg usm)"/>
+        <param name="~usm" value="$(arg usm)"/> -->
 
 
     </node>

@@ -60,6 +60,8 @@
   <!-- start task_generator node -->
   <include file="$(find arena_bringup)/launch/sublaunch/task_generator.launch" unless="$(arg disable_scenario)">
   </include>
+   <include file="$(find arena_bringup)/launch/sublaunch/sensor_sim.launch" unless="$(arg disable_scenario)">
+  </include>
 
   <!-- start plan manager-->
   <include file="$(find arena_bringup)/launch/sublaunch/plan_manager.launch">

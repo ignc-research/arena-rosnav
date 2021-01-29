@@ -207,11 +207,11 @@ void PlanManager::execFSMCallback(const ros::TimerEvent& e) {
           changeFSMExecState(REPLAN_MID, "FSM");
           return; 
       }
-      if(dist_to_subgoal<0.2){
+      if(dist_to_subgoal<0.4){
           changeFSMExecState(REPLAN_MID, "FSM");
           return;
       }else{
-        //cout<<"Normal:Exec local"<<endl;
+        cout<<"Normal:Exec local"<<cur_state_->vel2d.norm()<<endl;
         return;
       }
 

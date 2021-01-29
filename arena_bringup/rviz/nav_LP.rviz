@@ -5,7 +5,6 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /obstacles1/static1
-        - /crowdnav1
       Splitter Ratio: 0.4374079406261444
     Tree Height: 1145
   - Class: rviz/Selection
@@ -39,7 +38,6 @@ Visualization Manager:
       Name: Path_Marker
       Namespaces:
         action_dir: true
-        path_arrow: true
         path_trail: true
         pose: true
       Queue Size: 100
@@ -227,14 +225,37 @@ Visualization Manager:
         - Alpha: 1
           Buffer Length: 1
           Class: rviz/Path
-          Color: 0; 85; 0
+          Color: 0; 170; 0
           Enabled: true
           Head Diameter: 0.30000001192092896
           Head Length: 0.20000000298023224
           Length: 0.30000001192092896
-          Line Style: Lines
-          Line Width: 0.07999999821186066
-          Name: Global Plan
+          Line Style: Billboards
+          Line Width: 0.05000000074505806
+          Name: teb
+          Offset:
+            X: 0
+            Y: 0
+            Z: 0
+          Pose Color: 255; 0; 0
+          Pose Style: None
+          Radius: 0.029999999329447746
+          Shaft Diameter: 0.10000000149011612
+          Shaft Length: 0.10000000149011612
+          Topic: /move_base/TebLocalPlannerROS/global_plan
+          Unreliable: false
+          Value: true
+        - Alpha: 1
+          Buffer Length: 1
+          Class: rviz/Path
+          Color: 0; 170; 0
+          Enabled: true
+          Head Diameter: 0.30000001192092896
+          Head Length: 0.20000000298023224
+          Length: 0.30000001192092896
+          Line Style: Billboards
+          Line Width: 0.05000000074505806
+          Name: mpc
           Offset:
             X: 0
             Y: 0
@@ -244,7 +265,30 @@ Visualization Manager:
           Radius: 0.029999999329447746
           Shaft Diameter: 0.10000000149011612
           Shaft Length: 0.10000000149011612
-          Topic: /move_base/NavfnROS/plan
+          Topic: /move_base/MpcLocalPlannerROS/global_plan
+          Unreliable: false
+          Value: true
+        - Alpha: 1
+          Buffer Length: 1
+          Class: rviz/Path
+          Color: 0; 170; 0
+          Enabled: true
+          Head Diameter: 0.30000001192092896
+          Head Length: 0.20000000298023224
+          Length: 0.30000001192092896
+          Line Style: Billboards
+          Line Width: 0.029999999329447746
+          Name: dwa
+          Offset:
+            X: 0
+            Y: 0
+            Z: 0
+          Pose Color: 255; 85; 255
+          Pose Style: None
+          Radius: 0.029999999329447746
+          Shaft Diameter: 0.10000000149011612
+          Shaft Length: 0.10000000149011612
+          Topic: /move_base/DWAPlannerROS/global_plan
           Unreliable: false
           Value: true
       Enabled: true
@@ -591,22 +635,22 @@ Visualization Manager:
     - Class: rviz/Group
       Displays:
         - Class: rviz/Marker
-          Enabled: false
+          Enabled: true
           Marker Topic: /cadrl/goal_path_marker
           Name: Marker
           Namespaces:
             {}
           Queue Size: 100
-          Value: false
+          Value: true
         - Class: rviz/MarkerArray
-          Enabled: false
-          Marker Topic: /cadrl/other_agents_markers
+          Enabled: true
+          Marker Topic: /other_agents_markers
           Name: MarkerArray
           Namespaces:
             {}
           Queue Size: 100
-          Value: false
-      Enabled: false
+          Value: true
+      Enabled: true
       Name: crowdnav
   Enabled: true
   Global Options:
@@ -633,7 +677,7 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Angle: -7.865009307861328
+      Angle: -7.855008125305176
       Class: rviz/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
@@ -643,11 +687,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 29.693511962890625
+      Scale: 47.27771759033203
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
-      X: 10.579460144042969
-      Y: 6.853889465332031
+      X: 3.673535108566284
+      Y: 1.1465524435043335
     Saved: ~
 Window Geometry:
   Displays:

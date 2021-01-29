@@ -10,8 +10,6 @@ from visualization_msgs.msg import Marker, MarkerArray
 import numpy as np
 import numpy.matlib
 import pickle
-from matplotlib import cm
-import matplotlib.pyplot as plt
 import copy
 import os
 import time
@@ -72,7 +70,7 @@ class NN_tb3():
         # handle obstacles close to vehicle's front
         self.stop_moving_flag = False
         self.d_min = 0.2
-        self.new_global_goal_received = False
+        self.new_global_goal_received = True
 
         # visualization
         self.path_marker = Marker()
@@ -155,18 +153,11 @@ class NN_tb3():
             index = msg.labels[i]
             x = msg.mean_points[i].x; y = msg.mean_points[i].y
             v_x = msg.velocities[i].x; v_y = msg.velocities[i].y
-            # radius = PED_RADIUS
-            # lower_r = np.linalg.norm(np.array([msg.mean_points[i].x-msg.min_points[i].x, msg.mean_points[i].y-msg.min_points[i].y]))
-            # upper_r = np.linalg.norm(np.array([msg.mean_points[i].x-msg.max_points[i].x, msg.mean_points[i].y-msg.max_points[i].y]))
             inflation_factor = 1.5
-            # radius = max(PED_RADIUS, inflation_factor * max(upper_r, lower_r))
             
             radius = msg.mean_points[i].z*inflation_factor
 
-
-
             xs.append(x); ys.append(y); radii.append(radius); labels.append(index); 
-            # static_map.append(msg.counts[i])
 
             # self.visualize_other_agent(x,y,radius,msg.labels[i])
             # helper fields
@@ -180,7 +171,7 @@ class NN_tb3():
             other_agents.append(agent.Agent(x, y, goal_x, goal_y, radius, pref_speed, heading_angle, index))
         self.visualize_other_agents(xs, ys, radii, labels)
         self.other_agents_state = other_agents
-
+        
     def stop_moving(self):
         twist = Twist()
         self.pub_twist.publish(twist)
@@ -469,8 +460,6 @@ class NN_tb3():
         rospy.loginfo("Stopped %s's velocity." %(self.veh_name))
 
 def run():
-    file_dir = os.path.dirname(os.path.realpath(__file__))
-    plt.rcParams.update({'font.size': 18})
     rospack = rospkg.RosPack()
 
     a = network.Actions()
@@ -486,7 +475,7 @@ def run():
 
     print('==================================\ncadrl node started')
     print("tb3 speed:", pref_speed, "\n==================================")
-
+    rospy.sleep(5)
     nn_tb3 = NN_tb3(veh_name, veh_data, nn, actions)
     rospy.on_shutdown(nn_tb3.on_shutdown)
 
