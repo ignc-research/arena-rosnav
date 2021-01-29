@@ -123,8 +123,8 @@ def print_hyperparameters(hyperparams_obj: agent_hyperparams):
 
 
 def check_hyperparam_format(hyperparams_obj: agent_hyperparams, loaded_hyperparams: dict, PATHS: dict):
-    if not set(hyperparams_obj.__dict__.keys()) == set(loaded_hyperparams.keys()):
-        raise AssertionError("'hyperparameters.json' in %s has unmatching keys" % PATHS.get('model'))
+    """if not set(hyperparams_obj.__dict__.keys()) == set(loaded_hyperparams.keys()):
+        raise AssertionError("'hyperparameters.json' in %s has unmatching keys" % PATHS.get('model'))"""
     if not isinstance(loaded_hyperparams['discrete_action_space'], bool):
         raise TypeError("Parameter 'discrete_action_space' not of type bool")
     if not loaded_hyperparams['task_mode'] in ["custom", "random", "staged"]:

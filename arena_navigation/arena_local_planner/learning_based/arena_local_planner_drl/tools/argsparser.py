@@ -20,6 +20,12 @@ def training_args(parser):
     parser.add_argument('--tb', action='store_true', help='enables tensorboard logging')
 
 
+def run_agent_args(parser):
+    parser.add_argument('--no-gpu', action='store_true', help='disables gpu for training')
+    parser.add_argument('--load', type=str, metavar="[agent name]", help='agent to be loaded for training')
+    parser.add_argument('-v', '--verbose', choices=['0', '1'], default='1')
+
+
 def custom_mlp_args(parser):
     """ arguments for the custom mlp mode """
     custom_mlp_args = parser.add_argument_group('custom mlp args', 'architecture arguments for the custom mlp')
@@ -53,10 +59,23 @@ def process_training_args(parsed_args):
         delattr(parsed_args, 'act_fn')
 
 
+def process_run_agent_args(parsed_args):
+    if parsed_args.no_gpu:
+        os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+
+
 def parse_training_args(args=None, ignore_unknown=False):
     """ parser for training script """
     arg_populate_funcs = [training_args, custom_mlp_args]
     arg_check_funcs = [process_training_args]
+
+    return parse_various_args(args, arg_populate_funcs, arg_check_funcs, ignore_unknown)
+
+
+def parse_run_agent_args(args=None, ignore_unknown=False):
+    """ parser for training script """
+    arg_populate_funcs = [run_agent_args]
+    arg_check_funcs = [process_run_agent_args]
 
     return parse_various_args(args, arg_populate_funcs, arg_check_funcs, ignore_unknown)
 
