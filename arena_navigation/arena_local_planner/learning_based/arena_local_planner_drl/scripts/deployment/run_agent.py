@@ -6,7 +6,7 @@ import numpy as np
 import time
 
 from stable_baselines3 import PPO
-from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv
+from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv, VecNormalize
 
 from task_generator.task_generator.tasks import get_predefined_task
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.rl_agent.envs.flatland_gym_env import FlatlandEnv
@@ -41,33 +41,28 @@ if __name__ == "__main__":
     # initialize task manager
     task_manager = get_predefined_task(mode='ScenerioTask', PATHS=PATHS)
     # initialize gym env
-    env = FlatlandEnv(
-        task_manager, PATHS.get('robot_setting'), PATHS.get('robot_as'), params['reward_fnc'], params['discrete_action_space'], goal_radius=0.50, max_steps_per_episode=350)
+    env = DummyVecEnv([lambda: FlatlandEnv(
+        task_manager, PATHS.get('robot_setting'), PATHS.get('robot_as'), params['reward_fnc'], params['discrete_action_space'], goal_radius=0.50, max_steps_per_episode=350)])
+    if params['normalize']:
+        env = VecNormalize(env, training=False, norm_obs=True, norm_reward=False, clip_reward=15)
+
     # load agent
     agent = PPO.load(os.path.join(PATHS['model'], "best_model.zip"), env)
-
+    
     env.reset()
-    
-    # send action 'stand still' in order to get first obs
-    if params['discrete_action_space']:
-        obs, rewards, dones, info = env.step(6)
-    else:
-        obs, rewards, dones, info = env.step([0, 0])
-
-    
     first_obs = True
     # iterate through each scenario max_repeat times
     while True:
         if first_obs:
             # send action 'stand still' in order to get first obs
             if params['discrete_action_space']:
-                obs, rewards, dones, info = env.step(6)
+                obs, rewards, dones, info = env.step([6])
             else:
-                obs, rewards, dones, info = env.step([0, 0])
+                obs, rewards, dones, info = env.step([[0.0, 0.0]])
             first_obs = False
             cum_reward = 0.0
 
-        action, _ = agent.predict(obs)
+        action, _ = agent.predict(obs, deterministic=True)
 
         # clip action
         if not params['discrete_action_space']:
@@ -80,9 +75,9 @@ if __name__ == "__main__":
         
         if done:
             if args.verbose == '1':
-                if info['done_reason'] == 0:
+                if info[0]['done_reason'] == 0:
                     done_reason = "exceeded max steps"
-                elif info['done_reason'] == 1:
+                elif info[0]['done_reason'] == 1:
                     done_reason = "collision"
                 else:
                     done_reason = "goal reached"
