@@ -6,7 +6,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import math
-import rospy
 from matplotlib.pyplot import figure
 # 
 class newBag():
