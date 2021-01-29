@@ -40,7 +40,7 @@ if __name__ == "__main__":
     # initialize task manager
     task_manager = get_predefined_task(mode='ScenerioTask', PATHS=PATHS)
     # initialize gym env
-    env = DummyVecEnv([lambda: FlatlandEnv(task_manager, PATHS.get('robot_setting'), PATHS.get('robot_as'), params['reward_fnc'], params['discrete_action_space'], goal_radius=1.00, max_steps_per_episode=350)])
+    env = FlatlandEnv(task_manager, PATHS.get('robot_setting'), PATHS.get('robot_as'), params['reward_fnc'], params['discrete_action_space'], goal_radius=0.50, max_steps_per_episode=350)
     # load agent
     agent = PPO.load(os.path.join(PATHS['model'], "best_model.zip"), env)
 
@@ -48,12 +48,23 @@ if __name__ == "__main__":
     
     # send action 'stand still' in order to get first obs
     if params['discrete_action_space']:
-        obs, rewards, dones, info = env.step(len(env.action_space)-1)
+        obs, rewards, dones, info = env.step(6)
     else:
         obs, rewards, dones, info = env.step([0, 0])
 
+    
+    first_obs = True
     # iterate through each scenario max_repeat times
     while True:
+        if first_obs:
+            # send action 'stand still' in order to get first obs
+            if params['discrete_action_space']:
+                obs, rewards, dones, info = env.step(6)
+            else:
+                obs, rewards, dones, info = env.step([0, 0])
+            first_obs = False
+            cum_reward = 0.0
+
         action, _ = agent.predict(obs)
 
         # clip action
@@ -63,11 +74,10 @@ if __name__ == "__main__":
         # apply action
         obs, rewards, done, info = env.step(action)
 
-        cum_reward = 0.0
         cum_reward += rewards
         
-        if args.verbose == '1':
-            if done:
+        if done:
+            if args.verbose == '1':
                 if info['done_reason'] == 0:
                     done_reason = "exceeded max steps"
                 elif info['done_reason'] == 1:
@@ -76,7 +86,8 @@ if __name__ == "__main__":
                     done_reason = "goal reached"
                 
                 print("Episode finished with reward of %f (finish reason: %s)"% (cum_reward, done_reason))
-                cum_reward = 0
+            env.reset()
+            first_obs = True
 
         time.sleep(0.0001)
         if rospy.is_shutdown():
