@@ -34,7 +34,7 @@ if __name__ == "__main__":
     # initialize hyperparams
     params = load_hyperparameters_json(agent_hyperparams, PATHS)
 
-    print("START RUNNING AGENT:    %s \n" % params['agent_name'])
+    print("START RUNNING AGENT:    %s" % params['agent_name'])
     print_hyperparameters(params)
 
     # initialize task manager
@@ -46,11 +46,13 @@ if __name__ == "__main__":
 
     env.reset()
     
+    # send action 'stand still' in order to get first obs
     if params['discrete_action_space']:
         obs, rewards, dones, info = env.step(len(env.action_space)-1)
     else:
         obs, rewards, dones, info = env.step([0, 0])
 
+    # iterate through each scenario max_repeat times
     while True:
         action, _ = agent.predict(obs)
 
@@ -63,8 +65,7 @@ if __name__ == "__main__":
 
         cum_reward = 0.0
         cum_reward += rewards
-
-        # Episode over?
+        
         if args.verbose == '1':
             if done:
                 if info['done_reason'] == 0:
