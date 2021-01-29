@@ -4,7 +4,7 @@ import rospy
 from datetime import datetime as dt
 
 from stable_baselines3 import PPO
-from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv
+from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv, VecNormalize
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.callbacks import EvalCallback
 
@@ -31,8 +31,10 @@ n_epochs = 4
 clip_range = 0.2
 reward_fnc = "rule_01"
 discrete_action_space = False
+normalize = True
 start_stage = 1
 task_mode = "staged"    # custom, random or staged
+normalize = True
 ##########################
 
 
@@ -104,19 +106,29 @@ if __name__ == "__main__":
     print("________ STARTING TRAINING WITH:  %s ________\n" % AGENT_NAME)
 
     # initialize hyperparameters (save to/ load from json)
-    hyperparams_obj = agent_hyperparams(AGENT_NAME, robot, gamma, n_steps, ent_coef, learning_rate, vf_coef,max_grad_norm, gae_lambda, batch_size, 
-                                    n_epochs, clip_range, reward_fnc, discrete_action_space, task_mode, start_stage)
+    hyperparams_obj = agent_hyperparams(
+        AGENT_NAME, robot, gamma, n_steps, ent_coef, learning_rate, vf_coef,max_grad_norm, gae_lambda, batch_size, 
+        n_epochs, clip_range, reward_fnc, discrete_action_space, normalize, task_mode, start_stage)
     params = initialize_hyperparameters(agent_name=AGENT_NAME, PATHS=PATHS, hyperparams_obj=hyperparams_obj, load_target=args.load)
 
     # instantiate gym environment
     n_envs = 1
     task_manager = get_predefined_task(params['task_mode'], params['curr_stage'], PATHS)
-    env = DummyVecEnv([lambda: FlatlandEnv(task_manager, PATHS.get('robot_setting'), PATHS.get('robot_as'), params['reward_fnc'], params['discrete_action_space'], goal_radius=1.00, max_steps_per_episode=350)] * n_envs)
-    
+    env = DummyVecEnv(
+        [lambda: FlatlandEnv(task_manager, PATHS.get('robot_setting'), PATHS.get('robot_as'), params['reward_fnc'], params['discrete_action_space'], goal_radius=1.00, max_steps_per_episode=200)] * n_envs)
+    if params['normalize']:
+        env = VecNormalize(env, training=True, norm_obs=True, norm_reward=False, clip_reward=15)
+
     # instantiate eval environment
-    trainstage_cb = InitiateNewTrainStage(TaskManager=task_manager, TreshholdType="rew", rew_threshold=13.5, task_mode=params['task_mode'], verbose=1)
-    eval_env = Monitor(FlatlandEnv(task_manager, PATHS.get('robot_setting'), PATHS.get('robot_as'), params['reward_fnc'], params['discrete_action_space'], goal_radius=1.00, max_steps_per_episode=350), PATHS.get('eval'), info_keywords=("done_reason",))
-    eval_cb = EvalCallback(eval_env, n_eval_episodes=20, eval_freq=10000, log_path=PATHS.get('eval'), best_model_save_path=PATHS.get('model'), deterministic=True, callback_on_new_best=trainstage_cb)
+    trainstage_cb = InitiateNewTrainStage(TaskManager=task_manager, TreshholdType="rew", rew_threshold=14.5, task_mode=params['task_mode'], verbose=1)
+    eval_env = Monitor(FlatlandEnv(
+        task_manager, PATHS.get('robot_setting'), PATHS.get('robot_as'), params['reward_fnc'], params['discrete_action_space'], goal_radius=1.00, max_steps_per_episode=250),
+        PATHS.get('eval'), info_keywords=("done_reason",))
+    eval_env = DummyVecEnv([lambda: eval_env])
+    if params['normalize']:
+        eval_env = VecNormalize(eval_env, training=False, norm_obs=True, norm_reward=False, clip_reward=15)
+    eval_cb = EvalCallback(
+        eval_env, n_eval_episodes=20, eval_freq=15000, log_path=PATHS.get('eval'), best_model_save_path=PATHS.get('model'), deterministic=True, callback_on_new_best=trainstage_cb)
 
     # determine mode
     if args.custom_mlp:
@@ -149,7 +161,7 @@ if __name__ == "__main__":
         elif os.path.isfile(os.path.join(PATHS.get('model'), "best_model.zip")):
             model = PPO.load(os.path.join(PATHS.get('model'), "best_model"), env)
 
-    # set num of timesteps to be generated 
+    # set num of timesteps to be generated robot
     if args.n is None:
         n_timesteps = 60000000
     else:
