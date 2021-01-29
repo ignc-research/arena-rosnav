@@ -11,7 +11,11 @@ void PlanCollector::initPlanModules(ros::NodeHandle &nh){
     goal_=geometry_msgs::PoseStamped();
     
     std::string global_plan_service_name = "/move_base/NavfnROS/make_plan";  
-    global_plan_client_= nh.serviceClient<nav_msgs::GetPlan>(global_plan_service_name);  
+    global_plan_client_= nh.serviceClient<nav_msgs::GetPlan>(global_plan_service_name);
+
+    // get plan parameter
+    nh.param("look_ahead_distance", look_ahead_distance_, 1.5);
+    nh.param("tolerance_approach", tolerance_approach_, 0.5);  
 }
 
 bool PlanCollector::generate_global_plan(RobotState &start_state,RobotState &end_state){
@@ -36,13 +40,11 @@ bool PlanCollector::generate_global_plan(RobotState &start_state,RobotState &end
 bool PlanCollector::generate_subgoal(RobotStatePtr cur_state, RobotStatePtr end_state, 
 nav_msgs::Path global_path, double obstacle_info, double sensor_info){
 
-    double look_ahead_distance=2;
-    double near_goal_distance=1;
-    double tolerance=0.5;
+    
     double dist_to_goal=(cur_state->pose2d-end_state->pose2d).norm();
     
     // find safe place
-    if(dist_to_goal<near_goal_distance){
+    if(dist_to_goal<look_ahead_distance_){
         subgoal_=end_state->to_PoseStampted();
         return true;
     }
@@ -54,7 +56,7 @@ nav_msgs::Path global_path, double obstacle_info, double sensor_info){
         wp_pose2d(0)=global_path.poses[i].pose.position.x;
         wp_pose2d(1)=global_path.poses[i].pose.position.y;
         double dist_to_robot=(cur_state->pose2d-wp_pose2d).norm();
-        if((dist_to_robot<look_ahead_distance+tolerance)&&(dist_to_robot>look_ahead_distance-tolerance)){
+        if((dist_to_robot<look_ahead_distance_+tolerance_approach_)&&(dist_to_robot>look_ahead_distance_-tolerance_approach_)){
             if(i>subgoal_id){
                 subgoal_id=i;
             }
