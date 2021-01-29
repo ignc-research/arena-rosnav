@@ -133,12 +133,6 @@ def run():
     bags_teb = bag_teb.split_bag()
     bags_mpc = bag_mpc.split_bag()
 
-    # print(len(bags))
-    run = "run_10"
-    x = 0#bags[run][0]
-    y = 0#bags[run][1]
-    t = 0#bags[run][2]
-
     global ax
     fig, ax = plt.subplots(figsize=(6, 12))
     bag_arena.evalPath("black",bags_arena)
