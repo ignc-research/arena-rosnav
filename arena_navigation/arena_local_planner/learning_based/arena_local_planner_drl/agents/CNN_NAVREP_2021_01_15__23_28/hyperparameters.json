@@ -13,6 +13,7 @@
     "clip_range": 0.2,
     "reward_fnc": "rule_00",
     "discrete_action_space": true,
+    "normalize": false,
     "task_mode": "staged",
     "curr_stage": 1,
     "n_timesteps": 0

@@ -50,7 +50,7 @@ class FlatlandEnv(gym.Env):
 
         # reward calculator
         if safe_dist is None:
-            safe_dist = 1.1*self._robot_radius
+            safe_dist = 1.5*self._robot_radius
 
         self.reward_calculator = RewardCalculator(
             robot_radius=self._robot_radius, safe_dist=1.1*self._robot_radius, goal_radius=goal_radius, rule=reward_fnc)
@@ -58,8 +58,10 @@ class FlatlandEnv(gym.Env):
         # action agent publisher
         self.agent_action_pub = rospy.Publisher('cmd_vel', Twist, queue_size=1)
         # service clients
-        self._service_name_step = '/step_world'
-        self._sim_step_client = rospy.ServiceProxy(
+        self._is_train_mode = rospy.get_param("train_mode")
+        if self._is_train_mode:
+            self._service_name_step = '/step_world'
+            self._sim_step_client = rospy.ServiceProxy(
             self._service_name_step, StepWorld)
         self.task = task
         self._steps_curr_episode = 0
@@ -81,7 +83,9 @@ class FlatlandEnv(gym.Env):
                     for footprint in body['footprints']:
                         if footprint['type'] == 'circle':
                             self._robot_radius = footprint.setdefault(
-                                'radius', 0.2)
+                                'radius', 0.3)*1.04
+                        if footprint['radius']:
+                            self._robot_radius = footprint['radius']*1.04
             # get laser related information
             for plugin in robot_data['plugins']:
                 if plugin['type'] == 'Laser':
@@ -153,7 +157,8 @@ class FlatlandEnv(gym.Env):
         # set task
         # regenerate start position end goal position of the robot and change the obstacles accordingly
         self.agent_action_pub.publish(Twist())
-        self._sim_step_client()
+        if self._is_train_mode:
+            self._sim_step_client()
         self.task.reset()
         self.reward_calculator.reset()
         self._steps_curr_episode = 0

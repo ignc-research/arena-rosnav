@@ -32,7 +32,6 @@ class NN_tb3():
         self.sub_subgoal = rospy.Subscriber('/plan_manager/subgoal',PoseStamped, self.cbSubGoal)
         self.sub_scan = rospy.Subscriber('/scan',LaserScan, self.cbScan)
         # pubs
-        self.pub_pose_marker = rospy.Publisher('/arena_pose',Marker,queue_size=1)
         self.pub_twist = rospy.Publisher('/cmd_vel',Twist,queue_size=1) 
 
         self.nn_timer = rospy.Timer(rospy.Duration(0.01),self.cbComputeActionArena)
@@ -147,90 +146,11 @@ class NN_tb3():
         twist = Twist()
         twist.linear.x = action_space[action][0]
         twist.angular.z = action_space[action][1]
-        
-        # if not self.goalReached():
-        #     # print(actionLib[action][0])
-        #     twist.linear.x = action_space[action][0]
-        #     # if rotate only
-        #     if action_space[action][0]==0:
-        #         twist.angular.z = action_space[action][1]
-        #     # otherewise check if angle error big enough
-        #     elif abs(self.deg_phi)>5: 
-        #         twist.angular.z = action_space[action][1]
 
         print("action "+str(action)+": "+str(action_space[action]))
         print("twist: "+str([twist.linear.x, twist.angular.z]))
         # print((sample))
         self.pub_twist.publish(twist)
-
-
-    def visualize_subgoal(self,subgoal, subgoal_options=None):
-        markers = MarkerArray()
-
-        # Display GREEN DOT at NN subgoal
-        marker = Marker()
-        marker.header.stamp = rospy.Time.now()
-        marker.header.frame_id = 'map'
-        marker.ns = 'subgoal'
-        marker.id = 0
-        marker.type = marker.CYLINDER
-        marker.action = marker.ADD
-        marker.pose.position.x = subgoal[0]
-        marker.pose.position.y = subgoal[1]
-        marker.scale = Vector3(x=0.2,y=0.2,z=0)
-        marker.color = ColorRGBA(r=0.0,g=0.0,b=0.0,a=1.0)
-        marker.lifetime = rospy.Duration(2.0)
-        self.pub_goal_path_marker.publish(marker)
-
-        if subgoal_options is not None:
-            for i in xrange(len(subgoal_options)):
-                marker = Marker()
-                marker.header.stamp = rospy.Time.now()
-                marker.header.frame_id = 'map'
-                marker.ns = 'subgoal'
-                marker.id = i+1
-                # marker.type = marker.CUBE
-                marker.type = marker.CYLINDER
-                marker.action = marker.ADD
-                marker.pose.position.x = subgoal_options[i][0]
-                marker.pose.position.y = subgoal_options[i][1]
-                marker.scale = Vector3(x=0.2,y=0.2,z=0.2)
-                marker.color = ColorRGBA(r=0.0,g=0.0,b=255,a=1.0)
-                marker.lifetime = rospy.Duration(1.0)
-                self.pub_goal_path_marker.publish(marker)
-
-    def visualize_pose(self,pos,orientation):
-        # Yellow Box for Vehicle
-        marker = Marker()
-        marker.header.stamp = rospy.Time.now()
-        marker.header.frame_id = 'map'
-        marker.ns = 'agent'
-        marker.id = 0
-        marker.type = marker.CUBE
-        marker.action = marker.ADD
-        marker.pose.position = pos
-        marker.pose.orientation = orientation
-        marker.scale = Vector3(x=0.7,y=0.42,z=1)
-        marker.color = ColorRGBA(r=1.0,g=1.0,a=1.0)
-        marker.lifetime = rospy.Duration(1.0)
-        self.pub_pose_marker.publish(marker)
-
-        # Red track for trajectory over time
-        marker = Marker()
-        marker.header.stamp = rospy.Time.now()
-        marker.header.frame_id = 'map'
-        marker.ns = 'agent'
-        marker.id = self.num_poses
-        marker.type = marker.CUBE
-        marker.action = marker.ADD
-        marker.pose.position = pos
-        marker.pose.orientation = orientation
-        marker.scale = Vector3(x=0.2,y=0.2,z=0.2)
-        marker.color = ColorRGBA(r=1.0,a=1.0)
-        marker.lifetime = rospy.Duration(10.0)
-        self.pub_pose_marker.publish(marker)
-
-        # print marker
 
     def on_shutdown(self):
         rospy.loginfo("[%s] Shutting down Node.")

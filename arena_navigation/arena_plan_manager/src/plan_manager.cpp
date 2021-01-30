@@ -14,6 +14,14 @@ void PlanManager::init(ros::NodeHandle& nh) {
     n.param("train_mode", train_mode, false);
     mode_=train_mode?TRAIN:TEST;
 
+    nh.param("look_ahead_distance", look_ahead_distance_, 1.5);
+    nh.param("tolerance_approach", tolerance_approach_, 0.5);
+
+    nh.param("timeout_goal", timeout_goal_, 300.);         //sec
+    nh.param("timeout_subgoal", timeout_subgoal_, 60.);    //sec
+
+    
+
     /* initialize main modules */
     planner_collector_.reset(new PlanCollector);
     planner_collector_->initPlanModules(nh);
@@ -149,69 +157,72 @@ void PlanManager::execFSMCallback(const ros::TimerEvent& e) {
 
       /* check env determine, calculate criterion */
       // fake obstacle info
-      double dist_to_obstacle;
-      random_device rd;
-      uniform_real_distribution<double> rand_obstacle;
-      uniform_real_distribution<double> rand_goal;
-      rand_obstacle = uniform_real_distribution<double>(0.0, 3.0 );
-      default_random_engine eng(rd());
-      dist_to_obstacle=rand_obstacle(eng);
+      //double dist_to_obstacle;
+      //random_device rd;
+      //uniform_real_distribution<double> rand_obstacle;
+      //uniform_real_distribution<double> rand_goal;
+      //rand_obstacle = uniform_real_distribution<double>(0.0, 3.0 );
+      //default_random_engine eng(rd());
+      //dist_to_obstacle=rand_obstacle(eng);
    
-      // distance to (global) goal
+      // calculate: distance to (global) goal
       double dist_to_goal;
       dist_to_goal=(cur_state_->pose2d-end_state_->pose2d).norm();
       
-      // distance to (mid horizon) subgoal
+      // calculate: distance to (mid horizon) subgoal
       double dist_to_subgoal;
       dist_to_subgoal=(cur_state_->pose2d-planner_collector_->subgoal_state_->pose2d).norm();
       
-      // timeout: avoid task too much time 
-      double timeout_goal,timeout_subgoal;
-      timeout_goal=60*5;
-      timeout_subgoal=60*1;
+      // calculate: timecot to avoid task takes too much time 
       double time_cost_goal=ros::Time::now().toSec()-start_time_.toSec();
       double time_cost_subgoal=ros::Time::now().toSec()-subgoal_start_time_.toSec();
       
-      // tolerance goal, torlerance subgoal
-      double tolerance_goal=0.5;
-      double tolerance_subgoal=0.3;
-
-      /*check state_transfer criterion*/
+     
+      /* check state_transfer: Goal Criterion */
       // check if reached goal
-      if(dist_to_goal<tolerance_goal){
+      if(dist_to_goal<tolerance_approach_){
         have_goal_=false;
         cout<<"reached to goal success"<<endl;
         changeFSMExecState(WAIT_GOAL, "FSM");
         return;
       }
 
-      // check if timeout
-      if(time_cost_goal>timeout_goal){
+      // check if goal timeout
+      if(time_cost_goal>timeout_goal_){
         have_goal_=false;
         cout<<"failed to goal"<<endl;
         changeFSMExecState(WAIT_GOAL, "FSM");
         return;
       }
-      // check if timeout subgoal
-      if(time_cost_subgoal>timeout_subgoal){
+      
+      /* check state_transfer: Subgoal Criterion */
+      // check if subgoal timeout 
+      if(time_cost_subgoal>timeout_subgoal_){
         cout<<"subgoal has been published for"<<time_cost_subgoal<<"sec"<<endl;
         cout<<"subgoal timeout"<<endl;
         changeFSMExecState(REPLAN_MID, "FSM");
         return;
       }
       
-      // check if need mid_horizon replan 
-
-      if(dist_to_subgoal>2 && cur_state_->vel2d.norm()>0.1 ){
-          // if the robot stay, then won't replan mid
-          changeFSMExecState(REPLAN_MID, "FSM");
+      // check if subgoal distance to current robot position is too far away
+      if(dist_to_subgoal>look_ahead_distance_){
+          // if the robot stopped at a pos far from subgoal, then won't replan mid, but wait for timeout and global replan
+          bool robot_stopped=cur_state_->vel2d.norm()<0.1;
+          if(!robot_stopped){ 
+            changeFSMExecState(REPLAN_MID, "FSM");
+          }
           return; 
       }
-      if(dist_to_subgoal<0.4){
+
+
+      // check if subgoal is reached. If reached then replan
+      if(dist_to_subgoal<tolerance_approach_){
           changeFSMExecState(REPLAN_MID, "FSM");
           return;
       }else{
-        // cout<<"Normal:Exec local"<<cur_state_->vel2d.norm()<<endl;
+        
+        //cout<<"Normal:Exec local"<<endl;
+
         return;
       }
 
@@ -228,7 +239,6 @@ void PlanManager::execFSMCallback(const ros::TimerEvent& e) {
       }
       /* get current state info */
       //RobotStatePtr mid_start_state=new RobotState(cur_state_->pose2d,cur_state_->theta,cur_state_->vel2d,cur_state_->w);
-      double dist_to_goal=1.0;
       double obstacle_info=1.0;
       double sensor_info=1.0;
       

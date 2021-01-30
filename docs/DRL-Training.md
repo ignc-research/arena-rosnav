@@ -208,6 +208,38 @@ Exemplary training curriculum:
 | 5               |  10              | 10                 |
 | 6               |  13              | 13                 |
 
+#### Run the trained agent
+
+Now that you've trained your agent you surely want to deploy and evaluate it. For that purpose we've implemented a specific task mode in which you can specify your scenarios in a .json file. The agent will then be challenged according to the scenarios defined in the file. (*TODO: link zum scenario mode readme*).  
+
+- Firstly navigate to the directory:
+```
+roscd arena_local_planner_drl/
+cd scripts/deployment/
+```
+
+- Then run the ```run_agent.py``` script
+
+**Generic program call**:
+```
+run_agent.py --load [agent_name] -s [scenario_name] -v [number] [optional flag]
+```
+
+| Program call         | Flags                            | Usage                                 |Description                                         |
+| -------------------- | -------------------------------- |-------------------------------------- |--------------------------------------------------- | 
+| ```run_agent.py```   |```--load ```                     | *agent_name* ([see below](#load-a-dnn-for-training))     | loads agent to the given name
+|                      |```-s``` or ```--scenario```      | *scenario_name*                       | loads the scenarios to the given .json file name
+|                      |(optional)```-v``` or ```--verbose```| *0 or 1*                              | verbose level
+|                      |(optional) ```--no-gpu```           | *None*                                | disables the gpu for the evaluation
+
+
+
+- example call:
+``` 
+python run_agent.py --load CNN_NAVREP_2021_01_15__23_28 -s scenario1 --no-gpu
+```
+
+
 #### Important Directories
 
 |Path|Description|

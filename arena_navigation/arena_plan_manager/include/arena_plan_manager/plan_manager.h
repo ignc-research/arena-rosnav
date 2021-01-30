@@ -62,6 +62,10 @@ private:
     RobotStatePtr end_state_;        // goal state
     ros::Time start_time_;
     ros::Time subgoal_start_time_;
+    double look_ahead_distance_;
+    double tolerance_approach_;
+    double timeout_goal_,timeout_subgoal_;
+
 
     
     /* ROS utils */

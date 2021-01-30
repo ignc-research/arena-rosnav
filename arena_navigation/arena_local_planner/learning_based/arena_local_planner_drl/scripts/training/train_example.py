@@ -10,7 +10,7 @@ import rospkg
 rospy.init_node("test")
 # task = get_predefined_task()
 task = get_predefined_task(mode="ScenerioTask", PATHS={
-                           "scenerios_json_path": "/home/joe/ssd/projects/arena-rosnav-ws/src/arena-rosnav/tmp/example_json_path.json"})
+                           "scenerios_json_path": "/home/joe/ssd/projects/arena-rosnav-ws/src/arena-rosnav/simulator_setup/scenerios/example_scenerio.json"})
 models_folder_path = rospkg.RosPack().get_path('simulator_setup')
 arena_local_planner_drl_folder_path = rospkg.RosPack().get_path(
     'arena_local_planner_drl')
