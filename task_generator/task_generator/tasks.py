@@ -23,7 +23,6 @@ class StopReset(Exception):
 
 class ABSTask(ABC):
     """An abstract class, all tasks must implement reset function.
-
     """
 
     def __init__(self, obstacles_manager: ObstaclesManager, robot_manager: RobotManager):
@@ -142,6 +141,7 @@ class ManualTask(ABSTask):
                         self._new_goal_received = False
                     try:
                         # in this step, the validation of the path will be checked
+                        
                         self.robot_manager.publish_goal(
                             self._goal.x, self._goal.y, self._goal.theta)
                     except Exception as e:
@@ -252,16 +252,20 @@ class ScenerioTask(ABSTask):
             robot_start_pos = robot_data["start_pos"]
             robot_goal_pos = robot_data["goal_pos"]
             info["robot_goal_pos"] = robot_goal_pos
+            
             self.robot_manager.set_start_pos_goal_pos(
                 Pose2D(*robot_start_pos), Pose2D(*robot_goal_pos))
             self._num_repeats_curr_scene += 1
             info['num_repeats_curr_scene'] = self._num_repeats_curr_scene
             info['max_repeats_curr_scene'] = self._max_repeats_curr_scene
+
         return info
 
     def _set_new_scenerio(self):
         try:
             while True:
+                if self._num_repeats_curr_scene - self._num_repeats_curr_scene < 0:
+                            break
                 self._idx_curr_scene += 1
                 scenerio_data = self._scenerios_data[self._idx_curr_scene]
                 scenerio_name = scenerio_data['scene_name']

@@ -13,7 +13,8 @@ from geometry_msgs.msg import Pose2D, PoseWithCovarianceStamped, PoseStamped
 from nav_msgs.msg import OccupancyGrid, Path
 
 from .utils import generate_freespace_indices, get_random_pos_on_map
-
+# for clearing costmap
+from clear_costmap import clear_costmaps
 
 class RobotManager:
     """
@@ -230,6 +231,8 @@ class RobotManager:
         goal.pose.orientation.x = quaternion[1]
         goal.pose.orientation.y = quaternion[2]
         goal.pose.orientation.z = quaternion[3]
+        
+        clear_costmaps()
         self._goal_pub.publish(goal)
         # self._validate_path()
 

@@ -37,9 +37,7 @@ Visualization Manager:
       Marker Topic: /visualizer/path
       Name: Path_Marker
       Namespaces:
-        action_dir: true
-        path_trail: true
-        pose: true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/Group
@@ -687,11 +685,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 47.27771759033203
+      Scale: 28.35222816467285
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
-      X: 3.673535108566284
-      Y: 1.1465524435043335
+      X: 12.743907928466797
+      Y: 6.815812110900879
     Saved: ~
 Window Geometry:
   Displays:
