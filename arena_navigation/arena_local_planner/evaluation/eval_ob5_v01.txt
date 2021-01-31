@@ -1,0 +1,46 @@
+
+Evaluation of cadrl_map1_ob5_01:
+----------------------   cadrl_map1_ob5_01 summary: ----------------------
+average time:        0 s
+average path length: 0 m
+average velocity:    0  m/s
+total number of collisions: 22
+
+Evaluation of arena_map1_ob5_01:
+run_2: [0.0, 0.0, nan, 0]
+----------------------   arena_map1_ob5_01 summary: ----------------------
+average time:        0.0 s
+average path length: 0.0 m
+average velocity:    nan  m/s
+total number of collisions: 4
+
+Evaluation of dwa_map1_ob5_01:
+----------------------   dwa_map1_ob5_01 summary: ----------------------
+average time:        0 s
+average path length: 0 m
+average velocity:    0  m/s
+total number of collisions: 30
+
+Evaluation of teb_map1_ob5_01:
+run_2: [0.0, 0.0, nan, 0]
+run_3: [0.0, 0.0, nan, 0]
+run_4: [727.950014559, 462.4589476257338, 0.6352894269888798, 11]
+run_5: [0.0, 0.0, nan, 0]
+run_6: [0.0, 0.0, nan, 0]
+run_7: [0.0, 0.0, nan, 0]
+run_8: [0.0, 0.0, nan, 0]
+run_9: [0.0, 0.0, nan, 0]
+run_10: [0.0, 0.0, nan, 0]
+run_11: [0.0, 0.0, nan, 0]
+----------------------   teb_map1_ob5_01 summary: ----------------------
+average time:        72.795 s
+average path length: 46.246 m
+average velocity:    nan  m/s
+total number of collisions: 28
+
+Evaluation of mpc_map1_ob5_01:
+----------------------   mpc_map1_ob5_01 summary: ----------------------
+average time:        0 s
+average path length: 0 m
+average velocity:    0  m/s
+total number of collisions: 16
