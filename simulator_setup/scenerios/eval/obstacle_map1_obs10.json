@@ -2,7 +2,7 @@
     "scenerios": [
         {
             "scene_name": "obstacle_map_0",
-            "repeats": 50,
+            "repeats": 30,
             "dynamic_obstacles": {
                 "dynamic_obs_0": {
                     "obstacle_radius": 0.3,
