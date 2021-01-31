@@ -2,7 +2,7 @@
 We provide tools to evaluate the planners. 
 
 ### Usage
-## 1) roslaunch arena_bringup start_arena_flatland.launch disable_scenario:="false" map_file:="map1" scenario_file:="eval/obstacle_map1_obs10.json" local_planner:="teb"
+### 1) roslaunch arena_bringup start_arena_flatland.launch disable_scenario:="false" map_file:="map1" scenario_file:="eval/obstacle_map1_obs10.json" local_planner:="teb"
 
   explanation:
     - disable_scenario:="false": to start a scenario (otherwise only the map will be loaded without additional obstacles / goals)
@@ -12,7 +12,7 @@ We provide tools to evaluate the planners.
     # Important:
       In order to change the velocity of the dynamic obstacles, the scenario file must be edited
     
-## 2) rosbag record -o cadrl_map1_ob10_vel_01 /scenario_reset -e "(.*)police(.*)"
+### 2) rosbag record -o cadrl_map1_ob10_vel_01 /scenario_reset -e "(.*)police(.*)"
   explanation:
     - this command will record all topics necessary for evaluation
     - -e "(.*)police(.*)": records all topics containing "police"
