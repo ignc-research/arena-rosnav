@@ -11,7 +11,7 @@ We provide tools to evaluate the planners.
     - local_planner:="teb": choose between "dwa", "teb", "mpc"
     - in order to change the velocity of the dynamic obstacles, the scenario file must be edited
     
-#### 2) rosbag record -o cadrl_map1_ob10_vel_01 /scenario_reset -e "(.*)police(.*)"
+2) ``` rosbag record -o cadrl_map1_ob10_vel_01 /scenario_reset -e "(.*)police(.*)" ```
   explanation:
     - this command will record all topics necessary for evaluation
     - -e "(.*)police(.*)": records all topics containing "police"
