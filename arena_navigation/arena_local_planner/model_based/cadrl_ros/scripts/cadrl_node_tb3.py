@@ -69,7 +69,7 @@ class NN_tb3():
 
         # handle obstacles close to vehicle's front
         self.stop_moving_flag = False
-        self.d_min = 0.2
+        self.d_min = 0.3
         self.new_global_goal_received = True
 
         # visualization
@@ -166,8 +166,8 @@ class NN_tb3():
             goal_x = x + 5.0; goal_y = y + 5.0
             
 
-            if pref_speed < 0.2:
-                pref_speed = 0; v_x = 0; v_y = 0
+            # if pref_speed < 0.2:
+            #     pref_speed = 0; v_x = 0; v_y = 0
             other_agents.append(agent.Agent(x, y, goal_x, goal_y, radius, pref_speed, heading_angle, index))
         self.visualize_other_agents(xs, ys, radii, labels)
         self.other_agents_state = other_agents
@@ -220,7 +220,7 @@ class NN_tb3():
             gain = 1.3 # canon: 2
             vw = gain*yaw_error
 
-            use_d_min = False
+            use_d_min = True
             if use_d_min: # canon: True
                 # use_d_min = True
                 # print "vmax:", self.find_vmax(self.d_min,yaw_error)
@@ -267,7 +267,7 @@ class NN_tb3():
         # construct agent_state
         x = self.pose.pose.position.x; y = self.pose.pose.position.y
         v_x = self.vel.x; v_y = self.vel.y
-        radius = self.veh_data['radius']; turning_dir = 0.0
+        radius = self.veh_data['radius']
         heading_angle = self.psi
         pref_speed = self.veh_data['pref_speed']
         goal_x = self.sub_goal.x

@@ -66,7 +66,7 @@ class TestNode():
         # print(num_clusters)
         for i in range(num_clusters):
             index = msg.labels[i]
-            # if index > 24: for static map
+            # if index > 24: #for static map
             x = msg.mean_points[i].x; y = msg.mean_points[i].y
             v_x = msg.velocities[i].x; v_y = msg.velocities[i].y
             vx.append(v_x)
@@ -80,12 +80,15 @@ class TestNode():
             radius = msg.mean_points[i].z*inflation_factor
 
             xs.append(x); ys.append(y); radii.append(radius); labels.append(index); 
-            # self.visualize_other_agent(x,y,radius,msg.labels[i])
+                # self.visualize_other_agent(x,y,radius,msg.labels[i])
 
         self.visualize_other_agents(xs, ys, radii, labels)
         self.other_agents_state["pos"] = [xs, ys] 
         self.other_agents_state["v"] = [vx,vy]
         self.other_agents_state["r"] = radii
+
+
+        # print("received")
 
 
     def max_yaw(self, a):
@@ -118,9 +121,9 @@ class TestNode():
             # abs(self.angle2Action) > 0.1 and
             vel = np.array([self.tb3.raw_action[0],self.tb3.raw_action[1]])
             if abs(self.angle2Action) < math.pi/2:
-                twist.linear.x = 0.1*np.linalg.norm(vel)
+                twist.linear.x = 0.3*np.linalg.norm(vel)
             else:
-                twist.linear.x = 0.05*np.linalg.norm(vel)
+                twist.linear.x = 0.1*np.linalg.norm(vel)
 
             twist.angular.z = self.max_yaw(self.angle2Action)
             
@@ -138,6 +141,7 @@ class TestNode():
         self.visualize_action()
 
     def cbComputeActionCrowdNav(self,event):
+
         robot_x = self.tb3.pose.pose.position.x
         robot_y = self.tb3.pose.pose.position.y
         # goal
@@ -159,23 +163,32 @@ class TestNode():
         obstacle_vx = [0.0,0.0,0.0,0.0,0.0]
         obstacle_vy = [0.0,0.0,0.0,0.0,0.0]
         obstacle_radius = 0.4
-
-        for prop in self.other_agents_state:
-            if prop == "pos":
-                x_y = self.other_agents_state[prop]
-                for i in range(len(x_y[0])):
-                   obstacle_x[i] = x_y[0][i]
-                   obstacle_y[i] = x_y[1][i]
-            if prop == "v":
-                v = self.other_agents_state[prop]
+        if False:
+            for prop in self.other_agents_state:
+                if prop == "pos":
+                    x_y = self.other_agents_state[prop]
+                    for i in range(len(x_y[0])):
+                        obstacle_x[i] = x_y[0][i]
+                        obstacle_y[i] = x_y[1][i]
+                if prop == "v":
+                    v = self.other_agents_state[prop]
+                    for i in range(len(v[0])):
+                        obstacle_vx[i] = v[0][i]
+                        obstacle_vy[i] = v[1][i]
+            # print(math.sqrt(obstacle_vx[3]**2+obstacle_vy[3]**2))
+            print("------------------------")
+            for i in range(5):
+                print("pos",i,":",obstacle_x[i]," ",obstacle_y[i])
+                v = math.sqrt(obstacle_vx[i]**2 + obstacle_vy[i]**2)
+                print("vel",i,":",obstacle_vx[i]," ",obstacle_vy[i],"|  v = ", v)
+        else:
+            if "v" in self.other_agents_state:
+                v = self.other_agents_state["v"]
                 for i in range(len(v[0])):
-                   obstacle_vx[i] = v[0][i]
-                   obstacle_vy[i] = v[1][i]
-        # print(math.sqrt(obstacle_vx[3]**2+obstacle_vy[3]**2))
-        print("------------------------")
-        for i in range(5):
-            print("pos",i,":",obstacle_x[i]," ",obstacle_y[i])
-            print("vel",i,":",obstacle_vx[i]," ",obstacle_vy[i])
+                    vm = math.sqrt(v[0][i]**2 + v[1][i]**2)
+                    if vm>0:
+                        print(i,vm)
+
         # initial obstacle instances and set value
         for i in range(self.env_config.getint('sim','human_num')):
             self.env.humans[i].set(obstacle_x[i], obstacle_y[i], goal_x,goal_y, obstacle_vx[i], obstacle_vy[i], theta, obstacle_radius)

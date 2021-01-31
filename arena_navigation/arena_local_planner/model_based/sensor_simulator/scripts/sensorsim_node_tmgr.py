@@ -10,6 +10,7 @@ from ford_msgs.msg import Clusters
 
 import copy
 
+from std_msgs.msg import Int16
 # col
 from scenario_police import police
 
@@ -17,38 +18,47 @@ class sensor():
 
     def __init__(self):
         # tmgr
-        rospy.sleep(5)
         # last updated topic
         self.update_cluster = True
 
-        # get robot pos
-        # self.sub_pose = rospy.Subscriber('/odom',Odometry,self.cbPose)
-        # pub obst pos
 
         self.obstacles_dyn = {}
         self.obstacles_static = {}
 
         self.cluster = Clusters()
         self.n_obst = 32
-
-        # collect static and dynamic obstacles
+        
         self.obst_topics_dyn = []
         self.obst_topics_static = []
-        self.get_obstacle_topics()
-        # rospy.Timer(rospy.Duration(2), self.get_obstacle_topics)
-
+        # pub
         self.pub_obst_odom = rospy.Publisher('/obst_odom',Clusters,queue_size=1)
         self.pub_timer = rospy.Timer(rospy.Duration(0.1),self.pub_odom)
+        # sub
+        self.sub_reset = rospy.Subscriber('/scenario_reset',Int16, self.cb_reset)
+
+
+
+
 
         # static obst
 
                     
+
+    def cb_reset(self,msg):
+        # print(msg)
+        # collect static and dynamic obstacles
+        self.obst_topics_dyn = []
+        self.obst_topics_static = []
+        self.get_obstacle_topics()
+  
+
     def update_obstacle_odom(self):
         # subscribe 
         for topic in self.obst_topics_dyn:
             rospy.Subscriber(topic,MarkerArray,self.cb_marker, topic) 
         for topic in self.obst_topics_static:
             rospy.Subscriber(topic,MarkerArray,self.cb_marker, topic) 
+        
 
     def get_obstacle_topics(self):
         topics = rospy.get_published_topics()
@@ -66,16 +76,11 @@ class sensor():
         print("static obstacles:", len(self.obst_topics_static))
         for topic in self.obst_topics_static:
             print(topic)
+        
               
     def pub_odom(self,event):
         self.update_cluster = False
         self.fill_cluster()
-        # check topics again if missing
-        # if len(self.obstacles_dyn)+len(self.obstacles_static) < self.n_obst:
-        #     print("true: ", len(self.cluster.mean_points) )
-        #     self.get_obstacle_topics()
-          
-
         self.pub_obst_odom.publish(self.cluster)  
         # reset cluster
         self.cluster = Clusters()  
@@ -134,7 +139,6 @@ class sensor():
                         v.x = (pos.x-old_pos.x)/dt
                         v.y = (pos.y-old_pos.y)/dt
                     # update dyn obst
-                    # label = list(self.obstacles_dyn).index(topic) + len(self.obst_topics_static)
                     label = topic.replace("/flatland_server/debug/model/obstacle_dynamic_with_traj_", "")
                     label = int(label) + len(self.obst_topics_static) + 1
                 self.obstacles_dyn[topic] = [pos, r, v, m.header.stamp,label]
@@ -143,7 +147,7 @@ class sensor():
                 if topic in self.obstacles_static:
                     # label = list(self.obstacles_static).index(topic)
                     label = topic.replace("/flatland_server/debug/model/obstacle_circle_static_", "")
-                    label = int(label)
+                    label = int(label) 
                 self.obstacles_static[topic] = [pos, r, v, label]
 
 
