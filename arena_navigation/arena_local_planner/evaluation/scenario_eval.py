@@ -80,7 +80,7 @@ class newBag():
             reset = t_reset[n]
             # check if respawned
             # if current_time > reset-6 and n < len(t_reset)-1 and x<0:
-            if current_time > reset-6 and n < len(t_reset)-1 and x<0.1:
+            if current_time > reset-6 and n < len(t_reset)-1 and x<0.5:
                 n += 1
                 # store the run
                 bags["run_"+str(n)] = [pose_x,pose_y,t,col_xy]
@@ -94,7 +94,7 @@ class newBag():
             if  len(pose_x) > 0:
                 pose_x.append(x)
                 pose_y.append(y)
-            elif x < 0.1:
+            elif x < 0.5:
                 # print("run_"+str(n))
                 # print("x:",x,"y",y)
                 pose_x.append(x)
@@ -277,7 +277,7 @@ def run():
     ns = "_map1_ob5_01"
     newBag("cadrl" + ns, fn, "b", "bags/scenaries/cadrl/cadrl_map1_ob5_vel_01.bag")
     newBag("arena" + ns, fn, "g", "bags/scenaries/arena/arena2d_map1_real_ob5_vel_01.bag")
-    newBag("dwa" + ns, fn, "k", "bags/scenaries/dwa/dwa_map1_ob5_vel_01.bag")
+    newBag("dwa" + ns, fn, "k", "bags/scenaries/dwa/dwa_map1_ob5_vel_03.bag")
     newBag("teb" + ns, fn, "r", "bags/scenaries/teb/teb_map1_ob5_vel_03.bag")
     newBag("mpc" + ns, fn, "p", "bags/scenaries/mpc/mpc_map1_ob5_vel_03.bag")
 
