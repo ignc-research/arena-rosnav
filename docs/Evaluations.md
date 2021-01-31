@@ -2,7 +2,7 @@
 We provide tools to evaluate the planners. 
 
 ### Usage
-`` roslaunch arena_bringup start_arena_flatland.launch disable_scenario:="false" map_file:="map1" scenario_file:="eval/obstacle_map1_obs10.json" local_planner:="teb"
+``` roslaunch arena_bringup start_arena_flatland.launch disable_scenario:="false" map_file:="map1" scenario_file:="eval/obstacle_map1_obs10.json" local_planner:="teb" ```
 
   explanation:
     - disable_scenario:="false": to start a scenario (otherwise only the map will be loaded without additional obstacles / goals)
