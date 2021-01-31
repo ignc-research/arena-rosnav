@@ -9,7 +9,7 @@ We provide tools to evaluate the planners.
     - map_file:="map1": select a map file (ie map_file:="map_empty") for the map without static obstacles
     - scenario_file:="eval/obstacle_map1_obs10.json": select the corresponding scenario file
     - local_planner:="teb": choose between "dwa", "teb", "mpc"
-    ##### Important:
+    #### Important:
       In order to change the velocity of the dynamic obstacles, the scenario file must be edited
     
 #### 2) rosbag record -o cadrl_map1_ob10_vel_01 /scenario_reset -e "(.*)police(.*)"
