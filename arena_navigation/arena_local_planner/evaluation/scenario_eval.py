@@ -13,7 +13,7 @@ import seaborn as sb
 class newBag():
     def __init__(self, planner, plot_style, bag_name, odom_topic="/sensorsim/police/odom", collision_topic="/sensorsim/police/collision"):
         self.bag = bagreader(bag_name)
-        eps = self.split_bag(odom_topic, collision_topic)
+        eps = self.split_runs(odom_topic, collision_topic)
         self.evalPath(plot_style,planner,eps)
 
     def make_heat_map(self,xy):
@@ -25,11 +25,12 @@ class newBag():
                 y = -int(round(pos[0], 0))
                 x = int(round(pos[1], 0))
                 data[x,y] += 1
+                # print(data[x,y])
         heat_map = sb.heatmap(data,  cmap="YlGnBu")
         heat_map.invert_yaxis()
         plt.show()
 
-    def split_bag(self,odom_topic,collision_topic):
+    def split_runs(self,odom_topic,collision_topic):
         # get odometry
         odom_csv = self.bag.message_by_topic(odom_topic)
         df_odom = pd.read_csv(odom_csv, error_bad_lines=False)
@@ -40,7 +41,7 @@ class newBag():
         t_col = []
         for i in range(len(df_collision)): 
             t_col.append(df_collision.loc[i, "Time"])
-        print("collisions: ",len(t_col))
+        print("collisions in total: ",len(t_col))
         # get reset time
         reset_csv = self.bag.message_by_topic("/scenario_reset")
         df_reset = pd.read_csv(reset_csv, error_bad_lines=False)
@@ -58,6 +59,7 @@ class newBag():
         n = 0
         # collsion pos
         col_xy = []
+        nc = 0
 
 
         for i in range(len(df_odom)): 
@@ -79,6 +81,7 @@ class newBag():
                 pose_x = []
                 pose_y = []
                 t = []
+                col_xy = []
    
             if  len(pose_x) > 0:
                 pose_x.append(x)
@@ -93,10 +96,10 @@ class newBag():
             # get trajectory
 
             # check for col
-            if len(t_col) > 0:
-                if current_time >= t_col[0]:
-                    t_col.pop(0)
+            if len(t_col) > nc:
+                if current_time >= t_col[nc]:
                     col_xy.append([x,y])
+                    nc += 1
 
             
         bags.pop("run_1")
@@ -148,6 +151,7 @@ class newBag():
                 n_col = len(bags[run][3])
 
                 print([duration, path_length, av_vel, n_col])
+                # print("\n------------------------\n",bags[run][3])
                 col_xy.append(bags[run][3])
 
 
@@ -157,7 +161,7 @@ class newBag():
         print("average velocity:    ", self.average(vels))
 
         self.print_patches(col_xy)
-        self.make_heat_map(col_xy)
+        # self.make_heat_map(col_xy)
             
 
 
@@ -169,7 +173,7 @@ def run():
     # # read bag
     # bag_teb = newBag("bags/scenaries/teb_ob_05_vel_02.bag")
     # # split runs
-    # eps_teb = bag_teb.split_bag()
+    # eps_teb = bag_teb.split_runs()
     # # evaluate
     # bag_teb.evalPath("r",eps_teb)
 
@@ -177,7 +181,7 @@ def run():
     # # read bag
     # bag_dwa = newBag("bags/scenaries/dwa_ob_05_vel_02.bag")
     # # split runs
-    # eps_dwa = bag_dwa.split_bag()
+    # eps_dwa = bag_dwa.split_runs()
     # # evaluate
     # bag_dwa.evalPath("black",eps_dwa)
 
@@ -185,7 +189,7 @@ def run():
     # # read bag
     # bag_mpc = newBag("bags/scenaries/mpc_ob_05_vel_02.bag")
     # # split runs
-    # eps_mpc = bag_mpc.split_bag()
+    # eps_mpc = bag_mpc.split_runs()
     # # evaluate
     # bag_mpc.evalPath("purple",eps_mpc)    
     
@@ -193,7 +197,7 @@ def run():
     # # read bag
     # bag_cadrl = newBag("bags/scenaries/cadrl_ob_05_vel_02.bag")
     # # split runs
-    # eps_cadrl = bag_cadrl.split_bag()
+    # eps_cadrl = bag_cadrl.split_runs()
     # # evaluate
     # bag_cadrl.evalPath("b",eps_cadrl)
 
@@ -201,13 +205,14 @@ def run():
     # # read bag
     # bag_arena = newBag("bags/scenaries/arena_ob_05_vel_02.bag")
     # # split runs
-    # eps_arena = bag_arena.split_bag()
+    # eps_arena = bag_arena.split_runs()
     # # evaluate
     # bag_arena.evalPath("g",eps_arena)
 
-    # new
+    # cadrl
     newBag("cadrl_01","b","bags/scenaries/cadrl_map1_ob10_vel_01.bag")
-    newBag("cadrl_02","b","bags/scenaries/cadrl_map1_ob10_vel_02.bag")
+    newBag("cadrl_02","g","bags/scenaries/cadrl_map1_ob10_vel_02.bag")
+    newBag("cadrl_03","k","bags/scenaries/cadrl_map1_ob10_vel_03.bag")
 
 
 
