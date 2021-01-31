@@ -15,14 +15,14 @@ from visualization_msgs.msg import Marker, MarkerArray
 # 
 class newBag():
     def __init__(self, planner,file_name, plot_style, bag_name, odom_topic="/sensorsim/police/odom", collision_topic="/sensorsim/police/collision"):
+        # self.make_txt(file_name,"","w")
         self.bag = bagreader(bag_name)
         eps = self.split_runs(odom_topic, collision_topic)
         self.evalPath(plot_style,planner,file_name,eps)
-
         self.nc_total = 0
 
-    def make_txt(self,file,msg):
-        f = open(file, "a")
+    def make_txt(self,file,msg,ron="a"):
+        f = open(file, ron)
         f.write(msg)
         f.close()
 
@@ -42,12 +42,16 @@ class newBag():
 
     def split_runs(self,odom_topic,collision_topic):
         # get odometry
+        
         odom_csv = self.bag.message_by_topic(odom_topic)
         df_odom = pd.read_csv(odom_csv, error_bad_lines=False)
 
         # get collision time
-        collision_csv = self.bag.message_by_topic(collision_topic)
-        df_collision = pd.read_csv(collision_csv, error_bad_lines=False)
+        try:
+            collision_csv = self.bag.message_by_topic(collision_topic)
+            df_collision = pd.read_csv(collision_csv, error_bad_lines=False)
+        except Exception as e:
+            df_collision = []
         t_col = []
         for i in range(len(df_collision)): 
             t_col.append(df_collision.loc[i, "Time"])
@@ -80,7 +84,8 @@ class newBag():
             reset = t_reset[n]
             # check if respawned
             # if current_time > reset-6 and n < len(t_reset)-1 and x<0:
-            if current_time > reset-6 and n < len(t_reset)-1 and x<0.5:
+            global start_x
+            if current_time > reset-6 and n < len(t_reset)-1 and x < start_x:
                 n += 1
                 # store the run
                 bags["run_"+str(n)] = [pose_x,pose_y,t,col_xy]
@@ -94,7 +99,7 @@ class newBag():
             if  len(pose_x) > 0:
                 pose_x.append(x)
                 pose_y.append(y)
-            elif x < 0.5:
+            elif x < start_x:
                 # print("run_"+str(n))
                 # print("x:",x,"y",y)
                 pose_x.append(x)
@@ -152,8 +157,8 @@ class newBag():
                 path_length = np.sum(np.sqrt(dist_array)) 
                 # for av
                 trajs.append(path_length)
-                # if path_length > 0:
-                #     ax.plot(y,x, clr, label='Cosine wave')
+                if path_length > 0:
+                    ax.plot(y,x, clr, label='Cosine wave')
 
                 duration = t[len(t)-1] - t[0]
                 # for av
@@ -203,83 +208,143 @@ def getMap(msg):
     plt.show()
 
 def run():
-    global ax
+    global ax, start_x
     fig, ax = plt.subplots(figsize=(6, 12))
 
 
-    # ax.imshow(img, extent=[-13.7, 0.6, -4.4, 25.25])
 
-    # cadrl -----------------------------------------------------------------
-    # obstacles 5
-    # newBag("cadrl_map1_ob5_01","b","bags/scenaries/cadrl/cadrl_map1_ob5_vel_01.bag")
-    # obstacles 10
-    # newBag("cadrl_01","b","bags/scenaries/cadrl/cadrl_map1_ob10_vel_01.bag")
-    # newBag("cadrl_02","g","bags/scenaries/cadrl/cadrl_map1_ob10_vel_02.bag")
-    # newBag("cadrl_03","k","bags/scenaries/cadrl/cadrl_map1_ob10_vel_03.bag")
-    # obstacles 20
-    # newBag("cadrl_01","b","bags/scenaries/cadrl/cadrl_map1_ob20_vel_01.bag")
-    # newBag("cadrl_02","g","bags/scenaries/cadrl/cadrl_map1_ob20_vel_02.bag")
-    # newBag("cadrl_03","k","bags/scenaries/cadrl/cadrl_map1_ob20_vel_03.bag")
+    # obstacle_map1_obs5.json
+    start_x = 0.5
+    fn = "obstacle_map1_obs5.txt"
+    newBag("cadrl_01", fn, "b", "bags/scenaries/cadrl/cadrl_map1_ob5_vel_01.bag")
+    newBag("cadrl_02", fn, "b", "bags/scenaries/cadrl/cadrl_map1_ob5_vel_02.bag")
+    newBag("cadrl_03", fn, "b", "bags/scenaries/cadrl/cadrl_map1_ob5_vel_03.bag")
+
+    newBag("arena_01", fn, "g", "bags/scenaries/arena/arena2d_map1_real_ob5_vel_01.bag")
+
+    newBag("dwa_01", fn, "k", "bags/scenaries/dwa/dwa_map1_ob5_vel_01.bag")
+    newBag("dwa_02", fn, "k", "bags/scenaries/dwa/dwa_map1_ob5_vel_02.bag")
+    newBag("dwa_03", fn, "k", "bags/scenaries/dwa/dwa_map1_ob5_vel_03.bag")
+
+    newBag("teb_01", fn, "r", "bags/scenaries/teb/teb_map1_ob5_vel_01.bag")
+    newBag("teb_02", fn, "r", "bags/scenaries/teb/teb_map1_ob5_vel_02.bag")
+    newBag("teb_03", fn, "r", "bags/scenaries/teb/teb_map1_ob5_vel_03.bag")
+
+    newBag("mpc_01", fn, "p", "bags/scenaries/mpc/mpc_map1_ob5_vel_01.bag")
+    newBag("mpc_02", fn, "p", "bags/scenaries/mpc/mpc_map1_ob5_vel_02.bag")
+    newBag("mpc_03", fn, "p", "bags/scenaries/mpc/mpc_map1_ob5_vel_03.bag")
+
+    start_x = 0
+
+    # obstacle_map1_obs10.json
+    fn = "obstacle_map1_obs10.txt"
+    newBag("cadrl_01", fn, "b", "bags/scenaries/cadrl/cadrl_map1_ob10_vel_01.bag")
+    newBag("cadrl_02", fn, "b", "bags/scenaries/cadrl/cadrl_map1_ob10_vel_02.bag")
+    newBag("cadrl_03", fn, "b", "bags/scenaries/cadrl/cadrl_map1_ob10_vel_03.bag")
+
+    newBag("arena_01", fn, "g", "bags/scenaries/arena/arena2d_map1_real_ob10_vel_01.bag")
+
+    newBag("dwa_01", fn, "k", "bags/scenaries/dwa/dwa_map1_ob10_vel_01.bag")
+    newBag("dwa_02", fn, "k", "bags/scenaries/dwa/dwa_map1_ob10_vel_03.bag")
+
+    newBag("teb_01", fn, "r", "bags/scenaries/teb/teb_map1_ob10_vel_01.bag")
+    newBag("teb_02", fn, "r", "bags/scenaries/teb/teb_map1_ob10_vel_02.bag")
+    newBag("teb_03", fn, "r", "bags/scenaries/teb/teb_map1_ob10_vel_03.bag")
+
+    newBag("mpc_01", fn, "p", "bags/scenaries/mpc/mpc_map1_ob10_vel_01.bag")
+    newBag("mpc_02", fn, "p", "bags/scenaries/mpc/mpc_map1_ob10_vel_02.bag")
+    newBag("mpc_03", fn, "p", "bags/scenaries/mpc/mpc_map1_ob10_vel_03.bag")
+
+
+    # obstacle_map1_obs20.json
+    fn = "obstacle_map1_obs20.txt"
+    newBag("cadrl_01", fn, "b", "bags/scenaries/cadrl/cadrl_map1_ob20_vel_01.bag")
+    newBag("cadrl_02", fn, "b", "bags/scenaries/cadrl/cadrl_map1_ob20_vel_02.bag")
+    newBag("cadrl_03", fn, "b", "bags/scenaries/cadrl/cadrl_map1_ob20_vel_03.bag")
+
+    newBag("arena_01", fn, "g", "bags/scenaries/arena/arena2d_map1_real_real_ob20_vel_01.bag")
+    newBag("arena_02", fn, "g", "bags/scenaries/arena/arena2d_map1_real_real_ob20_vel_02.bag")
+    newBag("arena_03", fn, "g", "bags/scenaries/arena/arena2d_map1_real_real_ob20_vel_03.bag")
     
-    # dwa --------------------------------------------------------------------
-    # Empty obstacles 5
-    # newBag("dwa_empty_5_01","k","bags/scenaries/dwa/dwa_empty_map_ob10_vel_01.bag")
-    # newBag("dwa_empty_5_02","k","bags/scenaries/dwa/dwa_empty_map_ob10_vel_02.bag")
-    # newBag("dwa_empty_5_03","k","bags/scenaries/dwa/dwa_empty_map_ob10_vel_03.bag")
+    newBag("dwa_01", fn, "k", "bags/scenaries/dwa/dwa_map1_ob20_vel_01.bag")
+    newBag("dwa_02", fn, "k", "bags/scenaries/dwa/dwa_map1_ob20_vel_02.bag")
+    newBag("dwa_03", fn, "k", "bags/scenaries/dwa/dwa_map1_ob20_vel_03.bag")
 
-    # Empty obstacles 10
-    # newBag("dwa_01","k","bags/scenaries/dwa/dwa_empty_map_ob10_vel_01.bag")
-    # newBag("dwa_02","k","bags/scenaries/dwa/dwa_empty_map_ob10_vel_02.bag")
-    # newBag("dwa_03","k","bags/scenaries/dwa/dwa_empty_map_ob10_vel_03.bag")
+    newBag("mpc_01", fn, "p", "bags/scenaries/mpc/mpc_map1_ob20_vel_01.bag")
+    newBag("mpc_02", fn, "p", "bags/scenaries/mpc/mpc_map1_ob20_vel_02.bag")
+    newBag("mpc_03", fn, "p", "bags/scenaries/mpc/mpc_map1_ob20_vel_03.bag")
+    
+    newBag("teb_01", fn, "r", "bags/scenaries/teb/teb_map1_ob20_vel_01.bag")
+    newBag("teb_02", fn, "r", "bags/scenaries/teb/teb_map1_ob20_vel_02.bag")
+    newBag("teb_03", fn, "r", "bags/scenaries/teb/teb_map1_ob20_vel_03.bag")
+
+    # map_empty_obs5.json
+    fn = "map_empty_obs5.txt"
+    newBag("cadrl_01", fn, "b", "bags/scenaries/cadrl/cadrl_map_empty_ob5_vel_01.bag")
+
+    newBag("arena_01", fn, "g", "bags/scenaries/arena/arena2d_empty_ob5_vel_01.bag")
+
+    newBag("dwa_01", fn, "k", "bags/scenaries/dwa/dwa_map_empty_ob5_vel_01.bag")
+    newBag("dwa_01", fn, "k", "bags/scenaries/dwa/dwa_map_empty_ob5_vel_02.bag")
+    newBag("dwa_01", fn, "k", "bags/scenaries/dwa/dwa_map_empty_ob5_vel_03.bag")
+
+    newBag("mpc_01", fn, "p", "bags/scenaries/mpc/mpc_map_empty_obs5_vel_01.bag")
+    newBag("mpc_02", fn, "p", "bags/scenaries/mpc/mpc_map_empty_obs5_vel_02.bag")
+
+    newBag("teb_01", fn, "r", "bags/scenaries/teb/teb_map1_ob5_vel_01.bag")
+    newBag("teb_02", fn, "r", "bags/scenaries/teb/teb_map1_ob5_vel_02.bag")
+    newBag("teb_03", fn, "r", "bags/scenaries/teb/teb_map1_ob5_vel_03.bag")
+
+    # map_empty_obs10.json
+    fn = "_map_empty_obs10.txt"
+    newBag("cadrl_01", fn, "b", "bags/scenaries/cadrl/cadrl_map_empty_ob10_vel_01.bag")
+    newBag("cadrl_02", fn, "b", "bags/scenaries/cadrl/cadrl_map_empty_ob10_vel_02.bag")
+    newBag("cadrl_03", fn, "b", "bags/scenaries/cadrl/cadrl_map_empty_ob10_vel_03.bag")
+
+    newBag("arena_01_p1", fn, "g", "bags/scenaries/arena/arena2d_empty_ob10_vel_01_p1.bag")
+    newBag("arena_01_p2", fn, "g", "bags/scenaries/arena/arena2d_empty_ob10_vel_01_p2.bag")
+
+    newBag("dwa_01", fn, "k", "bags/scenaries/dwa/dwa_map_empty_ob10_vel_01.bag")
+    newBag("dwa_02", fn, "k", "bags/scenaries/dwa/dwa_map_empty_ob10_vel_02.bag")
+    newBag("dwa_03", fn, "k", "bags/scenaries/dwa/dwa_map_empty_ob10_vel_03.bag")
+
+    newBag("mpc_01", fn, "p", "bags/scenaries/mpc/mpc_map_empty_ob10_vel_01.bag")
+    newBag("mpc_02", fn, "p", "bags/scenaries/mpc/mpc_map_empty_ob10_vel_02.bag")
+    newBag("mpc_03", fn, "p", "bags/scenaries/mpc/mpc_map_empty_ob10_vel_03.bag")
+
+    newBag("teb_01", fn, "r", "bags/scenaries/teb/teb_map1_ob10_vel_01.bag")
+    newBag("teb_01", fn, "r", "bags/scenaries/teb/teb_map1_ob10_vel_02.bag")
+    newBag("teb_01", fn, "r", "bags/scenaries/teb/teb_map1_ob10_vel_03.bag")
+
+    # map_empty_obs20.json
+    fn = "map_empty_obs20.txt"
+    newBag("cadrl_01", fn, "b", "bags/scenaries/cadrl/cadrl_map_empty_ob20_vel_01.bag")
+    newBag("cadrl_01", fn, "b", "bags/scenaries/cadrl/cadrl_map_empty_ob20_vel_02.bag")
+    newBag("cadrl_01", fn, "b", "bags/scenaries/cadrl/cadrl_map_empty_ob20_vel_03.bag")
+
+    newBag("arena_01_p1", fn, "g", "bags/scenaries/arena/arena2d_empty_ob20_vel_01_p1.bag")
+    newBag("arena_01_p2", fn, "g", "bags/scenaries/arena/arena2d_empty_ob20_vel_01_p2.bag")
+    newBag("arena_01_p3", fn, "g", "bags/scenaries/arena/arena2d_empty_ob20_vel_01_p3.bag")
+
+    newBag("dwa_01", fn, "k", "bags/scenaries/dwa/dwa_map_empty_ob20_vel_01.bag")
+    newBag("dwa_01", fn, "k", "bags/scenaries/dwa/dwa_map_empty_ob20_vel_02.bag")
+    newBag("dwa_01", fn, "k", "bags/scenaries/dwa/dwa_map_empty_ob20_vel_03.bag")
+
+    newBag("mpc_01", fn, "p", "bags/scenaries/mpc/mpc_map_empty_ob20_vel_01.bag")
+    newBag("mpc_03", fn, "p", "bags/scenaries/mpc/mpc_map_empty_ob20_vel_02.bag")
+
+    newBag("teb_01", fn, "r", "bags/scenaries/teb/teb_map1_ob20_vel_01.bag")
+    newBag("teb_02", fn, "r", "bags/scenaries/teb/teb_map1_ob20_vel_02.bag")
+    newBag("teb_03", fn, "r", "bags/scenaries/teb/teb_map1_ob20_vel_03.bag")
 
 
-    # mpc --------------------------------------------------------------------
-    # Empty obstacles 10
-    # newBag("mpc_empty_10_01","k","bags/scenaries/mpc/mpc_empty_map_ob10_vel_01.bag")
-    # newBag("mpc_empty_10_02","k","bags/scenaries/mpc/mpc_empty_map_ob10_vel_02.bag")
-    # newBag("mpc_empty_10_03","k","bags/scenaries/mpc/mpc_empty_map_ob10_vel_03.bag")
-
-    # Map1  
-    # newBag("mpc_map1_5_01","k","bags/scenaries/mpc/mpc_map1_ob5_vel_01.bag")
-
-
-    # Arena
-    # newBag("arena_map1_5_01","k","bags/scenaries/arena/arena2d_empty_ob5_vel_01.bag")
-    # newBag("arena_map1_ob20_01","k","bags/scenaries/arena/arena2d_map1_real_real_ob20_vel_01.bag")
-    # newBag("arena_map1_ob20_02","k","bags/scenaries/arena/arena2d_map1_real_real_ob20_vel_02.bag")
-    # newBag("arena_map1_ob20_03","k","bags/scenaries/arena/arena2d_map1_real_real_ob20_vel_03.bag")
-
-    # newBag("arena_map1_ob20_01p1","k","bags/scenaries/arena/arena2d_empty_ob20_vel_01_p1.bag")
-    # newBag("arena_map1_ob20_01p2","k","bags/scenaries/arena/arena2d_empty_ob20_vel_01_p2.bag")
-    # newBag("arena_map1_ob20_01p3","k","bags/scenaries/arena/arena2d_empty_ob20_vel_01_p3.bag")
 
 
 
-    # example plot
-    # ob 20 0.3
-    # fn = "eval_ob20_v03.txt"
-    # ns = "_map1_ob20_03"
-    # newBag("cadrl" + ns, fn, "b", "bags/scenaries/cadrl/cadrl_map1_ob20_vel_03.bag")
-    # newBag("arena" + ns, fn, "g", "bags/scenaries/arena/arena2d_map1_real_real_ob20_vel_03.bag")
-    # newBag("dwa" + ns, fn, "k", "bags/scenaries/dwa/dwa_map1_ob20_vel_03.bag")
-    # newBag("teb" + ns, fn, "r", "bags/scenaries/teb/teb_map1_ob20_vel_03.bag")
-    # newBag("mpc" + ns, fn, "p", "bags/scenaries/mpc/mpc_map1_ob20_vel_03.bag")
-    # # ob 10 0.3
-    # fn = "eval_ob10_v01.txt"
-    # ns = "_map1_ob10_01"
-    # newBag("cadrl" + ns, fn, "b", "bags/scenaries/cadrl/cadrl_map1_ob10_vel_01.bag")
-    # newBag("arena" + ns, fn, "g", "bags/scenaries/arena/arena2d_map1_real_ob10_vel_01.bag")
-    # newBag("dwa" + ns, fn, "k", "bags/scenaries/dwa/dwa_map1_ob10_vel_01.bag")
-    # newBag("teb" + ns, fn, "r", "bags/scenaries/teb/teb_map1_ob10_vel_03.bag")
-    # newBag("mpc" + ns, fn, "p", "bags/scenaries/mpc/mpc_map1_ob10_vel_03.bag")
-    # ob 5 0.3
-    fn = "eval_ob5_v01.txt"
-    ns = "_map1_ob5_01"
-    newBag("cadrl" + ns, fn, "b", "bags/scenaries/cadrl/cadrl_map1_ob5_vel_01.bag")
-    newBag("arena" + ns, fn, "g", "bags/scenaries/arena/arena2d_map1_real_ob5_vel_01.bag")
-    newBag("dwa" + ns, fn, "k", "bags/scenaries/dwa/dwa_map1_ob5_vel_03.bag")
-    newBag("teb" + ns, fn, "r", "bags/scenaries/teb/teb_map1_ob5_vel_03.bag")
-    newBag("mpc" + ns, fn, "p", "bags/scenaries/mpc/mpc_map1_ob5_vel_03.bag")
+
+
+
+
 
 
     # static map
