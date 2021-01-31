@@ -80,7 +80,7 @@ class newBag():
             reset = t_reset[n]
             # check if respawned
             # if current_time > reset-6 and n < len(t_reset)-1 and x<0:
-            if current_time > reset-6 and n < len(t_reset)-1 and x<0.0:
+            if current_time > reset-6 and n < len(t_reset)-1 and x<0.1:
                 n += 1
                 # store the run
                 bags["run_"+str(n)] = [pose_x,pose_y,t,col_xy]
@@ -257,21 +257,21 @@ def run():
 
     # example plot
     # ob 20 0.3
-    fn = "eval_ob20_v03.txt"
-    ns = "_map1_ob20_03"
-    newBag("cadrl" + ns, fn, "b", "bags/scenaries/cadrl/cadrl_map1_ob20_vel_03.bag")
-    newBag("arena" + ns, fn, "g", "bags/scenaries/arena/arena2d_map1_real_real_ob20_vel_03.bag")
-    newBag("dwa" + ns, fn, "k", "bags/scenaries/dwa/dwa_map1_ob20_vel_03.bag")
-    newBag("teb" + ns, fn, "r", "bags/scenaries/teb/teb_map1_ob20_vel_03.bag")
-    newBag("mpc" + ns, fn, "p", "bags/scenaries/mpc/mpc_map1_ob20_vel_03.bag")
-    # ob 10 0.3
-    fn = "eval_ob10_v01.txt"
-    ns = "_map1_ob10_01"
-    newBag("cadrl" + ns, fn, "b", "bags/scenaries/cadrl/cadrl_map1_ob10_vel_01.bag")
-    newBag("arena" + ns, fn, "g", "bags/scenaries/arena/arena2d_map1_real_ob10_vel_01.bag")
-    newBag("dwa" + ns, fn, "k", "bags/scenaries/dwa/dwa_map1_ob10_vel_01.bag")
-    newBag("teb" + ns, fn, "r", "bags/scenaries/teb/teb_map1_ob10_vel_03.bag")
-    newBag("mpc" + ns, fn, "p", "bags/scenaries/mpc/mpc_map1_ob10_vel_03.bag")
+    # fn = "eval_ob20_v03.txt"
+    # ns = "_map1_ob20_03"
+    # newBag("cadrl" + ns, fn, "b", "bags/scenaries/cadrl/cadrl_map1_ob20_vel_03.bag")
+    # newBag("arena" + ns, fn, "g", "bags/scenaries/arena/arena2d_map1_real_real_ob20_vel_03.bag")
+    # newBag("dwa" + ns, fn, "k", "bags/scenaries/dwa/dwa_map1_ob20_vel_03.bag")
+    # newBag("teb" + ns, fn, "r", "bags/scenaries/teb/teb_map1_ob20_vel_03.bag")
+    # newBag("mpc" + ns, fn, "p", "bags/scenaries/mpc/mpc_map1_ob20_vel_03.bag")
+    # # ob 10 0.3
+    # fn = "eval_ob10_v01.txt"
+    # ns = "_map1_ob10_01"
+    # newBag("cadrl" + ns, fn, "b", "bags/scenaries/cadrl/cadrl_map1_ob10_vel_01.bag")
+    # newBag("arena" + ns, fn, "g", "bags/scenaries/arena/arena2d_map1_real_ob10_vel_01.bag")
+    # newBag("dwa" + ns, fn, "k", "bags/scenaries/dwa/dwa_map1_ob10_vel_01.bag")
+    # newBag("teb" + ns, fn, "r", "bags/scenaries/teb/teb_map1_ob10_vel_03.bag")
+    # newBag("mpc" + ns, fn, "p", "bags/scenaries/mpc/mpc_map1_ob10_vel_03.bag")
     # ob 5 0.3
     fn = "eval_ob5_v01.txt"
     ns = "_map1_ob5_01"
