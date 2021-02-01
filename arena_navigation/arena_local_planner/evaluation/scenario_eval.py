@@ -38,31 +38,31 @@ class newBag():
         return
 
     def make_heat_map(self,xy):
-        # plt.figure()
-        # data = np.zeros((33, 20))
+        # fig, ax = plt.subplots(figsize=(6, 7))
+        # data = np.zeros((33, 25))
 
         # for xya in xy:
         #     for pos in xya:
         #         y = -int(round(pos[0], 0))
         #         x = int(round(pos[1], 0))
         #         data[x,y] += 1
-        #         # print(data[x,y])
-        # heat_map = sb.heatmap(data,  cmap="YlGnBu")
-        # heat_map.invert_yaxis()
+        # #         # print(data[x,y])
+        # # heat_map = sb.heatmap(data,  cmap="YlGnBu")
+        # # heat_map.invert_yaxis()
+        # # plt.show()
+
+        # # delta = 0.025
+        # # x = y = np.arange(-3.0, 3.0, delta)
+        # # X, Y = np.meshgrid(x, y)
+        # # Z1 = np.exp(-X**2 - Y**2)
+        # # Z2 = np.exp(-(X - 1)**2 - (Y - 1)**2)
+        # # Z = (Z1 - Z2) * 2
+
+        # im = ax.imshow(data, interpolation='bilinear', cmap=cm.RdYlGn,
+        #        origin='lower', extent=[-3, 3, -3, 3]
+        #        ,vmax=abs(data).max(), vmin=-abs(data).max())
         # plt.show()
-
-        delta = 0.025
-        x = y = np.arange(-3.0, 3.0, delta)
-        X, Y = np.meshgrid(x, y)
-        Z1 = np.exp(-X**2 - Y**2)
-        Z2 = np.exp(-(X - 1)**2 - (Y - 1)**2)
-        Z = (Z1 - Z2) * 2
-
-        im = ax.imshow(Z, interpolation='bilinear', cmap=cm.RdYlGn,
-               origin='lower', extent=[-3, 3, -3, 3],
-               vmax=abs(Z).max(), vmin=-abs(Z).max())
-
-        plt.show()
+        return 
 
     def split_runs(self,odom_topic,collision_topic):
         # get odometry
@@ -150,7 +150,7 @@ class newBag():
              return 0
 
     def print_patches(self,xya,clr):
-        global ax
+        global ax, lgnd
 
         for run_a in xya:
             for col_xy in run_a:
@@ -240,10 +240,11 @@ class newBag():
         self.make_txt(file_name,msg_col)
 
         self.print_patches(col_xy,lgnd[planner])
-        # self.make_heat_map(col_xy)
+        self.make_heat_map(col_xy)
 
 def eval_all(a,map,ob,vel):
     global ax, sm, lgnd
+    fig, ax = plt.subplots(figsize=(6, 7))
     
 
     mode =  map + "_" + ob + "_" + vel 
@@ -261,10 +262,10 @@ def eval_all(a,map,ob,vel):
             if file.endswith(".bag") and map in file and ob in file and vel in file:
                 print("bags/scenarios/"+planner+"/"+file)
                 fn = planner + mode
-                    
+                
                 newBag(planner, fn, "bags/scenarios/"+planner+"/"+file)
     
- 
+    
     legend_elements = []
     for l in lgnd:
             el = Line2D([0], [0], color=lgnd[l], lw=4, label=l)
@@ -286,7 +287,7 @@ def getMap(msg):
     # plt.show()
 
 def run():
-    global fig, ax, start_x, sm, lgnd
+    global ax, start_x, sm, lgnd
 
     lgnd = {}
     lgnd["arena"] = "tab:purple"
@@ -302,31 +303,22 @@ def run():
     start_x = 0.5
     # map
     #  5 01
-    fig, ax = plt.subplots(figsize=(6, 7))
     eval_all(["arena","cadrl","dwa","mpc","teb"],"map1","5","vel_01.")
     start_x = 0
     #  10 01
-    fig, ax = plt.subplots(figsize=(6, 7))
     eval_all(["arena","cadrl","dwa","mpc","teb"],"map1","10","vel_01.")
-    # #  20 01
-    fig, ax = plt.subplots(figsize=(6, 7))
+    # 20 01
     eval_all(["arena","cadrl","dwa","mpc","teb"],"map1","20","vel_01.")
 
 
     # empty map
     #  5 01
-    fig, ax = plt.subplots(figsize=(6, 7))
     eval_all(["arena","cadrl","dwa","mpc","teb"],"empty","5","vel_01.")    
     #  10 01
-    fig, ax = plt.subplots(figsize=(6, 7))
-    eval_all(["arena","cadrl","dwa","mpc","teb"],"empty","10","vel_01")    
     eval_all(["arena","cadrl","dwa","mpc","teb"],"empty","10","vel_01")    
     #  20 01
-    fig, ax = plt.subplots(figsize=(6, 7))
     eval_all(["arena","cadrl","dwa","mpc","teb"],"empty","20","vel_01")
-    eval_all(["arena","cadrl","dwa","mpc","teb"],"empty","20","vel_01")
-    eval_all(["arena","cadrl","dwa","mpc","teb"],"empty","20","vel_01")
-    
+
     
     
     plt.show()
