@@ -11,6 +11,12 @@
   <arg name="task_mode"       default="random"/>
   <param name="task_mode"     value="$(arg task_mode)"/>
 
+    <!-- <param name="use_sim_time" value="true"/> -->
+	  <arg name="ns" default="sim1"/>
+    <!-- <arg name="map_path"/>  -->
+    <!-- <arg name="update_rate"/>  -->
+
+
 
   <!-- Map parameters -->
 
@@ -76,6 +82,9 @@
     <arg name="local_planner"     value="$(arg local_planner)"/>
   </include>
 
-  
-    
+    <!-- Launch light pedsim -->
+  <include file="$(find arena_bringup)/launch/sublaunch/pedestrians_only.launch">
+      <arg name="ns" value="$(arg ns)" />
+      <arg name="map_path" value="$(arg map_path)"/>
+  </include>    
 </launch>

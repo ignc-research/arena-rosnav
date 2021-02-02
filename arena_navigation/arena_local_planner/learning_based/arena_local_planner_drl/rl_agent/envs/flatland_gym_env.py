@@ -54,7 +54,7 @@ class FlatlandEnv(gym.Env):
         if safe_dist is None:
             safe_dist = 1.1*self._robot_radius
         if safe_dist_h is None:
-            safe_dist_h = 10
+            safe_dist_h = 3
         
 
         self.reward_calculator = RewardCalculator(

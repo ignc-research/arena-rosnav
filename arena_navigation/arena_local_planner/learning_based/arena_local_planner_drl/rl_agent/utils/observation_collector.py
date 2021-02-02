@@ -57,7 +57,15 @@ class ObservationCollector():
         self._robot_vel = Twist()
         self._subgoal =  Pose2D()
         
+        # topic subscriber: subgoal
+        #TODO should we synchoronize it with other topics
+        self._subgoal_sub = message_filters.Subscriber('plan_manager/subgoal', PoseStamped) #self._subgoal_sub = rospy.Subscriber("subgoal", PoseStamped, self.callback_subgoal)
+        self._subgoal_sub.registerCallback(self.callback_subgoal)
 
+        # service clients
+        self._service_name_step='step_world'
+        self._sim_step_client = rospy.ServiceProxy(self._service_name_step, StepWorld)
+        
         # message_filter subscriber: laserscan, robot_pose
         self._scan_sub = message_filters.Subscriber("scan", LaserScan)
         self._robot_state_sub = message_filters.Subscriber('plan_manager/robot_state', RobotStateStamped)
@@ -84,15 +92,6 @@ class ObservationCollector():
         self.sychronized_list=[self._scan_sub, self._robot_state_sub]+self._dynamic_obstacle
         self.ts = message_filters.ApproximateTimeSynchronizer(self.sychronized_list,100,slop=0.05)#,allow_headerless=True)
         self.ts.registerCallback(self.callback_observation_received)
-        
-        # topic subscriber: subgoal
-        #TODO should we synchoronize it with other topics
-        self._subgoal_sub = message_filters.Subscriber('plan_manager/subgoal', PoseStamped) #self._subgoal_sub = rospy.Subscriber("subgoal", PoseStamped, self.callback_subgoal)
-        self._subgoal_sub.registerCallback(self.callback_subgoal)
-
-        # service clients
-        self._service_name_step='step_world'
-        self._sim_step_client = rospy.ServiceProxy(self._service_name_step, StepWorld)
     
     def get_observation_space(self):
         return self.observation_space

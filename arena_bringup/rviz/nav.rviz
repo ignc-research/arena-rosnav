@@ -6,15 +6,6 @@ Panels:
       Expanded:
         - /Global Options1
         - /RobotModel1
-        - /my_robot1
-        - /MarkerArray2
-        - /MarkerArray3
-        - /MarkerArray4
-        - /MarkerArray5
-        - /MarkerArray5/Namespaces1
-        - /MarkerArray6
-        - /MarkerArray7
-        - /MarkerArray8
         - /MarkerArray9
         - /MarkerArray10
         - /MarkerArray11
@@ -22,6 +13,7 @@ Panels:
         - /MarkerArray14
         - /MarkerArray15
         - /MarkerArray16
+        - /MarkerArray16/Status1
         - /MarkerArray17
         - /MarkerArray18
         - /MarkerArray19
@@ -350,21 +342,15 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: false
-        _base:
+        _base_h:
           Value: true
         base_footprint:
           Value: true
         laser_mount:
           Value: true
-        left_wheel:
-          Value: true
         map:
           Value: true
         odom:
-          Value: true
-        rear_wheel:
-          Value: true
-        right_wheel:
           Value: true
       Marker Scale: 1
       Name: TF
@@ -373,18 +359,12 @@ Visualization Manager:
       Show Names: true
       Tree:
         map:
-          _base:
-            {}
+          base_footprint:
+            laser_mount:
+              {}
           odom:
-            base_footprint:
-              laser_mount:
-                {}
-              left_wheel:
-                {}
-              rear_wheel:
-                {}
-              right_wheel:
-                {}
+            _base_h:
+              {}
       Update Interval: 0
       Value: true
     - Class: rviz/MarkerArray
@@ -420,45 +400,45 @@ Visualization Manager:
       Queue Size: 100
       Value: false
     - Class: rviz/MarkerArray
-      Enabled: false
-      Marker Topic: /flatland_server/debug/model/obstacles_static_wagon_00
+      Enabled: true
+      Marker Topic: /flatland_server/debug/model/obstacles_static_random_00
       Name: MarkerArray
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
-      Value: false
+      Value: true
     - Class: rviz/MarkerArray
-      Enabled: false
-      Marker Topic: /flatland_server/debug/model/obstacles_static_wagon_01
+      Enabled: true
+      Marker Topic: /flatland_server/debug/model/obstacles_static_random_01
       Name: MarkerArray
       Namespaces:
-        {}
+        "": true
       Queue Size: 111
-      Value: false
+      Value: true
     - Class: rviz/MarkerArray
-      Enabled: false
-      Marker Topic: /flatland_server/debug/model/obstacles_static_wagon_02
+      Enabled: true
+      Marker Topic: /flatland_server/debug/model/obstacles_static_random_02
       Name: MarkerArray
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
-      Value: false
+      Value: true
     - Class: rviz/MarkerArray
-      Enabled: false
-      Marker Topic: /flatland_server/debug/model/obstacles_static_wagon_03
+      Enabled: true
+      Marker Topic: /flatland_server/debug/model/obstacles_static_random_03
       Name: MarkerArray
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
-      Value: false
+      Value: true
     - Class: rviz/MarkerArray
-      Enabled: false
+      Enabled: true
       Marker Topic: /flatland_server/debug/model/obstacles_static_random_04
       Name: MarkerArray
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
-      Value: false
+      Value: true
     - Class: rviz/MarkerArray
       Enabled: true
       Marker Topic: /flatland_server/debug/model/obstacles_static_random_05
@@ -476,45 +456,45 @@ Visualization Manager:
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
-      Enabled: false
-      Marker Topic: /flatland_server/debug/model/obstacles_static_wagon_07
+      Enabled: true
+      Marker Topic: /flatland_server/debug/model/obstacles_static_random_07
       Name: MarkerArray
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
-      Value: false
+      Value: true
     - Class: rviz/MarkerArray
-      Enabled: false
-      Marker Topic: /flatland_server/debug/model/obstacles_static_wagon_08
+      Enabled: true
+      Marker Topic: /flatland_server/debug/model/obstacles_static_random_08
       Name: MarkerArray
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
-      Value: false
+      Value: true
     - Class: rviz/MarkerArray
-      Enabled: false
-      Marker Topic: /flatland_server/debug/model/obstacles_static_wagon_09
+      Enabled: true
+      Marker Topic: /flatland_server/debug/model/obstacles_static_random_09
       Name: MarkerArray
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
-      Value: false
+      Value: true
     - Class: rviz/MarkerArray
-      Enabled: false
-      Marker Topic: /flatland_server/debug/model/obstacles_static_wagon_10
+      Enabled: true
+      Marker Topic: /flatland_server/debug/model/obstacles_static_random_10
       Name: MarkerArray
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
-      Value: false
+      Value: true
     - Class: rviz/MarkerArray
-      Enabled: false
-      Marker Topic: /flatland_server/debug/model/obstacles_static_wagon_11
+      Enabled: true
+      Marker Topic: /flatland_server/debug/model/obstacles_static_random_11
       Name: MarkerArray
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
-      Value: false
+      Value: true
     - Class: rviz/MarkerArray
       Enabled: false
       Marker Topic: /flatland_server/debug/model/obstacles_dynamic_person_two_legged_00
@@ -540,13 +520,13 @@ Visualization Manager:
       Queue Size: 100
       Value: false
     - Class: rviz/MarkerArray
-      Enabled: false
+      Enabled: true
       Marker Topic: /flatland_server/debug/model/obstacles_dynamic_person_two_legged_03
       Name: MarkerArray
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
-      Value: false
+      Value: true
     - Class: rviz/MarkerArray
       Enabled: false
       Marker Topic: /flatland_server/debug/model/obstacles_dynamic_person_two_legged_04
@@ -684,7 +664,7 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Angle: -7.8350067138671875
+      Angle: -7.850008487701416
       Class: rviz/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
@@ -694,11 +674,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 18.553178787231445
+      Scale: 20.245569229125977
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
-      X: 9.770020484924316
-      Y: 5.4435906410217285
+      X: 4.394783973693848
+      Y: 3.946451187133789
     Saved: ~
 Window Geometry:
   Displays:

@@ -1,0 +1,9 @@
+<launch>
+	<arg name="ns"/> 
+
+  <node name="pedsim_visualizer" type="pedsim_visualizer_node" pkg="pedsim_visualizer" output="screen">
+    <remap from="/tf" to="/$(arg ns)/tf"/>
+		<remap from="/clock" to="/$(arg ns)/clock"/>
+  </node>
+  
+</launch>

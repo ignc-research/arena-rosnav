@@ -31,13 +31,12 @@ class RobotManager:
         """
         self.is_training_mode = is_training_mode
         self._get_robot_configration(robot_yaml_path)
-        # setup proxy to handle  services provided by flatland
+        # setup proxy to handle  services provided by flatland and ped_simulator
         rospy.wait_for_service('move_model', timeout=20)
         #rospy.wait_for_service('step_world', timeout=20)
         self._srv_move_model = rospy.ServiceProxy('move_model', MoveModel)
         # it's only needed in training mode to send the clock signal.
         self._step_world = rospy.ServiceProxy("step_world", StepWorld)
-
         # subcriber
         # self._global_path_sub = rospy.Subscriber(
         #     "move_base/NavfnROS/plan", Path, self._global_path_callback)

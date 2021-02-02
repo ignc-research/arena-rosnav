@@ -18,7 +18,7 @@ class TaskGenerator:
         # mode='random'
         self.task=get_predefined_task(mode)
         #declare new service task_generator, request are handled in callback task generate
-        self.task_service_server= rospy.Service('task_generator', Trigger,self.callback_task_generate)
+        self.task_service_server= rospy.Service('task_generator', Trigger, self.callback_task_generate)
         
     def callback_task_generate(self,req):
         print("RESET")

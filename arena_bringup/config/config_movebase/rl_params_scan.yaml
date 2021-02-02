@@ -1,0 +1,8 @@
+rl_agent:
+  state_mode: 1 # 0: image, 1: laserscan
+  
+  resolution: 0.05
+  scan_size: 90 
+
+
+  

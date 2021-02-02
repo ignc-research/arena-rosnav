@@ -1,9 +1,10 @@
 bodies:
 - color:
-  - 1.0
-  - 1.0
-  - 1.0
-  - 0.1
+  - 0.5
+  - 0.8
+  - 0.7
+  - 0.0
+  enabled: true
   footprints:
   - center:
     - 0
@@ -12,7 +13,8 @@ bodies:
     density: 0
     layers:
     - all
-    radius: 0.001
+    radius: 0.5
+    sensor: true
     type: circle
   name: base_h
   pose:
@@ -21,10 +23,11 @@ bodies:
   - 0
   type: dynamic
 - color:
-  - 0.2
-  - 0.8
-  - 0.2
+  - 0.3
   - 0.5
+  - 0.7
+  - 0.6
+  enabled: true
   footprints:
   - center:
     - 0.0
@@ -34,6 +37,7 @@ bodies:
     layers:
     - all
     radius: 0.1
+    sensor: false
     type: circle
   name: left_leg
   pose:
@@ -42,10 +46,11 @@ bodies:
   - 0
   type: dynamic
 - color:
-  - 0.2
-  - 0.8
-  - 0.2
+  - 0.3
   - 0.5
+  - 0.7
+  - 0.6
+  enabled: true
   footprints:
   - center:
     - -0.0
@@ -55,6 +60,7 @@ bodies:
     layers:
     - all
     radius: 0.1
+    sensor: false
     type: circle
   name: right_leg
   pose:
@@ -67,18 +73,18 @@ plugins:
   base_body: base_h
   left_leg_body: left_leg
   leg_offset: 0.3
-  leg_radius: 0.1
+  leg_radius: 0.3
   name: pedsim_movement
   right_leg_body: right_leg
-  step_time: 0.6
+  step_time: 0.1
   toggle_leg_movement: true
   type: PedsimMovement
   update_rate: 40
-  var_leg_offset: 0.05
-  var_leg_radius: 0.02
-  var_step_time: 0.1
+  var_leg_offset: 0.002
+  var_leg_radius: 0.01
+  var_step_time: 0.001
 - body: base_h
-  ground_truth_pub: dynamic_human_7
+  ground_truth_pub: dynamic_human_0
   name: pose_publisher
   odom_frame_id: odom
   pub_rate: 10

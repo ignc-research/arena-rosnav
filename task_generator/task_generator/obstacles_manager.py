@@ -3,6 +3,7 @@ import random
 from typing import Union
 import re
 import yaml
+import numpy as np
 import os
 from flatland_msgs.srv import DeleteModel, DeleteModelRequest
 from flatland_msgs.srv import SpawnModel, SpawnModelRequest
@@ -10,6 +11,9 @@ from flatland_msgs.srv import MoveModel, MoveModelRequest
 from flatland_msgs.srv import StepWorld
 from nav_msgs.msg import OccupancyGrid
 from geometry_msgs.msg import Pose2D
+from pedsim_srvs.srv import SpawnPeds
+from pedsim_msgs.msg import Ped
+from std_srvs.srv import SetBool, Empty
 import rospy
 import rospkg
 import shutil
@@ -27,6 +31,11 @@ class ObstaclesManager:
         rospy.wait_for_service('move_model', timeout=20)
         rospy.wait_for_service('delete_model', timeout=20)
         rospy.wait_for_service('spawn_model', timeout=20)
+        rospy.wait_for_service('/pedsim_simulator/remove_all_peds', timeout=20)
+        # start=rospy.rostime.get_time()
+        # print("start wait ",start)
+        rospy.wait_for_service('/pedsim_simulator/respawn_peds' , timeout=20)
+        # print("passed ",rospy.rostime.get_time()-start)
         if is_training:
             rospy.wait_for_service('step_world', timeout=20)
         # allow for persistent connections to services
@@ -36,14 +45,26 @@ class ObstaclesManager:
             'delete_model', DeleteModel, persistent=True)
         self._srv_spawn_model = rospy.ServiceProxy(
             'spawn_model', SpawnModel, persistent=True)
+
+        # self.__respawn_models = rospy.ServiceProxy('/respawn_models' % self.NS, RespawnModels)
+        # self.__spawn_ped_srv = rospy.ServiceProxy(
+        #     '/pedsim_simulator/spawn_ped', SpawnPeds, persistent=True)
+        self.__respawn_peds_srv = rospy.ServiceProxy(
+            '/pedsim_simulator/respawn_peds' , SpawnPeds, persistent=True)
+        self.__remove_all_peds_srv = rospy.ServiceProxy(
+            '/pedsim_simulator/remove_all_peds' , SetBool, persistent=True)
         # self._srv_sim_step = rospy.ServiceProxy('step_world', StepWorld, persistent=True)
 
         self.update_map(map_)
-        self.obstacle_name_list = []
+        self.static_obstacle_name_list = []
+        self.__peds=[]
         self.obstacle_name_str=""
         self._obstacle_name_prefix = 'obstacles'
         # remove all existing obstacles generated before create an instance of this class
         self.remove_obstacles()
+        # print("start wait ")
+        # self.__remove_all_peds()
+        # print("start wait ")
 
     def update_map(self, new_map: OccupancyGrid):
         self.map = new_map
@@ -73,41 +94,45 @@ class ObstaclesManager:
         type_obstacle = self._obstacle_name_prefix+'_'+type_obstacle
         model_name = os.path.basename(model_yaml_file_path).split('.')[0]
         name_prefix = type_obstacle + '_' + model_name
-        count_same_type = sum(
-            1 if obstacle_name.startswith(name_prefix) else 0
-            for obstacle_name in self.obstacle_name_list)
+        if type_obstacle == 'obstacles_dynamic':
+            # print("reach here dynamic")
+            self.spawn_random_peds_in_world(num_obstacles)
+        else:
+            count_same_type = sum(
+                1 if obstacle_name.startswith(name_prefix) else 0
+                for obstacle_name in self.static_obstacle_name_list)
 
-        for instance_idx in range(count_same_type, count_same_type + num_obstacles):
-            max_num_try = 10
-            i_curr_try = 0
-            while i_curr_try < max_num_try:
-                spawn_request = SpawnModelRequest()
-                spawn_request.yaml_path = model_yaml_file_path
-                spawn_request.name = f'{name_prefix}_{instance_idx:02d}'
-                spawn_request.ns = rospy.get_namespace()
-                # x, y, theta = get_random_pos_on_map(self._free_space_indices, self.map,)
-                # set the postion of the obstacle out of the map to hidden them
-                x = self.map.info.origin.position.x - 3 * \
-                    self.map.info.resolution * self.map.info.height
-                y = self.map.info.origin.position.y - 3 * \
-                    self.map.info.resolution * self.map.info.width
-                theta = theta = random.uniform(-math.pi, math.pi)
-                spawn_request.pose.x = x
-                spawn_request.pose.y = y
-                spawn_request.pose.theta = theta
-                # try to call service
-                response = self._srv_spawn_model.call(spawn_request)
-                if not response.success:  # if service not succeeds, do something and redo service
-                    rospy.logwarn(
-                        f"spawn object {spawn_request.name} failed! trying again... [{i_curr_try+1}/{max_num_try} tried]")
-                    rospy.logwarn(response.message)
-                    i_curr_try += 1
-                else:
-                    self.obstacle_name_list.append(spawn_request.name)
-                    # self.obstacle_name_str=self.obstacle_name_str+","+spawn_request.name
-                    break
-            if i_curr_try == max_num_try:
-                raise rospy.ServiceException(f" failed to register obstacles")
+            for instance_idx in range(count_same_type, count_same_type + num_obstacles):
+                max_num_try = 10
+                i_curr_try = 0
+                while i_curr_try < max_num_try:
+                    spawn_request = SpawnModelRequest()
+                    spawn_request.yaml_path = model_yaml_file_path
+                    spawn_request.name = f'{name_prefix}_{instance_idx:02d}'
+                    spawn_request.ns = rospy.get_namespace()
+                    # x, y, theta = get_random_pos_on_map(self._free_space_indices, self.map,)
+                    # set the postion of the obstacle out of the map to hidden them
+                    x = self.map.info.origin.position.x - 3 * \
+                        self.map.info.resolution * self.map.info.height
+                    y = self.map.info.origin.position.y - 3 * \
+                        self.map.info.resolution * self.map.info.width
+                    theta = theta = random.uniform(-math.pi, math.pi)
+                    spawn_request.pose.x = x
+                    spawn_request.pose.y = y
+                    spawn_request.pose.theta = theta
+                    # try to call service
+                    response = self._srv_spawn_model.call(spawn_request)
+                    if not response.success:  # if service not succeeds, do something and redo service
+                        rospy.logwarn(
+                            f"spawn object {spawn_request.name} failed! trying again... [{i_curr_try+1}/{max_num_try} tried]")
+                        rospy.logwarn(response.message)
+                        i_curr_try += 1
+                    else:
+                        self.static_obstacle_name_list.append(spawn_request.name)
+                        # self.obstacle_name_str=self.obstacle_name_str+","+spawn_request.name
+                        break
+                if i_curr_try == max_num_try:
+                    raise rospy.ServiceException(f" failed to register static obstacles")
         return self
 
     def register_random_obstacles(self, num_obstacles: int, p_dynamic=0.5):
@@ -180,7 +205,7 @@ class ObstaclesManager:
             theta (float): [description]
         """
 
-        assert obstacle_name in self.obstacle_name_list, "can't move the obstacle because it has not spawned in the flatland"
+        assert obstacle_name in self.static_obstacle_name_list, "can't move the obstacle because it has not spawned in the flatland"
         # call service move_model
 
         srv_request = MoveModelRequest()
@@ -200,10 +225,10 @@ class ObstaclesManager:
             active_obstacle_rate (float): a parameter change the number of the obstacles within the map
             forbidden_zones (list): a list of tuples with the format (x,y,r),where the the obstacles should not be reset.
         """
-        active_obstacle_names = random.sample(self.obstacle_name_list, int(
-            len(self.obstacle_name_list) * active_obstacle_rate))
+        active_obstacle_names = random.sample(self.static_obstacle_name_list, int(
+            len(self.static_obstacle_name_list) * active_obstacle_rate))
         non_active_obstacle_names = set(
-            self.obstacle_name_list) - set(active_obstacle_names)
+            self.static_obstacle_name_list) - set(active_obstacle_names)
 
         # non_active obstacles will be moved to outside of the map
         resolution = self.map.info.resolution
@@ -335,8 +360,8 @@ class ObstaclesManager:
 
 
     def remove_obstacle(self, name: str):
-        if len(self.obstacle_name_list) != 0:
-            assert name in self.obstacle_name_list
+        if len(self.static_obstacle_name_list) != 0:
+            assert name in self.static_obstacle_name_list
         srv_request = DeleteModelRequest()
         srv_request.name = name
         response = self._srv_delete_model(srv_request)
@@ -353,17 +378,17 @@ class ObstaclesManager:
             prefix_names (Union[list,None], optional): a list of group names. if it is None then all obstacles will
                 be deleted. Defaults to None.
         """
-        if len(self.obstacle_name_list) != 0:
+        if len(self.static_obstacle_name_list) != 0:
             if prefix_names is None:
                 group_names = '.'
             re_pattern = "^(?:" + '|'.join(prefix_names) + r')\w*'
             r = re.compile(re_pattern)
             to_be_removed_obstacles_names = list(
-                filter(r.match, self.obstacle_name_list))
+                filter(r.match, self.static_obstacle_name_list))
             for n in to_be_removed_obstacles_names:
                 self.remove_obstacle(n)
-            self.obstacle_name_list = list(
-                set(self.obstacle_name_list)-set(to_be_removed_obstacles_names))
+            self.static_obstacle_name_list = list(
+                set(self.static_obstacle_name_list)-set(to_be_removed_obstacles_names))
         else:
             # it possible that in flatland there are still obstacles remaining when we create an instance of
             # this class.
@@ -374,3 +399,88 @@ class ObstaclesManager:
                 object_name = topic_name.split("/")[-1]
                 if object_name.startswith(self._obstacle_name_prefix):
                     self.remove_obstacle(object_name)
+
+    def __respawn_peds(self, peds):
+        """
+        Spawning one pedestrian in the simulation.
+        :param  start_pos start position of the pedestrian.
+        :param  wps waypoints the pedestrian is supposed to walk to.
+        :param  id id of the pedestrian.
+        """
+        self.__ped_type=0
+        self.__ped_file=os.path.join(rospkg.RosPack().get_path(
+            'simulator_setup'), 'dynamic_obstacles/person_two_legged.model.yaml')
+        srv = SpawnPeds()
+        srv.peds = []
+        for ped in peds:
+            msg = Ped()
+            msg.id = ped[0]
+            msg.pos = Point()
+            msg.pos.x = ped[1][0]
+            msg.pos.y = ped[1][1]
+            msg.pos.z = ped[1][2]
+            msg.type = self.__ped_type
+            msg.number_of_peds = 1
+            msg.yaml_file = self.__ped_file
+            msg.waypoints = []
+            for pos in ped[2]:
+                p = Point()
+                p.x = pos[0]
+                p.y = pos[1]
+                p.z = pos[2]
+                msg.waypoints.append(p)
+            srv.peds.append(msg)
+        # print("reach here ped")
+        try:
+            # self.__spawn_ped_srv.call(srv.peds)
+            print("reached here start")
+            self.__respawn_peds_srv.call(srv.peds)
+            print("reached here end")
+        except rospy.ServiceException:
+            print('Spawn object: rospy.ServiceException. Closing serivce')
+            try:
+                self._srv_spawn_model.close()
+            except AttributeError:
+                print('Spawn object close(): AttributeError.')
+                return
+        self.__peds = peds
+        return
+
+    def spawn_random_peds_in_world(self, n):
+        """
+        Spawning n random pedestrians in the whole world.
+        :param n number of pedestrians that will be spawned.
+        """
+        ped_array = []
+        for i in range(n):
+            waypoints = np.array([], dtype=np.int64).reshape(0, 3)
+            [x, y, theta] = get_random_pos_on_map(self.map)
+            waypoints = np.vstack([waypoints, [x, y, 0.3]])
+            if random.uniform(0.0, 1.0) < 0.8:
+                for j in range(4):
+                    dist = 0
+                    while dist < 4:
+                        [x2, y2, theta2] = get_random_pos_on_map(self.map)
+                        dist = self.__mean_sqare_dist_((waypoints[-1,0] - x2), (waypoints[-1,1] - y2))
+                    waypoints = np.vstack([waypoints, [x2, y2, 0.3]])
+            ped_array.append(i, [x, y, 0.0], waypoints)
+            self.__respawn_peds(ped_array)
+
+    def __mean_sqare_dist_(self, x, y):
+        """
+        Computing mean square distance of x and y
+        :param x, y
+        :return: sqrt(x^2 + y^2)
+        """
+        return math.sqrt(math.pow(x, 2) + math.pow(y, 2))
+
+    def __remove_all_peds(self):
+        """
+        Removes all pedestrians, that has been spawned so far
+        """
+        srv = SetBool()
+        srv.data = True
+        # rospy.wait_for_service('%s/pedsim_simulator/remove_all_peds' % self.NS)
+        self.__remove_all_peds_srv.call(srv.data)
+        self.__peds = []
+        return
