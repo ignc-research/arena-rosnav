@@ -317,7 +317,7 @@ def eval_all(a,map,ob,vel):
     read_scn_file(map, ob)
 
     mode =  map + "_" + ob + "_" + vel 
-    fig.suptitle(mode, fontsize=16)
+    # fig.suptitle(mode, fontsize=16)
     # plot static map
     if not "empty" in map:
         # img = plt.imread("map_small.png")
