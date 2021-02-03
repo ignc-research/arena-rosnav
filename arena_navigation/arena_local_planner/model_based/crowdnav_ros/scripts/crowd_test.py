@@ -71,22 +71,17 @@ class TestNode():
             v_x = msg.velocities[i].x; v_y = msg.velocities[i].y
             vx.append(v_x)
             vy.append(v_y)
-            # radius = PED_RADIUS
-            # lower_r = np.linalg.norm(np.array([msg.mean_points[i].x-msg.min_points[i].x, msg.mean_points[i].y-msg.min_points[i].y]))
-            # upper_r = np.linalg.norm(np.array([msg.mean_points[i].x-msg.max_points[i].x, msg.mean_points[i].y-msg.max_points[i].y]))
+
             inflation_factor = 1.5
-            # radius = max(PED_RADIUS, inflation_factor * max(upper_r, lower_r))
             
             radius = msg.mean_points[i].z*inflation_factor
 
             xs.append(x); ys.append(y); radii.append(radius); labels.append(index); 
-                # self.visualize_other_agent(x,y,radius,msg.labels[i])
 
         self.visualize_other_agents(xs, ys, radii, labels)
         self.other_agents_state["pos"] = [xs, ys] 
         self.other_agents_state["v"] = [vx,vy]
         self.other_agents_state["r"] = radii
-
 
         # print("received")
 
@@ -141,7 +136,6 @@ class TestNode():
         self.visualize_action()
 
     def cbComputeActionCrowdNav(self,event):
-
         robot_x = self.tb3.pose.pose.position.x
         robot_y = self.tb3.pose.pose.position.y
         # goal
@@ -162,8 +156,8 @@ class TestNode():
         # velocity
         obstacle_vx = [0.0,0.0,0.0,0.0,0.0]
         obstacle_vy = [0.0,0.0,0.0,0.0,0.0]
-        obstacle_radius = 0.4
-        if False:
+        obstacle_radius = 4
+        if True:
             for prop in self.other_agents_state:
                 if prop == "pos":
                     x_y = self.other_agents_state[prop]

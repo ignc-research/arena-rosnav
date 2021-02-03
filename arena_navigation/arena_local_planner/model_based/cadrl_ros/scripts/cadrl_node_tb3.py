@@ -35,7 +35,6 @@ class NN_tb3():
     def __init__(self, veh_name, veh_data, nn, actions):
 
         #tb3
-        self.obst_rad = 0.5
 
         # canon 
         self.node_name = rospy.get_name()
@@ -166,6 +165,7 @@ class NN_tb3():
             goal_x = x + 5.0; goal_y = y + 5.0
             
 
+            v_x = 3*v_x; v_y = 3*v_y
             # if pref_speed < 0.2:
             #     pref_speed = 0; v_x = 0; v_y = 0
             other_agents.append(agent.Agent(x, y, goal_x, goal_y, radius, pref_speed, heading_angle, index))
@@ -181,7 +181,6 @@ class NN_tb3():
         self.desired_action = action
         self.desired_position.pose.position.x = self.pose.pose.position.x + 1*action[0]*np.cos(action[1])
         self.desired_position.pose.position.y = self.pose.pose.position.y + 1*action[0]*np.sin(action[1])
-
 
     def find_vmax(self, d_min, heading_diff):
         # Calculate maximum linear velocity, as a function of error in

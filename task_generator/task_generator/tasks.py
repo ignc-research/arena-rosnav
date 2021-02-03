@@ -228,7 +228,8 @@ class ScenerioTask(ABSTask):
         """
         super().__init__(obstacles_manager, robot_manager)
         json_path = Path(scenerios_json_path)
-        assert json_path.is_file() and json_path.suffix == ".json"
+        print(scenerios_json_path)
+        # assert json_path.is_file() and json_path.suffix == ".json"
         json_data = json.load(json_path.open())
         self._scenerios_data = json_data["scenerios"]
         # current index of the scenerio

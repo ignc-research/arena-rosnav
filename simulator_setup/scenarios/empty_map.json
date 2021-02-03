@@ -6,7 +6,7 @@
             "dynamic_obstacles": {
                 "dynamic_obs_0": {
                     "obstacle_radius": 0.3,
-                    "linear_velocity": 0.1,
+                    "linear_velocity": 0.3,
                     "start_pos": [
                         2,
                         0,
@@ -27,7 +27,7 @@
                 },
                 "dynamic_obs_1": {
                     "obstacle_radius": 0.3,
-                    "linear_velocity": 0.1,
+                    "linear_velocity": 0.3,
                     "start_pos": [
                         4,
                         0,
@@ -36,7 +36,7 @@
                     "waypoints": [
                         [
                             0,
-                            -2,
+                            -4.01,
                             0
                         ]
                     ],
@@ -48,7 +48,7 @@
                 },
                 "dynamic_obs_2": {
                     "obstacle_radius": 0.3,
-                    "linear_velocity": 0.1,
+                    "linear_velocity": 0.3,
                     "start_pos": [
                         5,
                         0,
@@ -57,7 +57,7 @@
                     "waypoints": [
                         [
                             0,
-                            2,
+                            4.01,
                             0
                         ]
                     ],
@@ -79,7 +79,7 @@
                     "waypoints": [
                         [
                             0,
-                            -2,
+                            -4.01,
                             0
                         ]
                     ],

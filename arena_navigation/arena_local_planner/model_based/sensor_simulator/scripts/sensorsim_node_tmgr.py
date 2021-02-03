@@ -136,8 +136,8 @@ class sensor():
                     curr_time = m.header.stamp.nsecs
                     dt = (curr_time-old_time)*10**-9
                     if dt>0:
-                        v.x = (pos.x-old_pos.x)/dt
-                        v.y = (pos.y-old_pos.y)/dt
+                        v.x = round((pos.x-old_pos.x)/dt,3)
+                        v.y = round((pos.y-old_pos.y)/dt,3)
                     # update dyn obst
                     label = topic.replace("/flatland_server/debug/model/obstacle_dynamic_with_traj_", "")
                     label = int(label) + len(self.obst_topics_static) + 1

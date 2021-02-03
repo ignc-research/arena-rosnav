@@ -1,13 +1,17 @@
-# 
+# for data
 import rosbag
 import bagpy
 from bagpy import bagreader
 import pandas as pd
+import json
+import rospkg
+# for plots
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 from matplotlib.pyplot import figure
 from matplotlib.patches import Polygon
 import matplotlib.cm as cm
+# calc
 import numpy as np
 import math
 import seaborn as sb
@@ -19,16 +23,19 @@ import os
 # 
 class newBag():
     def __init__(self, planner,file_name, bag_name):
-
+        # bag topics
         odom_topic="/sensorsim/police/odom"
         collision_topic="/sensorsim/police/collision"
+        # 
+        self.col_zones = {}
+        self.nc_total = 0
+        self.nc_curr = 0
+        # eval bags
+
         self.bag = bagreader(bag_name)
         eps = self.split_runs(odom_topic, collision_topic)
         self.evalPath(planner,file_name,eps)
-        self.nc_total = 0
-        # self.make_heat_map(1)
-
-
+        # return
 
 
     def make_txt(self,file,msg,ron="a"):
@@ -149,30 +156,27 @@ class newBag():
         else:
              return 0
 
-    def print_patches(self,xya,clr):
-        global ax, lgnd
+    def plot_collisions(self, xya, clr, multiple = True):
+        global ax
 
-        for run_a in xya:
-            for col_xy in run_a:
-                circle = plt.Circle((-col_xy[1], col_xy[0]), 0.3, color=clr, fill = True)
-                ax.add_patch(circle)
+        z_id = 0
+        if multiple:
+            for run_a in xya:
+                for col_xy in run_a:
+                    circle = plt.Circle((-col_xy[1], col_xy[0]), 0.3, color=clr, fill = True, alpha = 0.3)
+                    ax.add_patch(circle)
+                    # if z_id in self.col_zones:
+                    #     self.col_zones[z_id] = []
+                    # else:
+                    #     self.col_zones[z_id] = [col_xy[0], col_xy[1], 0]
+        else:
+            if self.nc_curr > 0:
+                circle.remove()
 
-        # a = 0.5
-        # h = a*math.sqrt(3)/2
-        # patches = []
-        # polyg_pts = []
-        # polyg_pts.append([a/2, -h/2]) 
-        # polyg_pts.append([0, h/2]) 
-        # polyg_pts.append([-a/2, -h/2]) 
-
-        # polygon = Polygon(polyg_pts, True)
-        # plt.polygon
-        # patches.append(polygon)
-
-
-        # plt.Polygon([pt1,pt2], closed=None, fill=None, edgecolor='r')
-
-        # ax.add_patch(polygon)
+            col_xy = xya
+            self.nc_curr += 0.05
+            circle = plt.Circle((-col_xy[1], col_xy[0]), self.nc_curr, color=clr, fill = False, alpha = 0.3)
+            ax.add_patch(circle)
 
     def evalPath(self, planner, file_name, bags):
         col_xy = []
@@ -201,6 +205,7 @@ class newBag():
                 if path_length > 0:
                     ax.plot(y, x, lgnd[planner], alpha=0.2)
 
+
                 duration = t[len(t)-1] - t[0]
                 # for av
                 durations.append(duration)
@@ -219,6 +224,10 @@ class newBag():
                 self.make_txt(file_name, "\n"+cr)
 
                 col_xy.append(bags[run][3])
+
+                # if len(bags[run][3]) > 0:
+                #     self.plot_collisions(bags[run][3][0], lgnd[planner], False)
+
 
 
         msg_planner = "\n----------------------   "+planner+" summary: ----------------------"
@@ -239,40 +248,102 @@ class newBag():
         self.make_txt(file_name,msg_av)
         self.make_txt(file_name,msg_col)
 
-        self.print_patches(col_xy,lgnd[planner])
-        self.make_heat_map(col_xy)
+        self.plot_collisions(col_xy,lgnd[planner])
+        # self.make_heat_map(col_xy)
+
+def plot_arrow(start,end):
+    global ax
+    # ax.arrow(-start[1], start[0], -end[1], end[0], head_width=0.05, head_length=0.1, fc='k', ec='k')
+    plt.arrow(-start[1], start[0], -end[1], end[0],  
+        head_width = 0.2, 
+        width = 0, 
+        ec = "black",
+        fc = "black",
+        ls ="-")
+
+def plot_dyn_obst(ob_xy):
+    global ax
+
+    circle = plt.Circle((-ob_xy[1], ob_xy[0]), 0.3, color="black", fill = False, alpha = 1)
+    ax.add_patch(circle)
+
+def read_scn_file(map, ob):
+    global start_x
+    # find json path
+    rospack = rospkg.RosPack()
+    json_path = rospack.get_path('simulator_setup')+'/scenarios/eval/'
+    print(json_path)
+    for file in os.listdir(json_path):
+        if file.endswith(".json") and map in file and ob in file:
+            jf = file
+    # read file
+    with open(json_path+"/"+jf, 'r') as myfile:
+        data=myfile.read()
+    obj = json.loads(data)
+
+    # json to dict
+    for i in obj:
+        for l in obj[i]:
+            data = l
+    
+    # get json data
+    for do in data["dynamic_obstacles"]:
+        sp   = data["dynamic_obstacles"][do]["start_pos"]
+        sp_x = sp[0]
+        sp_y = sp[1]
+
+        wp   = data["dynamic_obstacles"][do]["waypoints"][0]
+        wp_x = wp[0]
+        wp_y = wp[1]
+        
+        ep_x = sp_x + wp_x
+        ep_y = sp_y + wp_y
+        ep   = [ep_x, ep_y]
+
+        plot_dyn_obst(sp)
+        plot_dyn_obst(ep)
+        plot_arrow(sp,wp)
+
+        # print(sp)
+        # print(ep)
+        # print("------------------------")
+        
+    start_x = data["robot"]["start_pos"][0] + 0.5
 
 def eval_all(a,map,ob,vel):
     global ax, sm, lgnd
     fig, ax = plt.subplots(figsize=(6, 7))
     
+    read_scn_file(map, ob)
 
     mode =  map + "_" + ob + "_" + vel 
     fig.suptitle(mode, fontsize=16)
+    # plot static map
     if not "empty" in map:
-        img = plt.imread("map_small.png")
-        ax.imshow(img, extent=[-19.7, 6, -6, 27])
-        # plt.scatter(sm[1], sm[0])
+        # img = plt.imread("map_small.png")
+        # ax.imshow(img, extent=[-20, 6, -6, 27.3])
+        plt.scatter(sm[1], sm[0],s = 0.2 , c = "grey")
+        # plt.plot(sm[1], sm[0],"--")
         
-    
+    # return
     cur_path = str(pathlib.Path().absolute())
     # print(cur_path)
     for planner in a:
         for file in os.listdir(cur_path+"/bags/scenarios/"+planner):
             if file.endswith(".bag") and map in file and ob in file and vel in file:
-                print("bags/scenarios/"+planner+"/"+file)
+                # print("bags/scenarios/"+planner+"/"+file)
                 fn = planner + mode
                 
                 newBag(planner, fn, "bags/scenarios/"+planner+"/"+file)
     
-    
+    # dhow legend labels once per planner
     legend_elements = []
     for l in lgnd:
             el = Line2D([0], [0], color=lgnd[l], lw=4, label=l)
             legend_elements.append(el)
 
     ax.legend(handles=legend_elements, loc=0)
-    plt.savefig(mode+'.pdf')
+    plt.savefig('plots/'+mode+'.pdf')
 
 def getMap(msg):
     global ax, sm
@@ -280,12 +351,30 @@ def getMap(msg):
     points_y = []
     # print(msg.markers[0])
     for p in msg.markers[0].points:
-        points_x.append(p.x-6)
-        points_y.append(-p.y+6)
+        if  2 < p.y < 25 :
+            points_x.append(p.x-6)
+            points_y.append(-p.y+6)
     # plt.scatter(points_y, points_x)
     sm = [points_x, points_y]
     # plt.show()
 
+    # map_obs ={}
+    # obc = 0
+    # for i in range(len(points_x)):
+    #     # x = points_x[i]
+    #     # y = points_y[i]
+    #     # if obc not in map_obs[obc]:
+    #     #     map_obs[obc] = []
+
+    #     # map_obs[obc] = map_obs[obc].append([points_x, points_y])
+    #     if i < len(points_x)-1:
+    #         dx = points_x[i+1] -  points_x[i]
+    #         dy = points_y[i+1] -  points_y[i]
+    #         dp = math.sqrt(dx**2+dy**2)
+
+    #         if dp > 1:
+    #             print(i)
+    
 def run():
     global ax, start_x, sm, lgnd
 
@@ -296,33 +385,33 @@ def run():
     lgnd["mpc"] = "tab:green"
     lgnd["teb"] = "tab:orange"
     # static map
-    # rospy.init_node("eval", anonymous=False)
-    # rospy.Subscriber('/flatland_server/debug/layer/static',MarkerArray, getMap)
+    rospy.init_node("eval", anonymous=False)
+    rospy.Subscriber('/flatland_server/debug/layer/static',MarkerArray, getMap)
     
 
-    start_x = 0.5
+    # start_x = 0.5
     # map
     #  5 01
-    eval_all(["arena","cadrl","dwa","mpc","teb"],"map1","5","vel_01.")
-    start_x = 0
-    #  10 01
-    eval_all(["arena","cadrl","dwa","mpc","teb"],"map1","10","vel_01.")
+    eval_all(["arena","cadrl","dwa","mpc","teb"],"map1","5","vel_03")
+    # # start_x = 0
+    # #  10 01
+    eval_all(["arena","cadrl","dwa","mpc","teb"],"map1","10","vel_03")
     # 20 01
-    eval_all(["arena","cadrl","dwa","mpc","teb"],"map1","20","vel_01.")
+    eval_all(["arena","cadrl","dwa","mpc","teb"],"map1","20","vel_03")
 
 
     # empty map
     #  5 01
-    eval_all(["arena","cadrl","dwa","mpc","teb"],"empty","5","vel_01.")    
+    eval_all(["arena","cadrl","dwa","mpc","teb"],"empty","5","vel_03")    
     #  10 01
-    eval_all(["arena","cadrl","dwa","mpc","teb"],"empty","10","vel_01")    
+    eval_all(["arena","cadrl","dwa","mpc","teb"],"empty","10","vel_03")    
     #  20 01
-    eval_all(["arena","cadrl","dwa","mpc","teb"],"empty","20","vel_01")
+    eval_all(["arena","cadrl","dwa","mpc","teb"],"empty","20","vel_03")
 
     
     
     plt.show()
-    # rospy.spin()
+    rospy.spin()
 
 
 if __name__=="__main__":
