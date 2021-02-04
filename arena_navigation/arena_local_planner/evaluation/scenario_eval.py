@@ -116,7 +116,8 @@ class newBag():
             reset = t_reset[n]
             # check if respawned
             # if current_time > reset-6 and n < len(t_reset)-1 and x<0:
-            global start_x
+            global start
+            start_x = start[0] + 0.5
             if current_time > reset-6 and n < len(t_reset)-1 and x < start_x:
                 n += 1
                 # store the run
@@ -180,14 +181,19 @@ class newBag():
 
     def evalPath(self, planner, file_name, bags):
         col_xy = []
-        global ax, lgnd
+        global ax, lgnd, axlim
 
         durations = [] 
         trajs = []
         vels  = []
 
         self.make_txt(file_name, "\n"+"Evaluation of "+planner+":")
-        
+        axlim = {}
+        axlim["x_min"] = 100
+        axlim["x_max"] = -100
+        axlim["y_min"] = 100
+        axlim["y_max"] = -100
+
         for run in bags:
             if run != "nrun_30":
                 pose_x = bags[run][0]
@@ -195,6 +201,17 @@ class newBag():
 
                 x = np.array(pose_x)
                 y = -np.array(pose_y)
+                # # x
+                # if min(x) < axlim["x_min"]:
+                #     axlim["x_min"] = x
+                # if max(x) > axlim["x_max"]:
+                #     axlim["x_max"] = x
+                # # y
+                # if min(y) < axlim["y_min"]:
+                #     axlim["y_min"] = y
+                # if max(y) > axlim["y_max"]:
+                #     axlim["y_max"] = y
+                
                 
                 t = bags[run][2]
 
@@ -268,7 +285,7 @@ def plot_dyn_obst(ob_xy):
     ax.add_patch(circle)
 
 def read_scn_file(map, ob):
-    global start_x
+    global start, goal
     # find json path
     rospack = rospkg.RosPack()
     json_path = rospack.get_path('simulator_setup')+'/scenarios/eval/'
@@ -308,10 +325,11 @@ def read_scn_file(map, ob):
         # print(ep)
         # print("------------------------")
         
-    start_x = data["robot"]["start_pos"][0] + 0.5
+    start = data["robot"]["start_pos"]
+    goal  = data["robot"]["goal_pos"]
 
 def eval_all(a,map,ob,vel):
-    global ax, sm, lgnd
+    global ax, sm, lgnd, start, goal, axlim
     fig, ax = plt.subplots(figsize=(6, 7))
     
     read_scn_file(map, ob)
@@ -343,6 +361,23 @@ def eval_all(a,map,ob,vel):
             legend_elements.append(el)
 
     ax.legend(handles=legend_elements, loc=0)
+    
+    ax.set_ylim([start[0]-1, goal[0]+1])
+
+    # if "map" in map:
+    #     ax.set_xlim([start[0]-1, goal[0]+1])
+    # else:
+    #     ax.set_xlim([start[0]-1, goal[0]+1])
+
+
+    # print(start)
+    # print(goal)
+    # ax.set_ylim([axlim["y_min"], axlim["y_max"]])
+    # ax.set_xlim([axlim["x_min"], axlim["x_max"]])
+
+
+
+
     plt.savefig('plots/'+mode+'.pdf')
 
 def getMap(msg):
@@ -376,7 +411,7 @@ def getMap(msg):
     #             print(i)
     
 def run():
-    global ax, start_x, sm, lgnd
+    global ax, sm, lgnd
 
     lgnd = {}
     lgnd["arena"] = "tab:purple"
