@@ -21,7 +21,7 @@ import time
 class FlatlandEnv(gym.Env):
     """Custom Environment that follows gym interface"""
 
-    def __init__(self, task: ABSTask, robot_yaml_path: str, settings_yaml_path: str, reward_fnc: str, is_action_space_discrete, safe_dist: float = None, goal_radius: float = 0.1, max_steps_per_episode=100):
+    def __init__(self, ns: str, task: ABSTask, robot_yaml_path: str, settings_yaml_path: str, reward_fnc: str, is_action_space_discrete, safe_dist: float = None, goal_radius: float = 0.1, max_steps_per_episode=100):
         """Default env
         Flatland yaml node check the entries in the yaml file, therefore other robot related parameters cound only be saved in an other file.
         TODO : write an uniform yaml paser node to handel with multiple yaml files.
@@ -38,9 +38,11 @@ class FlatlandEnv(gym.Env):
             goal_radius (float, optional): [description]. Defaults to 0.1.
         """
         super(FlatlandEnv, self).__init__()
+
+        # process specific namespace in ros system
+        self.ns = ns
         # Define action and observation space
         # They must be gym.spaces objects
-
         self._is_action_space_discrete = is_action_space_discrete
         self.setup_by_configuration(robot_yaml_path, settings_yaml_path)
         # observation collector
