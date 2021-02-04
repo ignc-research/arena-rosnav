@@ -31,13 +31,15 @@ import numpy as np
 
 
 class ObservationCollector():
-    def __init__(self,num_lidar_beams:int,lidar_range:float):
+    def __init__(self, ns:str, num_lidar_beams:int, lidar_range:float):
         """ a class to collect and merge observations
 
         Args:
             num_lidar_beams (int): [description]
             lidar_range (float): [description]
         """
+        self.ns = ns
+
         # define observation_space
         self.observation_space = ObservationCollector._stack_spaces((
             spaces.Box(low=0, high=lidar_range, shape=(num_lidar_beams,), dtype=np.float32),
@@ -55,22 +57,22 @@ class ObservationCollector():
         
 
         # message_filter subscriber: laserscan, robot_pose
-        self._scan_sub = message_filters.Subscriber("scan", LaserScan)
-        self._robot_state_sub = message_filters.Subscriber('plan_manager/robot_state', RobotStateStamped)
+        self._scan_sub = message_filters.Subscriber(f'{self.ns}/scan', LaserScan)
+        self._robot_state_sub = message_filters.Subscriber(f'{self.ns}/plan_manager/robot_state', RobotStateStamped)
         
         # message_filters.TimeSynchronizer: call callback only when all sensor info are ready
         self.ts = message_filters.ApproximateTimeSynchronizer([self._scan_sub, self._robot_state_sub], 100,slop=0.05)#,allow_headerless=True)
         self.ts.registerCallback(self.callback_observation_received)
         
         # topic subscriber: subgoal
-        #TODO should we synchoronize it with other topics
-        self._subgoal_sub = message_filters.Subscriber('plan_manager/subgoal', PoseStamped) #self._subgoal_sub = rospy.Subscriber("subgoal", PoseStamped, self.callback_subgoal)
+        #TODO should we synchronize it with other topics
+        self._subgoal_sub = message_filters.Subscriber(f'{self.ns}/plan_manager/subgoal', PoseStamped) #self._subgoal_sub = rospy.Subscriber("subgoal", PoseStamped, self.callback_subgoal)
         self._subgoal_sub.registerCallback(self.callback_subgoal)
         
         # service clients
         self._is_train_mode = rospy.get_param("train_mode")
         if self._is_train_mode:
-            self._service_name_step='step_world'
+            self._service_name_step = f'{self.ns}/step_world'
             self._sim_step_client = rospy.ServiceProxy(self._service_name_step, StepWorld)
 
 
@@ -178,7 +180,7 @@ if __name__ == '__main__':
     rospy.init_node('states', anonymous=True)
     print("start")
 
-    state_collector=ObservationCollector(360,10)
+    state_collector=ObservationCollector("sim1", 360, 10)
     i=0
     r=rospy.Rate(100)
     while(i<=1000):
