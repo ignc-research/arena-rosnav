@@ -46,10 +46,11 @@
     <arg name="rviz_file"       value="$(arg rviz_file)"/>
   </include>
 
-    <!-- map server-->
+  <!-- map server-->
   <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_path)" ns="$(arg ns)">
       <param name="frame_id" value="$(arg global_frame_id)"/>
-      <remap from="/clock" to="/$(arg ns)/clock"/>
+      <remap from="/clock"   to="/$(arg ns)/clock"/>
+      <remap from="/map"     to="/$(arg ns)/map"/>
   </node>
 
   <!-- use fake localization-->

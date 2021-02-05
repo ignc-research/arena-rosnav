@@ -21,7 +21,7 @@ class RobotManager:
     is managed
     """
 
-    def __init__(self, map_: OccupancyGrid, robot_yaml_path: str, is_training_mode: bool):
+    def __init__(self, ns: str, map_: OccupancyGrid, robot_yaml_path: str, is_training_mode: bool):
         """[summary]
 
         Args:
@@ -29,14 +29,16 @@ class RobotManager:
             robot_yaml_path (str): the file name of the robot yaml file.
             is_training_mode (bool): a flag to indicate the mode (training or test)
         """
+        self.ns = ns
+
         self.is_training_mode = is_training_mode
         self._get_robot_configration(robot_yaml_path)
         # setup proxy to handle  services provided by flatland
-        rospy.wait_for_service('move_model', timeout=20)
+        rospy.wait_for_service(f'{self.ns}move_model', timeout=20)
         #rospy.wait_for_service('step_world', timeout=20)
-        self._srv_move_model = rospy.ServiceProxy('move_model', MoveModel)
+        self._srv_move_model = rospy.ServiceProxy(f'{self.ns}move_model', MoveModel)
         # it's only needed in training mode to send the clock signal.
-        self._step_world = rospy.ServiceProxy("step_world", StepWorld)
+        self._step_world = rospy.ServiceProxy(f'{self.ns}step_world', StepWorld)
 
         # subcriber
         # self._global_path_sub = rospy.Subscriber(
@@ -49,7 +51,7 @@ class RobotManager:
         # self._initialpose_pub = rospy.Publisher(
         #     'initialpose', PoseWithCovarianceStamped, queue_size=1)
         self._goal_pub = rospy.Publisher(
-            '/goal', PoseStamped, queue_size=1, latch=True)
+            f'{self.ns}goal', PoseStamped, queue_size=1, latch=True)
 
         self.update_map(map_)
 

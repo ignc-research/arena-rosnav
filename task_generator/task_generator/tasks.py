@@ -331,15 +331,22 @@ class ScenerioTask(ABSTask):
         json.dump(json_data, dst_json_path_.open('w'), indent=4)
 
 
-def get_predefined_task(mode="random", start_stage: int = 1, PATHS: dict = None):
+def get_predefined_task(ns: str, mode="random", start_stage: int = 1, PATHS: dict = None):
 
     # TODO extend get_predefined_task(mode="string") such that user can choose between task, if mode is
 
     # check is it on traininig mode or test mode. if it's on training mode
     # flatland will provide an service called 'step_world' to change the simulation time
     # otherwise it will be bounded to real time.
+
+    # either e.g. ns = 'sim1/' or ns = ''
+    if ns is not None:
+        ns = ns + '/'
+    else:
+        ns = ''
+
     try:
-        rospy.wait_for_service('step_world', timeout=0.5)
+        rospy.wait_for_service(f'{ns}step_world', timeout=0.5)
         TRAINING_MODE = True
     except ROSException:
         TRAINING_MODE = False
@@ -350,21 +357,21 @@ def get_predefined_task(mode="random", start_stage: int = 1, PATHS: dict = None)
         # the configuration including the map service.
         steps = 400
         step_world = rospy.ServiceProxy(
-            'step_world', StepWorld, persistent=True)
+            f'{ns}step_world', StepWorld, persistent=True)
         for _ in range(steps):
             step_world()
 
     # get the map
-    service_client_get_map = rospy.ServiceProxy("static_map", GetMap)
+    service_client_get_map = rospy.ServiceProxy(f'{ns}static_map', GetMap)
     map_response = service_client_get_map()
 
     # use rospkg to get the path where the model config yaml file stored
     models_folder_path = rospkg.RosPack().get_path('simulator_setup')
     # robot's yaml file is needed to get its radius.
-    robot_manager = RobotManager(map_response.map, os.path.join(
+    robot_manager = RobotManager(ns, map_response.map, os.path.join(
         models_folder_path, 'robot', "myrobot.model.yaml"), TRAINING_MODE)
 
-    obstacles_manager = ObstaclesManager(map_response.map, TRAINING_MODE)
+    obstacles_manager = ObstaclesManager(ns, map_response.map, TRAINING_MODE)
     # only generate 3 static obstaticles
     # obstacles_manager.register_obstacles(3, os.path.join(
     # models_folder_path, "obstacles", 'random.model.yaml'), 'static')

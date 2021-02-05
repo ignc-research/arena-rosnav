@@ -41,6 +41,9 @@ class FlatlandEnv(gym.Env):
 
         # process specific namespace in ros system
         self.ns = ns
+
+        rospy.init_node(f'ros_env_{ns}', anonymous=True)
+
         # Define action and observation space
         # They must be gym.spaces objects
         self._is_action_space_discrete = is_action_space_discrete
