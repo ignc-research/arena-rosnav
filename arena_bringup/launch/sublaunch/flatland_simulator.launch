@@ -32,14 +32,15 @@
   <arg name="initial_pose_y" default="0.0"/>
   <arg name="initial_pose_a" default="0.0"/>
 
-  <node name="spawn_model" pkg="rosservice" type="rosservice" ns="$(arg ns)"
-    args="call --wait /spawn_model &quot;{
+
+  <!-- <node name="spawn_model" pkg="rosservice" type="rosservice" ns="$(arg ns)"
+    args="call wait $(arg ns)/spawn_model &quot;{
       yaml_path: '$(find simulator_setup)/robot/myrobot.model.yaml',
       name: 'myrobot',
       ns: '',
       pose: {x: $(arg initial_pose_x), y: $(arg initial_pose_y), theta: $(arg initial_pose_a)}}&quot;"
-    />
-  
+  /> -->
+
   <!--  ************** flatland viz  ***************  -->
   <group if="$(arg show_viz)">
     <node name="flatland_viz" pkg="flatland_viz" type="flatland_viz" output="screen" required="false" unless="$(arg use_rviz)"/>
