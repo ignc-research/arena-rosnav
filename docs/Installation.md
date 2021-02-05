@@ -82,8 +82,6 @@ mkdir -p catkin_ws/src && cd catkin_ws/src
 git clone https://github.com/ignc-research/arena-rosnav
 
 cd arena-rosnav && rosws update
-cd ../forks/navigation/mpc_local_planner
-rosdep install mpc_local_planner
 source $HOME/.zshrc
 cd ../.. 
 catkin_make -DPYTHON_EXECUTABLE=/usr/bin/python3
