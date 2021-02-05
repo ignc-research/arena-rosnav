@@ -40,7 +40,10 @@ class FlatlandEnv(gym.Env):
         super(FlatlandEnv, self).__init__()
 
         # process specific namespace in ros system
-        self.ns = ns
+        if ns is not None:
+            self.ns = ns + '/'
+        else:
+            self.ns = ''
 
         rospy.init_node(f'ros_env_{ns}', anonymous=True)
 
@@ -61,11 +64,11 @@ class FlatlandEnv(gym.Env):
             robot_radius=self._robot_radius, safe_dist=1.1*self._robot_radius, goal_radius=goal_radius, rule=reward_fnc)
 
         # action agent publisher
-        self.agent_action_pub = rospy.Publisher(f'{self.ns}/cmd_vel', Twist, queue_size=1)
+        self.agent_action_pub = rospy.Publisher(f'{self.ns}cmd_vel', Twist, queue_size=1)
         # service clients
         self._is_train_mode = rospy.get_param("train_mode")
         if self._is_train_mode:
-            self._service_name_step = f'{self.ns}/step_world'
+            self._service_name_step = f'{self.ns}step_world'
             self._sim_step_client = rospy.ServiceProxy(
             self._service_name_step, StepWorld)
         self.task = task
