@@ -113,13 +113,14 @@ if __name__ == "__main__":
 
     # instantiate gym environment
     n_envs = 1
-    task_manager = get_predefined_task(params['task_mode'], params['curr_stage'], PATHS)
+    task_manager = get_predefined_task("sim1", params['task_mode'], params['curr_stage'], PATHS)
     env = DummyVecEnv(
         [lambda: FlatlandEnv("sim1", task_manager, PATHS.get('robot_setting'), PATHS.get('robot_as'), params['reward_fnc'], params['discrete_action_space'], goal_radius=1.00, max_steps_per_episode=200)] * n_envs)
     if params['normalize']:
         env = VecNormalize(env, training=True, norm_obs=True, norm_reward=False, clip_reward=15)
 
     # instantiate eval environment
+    """    
     trainstage_cb = InitiateNewTrainStage(TaskManager=task_manager, TreshholdType="rew", rew_threshold=14.5, task_mode=params['task_mode'], verbose=1)
     eval_env = Monitor(FlatlandEnv(
         "sim1", task_manager, PATHS.get('robot_setting'), PATHS.get('robot_as'), params['reward_fnc'], params['discrete_action_space'], goal_radius=1.00, max_steps_per_episode=250),
@@ -129,7 +130,7 @@ if __name__ == "__main__":
         eval_env = VecNormalize(eval_env, training=False, norm_obs=True, norm_reward=False, clip_reward=15)
     eval_cb = EvalCallback(
         eval_env, n_eval_episodes=20, eval_freq=15000, log_path=PATHS.get('eval'), best_model_save_path=PATHS.get('model'), deterministic=True, callback_on_new_best=trainstage_cb)
-
+    """
     # determine mode
     if args.custom_mlp:
         # custom mlp flag
@@ -168,7 +169,8 @@ if __name__ == "__main__":
         n_timesteps = args.n
 
     # start training
-    model.learn(total_timesteps = n_timesteps, callback=eval_cb, reset_num_timesteps = False)
+    # model.learn(total_timesteps = n_timesteps, callback=eval_cb, reset_num_timesteps = False)
+    model.learn(total_timesteps = n_timesteps, reset_num_timesteps = False)
 
     # update the timesteps the model has trained in total
     update_total_timesteps_json(hyperparams_obj, n_timesteps, PATHS)
