@@ -24,6 +24,7 @@
 
     <!-- remapping for namespace -->
     <remap from="/clock" to="/$(arg ns)/clock"/>
+    <remap from="/tf"    to="/$(arg ns)/tf"/>
   </node>
 
   
@@ -101,6 +102,7 @@
       <remap from="/particlecloud" to="/$(arg ns)/particlecloud"/>
       <remap from="/planning_vis/goal" to="/$(arg ns)/planning_vis/goal"/>
       <remap from="/planning_vis/goal_array" to="/$(arg ns)/planning_vis/goal_array"/> 
+      <remap from="/map" to="/$(arg ns)/map"/>
     </node>
   </group>    
 </launch>

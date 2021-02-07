@@ -15,6 +15,6 @@
     "discrete_action_space": true,
     "normalize": false,
     "task_mode": "staged",
-    "curr_stage": 1,
-    "n_timesteps": 0
+    "curr_stage": 3,
+    "n_timesteps": 7200
 }

@@ -541,7 +541,11 @@ class ObstaclesManager:
             topics = rospy.get_published_topics()
             for t in topics:
                 # the format of the topic is (topic_name,message_name)
-                topic_name = t[0]
-                object_name = topic_name.split("/")[-1]
+                topic_name = t[0].split("/")
+                object_name = topic_name[-1]
                 if object_name.startswith(self._obstacle_name_prefix):
-                    self.remove_obstacle(object_name)
+                    if "sim" in self.ns:
+                        if self.ns[:-1] in topic_name:
+                            self.remove_obstacle(object_name)
+                    else:
+                        self.remove_obstacle(object_name)

@@ -39,11 +39,13 @@ class FlatlandEnv(gym.Env):
         """
         super(FlatlandEnv, self).__init__()
 
-        # process specific namespace in ros system
+        # process specific namespace in ros
         if ns is not None:
             self.ns = ns + '/'
         else:
             self.ns = ''
+
+        rospy.init_node(f'train_env_{ns[-1]}')
 
         # Define action and observation space
         # They must be gym.spaces objects
