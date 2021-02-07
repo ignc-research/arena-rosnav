@@ -1,0 +1,71 @@
+
+<launch>
+  <arg name="ns" default="sim_01"/>
+  <arg name="rviz_file"       default="nav"/>
+  <!-- if true use rviz for visualization otherwise use flatland_viz-->
+  <arg name="use_rviz" default="true"/>
+
+
+
+  <env name="ROSCONSOLE_FORMAT" value="[${severity} ${time} ${logger}]: ${message}" />
+
+  <!--  ************** flatland viz  ***************  -->
+    <node name="flatland_viz" pkg="flatland_viz" type="flatland_viz" output="screen" required="false" ns="$(arg ns)" unless="$(arg use_rviz)"/>
+  <!--  ************** rviz  ***************  -->
+  <group if="$(arg use_rviz)">
+    <node name="flatland_rviz" pkg="rviz" type="rviz" output="screen" ns="$(arg ns)" args="-d $(find arena_bringup)/rviz/$(arg rviz_file).rviz">
+      <!-- remapping for namespace -->
+      <remap from="/initialpose" to="/$(arg ns)/initialpose"/>
+      <remap from="/move_base_simple/goal" to="/$(arg ns)/move_base_simple/goal"/>
+      <remap from="/clock" to="/$(arg ns)/clock"/>
+      <remap from="/flatland_server/debug/layer/static" to="/$(arg ns)/flatland_server/debug/layer/static"/>
+      <remap from="/flatland_server/debug/layer/static_3d" to="/$(arg ns)/flatland_server/debug/layer/static_3d"/>
+      <remap from="/flatland_server/debug/model/cleaner1" to="/$(arg ns)/flatland_server/debug/model/cleaner1"/>
+      <remap from="/flatland_server/debug/model/myrobot" to="/$(arg ns)/flatland_server/debug/model/myrobot"/>
+      <remap from="/flatland_server/debug/model/obstacles_dynamic_random_00" to="/$(arg ns)/flatland_server/debug/model/obstacles_dynamic_random_00"/>
+      <remap from="/flatland_server/debug/model/obstacles_dynamic_random_01" to="/$(arg ns)/flatland_server/debug/model/obstacles_dynamic_random_01"/>
+      <remap from="/flatland_server/debug/model/obstacles_dynamic_random_02" to="/$(arg ns)/flatland_server/debug/model/obstacles_dynamic_random_02"/>
+      <remap from="/flatland_server/debug/model/obstacles_static_random_00" to="/$(arg ns)/flatland_server/debug/model/obstacles_static_random_00"/>
+      <remap from="/flatland_server/debug/model/obstacles_static_random_01" to="/$(arg ns)/flatland_server/debug/model/obstacles_static_random_01"/>
+      <remap from="/flatland_server/debug/model/obstacles_static_random_02" to="/$(arg ns)/flatland_server/debug/model/obstacles_static_random_02"/>
+      <remap from="/flatland_server/debug/model/stat_obj_0" to="/$(arg ns)/flatland_server/debug/model/stat_obj_0"/>
+      <remap from="/flatland_server/debug/model/stat_obj_1" to="/$(arg ns)/flatland_server/debug/model/stat_obj_1"/>
+      <remap from="/flatland_server/debug/model/stat_obj_2" to="/$(arg ns)/flatland_server/debug/model/stat_obj_2"/>
+      <remap from="/flatland_server/debug/model/stat_obj_3" to="/$(arg ns)/flatland_server/debug/model/stat_obj_3"/>
+      <remap from="/flatland_server/debug/model/stat_obj_4" to="/$(arg ns)/flatland_server/debug/model/stat_obj_4"/>
+      <remap from="/flatland_server/debug/model/stat_obj_5" to="/$(arg ns)/flatland_server/debug/model/stat_obj_5"/>
+      <remap from="/flatland_server/debug/model/stat_obj_6" to="/$(arg ns)/flatland_server/debug/model/stat_obj_6"/>
+      <remap from="/flatland_server/debug/model/stat_obj_7" to="/$(arg ns)/flatland_server/debug/model/stat_obj_7"/>
+      <remap from="/flatland_server/debug/model/stat_obj_8" to="/$(arg ns)/flatland_server/debug/model/stat_obj_8"/>
+      <remap from="/flatland_server/debug/model/stat_obj_9" to="/$(arg ns)/flatland_server/debug/model/stat_obj_9"/>
+      <remap from="/flatland_server/debug/model/stat_obj_10" to="/$(arg ns)/flatland_server/debug/model/stat_obj_10"/>
+      <remap from="/flatland_server/debug/model/stat_obj_11" to="/$(arg ns)/flatland_server/debug/model/stat_obj_11"/>
+      <remap from="/flatland_server/debug/model/stat_obj_12" to="/$(arg ns)/flatland_server/debug/model/stat_obj_12"/>
+      <remap from="/flatland_server/debug/model/stat_obj_13" to="/$(arg ns)/flatland_server/debug/model/stat_obj_13"/>
+      <remap from="/flatland_server/debug/model/stat_obj_14" to="/$(arg ns)/flatland_server/debug/model/stat_obj_14"/>
+      <remap from="/flatland_server/debug/model/stat_obj_15" to="/$(arg ns)/flatland_server/debug/model/stat_obj_15"/>
+      <remap from="/flatland_server/debug/model/walker_model0" to="/$(arg ns)/flatland_server/debug/model/walker_model0"/>
+      <remap from="/move_base/DWAPlannerROS/local_plan" to="/$(arg ns)/move_base/DWAPlannerROS/local_plan"/>
+      <remap from="/move_base/NavfnROS/plan" to="/$(arg ns)/move_base/NavfnROS/plan"/>
+      <remap from="/move_base/TrajectoryPlannerROS/local_plan" to="/$(arg ns)/move_base/TrajectoryPlannerROS/local_plan"/>
+      <remap from="/move_base/global_costmap/costmap" to="/$(arg ns)/move_base/global_costmap/costmap"/>
+      <remap from="/move_base/global_costmap/costmap_updates" to="/$(arg ns)/move_base/global_costmap/costmap_updates"/>
+      <remap from="/move_base/local_costmap/costmap" to="/$(arg ns)/move_base/local_costmap/costmap"/>
+      <remap from="/move_base/local_costmap/costmap_updates" to="/$(arg ns)/move_base/local_costmap/costmap_updates"/>
+      <remap from="/move_base_simple/goal" to="/$(arg ns)/move_base_simple/goal"/>
+      <remap from="/planning_vis/global_path" to="/$(arg ns)/planning_vis/global_path"/>
+      <remap from="/planning_vis/global_path_array" to="/$(arg ns)/planning_vis/global_path_array"/>
+      <remap from="/planning_vis/subgoal" to="/$(arg ns)/planning_vis/subgoal"/>
+      <remap from="/planning_vis/subgoal_array" to="/$(arg ns)/planning_vis/subgoal_array"/>
+      <remap from="/scan" to="/$(arg ns)/scan"/>
+      <remap from="/subgoal_vis" to="/$(arg ns)/subgoal_vis"/>
+      <!-- <remap from="/tf" to="/$(arg ns)/tf"/>  
+      <remap from="/tf_static" to="/$(arg ns)/tf_static"/> -->
+      <remap from="/waypoint_markers" to="/$(arg ns)/waypoint_markers"/>
+      <remap from="/waypoint_markers_array" to="/$(arg ns)/waypoint_markers_array"/>
+      <remap from="/particlecloud" to="/$(arg ns)/particlecloud"/>
+      <remap from="/planning_vis/goal" to="/$(arg ns)/planning_vis/goal"/>
+      <remap from="/planning_vis/goal_array" to="/$(arg ns)/planning_vis/goal_array"/> 
+    </node>
+  </group>    
+</launch>

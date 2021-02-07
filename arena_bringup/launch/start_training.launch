@@ -1,0 +1,73 @@
+<launch>
+
+  <!-- Here are the argument that may be frequently changed -->
+  <arg name="ns_prefix" default="sim" />
+  <arg name="num_envs" default="0" />
+  <!-- To make the training more efficient make sure this step_size*laser_update_rate == 1  -->
+  <arg name="step_size" default="0.1"/>
+  <!-- the folder name under the path simulator_setup/maps  -->
+  <arg name="map_folder_name" default="map_empty" />
+
+  <!-- the velocity of randomly genelized obstacles  -->
+  <arg name="obs_vel" default="0.3" />
+  <!-- if it's false flatland server will not publish any debug related infomation and you will not able to visuzalize e.g robot, dynamic obstacles  -->
+  <arg name="show_viz"  default="true"/>
+  <!-- plan manager related params -->
+  <!-- in meters -->
+  <arg name="look_ahead_distance"   default="1.5"/>
+  <arg name="tolerance_approach"    default="0.6"/>
+  <!-- in seconds -->
+  <arg name="timeout_goal"          default="330"/>
+  <arg name="timeout_subgoal"       default="30"/>
+i
+  <!-- trival params, you may change it but makes not much sense -->
+  <arg name="viz_pub_rate" default="30" />
+
+  <!--  PARAMS DON'T CHANGE THEM  -->
+  <param name="use_sim_time" value="true" />
+  <param name="train_mode" value="true" />
+  <param name="num_envs" value="$(arg num_envs)" />
+  <param name="obs_vel" value="$(arg obs_vel)" /> 
+  <arg name="map_path" default="$(find simulator_setup)/maps/$(arg map_folder_name)/map.yaml" />
+  <param name="world_path" value="$(find simulator_setup)/maps/$(arg map_folder_name)/map.world.yaml" />
+  <param name="show_viz" value="$(arg show_viz)"/>
+  <param name="viz_pub_rate" value="$(arg viz_pub_rate)"/>
+  <param name="look_ahead_distance"   value="$(arg look_ahead_distance)"/>
+  <param name="tolerance_approach"    value="$(arg tolerance_approach)"/>
+  <param name="timeout_goal"          value="$(arg timeout_goal)"/>
+  <param name="timeout_subgoal"       value="$(arg timeout_subgoal)"/>
+
+
+  <!-- map server-->
+  <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_path)">
+    <!-- In multi-env training /clock not available, since we only want one map_server, it's clock topic is remapped to /clock -->
+    <remap from="/clock" to="/$(arg ns_prefix)_01/clock" />
+
+</node>
+
+
+<!-- <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" >
+  <arg name="ns" value="$(arg ns_prefix)_01" />
+</include> -->
+
+
+
+  <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=1)">
+    <arg name="ns" value="$(arg ns_prefix)_01" />
+  </include>
+  <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=2)">
+    <arg name="ns" value="$(arg ns_prefix)_02" />
+  </include>
+  <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=3)">
+    <arg name="ns" value="$(arg ns_prefix)_03" />
+  </include>
+  <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=4)">
+    <arg name="ns" value="$(arg ns_prefix)_04" />
+  </include>
+  <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=5)">
+    <arg name="ns" value="$(arg ns_prefix)_05" />
+  </include>
+  <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=6)">
+    <arg name="ns" value="$(arg ns_prefix)_06" />
+  </include>
+</launch>
