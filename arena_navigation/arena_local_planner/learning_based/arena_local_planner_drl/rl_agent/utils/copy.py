@@ -11,7 +11,7 @@ import time # for debuging
 # observation msgs
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Pose2D,PoseStamped, PoseWithCovarianceStamped
-from geometry_msgs.msg import TwistStamped, Twist
+from geometry_msgs.msg import Twist
 from nav_msgs.msg import Path
 from arena_plan_msgs.msg import RobotState,RobotStateStamped
 
@@ -64,15 +64,17 @@ class ObservationCollector():
         self.ts = message_filters.ApproximateTimeSynchronizer([self._scan_sub, self._robot_state_sub], 100,slop=0.05)#,allow_headerless=True)
         self.ts.registerCallback(self.callback_observation_received)
         
-        # topic subscriber: subgoal
+        # subscribe to topics: plan_manager/subgoal, plna_manager/globalPlan and callback 
         #TODO should we synchoronize it with other topics
         self._subgoal_sub = message_filters.Subscriber('plan_manager/subgoal', PoseStamped) #self._subgoal_sub = rospy.Subscriber("subgoal", PoseStamped, self.callback_subgoal)
         self._subgoal_sub.registerCallback(self.callback_subgoal)
         self._globalPlan_sub = message_filters.Subscriber('plan_manager/globalPlan', Path)
         self._globalPlan_sub.registerCallback(self.callback_globalPlan)
         # service clients
-        self._service_name_step='step_world'
-        self._sim_step_client = rospy.ServiceProxy(self._service_name_step, StepWorld)
+        self._is_train_mode = rospy.get_param("train_mode")
+        if self._is_train_mode:
+            self._service_name_step='step_world'
+            self._sim_step_client = rospy.ServiceProxy(self._service_name_step, StepWorld)
 
 
     
@@ -82,21 +84,23 @@ class ObservationCollector():
     def get_observations(self):
         # reset flag 
         self._flag_all_received=False
-        
+        if self._is_train_mode: 
         # sim a step forward until all sensor msg uptodate
-        i=0
-        while(self._flag_all_received==False):
-            self.call_service_takeSimStep()
-            i+=1
+            i=0
+            while(self._flag_all_received==False):
+                self.call_service_takeSimStep()
+                i+=1
         # rospy.logdebug(f"Current observation takes {i} steps for Synchronization")
         #print(f"Current observation takes {i} steps for Synchronization")
         scan=self._scan.ranges.astype(np.float32)
         rho, theta = ObservationCollector._get_goal_pose_in_robot_frame(self._subgoal,self._robot_pose)
         merged_obs = np.hstack([scan, np.array([rho,theta])])
         obs_dict = {}
+        #append laserscan and goal wrt robot frame to observation dictionary
         obs_dict["laser_scan"] = scan
         obs_dict['goal_in_robot_frame'] = [rho,theta]
-        obs_dict['robot_position'] = self._robot_pose
+        #append robot pose and global plan to observation dictionary
+        obs_dict['robot_pose'] = self._robot_pose
         obs_dict['globalPlan'] = self._globalPlan
         return merged_obs, obs_dict
     
@@ -121,11 +125,12 @@ class ObservationCollector():
         self._subgoal=self.process_subgoal_msg(msg_Subgoal)
         
         return
-        
+
     def callback_globalPlan(self,msg_globalPlan):
         self._globalPlan=msg_globalPlan
         
         return
+        
     def callback_observation_received(self,msg_LaserScan,msg_RobotStateStamped):
         # process sensor msg
         self._scan=self.process_scan_msg(msg_LaserScan)
