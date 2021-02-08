@@ -1,8 +1,7 @@
 import argparse
 import os
 
-from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.tools.custom_mlp_args_utils import get_net_arch
-
+from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.tools.custom_mlp_utils import get_net_arch
 
 def training_args(parser):
     """ program arguments training script """
@@ -14,10 +13,15 @@ def training_args(parser):
     group.add_argument('--custom-mlp', action='store_true', help='enables training with custom multilayer perceptron')
     group.add_argument('--load', type=str, metavar="[agent name]", help='agent to be loaded for training')
     parser.add_argument('--n', type=int, help='timesteps in total to be generated for training')
-
     parser.add_argument('-log', '--eval_log', action='store_true', help='enables storage of evaluation data')
-
     parser.add_argument('--tb', action='store_true', help='enables tensorboard logging')
+
+
+def run_agent_args(parser):
+    parser.add_argument('--no-gpu', action='store_true', help='disables gpu for training')
+    parser.add_argument('--load', type=str, metavar="[agent name]", help='agent to be loaded for training')
+    parser.add_argument('-s', '--scenario', type=str, metavar="[scenario name]", default='scenario1', help='name of scenario file for deployment')
+    parser.add_argument('-v', '--verbose', choices=['0', '1'], default='1')
 
 
 def custom_mlp_args(parser):
@@ -53,10 +57,25 @@ def process_training_args(parsed_args):
         delattr(parsed_args, 'act_fn')
 
 
+def process_run_agent_args(parsed_args):
+    if parsed_args.no_gpu:
+        os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+    if parsed_args.load is None:
+        raise Exception("No agent name was given!")
+
+
 def parse_training_args(args=None, ignore_unknown=False):
     """ parser for training script """
     arg_populate_funcs = [training_args, custom_mlp_args]
     arg_check_funcs = [process_training_args]
+
+    return parse_various_args(args, arg_populate_funcs, arg_check_funcs, ignore_unknown)
+
+
+def parse_run_agent_args(args=None, ignore_unknown=False):
+    """ parser for training script """
+    arg_populate_funcs = [run_agent_args]
+    arg_check_funcs = [process_run_agent_args]
 
     return parse_various_args(args, arg_populate_funcs, arg_check_funcs, ignore_unknown)
 

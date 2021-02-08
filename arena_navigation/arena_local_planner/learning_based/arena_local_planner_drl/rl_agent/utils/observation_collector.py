@@ -71,8 +71,10 @@ class ObservationCollector():
         self._globalPlan_sub = message_filters.Subscriber('plan_manager/globalPlan', Path)
         self._globalPlan_sub.registerCallback(self.callback_globalPlan)
         # service clients
-        self._service_name_step='step_world'
-        self._sim_step_client = rospy.ServiceProxy(self._service_name_step, StepWorld)
+        self._is_train_mode = rospy.get_param("train_mode")
+        if self._is_train_mode:
+            self._service_name_step='step_world'
+            self._sim_step_client = rospy.ServiceProxy(self._service_name_step, StepWorld)
 
 
     
@@ -82,12 +84,12 @@ class ObservationCollector():
     def get_observations(self):
         # reset flag 
         self._flag_all_received=False
-        
+        if self._is_train_mode: 
         # sim a step forward until all sensor msg uptodate
-        i=0
-        while(self._flag_all_received==False):
-            self.call_service_takeSimStep()
-            i+=1
+            i=0
+            while(self._flag_all_received==False):
+                self.call_service_takeSimStep()
+                i+=1
         # rospy.logdebug(f"Current observation takes {i} steps for Synchronization")
         #print(f"Current observation takes {i} steps for Synchronization")
         scan=self._scan.ranges.astype(np.float32)

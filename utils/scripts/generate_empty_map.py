@@ -9,8 +9,7 @@ def generate_empty_map(map_parent_dir_path, map_dir_name, width_in_meter, height
     try:
         map_dir_path.mkdir(parents=True)
     except OSError:
-        user_input = input(
-            f"The folder \"{map_dir_path}\" is alredy existing, do you want to overwrite the files inside? y[es] or n[o]?\t")
+        user_input = input("The folder \"{map_dir_path}\" is alredy existing, do you want to overwrite the files inside? y[es] or n[o]?\t")
         if user_input.startswith('n'):
             exit(0)
     # generate map png file
@@ -51,7 +50,7 @@ def generate_empty_map(map_parent_dir_path, map_dir_name, width_in_meter, height
     map_world_data = yaml.safe_load(map_world_template)
     yaml.safe_dump(map_world_data, map_dir_path.joinpath(
         'map.world.yaml').open('w'))
-    print(f'new map has been create at: {map_dir_path.} !')
+    print('new map has been created at: {map_dir_path.} !')
 
 
 if __name__ == "__main__":
