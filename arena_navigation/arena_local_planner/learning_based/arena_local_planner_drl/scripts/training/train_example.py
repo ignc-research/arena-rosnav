@@ -7,7 +7,7 @@ from task_generator.tasks import get_predefined_task
 import rospy
 import rospkg
 
-rospy.init_node("test",disable_signals=True)
+rospy.init_node("test", disable_signals=True)
 # task = get_predefined_task()
 task = get_predefined_task(ns="sim_01", mode="random", PATHS={
                            "scenerios_json_path": "/home/joe/ssd/projects/arena-rosnav-ws/src/arena-rosnav/simulator_setup/scenerios/example_scenerio.json"})

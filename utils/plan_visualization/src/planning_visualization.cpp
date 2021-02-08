@@ -4,13 +4,13 @@
 PlanningVisualization::PlanningVisualization(ros::NodeHandle& nh) {
   node = nh;
 
-  goal_pub_ = node.advertise<visualization_msgs::Marker>("/planning_vis/goal", 20);
+  goal_pub_ = node.advertise<visualization_msgs::Marker>("planning_vis/goal", 20);
   pubs_.push_back(goal_pub_);
 
-  subgoal_pub_ = node.advertise<visualization_msgs::Marker>("/planning_vis/subgoal", 20);
+  subgoal_pub_ = node.advertise<visualization_msgs::Marker>("planning_vis/subgoal", 20);
   pubs_.push_back(subgoal_pub_);
 
-  global_path_pub_ = node.advertise<visualization_msgs::Marker>("/planning_vis/global_path", 20);
+  global_path_pub_ = node.advertise<visualization_msgs::Marker>("planning_vis/global_path", 20);
   pubs_.push_back(global_path_pub_);
 
 }
