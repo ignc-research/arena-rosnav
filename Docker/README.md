@@ -6,7 +6,7 @@ https://docs.docker.com/docker-for-mac/install/
 ```
 git clone https://github.com/Herrsun/arena-rosnav
 ```
-2. Open local terminal under the path where you just clone the repo
+2. Open local terminal under the path of arena-rosnav
 3. Run `docker-compose up --build`
 
 ## Start /Enter /Stop the container
@@ -14,7 +14,7 @@ git clone https://github.com/Herrsun/arena-rosnav
 ```
 docker ps
 ```
-2. Start container (run under the path containing docker-compose.yml)
+2. Start container (under the path of arena-rosnav)
 ```
 docker-compose start
 ```
@@ -22,7 +22,7 @@ docker-compose start
 ```
 docker exec -it arena-rosnav bash
 ```
-4. Stop the container (run under the path containing docker-compose.yml)cd 
+4. Stop the container (under the path of arena-rosnav)
 ```
 docker-compose stop 
 ```
