@@ -23,33 +23,30 @@ class ObstaclesManager:
     A manager class using flatland provided services to spawn, move and delete obstacles.
     """
 
-    def __init__(self, ns: str, map_: OccupancyGrid, is_training=True):
+    def __init__(self, ns: str, map_: OccupancyGrid):
         """
         Args:
             map_ (OccupancyGrid):
-            is_training (bool, optional): is it training or testing. Defaults to True.
             plugin_name: The name of the plugin which is used to control the movement of the obstacles, Currently we use "RandomMove" for training and Tween2 for evaluation.
                 The Plugin Tween2 can move the the obstacle along a trajectory which can be assigned by multiple waypoints with a constant velocity.Defaults to "RandomMove".
         """
         self.ns = ns
+        self.ns_prefix = "/" if ns == '' else "/"+ns+"/"
 
         # a list of publisher to move the obstacle to the start pos.
         self._move_all_obstacles_start_pos_pubs = []
 
         # setup proxy to handle  services provided by flatland
-        rospy.wait_for_service(f'{self.ns}move_model', timeout=20)
-        rospy.wait_for_service(f'{self.ns}delete_model', timeout=20)
-        rospy.wait_for_service(f'{self.ns}spawn_model', timeout=20)
-        if is_training:
-            rospy.wait_for_service(f'{self.ns}step_world', timeout=20)
+        rospy.wait_for_service(f'{self.ns_prefix}move_model', timeout=20)
+        rospy.wait_for_service(f'{self.ns_prefix}delete_model', timeout=20)
+        rospy.wait_for_service(f'{self.ns_prefix}spawn_model', timeout=20)
         # allow for persistent connections to services
         self._srv_move_model = rospy.ServiceProxy(
-            f'{self.ns}move_model', MoveModel, persistent=True)
+            f'{self.ns_prefix}move_model', MoveModel, persistent=True)
         self._srv_delete_model = rospy.ServiceProxy(
-            f'{self.ns}delete_model', DeleteModel, persistent=True)
+            f'{self.ns_prefix}delete_model', DeleteModel, persistent=True)
         self._srv_spawn_model = rospy.ServiceProxy(
-            f'{self.ns}spawn_model', SpawnModel, persistent=True)
-        # self._srv_sim_step = rospy.ServiceProxy('step_world', StepWorld, persistent=True)
+            f'{self.ns_prefix}spawn_model', SpawnModel, persistent=True)
 
         self.update_map(map_)
         self.obstacle_name_list = []
@@ -331,7 +328,7 @@ class ObstaclesManager:
         move_with_traj['linear_velocity'] = linear_velocity
         # set the topic name for moving the object to the start point.
         # we can not use the flatland provided service to move the object, othewise the Tween2 will not work properly.
-        move_with_traj['move_to_start_pos_topic'] = self.ns + obstacle_name + \
+        move_with_traj['move_to_start_pos_topic'] = self.ns_prefix + obstacle_name + \
             '/move_to_start_pos'
         move_to_start_pos_pub = rospy.Publisher(
             move_with_traj['move_to_start_pos_topic'], Empty, queue_size=1)
@@ -340,7 +337,7 @@ class ObstaclesManager:
         move_with_traj['mode'] = mode
         move_with_traj['body'] = 'object_with_traj'
         move_with_traj['trigger_zones'] = trigger_zones
-        move_with_traj['robot_odom_topic'] = self.ns + 'odom'
+        move_with_traj['robot_odom_topic'] = self.ns_prefix + 'odom'
         dict_file['plugins'].append(move_with_traj)
 
         with open(yaml_path, 'w') as fd:

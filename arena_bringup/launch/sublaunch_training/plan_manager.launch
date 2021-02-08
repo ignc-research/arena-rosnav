@@ -10,7 +10,7 @@
     <arg name="timeout_subgoal" />
     
     
-    <include file="$(find arena_bringup)/launch/sublaunch/move_base.launch" ns="$(arg ns)"/>
+    <include file="$(find arena_bringup)/launch/sublaunch_training/move_base.launch" ns="$(arg ns)"/>
    
 
     <!-- arena_plan_manager -->

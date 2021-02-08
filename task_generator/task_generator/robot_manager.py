@@ -6,7 +6,7 @@ import threading
 from typing import Union
 import rospy
 import tf
-from flatland_msgs.srv import MoveModel, MoveModelRequest, SpawnModelRequest,SpawnModel
+from flatland_msgs.srv import MoveModel, MoveModelRequest, SpawnModelRequest, SpawnModel
 from flatland_msgs.srv import StepWorld
 from geometry_msgs.msg import Pose2D, PoseWithCovarianceStamped, PoseStamped
 
@@ -21,39 +21,40 @@ class RobotManager:
     is managed
     """
 
-    def __init__(self, ns: str, map_: OccupancyGrid, robot_yaml_path: str, is_training_mode: bool,timeout = 20):
+    def __init__(self, ns: str, map_: OccupancyGrid, robot_yaml_path: str, timeout=20):
         """[summary]
 
         Args:
+            ns(namespace): if ns == '', we will use global namespace
             map_ (OccupancyGrid): the map info
             robot_yaml_path (str): the file name of the robot yaml file.
-            is_training_mode (bool): a flag to indicate the mode (training or test)
+
         """
         self.ns = ns
-
-        self.is_training_mode = is_training_mode
+        self.ns_prefix = "/" if ns == "" else "/"+ns+"/"
+        
+        self.is_training_mode = rospy.get_param("/train_mode")
+        self.step_size = rospy.get_param("step_size")
         self._get_robot_configration(robot_yaml_path)
         # setup proxy to handle  services provided by flatland
-        rospy.wait_for_service(f'{self.ns}move_model', timeout=timeout)
-        rospy.wait_for_service(f'{self.ns}spawn_model',timeout=timeout)
+        rospy.wait_for_service(f'{self.ns_prefix}move_model', timeout=timeout)
+        rospy.wait_for_service(f'{self.ns_prefix}spawn_model', timeout=timeout)
         #rospy.wait_for_service('step_world', timeout=20)
-        self._srv_move_model = rospy.ServiceProxy(f'{self.ns}move_model', MoveModel)
-        self._srv_spawn_model = rospy.ServiceProxy(f'{self.ns}spawn_model',SpawnModel)
+        self._srv_move_model = rospy.ServiceProxy(
+            f'{self.ns_prefix}move_model', MoveModel)
+        self._srv_spawn_model = rospy.ServiceProxy(
+            f'{self.ns_prefix}spawn_model', SpawnModel)
         # it's only needed in training mode to send the clock signal.
-        self._step_world = rospy.ServiceProxy(f'{self.ns}step_world', StepWorld)
+        self._step_world = rospy.ServiceProxy(
+            f'{self.ns_prefix}step_world', StepWorld)
 
-        # subcriber
-        # self._global_path_sub = rospy.Subscriber(
-        #     "move_base/NavfnROS/plan", Path, self._global_path_callback)
-        # self._goal_status_sub = rospy.Subscriber("move_base/status", GoalStatusArray,
-        #                                          self.goal_status_callback, queue_size=1)
 
         # publisher
         # publish the start position of the robot
         # self._initialpose_pub = rospy.Publisher(
         #     'initialpose', PoseWithCovarianceStamped, queue_size=1)
         self._goal_pub = rospy.Publisher(
-            f'{self.ns}goal', PoseStamped, queue_size=1, latch=True)
+            f'{self.ns_prefix}goal', PoseStamped, queue_size=1, latch=True)
 
         self.update_map(map_)
         self._spawn_robot(robot_yaml_path)
@@ -72,8 +73,8 @@ class RobotManager:
         request = SpawnModelRequest()
         request.yaml_path = robot_yaml_path
         request.name = "myrobot"
+        request.ns = self.ns
         self._srv_spawn_model(request)
-        
 
     def _get_robot_configration(self, robot_yaml_path):
         """get robot info e.g robot name, radius, Laser related infomation
@@ -89,11 +90,13 @@ class RobotManager:
                 if body['name'] == "base_footprint":
                     for footprint in body['footprints']:
                         if footprint['type'] == 'circle':
-                            self.ROBOT_RADIUS = footprint.setdefault('radius', 0.2)
+                            self.ROBOT_RADIUS = footprint.setdefault(
+                                'radius', 0.2)
             # get laser_update_rate
             for plugin in robot_data['plugins']:
                 if plugin['type'] == 'Laser':
-                    self.LASER_UPDATE_RATE = plugin.setdefault('update_rate', 1)
+                    self.LASER_UPDATE_RATE = plugin.setdefault(
+                        'update_rate', 1)
 
     def update_map(self, new_map: OccupancyGrid):
         self.map = new_map
@@ -118,11 +121,9 @@ class RobotManager:
             # a necessaray procedure to let the flatland publish the
             # laser,odom's Transformation, which are needed for creating
             # global path
-            for _ in range(self.LASER_UPDATE_RATE + 1):
+            for _ in range(math.ceil(1/(self.step_size*self.LASER_UPDATE_RATE))):
                 self._step_world()
 
-        # publish robot position
-        # self._pub_initial_position(pose.x, pose.y, pose.theta)
 
     def set_start_pos_random(self):
         start_pos = Pose2D()
@@ -204,26 +205,6 @@ class RobotManager:
                     "can not generate a path with the given start position and the goal position of the robot")
             else:
                 self._new_global_path_generated = False  # reset it
-
-    def _pub_initial_position(self, x, y, theta):
-        """
-        Publishing new initial position (x, y, theta) --> for localization
-        :param x x-position of the robot
-        :param y y-position of the robot
-        :param theta theta-position of the robot
-        """
-        initpose = PoseWithCovarianceStamped()
-        initpose.header.stamp = rospy.get_rostime()
-        initpose.header.frame_id = "map"
-        initpose.pose.pose.position.x = x
-        initpose.pose.pose.position.y = y
-        quaternion = tf.transformations.quaternion_from_euler(0, 0, theta)
-
-        initpose.pose.pose.orientation.w = quaternion[0]
-        initpose.pose.pose.orientation.x = quaternion[1]
-        initpose.pose.pose.orientation.y = quaternion[2]
-        initpose.pose.pose.orientation.z = quaternion[3]
-        self._initialpose_pub.publish(initpose)
 
     def publish_goal(self, x, y, theta):
         """

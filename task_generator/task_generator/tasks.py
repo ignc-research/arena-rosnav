@@ -26,13 +26,12 @@ class ABSTask(ABC):
 
     """
 
-    def __init__(self, ns: str, obstacles_manager: ObstaclesManager, robot_manager: RobotManager):
-        self.ns = ns
+    def __init__(self, obstacles_manager: ObstaclesManager, robot_manager: RobotManager):
         self.obstacles_manager = obstacles_manager
         self.robot_manager = robot_manager
-        self._service_client_get_map = rospy.ServiceProxy(f'{self.ns}static_map', GetMap)
+        self._service_client_get_map = rospy.ServiceProxy('/static_map', GetMap)
         self._map_lock = Lock()
-        rospy.Subscriber(f'{self.ns}map', OccupancyGrid, self._update_map)
+        rospy.Subscriber('/map', OccupancyGrid, self._update_map)
         # a mutex keep the map is not unchanged during reset task.
 
     @abstractmethod
@@ -51,8 +50,8 @@ class RandomTask(ABSTask):
     """ Evertime the start position and end position of the robot is reset.
     """
 
-    def __init__(self, ns: str, obstacles_manager: ObstaclesManager, robot_manager: RobotManager):
-        super().__init__(ns, obstacles_manager, robot_manager)
+    def __init__(self, obstacles_manager: ObstaclesManager, robot_manager: RobotManager):
+        super().__init__(obstacles_manager, robot_manager)
 
     def reset(self):
         """[summary]
@@ -83,8 +82,8 @@ class ManualTask(ABSTask):
     """randomly spawn obstacles and user can mannually set the goal postion of the robot
     """
 
-    def __init__(self, ns: str, obstacles_manager: ObstaclesManager, robot_manager: RobotManager):
-        super().__init__(ns, obstacles_manager, robot_manager)
+    def __init__(self,obstacles_manager: ObstaclesManager, robot_manager: RobotManager):
+        super().__init__(obstacles_manager, robot_manager)
         # subscribe
         rospy.Subscriber(f'{self.ns}manual_goal', Pose2D, self._set_goal_callback)
         self._goal = Pose2D()
@@ -120,8 +119,8 @@ class ManualTask(ABSTask):
 
 
 class StagedRandomTask(RandomTask):
-    def __init__(self, ns: str, obstacles_manager: ObstaclesManager, robot_manager: RobotManager, start_stage: int = 1, PATHS=None):
-        super().__init__(ns, obstacles_manager, robot_manager)
+    def __init__(self, obstacles_manager: ObstaclesManager, robot_manager: RobotManager, start_stage: int = 1, PATHS=None):
+        super().__init__(obstacles_manager, robot_manager)
         if not isinstance(start_stage, int):
             raise ValueError("Given start_stage not an Integer!")
         self._curr_stage = start_stage
@@ -186,12 +185,12 @@ class StagedRandomTask(RandomTask):
 
 
 class ScenerioTask(ABSTask):
-    def __init__(self, ns: str, obstacles_manager: ObstaclesManager, robot_manager: RobotManager, scenerios_json_path: str):
+    def __init__(self, obstacles_manager: ObstaclesManager, robot_manager: RobotManager, scenerios_json_path: str):
         """ The scenerio_json_path only has the "Scenerios" section, which contains a list of scenerios
         Args:
             scenerios_json_path (str): [description]
         """
-        super().__init__(ns, obstacles_manager, robot_manager)
+        super().__init__(obstacles_manager, robot_manager)
         json_path = Path(scenerios_json_path)
         assert json_path.is_file() and json_path.suffix == ".json"
         json_data = json.load(json_path.open())
@@ -341,38 +340,18 @@ def get_predefined_task(ns: str, mode="random", start_stage: int = 1, PATHS: dic
     # otherwise it will be bounded to real time.
 
     # either e.g. ns = 'sim1/' or ns = ''
-    if ns is not None:
-        ns = ns + '/'
-    else:
-        ns = ''
-
-    try:
-        rospy.wait_for_service(f'{ns}step_world', timeout=0.5)
-        TRAINING_MODE = True
-    except ROSException:
-        TRAINING_MODE = False
-
-    if TRAINING_MODE:
-        from flatland_msgs.srv import StepWorld, StepWorldRequest
-        # This is kind of hacky. the services provided by flatland may take a couple of step to complete
-        # the configuration including the map service.
-        steps = 400
-        step_world = rospy.ServiceProxy(
-            f'{ns}step_world', StepWorld, persistent=True)
-        for _ in range(steps):
-            step_world()
 
     # get the map
-    service_client_get_map = rospy.ServiceProxy(f'{ns}static_map', GetMap)
+    service_client_get_map = rospy.ServiceProxy('/static_map', GetMap)
     map_response = service_client_get_map()
 
     # use rospkg to get the path where the model config yaml file stored
     models_folder_path = rospkg.RosPack().get_path('simulator_setup')
     # robot's yaml file is needed to get its radius.
     robot_manager = RobotManager(ns, map_response.map, os.path.join(
-        models_folder_path, 'robot', "myrobot.model.yaml"), TRAINING_MODE)
+        models_folder_path, 'robot', "myrobot.model.yaml"))
 
-    obstacles_manager = ObstaclesManager(ns, map_response.map, TRAINING_MODE)
+    obstacles_manager = ObstaclesManager(ns, map_response.map)
     # only generate 3 static obstaticles
     # obstacles_manager.register_obstacles(3, os.path.join(
     # models_folder_path, "obstacles", 'random.model.yaml'), 'static')
@@ -384,16 +363,16 @@ def get_predefined_task(ns: str, mode="random", start_stage: int = 1, PATHS: dic
     task = None
     if mode == "random":
         obstacles_manager.register_random_obstacles(20, 0.4)
-        task = RandomTask(ns, obstacles_manager, robot_manager)
+        task = RandomTask(obstacles_manager, robot_manager)
         print("random tasks requested")
     if mode == "manual":
         obstacles_manager.register_random_obstacles(20, 0.4)
-        task = ManualTask(ns, obstacles_manager, robot_manager)
+        task = ManualTask(obstacles_manager, robot_manager)
         print("manual tasks requested")
     if mode == "staged":
         task = StagedRandomTask(
             ns, obstacles_manager, robot_manager, start_stage, PATHS)
     if mode == "ScenerioTask":
-        task = ScenerioTask(ns, obstacles_manager, robot_manager,
+        task = ScenerioTask(obstacles_manager, robot_manager,
                             PATHS['scenerios_json_path'])
     return task

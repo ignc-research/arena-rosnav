@@ -35,7 +35,7 @@ void PlanManager::init(ros::NodeHandle& nh) {
     exec_state_  = FSM_EXEC_STATE::INIT;
     have_goal_ = false;
     have_odom_   = false;
-    cur_state_=new RobotState(Eigen::Vector2d::Zero(),0.0,Eigen::Vector2d::Zero(),0.0);
+    cur_state_.reset(new RobotState(Eigen::Vector2d::Zero(),0.0,Eigen::Vector2d::Zero(),0.0));
     
     /* callback */
     exec_timer_   = nh.createTimer(ros::Duration(0.01), &PlanManager::execFSMCallback, this);
@@ -46,7 +46,7 @@ void PlanManager::init(ros::NodeHandle& nh) {
     odom_sub_ = nh.subscribe("/odometry/ground_truth", 1, &PlanManager::odometryCallback, this); // odom  //odometry/ground_truth
 
     // publisher
-    subgoal_pub_  = nh.advertise<geometry_msgs::PoseStamped>("subgoal",10);// relative name:/ns/node_name/subgoal
+    subgoal_pub_  = nh.advertise<geometry_msgs::PoseStamped>("subgoal",10);// relative name:/ns/subgoal
     robot_state_pub_  = nh.advertise<arena_plan_msgs::RobotStateStamped>("robot_state",10);
     /* test purpose*/
     
@@ -59,7 +59,7 @@ void PlanManager::goalCallback(const geometry_msgs::PoseStampedPtr& msg) {
     cout << " Task Triggered!" << endl;
 
     // set end_state
-    end_state_=new RobotState(msg->pose);
+    end_state_.reset(new RobotState(msg->pose));
     end_state_->vel2d.setZero();
     
     // change state: to GEN_NEW_GLOBAL
@@ -87,7 +87,7 @@ void PlanManager::goalCallback(const geometry_msgs::PoseStampedPtr& msg) {
 
 void PlanManager::odometryCallback(const nav_msgs::OdometryConstPtr& msg){
   // get robot state according to odometry msg
-  cur_state_= new RobotState(*msg);
+  cur_state_.reset(new RobotState(*msg));
 
   // publish robot state
   robot_state_pub_.publish(cur_state_->toRobotStateStamped());
@@ -137,7 +137,7 @@ void PlanManager::execFSMCallback(const ros::TimerEvent& e) {
         return;
       }
       // set robot start state
-      start_state_=new RobotState(cur_state_->pose2d,cur_state_->theta,cur_state_->vel2d,cur_state_->w);
+      start_state_.reset(new RobotState(cur_state_->pose2d,cur_state_->theta,cur_state_->vel2d,cur_state_->w));
       
       // execute global planning
       bool global_plan_success=planner_collector_->generate_global_plan(*start_state_,*end_state_);

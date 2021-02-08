@@ -27,6 +27,7 @@ i
   <param name="use_sim_time" value="true" />
   <param name="train_mode" value="true" />
   <param name="num_envs" value="$(arg num_envs)" />
+  <param name="step_size" value="$(arg step_size)" /> 
   <param name="obs_vel" value="$(arg obs_vel)" /> 
   <arg name="map_path" default="$(find simulator_setup)/maps/$(arg map_folder_name)/map.yaml" />
   <param name="world_path" value="$(find simulator_setup)/maps/$(arg map_folder_name)/map.world.yaml" />

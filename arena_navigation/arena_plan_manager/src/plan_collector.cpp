@@ -65,8 +65,7 @@ nav_msgs::Path global_path, double obstacle_info, double sensor_info){
     
     if(subgoal_id>0){
         subgoal_=global_path.poses[subgoal_id];
-        subgoal_state_=new RobotState(subgoal_.pose);
-
+        subgoal_state_.reset(new RobotState(subgoal_.pose));
         return true;
     }else{
         return false;
