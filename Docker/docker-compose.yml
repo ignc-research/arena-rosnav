@@ -1,0 +1,25 @@
+version: '3'
+services:
+  ros:
+    build: .
+    command: tail -f /dev/null
+    # volumes: 
+    #   - ./catkin_ws:/root/catkin_ws/
+    environment:
+      - DISPLAY=novnc:0.0
+    env_file:
+      - ros.env
+    networks:
+      - x11
+    container_name: arena-rosnav
+  novnc:  
+    image: theasp/novnc:latest
+    env_file:
+      - novnc.env
+    ports:
+      - "8080:8080"
+    networks:
+      - x11
+    container_name: novnc
+networks:
+  x11:
