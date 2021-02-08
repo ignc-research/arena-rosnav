@@ -1,21 +1,21 @@
 version: '3'
 services:
   ros:
-    build: .
+    build: ./Docker
     command: tail -f /dev/null
-    # volumes: 
-    #   - ./catkin_ws:/root/catkin_ws/
+    volumes: 
+      - .:/root/catkin_ws/src/arena-rosnav
     environment:
       - DISPLAY=novnc:0.0
     env_file:
-      - ros.env
+      - ./Docker/ros.env
     networks:
       - x11
     container_name: arena-rosnav
   novnc:  
     image: theasp/novnc:latest
     env_file:
-      - novnc.env
+      - ./Docker/novnc.env
     ports:
       - "8080:8080"
     networks:
