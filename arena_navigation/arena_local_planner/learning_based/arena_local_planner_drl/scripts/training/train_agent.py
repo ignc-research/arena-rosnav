@@ -100,14 +100,17 @@ def get_paths(agent_name: str, args) -> dict:
 
     return PATHS
 
+
 def make_envs(task_manager, rank: int, params: dict, seed: int=0, PATHS: dict=None, train: bool=True):
     """
     Utility function for multiprocessed env
     
     :param task_manager: (Object)
-    :param num_env: (int) the number of environment you wish to have in subprocesses
-    :param seed: (int) the inital seed for RNG
     :param rank: (int) index of the subprocess
+    :param params: (dict) hyperparameters of agent to be trained
+    :param seed: (int) the inital seed for RNG
+    :param PATHS: (dict) script relevant paths
+    :param train: (bool) to differentiate between train and eval env
     :return: (Callable)
     """
     def _init() -> Union[gym.Env, gym.Wrapper]:
@@ -127,6 +130,7 @@ def make_envs(task_manager, rank: int, params: dict, seed: int=0, PATHS: dict=No
         return env
     set_random_seed(seed)
     return _init
+
 
 if __name__ == "__main__":
     args, _ = parse_training_args()
@@ -150,16 +154,18 @@ if __name__ == "__main__":
         eval_max_steps_per_episode, goal_radius, args.n_envs)
     params = initialize_hyperparameters(agent_name=AGENT_NAME, PATHS=PATHS, hyperparams_obj=hyperparams_obj, load_target=args.load)
 
-    # instantiate gym environment
+    # task managers for each simulation
     task_managers=[]
     for i in range(args.n_envs):
         task_managers.append(
             get_predefined_task(f"sim{i+1}", params['task_mode'], params['curr_stage'], PATHS))
 
+    # instantiate gym environment
     env = SubprocVecEnv(
         [make_envs(task_managers[i], i, params=params, PATHS=PATHS) for i in range(args.n_envs)], start_method='fork')
     if params['normalize']:
-        env = VecNormalize(env, training=True, norm_obs=True, norm_reward=False, clip_reward=15)
+        env = VecNormalize(
+            env, training=True, norm_obs=True, norm_reward=False, clip_reward=15)
 
     # threshold settings for training curriculum
     # type can be either 'succ' or 'rew'
@@ -167,16 +173,18 @@ if __name__ == "__main__":
         TaskManagers=task_managers, treshhold_type="succ", rew_threshold=14.5, succ_rate_threshold=0.80, task_mode=params['task_mode'], verbose=1)
     
     # instantiate eval environment
+    # take task_manager from first sim (currently evaluation only provided for single process)
     eval_env = DummyVecEnv(
         [make_envs(task_managers[0], 0, params=params, PATHS=PATHS, train=False)])
     if params['normalize']:
-        eval_env = VecNormalize(eval_env, training=False, norm_obs=True, norm_reward=False, clip_reward=15)
+        eval_env = VecNormalize(
+            eval_env, training=False, norm_obs=True, norm_reward=False, clip_reward=15)
     
     # evaluation settings
     # n_eval_episodes: number of episodes to evaluate agent on
     # eval_freq: evaluate the agent every eval_freq train timesteps
     eval_cb = EvalCallback(
-        eval_env, n_eval_episodes=10, eval_freq=300, log_path=PATHS.get('eval'), best_model_save_path=PATHS.get('model'), deterministic=True, callback_on_new_best=trainstage_cb)
+        eval_env, n_eval_episodes=30, eval_freq=10000, log_path=PATHS.get('eval'), best_model_save_path=PATHS.get('model'), deterministic=True, callback_on_new_best=trainstage_cb)
    
     # determine mode
     if args.custom_mlp:
@@ -189,8 +197,8 @@ if __name__ == "__main__":
         # predefined agent flag
         if args.agent == "MLP_ARENA2D":
                 model = PPO(MLP_ARENA2D_POLICY, env, gamma = gamma, n_steps = n_steps, ent_coef = ent_coef, 
-                        learning_rate = learning_rate, vf_coef = vf_coef, max_grad_norm = max_grad_norm, gae_lambda = gae_lambda, 
-                        batch_size = batch_size, n_epochs = n_epochs, clip_range = clip_range, tensorboard_log = PATHS.get('tb'), verbose = 1)
+                            learning_rate = learning_rate, vf_coef = vf_coef, max_grad_norm = max_grad_norm, gae_lambda = gae_lambda, 
+                            batch_size = batch_size, n_epochs = n_epochs, clip_range = clip_range, tensorboard_log = PATHS.get('tb'), verbose = 1)
 
         elif args.agent == "DRL_LOCAL_PLANNER" or args.agent == "CNN_NAVREP":
             if args.agent == "DRL_LOCAL_PLANNER":
@@ -199,9 +207,9 @@ if __name__ == "__main__":
                 policy_kwargs = policy_kwargs_navrep
 
             model = PPO("CnnPolicy", env, policy_kwargs = policy_kwargs, 
-                gamma = gamma, n_steps = n_steps, ent_coef = ent_coef, learning_rate = learning_rate, vf_coef = vf_coef, 
-                max_grad_norm = max_grad_norm, gae_lambda = gae_lambda, batch_size = batch_size, n_epochs = n_epochs, 
-                clip_range = clip_range, tensorboard_log = PATHS.get('tb'), verbose = 1)
+                        gamma = gamma, n_steps = n_steps, ent_coef = ent_coef, learning_rate = learning_rate, vf_coef = vf_coef, 
+                        max_grad_norm = max_grad_norm, gae_lambda = gae_lambda, batch_size = batch_size, n_epochs = n_epochs, 
+                        clip_range = clip_range, tensorboard_log = PATHS.get('tb'), verbose = 1)
     else:
         # load flag
         if os.path.isfile(os.path.join(PATHS.get('model'), AGENT_NAME + ".zip")):
@@ -218,10 +226,10 @@ if __name__ == "__main__":
     # start training
     start = time.time()
     model.learn(total_timesteps = n_timesteps, callback=eval_cb, reset_num_timesteps=True)
-    print(f'Time passed for {n_timesteps}: {time.time()-start}s')
+    print(f'Time passed for {n_timesteps} timesteps: {time.time()-start}s')
 
     # update the timesteps the model has trained in total
-    update_total_timesteps_json(hyperparams_obj, n_timesteps, PATHS)
+    update_total_timesteps_json(n_timesteps, PATHS)
     print("training done!")
     
 """

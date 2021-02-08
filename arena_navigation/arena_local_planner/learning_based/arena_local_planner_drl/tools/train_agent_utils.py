@@ -138,7 +138,7 @@ def print_hyperparameters(hyperparams: Union[dict, agent_hyperparams]):
     print("\n--------------------------------")
     print("         HYPERPARAMETERS         \n")
     for param, param_val in hyperparams.items():
-        print("{:25s}{:<10s}".format((param+":"), str(param_val)))
+        print("{:30s}{:<10s}".format((param+":"), str(param_val)))
     print("--------------------------------\n\n")
 
 
