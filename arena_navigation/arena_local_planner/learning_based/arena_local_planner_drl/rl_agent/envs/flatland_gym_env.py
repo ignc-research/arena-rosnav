@@ -21,7 +21,7 @@ import time
 class FlatlandEnv(gym.Env):
     """Custom Environment that follows gym interface"""
 
-    def __init__(self, ns: str, task: ABSTask, robot_yaml_path: str, settings_yaml_path: str, reward_fnc: str, is_action_space_discrete, safe_dist: float = None, goal_radius: float = 0.1, max_steps_per_episode=100):
+    def __init__(self, ns: str, task: ABSTask, robot_yaml_path: str, settings_yaml_path: str, reward_fnc: str, is_action_space_discrete, safe_dist: float = None, goal_radius: float = 0.1, max_steps_per_episode=100, train_mode: bool = True):
         """Default env
         Flatland yaml node check the entries in the yaml file, therefore other robot related parameters cound only be saved in an other file.
         TODO : write an uniform yaml paser node to handel with multiple yaml files.
@@ -45,8 +45,10 @@ class FlatlandEnv(gym.Env):
         else:
             self.ns = ''
 
-        rospy.init_node(f'train_env_{ns[-1]}')
-
+        if train_mode:
+            rospy.init_node(f'train_env_{ns[-1]}')
+        else:
+            rospy.init_node(f'eval_env_{ns[-1]}')
         # Define action and observation space
         # They must be gym.spaces objects
         self._is_action_space_discrete = is_action_space_discrete
@@ -91,9 +93,9 @@ class FlatlandEnv(gym.Env):
                     for footprint in body['footprints']:
                         if footprint['type'] == 'circle':
                             self._robot_radius = footprint.setdefault(
-                                'radius', 0.3)*1.04
+                                'radius', 0.3)*1.05
                         if footprint['radius']:
-                            self._robot_radius = footprint['radius']*1.04
+                            self._robot_radius = footprint['radius']*1.05
             # get laser related information
             for plugin in robot_data['plugins']:
                 if plugin['type'] == 'Laser':
@@ -153,10 +155,12 @@ class FlatlandEnv(gym.Env):
         info = {}
         if done:
             info['done_reason'] = reward_info['done_reason']
+            info['is_success'] = reward_info['is_success']
         else:
             if self._steps_curr_episode == self._max_steps_per_episode:
                 done = True
                 info['done_reason'] = 0
+                info['is_success'] = 0
 
         return merged_obs, reward, done, info
 

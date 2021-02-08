@@ -122,20 +122,29 @@ class ManualTask(ABSTask):
 class StagedRandomTask(RandomTask):
     def __init__(self, ns: str, obstacles_manager: ObstaclesManager, robot_manager: RobotManager, start_stage: int = 1, PATHS=None):
         super().__init__(ns, obstacles_manager, robot_manager)
-        if not isinstance(start_stage, int):
-            raise ValueError("Given start_stage not an Integer!")
         self._curr_stage = start_stage
         self._stages = dict()
         self._PATHS = PATHS
         self._read_stages_from_yaml()
+
+        # check start stage format
+        if not isinstance(start_stage, int):
+            raise ValueError(
+                "Given start_stage not an Integer!")
         if self._curr_stage < 1 or self._curr_stage > len(self._stages):
             raise IndexError(
                 "Start stage given for training curriculum out of bounds! Has to be between {1 to %d}!" % len(self._stages))
+
+        # hyperparamters.json location
+        self.json_file = os.path.join(
+            self._PATHS.get('model'), "hyperparameters.json")
+        assert os.path.isfile(self.json_file), "Found no 'hyperparameters.json' at %s" % json_file
+
         self._initiate_stage()
 
     def next_stage(self):
         if self._curr_stage < len(self._stages):
-            self._curr_stage += 1
+            self._curr_stage = self._curr_stage + 1
             self._update_curr_stage_json()
             self._remove_obstacles()
             self._initiate_stage()
@@ -164,22 +173,18 @@ class StagedRandomTask(RandomTask):
                 "Couldn't find 'training_curriculum.yaml' in %s " % self._PATHS.get('curriculum'))
 
     def _update_curr_stage_json(self):
-        file_location = os.path.join(
-            self._PATHS.get('model'), "hyperparameters.json")
-        if os.path.isfile(file_location):
-            with open(file_location, "r") as file:
-                hyperparams = json.load(file)
-            try:
-                hyperparams['curr_stage'] = self._curr_stage
-            except Exception:
-                raise Warning(
-                    "Parameter 'curr_stage' not found in 'hyperparameters.json'!")
-            else:
-                with open(file_location, "w", encoding='utf-8') as target:
-                    json.dump(hyperparams, target,
-                              ensure_ascii=False, indent=4)
+        with open(self.json_file, "r") as file:
+            hyperparams = json.load(file)
+        try:
+            hyperparams['curr_stage'] = self._curr_stage
+        except Exception:
+            raise Warning(
+                "Parameter 'curr_stage' not found in 'hyperparameters.json'!")
         else:
-            raise Warning("File not found %s" % file_location)
+            with open(self.json_file, "w", encoding='utf-8') as target:
+                json.dump(hyperparams, target,
+                        ensure_ascii=False, indent=4)
+
 
     def _remove_obstacles(self):
         self.obstacles_manager.remove_obstacles()

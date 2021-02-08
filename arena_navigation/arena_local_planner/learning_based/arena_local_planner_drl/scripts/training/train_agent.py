@@ -1,7 +1,8 @@
 import os
 import rospy
 import time
-
+import rosnode
+from typing import Union
 from datetime import datetime as dt
 
 from stable_baselines3 import PPO
@@ -33,14 +34,16 @@ n_epochs = 4
 clip_range = 0.2
 reward_fnc = "rule_01"
 discrete_action_space = False
-normalize = True
-start_stage = 3
+start_stage = 1
+train_max_steps_per_episode = 200
+eval_max_steps_per_episode = 200
+goal_radius = 1.00
 task_mode = "staged"    # custom, random or staged
 normalize = False
 ##########################
 
 
-def get_agent_name(args):
+def get_agent_name(args) -> str:
     """ Function to get agent name to save to/load from file system
     
     Example names:
@@ -97,7 +100,7 @@ def get_paths(agent_name: str, args) -> dict:
 
     return PATHS
 
-def make_envs(task_manager, rank: int, seed: int=0, PATHS: dict=None):
+def make_envs(task_manager, rank: int, params: dict, seed: int=0, PATHS: dict=None, train: bool=True):
     """
     Utility function for multiprocessed env
     
@@ -107,8 +110,19 @@ def make_envs(task_manager, rank: int, seed: int=0, PATHS: dict=None):
     :param rank: (int) index of the subprocess
     :return: (Callable)
     """
-    def _init() -> gym.Env:
-        env = FlatlandEnv(f"sim{rank+1}", task_manager, PATHS.get('robot_setting'), PATHS.get('robot_as'), params['reward_fnc'], params['discrete_action_space'], goal_radius=1.00, max_steps_per_episode=200)
+    def _init() -> Union[gym.Env, gym.Wrapper]:
+        if train:
+            # train env
+            env = FlatlandEnv(
+                f"sim{rank+1}", task_manager, PATHS.get('robot_setting'), PATHS.get('robot_as'), params['reward_fnc'], params['discrete_action_space'], 
+                goal_radius=params['goal_radius'], max_steps_per_episode=params['train_max_steps_per_episode'])
+        else:
+            # eval env
+            env = Monitor(
+                    FlatlandEnv(
+                        f"sim{rank+1}", task_manager, PATHS.get('robot_setting'), PATHS.get('robot_as'), params['reward_fnc'], params['discrete_action_space'], 
+                        goal_radius=params['goal_radius'], max_steps_per_episode=params['eval_max_steps_per_episode'], train_mode=False),
+                    PATHS.get('eval'), info_keywords=("done_reason", "is_success"))
         env.seed(seed + rank)
         return env
     set_random_seed(seed)
@@ -123,35 +137,47 @@ if __name__ == "__main__":
 
     print("________ STARTING TRAINING WITH:  %s ________\n" % AGENT_NAME)
 
+    # check if simulations are booted
+    for i in range(args.n_envs):
+        ns = rosnode.get_node_names(namespace='sim'+str(i+1))
+        assert len(ns) > 0, f"Check if {args.n_envs} different simulation environments are running"
+        assert len(ns) > 4, f"Check if all simulation parts of namespace '{'/sim'+str(i+1)}' are running properly"
+
     # initialize hyperparameters (save to/ load from json)
     hyperparams_obj = agent_hyperparams(
         AGENT_NAME, robot, gamma, n_steps, ent_coef, learning_rate, vf_coef,max_grad_norm, gae_lambda, batch_size, 
-        n_epochs, clip_range, reward_fnc, discrete_action_space, normalize, task_mode, start_stage)
+        n_epochs, clip_range, reward_fnc, discrete_action_space, normalize, task_mode, start_stage, train_max_steps_per_episode,
+        eval_max_steps_per_episode, goal_radius, args.n_envs)
     params = initialize_hyperparameters(agent_name=AGENT_NAME, PATHS=PATHS, hyperparams_obj=hyperparams_obj, load_target=args.load)
 
     # instantiate gym environment
-    n_envs = 1
     task_managers=[]
-    for i in range(n_envs):
-        task_managers.append(get_predefined_task(f"sim{i+1}", params['task_mode'], params['curr_stage'], PATHS))
+    for i in range(args.n_envs):
+        task_managers.append(
+            get_predefined_task(f"sim{i+1}", params['task_mode'], params['curr_stage'], PATHS))
 
-    env = SubprocVecEnv([make_envs(task_managers[i], i, PATHS=PATHS) for i in range(n_envs)], start_method='fork')
-
+    env = SubprocVecEnv(
+        [make_envs(task_managers[i], i, params=params, PATHS=PATHS) for i in range(args.n_envs)], start_method='fork')
     if params['normalize']:
         env = VecNormalize(env, training=True, norm_obs=True, norm_reward=False, clip_reward=15)
 
+    # threshold settings for training curriculum
+    # type can be either 'succ' or 'rew'
+    trainstage_cb = InitiateNewTrainStage(
+        TaskManagers=task_managers, treshhold_type="succ", rew_threshold=14.5, succ_rate_threshold=0.80, task_mode=params['task_mode'], verbose=1)
+    
     # instantiate eval environment
-    """    
-    trainstage_cb = InitiateNewTrainStage(TaskManager=task_manager, TreshholdType="rew", rew_threshold=14.5, task_mode=params['task_mode'], verbose=1)
-    eval_env = Monitor(FlatlandEnv(
-        "sim1", task_manager, PATHS.get('robot_setting'), PATHS.get('robot_as'), params['reward_fnc'], params['discrete_action_space'], goal_radius=1.00, max_steps_per_episode=250),
-        PATHS.get('eval'), info_keywords=("done_reason",))
-    eval_env = DummyVecEnv([lambda: eval_env])
+    eval_env = DummyVecEnv(
+        [make_envs(task_managers[0], 0, params=params, PATHS=PATHS, train=False)])
     if params['normalize']:
         eval_env = VecNormalize(eval_env, training=False, norm_obs=True, norm_reward=False, clip_reward=15)
+    
+    # evaluation settings
+    # n_eval_episodes: number of episodes to evaluate agent on
+    # eval_freq: evaluate the agent every eval_freq train timesteps
     eval_cb = EvalCallback(
-        eval_env, n_eval_episodes=20, eval_freq=15000, log_path=PATHS.get('eval'), best_model_save_path=PATHS.get('model'), deterministic=True, callback_on_new_best=trainstage_cb)
-    """
+        eval_env, n_eval_episodes=10, eval_freq=300, log_path=PATHS.get('eval'), best_model_save_path=PATHS.get('model'), deterministic=True, callback_on_new_best=trainstage_cb)
+   
     # determine mode
     if args.custom_mlp:
         # custom mlp flag
@@ -190,9 +216,8 @@ if __name__ == "__main__":
         n_timesteps = args.n
 
     # start training
-    # model.learn(total_timesteps = n_timesteps, callback=eval_cb, reset_num_timesteps = False)
     start = time.time()
-    model.learn(total_timesteps = n_timesteps, reset_num_timesteps = False)
+    model.learn(total_timesteps = n_timesteps, callback=eval_cb, reset_num_timesteps=True)
     print(f'Time passed for {n_timesteps}: {time.time()-start}s')
 
     # update the timesteps the model has trained in total
