@@ -9,13 +9,16 @@ sys.path.append('/home/junhui/study/Masterarbeit/arenarosnav/test_ws/src/arena_r
 sys.path.append('/home/junhui/study/Masterarbeit/arenarosnav/test_ws/src/arena_rosnav/task_generator')
 sys.path.append('/home/junhui/study/Masterarbeit/arenarosnav/test_ws/src/arena_rosnav/task_generator/task_generator')
 import rospy
-
+import time
+import rosnode
+from typing import Union
 from datetime import datetime as dt
 
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv, VecNormalize
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.callbacks import EvalCallback
+from stable_baselines3.common.utils import set_random_seed
 
 from task_generator.task_generator.tasks import get_predefined_task
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.scripts.custom_policy import *
@@ -26,11 +29,7 @@ from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.tools.staged_train_callback import InitiateNewTrainStage
 
 ##### HYPERPARAMETER #####
-<<<<<<< HEAD
-""" (will be used upon initializing new agent) """
-=======
 """ will be used upon initializing new agent """
->>>>>>> master
 robot = "myrobot"
 gamma = 0.99
 n_steps = 128
@@ -42,23 +41,19 @@ gae_lambda = 0.95
 batch_size = 64
 n_epochs = 4
 clip_range = 0.2
-<<<<<<< HEAD
-reward_fnc = "01"
-discrete_action_space = True
-start_stage = 4
-task_mode = "staged"    # custom, random or staged
-=======
 reward_fnc = "rule_01"
 discrete_action_space = False
 normalize = True
 start_stage = 1
+train_max_steps_per_episode = 200
+eval_max_steps_per_episode = 200
+goal_radius = 1.00
 task_mode = "staged"    # custom, random or staged
 normalize = True
->>>>>>> master
 ##########################
 
 
-def get_agent_name(args):
+def get_agent_name(args) -> str:
     """ Function to get agent name to save to/load from file system
     
     Example names:
@@ -112,7 +107,36 @@ def get_paths(agent_name: str, args) -> dict:
         PATHS['tb'] = None
 
     return PATHS
-
+def make_envs(task_manager, rank: int, params: dict, seed: int=0, PATHS: dict=None, train: bool=True):
+    """
+    Utility function for multiprocessed env
+    
+    :param task_manager: (Object)
+    :param rank: (int) index of the subprocess
+    :param params: (dict) hyperparameters of agent to be trained
+    :param seed: (int) the inital seed for RNG
+    :param PATHS: (dict) script relevant paths
+    :param train: (bool) to differentiate between train and eval env
+    :return: (Callable)
+    """
+    def _init() -> Union[gym.Env, gym.Wrapper]:
+        if train:
+            # train env
+            env = FlatlandEnv(
+                f"sim_0{rank+1}", task_manager, PATHS.get('robot_setting'), PATHS.get('robot_as'), params['reward_fnc'], params['discrete_action_space'], 
+                goal_radius=params['goal_radius'], max_steps_per_episode=params['train_max_steps_per_episode'])
+        else:
+            # eval env
+            env = Monitor(
+                    FlatlandEnv(
+                        f"sim_0{rank+1}", task_manager, PATHS.get('robot_setting'), PATHS.get('robot_as'), params['reward_fnc'], params['discrete_action_space'], 
+                        goal_radius=params['goal_radius'], max_steps_per_episode=params['eval_max_steps_per_episode'], train_mode=False),
+                    PATHS.get('eval'), info_keywords=("done_reason", "is_success")
+                    )
+        env.seed(seed + rank)
+        return env
+    set_random_seed(seed)
+    return _init
 
 if __name__ == "__main__":
     args, _ = parse_training_args()
@@ -124,59 +148,77 @@ if __name__ == "__main__":
     PATHS = get_paths(AGENT_NAME, args)
 
     print("________ STARTING TRAINING WITH:  %s ________\n" % AGENT_NAME)
+    # check if simulations are booted
+    for i in range(args.n_envs):
+        ns = rosnode.get_node_names(namespace='sim_0'+str(i+1))
+        assert len(ns) > 0, f"Check if {args.n_envs} different simulation environments are running"
+        assert len(ns) > 2, f"Check if all simulation parts of namespace '{'/sim_0'+str(i+1)}' are running properly"
 
     # initialize hyperparameters (save to/ load from json)
-<<<<<<< HEAD
-    hyperparams_obj = agent_hyperparams(AGENT_NAME, robot, gamma, n_steps, ent_coef, learning_rate, vf_coef,max_grad_norm, gae_lambda, batch_size, 
-                                    n_epochs, clip_range, reward_fnc, discrete_action_space, task_mode, start_stage)
-=======
     hyperparams_obj = agent_hyperparams(
         AGENT_NAME, robot, gamma, n_steps, ent_coef, learning_rate, vf_coef,max_grad_norm, gae_lambda, batch_size, 
         n_epochs, clip_range, reward_fnc, discrete_action_space, normalize, task_mode, start_stage)
->>>>>>> master
     params = initialize_hyperparameters(agent_name=AGENT_NAME, PATHS=PATHS, hyperparams_obj=hyperparams_obj, load_target=args.load)
+    # task managers for each simulation
+    task_managers=[]
+    for i in range(args.n_envs):
+        task_managers.append(
+            get_predefined_task(f"sim_0{i+1}", params['task_mode'], params['curr_stage'], PATHS))
 
+    # instantiate gym environment
+    env = SubprocVecEnv(
+        [make_envs(
+            task_managers[i], i, params=params, PATHS=PATHS) for i in range(args.n_envs)]
+        , start_method='fork')
     # instantiate gym environment
     n_envs = 1
     task_manager = get_predefined_task(params['task_mode'], params['curr_stage'], PATHS)
-<<<<<<< HEAD
-    env = DummyVecEnv([lambda: FlatlandEnv(task_manager, PATHS.get('robot_setting'), PATHS.get('robot_as'), params['discrete_action_space'], goal_radius=1.00, max_steps_per_episode=350)] * n_envs)
-    
-    # instantiate eval environment
-    trainstage_cb = InitiateNewTrainStage(TaskManager=task_manager, TreshholdType="rew", rew_threshold=13.5, task_mode=params['task_mode'], verbose=1)
-    eval_env = Monitor(FlatlandEnv(task_manager, PATHS.get('robot_setting'), PATHS.get('robot_as'), params['discrete_action_space'], goal_radius=1.00, max_steps_per_episode=350), PATHS.get('eval'), info_keywords=("done_reason",))
-    eval_cb = EvalCallback(eval_env, n_eval_episodes=20, eval_freq=10000, log_path=PATHS.get('eval'), best_model_save_path=PATHS.get('model'), deterministic=True, callback_on_new_best=trainstage_cb)
-=======
     env = DummyVecEnv(
         [lambda: FlatlandEnv(task_manager, PATHS.get('robot_setting'), PATHS.get('robot_as'), params['reward_fnc'], params['discrete_action_space'], goal_radius=1.00, max_steps_per_episode=200)] * n_envs)
     if params['normalize']:
         env = VecNormalize(env, training=True, norm_obs=True, norm_reward=False, clip_reward=15)
 
-    # instantiate eval environment
-    trainstage_cb = InitiateNewTrainStage(TaskManager=task_manager, TreshholdType="rew", rew_threshold=14.5, task_mode=params['task_mode'], verbose=1)
+    # threshold settings for training curriculum
+    # type can be either 'succ' or 'rew'
+    trainstage_cb = InitiateNewTrainStage(
+        TaskManagers=task_managers, treshhold_type="succ", rew_threshold=14.5, 
+        succ_rate_threshold=0.80, task_mode=params['task_mode'], verbose=1)
     eval_env = Monitor(FlatlandEnv(
         task_manager, PATHS.get('robot_setting'), PATHS.get('robot_as'), params['reward_fnc'], params['discrete_action_space'], goal_radius=1.00, max_steps_per_episode=250),
         PATHS.get('eval'), info_keywords=("done_reason",))
-    eval_env = DummyVecEnv([lambda: eval_env])
+    # instantiate eval environment
+    # take task_manager from first sim (currently evaluation only provided for single process)
+    eval_env = DummyVecEnv(
+        [make_envs(task_managers[0], 0, params=params, PATHS=PATHS, train=False)]
+        )
     if params['normalize']:
         eval_env = VecNormalize(eval_env, training=False, norm_obs=True, norm_reward=False, clip_reward=15)
     eval_cb = EvalCallback(
-        eval_env, n_eval_episodes=20, eval_freq=15000, log_path=PATHS.get('eval'), best_model_save_path=PATHS.get('model'), deterministic=True, callback_on_new_best=trainstage_cb)
->>>>>>> master
+        eval_env, n_eval_episodes=30, eval_freq=10000, 
+        log_path=PATHS.get('eval'), 
+        best_model_save_path=PATHS.get('model'), 
+        deterministic=True, 
+        callback_on_new_best=trainstage_cb)
 
     # determine mode
     if args.custom_mlp:
         # custom mlp flag
-        model = PPO("MlpPolicy", env, policy_kwargs = dict(net_arch = args.net_arch, activation_fn = get_act_fn(args.act_fn)), 
-                    gamma = gamma, n_steps = n_steps, ent_coef = ent_coef, learning_rate = learning_rate, vf_coef = vf_coef, 
-                    max_grad_norm = max_grad_norm, gae_lambda = gae_lambda, batch_size = batch_size, n_epochs = n_epochs, clip_range = clip_range, 
-                    tensorboard_log = PATHS.get('tb'), verbose = 1)
+        model = PPO(
+            "MlpPolicy", env, 
+            policy_kwargs = dict(net_arch = args.net_arch, activation_fn = get_act_fn(args.act_fn)), 
+            gamma = gamma, n_steps = n_steps, ent_coef = ent_coef, learning_rate = learning_rate, 
+            vf_coef = vf_coef, max_grad_norm = max_grad_norm, gae_lambda = gae_lambda, 
+            batch_size = batch_size, n_epochs = n_epochs, clip_range = clip_range, 
+            tensorboard_log = PATHS.get('tb'), verbose = 1)
     elif args.agent is not None:
         # predefined agent flag
         if args.agent == "MLP_ARENA2D":
-                model = PPO(MLP_ARENA2D_POLICY, env, gamma = gamma, n_steps = n_steps, ent_coef = ent_coef, 
-                        learning_rate = learning_rate, vf_coef = vf_coef, max_grad_norm = max_grad_norm, gae_lambda = gae_lambda, 
-                        batch_size = batch_size, n_epochs = n_epochs, clip_range = clip_range, tensorboard_log = PATHS.get('tb'), verbose = 1)
+                model = PPO(
+                    MLP_ARENA2D_POLICY, env, 
+                    gamma = gamma, n_steps = n_steps, ent_coef = ent_coef, learning_rate = learning_rate, 
+                    vf_coef = vf_coef, max_grad_norm = max_grad_norm, gae_lambda = gae_lambda,
+                    batch_size = batch_size, n_epochs = n_epochs, clip_range = clip_range, 
+                    tensorboard_log = PATHS.get('tb'), verbose = 1)
 
         elif args.agent == "DRL_LOCAL_PLANNER" or args.agent == "CNN_NAVREP":
             if args.agent == "DRL_LOCAL_PLANNER":
@@ -184,37 +226,35 @@ if __name__ == "__main__":
             else:
                 policy_kwargs = policy_kwargs_navrep
 
-            model = PPO("CnnPolicy", env, policy_kwargs = policy_kwargs, 
-                gamma = gamma, n_steps = n_steps, ent_coef = ent_coef, learning_rate = learning_rate, vf_coef = vf_coef, 
-                max_grad_norm = max_grad_norm, gae_lambda = gae_lambda, batch_size = batch_size, n_epochs = n_epochs, 
-                clip_range = clip_range, tensorboard_log = PATHS.get('tb'), verbose = 1)
+            model = PPO(
+                "CnnPolicy", env, 
+                policy_kwargs = policy_kwargs, 
+                gamma = gamma, n_steps = n_steps, ent_coef = ent_coef, learning_rate = learning_rate, 
+                vf_coef = vf_coef, max_grad_norm = max_grad_norm, gae_lambda = gae_lambda,
+                batch_size = batch_size, n_epochs = n_epochs, clip_range = clip_range, 
+                tensorboard_log = PATHS.get('tb'), verbose = 1)
     else:
         # load flag
         if os.path.isfile(os.path.join(PATHS.get('model'), AGENT_NAME + ".zip")):
             model = PPO.load(os.path.join(PATHS.get('model'), AGENT_NAME), env)
         elif os.path.isfile(os.path.join(PATHS.get('model'), "best_model.zip")):
             model = PPO.load(os.path.join(PATHS.get('model'), "best_model"), env)
-
-<<<<<<< HEAD
-    # set num of timesteps to be generated 
-=======
+        model.update_n_envs()
     # set num of timesteps to be generated robot
->>>>>>> master
     if args.n is None:
         n_timesteps = 60000000
     else:
         n_timesteps = args.n
 
     # start training
-    model.learn(total_timesteps = n_timesteps, callback=eval_cb, reset_num_timesteps = False)
+    start = time.time()
+    model.learn(
+        total_timesteps = n_timesteps, callback=eval_cb, reset_num_timesteps=True)
+    print(f'Time passed for {n_timesteps} timesteps: {time.time()-start}s')
 
     # update the timesteps the model has trained in total
     update_total_timesteps_json(hyperparams_obj, n_timesteps, PATHS)
-<<<<<<< HEAD
-    print("training done and model saved!")
-=======
     print("training done!")
->>>>>>> master
     
 """
     s = time.time()

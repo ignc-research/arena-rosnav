@@ -13,11 +13,11 @@ from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.tools.argsparser import parse_run_agent_args
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.tools.train_agent_utils import *
 
+### HYPERPARAMETERS ###
+max_steps_per_episode = 250
 
 if __name__ == "__main__":
     args, _ = parse_run_agent_args()
-
-    rospy.init_node("run_node")
 
     # get paths
     dir = rospkg.RosPack().get_path('arena_local_planner_drl')
@@ -27,30 +27,37 @@ if __name__ == "__main__":
         'robot_as' : os.path.join(rospkg.RosPack().get_path('arena_local_planner_drl'), 'configs', 'default_settings.yaml'),
         'scenerios_json_path' : os.path.join(rospkg.RosPack().get_path('simulator_setup'), 'scenerios', args.scenario+'.json')
     }
+
     assert os.path.isfile(
         os.path.join(PATHS['model'], 'best_model.zip')), "No model file found in %s" % PATHS['model']
     assert os.path.isfile(
         PATHS['scenerios_json_path']), "No scenario file named %s" % PATHS['scenerios_json_path']
 
     # initialize hyperparams
-    params = load_hyperparameters_json(agent_hyperparams, PATHS)
+    params = load_hyperparameters_json(PATHS)
 
     print("START RUNNING AGENT:    %s" % params['agent_name'])
     print_hyperparameters(params)
 
     # initialize task manager
-    task_manager = get_predefined_task(mode='ScenerioTask', PATHS=PATHS)
+    task_manager = get_predefined_task(ns='sim_01', mode='ScenerioTask', PATHS=PATHS)
+    
     # initialize gym env
-    env = DummyVecEnv([lambda: FlatlandEnv(
-        task_manager, PATHS.get('robot_setting'), PATHS.get('robot_as'), params['reward_fnc'], params['discrete_action_space'], goal_radius=0.50, max_steps_per_episode=350)])
+    env = DummyVecEnv(
+        [lambda: FlatlandEnv(
+            'sim_01', task_manager, PATHS.get('robot_setting'), PATHS.get('robot_as'), params['reward_fnc'], params['discrete_action_space'], 
+            goal_radius=0.50, max_steps_per_episode=max_steps_per_episode, train_mode=False)
+        ])
     if params['normalize']:
-        env = VecNormalize(env, training=False, norm_obs=True, norm_reward=False, clip_reward=15)
+        env = VecNormalize(
+            env, training=False, norm_obs=True, norm_reward=False, clip_reward=15)
 
     # load agent
     agent = PPO.load(os.path.join(PATHS['model'], "best_model.zip"), env)
     
     env.reset()
     first_obs = True
+
     # iterate through each scenario max_repeat times
     while True:
         if first_obs:
@@ -66,7 +73,9 @@ if __name__ == "__main__":
 
         # clip action
         if not params['discrete_action_space']:
-            action = np.maximum(np.minimum(agent.action_space.high, action), agent.action_space.low)
+            action = np.maximum(
+                np.minimum(agent.action_space.high, action), agent.action_space.low
+                )
         
         # apply action
         obs, rewards, done, info = env.step(action)

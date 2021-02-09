@@ -66,7 +66,7 @@ def get_random_pos_on_map(free_space_indices, map_: OccupancyGrid, safe_dist: fl
     n_check_failed = 0
     x_in_meters, y_in_meters = None, None
     while not pos_valid:
-        idx = random.randint(0, n_freespace_cells)
+        idx = random.randint(0, n_freespace_cells-1)
         # in cells
         y_in_cells, x_in_cells = free_space_indices[0][idx], free_space_indices[1][idx]
         # convert x, y in meters

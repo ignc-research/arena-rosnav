@@ -7,29 +7,24 @@ from task_generator.tasks import get_predefined_task
 import rospy
 import rospkg
 
-rospy.init_node("test")
+rospy.init_node("test", disable_signals=True)
 # task = get_predefined_task()
-task = get_predefined_task(mode="ScenerioTask", PATHS={
+task = get_predefined_task(ns="sim_01",mode="ScenerioTask", PATHS={
                            "scenerios_json_path": "/home/joe/ssd/projects/arena-rosnav-ws/src/arena-rosnav/simulator_setup/scenerios/example_scenerio.json"})
 models_folder_path = rospkg.RosPack().get_path('simulator_setup')
 arena_local_planner_drl_folder_path = rospkg.RosPack().get_path(
     'arena_local_planner_drl')
 
 
-<<<<<<< HEAD
-env = FlatlandEnv(task,os.path.join(models_folder_path,'robot','turtlebot.model.yaml'),
-                    os.path.join(arena_local_planner_drl_folder_path,'configs','default_settings.yaml'),True,
-=======
-env = FlatlandEnv(task, os.path.join(models_folder_path, 'robot', 'myrobot.model.yaml'),
+env = FlatlandEnv("sim_01", task, os.path.join(models_folder_path, 'robot', 'myrobot.model.yaml'),
                   os.path.join(arena_local_planner_drl_folder_path,
                                'configs', 'default_settings.yaml'), "rule_00", True,
->>>>>>> master
                   )
 model = A2C('MlpPolicy', env, verbose=1)
 
 s = time.time()
 try:
-    model.learn(total_timesteps=3000)
+    model.learn(total_timesteps=1000)
 except KeyboardInterrupt:
     try:
         sys.exit(0)

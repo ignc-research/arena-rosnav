@@ -76,6 +76,7 @@ class RewardCalculator():
             self.curr_reward = reward
             self.info['is_done'] = True
             self.info['done_reason'] = 2
+            self.info['is_success'] = 1
         else:
             self.info['is_done'] = False
 
@@ -128,6 +129,7 @@ class RewardCalculator():
             self.curr_reward -= punishment
             self.info['is_done'] = True
             self.info['done_reason'] = 1
+            self.info['is_success'] = 0
 
     def _reward_human_safety_dist(self, human_in_robot_frame, punishment = 50):
         if human_in_robot_frame[0].min()<self.safe_dist_h:

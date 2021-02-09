@@ -137,7 +137,7 @@ int main(int argc, char** argv)
 {
   ros::init(argc, argv, "fake_localization");
   
-  ros::NodeHandle private_nh("~");
+  ros::NodeHandle private_nh{};
 
   FakeLocalization robot_pose_node(private_nh);
 
