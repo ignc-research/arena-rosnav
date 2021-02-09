@@ -14,7 +14,7 @@ git clone https://github.com/Herrsun/arena-rosnav
 ```
 docker ps
 ```
-2. Start container (run under the path containing docker-compose.yml)
+2. Start container (under the path of arena-rosnav)
 ```
 docker-compose start
 ```
@@ -22,7 +22,7 @@ docker-compose start
 ```
 docker exec -it arena-rosnav bash
 ```
-4. Stop the container (run under the path containing docker-compose.yml)cd 
+4. Stop the container (under the path of arena-rosnav)
 ```
 docker-compose stop 
 ```
@@ -49,7 +49,7 @@ roslaunch arena_bringup start_arena_flatland.launch train_mode:=false use_viz:=t
 2. Open the arena-rosnav folder in VS Code
 3. Click the green icon in the lower left corner (or type `F1`) 
 4. Select `Remote-Containers: Reopen in Container`
-5. Select `From docker-compose.yml`
+5. Select `From docker-compose.yml` 
 6. Select `ros`
 7. Modify the files which are automatically created by VS Code
     * devcontainer.json in .devcontainer folder
