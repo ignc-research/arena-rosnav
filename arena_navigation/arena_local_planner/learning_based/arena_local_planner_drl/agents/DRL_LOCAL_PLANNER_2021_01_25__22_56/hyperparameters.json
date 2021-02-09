@@ -20,5 +20,5 @@
     "normalize": true,
     "task_mode": "staged",
     "curr_stage": 1,
-    "n_timesteps": 18000
+    "n_timesteps": 24000
 }
