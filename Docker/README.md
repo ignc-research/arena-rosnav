@@ -7,7 +7,7 @@ https://docs.docker.com/docker-for-mac/install/
 git clone https://github.com/Herrsun/arena-rosnav
 ```
 2. Open local terminal under the path where you just clone the repo
-3. Run `docker-compose up --build`
+3. Run `docker-compose up -d`
 
 ## Start /Enter /Stop the container
 1. Check if the arena-rosnav and novnc container is already started
@@ -46,7 +46,13 @@ roslaunch arena_bringup start_arena_flatland.launch train_mode:=false use_viz:=t
 
 ## Develop in VS Code
 1. Install plugin Remote - Containers in VS Code
-2. Click the green icon in the lower left corner (or type `F1`) 
-3. Select `Remote-Containers: Reopen in Container`
-4. Select `From docker-compose.yml`
-5. Select `ros`
+2. Open the arena-rosnav folder in VS Code
+3. Click the green icon in the lower left corner (or type `F1`) 
+4. Select `Remote-Containers: Reopen in Container`
+5. Select `From docker-compose.yml`
+6. Select `ros`
+7. Modify the files which are automatically created by VS Code
+    * devcontainer.json in .devcontainer folder
+    You can change the workspaceFolder to "workspaceFolder": "/root/catkin_ws/src/arena-rosnav"
+    * docker-compose.yml in .devcontainer folder
+    You can comment the "volumes:- .:/workspace:cached", which is redundant

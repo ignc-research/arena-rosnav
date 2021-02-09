@@ -56,7 +56,7 @@ RUN . /usr/local/bin/virtualenvwrapper.sh \
 && workon rosnav \
 && pip install --extra-index-url https://rospypi.github.io/simple/ rospy rosbag tf tf2_ros --ignore-installed \
 && pip install pyyaml catkin_pkg netifaces pathlib \
-&& pip install stable-baselines3
+&& pip --no-cache-dir install stable-baselines3
 
 # 4. Install Arena-Rosnav repo and compile
 RUN git clone --depth 1 https://github.com/ignc-research/arena-rosnav /root/catkin_ws/src/arena-rosnav \
