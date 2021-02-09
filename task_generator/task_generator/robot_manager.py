@@ -32,7 +32,7 @@ class RobotManager:
         """
         self.ns = ns
         self.ns_prefix = "/" if ns == "" else "/"+ns+"/"
-        
+
         self.is_training_mode = rospy.get_param("/train_mode")
         self.step_size = rospy.get_param("step_size")
         self._get_robot_configration(robot_yaml_path)
@@ -47,7 +47,6 @@ class RobotManager:
         # it's only needed in training mode to send the clock signal.
         self._step_world = rospy.ServiceProxy(
             f'{self.ns_prefix}step_world', StepWorld)
-
 
         # publisher
         # publish the start position of the robot
@@ -121,9 +120,11 @@ class RobotManager:
             # a necessaray procedure to let the flatland publish the
             # laser,odom's Transformation, which are needed for creating
             # global path
+            assert self.step_size * \
+                self.LASER_UPDATE_RATE == 1, f"TO run the traning successfully, make sure the laser_update_rate*step_size == 1 \
+                \n\tcurrent step_size:\t {self.step_size}\n\tcurrent laser's update rate:\t {self.LASER_UPDATE_RATE} "
             for _ in range(math.ceil(1/(self.step_size*self.LASER_UPDATE_RATE))):
                 self._step_world()
-
 
     def set_start_pos_random(self):
         start_pos = Pose2D()

@@ -11,6 +11,7 @@ rospy.init_node("test", disable_signals=True)
 # task = get_predefined_task()
 task = get_predefined_task(ns="sim_01", mode="random", PATHS={
                            "scenerios_json_path": "/home/joe/ssd/projects/arena-rosnav-ws/src/arena-rosnav/simulator_setup/scenerios/example_scenerio.json"})
+            
 models_folder_path = rospkg.RosPack().get_path('simulator_setup')
 arena_local_planner_drl_folder_path = rospkg.RosPack().get_path(
     'arena_local_planner_drl')
@@ -24,7 +25,7 @@ model = A2C('MlpPolicy', env, verbose=1)
 
 s = time.time()
 try:
-    model.learn(total_timesteps=3000)
+    model.learn(total_timesteps=1000)
 except KeyboardInterrupt:
     try:
         sys.exit(0)
