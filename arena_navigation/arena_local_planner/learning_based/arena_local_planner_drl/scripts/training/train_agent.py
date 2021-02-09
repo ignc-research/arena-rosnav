@@ -117,13 +117,13 @@ def make_envs(task_manager, rank: int, params: dict, seed: int=0, PATHS: dict=No
         if train:
             # train env
             env = FlatlandEnv(
-                f"sim{rank+1}", task_manager, PATHS.get('robot_setting'), PATHS.get('robot_as'), params['reward_fnc'], params['discrete_action_space'], 
+                f"sim_0{rank+1}", task_manager, PATHS.get('robot_setting'), PATHS.get('robot_as'), params['reward_fnc'], params['discrete_action_space'], 
                 goal_radius=params['goal_radius'], max_steps_per_episode=params['train_max_steps_per_episode'])
         else:
             # eval env
             env = Monitor(
                     FlatlandEnv(
-                        f"sim{rank+1}", task_manager, PATHS.get('robot_setting'), PATHS.get('robot_as'), params['reward_fnc'], params['discrete_action_space'], 
+                        f"sim_0{rank+1}", task_manager, PATHS.get('robot_setting'), PATHS.get('robot_as'), params['reward_fnc'], params['discrete_action_space'], 
                         goal_radius=params['goal_radius'], max_steps_per_episode=params['eval_max_steps_per_episode'], train_mode=False),
                     PATHS.get('eval'), info_keywords=("done_reason", "is_success"))
         env.seed(seed + rank)
@@ -143,9 +143,9 @@ if __name__ == "__main__":
 
     # check if simulations are booted
     for i in range(args.n_envs):
-        ns = rosnode.get_node_names(namespace='sim'+str(i+1))
+        ns = rosnode.get_node_names(namespace='sim_0'+str(i+1))
         assert len(ns) > 0, f"Check if {args.n_envs} different simulation environments are running"
-        assert len(ns) > 4, f"Check if all simulation parts of namespace '{'/sim'+str(i+1)}' are running properly"
+        assert len(ns) > 2, f"Check if all simulation parts of namespace '{'/sim_0'+str(i+1)}' are running properly"
 
     # initialize hyperparameters (save to/ load from json)
     hyperparams_obj = agent_hyperparams(
@@ -158,7 +158,7 @@ if __name__ == "__main__":
     task_managers=[]
     for i in range(args.n_envs):
         task_managers.append(
-            get_predefined_task(f"sim{i+1}", params['task_mode'], params['curr_stage'], PATHS))
+            get_predefined_task(f"sim_0{i+1}", params['task_mode'], params['curr_stage'], PATHS))
 
     # instantiate gym environment
     env = SubprocVecEnv(
