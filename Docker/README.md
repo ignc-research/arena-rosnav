@@ -52,7 +52,7 @@ roslaunch arena_bringup start_arena_flatland.launch train_mode:=false use_viz:=t
 5. Select `From docker-compose.yml` 
 6. Select `ros`
 7. Modify the files which are automatically created by VS Code
-    * devcontainer.json in .devcontainer folder
+    * devcontainer.json in .devcontainer folder  
     You can change the workspaceFolder to "workspaceFolder": "/root/catkin_ws/src/arena-rosnav"
-    * docker-compose.yml in .devcontainer folder
+    * docker-compose.yml in .devcontainer folder  
     You can comment the "volumes:- .:/workspace:cached", which is redundant
