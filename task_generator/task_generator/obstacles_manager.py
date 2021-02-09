@@ -10,7 +10,7 @@ from flatland_msgs.srv import SpawnModel, SpawnModelRequest
 from flatland_msgs.srv import MoveModel, MoveModelRequest
 from flatland_msgs.srv import StepWorld
 from nav_msgs.msg import OccupancyGrid
-from geometry_msgs.msg import Pose2D
+from geometry_msgs.msg import Pose2D, Twist, Point
 from pedsim_srvs.srv import SpawnPeds
 from pedsim_msgs.msg import Ped
 from std_srvs.srv import SetBool, Empty
@@ -31,10 +31,11 @@ class ObstaclesManager:
         rospy.wait_for_service('move_model', timeout=20)
         rospy.wait_for_service('delete_model', timeout=20)
         rospy.wait_for_service('spawn_model', timeout=20)
-        rospy.wait_for_service('/pedsim_simulator/remove_all_peds', timeout=20)
+        rospy.wait_for_service('pedsim_simulator/remove_all_peds', timeout=20)
         # start=rospy.rostime.get_time()
         # print("start wait ",start)
-        rospy.wait_for_service('/pedsim_simulator/respawn_peds' , timeout=20)
+        rospy.wait_for_service('pedsim_simulator/respawn_peds' , timeout=20)
+        rospy.wait_for_service('pedsim_simulator/spawn_ped' , timeout=20)
         # print("passed ",rospy.rostime.get_time()-start)
         if is_training:
             rospy.wait_for_service('step_world', timeout=20)
@@ -46,13 +47,14 @@ class ObstaclesManager:
         self._srv_spawn_model = rospy.ServiceProxy(
             'spawn_model', SpawnModel, persistent=True)
 
-        # self.__respawn_models = rospy.ServiceProxy('/respawn_models' % self.NS, RespawnModels)
-        # self.__spawn_ped_srv = rospy.ServiceProxy(
-        #     '/pedsim_simulator/spawn_ped', SpawnPeds, persistent=True)
+        # self.__respawn_models = rospy.ServiceProxy('respawn_models', RespawnModels,persistent=True)
+        # self.__respawn_models = rospy.ServiceProxy('%s/respawn_models' % self.NS, RespawnModels)
+        self.__spawn_ped_srv = rospy.ServiceProxy(
+            'pedsim_simulator/spawn_ped', SpawnPeds, persistent=True)
         self.__respawn_peds_srv = rospy.ServiceProxy(
-            '/pedsim_simulator/respawn_peds' , SpawnPeds, persistent=True)
+            'pedsim_simulator/respawn_peds' , SpawnPeds, persistent=True)
         self.__remove_all_peds_srv = rospy.ServiceProxy(
-            '/pedsim_simulator/remove_all_peds' , SetBool, persistent=True)
+            'pedsim_simulator/remove_all_peds' , SetBool, persistent=True)
         # self._srv_sim_step = rospy.ServiceProxy('step_world', StepWorld, persistent=True)
 
         self.update_map(map_)
@@ -65,6 +67,10 @@ class ObstaclesManager:
         # print("start wait ")
         # self.__remove_all_peds()
         # print("start wait ")
+    def setForbidden_zones(self, forbidden_zones: Union[list, None] = None):
+        """ set the forbidden areas for spawning obstacles
+        """
+        self.forbidden_zones=forbidden_zones 
 
     def update_map(self, new_map: OccupancyGrid):
         self.map = new_map
@@ -94,8 +100,9 @@ class ObstaclesManager:
         type_obstacle = self._obstacle_name_prefix+'_'+type_obstacle
         model_name = os.path.basename(model_yaml_file_path).split('.')[0]
         name_prefix = type_obstacle + '_' + model_name
+
         if type_obstacle == 'obstacles_dynamic':
-            # print("reach here dynamic")
+            # print("asad",num_obstacles)
             self.spawn_random_peds_in_world(num_obstacles)
         else:
             count_same_type = sum(
@@ -132,7 +139,7 @@ class ObstaclesManager:
                         # self.obstacle_name_str=self.obstacle_name_str+","+spawn_request.name
                         break
                 if i_curr_try == max_num_try:
-                    raise rospy.ServiceException(f" failed to register static obstacles")
+                    raise rospy.ServiceException(f" failed to register static obstacles")        
         return self
 
     def register_random_obstacles(self, num_obstacles: int, p_dynamic=0.5):
@@ -163,17 +170,19 @@ class ObstaclesManager:
             min_obstacle_radius (float, optional): the minimum radius of the obstacle. Defaults to 0.5.
             max_obstacle_radius (float, optional): the maximum radius of the obstacle. Defaults to 0.5.
         """
+        # self.human_id=0
         for i in range(num_obstacles):
-            self.obstacle_name_str=self.obstacle_name_str+","+f'dynamic_human_{i}'
-            model_path = os.path.join(rospkg.RosPack().get_path(
-            'simulator_setup'), 'dynamic_obstacles/person_two_legged.model.yaml')
-            with open(model_path, 'r') as f:
-                content = yaml.safe_load(f)
-                #update topic name
-                content['plugins'][1]['ground_truth_pub']=f'dynamic_human_{i}'
-            with open(model_path , 'w') as nf:
-                yaml.dump(content, nf)
-            self.register_obstacles(1, model_path, "dynamic")
+            self.obstacle_name_str=self.obstacle_name_str+","+f'pedsim_agent_{i+1}/dynamic_human'
+        model_path = os.path.join(rospkg.RosPack().get_path(
+        'simulator_setup'), 'dynamic_obstacles/person_two_legged.model.yaml')
+        # with open(model_path, 'r') as f:
+        #     content = yaml.safe_load(f)
+        #     #update topic name
+        #     content['plugins'][1]['ground_truth_pub']=f'dynamic_human_{i}'
+        # with open(model_path , 'w') as nf:
+        #     yaml.dump(content, nf)
+        # print("reach here ")
+        self.register_obstacles(num_obstacles, model_path, "dynamic")
             # os.remove(model_path)
 
     def register_random_static_obstacles(self, num_obstacles: int, num_vertices_min=3, num_vertices_max=6, min_obstacle_radius=0.5, max_obstacle_radius=2):
@@ -187,6 +196,7 @@ class ObstaclesManager:
             max_obstacle_radius (float, optional): the maximum radius of the obstacle. Defaults to 2.
         """
         for _ in range(num_obstacles):
+            # print("reach here ")
             num_vertices = random.randint(num_vertices_min, num_vertices_max)
             model_path = self._generate_random_obstacle_yaml(
                 False, num_vertices=num_vertices, min_obstacle_radius=min_obstacle_radius, max_obstacle_radius=max_obstacle_radius)
@@ -412,6 +422,7 @@ class ObstaclesManager:
             'simulator_setup'), 'dynamic_obstacles/person_two_legged.model.yaml')
         srv = SpawnPeds()
         srv.peds = []
+        # print(peds)
         for ped in peds:
             msg = Ped()
             msg.id = ped[0]
@@ -430,41 +441,61 @@ class ObstaclesManager:
                 p.z = pos[2]
                 msg.waypoints.append(p)
             srv.peds.append(msg)
-        # print("reach here ped")
-        try:
-            # self.__spawn_ped_srv.call(srv.peds)
-            print("reached here start")
-            self.__respawn_peds_srv.call(srv.peds)
-            print("reached here end")
-        except rospy.ServiceException:
-            print('Spawn object: rospy.ServiceException. Closing serivce')
-            try:
-                self._srv_spawn_model.close()
-            except AttributeError:
-                print('Spawn object close(): AttributeError.')
-                return
+
+        max_num_try = 2
+        i_curr_try = 0
+        while i_curr_try < max_num_try:
+            # try to call service
+            response=self.__respawn_peds_srv.call(srv.peds)
+            # response=self.__spawn_ped_srv.call(srv.peds)
+            if not response.finished:  # if service not succeeds, do something and redo service
+                rospy.logwarn(
+                    f"spawn human failed! trying again... [{i_curr_try+1}/{max_num_try} tried]")
+                # rospy.logwarn(response.message)
+                i_curr_try += 1
+            else:
+                break
+        # if i_curr_try == max_num_try:
+        #     raise rospy.ServiceException(f" failed to repawn human")    
+            
+        #     # print("reached here start")
+        # except rospy.ServiceException:
+        #     print('Spawn object: rospy.ServiceException. Closing serivce')
+        #     try:
+        #         self._srv_spawn_model.close()
+        #     except AttributeError:
+        #         print('Spawn object close(): AttributeError.')
+        #         return
         self.__peds = peds
         return
 
-    def spawn_random_peds_in_world(self, n):
+    def spawn_random_peds_in_world(self, n:int, safe_distance:float=3.5, forbidden_zones: Union[list, None] = None):
         """
         Spawning n random pedestrians in the whole world.
         :param n number of pedestrians that will be spawned.
+        :param map the occupancy grid of the current map (TODO: the map should be updated every spawn)
+        :safe_distance [meter] for sake of not exceeding the safety distance at the beginning phase
         """
-        ped_array = []
+        ped_array = None
+        # self.human_id+=1
         for i in range(n):
             waypoints = np.array([], dtype=np.int64).reshape(0, 3)
-            [x, y, theta] = get_random_pos_on_map(self.map)
-            waypoints = np.vstack([waypoints, [x, y, 0.3]])
-            if random.uniform(0.0, 1.0) < 0.8:
-                for j in range(4):
-                    dist = 0
-                    while dist < 4:
-                        [x2, y2, theta2] = get_random_pos_on_map(self.map)
-                        dist = self.__mean_sqare_dist_((waypoints[-1,0] - x2), (waypoints[-1,1] - y2))
-                    waypoints = np.vstack([waypoints, [x2, y2, 0.3]])
-            ped_array.append(i, [x, y, 0.0], waypoints)
-            self.__respawn_peds(ped_array)
+            [x, y, theta] = get_random_pos_on_map(self._free_space_indices, self.map, safe_distance, forbidden_zones)
+            waypoints = np.vstack([waypoints, [x, y, 2]]) # the first waypoint
+            # if random.uniform(0.0, 1.0) < 0.8:
+            safe_distance=safe_distance-3 #the other waypoints don't need to avoid robot
+            for j in range(4):
+                dist = 0
+                while dist < 4:
+                    [x2, y2, theta2] = get_random_pos_on_map(self._free_space_indices, self.map, safe_distance, forbidden_zones)
+                    dist = self.__mean_sqare_dist_((waypoints[-1,0] - x2), (waypoints[-1,1] - y2))
+                waypoints = np.vstack([waypoints, [x2, y2, 2]])
+            ped=np.array([i+1, [x, y, 0.0], waypoints])
+            if ped_array==None:
+                ped_array=ped
+            else:
+                ped_array=np.vstack([ped_array,ped]) 
+        self.__respawn_peds(ped_array)
 
     def __mean_sqare_dist_(self, x, y):
         """

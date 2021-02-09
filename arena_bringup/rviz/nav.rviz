@@ -10,16 +10,8 @@ Panels:
         - /MarkerArray10
         - /MarkerArray11
         - /MarkerArray12
+        - /MarkerArray13
         - /MarkerArray14
-        - /MarkerArray15
-        - /MarkerArray16
-        - /MarkerArray16/Status1
-        - /MarkerArray17
-        - /MarkerArray18
-        - /MarkerArray19
-        - /MarkerArray20
-        - /MarkerArray21
-        - /MarkerArray22
         - /Marker3
       Splitter Ratio: 0.6484751105308533
     Tree Height: 796
@@ -342,8 +334,6 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: false
-        _base_h:
-          Value: true
         base_footprint:
           Value: true
         laser_mount:
@@ -351,6 +341,48 @@ Visualization Manager:
         map:
           Value: true
         odom:
+          Value: true
+        pedsim_agent_10_base:
+          Value: true
+        pedsim_agent_11_base:
+          Value: true
+        pedsim_agent_12_base:
+          Value: true
+        pedsim_agent_13_base:
+          Value: true
+        pedsim_agent_14_base:
+          Value: true
+        pedsim_agent_15_base:
+          Value: true
+        pedsim_agent_16_base:
+          Value: true
+        pedsim_agent_17_base:
+          Value: true
+        pedsim_agent_18_base:
+          Value: true
+        pedsim_agent_19_base:
+          Value: true
+        pedsim_agent_1_base:
+          Value: true
+        pedsim_agent_20_base:
+          Value: true
+        pedsim_agent_21_base:
+          Value: true
+        pedsim_agent_2_base:
+          Value: true
+        pedsim_agent_3_base:
+          Value: true
+        pedsim_agent_4_base:
+          Value: true
+        pedsim_agent_5_base:
+          Value: true
+        pedsim_agent_6_base:
+          Value: true
+        pedsim_agent_7_base:
+          Value: true
+        pedsim_agent_8_base:
+          Value: true
+        pedsim_agent_9_base:
           Value: true
       Marker Scale: 1
       Name: TF
@@ -363,7 +395,47 @@ Visualization Manager:
             laser_mount:
               {}
           odom:
-            _base_h:
+            pedsim_agent_10_base:
+              {}
+            pedsim_agent_11_base:
+              {}
+            pedsim_agent_12_base:
+              {}
+            pedsim_agent_13_base:
+              {}
+            pedsim_agent_14_base:
+              {}
+            pedsim_agent_15_base:
+              {}
+            pedsim_agent_16_base:
+              {}
+            pedsim_agent_17_base:
+              {}
+            pedsim_agent_18_base:
+              {}
+            pedsim_agent_19_base:
+              {}
+            pedsim_agent_1_base:
+              {}
+            pedsim_agent_20_base:
+              {}
+            pedsim_agent_21_base:
+              {}
+            pedsim_agent_2_base:
+              {}
+            pedsim_agent_3_base:
+              {}
+            pedsim_agent_4_base:
+              {}
+            pedsim_agent_5_base:
+              {}
+            pedsim_agent_6_base:
+              {}
+            pedsim_agent_7_base:
+              {}
+            pedsim_agent_8_base:
+              {}
+            pedsim_agent_9_base:
               {}
       Update Interval: 0
       Value: true
@@ -476,7 +548,7 @@ Visualization Manager:
       Marker Topic: /flatland_server/debug/model/obstacles_static_random_09
       Name: MarkerArray
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -484,7 +556,7 @@ Visualization Manager:
       Marker Topic: /flatland_server/debug/model/obstacles_static_random_10
       Name: MarkerArray
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -492,76 +564,12 @@ Visualization Manager:
       Marker Topic: /flatland_server/debug/model/obstacles_static_random_11
       Name: MarkerArray
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
       Enabled: false
-      Marker Topic: /flatland_server/debug/model/obstacles_dynamic_person_two_legged_00
-      Name: MarkerArray
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: false
-    - Class: rviz/MarkerArray
-      Enabled: false
-      Marker Topic: /flatland_server/debug/model/obstacles_dynamic_person_two_legged_01
-      Name: MarkerArray
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: false
-    - Class: rviz/MarkerArray
-      Enabled: false
-      Marker Topic: /flatland_server/debug/model/obstacles_dynamic_person_two_legged_02
-      Name: MarkerArray
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: false
-    - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /flatland_server/debug/model/obstacles_dynamic_person_two_legged_03
-      Name: MarkerArray
-      Namespaces:
-        "": true
-      Queue Size: 100
-      Value: true
-    - Class: rviz/MarkerArray
-      Enabled: false
-      Marker Topic: /flatland_server/debug/model/obstacles_dynamic_person_two_legged_04
-      Name: MarkerArray
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: false
-    - Class: rviz/MarkerArray
-      Enabled: false
-      Marker Topic: /flatland_server/debug/model/obstacles_dynamic_person_two_legged_05
-      Name: MarkerArray
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: false
-    - Class: rviz/MarkerArray
-      Enabled: false
-      Marker Topic: /flatland_server/debug/model/obstacles_dynamic_person_two_legged_06
-      Name: MarkerArray
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: false
-    - Class: rviz/MarkerArray
-      Enabled: false
-      Marker Topic: /flatland_server/debug/model/obstacles_dynamic_person_two_legged_07
-      Name: MarkerArray
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: false
-    - Class: rviz/MarkerArray
-      Enabled: false
-      Marker Topic: /flatland_server/debug/layer/static_3d
+      Marker Topic: /flatland_server/debug/layer/2d
       Name: MarkerArray
       Namespaces:
         {}
@@ -619,7 +627,7 @@ Visualization Manager:
       Marker Topic: /planning_vis/goal
       Name: Marker
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/Marker
@@ -638,9 +646,258 @@ Visualization Manager:
         {}
       Queue Size: 100
       Value: true
+    - Alpha: 1
+      Class: spencer_tracking_rviz_plugin/TrackedPersons
+      Color: 130; 130; 130
+      Color map offset: 0
+      Color transform: Rainbow
+      Delete after no. cycles: 100
+      Enabled: false
+      Excluded person IDs: ""
+      Font color: 255; 255; 255
+      Font color style: Same color
+      Font scale: 2
+      History as line:
+        Line width: 0.05000000074505806
+        Value: true
+      History size: 100
+      Included person IDs: ""
+      Min. history point distance: 0.4000000059604645
+      Missed alpha: 0.5
+      Name: TrackedPersons
+      Occlusion alpha: 0.30000001192092896
+      Render covariances:
+        Line width: 0.10000000149011612
+        Value: true
+      Render detection IDs: true
+      Render history: true
+      Render person visual: true
+      Render track IDs: true
+      Render track state: true
+      Render velocities: true
+      Show DELETED tracks: false
+      Show MATCHED tracks: true
+      Show MISSED tracks: true
+      Show OCCLUDED tracks: true
+      Style:
+        Line width: 0.05000000074505806
+        Scaling factor: 1
+        Value: Cylinders
+      Topic: /pedsim_visualizer/tracked_persons
+      Unreliable: false
+      Value: false
+      Z offset:
+        Use Z position from message: false
+        Value: 0
+    - Alpha: 1
+      Class: spencer_tracking_rviz_plugin/TrackedGroups
+      Color: 130; 130; 130
+      Color map offset: 0
+      Color transform: Rainbow
+      Connect group members: true
+      Enabled: false
+      Excluded group IDs: ""
+      Excluded person IDs: ""
+      Font color: 255; 255; 255
+      Font color style: Same color
+      Font scale: 2
+      Global history size: 1000
+      Group ID Z offset: 2
+      Included group IDs: ""
+      Included person IDs: ""
+      Name: TrackedGroups
+      Occlusion alpha: 0.5
+      Render group IDs:
+        Hide IDs of single-person groups: false
+        Value: true
+      Render history: false
+      Single-person groups in constant color: true
+      Style:
+        Line width: 0.05000000074505806
+        Scaling factor: 1
+        Value: Cylinders
+      Topic: /pedsim_visualizer/tracked_groups
+      Tracked persons topic: ""
+      Unreliable: false
+      Value: false
+      Z offset:
+        Use Z position from message: false
+        Value: 0
+    - Class: rviz/Group
+      Displays:
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /flatland_server/debug/model/person_8
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /flatland_server/debug/model/person_1
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /flatland_server/debug/model/person_2
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /flatland_server/debug/model/person_3
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /flatland_server/debug/model/person_4
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /flatland_server/debug/model/person_5
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /flatland_server/debug/model/person_6
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /flatland_server/debug/model/person_7
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /flatland_server/debug/model/person_9
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /flatland_server/debug/model/person_10
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /flatland_server/debug/model/person_13
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /flatland_server/debug/model/person_11
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /flatland_server/debug/model/person_12
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /flatland_server/debug/model/person_15
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /flatland_server/debug/model/person_14
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /flatland_server/debug/model/person_16
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /flatland_server/debug/model/person_17
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /flatland_server/debug/model/person_18
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /flatland_server/debug/model/person_19
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /flatland_server/debug/model/person_20
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /flatland_server/debug/model/person_21
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+      Enabled: true
+      Name: human
   Enabled: true
   Global Options:
-    Background Color: 0; 0; 0
+    Background Color: 78; 154; 6
     Default Light: true
     Fixed Frame: map
     Frame Rate: 30
@@ -674,11 +931,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 20.245569229125977
+      Scale: 24.85395622253418
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
-      X: 4.394783973693848
-      Y: 3.946451187133789
+      X: 8.107921600341797
+      Y: 5.982569217681885
     Saved: ~
 Window Geometry:
   Displays:

@@ -3,7 +3,7 @@ bodies:
   footprints:
   - collision: 'true'
     density: 0
-    layers: [all]
+    layers: ['static']
     points:
     - [0.7607740402134184, 0.0]
     - [-0.38038702010670905, 0.6588496453645445]

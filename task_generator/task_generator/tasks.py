@@ -60,14 +60,15 @@ class RandomTask(ABSTask):
             while fail_times < max_fail_times:
                 try:
                     start_pos, goal_pos = self.robot_manager.set_start_pos_goal_pos()
-                    self.obstacles_manager.reset_pos_obstacles_random(
-                        forbidden_zones=[
+                    forbiddenZones=[
                             (start_pos.x,
                                 start_pos.y,
                                 self.robot_manager.ROBOT_RADIUS),
                             (goal_pos.x,
                                 goal_pos.y,
-                                self.robot_manager.ROBOT_RADIUS)])
+                                self.robot_manager.ROBOT_RADIUS)]
+                    self.obstacles_manager.setForbidden_zones(forbiddenZones)
+                    self.obstacles_manager.reset_pos_obstacles_random(forbidden_zones=forbiddenZones)
                     # publish the obstacles name
                     # self.pub_obstacles_name.publish(self.obstacles_manager.obstacle_name_str)
                     break
@@ -193,7 +194,7 @@ def get_predefined_task(mode="random", start_stage: int = 0, PATHS: dict = None)
             step_world()
 
     # get the map
-    service_client_get_map = rospy.ServiceProxy("static_map", GetMap)
+    service_client_get_map = rospy.ServiceProxy("/static_map", GetMap)
     map_response = service_client_get_map()
 
     # use rospkg to get the path where the model config yaml file stored
@@ -212,7 +213,7 @@ def get_predefined_task(mode="random", start_stage: int = 0, PATHS: dict = None)
     # TODO In the future more Task will be supported and the code unrelated to
     # Tasks will be moved to other classes or functions.
     if mode == "random":
-        obstacles_manager.register_random_obstacles(20, 0.4)
+        obstacles_manager.register_random_obstacles(30, 0.7)
         task = RandomTask(obstacles_manager, robot_manager)
         print("random tasks requested")
     if mode == "manual":
