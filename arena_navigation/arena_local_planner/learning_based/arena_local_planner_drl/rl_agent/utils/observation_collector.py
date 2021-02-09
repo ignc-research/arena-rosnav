@@ -63,8 +63,10 @@ class ObservationCollector():
         self._subgoal_sub.registerCallback(self.callback_subgoal)
 
         # service clients
-        self._service_name_step='step_world'
-        self._sim_step_client = rospy.ServiceProxy(self._service_name_step, StepWorld)
+        self._is_train_mode = rospy.get_param("train_mode")
+        if self._is_train_mode:
+            self._service_name_step='step_world'
+            self._sim_step_client = rospy.ServiceProxy(self._service_name_step, StepWorld)
         
         # message_filter subscriber: laserscan, robot_pose
         self._scan_sub = message_filters.Subscriber("scan", LaserScan)
@@ -87,6 +89,10 @@ class ObservationCollector():
         # print('dynamic',dynamic_obstacles_list)
         for  self.i, dynamic_name in enumerate(dynamic_obstacles_list):
             self._dynamic_obstacle[self.i] = message_filters.Subscriber(dynamic_name, Odometry)
+        # self._is_train_mode = rospy.get_param("train_mode")
+        # if self._is_train_mode:
+        #     self._service_name_step='step_world'
+        #     self._sim_step_client = rospy.ServiceProxy(self._service_name_step, StepWorld)
 
         # message_filters.TimeSynchronizer: call callback only when all sensor info are ready
         self.sychronized_list=[self._scan_sub, self._robot_state_sub]+self._dynamic_obstacle
@@ -99,12 +105,12 @@ class ObservationCollector():
     def get_observations(self):
         # reset flag 
         self._flag_all_received=False
-        
+        if self._is_train_mode: 
         # sim a step forward until all sensor msg uptodate
-        i=0
-        while(self._flag_all_received==False):
-            self.call_service_takeSimStep()
-            i+=1
+            i=0
+            while(self._flag_all_received==False):
+                self.call_service_takeSimStep()
+                i+=1
         # rospy.logdebug(f"Current observation takes {i} steps for Synchronization")
         #print(f"Current observation takes {i} steps for Synchronization")
         scan=self._scan.ranges.astype(np.float32)

@@ -37,6 +37,9 @@ public:
 private:
     ros::ServiceClient global_plan_client_;
 
+    double look_ahead_distance_;
+    double tolerance_approach_;
+
 
 
 public:

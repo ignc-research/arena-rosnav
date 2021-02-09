@@ -4,7 +4,8 @@ import rospy
 from typing import Tuple
 
 class RewardCalculator():
-    def __init__(self, safe_dist:float, safe_dist_h:float, goal_radius:float, rule:str = 'rule_01' ):
+    def __init__(self, robot_radius: float, safe_dist:float, safe_dist_h:float, goal_radius:float, rule:str = 'rule_01' ):
+    # def __init__(self, robot_radius: float, safe_dist:float, goal_radius:float, rule:str = 'rule_00' ):
         """A class for calculating reward based various rules.
 
         Args:
@@ -15,11 +16,16 @@ class RewardCalculator():
         self.curr_reward = 0
         # additional info will be stored here and be returned alonge with reward.
         self.info = {}
+        self.robot_radius = robot_radius
         self.goal_radius = goal_radius
         self.last_goal_dist = None
         self.safe_dist = safe_dist
         self.safe_dist_h=safe_dist_h
-        self._cal_funcs = {'rule_00': RewardCalculator._cal_reward_rule_00, 'rule_01': RewardCalculator._cal_reward_rule_01}
+        # self._cal_funcs = {'rule_00': RewardCalculator._cal_reward_rule_00, 'rule_01': RewardCalculator._cal_reward_rule_01}
+        self._cal_funcs = {
+            'rule_00': RewardCalculator._cal_reward_rule_00,
+            'rule_01': RewardCalculator._cal_reward_rule_01
+            }
         self.cal_func = self._cal_funcs[rule]
 
     def reset(self):
@@ -49,19 +55,20 @@ class RewardCalculator():
 
     def _cal_reward_rule_00(self, laser_scan: np.ndarray, goal_in_robot_frame: Tuple[float,float],dynamic_obstacles_in_robot_frame:np.ndarray, *args,**kwargs):
 
-        self._reward_goal_approached(goal_in_robot_frame)
         self._reward_goal_reached(goal_in_robot_frame)
-        self._reward_laserscan_general(laser_scan)
-        # print('00')
-
-    def _cal_reward_rule_01(self, laser_scan: np.ndarray, goal_in_robot_frame: Tuple[float,float], dynamic_obstacles_in_robot_frame:np.ndarray, *args,**kwargs):
-
+        self._reward_safe_dist(laser_scan)
+        self._reward_collision(laser_scan)
         self._reward_goal_approached(goal_in_robot_frame)
+        
+
+    def _cal_reward_rule_01(self, laser_scan: np.ndarray, goal_in_robot_frame: Tuple[float,float],*args,**kwargs):
+        
         self._reward_goal_reached(goal_in_robot_frame)
+        self._reward_safe_dist(laser_scan)
+        self._reward_collision(laser_scan)
+        self._reward_goal_approached2(goal_in_robot_frame)
         self._reward_human_safety_dist(dynamic_obstacles_in_robot_frame)
-        # print('01')
-        self._reward_laserscan_general(laser_scan)        
-    
+        
 
     def _reward_goal_reached(self,goal_in_robot_frame, reward = 100):
 
@@ -72,7 +79,8 @@ class RewardCalculator():
         else:
             self.info['is_done'] = False
 
-    def _reward_goal_approached(self, goal_in_robot_frame,reward = 0.2, punishment = 0.3):
+
+    def _reward_goal_approached(self, goal_in_robot_frame,reward = 1, punishment = 0.0001):
         if self.last_goal_dist is not None:
             #goal_in_robot_frame : [rho, theta]
             """
@@ -92,8 +100,31 @@ class RewardCalculator():
             self.curr_reward += reward
         self.last_goal_dist = goal_in_robot_frame[0]
 
-    def _reward_laserscan_general(self,laser_scan, punishment = 100):
-        if laser_scan.min()<self.safe_dist:
+
+    def _reward_goal_approached2(self, goal_in_robot_frame,reward = 1, punishment = 0.01):
+        if self.last_goal_dist is not None:
+            #goal_in_robot_frame : [rho, theta]
+
+            # if current goal distance shorter than last one, positive weighted reward - otherwise negative wegihted reward
+            w = 0.25
+            reward = round(w*(self.last_goal_dist - goal_in_robot_frame[0]), 3)
+            
+            # higher negative weight when moving away from goal (to avoid driving unnecessary circles when train in contin. action space)
+            if (self.last_goal_dist - goal_in_robot_frame[0]) > 0:
+                w = 0.25
+            elif (self.last_goal_dist - goal_in_robot_frame[0]) < 0:
+                w = 0.4
+            reward = round(w*(self.last_goal_dist - goal_in_robot_frame[0]), 3)
+
+            # punishment for not moving
+            if self.last_goal_dist == goal_in_robot_frame[0]:
+                reward = -punishment
+            self.curr_reward += reward
+        self.last_goal_dist = goal_in_robot_frame[0]
+
+
+    def _reward_collision(self,laser_scan, punishment = 10):
+        if laser_scan.min() <= self.robot_radius:
             self.curr_reward -= punishment
             self.info['is_done'] = True
             self.info['done_reason'] = 1
@@ -104,7 +135,11 @@ class RewardCalculator():
             self.info['is_done'] = True
             self.info['done_reason'] = 3
     
+    def _reward_safe_dist(self, laser_scan, punishment = 0.15):
+        if laser_scan.min() < self.safe_dist:
+            self.curr_reward -= punishment
     
+
 
 
         
