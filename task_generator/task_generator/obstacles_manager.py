@@ -474,14 +474,24 @@ class ObstaclesManager:
             #     min_obstacle_vert, max_obstacle_vert)
             radius = random.uniform(
                 min_obstacle_radius, max_obstacle_radius)
-
-            for _ in range(num_vertices):
-                angle = 2 * math.pi * random.uniform(0, 1)
-                vert = [math.cos(angle) * radius,
-                        math.sin(angle) * radius]
-                # print(vert)
-                # print(angle)
-                f["points"].append(vert)
+            # When we send the request to ask flatland server to respawn the object with polygon, it will do some checks
+            # one important assert is that the minimum distance should be above this value
+            # https://github.com/erincatto/box2d/blob/75496a0a1649f8ee6d2de6a6ab82ee2b2a909f42/include/box2d/b2_common.h#L65
+            POINTS_MIN_DIST = 0.005*1.1
+            def min_dist_check_passed(points):
+                points_1_x_2 = points[None,...]
+                points_x_1_2 = points[:,None,:]
+                points_dist = ((points_1_x_2-points_x_1_2)**2).sum(axis=2).squeeze()
+                np.fill_diagonal(points_dist,1)
+                min_dist = points_dist.min()
+                return min_dist>POINTS_MIN_DIST
+            points = None
+            while points is None:
+                angles = 2*np.pi*np.random.random(num_vertices)
+                points = np.array([np.cos(angles),np.sin(angles)]).T
+                if not min_dist_check_passed(points):
+                    points = None
+            f['points'] = points.tolist()
 
         body["footprints"].append(f)
         # define dict_file
