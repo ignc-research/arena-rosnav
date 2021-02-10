@@ -39,7 +39,7 @@ class ObservationCollector():
             num_lidar_beams (int): [description]
             lidar_range (float): [description]
         """
-        # define observation_space
+        # define observation_space Todo add global plan message as obs
         self.observation_space = ObservationCollector._stack_spaces((
             spaces.Box(low=0, high=lidar_range, shape=(num_lidar_beams,), dtype=np.float32),
             spaces.Box(low=0, high=10, shape=(1,), dtype=np.float32) ,
@@ -49,6 +49,10 @@ class ObservationCollector():
         # flag of new sensor info
         self._flag_all_received=False
 
+        #for wp-training
+        self._flag_everything_received=False
+        self._wp_training = False
+
         self._scan = LaserScan()
         self._robot_pose = Pose2D()
         self._robot_vel = Twist()
@@ -56,13 +60,25 @@ class ObservationCollector():
         self._globalPlan = Path()
         
 
+
+
         # message_filter subscriber: laserscan, robot_pose
-        self._scan_sub = message_filters.Subscriber("scan", LaserScan)
-        self._robot_state_sub = message_filters.Subscriber('plan_manager/robot_state', RobotStateStamped)
-        
+        self._scan_sub = rospy.Subscriber("scan", LaserScan, self.cbScan)
+        self._robot_state_sub = rospy.Subscriber('plan_manager/robot_state', RobotStateStamped, self.cbRobotPosition)
+        #for wp training synchronize with waypoint reached message, only perform step if wp is reached
+        self._wpReached_sub = message_filters.Subscriber("waypoint_drl", PoseStamped)
+
+        #self.sub_robot_position = rospy.Subscriber('/odom',PoseStamped, self.cbRobotPosition)
+        self.sub_subgoal = rospy.Subscriber('move_base_simple/goal', PoseStamped, self.cbSubGoal)
         # message_filters.TimeSynchronizer: call callback only when all sensor info are ready
-        self.ts = message_filters.ApproximateTimeSynchronizer([self._scan_sub, self._robot_state_sub], 100,slop=0.05)#,allow_headerless=True)
-        self.ts.registerCallback(self.callback_observation_received)
+
+
+        # if self._wp_training: 
+        #     self.ts = message_filters.ApproximateTimeSynchronizer([self._wpReached_sub, self._robot_state_sub], 100,slop=0.05)#,allow_headerless=True)
+        # else: 
+        #     self.ts = message_filters.ApproximateTimeSynchronizer([self._scan_sub, self._robot_state_sub], 100,slop=0.05)#,allow_headerless=True)
+
+        #self.ts.registerCallback(self.callback_observation_received)
         
         # topic subscriber: subgoal
         #TODO should we synchoronize it with other topics
@@ -77,6 +93,22 @@ class ObservationCollector():
             self._sim_step_client = rospy.ServiceProxy(self._service_name_step, StepWorld)
 
 
+
+    def cbScan(self,msg):
+        self._scan=self.process_scan_msg(msg)
+
+    def cbRobotPosition(self,msg):
+        
+        self._robot_pose,self._robot_vel=self.process_robot_state_msg(msg)
+        # self._robot_pose.x = msg.pose.position.x
+        # self._robot_pose.y = msg.pose.position.y
+
+        if (self._robot_pose.x == self._subgoal.x and self._robot_pose.y == self._subgoal.y):
+            self._flag_everything_received == True
+        
+    def cbSubGoal(self,msg):
+        self._subgoal.x = msg.pose.position.x
+        self._subgoal.y = msg.pose.position.y
     
     def get_observation_space(self):
         return self.observation_space
@@ -84,12 +116,12 @@ class ObservationCollector():
     def get_observations(self):
         # reset flag 
         self._flag_all_received=False
-        if self._is_train_mode: 
-        # sim a step forward until all sensor msg uptodate
-            i=0
-            while(self._flag_all_received==False):
-                self.call_service_takeSimStep()
-                i+=1
+        # if self._is_train_mode: 
+        # # sim a step forward until all sensor msg uptodate
+        #     i=0
+        #     while(self._flag_everything_received==False):
+        #         self.call_service_takeSimStep()
+        #         i+=1
         # rospy.logdebug(f"Current observation takes {i} steps for Synchronization")
         #print(f"Current observation takes {i} steps for Synchronization")
         scan=self._scan.ranges.astype(np.float32)
@@ -134,7 +166,7 @@ class ObservationCollector():
         self._robot_pose,self._robot_vel=self.process_robot_state_msg(msg_RobotStateStamped)
         # ask subgoal service
         #self._subgoal=self.call_service_askForSubgoal()
-        self._flag_all_received=True
+        #self._flag_all_received=True
         
     def process_scan_msg(self, msg_LaserScan):
         # remove_nans_from_scan

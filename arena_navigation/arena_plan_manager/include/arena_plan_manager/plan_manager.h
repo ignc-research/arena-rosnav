@@ -53,6 +53,7 @@ private:
 
     geometry_msgs::PoseStamped goal_;              // global goal
     geometry_msgs::PoseStamped subgoal_;           // mid goal(waypoint/subgoal)
+    nav_msgs::Path globalPlan;
     
     //Eigen::Vector3d odom_pos_, odom_vel_;  
     //Eigen::Vector3d start_pt_, start_vel_;  
@@ -75,6 +76,7 @@ private:
     
     ros::Subscriber goal_sub_, odom_sub_;
     
+    ros::Publisher globalPlan_pub_;
     
     ros::Publisher subgoal_pub_;
 
