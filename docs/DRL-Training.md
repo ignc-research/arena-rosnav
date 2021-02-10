@@ -10,6 +10,7 @@ As a fundament for our Deep Reinforcement Learning approaches [StableBaselines3]
 * Load your trained agent to continue training
 * Optionally log training and evaluation data
 * Enable and modify training curriculum
+* Run and evaluate your trained agents
 
 
 ##### Quick Start
