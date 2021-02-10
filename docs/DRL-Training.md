@@ -53,13 +53,13 @@ train_agent.py [agent flag] [agent_name | unique_agent_name | custom mlp params]
 |                      |```--load ```                     | *unique_agent_name* ([see below](#load-a-dnn-for-training))   | loads agent to the given name
 |                      |```--custom-mlp```                | _custom_mlp_params_ ([see below](#training-with-a-custom-mlp))| initializes custom MLP according to given arguments 
 
-(_Custom Multilayer Perceptron_ parameters will only be considered when ```--custom-mlp``` was set)
 |  Custom Mlp Flags | Syntax                | Description                                   |
 | ----------------  | ----------------------| ----------------------------------------------|
 |  ```--body ```    | ```{num}-{num}-...``` |architecture of the shared latent network      |
 |  ```--pi```       | ```{num}-{num}-...``` |architecture of the latent policy network      |
 |  ```--vf```       | ```{num}-{num}-...``` |architecture of the latent value network       |
 |  ```--act_fn ```  | ```{relu, sigmoid or tanh}```|activation function to be applied after each hidden layer |
+(_Custom Multilayer Perceptron_ parameters will only be considered when ```--custom-mlp``` was set)
 
 |  Optional Flags        | Description                                    |
 | ---------------------- | -----------------------------------------------|
