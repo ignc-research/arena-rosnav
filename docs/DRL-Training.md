@@ -215,12 +215,12 @@ For the purpose of speeding up the training an exemplary training currucilum was
 
 In our implementation a reward threshold or a certain percentage of successful episodes must be reached to trigger the next stage. The statistics of each evaluation run is calculated and considered. Moreover when a new best mean reward was reached the model will be saved automatically.
 
-In order to change the evaluation metrics you have to change the parameters of _InitiateNewTrainStage_ (in train_agent.py). 
+In order to change the evaluation metrics you have to change the parameters of _InitiateNewTrainStage_ (in train_agent.py): 
 ```python
    trainstage_cb = InitiateNewTrainStage(
         TaskManagers=task_managers, treshhold_type="succ", rew_threshold=14.5, succ_rate_threshold=0.80, (...))
 ```
-(_threshold_type_ can be set either _succ_ - considers success rate - or _rew_ - considers reward)
+(_threshold_type_ can be set either "_succ_" - considers success rate - or "_rew_" - considers reward)
 
 Exemplary training curriculum:
 | Stage           | Static Obstacles | Dynamic Obstacles  |
