@@ -27,6 +27,8 @@ Train DRL agents on ROS compatible simulations for autonomous navigation in high
 
 * Modular structure for extension of new functionalities and approaches
 
+* Integration of ROS Navigation Stack 
+
 
 ### Recent Updates
 
