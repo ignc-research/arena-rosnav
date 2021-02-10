@@ -542,7 +542,7 @@ class ObstaclesManager:
                 object_name = topic_name[-1]
                 if object_name.startswith(self._obstacle_name_prefix):
                     if "sim" in self.ns:
-                        if self.ns[:-1] in topic_name:
+                        if self.ns in topic_name:
                             self.remove_obstacle(object_name)
                     else:
                         self.remove_obstacle(object_name)

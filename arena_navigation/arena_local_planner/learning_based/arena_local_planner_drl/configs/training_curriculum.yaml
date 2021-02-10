@@ -7,17 +7,17 @@
   static: 0
   dynamic: 0
 2:
-  static: 10
+  static: 2
   dynamic: 0
 3:
-  static: 20
+  static: 4
   dynamic: 0
 4:
-  static: 0
-  dynamic: 10
+  static: 2
+  dynamic: 2
 5:
-  static: 10
-  dynamic: 10
+  static: 2
+  dynamic: 4
 6:
-  static: 13
-  dynamic: 13
+  static: 3
+  dynamic: 5

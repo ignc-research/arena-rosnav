@@ -45,11 +45,12 @@ class FlatlandEnv(gym.Env):
             self.ns_prefix = '/'+ns + '/'
         else:
             self.ns_prefix = '/'
-
+        
+        """ debug
         if train_mode:
             rospy.init_node(f'train_env_{ns[-1]}')
         else:
-            rospy.init_node(f'eval_env_{ns[-1]}')
+            rospy.init_node(f'eval_env_{ns[-1]}')"""
         # Define action and observation space
         # They must be gym.spaces objects
         self._is_action_space_discrete = is_action_space_discrete
@@ -150,7 +151,7 @@ class FlatlandEnv(gym.Env):
             obs_dict['laser_scan'], obs_dict['goal_in_robot_frame'])
         done = reward_info['is_done']
 
-        print("reward:  {}".format(reward))
+        # print("reward:  {}".format(reward))
         
         # info
         info = {}

@@ -23,23 +23,23 @@ from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl
 """ will be used upon initializing new agent """
 robot = "myrobot"
 gamma = 0.99
-n_steps = 128
-ent_coef = 0.01
-learning_rate = 2.5e-4
-vf_coef = 0.5
+n_steps = 4800
+ent_coef = 0.005
+learning_rate = 3e-4
+vf_coef = 0.2
 max_grad_norm = 0.5
 gae_lambda = 0.95
-batch_size = 64
-n_epochs = 4
+batch_size = 15
+n_epochs = 3
 clip_range = 0.2
 reward_fnc = "rule_01"
 discrete_action_space = False
 start_stage = 1
-train_max_steps_per_episode = 200
-eval_max_steps_per_episode = 200
-goal_radius = 1.00
+train_max_steps_per_episode = 500
+eval_max_steps_per_episode = 500
+goal_radius = 0.25
 task_mode = "staged"    # custom, random or staged
-normalize = False
+normalize = True
 ##########################
 
 
@@ -140,6 +140,7 @@ def make_envs(task_manager, rank: int, params: dict, seed: int=0, PATHS: dict=No
 if __name__ == "__main__":
     args, _ = parse_training_args()
 
+    rospy.init_node("debug_node")
     # generate agent name and model specific paths
     AGENT_NAME = get_agent_name(args)
     PATHS = get_paths(AGENT_NAME, args)
@@ -165,13 +166,20 @@ if __name__ == "__main__":
     task_managers=[]
     for i in range(args.n_envs):
         task_managers.append(
-            get_predefined_task(f"sim_0{i+1}", params['task_mode'], params['curr_stage'], PATHS))
+            get_predefined_task(
+                f"sim_0{i+1}", params['task_mode'], params['curr_stage'], PATHS))
 
     # instantiate gym environment
+    """
     env = SubprocVecEnv(
         [make_envs(
             task_managers[i], i, params=params, PATHS=PATHS) for i in range(args.n_envs)]
-        , start_method='fork')
+        , start_method='fork')"""
+
+    # debug
+    env = DummyVecEnv(
+        [make_envs(
+            task_managers[i], i, params=params, PATHS=PATHS) for i in range(args.n_envs)])
     if params['normalize']:
         env = VecNormalize(
             env, training=True, norm_obs=True, norm_reward=False, clip_reward=15)
@@ -180,7 +188,7 @@ if __name__ == "__main__":
     # type can be either 'succ' or 'rew'
     trainstage_cb = InitiateNewTrainStage(
         TaskManagers=task_managers, treshhold_type="succ", rew_threshold=14.5, 
-        succ_rate_threshold=0.80, task_mode=params['task_mode'], verbose=1)
+        succ_rate_threshold=0.90, task_mode=params['task_mode'], verbose=1)
     
     # instantiate eval environment
     # take task_manager from first sim (currently evaluation only provided for single process)
@@ -196,7 +204,7 @@ if __name__ == "__main__":
     # n_eval_episodes: number of episodes to evaluate agent on
     # eval_freq: evaluate the agent every eval_freq train timesteps
     eval_cb = EvalCallback(
-        eval_env, n_eval_episodes=30, eval_freq=10000, 
+        eval_env, n_eval_episodes=30, eval_freq=25000, 
         log_path=PATHS.get('eval'), 
         best_model_save_path=PATHS.get('model'), 
         deterministic=True, 
