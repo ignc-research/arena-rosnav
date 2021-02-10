@@ -59,6 +59,7 @@ train_agent.py [agent flag] [agent_name | unique_agent_name | custom mlp params]
 |  ```--pi```       | ```{num}-{num}-...``` |architecture of the latent policy network      |
 |  ```--vf```       | ```{num}-{num}-...``` |architecture of the latent value network       |
 |  ```--act_fn ```  | ```{relu, sigmoid or tanh}```|activation function to be applied after each hidden layer |
+
 (_Custom Multilayer Perceptron_ parameters will only be considered when ```--custom-mlp``` was set)
 
 |  Optional Flags        | Description                                    |
@@ -219,7 +220,7 @@ In order to change the evaluation metrics you have to change the parameters of _
    trainstage_cb = InitiateNewTrainStage(
         TaskManagers=task_managers, treshhold_type="succ", rew_threshold=14.5, succ_rate_threshold=0.80, (...))
 ```
-_threshold_type_ can be set either _succ_ (considers success rate) or _rew_ (considers reward).
+(_threshold_type_ can be set either _succ_ - considers success rate - or _rew_ - considers reward)
 
 Exemplary training curriculum:
 | Stage           | Static Obstacles | Dynamic Obstacles  |
