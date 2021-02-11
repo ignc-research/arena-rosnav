@@ -1,6 +1,7 @@
 version: '3'
 services:
   ros:
+    image: arena-rosnav:add-rl-collision
     build: ./Docker
     command: tail -f /dev/null
     volumes: 
