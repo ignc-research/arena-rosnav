@@ -31,15 +31,7 @@ class ABSTask(ABC):
         self.robot_manager = robot_manager
         self._service_client_get_map = rospy.ServiceProxy('/static_map', GetMap)
         self._map_lock = Lock()
-<<<<<<< HEAD
-        rospy.Subscriber("map", OccupancyGrid, self._update_map)
-        #publish the obstacles name
-        # publish obstacles name
-        # self.pub_obstacles_name=rospy.Publisher('/obstacles_name', String, queue_size=1)
-        #self.obstacles_manager.pub_obstacles_name.publish(self.obstacles_manager.obstacle_name_str)
-=======
         rospy.Subscriber('/map', OccupancyGrid, self._update_map)
->>>>>>> drl_multiprocessing
         # a mutex keep the map is not unchanged during reset task.
 
     @abstractmethod
@@ -364,11 +356,7 @@ def get_predefined_task(ns: str, mode="random", start_stage: int = 1, PATHS: dic
     # either e.g. ns = 'sim1/' or ns = ''
 
     # get the map
-<<<<<<< HEAD
-    service_client_get_map = rospy.ServiceProxy("/static_map", GetMap)
-=======
     service_client_get_map = rospy.ServiceProxy('/static_map', GetMap)
->>>>>>> drl_multiprocessing
     map_response = service_client_get_map()
 
     # use rospkg to get the path where the model config yaml file stored

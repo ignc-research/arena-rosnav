@@ -568,13 +568,13 @@ Visualization Manager:
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
-      Enabled: false
+      Enabled: true
       Marker Topic: /flatland_server/debug/layer/2d
       Name: MarkerArray
       Namespaces:
         {}
       Queue Size: 100
-      Value: false
+      Value: true
     - Class: rviz/MarkerArray
       Enabled: false
       Marker Topic: /flatland_server/debug/layer/static
@@ -627,7 +627,7 @@ Visualization Manager:
       Marker Topic: /planning_vis/goal
       Name: Marker
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
       Value: true
     - Class: rviz/Marker
@@ -921,7 +921,7 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Angle: -7.850008487701416
+      Angle: -7.860007286071777
       Class: rviz/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
@@ -931,11 +931,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 24.85395622253418
+      Scale: 31.773380279541016
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
-      X: 8.107921600341797
-      Y: 5.982569217681885
+      X: 11.74364185333252
+      Y: 5.525009632110596
     Saved: ~
 Window Geometry:
   Displays:
