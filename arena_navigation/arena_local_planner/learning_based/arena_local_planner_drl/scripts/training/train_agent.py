@@ -74,12 +74,18 @@ def get_paths(agent_name: str, args) -> dict:
     dir = rospkg.RosPack().get_path('arena_local_planner_drl')
 
     PATHS = {
-        'model' : os.path.join(dir, 'agents', agent_name),
-        'tb' : os.path.join(dir, 'training_logs', 'tensorboard', agent_name),
-        'eval' : os.path.join(dir, 'training_logs', 'train_eval_log', agent_name),
-        'robot_setting' : os.path.join(rospkg.RosPack().get_path('simulator_setup'), 'robot', robot + '.model.yaml'),
-        'robot_as' : os.path.join(rospkg.RosPack().get_path('arena_local_planner_drl'), 'configs', 'default_settings.yaml'),
-        'curriculum' : os.path.join(rospkg.RosPack().get_path('arena_local_planner_drl'), 'configs', 'training_curriculum.yaml')
+        'model': 
+        os.path.join(dir, 'agents', agent_name),
+        'tb': 
+        os.path.join(dir, 'training_logs', 'tensorboard', agent_name),
+        'eval': 
+        os.path.join(dir, 'training_logs', 'train_eval_log', agent_name),
+        'robot_setting': 
+        os.path.join(rospkg.RosPack().get_path('simulator_setup'), 'robot', robot + '.model.yaml'),
+        'robot_as': 
+        os.path.join(rospkg.RosPack().get_path('arena_local_planner_drl'), 'configs', 'default_settings.yaml'),
+        'curriculum': 
+        os.path.join(rospkg.RosPack().get_path('arena_local_planner_drl'), 'configs', 'training_curriculum.yaml')
     }
     # check for mode
     if args.load is None:
@@ -109,28 +115,35 @@ def make_envs(task_manager, rank: int, params: dict, seed: int=0, PATHS: dict=No
     """
     Utility function for multiprocessed env
     
-    :param task_manager: (Object)
+    :param task_manager: (Object) interface for managing the tasks
     :param rank: (int) index of the subprocess
     :param params: (dict) hyperparameters of agent to be trained
     :param seed: (int) the inital seed for RNG
     :param PATHS: (dict) script relevant paths
     :param train: (bool) to differentiate between train and eval env
+    :param args: (Namespace) program arguments
     :return: (Callable)
     """
     def _init() -> Union[gym.Env, gym.Wrapper]:
         if train:
             # train env
             env = FlatlandEnv(
-                f"sim_0{rank+1}", task_manager, PATHS.get('robot_setting'), PATHS.get('robot_as'), params['reward_fnc'], params['discrete_action_space'], 
-                goal_radius=params['goal_radius'], max_steps_per_episode=params['train_max_steps_per_episode'])
+                f"sim_0{rank+1}", task_manager, 
+                PATHS.get('robot_setting'), PATHS.get('robot_as'), params['reward_fnc'], params['discrete_action_space'], 
+                goal_radius=params['goal_radius'], max_steps_per_episode=params['train_max_steps_per_episode'],
+                debug=args.debug
+            )
         else:
             # eval env
             env = Monitor(
                     FlatlandEnv(
-                        f"sim_0{rank+1}", task_manager, PATHS.get('robot_setting'), PATHS.get('robot_as'), params['reward_fnc'], params['discrete_action_space'], 
-                        goal_radius=params['goal_radius'], max_steps_per_episode=params['eval_max_steps_per_episode'], train_mode=False),
+                        f"sim_0{rank+1}", task_manager, 
+                        PATHS.get('robot_setting'), PATHS.get('robot_as'), params['reward_fnc'], params['discrete_action_space'], 
+                        goal_radius=params['goal_radius'], max_steps_per_episode=params['eval_max_steps_per_episode'], 
+                        train_mode=False, debug=args.debug
+                    ),
                     PATHS.get('eval'), info_keywords=("done_reason", "is_success")
-                    )
+            )
         env.seed(seed + rank)
         return env
     set_random_seed(seed)
@@ -140,7 +153,9 @@ def make_envs(task_manager, rank: int, params: dict, seed: int=0, PATHS: dict=No
 if __name__ == "__main__":
     args, _ = parse_training_args()
 
-    rospy.init_node("debug_node")
+    if args.debug:
+        rospy.init_node("debug_node", disable_signals=True)
+        
     # generate agent name and model specific paths
     AGENT_NAME = get_agent_name(args)
     PATHS = get_paths(AGENT_NAME, args)
@@ -158,6 +173,7 @@ if __name__ == "__main__":
         AGENT_NAME, robot, gamma, n_steps, ent_coef, learning_rate, vf_coef,max_grad_norm, gae_lambda, batch_size, 
         n_epochs, clip_range, reward_fnc, discrete_action_space, normalize, task_mode, start_stage, train_max_steps_per_episode,
         eval_max_steps_per_episode, goal_radius)
+
     params = initialize_hyperparameters(
         agent_name=AGENT_NAME, PATHS=PATHS, 
         hyperparams_obj=hyperparams_obj, load_target=args.load)
@@ -170,16 +186,19 @@ if __name__ == "__main__":
                 f"sim_0{i+1}", params['task_mode'], params['curr_stage'], PATHS))
 
     # instantiate gym environment
-    """
-    env = SubprocVecEnv(
-        [make_envs(
-            task_managers[i], i, params=params, PATHS=PATHS) for i in range(args.n_envs)]
-        , start_method='fork')"""
+    # when debug run on one process only
+    if not args.debug:
+        env = SubprocVecEnv(
+            [make_envs(
+                task_managers[i], i, params=params, PATHS=PATHS) for i in range(args.n_envs)], 
+            start_method='fork'
+        )
+    else:
+        env = DummyVecEnv(
+            [make_envs(
+                task_managers[i], i, params=params, PATHS=PATHS) for i in range(args.n_envs)]
+        )
 
-    # debug
-    env = DummyVecEnv(
-        [make_envs(
-            task_managers[i], i, params=params, PATHS=PATHS) for i in range(args.n_envs)])
     if params['normalize']:
         env = VecNormalize(
             env, training=True, norm_obs=True, norm_reward=False, clip_reward=15)
@@ -194,7 +213,7 @@ if __name__ == "__main__":
     # take task_manager from first sim (currently evaluation only provided for single process)
     eval_env = DummyVecEnv(
         [make_envs(task_managers[0], 0, params=params, PATHS=PATHS, train=False)]
-        )
+    )
     if params['normalize']:
         eval_env = VecNormalize(
             eval_env, training=False, norm_obs=True, 
@@ -269,15 +288,3 @@ if __name__ == "__main__":
     update_total_timesteps_json(n_timesteps, PATHS)
     print("training done!")
     
-"""
-    s = time.time()
-    model.learn(total_timesteps = 3000)
-    print("steps per second: {}".format(1000 / (time.time() - s)))
-    # obs = env.reset()
-    # for i in range(1000):
-    #     action, _state = model.predict(obs, deterministic = True)
-    #     obs, reward, done, info = env.step(action)
-    #     env.render()
-    #     if done:
-    #       obs = env.reset()
-"""

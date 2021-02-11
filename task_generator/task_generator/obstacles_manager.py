@@ -4,6 +4,7 @@ from typing import Union
 import re
 import yaml
 import os
+import warnings
 from flatland_msgs.srv import DeleteModel, DeleteModelRequest
 from flatland_msgs.srv import SpawnModel, SpawnModelRequest
 from flatland_msgs.srv import MoveModel, MoveModelRequest
@@ -508,8 +509,12 @@ class ObstaclesManager:
         response = self._srv_delete_model(srv_request)
 
         if not response.success:
+            """
             raise rospy.ServiceException(
                 f"failed to remove the object with the name: {name}! ")
+            """
+            warnings.warn(
+                f"failed to remove the object with the name: {name}!")
         else:
             rospy.logdebug(f"Removed the obstacle with the name {name}")
 
