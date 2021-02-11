@@ -33,7 +33,6 @@ import numpy as np
 class ObservationCollector():
     def __init__(self,num_lidar_beams:int,lidar_range:float):
         """ a class to collect and merge observations
-
         Args:
             num_lidar_beams (int): [description]
             lidar_range (float): [description]
@@ -184,10 +183,3 @@ if __name__ == '__main__':
         obs=state_collector.get_observations()
         
         time.sleep(0.001)
-        
-
-
-    
-
-
-

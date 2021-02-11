@@ -35,6 +35,9 @@ void PlanManager::init(ros::NodeHandle& nh) {
 
     // publisher
     subgoal_pub_  = nh.advertise<geometry_msgs::PoseStamped>("subgoal",10);// relative name:/ns/node_name/subgoal
+    //for training mode 
+    wp4train_pup_  = nh.advertise<geometry_msgs::PoseStamped>("wp4train",10);// relative name:/ns/node_name/subgoal
+    globalPlan_pub_  = nh.advertise<nav_msgs::Path>("globalPlan",10); // relative name:/ns/node_name/globalPlan
     robot_state_pub_  = nh.advertise<arena_plan_msgs::RobotStateStamped>("robot_state",10);
     /* test purpose*/
     
@@ -120,10 +123,10 @@ void PlanManager::execFSMCallback(const ros::TimerEvent& e) {
 
 
     case GEN_NEW_GLOBAL: {
-      if(mode_==TRAIN){
-        changeFSMExecState(REPLAN_MID, "FSM");
-        return;
-      }
+      // if(mode_==TRAIN){
+      //   changeFSMExecState(REPLAN_MID, "FSM");
+      //   return;
+      // }
       // set robot start state
       start_state_=new RobotState(cur_state_->pose2d,cur_state_->theta,cur_state_->vel2d,cur_state_->w);
       
@@ -219,7 +222,18 @@ void PlanManager::execFSMCallback(const ros::TimerEvent& e) {
         subgoal_pub_.publish(end_state_->to_PoseStampted());
         visualization_->drawSubgoal(end_state_->to_PoseStampted(), 0.3, Eigen::Vector4d(0, 0, 0, 1.0));
         cout<<"MID_REPLAN Success"<<endl;
-        changeFSMExecState(EXEC_LOCAL, "FSM");
+        globalPlan_pub_.publish(planner_collector_->global_path_);
+        double dist_to_goal=1.0;
+        double obstacle_info=1.0;
+        double sensor_info=1.0;
+        bool get_subgoal_success = planner_collector_->generate_subgoal(cur_state_,end_state_, planner_collector_->global_path_,obstacle_info,sensor_info);
+      
+        if (get_subgoal_success) {
+        // success: publish new subgoal & going to state EXEC_LOCAL
+          wp4train_pup_.publish(planner_collector_->subgoal_);
+          visualization_->drawSubgoal(planner_collector_->subgoal_, 0.3, Eigen::Vector4d(0, 0, 0, 1.0));
+          changeFSMExecState(EXEC_LOCAL, "FSM"); 
+          }
         return;
       }
       /* get current state info */

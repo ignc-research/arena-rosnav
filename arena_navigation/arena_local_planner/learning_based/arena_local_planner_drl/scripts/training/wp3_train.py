@@ -10,7 +10,7 @@ from stable_baselines3.common.callbacks import EvalCallback
 
 from task_generator.task_generator.tasks import get_predefined_task
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.scripts.custom_policy import *
-from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.rl_agent.envs.flatland_gym_env import FlatlandEnv
+from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.rl_agent.envs.wp3_env import wp3Env
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.tools.argsparser import parse_training_args
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.tools.train_agent_utils import *
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.tools.custom_mlp_args_utils import *
@@ -156,10 +156,10 @@ if __name__ == "__main__":
     # instantiate gym environment
     n_envs = 1
     task = get_predefined_task("random")
-    env = DummyVecEnv([lambda: FlatlandEnv(task, PATHS.get('robot_setting'), PATHS.get('robot_as'), discrete_action_space, goal_radius=1.25, max_steps_per_episode=550)] * n_envs)
+    env = DummyVecEnv([lambda: wp3Env(task, PATHS.get('robot_setting'), PATHS.get('robot_as'), discrete_action_space, goal_radius=1.25, max_steps_per_episode=550)] * n_envs)
    
     # instantiate eval environment
-    eval_env = Monitor(FlatlandEnv(task, PATHS.get('robot_setting'), PATHS.get('robot_as'), discrete_action_space, goal_radius=1.25, max_steps_per_episode=550), PATHS.get('eval'), info_keywords=("done_reason",))
+    eval_env = Monitor(wp3Env(task, PATHS.get('robot_setting'), PATHS.get('robot_as'), discrete_action_space, goal_radius=1.25, max_steps_per_episode=550), PATHS.get('eval'), info_keywords=("done_reason",))
     eval_cb = EvalCallback(eval_env, n_eval_episodes=10, eval_freq=5000, log_path=PATHS.get('eval'), best_model_save_path=PATHS.get('model'), deterministic=True)
 
     # determine mode
