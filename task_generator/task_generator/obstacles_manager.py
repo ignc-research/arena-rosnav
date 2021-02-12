@@ -40,34 +40,34 @@ class ObstaclesManager:
         self._move_all_obstacles_start_pos_pubs = []
 
         # setup proxy to handle  services provided by flatland
-        rospy.wait_for_service('move_model', timeout=20) #f'{self.ns_prefix}
-        rospy.wait_for_service('delete_model', timeout=20) #f'{self.ns_prefix}
-        rospy.wait_for_service('spawn_model', timeout=20) #f'{self.ns_prefix}
-        rospy.wait_for_service('pedsim_simulator/remove_all_peds', timeout=20)
+        rospy.wait_for_service(f'{self.ns_prefix}move_model', timeout=20) 
+        rospy.wait_for_service(f'{self.ns_prefix}delete_model', timeout=20)
+        rospy.wait_for_service(f'{self.ns_prefix}spawn_model', timeout=20) 
+        rospy.wait_for_service(f'{self.ns_prefix}pedsim_simulator/remove_all_peds', timeout=20)
         # start=rospy.rostime.get_time()
         # print("start wait ",start)
-        rospy.wait_for_service('pedsim_simulator/respawn_peds' , timeout=20)
-        rospy.wait_for_service('pedsim_simulator/spawn_ped' , timeout=20)
+        rospy.wait_for_service(f'{self.ns_prefix}pedsim_simulator/respawn_peds' , timeout=20)
+        rospy.wait_for_service(f'{self.ns_prefix}pedsim_simulator/spawn_ped' , timeout=20)
         # print("passed ",rospy.rostime.get_time()-start)
         is_training=rospy.get_param("/train_mode")
         if is_training:
             rospy.wait_for_service('step_world', timeout=20)
         # allow for persistent connections to services
         self._srv_move_model = rospy.ServiceProxy(
-            'move_model', MoveModel, persistent=True) #f'{self.ns_prefix}
+            f'{self.ns_prefix}move_model', MoveModel, persistent=True) 
         self._srv_delete_model = rospy.ServiceProxy(
-            'delete_model', DeleteModel, persistent=True) #f'{self.ns_prefix}
+            f'{self.ns_prefix}delete_model', DeleteModel, persistent=True) 
         self._srv_spawn_model = rospy.ServiceProxy(
-            'spawn_model', SpawnModel, persistent=True) #f'{self.ns_prefix}
+            f'{self.ns_prefix}spawn_model', SpawnModel, persistent=True) 
 
         # self.__respawn_models = rospy.ServiceProxy('respawn_models', RespawnModels,persistent=True)
         # self.__respawn_models = rospy.ServiceProxy('%s/respawn_models' % self.NS, RespawnModels)
         self.__spawn_ped_srv = rospy.ServiceProxy(
-            'pedsim_simulator/spawn_ped', SpawnPeds, persistent=True)
+            f'{self.ns_prefix}pedsim_simulator/spawn_ped', SpawnPeds, persistent=True)
         self.__respawn_peds_srv = rospy.ServiceProxy(
-            'pedsim_simulator/respawn_peds' , SpawnPeds, persistent=True)
+            f'{self.ns_prefix}pedsim_simulator/respawn_peds' , SpawnPeds, persistent=True)
         self.__remove_all_peds_srv = rospy.ServiceProxy(
-            'pedsim_simulator/remove_all_peds' , SetBool, persistent=True)
+            f'{self.ns_prefix}pedsim_simulator/remove_all_peds' , SetBool, persistent=True)
         # self._srv_sim_step = rospy.ServiceProxy('step_world', StepWorld, persistent=True)
 
         self.update_map(map_)

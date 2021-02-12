@@ -5,12 +5,20 @@
     <arg name="global_frame_id"   value="map"/>
     <arg name="odom_frame_id"     value="$(arg ns)_odom"/>
     <arg name="base_frame_id"     value="$(arg ns)_footprint"/>
-    
+
+    <!-- the folder name under the path simulator_setup/maps add specially for pedsim 
+    <arg name="map_folder_name" default="map_empty" /> -->
   
     <!-- use simulator and rviz-->
     <include file="$(find arena_bringup)/launch/sublaunch_training/flatland_simulator.launch">
         <arg name="ns" value="$(arg ns)"/>
     </include>
+
+    <!-- Launch light pedsim -->
+    <include file="$(find arena_bringup)/launch/sublaunch_training/pedestrians_only.launch">
+        <arg name="ns" value="$(arg ns)" />
+        <!-- <arg name="map_path" value="$(arg map_path)"/> -->
+    </include> 
 
     <!-- use fake localization-->
     <include file="$(find arena_bringup)/launch/sublaunch_training/fake_localization.launch">

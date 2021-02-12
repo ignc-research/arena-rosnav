@@ -192,6 +192,7 @@ if __name__ == "__main__":
     # check if simulations are booted
     for i in range(args.n_envs):
         ns = rosnode.get_node_names(namespace='sim_0'+str(i+1))
+        # print(ns)
         assert (len(ns) > 0
         ), f"Check if {args.n_envs} different simulation environments are running"
         assert (len(ns) > 2
@@ -228,10 +229,10 @@ if __name__ == "__main__":
                 [make_envs(task_managers[i], i, params=params, PATHS=PATHS) 
                     for i in range(args.n_envs)])
 
-    if params['normalize']:
-        env = VecNormalize(
-            env, training=True, 
-            norm_obs=True, norm_reward=False, clip_reward=15)
+    # if params['normalize']:
+    #     env = VecNormalize(
+    #         env, training=True, 
+    #         norm_obs=True, norm_reward=False, clip_reward=15)
 
     # threshold settings for training curriculum
     # type can be either 'succ' or 'rew'

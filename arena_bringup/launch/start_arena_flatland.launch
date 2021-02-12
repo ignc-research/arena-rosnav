@@ -66,8 +66,8 @@
   </include>
 
   <!-- start task_generator node -->
-  <!-- <include file="$(find arena_bringup)/launch/sublaunch/task_generator.launch" unless="$(arg train_mode)">
-  </include> -->
+  <include file="$(find arena_bringup)/launch/sublaunch/task_generator.launch" unless="$(arg train_mode)">
+  </include>
 
   <!-- start plan manager-->
   <include file="$(find arena_bringup)/launch/sublaunch/plan_manager.launch">

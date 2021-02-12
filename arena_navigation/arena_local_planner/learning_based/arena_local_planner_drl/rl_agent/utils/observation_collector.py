@@ -61,18 +61,18 @@ class ObservationCollector():
         
         # topic subscriber: subgoal
         #TODO should we synchoronize it with other topics
-        self._subgoal_sub = message_filters.Subscriber( "/subgoal", PoseStamped) # f"{self.ns_prefix}#self._subgoal_sub = rospy.Subscriber("subgoal", PoseStamped, self.callback_subgoal)
+        self._subgoal_sub = message_filters.Subscriber( f'{self.ns_prefix}/subgoal', PoseStamped)#self._subgoal_sub = rospy.Subscriber("subgoal", PoseStamped, self.callback_subgoal)
         self._subgoal_sub.registerCallback(self.callback_subgoal)
 
         # service clients
         self._is_train_mode = rospy.get_param("/train_mode")
         if self._is_train_mode:
-            self._service_name_step='step_world' #f'{self.ns_prefix}
+            self._service_name_step=f'{self.ns_prefix}/step_world' 
             self._sim_step_client = rospy.ServiceProxy(self._service_name_step, StepWorld)
         
         # message_filter subscriber: laserscan, robot_pose
-        self._scan_sub = message_filters.Subscriber( 'scan', LaserScan) #f'{self.ns_prefix}
-        self._robot_state_sub = message_filters.Subscriber('robot_state', RobotStateStamped) #f'{self.ns_prefix}
+        self._scan_sub = message_filters.Subscriber( f'{self.ns_prefix}scan', LaserScan) 
+        self._robot_state_sub = message_filters.Subscriber(f'{self.ns_prefix}robot_state', RobotStateStamped) 
         # subscribe task distribution
         self._service_task_generator='task_generator'
         rospy.wait_for_service('task_generator', timeout=20)
