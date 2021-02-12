@@ -192,13 +192,13 @@ class NN_tb3():
             self.stop_moving()
             return
 
-    def cbComputeActionCrowdNav(self, event):
+    def cbComputeActionCrowdNav(self, event,env,policy,action_bound):
         obs = env.get_laser_observation()
         obs_stack = deque([obs, obs, obs])
         # ************************************ Input ************************************
         # agent: goal, start position
-        input_goal = [-25.00, -0.00]    # [-25,0] is for the cordinate system in circle wolrd
-        input_start_position = [0.5, 0.0, np.pi]    # x, y, theta
+        input_goal = [self.global_goal.pose.position.x, self.global_goal.pose.position.x]    # [-25,0] is for the cordinate system in circle wolrd
+        input_start_position = [self.pose.pose.position.x, self.pose.pose.position.y, self.psi]    # x, y, theta
 
         env.goal_point = input_goal
         goal = np.asarray(env.get_local_goal())     # transfer to robot based codinate system
@@ -211,7 +211,7 @@ class NN_tb3():
         # ************************************ Output ************************************
         # agent: postion(x,y,theta),velocity(v,angular)
 
-        _,scaled_action =generate_action_no_sampling(env=env, state_list=[state], policy=policy, action_bound=action_bound)
+        _,scaled_action =generate_action_no_sampling(env=env, state_list=[state], policy=policy, action_bount = action_bound)  #此处赋值可能有问题
         action = scaled_action[0]
         print('velocity : ', action[0], 'velocity_angular : ', action[1])
 
