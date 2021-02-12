@@ -1,6 +1,8 @@
 version: '3'
 services:
   ros:
+    stdin_open: true
+    tty: true
     image: arena-rosnav:add-rl-collision
     build: ./Docker
     command: tail -f /dev/null
@@ -13,6 +15,7 @@ services:
     networks:
       - x11
     container_name: arena-rosnav
+  
   novnc:  
     image: theasp/novnc:latest
     env_file:
