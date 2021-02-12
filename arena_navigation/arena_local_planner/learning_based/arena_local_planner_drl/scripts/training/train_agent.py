@@ -48,7 +48,7 @@ start_stage = 1
 train_max_steps_per_episode = 500
 eval_max_steps_per_episode = 500
 goal_radius = 0.25
-task_mode = "staged"    # custom, random or staged
+task_mode = "random"    # custom, random or staged
 normalize = True
 ##########################
 
