@@ -7,6 +7,7 @@ def training_args(parser):
     """ program arguments training script """
     parser.add_argument('--n_envs', type=int, default=1, help='number of parallel environments')
     parser.add_argument('--no-gpu', action='store_true', help='disables gpu for training')
+    parser.add_argument('--debug', action='store_true', help='disables multiprocessing in order to debug')
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('--agent', type=str,
                         choices=['MLP_ARENA2D', 'DRL_LOCAL_PLANNER', 'CNN_NAVREP'],

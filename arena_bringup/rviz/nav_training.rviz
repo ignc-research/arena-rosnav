@@ -553,7 +553,7 @@ Visualization Manager:
       Value: true
     - Class: rviz/MarkerArray
       Enabled: true
-      Marker Topic: /sim_01/flatland_server/debug/model/obstacle_random_dynamic_00
+      Marker Topic: flatland_server/debug/model/obstacle_random_dynamic_00
       Name: MarkerArray
       Namespaces:
         "": true

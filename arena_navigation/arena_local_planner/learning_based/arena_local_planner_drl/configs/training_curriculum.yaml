@@ -17,7 +17,10 @@
   dynamic: 2
 5:
   static: 2
-  dynamic: 4
+  dynamic: 3
 6:
   static: 3
   dynamic: 5
+7:
+  static: 3
+  dynamic: 7
