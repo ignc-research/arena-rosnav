@@ -11,7 +11,7 @@ from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.callbacks import EvalCallback
 from stable_baselines3.common.utils import set_random_seed
 
-from task_generator.task_generator.tasks import get_predefined_task
+from task_generator.task_generator.tasks import *
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.scripts.custom_policy import *
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.rl_agent.envs.flatland_gym_env import FlatlandEnv
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.tools.argsparser import parse_training_args
@@ -55,10 +55,11 @@ def get_agent_name(args) -> str:
     START_TIME = dt.now().strftime("%Y_%m_%d__%H_%M")
 
     if args.custom_mlp:
-        return "MLP_B_" + args.body 
-        + "_P_" + args.pi 
-        + "_V_" + args.vf + "_" 
-        + args.act_fn + "_" + START_TIME
+        return (
+            "MLP_B_" + args.body 
+            + "_P_" + args.pi 
+            + "_V_" + args.vf + "_" 
+            + args.act_fn + "_" + START_TIME)
     if args.load is None:
         return args.agent + "_" + START_TIME
     return args.load
@@ -75,26 +76,38 @@ def get_paths(agent_name: str, args) -> dict:
 
     PATHS = {
         'model': 
-        os.path.join(dir, 'agents', agent_name),
+            os.path.join(
+                dir, 'agents', agent_name),
         'tb': 
-        os.path.join(dir, 'training_logs', 'tensorboard', agent_name),
+            os.path.join(
+                dir, 'training_logs', 'tensorboard', agent_name),
         'eval': 
-        os.path.join(dir, 'training_logs', 'train_eval_log', agent_name),
+            os.path.join(
+                dir, 'training_logs', 'train_eval_log', agent_name),
         'robot_setting': 
-        os.path.join(rospkg.RosPack().get_path('simulator_setup'), 'robot', robot + '.model.yaml'),
+            os.path.join(
+                rospkg.RosPack().get_path('simulator_setup'),
+                'robot', robot + '.model.yaml'),
         'robot_as': 
-        os.path.join(rospkg.RosPack().get_path('arena_local_planner_drl'), 'configs', 'default_settings.yaml'),
+            os.path.join(
+                rospkg.RosPack().get_path('arena_local_planner_drl'), 
+                'configs', 'default_settings.yaml'),
         'curriculum': 
-        os.path.join(rospkg.RosPack().get_path('arena_local_planner_drl'), 'configs', 'training_curriculum.yaml')
+            os.path.join(
+                rospkg.RosPack().get_path('arena_local_planner_drl'), 
+                'configs', 'training_curriculum.yaml')
     }
     # check for mode
     if args.load is None:
         os.makedirs(PATHS.get('model'))
     else:
-        if not os.path.isfile(os.path.join(
-            PATHS.get('model'), AGENT_NAME + ".zip")) and not os.path.isfile(os.path.join(PATHS.get('model'), "best_model.zip")):
+        if (not os.path.isfile(
+                os.path.join(PATHS.get('model'), AGENT_NAME + ".zip")) 
+            and not os.path.isfile(
+                os.path.join(PATHS.get('model'), "best_model.zip"))):
             raise FileNotFoundError(
-                "Couldn't find model named %s.zip' or 'best_model.zip' in '%s'" % (AGENT_NAME, PATHS.get('model')))
+                "Couldn't find model named %s.zip' or 'best_model.zip' in '%s'" 
+                % (AGENT_NAME, PATHS.get('model')))
     # evaluation log enabled
     if args.eval_log:
         if not os.path.exists(PATHS.get('eval')):
@@ -111,7 +124,12 @@ def get_paths(agent_name: str, args) -> dict:
     return PATHS
 
 
-def make_envs(task_manager, rank: int, params: dict, seed: int=0, PATHS: dict=None, train: bool=True):
+def make_envs(task_manager: Union[RandomTask, StagedRandomTask, ManualTask, ScenerioTask], 
+              rank: int, 
+              params: dict, 
+              seed: int=0, 
+              PATHS: dict=None, 
+              train: bool=True):
     """
     Utility function for multiprocessed env
     
@@ -129,21 +147,23 @@ def make_envs(task_manager, rank: int, params: dict, seed: int=0, PATHS: dict=No
             # train env
             env = FlatlandEnv(
                 f"sim_0{rank+1}", task_manager, 
-                PATHS.get('robot_setting'), PATHS.get('robot_as'), params['reward_fnc'], params['discrete_action_space'], 
-                goal_radius=params['goal_radius'], max_steps_per_episode=params['train_max_steps_per_episode'],
-                debug=args.debug
-            )
+                PATHS.get('robot_setting'), PATHS.get('robot_as'), 
+                params['reward_fnc'], params['discrete_action_space'], 
+                goal_radius=params['goal_radius'], 
+                max_steps_per_episode=params['train_max_steps_per_episode'],
+                debug=args.debug)
         else:
             # eval env
             env = Monitor(
                     FlatlandEnv(
                         f"sim_0{rank+1}", task_manager, 
-                        PATHS.get('robot_setting'), PATHS.get('robot_as'), params['reward_fnc'], params['discrete_action_space'], 
-                        goal_radius=params['goal_radius'], max_steps_per_episode=params['eval_max_steps_per_episode'], 
+                        PATHS.get('robot_setting'), PATHS.get('robot_as'), 
+                        params['reward_fnc'], params['discrete_action_space'], 
+                        goal_radius=params['goal_radius'], 
+                        max_steps_per_episode=params['eval_max_steps_per_episode'], 
                         train_mode=False, debug=args.debug
-                    ),
-                    PATHS.get('eval'), info_keywords=("done_reason", "is_success")
-            )
+                        ),
+                    PATHS.get('eval'), info_keywords=("done_reason", "is_success"))
         env.seed(seed + rank)
         return env
     set_random_seed(seed)
@@ -165,13 +185,17 @@ if __name__ == "__main__":
     # check if simulations are booted
     for i in range(args.n_envs):
         ns = rosnode.get_node_names(namespace='sim_0'+str(i+1))
-        assert len(ns) > 0, f"Check if {args.n_envs} different simulation environments are running"
-        assert len(ns) > 2, f"Check if all simulation parts of namespace '{'/sim_0'+str(i+1)}' are running properly"
+        assert (len(ns) > 0
+        ), f"Check if {args.n_envs} different simulation environments are running"
+        assert (len(ns) > 2
+        ), f"Check if all simulation parts of namespace '{'/sim_0'+str(i+1)}' are running properly"
 
     # initialize hyperparameters (save to/ load from json)
     hyperparams_obj = agent_hyperparams(
-        AGENT_NAME, robot, gamma, n_steps, ent_coef, learning_rate, vf_coef,max_grad_norm, gae_lambda, batch_size, 
-        n_epochs, clip_range, reward_fnc, discrete_action_space, normalize, task_mode, start_stage, train_max_steps_per_episode,
+        AGENT_NAME, robot, gamma, n_steps, ent_coef, 
+        learning_rate, vf_coef,max_grad_norm, gae_lambda, batch_size, 
+        n_epochs, clip_range, reward_fnc, discrete_action_space, normalize, 
+        task_mode, start_stage, train_max_steps_per_episode,
         eval_max_steps_per_episode, goal_radius)
 
     params = initialize_hyperparameters(
@@ -189,43 +213,45 @@ if __name__ == "__main__":
     # when debug run on one process only
     if not args.debug:
         env = SubprocVecEnv(
-            [make_envs(
-                task_managers[i], i, params=params, PATHS=PATHS) for i in range(args.n_envs)], 
-            start_method='fork'
-        )
+                [make_envs(task_managers[i], i, params=params, PATHS=PATHS) 
+                    for i in range(args.n_envs)], 
+                start_method='fork')
     else:
         env = DummyVecEnv(
-            [make_envs(
-                task_managers[i], i, params=params, PATHS=PATHS) for i in range(args.n_envs)]
-        )
+                [make_envs(task_managers[i], i, params=params, PATHS=PATHS) 
+                    for i in range(args.n_envs)])
 
     if params['normalize']:
         env = VecNormalize(
-            env, training=True, norm_obs=True, norm_reward=False, clip_reward=15)
+            env, training=True, 
+            norm_obs=True, norm_reward=False, clip_reward=15)
 
     # threshold settings for training curriculum
     # type can be either 'succ' or 'rew'
     trainstage_cb = InitiateNewTrainStage(
-        TaskManagers=task_managers, treshhold_type="succ", rew_threshold=14.5, 
-        succ_rate_threshold=0.90, task_mode=params['task_mode'], verbose=1)
+        TaskManagers=task_managers, 
+        treshhold_type="succ", 
+        rew_threshold=14.5, succ_rate_threshold=0.90, 
+        task_mode=params['task_mode'], verbose=1)
     
     # instantiate eval environment
     # take task_manager from first sim (currently evaluation only provided for single process)
     eval_env = DummyVecEnv(
         [make_envs(task_managers[0], 0, params=params, PATHS=PATHS, train=False)]
     )
+
     if params['normalize']:
         eval_env = VecNormalize(
-            eval_env, training=False, norm_obs=True, 
-            norm_reward=False, clip_reward=15)
+            eval_env, training=False, 
+            norm_obs=True, norm_reward=False, clip_reward=15)
     
     # evaluation settings
     # n_eval_episodes: number of episodes to evaluate agent on
     # eval_freq: evaluate the agent every eval_freq train timesteps
     eval_cb = EvalCallback(
-        eval_env, n_eval_episodes=30, eval_freq=25000, 
-        log_path=PATHS.get('eval'), 
-        best_model_save_path=PATHS.get('model'), 
+        eval_env, 
+        n_eval_episodes=30, eval_freq=25000, 
+        log_path=PATHS.get('eval'), best_model_save_path=PATHS.get('model'), 
         deterministic=True, 
         callback_on_new_best=trainstage_cb)
    
@@ -234,20 +260,27 @@ if __name__ == "__main__":
         # custom mlp flag
         model = PPO(
             "MlpPolicy", env, 
-            policy_kwargs = dict(net_arch = args.net_arch, activation_fn = get_act_fn(args.act_fn)), 
-            gamma = gamma, n_steps = n_steps, ent_coef = ent_coef, learning_rate = learning_rate, 
-            vf_coef = vf_coef, max_grad_norm = max_grad_norm, gae_lambda = gae_lambda, 
-            batch_size = batch_size, n_epochs = n_epochs, clip_range = clip_range, 
-            tensorboard_log = PATHS.get('tb'), verbose = 1)
+            policy_kwargs = dict(
+                net_arch = args.net_arch, activation_fn = get_act_fn(args.act_fn)), 
+            gamma = gamma,                     n_steps = n_steps, 
+            ent_coef = ent_coef,               learning_rate = learning_rate, 
+            vf_coef = vf_coef,                 max_grad_norm = max_grad_norm, 
+            gae_lambda = gae_lambda,           batch_size = batch_size, 
+            n_epochs = n_epochs,               clip_range = clip_range, 
+            tensorboard_log = PATHS.get('tb'), verbose = 1
+        )
     elif args.agent is not None:
         # predefined agent flag
         if args.agent == "MLP_ARENA2D":
                 model = PPO(
                     MLP_ARENA2D_POLICY, env, 
-                    gamma = gamma, n_steps = n_steps, ent_coef = ent_coef, learning_rate = learning_rate, 
-                    vf_coef = vf_coef, max_grad_norm = max_grad_norm, gae_lambda = gae_lambda,
-                    batch_size = batch_size, n_epochs = n_epochs, clip_range = clip_range, 
-                    tensorboard_log = PATHS.get('tb'), verbose = 1)
+                    gamma = gamma,                     n_steps = n_steps, 
+                    ent_coef = ent_coef,               learning_rate = learning_rate, 
+                    vf_coef = vf_coef,                 max_grad_norm = max_grad_norm, 
+                    gae_lambda = gae_lambda,           batch_size = batch_size, 
+                    n_epochs = n_epochs,               clip_range = clip_range, 
+                    tensorboard_log = PATHS.get('tb'), verbose = 1
+                )
 
         elif args.agent == "DRL_LOCAL_PLANNER" or args.agent == "CNN_NAVREP":
             if args.agent == "DRL_LOCAL_PLANNER":
@@ -258,18 +291,23 @@ if __name__ == "__main__":
             model = PPO(
                 "CnnPolicy", env, 
                 policy_kwargs = policy_kwargs, 
-                gamma = gamma, n_steps = n_steps, ent_coef = ent_coef, learning_rate = learning_rate, 
-                vf_coef = vf_coef, max_grad_norm = max_grad_norm, gae_lambda = gae_lambda,
-                batch_size = batch_size, n_epochs = n_epochs, clip_range = clip_range, 
-                tensorboard_log = PATHS.get('tb'), verbose = 1)
+                gamma = gamma,                     n_steps = n_steps, 
+                ent_coef = ent_coef,               learning_rate = learning_rate, 
+                vf_coef = vf_coef,                 max_grad_norm = max_grad_norm, 
+                gae_lambda = gae_lambda,           batch_size = batch_size, 
+                n_epochs = n_epochs,               clip_range = clip_range, 
+                tensorboard_log = PATHS.get('tb'), verbose = 1
+            )
     else:
         # load flag
         if os.path.isfile(
-            os.path.join(PATHS.get('model'), AGENT_NAME + ".zip")):
-            model = PPO.load(os.path.join(PATHS.get('model'), AGENT_NAME), env)
+                os.path.join(PATHS.get('model'), AGENT_NAME + ".zip")):
+            model = PPO.load(
+                os.path.join(PATHS.get('model'), AGENT_NAME), env)
         elif os.path.isfile(
-            os.path.join(PATHS.get('model'), "best_model.zip")):
-            model = PPO.load(os.path.join(PATHS.get('model'), "best_model"), env)
+                os.path.join(PATHS.get('model'), "best_model.zip")):
+            model = PPO.load(
+                os.path.join(PATHS.get('model'), "best_model"), env)
         model.update_n_envs()
 
     # set num of timesteps to be generated
