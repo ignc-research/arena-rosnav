@@ -90,12 +90,10 @@ def get_paths(agent_name: str, args) -> dict:
                 'robot', robot + '.model.yaml'),
         'robot_as': 
             os.path.join(
-                rospkg.RosPack().get_path('arena_local_planner_drl'), 
-                'configs', 'default_settings.yaml'),
+                dir, 'configs', 'default_settings.yaml'),
         'curriculum': 
             os.path.join(
-                rospkg.RosPack().get_path('arena_local_planner_drl'), 
-                'configs', 'training_curriculum.yaml')
+                dir, 'configs', 'training_curriculum.yaml')
     }
     # check for mode
     if args.load is None:
@@ -104,7 +102,8 @@ def get_paths(agent_name: str, args) -> dict:
         if (not os.path.isfile(
                 os.path.join(PATHS.get('model'), AGENT_NAME + ".zip")) 
             and not os.path.isfile(
-                os.path.join(PATHS.get('model'), "best_model.zip"))):
+                os.path.join(PATHS.get('model'), "best_model.zip"))
+            ):
             raise FileNotFoundError(
                 "Couldn't find model named %s.zip' or 'best_model.zip' in '%s'" 
                 % (AGENT_NAME, PATHS.get('model')))
@@ -155,15 +154,15 @@ def make_envs(task_manager: Union[RandomTask, StagedRandomTask, ManualTask, Scen
         else:
             # eval env
             env = Monitor(
-                    FlatlandEnv(
-                        f"sim_0{rank+1}", task_manager, 
-                        PATHS.get('robot_setting'), PATHS.get('robot_as'), 
-                        params['reward_fnc'], params['discrete_action_space'], 
-                        goal_radius=params['goal_radius'], 
-                        max_steps_per_episode=params['eval_max_steps_per_episode'], 
-                        train_mode=False, debug=args.debug
-                        ),
-                    PATHS.get('eval'), info_keywords=("done_reason", "is_success"))
+                FlatlandEnv(
+                    f"sim_0{rank+1}", task_manager, 
+                    PATHS.get('robot_setting'), PATHS.get('robot_as'), 
+                    params['reward_fnc'], params['discrete_action_space'], 
+                    goal_radius=params['goal_radius'], 
+                    max_steps_per_episode=params['eval_max_steps_per_episode'], 
+                    train_mode=False, debug=args.debug
+                    ),
+                PATHS.get('eval'), info_keywords=("done_reason", "is_success"))
         env.seed(seed + rank)
         return env
     set_random_seed(seed)
@@ -199,7 +198,7 @@ if __name__ == "__main__":
         eval_max_steps_per_episode, goal_radius)
 
     params = initialize_hyperparameters(
-        agent_name=AGENT_NAME, PATHS=PATHS, 
+        agent_name=AGENT_NAME,           PATHS=PATHS, 
         hyperparams_obj=hyperparams_obj, load_target=args.load)
 
     # task managers for each simulation
@@ -213,13 +212,13 @@ if __name__ == "__main__":
     # when debug run on one process only
     if not args.debug:
         env = SubprocVecEnv(
-                [make_envs(task_managers[i], i, params=params, PATHS=PATHS) 
-                    for i in range(args.n_envs)], 
-                start_method='fork')
+            [make_envs(task_managers[i], i, params=params, PATHS=PATHS) 
+                for i in range(args.n_envs)], 
+            start_method='fork')
     else:
         env = DummyVecEnv(
-                [make_envs(task_managers[i], i, params=params, PATHS=PATHS) 
-                    for i in range(args.n_envs)])
+            [make_envs(task_managers[i], i, params=params, PATHS=PATHS) 
+                for i in range(args.n_envs)])
 
     if params['normalize']:
         env = VecNormalize(
@@ -237,8 +236,7 @@ if __name__ == "__main__":
     # instantiate eval environment
     # take task_manager from first sim (currently evaluation only provided for single process)
     eval_env = DummyVecEnv(
-        [make_envs(task_managers[0], 0, params=params, PATHS=PATHS, train=False)]
-    )
+        [make_envs(task_managers[0], 0, params=params, PATHS=PATHS, train=False)])
 
     if params['normalize']:
         eval_env = VecNormalize(
@@ -308,7 +306,7 @@ if __name__ == "__main__":
                 os.path.join(PATHS.get('model'), "best_model.zip")):
             model = PPO.load(
                 os.path.join(PATHS.get('model'), "best_model"), env)
-        model.update_n_envs()
+        update_hyperparam_model(model, params, args.n_envs)
 
     # set num of timesteps to be generated
     if args.n is None:

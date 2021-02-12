@@ -3,6 +3,8 @@ import datetime
 import json
 from typing import Union
 
+from stable_baselines3 import PPO
+
 """ dictionary holding the params for key validation when loading from json """
 hyperparams = {
     key: None for key in [
@@ -149,3 +151,36 @@ def check_hyperparam_format(loaded_hyperparams: dict, PATHS: dict):
     if not loaded_hyperparams['task_mode'] in ["custom", "random", "staged"]:
         raise TypeError("Parameter 'task_mode' has unknown value")
 
+
+def update_hyperparam_model(model: PPO, params: dict, n_envs: int = 1):
+    """
+    Updates parameter of loaded PPO agent
+
+    :param model(object, PPO): loaded PPO agent
+    :param params: dictionary containing loaded hyperparams
+    :param n_envs: number of parallel environments
+    """
+    if model.batch_size != params['batch_size']:
+        model.batch_size = params['batch_size']
+    if model.gamma != params['gamma']:
+        model.gamma = params['gamma']
+    if model.n_steps != params['n_steps']:
+        model.n_steps = params['n_steps']
+    if model.ent_coef != params['ent_coef']:
+        model.ent_coef = params['ent_coef']
+    if model.learning_rate != params['learning_rate']:
+        model.learning_rate = params['learning_rate']
+    if model.vf_coef != params['vf_coef']:
+        model.vf_coef = params['vf_coef']
+    if model.max_grad_norm != params['max_grad_norm']:
+        model.max_grad_norm = params['max_grad_norm']
+    if model.gae_lambda != params['gae_lambda']:
+        model.gae_lambda = params['gae_lambda']
+    if model.n_epochs != params['n_epochs']:
+        model.n_epochs = params['n_epochs']
+    """
+    if model.clip_range != params['clip_range']:
+        model.clip_range = params['clip_range']
+    """
+    if model.n_envs != n_envs:
+        model.update_n_envs()
