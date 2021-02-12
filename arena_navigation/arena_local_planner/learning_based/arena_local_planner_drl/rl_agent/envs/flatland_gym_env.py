@@ -48,11 +48,12 @@ class FlatlandEnv(gym.Env):
             self.ns_prefix = '/'+ns + '/'
         else:
             self.ns_prefix = '/'
-
+        
+        """ debug
         if train_mode:
             rospy.init_node(f'train_env_{ns[-1]}')
         else:
-            rospy.init_node(f'eval_env_{ns[-1]}')
+            rospy.init_node(f'eval_env_{ns[-1]}')"""
         # Define action and observation space
         # They must be gym.spaces objects
         self._is_action_space_discrete = is_action_space_discrete
@@ -77,11 +78,11 @@ class FlatlandEnv(gym.Env):
         #     robot_radius=self._robot_radius, safe_dist=1.1*self._robot_radius, goal_radius=goal_radius, rule=reward_fnc)
 
         # action agent publisher
-        self.agent_action_pub = rospy.Publisher(f'{self.ns_prefix}cmd_vel', Twist, queue_size=1)
+        self.agent_action_pub = rospy.Publisher('cmd_vel', Twist, queue_size=1) #f'{self.ns_prefix}
         # service clients
         self._is_train_mode = rospy.get_param("/train_mode")
         if self._is_train_mode:
-            self._service_name_step = f'{self.ns_prefix}step_world'
+            self._service_name_step = 'step_world' #f'{self.ns_prefix}
             self._sim_step_client = rospy.ServiceProxy(
             self._service_name_step, StepWorld)
         self.task = task
@@ -161,7 +162,7 @@ class FlatlandEnv(gym.Env):
             obs_dict['laser_scan'], obs_dict['goal_in_robot_frame'], obs_dict['human_in_robot_frame'])
         done = reward_info['is_done']
 
-        print("reward:  {}".format(reward))
+        # print("reward:  {}".format(reward))
         
         # info
         info = {}

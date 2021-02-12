@@ -12,8 +12,8 @@ from nav_msgs.srv import GetMap
 from geometry_msgs.msg import Pose2D
 from rospy.exceptions import ROSException
 
-from .obstacles_manager import ObstaclesManager
-from .robot_manager import RobotManager
+from obstacles_manager import ObstaclesManager
+from robot_manager import RobotManager
 from pathlib import Path
 
 
@@ -154,10 +154,11 @@ class StagedRandomTask(RandomTask):
         if self._curr_stage < len(self._stages):
             self._curr_stage = self._curr_stage + 1
             self._update_curr_stage_json()
-            self._remove_obstacles()
             self._initiate_stage()
 
     def _initiate_stage(self):
+        self._remove_obstacles()
+        
         static_obstacles = self._stages[self._curr_stage]['static']
         dynamic_obstacles = self._stages[self._curr_stage]['dynamic']
 

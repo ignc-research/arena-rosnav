@@ -34,26 +34,26 @@ class RobotManager:
         self.ns_prefix = "/" if ns == "" else "/"+ns+"/"
 
         self.is_training_mode = rospy.get_param("/train_mode")
-        self.step_size = rospy.get_param("step_size")
+        self.step_size = rospy.get_param("/flatland_server/step_size")
         self._get_robot_configration(robot_yaml_path)
         # setup proxy to handle  services provided by flatland
-        rospy.wait_for_service(f'{self.ns_prefix}move_model', timeout=timeout)
-        rospy.wait_for_service(f'{self.ns_prefix}spawn_model', timeout=timeout)
+        rospy.wait_for_service('move_model', timeout=timeout)
+        rospy.wait_for_service('spawn_model', timeout=timeout)
         #rospy.wait_for_service('step_world', timeout=20)
         self._srv_move_model = rospy.ServiceProxy(
-            f'{self.ns_prefix}move_model', MoveModel)
+            'move_model', MoveModel)
         self._srv_spawn_model = rospy.ServiceProxy(
-            f'{self.ns_prefix}spawn_model', SpawnModel)
+            'spawn_model', SpawnModel)
         # it's only needed in training mode to send the clock signal.
         self._step_world = rospy.ServiceProxy(
-            f'{self.ns_prefix}step_world', StepWorld)
+           'step_world', StepWorld)
 
         # publisher
         # publish the start position of the robot
         # self._initialpose_pub = rospy.Publisher(
         #     'initialpose', PoseWithCovarianceStamped, queue_size=1)
         self._goal_pub = rospy.Publisher(
-            f'{self.ns_prefix}goal', PoseStamped, queue_size=1, latch=True)
+            'goal', PoseStamped, queue_size=1, latch=True) #f'{self.ns_prefix}
 
         self.update_map(map_)
         self._spawn_robot(robot_yaml_path)

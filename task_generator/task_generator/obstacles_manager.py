@@ -39,24 +39,25 @@ class ObstaclesManager:
         self._move_all_obstacles_start_pos_pubs = []
 
         # setup proxy to handle  services provided by flatland
-        rospy.wait_for_service(f'{self.ns_prefix}move_model', timeout=20)
-        rospy.wait_for_service(f'{self.ns_prefix}delete_model', timeout=20)
-        rospy.wait_for_service(f'{self.ns_prefix}spawn_model', timeout=20)
+        rospy.wait_for_service('move_model', timeout=20) #f'{self.ns_prefix}
+        rospy.wait_for_service('delete_model', timeout=20) #f'{self.ns_prefix}
+        rospy.wait_for_service('spawn_model', timeout=20) #f'{self.ns_prefix}
         rospy.wait_for_service('pedsim_simulator/remove_all_peds', timeout=20)
         # start=rospy.rostime.get_time()
         # print("start wait ",start)
         rospy.wait_for_service('pedsim_simulator/respawn_peds' , timeout=20)
         rospy.wait_for_service('pedsim_simulator/spawn_ped' , timeout=20)
         # print("passed ",rospy.rostime.get_time()-start)
+        is_training=rospy.get_param("/train_mode")
         if is_training:
             rospy.wait_for_service('step_world', timeout=20)
         # allow for persistent connections to services
         self._srv_move_model = rospy.ServiceProxy(
-            f'{self.ns_prefix}move_model', MoveModel, persistent=True)
+            'move_model', MoveModel, persistent=True) #f'{self.ns_prefix}
         self._srv_delete_model = rospy.ServiceProxy(
-            f'{self.ns_prefix}delete_model', DeleteModel, persistent=True)
+            'delete_model', DeleteModel, persistent=True) #f'{self.ns_prefix}
         self._srv_spawn_model = rospy.ServiceProxy(
-            f'{self.ns_prefix}spawn_model', SpawnModel, persistent=True)
+            'spawn_model', SpawnModel, persistent=True) #f'{self.ns_prefix}
 
         # self.__respawn_models = rospy.ServiceProxy('respawn_models', RespawnModels,persistent=True)
         # self.__respawn_models = rospy.ServiceProxy('%s/respawn_models' % self.NS, RespawnModels)
@@ -88,7 +89,7 @@ class ObstaclesManager:
         # a tuple stores the indices of the non-occupied spaces. format ((y,....),(x,...)
         self._free_space_indices = generate_freespace_indices(self.map)
 
-    def register_obstacles(self, num_obstacles: int, model_yaml_file_path: str, start_pos: list = []):
+    def register_obstacles(self, num_obstacles: int, model_yaml_file_path: str, start_pos: list = [],type_obstacle:str='dynamic'):
         """register the obstacles defined by a yaml file and request flatland to respawn the them.
 
         Args:
@@ -111,7 +112,7 @@ class ObstaclesManager:
         model_name = os.path.basename(model_yaml_file_path).split('.')[0]
         name_prefix = self._obstacle_name_prefix + '_' + model_name
 
-        if type_obstacle == 'obstacles_dynamic':
+        if type_obstacle == 'human':
             # print("asad",num_obstacles)
             self.spawn_random_peds_in_world(num_obstacles)
         else:
@@ -130,11 +131,11 @@ class ObstaclesManager:
                     if len(start_pos) == 0:
                     # x, y, theta = get_random_pos_on_map(self._free_space_indices, self.map,)
                     # set the postion of the obstacle out of the map to hidden them
-                    x = self.map.info.origin.position.x - 3 * \
-                        self.map.info.resolution * self.map.info.height
-                    y = self.map.info.origin.position.y - 3 * \
-                        self.map.info.resolution * self.map.info.width
-                    theta = theta = random.uniform(-math.pi, math.pi)
+                        x = self.map.info.origin.position.x - 3 * \
+                            self.map.info.resolution * self.map.info.height
+                        y = self.map.info.origin.position.y - 3 * \
+                            self.map.info.resolution * self.map.info.width
+                        theta = theta = random.uniform(-math.pi, math.pi)
                     else:
                         assert len(start_pos) == 3
                         x = start_pos[0]
@@ -192,7 +193,7 @@ class ObstaclesManager:
             self.obstacle_name_str=self.obstacle_name_str+","+f'pedsim_agent_{i+1}/dynamic_human'
         model_path = os.path.join(rospkg.RosPack().get_path(
         'simulator_setup'), 'dynamic_obstacles/person_two_legged.model.yaml')
-        self.register_obstacles(num_obstacles, model_path, "dynamic")
+        self.register_obstacles(num_obstacles, model_path, type_obstacle='human')
             # os.remove(model_path)
 ##dynamic spawn in master branch
         # for _ in range(num_obstacles):
@@ -217,7 +218,7 @@ class ObstaclesManager:
             num_vertices = random.randint(num_vertices_min, num_vertices_max)
             model_path = self._generate_random_obstacle_yaml(
                 False, num_vertices=num_vertices, min_obstacle_radius=min_obstacle_radius, max_obstacle_radius=max_obstacle_radius)
-            self.register_obstacles(1, model_path)
+            self.register_obstacles(1, model_path, type_obstacle='static')
             os.remove(model_path)
 
     def register_static_obstacle_polygon(self, vertices: np.ndarray):
@@ -229,7 +230,7 @@ class ObstaclesManager:
         assert vertices.ndim == 2 and vertices.shape[0] >= 3 and vertices.shape[1] == 2
         model_path, start_pos = self._generate_static_obstacle_polygon_yaml(
             vertices)
-        self.register_obstacles(1, model_path, start_pos)
+        self.register_obstacles(1, model_path, start_pos, type_obstacle='static')
         os.remove(model_path)
 
     def register_static_obstacle_circle(self,x,y,circle):
@@ -254,7 +255,7 @@ class ObstaclesManager:
         model_path, move_to_start_pub = self._generate_dynamic_obstacle_yaml_tween2(
             obstacle_name, obstacle_radius, linear_velocity, waypoints, is_waypoint_relative,  mode, trigger_zones)
         self._move_all_obstacles_start_pos_pubs.append(move_to_start_pub)
-        self.register_obstacles(1, model_path, start_pos)
+        self.register_obstacles(1, model_path, start_pos,type_obstacle='circle_random')
         os.remove(model_path)
 
     def move_all_obstacles_to_start_pos_tween2(self):
@@ -458,6 +459,15 @@ class ObstaclesManager:
             yaml.dump(dict_file, fd)
         return yaml_path
 
+    def min_dist_check_passed(self,points):
+        POINTS_MIN_DIST = 0.005*1.1
+        points_1_x_2 = points[None,...]
+        points_x_1_2 = points[:,None,:]
+        points_dist = ((points_1_x_2-points_x_1_2)**2).sum(axis=2).squeeze()
+        np.fill_diagonal(points_dist,1)
+        min_dist = points_dist.min()
+        return min_dist>POINTS_MIN_DIST
+
     def _generate_random_obstacle_yaml(self,
                                        is_dynamic=False,
                                        linear_velocity=0.3,
@@ -511,14 +521,18 @@ class ObstaclesManager:
             #     min_obstacle_vert, max_obstacle_vert)
         radius = random.uniform(
             min_obstacle_radius, max_obstacle_radius)
+        # When we send the request to ask flatland server to respawn the object with polygon, it will do some checks
+        # one important assert is that the minimum distance should be above this value
+        # https://github.com/erincatto/box2d/blob/75496a0a1649f8ee6d2de6a6ab82ee2b2a909f42/include/box2d/b2_common.h#L65
+        
+        points = None
+        while points is None:
+            angles = 2*np.pi*np.random.random(num_vertices)
+            points = np.array([np.cos(angles),np.sin(angles)]).T
+            if not self.min_dist_check_passed(points):
+                points = None
+        f['points'] = points.tolist()
 
-        for _ in range(num_vertices):
-            angle = 2 * math.pi * random.uniform(0, 1)
-            vert = [math.cos(angle) * radius,
-                    math.sin(angle) * radius]
-            # print(vert)
-            # print(angle)
-            f["points"].append(vert)
         body["footprints"].append(f)
         # define dict_file
         dict_file = {'bodies': [body], "plugins": []}
@@ -532,13 +546,13 @@ class ObstaclesManager:
                     # if plugin['type'] == 'PosePub':
                         
             # We added new plugin called RandomMove in the flatland repo
-            random_move = {}
-            random_move['type'] = 'RandomMove'
-            random_move['name'] = 'RandomMove Plugin'
-            random_move['linear_velocity'] = linear_velocity
-            random_move['angular_velocity_max'] = angular_velocity_max
-            random_move['body'] = 'random'
-            dict_file['plugins'].append(random_move)
+        random_move = {}
+        random_move['type'] = 'RandomMove'
+        random_move['name'] = 'RandomMove Plugin'
+        random_move['linear_velocity'] = linear_velocity
+        random_move['angular_velocity_max'] = angular_velocity_max
+        random_move['body'] = 'random'
+        dict_file['plugins'].append(random_move)
 
         with open(yaml_path, 'w') as fd:
             yaml.dump(dict_file, fd)
@@ -603,7 +617,7 @@ class ObstaclesManager:
                 object_name = topic_name[-1]
                 if object_name.startswith(self._obstacle_name_prefix):
                     if "sim" in self.ns:
-                        if self.ns[:-1] in topic_name:
+                        if self.ns in topic_name:
                             self.remove_obstacle(object_name)
                     else:
                         self.remove_obstacle(object_name)
@@ -693,6 +707,7 @@ class ObstaclesManager:
                 ped_array=ped
             else:
                 ped_array=np.vstack([ped_array,ped]) 
+        print(ped_array.shape)
         self.__respawn_peds(ped_array)
 
     def __mean_sqare_dist_(self, x, y):

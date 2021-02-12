@@ -32,22 +32,22 @@ from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl
 """ will be used upon initializing new agent """
 robot = "myrobot"
 gamma = 0.99
-n_steps = 128
-ent_coef = 0.01
-learning_rate = 2.5e-4
-vf_coef = 0.5
+n_steps = 4800
+ent_coef = 0.005
+learning_rate = 3e-4
+vf_coef = 0.2
 max_grad_norm = 0.5
 gae_lambda = 0.95
-batch_size = 64
-n_epochs = 4
+batch_size = 15
+n_epochs = 3
 clip_range = 0.2
 reward_fnc = "rule_01"
 discrete_action_space = False
 normalize = True
 start_stage = 1
-train_max_steps_per_episode = 200
-eval_max_steps_per_episode = 200
-goal_radius = 1.00
+train_max_steps_per_episode = 500
+eval_max_steps_per_episode = 500
+goal_radius = 0.25
 task_mode = "staged"    # custom, random or staged
 normalize = True
 ##########################
@@ -143,6 +143,7 @@ if __name__ == "__main__":
 
     rospy.init_node("train_node")
 
+    # rospy.init_node("debug_node")
     # generate agent name and model specific paths
     AGENT_NAME = get_agent_name(args)
     PATHS = get_paths(AGENT_NAME, args)
@@ -163,18 +164,20 @@ if __name__ == "__main__":
     task_managers=[]
     for i in range(args.n_envs):
         task_managers.append(
-            get_predefined_task(f"sim_0{i+1}", params['task_mode'], params['curr_stage'], PATHS))
+            get_predefined_task(
+                f"sim_0{i+1}", params['task_mode'], params['curr_stage'], PATHS))
 
     # instantiate gym environment
+    """
     env = SubprocVecEnv(
         [make_envs(
             task_managers[i], i, params=params, PATHS=PATHS) for i in range(args.n_envs)]
-        , start_method='fork')
-    # instantiate gym environment
-    n_envs = 1
-    task_manager = get_predefined_task(params['task_mode'], params['curr_stage'], PATHS)
+        , start_method='fork')"""
+
+    # debug
     env = DummyVecEnv(
-        [lambda: FlatlandEnv(task_manager, PATHS.get('robot_setting'), PATHS.get('robot_as'), params['reward_fnc'], params['discrete_action_space'], goal_radius=1.00, max_steps_per_episode=200)] * n_envs)
+        [make_envs(
+            task_managers[i], i, params=params, PATHS=PATHS) for i in range(args.n_envs)])
     if params['normalize']:
         env = VecNormalize(env, training=True, norm_obs=True, norm_reward=False, clip_reward=15)
 
@@ -194,7 +197,7 @@ if __name__ == "__main__":
     if params['normalize']:
         eval_env = VecNormalize(eval_env, training=False, norm_obs=True, norm_reward=False, clip_reward=15)
     eval_cb = EvalCallback(
-        eval_env, n_eval_episodes=30, eval_freq=10000, 
+        eval_env, n_eval_episodes=30, eval_freq=25000, 
         log_path=PATHS.get('eval'), 
         best_model_save_path=PATHS.get('model'), 
         deterministic=True, 
