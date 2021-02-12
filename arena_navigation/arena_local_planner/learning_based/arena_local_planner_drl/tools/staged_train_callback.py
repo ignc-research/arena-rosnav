@@ -2,7 +2,7 @@ import warnings
 import rospy
 import numpy as np
 from typing import List
-from stable_baselines3.common.callbacks import BaseCallback
+from stable_baselines3.common.callbacks import BaseCallback, EvalCallback
 from task_generator.task_generator.tasks import StagedRandomTask
 
 class InitiateNewTrainStage(BaseCallback):
@@ -18,26 +18,55 @@ class InitiateNewTrainStage(BaseCallback):
     :param task_mode (str): training task mode, if not 'staged' callback won't be called
     :param verbose:
     """
-    def __init__(self, TaskManagers: List[StagedRandomTask], treshhold_type: str, rew_threshold: float = 10, succ_rate_threshold: float = 0.8, task_mode: str = "staged", verbose = 0):
+    def __init__(self, 
+                TaskManagers: List[StagedRandomTask], 
+                treshhold_type: str, 
+                upper_threshold: float = 0, 
+                lower_threshold: float = 0, 
+                task_mode: str = "staged", 
+                verbose = 0):
+
         super(InitiateNewTrainStage, self).__init__(verbose = verbose)
         self.TaskManagers = TaskManagers
         self.threshhold_type = treshhold_type
-        assert self.threshhold_type == "rew" or self.threshhold_type == "succ", "given theshhold type neither 'rew' or 'succ'"
-        self.rew_threshold = rew_threshold
-        self.succ_rate_threshold = succ_rate_threshold
+
+        assert (self.threshhold_type == "rew" or self.threshhold_type == "succ"
+        ), "given theshhold type neither 'rew' or 'succ'"
+        
+        # default values
+        if self.threshhold_type == "rew" and upper_threshold == 0:
+            self.upper_threshold = 13
+            self.lower_threshold = 7
+        elif self.threshhold_type == "succ" and upper_threshold == 0:
+            self.upper_threshold = 0.85
+            self.lower_threshold = 0.6
+        else:
+            self.upper_threshold = upper_threshold
+            self.lower_threshold = lower_threshold
+
         self.verbose = verbose
         self.activated = bool(task_mode == "staged")
 
-    def _on_step(self) -> bool:
-        assert self.parent is not None, "'InitiateNewTrainStage' callback must be used " "with an 'EvalCallback'"
-        
-        if self.activated:
-            if self.parent.n_eval_episodes < 10:
-                warnings.warn("Only %d evaluation episodes considered for threshold monitoring" % self.parent.n_eval_episodes)
+    def _on_step(self, EvalObject: EvalCallback) -> bool:
+        assert (isinstance(EvalObject, EvalCallback)
+        ), f"InitiateNewTrainStage must be called within EvalCallback"
+    
 
-            if (self.threshhold_type == "rew" and self.parent.best_mean_reward >= self.rew_threshold) or (self.threshhold_type == "succ" and self.parent.last_success_rate >= self.succ_rate_threshold):
+        if self.activated:
+            if EvalObject.n_eval_episodes < 20:
+                warnings.warn("Only %d evaluation episodes considered for threshold monitoring," 
+                    "results might not represent agent performance well" % EvalObject.n_eval_episodes)
+            
+            if ((self.threshhold_type == "rew" and EvalObject.best_mean_reward >= self.upper_threshold) or
+                (self.threshhold_type == "succ" and EvalObject.last_success_rate >= self.upper_threshold)):
                 for task_manager in self.TaskManagers:
                     task_manager.next_stage()
-                self.parent.best_mean_reward = -np.inf
-                self.parent.last_success_rate = -np.inf
+                EvalObject.best_mean_reward = -np.inf
+                EvalObject.last_success_rate = -np.inf
+
+            if ((self.threshhold_type == "rew" and EvalObject.best_mean_reward <= self.lower_threshold) or
+                (self.threshhold_type == "succ" and EvalObject.last_success_rate <= self.lower_threshold)):
+                for task_manager in self.TaskManagers:
+                    task_manager.previous_stage()
+
         return True

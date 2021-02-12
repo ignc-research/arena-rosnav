@@ -230,7 +230,7 @@ if __name__ == "__main__":
     trainstage_cb = InitiateNewTrainStage(
         TaskManagers=task_managers, 
         treshhold_type="succ", 
-        rew_threshold=14.5, succ_rate_threshold=0.90, 
+        upper_threshold=0.9, lower_threshold=0.6, 
         task_mode=params['task_mode'], verbose=1)
     
     # instantiate eval environment
@@ -248,10 +248,10 @@ if __name__ == "__main__":
     # eval_freq: evaluate the agent every eval_freq train timesteps
     eval_cb = EvalCallback(
         eval_env, 
-        n_eval_episodes=30, eval_freq=25000, 
+        n_eval_episodes=30,         eval_freq=25000, 
         log_path=PATHS.get('eval'), best_model_save_path=PATHS.get('model'), 
         deterministic=True, 
-        callback_on_new_best=trainstage_cb)
+        callback_on_eval_end=trainstage_cb)
    
     # determine mode
     if args.custom_mlp:

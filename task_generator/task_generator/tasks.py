@@ -130,7 +130,8 @@ class StagedRandomTask(RandomTask):
         if not isinstance(start_stage, int):
             raise ValueError(
                 "Given start_stage not an Integer!")
-        if self._curr_stage < 1 or self._curr_stage > len(self._stages):
+        if (self._curr_stage < 1 or 
+            self._curr_stage > len(self._stages)):
             raise IndexError(
                 "Start stage given for training curriculum out of bounds! Has to be between {1 to %d}!" % len(self._stages))
 
@@ -144,6 +145,12 @@ class StagedRandomTask(RandomTask):
     def next_stage(self):
         if self._curr_stage < len(self._stages):
             self._curr_stage = self._curr_stage + 1
+            self._update_curr_stage_json()
+            self._initiate_stage()
+
+    def previous_stage(self):
+        if self._curr_stage > 1:
+            self._curr_stage = self._curr_stage - 1
             self._update_curr_stage_json()
             self._initiate_stage()
 
