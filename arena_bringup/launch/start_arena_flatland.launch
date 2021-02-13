@@ -54,7 +54,7 @@
 
   <!-- map server-->
   <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_path)">
-   <param name="frame_id" value="$(arg global_frame_id)"/>
+   <!-- <param name="frame_id" value="$(arg global_frame_id)"/> -->
   </node>
   
   <!-- use fake localization-->
@@ -66,8 +66,8 @@
   </include>
 
   <!-- start task_generator node -->
-  <include file="$(find arena_bringup)/launch/sublaunch/task_generator.launch" unless="$(arg train_mode)">
-  </include>
+  <!-- <include file="$(find arena_bringup)/launch/sublaunch/task_generator.launch" unless="$(arg train_mode)">
+  </include> -->
 
   <!-- start plan manager-->
   <include file="$(find arena_bringup)/launch/sublaunch/plan_manager.launch">

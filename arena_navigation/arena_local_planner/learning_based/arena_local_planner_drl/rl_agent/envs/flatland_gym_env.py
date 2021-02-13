@@ -24,7 +24,7 @@ import time
 class FlatlandEnv(gym.Env):
     """Custom Environment that follows gym interface"""
 
-    def __init__(self, ns: str, task: ABSTask, robot_yaml_path: str, settings_yaml_path: str, reward_fnc: str, is_action_space_discrete, safe_dist: float = None, goal_radius: float = 0.1, max_steps_per_episode=100, train_mode: bool = True, debug: bool = False):
+    def __init__(self, ns: str, task: ABSTask, robot_yaml_path: str, settings_yaml_path: str, reward_fnc: str, is_action_space_discrete, safe_dist: float = None, safe_dist_h: float = None, goal_radius: float = 0.1, max_steps_per_episode=100, train_mode: bool = True, debug: bool = False):
         """Default env
         Flatland yaml node check the entries in the yaml file, therefore other robot related parameters cound only be saved in an other file.
         TODO : write an uniform yaml paser node to handel with multiple yaml files.
@@ -64,14 +64,14 @@ class FlatlandEnv(gym.Env):
         self.observation_space = self.observation_collector.get_observation_space()
 
         # reward calculator
-        if safe_dist is None:
-            safe_dist = 1.5*self._robot_radius
+        # if safe_dist is None:
+        #     safe_dist = 1.5*self._robot_radius
         if safe_dist_h is None:
-            safe_dist_h = 3
+            self.safe_dist_h = 3
         
 
         self.reward_calculator = RewardCalculator(
-            robot_radius=self._robot_radius, safe_dist=1.1*self._robot_radius, goal_radius=goal_radius, rule=reward_fnc)
+            robot_radius=self._robot_radius, safe_dist=1.1*self._robot_radius, safe_dist_h= self.safe_dist_h,goal_radius=goal_radius, rule=reward_fnc)
         #     safe_dist = 1.5*self._robot_radius
 
         # self.reward_calculator = RewardCalculator(

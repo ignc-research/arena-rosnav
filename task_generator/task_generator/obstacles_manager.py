@@ -51,7 +51,7 @@ class ObstaclesManager:
         # print("passed ",rospy.rostime.get_time()-start)
         is_training=rospy.get_param("/train_mode")
         if is_training:
-            rospy.wait_for_service('step_world', timeout=20)
+            rospy.wait_for_service(f'{self.ns_prefix}step_world', timeout=20)
         # allow for persistent connections to services
         self._srv_move_model = rospy.ServiceProxy(
             f'{self.ns_prefix}move_model', MoveModel, persistent=True) 
@@ -712,7 +712,7 @@ class ObstaclesManager:
                 ped_array=ped
             else:
                 ped_array=np.vstack([ped_array,ped]) 
-        print(ped_array.shape)
+        # print(ped_array.shape)
         self.__respawn_peds(ped_array)
 
     def __mean_sqare_dist_(self, x, y):

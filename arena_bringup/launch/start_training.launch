@@ -27,8 +27,8 @@
   <param name="use_sim_time" value="true" />
   <param name="train_mode" value="true" />
   <param name="num_envs" value="$(arg num_envs)" />
-  <param name="step_size" value="$(arg step_size)" /> 
-  <param name="obs_vel" value="$(arg obs_vel)" /> 
+  <param name="step_size" value="$(arg step_size)" />
+  <param name="obs_vel" value="$(arg obs_vel)" />
   <arg name="map_path" default="$(find simulator_setup)/maps/$(arg map_folder_name)/map.yaml" />
   <param name="world_path" value="$(find simulator_setup)/maps/$(arg map_folder_name)/map.world.yaml" />
   <param name="show_viz" value="$(arg show_viz)"/>
@@ -51,21 +51,27 @@
 <env name="ROSCONSOLE_FORMAT" value="[${severity} ${time} ${logger}]: ${message}" />
 
   <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=1)">
+    <!-- <arg name="world_path" value="$(arg world_path)" /> -->
     <arg name="ns" value="$(arg ns_prefix)_01" />
   </include>
   <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=2)">
     <arg name="ns" value="$(arg ns_prefix)_02" />
+    <!-- <arg name="world_path" value="$(arg world_path)" /> -->
   </include>
   <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=3)">
     <arg name="ns" value="$(arg ns_prefix)_03" />
+    <!-- <arg name="world_path" value="$(arg world_path)" /> -->
   </include>
   <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=4)">
     <arg name="ns" value="$(arg ns_prefix)_04" />
+    <!-- <arg name="world_path" value="$(arg world_path)" /> -->
   </include>
   <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=5)">
     <arg name="ns" value="$(arg ns_prefix)_05" />
+    <!-- <arg name="world_path" value="$(arg world_path)" /> -->
   </include>
   <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=6)">
     <arg name="ns" value="$(arg ns_prefix)_06" />
+    <!-- <arg name="world_path" value="$(arg world_path)" /> -->
   </include>
 </launch>

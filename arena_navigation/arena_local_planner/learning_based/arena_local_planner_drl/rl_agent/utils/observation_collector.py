@@ -61,27 +61,33 @@ class ObservationCollector():
         
         # topic subscriber: subgoal
         #TODO should we synchoronize it with other topics
-        self._subgoal_sub = message_filters.Subscriber( f'{self.ns_prefix}/subgoal', PoseStamped)#self._subgoal_sub = rospy.Subscriber("subgoal", PoseStamped, self.callback_subgoal)
+        self._subgoal_sub = message_filters.Subscriber( f'{self.ns_prefix}subgoal', PoseStamped)#self._subgoal_sub = rospy.Subscriber("subgoal", PoseStamped, self.callback_subgoal)
         self._subgoal_sub.registerCallback(self.callback_subgoal)
 
         # service clients
         self._is_train_mode = rospy.get_param("/train_mode")
         if self._is_train_mode:
-            self._service_name_step=f'{self.ns_prefix}/step_world' 
+            self._service_name_step=f'{self.ns_prefix}step_world' 
             self._sim_step_client = rospy.ServiceProxy(self._service_name_step, StepWorld)
         
         # message_filter subscriber: laserscan, robot_pose
         self._scan_sub = message_filters.Subscriber( f'{self.ns_prefix}scan', LaserScan) 
         self._robot_state_sub = message_filters.Subscriber(f'{self.ns_prefix}robot_state', RobotStateStamped) 
-        # subscribe task distribution
-        self._service_task_generator='task_generator'
-        rospy.wait_for_service('task_generator', timeout=20)
-        self._task_generator_client = rospy.ServiceProxy(self._service_task_generator, Trigger)
-        # call the task_generator to get message of obstacle names
-        self.obstacles_name_req = TriggerRequest()
-        self.obstacles_name =self._task_generator_client(self.obstacles_name_req)
-        self.obstacles_name_str=self.obstacles_name.message
-        self.obstacles_name_list=self.obstacles_name_str.split(',')[1:]
+        # # subscribe task distribution
+        # self._service_task_generator='task_generator'
+        # rospy.wait_for_service('task_generator', timeout=20)
+        # self._task_generator_client = rospy.ServiceProxy(self._service_task_generator, Trigger)
+        # # call the task_generator to get message of obstacle names
+        # self.obstacles_name_req = TriggerRequest()
+        # self.obstacles_name =self._task_generator_client(self.obstacles_name_req)
+        # self.obstacles_name_str=self.obstacles_name.message
+        # 
+        #task_generator_node is abandoned in multi-process, here the topic is hardcoded, later should be sended from taskgeneraor
+        num_obstacles=21
+        self.obstacle_name_str=""
+        for i in range(num_obstacles):
+            self.obstacle_name_str=self.obstacle_name_str+","+f'pedsim_agent_{i+1}/dynamic_human'
+        self.obstacles_name_list=self.obstacle_name_str.split(',')[1:]
 
         # topic subscriber: human
         dynamic_obstacles_list=[i for i in self.obstacles_name_list if i.find('dynamic')!=-1]

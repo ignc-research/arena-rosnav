@@ -1,5 +1,6 @@
 <launch>
     <arg name="ns" />
+    <!-- <arg name="world_path"/> -->
 
     <!-- Don't change it if you don't know what does it mean! -->
     <arg name="global_frame_id"   value="map"/>
