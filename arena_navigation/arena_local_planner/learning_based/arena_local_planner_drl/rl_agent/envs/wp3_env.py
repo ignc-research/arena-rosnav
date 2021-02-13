@@ -64,7 +64,7 @@ class wp3Env(gym.Env):
         #sub robot position and sub global goal 
         self._robot_state_sub = rospy.Subscriber('/odom', Odometry, self.cbRobotPosition)
 
-        self._wp4train_sub = rospy.Subscriber('plan_manager/wp4train', PoseStamped, self.cbwp4train)
+        self._wp4train_sub = rospy.Subscriber('plan_manager/subgoal', PoseStamped, self.cbwp4train)
         self._globalPlan_sub = rospy.Subscriber('plan_manager/globalPlan', Path, self.cbglobalPlan)
         self._wp4train_reached =False
         # action agent publisher
@@ -143,7 +143,7 @@ class wp3Env(gym.Env):
     def _pub_action(self, action):
 
         #todo instead of counter, wait for robot pose = wp4train pose
-        if self._step_counter - self._previous_time > 80:
+        if self._step_counter - self._previous_time > 50:
             self._previous_time = self._step_counter
             # _, obs_dict = self.observation_collector.get_observations()
             # robot_position = obs_dict['robot_position']
@@ -212,8 +212,8 @@ class wp3Env(gym.Env):
 
     def reset(self):
         
-        self._previous_time = -100 # some negative number to infer first run
-        self._step_counter = 0
+        #self._previous_time = -100 # some negative number to infer first run
+        #self._step_counter = 0
         # set task
         # regenerate start position end goal position of the robot and change the obstacles accordingly
         self.agent_action_pub.publish(PoseStamped())

@@ -145,10 +145,10 @@ void PlanManager::execFSMCallback(const ros::TimerEvent& e) {
     }
 
     case EXEC_LOCAL: {
-      if(mode_==TRAIN){
-        //cout<<"EXEC_LOCAL"<<"Train mode"<<endl;
-        return;
-      }
+      // if(mode_==TRAIN){
+      //   //cout<<"EXEC_LOCAL"<<"Train mode"<<endl;
+      //   return;
+      // }
 
       /* check env determine, calculate criterion */
       // fake obstacle info
@@ -219,7 +219,8 @@ void PlanManager::execFSMCallback(const ros::TimerEvent& e) {
 
     case REPLAN_MID: {
       if(mode_==TRAIN){
-        subgoal_pub_.publish(end_state_->to_PoseStampted());
+        subgoal_pub_.publish(planner_collector_->subgoal_);
+        //subgoal_pub_.publish(end_state_->to_PoseStampted());
         visualization_->drawSubgoal(end_state_->to_PoseStampted(), 0.3, Eigen::Vector4d(0, 0, 0, 1.0));
         cout<<"MID_REPLAN Success"<<endl;
         globalPlan_pub_.publish(planner_collector_->global_path_);
@@ -241,7 +242,7 @@ void PlanManager::execFSMCallback(const ros::TimerEvent& e) {
       double dist_to_goal=1.0;
       double obstacle_info=1.0;
       double sensor_info=1.0;
-      
+      globalPlan_pub_.publish(planner_collector_->global_path_);
       /* new waypoint generation*/
       bool get_subgoal_success = planner_collector_->generate_subgoal(cur_state_,end_state_, planner_collector_->global_path_,obstacle_info,sensor_info);
       
