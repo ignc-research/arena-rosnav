@@ -6,7 +6,7 @@
   <arg name="world_path" default="$(find simulator_setup)/maps/$(arg map_folder_name)/map.world.yaml" />
 
   <!-- launch flatland server -->
-  <node name="flatland_server" pkg="flatland_server" type="flatland_server" output="screen" ns="$(arg ns)">  
+  <node name="flatland_server" pkg="flatland_server" type="flatland_server" output="screen" ns="$(arg ns)" launch-prefix="xterm -e gdb -ex run --args">  
     <!-- remapping for namespace -->
     <param name="world_path" value="$(arg world_path)" />
     <remap from="/clock" to="/$(arg ns)/clock"/>

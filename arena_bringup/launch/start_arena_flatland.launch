@@ -9,7 +9,7 @@
 
 
     <!-- <param name="use_sim_time" value="true"/> -->
-	  <arg name="ns" default="sim1"/>
+	  <arg name="ns" default="sim_01"/>
     <!-- <arg name="map_path"/>  -->
     <!-- <arg name="update_rate"/>  -->
 
@@ -39,13 +39,11 @@
   
  <!-- use simulator and rviz-->
   <include file="$(find arena_bringup)/launch/sublaunch/flatland_simulator.launch">
+    <arg name="ns"                value="$(arg ns)"/>
     <arg name="world_path"      value="$(arg world_path)"/>
-
     <arg name="update_rate"     default="50.0"/>
     <arg name="step_size"       default="0.05"/>
-
     <arg name="show_viz"        default="true"/>
-
     <arg name="viz_pub_rate"    default="30.0"/>
     <arg name="use_rviz"        default="$(arg use_viz)"/>  
     <arg name="train_mode"      value="$(arg train_mode)"/>
@@ -71,6 +69,7 @@
 
   <!-- start plan manager-->
   <include file="$(find arena_bringup)/launch/sublaunch/plan_manager.launch">
+    <arg name="ns"                value="$(arg ns)"/>
     <arg name="train_mode"        value="$(arg train_mode)"/>
     <arg name="global_frame_id"   value="$(arg global_frame_id)"/>
     <arg name="odom_frame_id"     value="$(arg odom_frame_id)"/>

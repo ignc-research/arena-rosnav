@@ -83,11 +83,14 @@ class ObservationCollector():
         # self.obstacles_name_str=self.obstacles_name.message
         # 
         #task_generator_node is abandoned in multi-process, here the topic is hardcoded, later should be sended from taskgeneraor
-        num_obstacles=21
-        self.obstacle_name_str=""
-        for i in range(num_obstacles):
-            self.obstacle_name_str=self.obstacle_name_str+","+f'pedsim_agent_{i+1}/dynamic_human'
+        # num_obstacles=21
+        self.obstacle_name_str=rospy.get_param(f'{self.ns_prefix}agent_topic_string')
+        self.test_topic_get=rospy.get_published_topics()
+        print(self.test_topic_get)
+        # for i in range(num_obstacles):
+        #     self.obstacle_name_str=self.obstacle_name_str+","+f'{self.ns_prefix}pedsim_agent_{i+1}/dynamic_human'
         self.obstacles_name_list=self.obstacle_name_str.split(',')[1:]
+        # print(self.obstacles_name_list)
 
         # topic subscriber: human
         dynamic_obstacles_list=[i for i in self.obstacles_name_list if i.find('dynamic')!=-1]
@@ -96,6 +99,7 @@ class ObservationCollector():
         self._human_postion, self._human_vel= [None]*len(dynamic_obstacles_list),  [None]*len(dynamic_obstacles_list)
         # print('dynamic',dynamic_obstacles_list)
         for  self.i, dynamic_name in enumerate(dynamic_obstacles_list):
+            # print(dynamic_name)
             self._dynamic_obstacle[self.i] = message_filters.Subscriber(dynamic_name, Odometry)
         # self._is_train_mode = rospy.get_param("train_mode")
         # if self._is_train_mode:
@@ -104,7 +108,7 @@ class ObservationCollector():
 
         # message_filters.TimeSynchronizer: call callback only when all sensor info are ready
         self.sychronized_list=[self._scan_sub, self._robot_state_sub]+self._dynamic_obstacle
-        self.ts = message_filters.ApproximateTimeSynchronizer(self.sychronized_list,100,slop=0.05)#,allow_headerless=True)
+        self.ts = message_filters.ApproximateTimeSynchronizer(self.sychronized_list,100,slop=0.05) #,allow_headerless=True)
         self.ts.registerCallback(self.callback_observation_received)
     
     def get_observation_space(self):
@@ -124,13 +128,13 @@ class ObservationCollector():
 
         if self._is_train_mode:
             self.call_service_takeSimStep()
-        with self._sub_flags_con:
-            while not all_sub_received():
-                self._sub_flags_con.wait()  # replace it with wait for later
-            reset_sub()
+        # with self._sub_flags_con:
+        #     while not all_sub_received():
+        #         self._sub_flags_con.wait()  # replace it with wait for later
+        #     reset_sub()
         # rospy.logdebug(f"Current observation takes {i} steps for Synchronization")
-        #print(f"Current observation takes {i} steps for Synchronization")
-        scan = self._scan.ranges.astype(np.float32)
+        # print(f"Current observation takes {i} steps for Synchronization")
+        scan = np.array(self._scan.ranges).astype(np.float32)
         rho, theta = ObservationCollector._get_goal_pose_in_robot_frame(
             self._subgoal, self._robot_pose)
         merged_obs = np.hstack([scan, np.array([rho, theta])])
@@ -140,6 +144,7 @@ class ObservationCollector():
         rho_h, theta_h = [None]*len(self._human_postion), [None]*len(self._human_postion)
         for  i, position in enumerate(self._human_postion):
             #TODO temporarily use the same fnc of _get_goal_pose_in_robot_frame
+            print("human position",position)
             rho_h[i], theta_h[i] = ObservationCollector._get_goal_pose_in_robot_frame(position,self._robot_pose)
             merged_obs = np.hstack([merged_obs, np.array([rho_h[i],theta_h[i]])])
         obs_dict['human_in_robot_frame'] = np.vstack([np.array(rho_h),np.array(theta_h)])

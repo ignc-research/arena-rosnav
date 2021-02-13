@@ -115,6 +115,7 @@ class ObstaclesManager:
 
         if type_obstacle == 'human':
             # print("asad",num_obstacles)
+            self.__remove_all_peds()
             self.spawn_random_peds_in_world(num_obstacles)
         else:
             count_same_type = sum(
@@ -190,8 +191,8 @@ class ObstaclesManager:
             max_obstacle_radius (float, optional): the maximum radius of the obstacle. Defaults to 0.5.
         """
         # self.human_id=0
-        for i in range(num_obstacles):
-            self.obstacle_name_str=self.obstacle_name_str+","+f'pedsim_agent_{i+1}/dynamic_human'
+        # for i in range(num_obstacles):
+        #     self.obstacle_name_str=self.obstacle_name_str+","+f'pedsim_agent_{i+1}/dynamic_human'
         model_path = os.path.join(rospkg.RosPack().get_path(
         'simulator_setup'), 'dynamic_obstacles/person_two_legged.model.yaml')
         self.register_obstacles(num_obstacles, model_path, type_obstacle='human')
@@ -629,18 +630,35 @@ class ObstaclesManager:
 
     def __respawn_peds(self, peds):
         """
-        Spawning one pedestrian in the simulation.
+        Spawning one pedestrian in the simulation. The type of pedestrian is randomly decided here.
+        TODO: the task generator later can decide the number of the agents
+        ADULT = 0, CHILD = 1, ROBOT = 2, ELDER = 3,
+        ADULT_AVOID_ROBOT = 10, ADULT_AVOID_ROBOT_REACTION_TIME = 11
         :param  start_pos start position of the pedestrian.
         :param  wps waypoints the pedestrian is supposed to walk to.
         :param  id id of the pedestrian.
         """
-        self.__ped_type=0
-        self.__ped_file=os.path.join(rospkg.RosPack().get_path(
-            'simulator_setup'), 'dynamic_obstacles/person_two_legged.model.yaml')
         srv = SpawnPeds()
         srv.peds = []
         # print(peds)
-        for ped in peds:
+        self.agent_topic_str=''
+        for i, ped in enumerate(peds):
+            elements = [0, 1, 3]
+            probabilities = [0.5, 0.2, 0.3]        
+            self.__ped_type=np.random.choice(elements, 1, p=probabilities)[0]            
+            if  self.__ped_type==0:
+                self.agent_topic_str+=f',{self.ns_prefix}pedsim_agent_{i+1}/dynamic_human'
+                self.__ped_file=os.path.join(rospkg.RosPack().get_path(
+                'simulator_setup'), 'dynamic_obstacles/person_two_legged.model.yaml')
+            elif self.__ped_type==1:
+                self.agent_topic_str+=f',{self.ns_prefix}pedsim_agent_{i+1}/dynamic_child'
+                self.__ped_file=os.path.join(rospkg.RosPack().get_path(
+                'simulator_setup'), 'dynamic_obstacles/person_two_legged_child.model.yaml')
+            else:
+                # print('elder')
+                self.agent_topic_str+=f',{self.ns_prefix}pedsim_agent_{i+1}/dynamic_elder'
+                self.__ped_file=os.path.join(rospkg.RosPack().get_path(
+                'simulator_setup'), 'dynamic_obstacles/person_single_circle_elder.model.yaml')
             msg = Ped()
             msg.id = ped[0]
             msg.pos = Point()
@@ -671,19 +689,10 @@ class ObstaclesManager:
                 # rospy.logwarn(response.message)
                 i_curr_try += 1
             else:
-                break
-        # if i_curr_try == max_num_try:
-        #     raise rospy.ServiceException(f" failed to repawn human")    
-            
-        #     # print("reached here start")
-        # except rospy.ServiceException:
-        #     print('Spawn object: rospy.ServiceException. Closing serivce')
-        #     try:
-        #         self._srv_spawn_model.close()
-        #     except AttributeError:
-        #         print('Spawn object close(): AttributeError.')
-        #         return
+                break            
+        # print("reached here respawn_humans")
         self.__peds = peds
+        rospy.set_param(f'{self.ns_prefix}agent_topic_string', self.agent_topic_str)
         return
 
     def spawn_random_peds_in_world(self, n:int, safe_distance:float=3.5, forbidden_zones: Union[list, None] = None):

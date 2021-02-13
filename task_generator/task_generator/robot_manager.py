@@ -30,11 +30,16 @@ class RobotManager:
             robot_yaml_path (str): the file name of the robot yaml file.
 
         """
-        self.ns = ns
+        # print("ns is ",ns)
+        if ns =='':
+            self.ns="sim_01"
+        else:
+            self.ns = ns
         self.ns_prefix = "/" if ns == "" else "/"+ns+"/"
+        # print("ns",f'{self.ns_prefix}flatland_server/step_size')
 
         self.is_training_mode = rospy.get_param("/train_mode")
-        self.step_size = rospy.get_param("/step_size") #/flatland_server
+        self.step_size = rospy.get_param(f'{self.ns_prefix}flatland_server/step_size') #f'{self.ns_prefix}flatland_server
         self._get_robot_configration(robot_yaml_path)
         # setup proxy to handle  services provided by flatland
         rospy.wait_for_service(f'{self.ns_prefix}move_model', timeout=timeout)

@@ -20,7 +20,7 @@ class TaskGenerator:
         mode = rospy.get_param("/task_generator_node/task_mode")
         scenerios_json_path = rospy.get_param("/task_generator_node/scenerios_json_path")
         paths = {"scenerios_json_path": scenerios_json_path}
-        self.task = get_predefined_task(ns="",mode=mode, PATHS=paths)
+        self.task = get_predefined_task(ns="sim_01",mode=mode, PATHS=paths)
 
         # if auto_reset is set to true, the task generator will automatically reset the task
         # this can be activated only when the mode set to 'ScenerioTask'

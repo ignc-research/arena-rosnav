@@ -7,7 +7,7 @@
   <!-- <param name="world_path" value="$(find simulator_setup)/maps/$(arg map_folder_name)/map.world.yaml" /> -->
 
   <!-- map server-->
-  <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_path)" launch-prefix="xterm -e gdb -ex run --args">
+  <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_path)">
     <!-- In multi-env training /clock not available, since we only want one map_server, it's clock topic is remapped to /clock -->
     <remap from="/clock" to="/$(arg ns_prefix)_01/clock" />
   </node>

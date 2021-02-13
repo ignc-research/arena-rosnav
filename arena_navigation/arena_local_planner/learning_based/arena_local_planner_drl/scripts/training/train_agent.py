@@ -213,6 +213,7 @@ if __name__ == "__main__":
     # task managers for each simulation
     task_managers=[]
     for i in range(args.n_envs):
+        # print("n",args.n_envs)
         task_managers.append(
             get_predefined_task(
                 f"sim_0{i+1}", params['task_mode'], params['curr_stage'], PATHS))

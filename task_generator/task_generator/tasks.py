@@ -52,8 +52,6 @@ class RandomTask(ABSTask):
 
     def __init__(self, obstacles_manager: ObstaclesManager, robot_manager: RobotManager):
         super().__init__(obstacles_manager, robot_manager)
-        #publish the obstacles name
-        # self.pub_obstacles_name.publish(self.obstacles_manager.obstacle_name_str)
 
     def reset(self):
         """[summary]
@@ -73,8 +71,6 @@ class RandomTask(ABSTask):
                                 self.robot_manager.ROBOT_RADIUS)]
                     self.obstacles_manager.setForbidden_zones(forbiddenZones)
                     self.obstacles_manager.reset_pos_obstacles_random(forbidden_zones=forbiddenZones)
-                    # publish the obstacles name
-                    # self.pub_obstacles_name.publish(self.obstacles_manager.obstacle_name_str)
                     break
                 except rospy.ServiceException as e:
                     rospy.logwarn(repr(e))
@@ -94,15 +90,11 @@ class ManualTask(ABSTask):
         self._goal = Pose2D()
         self._new_goal_received = False
         self._manual_goal_con = Condition()
-        #publish the obstacles name
-        # self.pub_obstacles_name.publish(self.obstacles_manager.obstacle_name_str)
 
     def reset(self):
         while True:
             with self._map_lock:
                 self.obstacles_manager.reset_pos_obstacles_random()
-                # publish the obstacles name
-                # self.pub_obstacles_name.publish(self.obstacles_manager.obstacle_name_str)
                 self.robot_manager.set_start_pos_random()
                 with self._manual_goal_con:
                     # the user has 60s to set the goal, otherwise all objects will be reset.
@@ -377,7 +369,7 @@ def get_predefined_task(ns: str, mode="random", start_stage: int = 1, PATHS: dic
     # Tasks will be moved to other classes or functions.
     task = None
     if mode == "random":
-        obstacles_manager.register_random_obstacles(30, 0.7)
+        obstacles_manager.register_random_obstacles(21, 1.0)
         task = RandomTask(obstacles_manager, robot_manager)
         print("random tasks requested")
     if mode == "manual":
