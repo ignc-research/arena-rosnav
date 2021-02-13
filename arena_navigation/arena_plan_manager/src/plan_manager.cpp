@@ -37,6 +37,7 @@ void PlanManager::init(ros::NodeHandle &nh)
   odom_sub_ = nh.subscribe("odometry/ground_truth", 1, &PlanManager::odometryCallback, this,ros::TransportHints().tcpNoDelay()); // odom  //odometry/ground_truth
 
   // publisher
+  globalPlan_pub_  = nh.advertise<nav_msgs::Path>("globalPlan",10); // relative name:/ns/node_name/globalPlan
   subgoal_pub_ = nh.advertise<geometry_msgs::PoseStamped>("subgoal", 10); // relative name:/ns/subgoal
   robot_state_pub_ = nh.advertise<arena_plan_msgs::RobotStateStamped>("robot_state", 10);
   /* test purpose*/
@@ -255,6 +256,7 @@ void PlanManager::execFSMCallback(const ros::TimerEvent &e)
   {
     if (mode_ == TRAIN)
     {
+      globalPlan_pub_.publish(planner_collector_->global_path_);
       subgoal_pub_.publish(end_state_->to_PoseStampted());
       visualization_->drawSubgoal(end_state_->to_PoseStampted(), 0.3, Eigen::Vector4d(0, 0, 0, 1.0));
       cout << "MID_REPLAN Success" << endl;
@@ -268,7 +270,7 @@ void PlanManager::execFSMCallback(const ros::TimerEvent &e)
 
     /* new waypoint generation*/
     bool get_subgoal_success = planner_collector_->generate_subgoal(cur_state_, end_state_, planner_collector_->global_path_, obstacle_info, sensor_info);
-
+    globalPlan_pub_.publish(planner_collector_->global_path_);    
     if (get_subgoal_success)
     {
       // success: publish new subgoal & going to state EXEC_LOCAL
