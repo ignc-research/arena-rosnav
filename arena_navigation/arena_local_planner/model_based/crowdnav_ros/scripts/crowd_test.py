@@ -85,7 +85,6 @@ class TestNode():
 
         # print("received")
 
-
     def max_yaw(self, a):
         phi = 0
         phi_tol = 0.1
@@ -110,6 +109,7 @@ class TestNode():
 
         # print(phi, a)
         return phi
+    
     def cbControl(self,event):
         twist = Twist()
         if not self.tb3.goalReached():
@@ -156,7 +156,7 @@ class TestNode():
         # velocity
         obstacle_vx = [0.0,0.0,0.0,0.0,0.0]
         obstacle_vy = [0.0,0.0,0.0,0.0,0.0]
-        obstacle_radius = 4
+        obstacle_radius = 6
         if True:
             for prop in self.other_agents_state:
                 if prop == "pos":
@@ -196,7 +196,6 @@ class TestNode():
 
         self.tb3.update_action(action)
         self.update_angle2Action()
-
 
     def visualize_other_agents(self,xs,ys,radii,labels):
             markers = MarkerArray()
@@ -245,7 +244,7 @@ def run():
     # rospy.sleep(0.1) # sometimes node isnt recognized
     print('==================================\ncrowd-node started\n==================================')
 
-    policy_name = "lstm"
+    policy_name = "sarl"
 
     device = 'cpu'
     phase = 'test'

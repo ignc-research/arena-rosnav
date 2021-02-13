@@ -235,7 +235,7 @@ class NN_tb3():
             return
 
         elif self.operation_mode.mode == self.operation_mode.SPIN_IN_PLACE:
-            print('Spinning in place.')
+            # print('Spinning in place.')
             self.stop_moving_flag = False
             angle_to_goal = np.arctan2(self.global_goal.pose.position.y - self.pose.pose.position.y, \
                 self.global_goal.pose.position.x - self.pose.pose.position.x) 
@@ -249,7 +249,7 @@ class NN_tb3():
                 self.pub_twist.publish(twist)
                 # print twist
             else:
-                print('Done spinning in place')
+                # print('Done spinning in place')
                 self.operation_mode.mode = self.operation_mode.NN
                 # self.new_global_goal_received = False
             return
