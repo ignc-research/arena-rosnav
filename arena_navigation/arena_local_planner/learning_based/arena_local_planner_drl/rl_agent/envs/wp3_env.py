@@ -68,7 +68,7 @@ class wp3Env(gym.Env):
         self._globalPlan_sub = rospy.Subscriber('plan_manager/globalPlan', Path, self.cbglobalPlan)
         self._wp4train_reached =False
         # action agent publisher
-        self.agent_action_pub = rospy.Publisher('move_base_simple/goal', PoseStamped, queue_size=1)
+        self.agent_action_pub = rospy.Publisher('plan_manager/wp4train', PoseStamped, queue_size=1)
 
         # service clients
         self._is_train_mode = rospy.get_param("train_mode")
@@ -143,7 +143,7 @@ class wp3Env(gym.Env):
     def _pub_action(self, action):
 
         #todo instead of counter, wait for robot pose = wp4train pose
-        if self._step_counter - self._previous_time > 50:
+        if self._step_counter - self._previous_time > 10:
             self._previous_time = self._step_counter
             # _, obs_dict = self.observation_collector.get_observations()
             # robot_position = obs_dict['robot_position']

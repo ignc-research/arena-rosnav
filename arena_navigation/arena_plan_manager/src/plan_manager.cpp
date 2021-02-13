@@ -231,7 +231,8 @@ void PlanManager::execFSMCallback(const ros::TimerEvent& e) {
       
         if (get_subgoal_success) {
         // success: publish new subgoal & going to state EXEC_LOCAL
-          wp4train_pup_.publish(planner_collector_->subgoal_);
+          subgoal_pub_.publish(planner_collector_->subgoal_);
+          //wp4train_pup_.publish(planner_collector_->subgoal_);
           visualization_->drawSubgoal(planner_collector_->subgoal_, 0.3, Eigen::Vector4d(0, 0, 0, 1.0));
           changeFSMExecState(EXEC_LOCAL, "FSM"); 
           }
