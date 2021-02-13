@@ -73,16 +73,6 @@ class ObservationCollector():
         # message_filter subscriber: laserscan, robot_pose
         self._scan_sub = message_filters.Subscriber( f'{self.ns_prefix}scan', LaserScan) 
         self._robot_state_sub = message_filters.Subscriber(f'{self.ns_prefix}robot_state', RobotStateStamped) 
-        # # subscribe task distribution
-        # self._service_task_generator='task_generator'
-        # rospy.wait_for_service('task_generator', timeout=20)
-        # self._task_generator_client = rospy.ServiceProxy(self._service_task_generator, Trigger)
-        # # call the task_generator to get message of obstacle names
-        # self.obstacles_name_req = TriggerRequest()
-        # self.obstacles_name =self._task_generator_client(self.obstacles_name_req)
-        # self.obstacles_name_str=self.obstacles_name.message
-        # 
-        #task_generator_node is abandoned in multi-process, here the topic is hardcoded, later should be sended from taskgeneraor
         # num_obstacles=21
         self.obstacle_name_str=rospy.get_param(f'{self.ns_prefix}agent_topic_string')
         self.test_topic_get=rospy.get_published_topics()
@@ -101,10 +91,7 @@ class ObservationCollector():
         for  self.i, dynamic_name in enumerate(dynamic_obstacles_list):
             # print(dynamic_name)
             self._dynamic_obstacle[self.i] = message_filters.Subscriber(dynamic_name, Odometry)
-        # self._is_train_mode = rospy.get_param("train_mode")
-        # if self._is_train_mode:
-        #     self._service_name_step='step_world'
-        #     self._sim_step_client = rospy.ServiceProxy(self._service_name_step, StepWorld)
+
 
         # message_filters.TimeSynchronizer: call callback only when all sensor info are ready
         self.sychronized_list=[self._scan_sub, self._robot_state_sub]+self._dynamic_obstacle
