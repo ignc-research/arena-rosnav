@@ -13,6 +13,7 @@ from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Pose2D,PoseStamped, PoseWithCovarianceStamped
 from geometry_msgs.msg import Twist
 from arena_plan_msgs.msg import RobotState,RobotStateStamped
+from nav_msgs.msg import Path
 
 # services
 from flatland_msgs.srv import StepWorld,StepWorldRequest
@@ -51,6 +52,7 @@ class ObservationCollector():
         self._robot_pose = Pose2D()
         self._robot_vel = Twist()
         self._subgoal =  Pose2D()
+        self._globalPlan = Path()
         
 
         # message_filter subscriber: laserscan, robot_pose
@@ -92,6 +94,8 @@ class ObservationCollector():
         obs_dict = {}
         obs_dict["laser_scan"] = scan
         obs_dict['goal_in_robot_frame'] = [rho,theta]
+        obs_dict['subgoal'] = self._subgoal
+        obs_dict['robot_pose'] = self._robot_pose
         return merged_obs, obs_dict
     
     @staticmethod

@@ -84,8 +84,9 @@ class wp3Env(gym.Env):
         #global variables for subscriber callbacks
         self._robot_pose = Pose2D()
         self._globalPlan = Path()
+        self._subgoal = Pose2D()
         self._wp4train = PoseStamped()
-
+        
         self._previous_time = 0
         self._step_counter = 0
         # # get observation
@@ -141,26 +142,32 @@ class wp3Env(gym.Env):
                                                high=np.array([angular_range[1]]), dtype=np.float)
 
     def _pub_action(self, action):
+        action_msg = PoseStamped()
 
-        #todo instead of counter, wait for robot pose = wp4train pose
+        #wait for robot to reach the waypoint first in about 10 steps
         if self._step_counter - self._previous_time > 10:
             self._previous_time = self._step_counter
-            # _, obs_dict = self.observation_collector.get_observations()
-            # robot_position = obs_dict['robot_position']
-            action_msg = PoseStamped()
+            _, obs_dict = self.observation_collector.get_observations()
+            self._robot_pose = obs_dict['robot_pose']
+            self._subgoal = obs_dict['subgoal']
+            dist_robot_goal = np.array([self._robot_pose.x - self._subgoal.x, self._robot_pose.y - self._subgoal.y])
+            dist_rg = np.linalg.norm(dist_robot_goal)
+            
             #todo consider the distance to global path when choosing next optimal waypoint
             #caluclate range with current robot position and transform into posestamped message 
             # robot_position+(angle*range)
             #send a goal message as action, remeber to normalize the quaternions (put orientationw as 1) and set the frame id of the goal! 
-            angle_grad = math.degrees(action[0]) # e.g. 90 degrees
-            action_msg.pose.position.x = self._wp4train.pose.position.x + (self.range_circle*math.cos(angle_grad))         
-            action_msg.pose.position.y = self._wp4train.pose.position.y + (self.range_circle*math.sin(angle_grad))   
-            dist_robot_goal = np.array([(self.range_circle*math.cos(angle_grad)) ,(self.range_circle*math.sin(angle_grad))])
-            dist_norm = np.linalg.norm(dist_robot_goal)
-            action_msg.pose.orientation.w = 1
-            action_msg.header.frame_id ="map"
-            self.agent_action_pub.publish(action_msg)
-            print(angle_grad)
+            if dist_rg < 0.5:
+                action_msg.pose = self._subgoal.pose 
+            else:
+                angle_grad = math.degrees(action[0]) # e.g. 90 degrees
+                action_msg.pose.position.x = self._wp4train.pose.position.x + (self.range_circle*math.cos(angle_grad))         
+                action_msg.pose.position.y = self._wp4train.pose.position.y + (self.range_circle*math.sin(angle_grad))   
+                action_msg.pose.orientation.w = 1
+                action_msg.header.frame_id ="map"
+                self.agent_action_pub.publish(action_msg)
+                print(angle_grad)
+
             #rospy.sleep(1)
             #print("chosen action:  {0}, deegrees:   {1}, sum: {2}, cos(): {3}, robot_position:   {4}".format(action[0], math.degrees(action[0]), (self.range_circle*np.cos(math.degrees(action[0]))),np.cos(math.degrees(action[0])), robot_position ))
 
