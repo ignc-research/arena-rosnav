@@ -35,7 +35,7 @@ class ABSTask(ABC):
         # a mutex keep the map is not unchanged during reset task.
 
     @abstractmethod
-    def reset(self):
+    def reset(self,obs_dict=None):
         """
         a funciton to reset the task. Make sure that _map_lock is used.
         """
@@ -53,15 +53,16 @@ class RandomTask(ABSTask):
     def __init__(self, obstacles_manager: ObstaclesManager, robot_manager: RobotManager):
         super().__init__(obstacles_manager, robot_manager)
 
-    def reset(self):
+    def reset(self,obs_dict=None):
         """[summary]
         """
+        self.last_obs_dict=obs_dict
         with self._map_lock:
             max_fail_times = 3
             fail_times = 0
             while fail_times < max_fail_times:
                 try:
-                    start_pos, goal_pos = self.robot_manager.set_start_pos_goal_pos()
+                    start_pos, goal_pos = self.robot_manager.set_start_pos_goal_pos(obs_dict=self.last_obs_dict)
                     forbiddenZones=[
                             (start_pos.x,
                                 start_pos.y,

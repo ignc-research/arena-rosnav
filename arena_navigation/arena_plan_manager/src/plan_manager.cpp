@@ -34,7 +34,7 @@ void PlanManager::init(ros::NodeHandle &nh)
 
   // subscriber
   goal_sub_ = nh.subscribe("goal", 1, &PlanManager::goalCallback, this);
-  odom_sub_ = nh.subscribe("odometry/ground_truth", 1, &PlanManager::odometryCallback, this,ros::TransportHints().tcpNoDelay()); // odom  //odometry/ground_truth
+  odom_sub_ = nh.subscribe("sim_01/odometry/ground_truth", 1, &PlanManager::odometryCallback, this,ros::TransportHints().tcpNoDelay()); // odom  //odometry/ground_truth
 
   // publisher
   subgoal_pub_ = nh.advertise<geometry_msgs::PoseStamped>("subgoal", 10); // relative name:/ns/subgoal

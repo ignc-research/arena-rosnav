@@ -4,7 +4,7 @@
   
   <arg name="local_planner"   default="dwa"/>
   <arg name="rviz_file"       default="nav"/>
-  <arg name="train_mode"      default="false"/>
+  <arg name="train_mode"      default="true"/>
   <param name="train_mode"    value="$(arg train_mode)"/>
 
 

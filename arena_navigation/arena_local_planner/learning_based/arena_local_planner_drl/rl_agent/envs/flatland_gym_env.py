@@ -67,7 +67,7 @@ class FlatlandEnv(gym.Env):
         # if safe_dist is None:
         #     safe_dist = 1.5*self._robot_radius
         if safe_dist_h is None:
-            self.safe_dist_h = 3
+            self.safe_dist_h = 1
         
 
         self.reward_calculator = RewardCalculator(
@@ -78,7 +78,7 @@ class FlatlandEnv(gym.Env):
         #     robot_radius=self._robot_radius, safe_dist=1.1*self._robot_radius, goal_radius=goal_radius, rule=reward_fnc)
 
         # action agent publisher
-        self.agent_action_pub = rospy.Publisher(f'{self.ns_prefix}cmd_vel', Twist, queue_size=1) 
+        self.agent_action_pub = rospy.Publisher(f'{self.ns_prefix}sim_01/cmd_vel', Twist, queue_size=1) 
         # service clients
         self._is_train_mode = rospy.get_param("/train_mode")
         if self._is_train_mode:
@@ -90,6 +90,8 @@ class FlatlandEnv(gym.Env):
         self._max_steps_per_episode = max_steps_per_episode
         # # get observation
         # obs=self.observation_collector.get_observations()
+        #store the obeservations from the last step for spawning the robot
+        self.last_obs_dict=None
 
     def setup_by_configuration(self, robot_yaml_path: str, settings_yaml_path: str):
         """get the configuration from the yaml file, including robot radius, discrete action space and continuous action space.
@@ -175,7 +177,7 @@ class FlatlandEnv(gym.Env):
                 done = True
                 info['done_reason'] = 0
                 info['is_success'] = 0
-
+        self.last_obs_dict=obs_dict
         return merged_obs, reward, done, info
 
     def reset(self):
@@ -185,7 +187,7 @@ class FlatlandEnv(gym.Env):
         self.agent_action_pub.publish(Twist())
         if self._is_train_mode:
             self._sim_step_client()
-        self.task.reset()
+        self.task.reset(self.last_obs_dict)
         self.reward_calculator.reset()
         self._steps_curr_episode = 0
         obs, _ = self.observation_collector.get_observations()

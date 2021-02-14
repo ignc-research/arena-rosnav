@@ -179,7 +179,7 @@ if __name__ == "__main__":
                         max_steps_per_episode=params['eval_max_steps_per_episode'], 
                         train_mode=False, debug=args.debug
                         ),
-                    PATHS.get('eval'), info_keywords=("done_reason",))
+                    PATHS.get('eval'), info_keywords=("done_reason", "is_success",))
     eval_env.seed(12321)
     eval_env = DummyVecEnv([lambda:eval_env])
     if params['normalize']:

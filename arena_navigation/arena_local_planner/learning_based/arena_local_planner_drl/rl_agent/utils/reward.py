@@ -64,7 +64,7 @@ class RewardCalculator():
         self._reward_goal_approached(goal_in_robot_frame)
         
 
-    def _cal_reward_rule_01(self, laser_scan: np.ndarray, goal_in_robot_frame: Tuple[float,float],*args,**kwargs):
+    def _cal_reward_rule_01(self, laser_scan: np.ndarray, goal_in_robot_frame: Tuple[float,float], adult_in_robot_frame:np.ndarray, child_in_robot_frame:np.ndarray,elder_in_robot_frame:np.ndarray,*args,**kwargs):
         
         self._reward_goal_reached(goal_in_robot_frame)
         self._reward_safe_dist(laser_scan)
@@ -141,18 +141,21 @@ class RewardCalculator():
             self.curr_reward -= punishment
             self.info['is_done'] = True
             self.info['done_reason'] = 3
+            self.info['is_success'] = 0
 
     def _reward_child_safety_dist(self, child_in_robot_frame, punishment = 50):
         if child_in_robot_frame[0].min()<self.safe_dist_child:
             self.curr_reward -= punishment
             self.info['is_done'] = True
             self.info['done_reason'] = 3
+            self.info['is_success'] = 0
 
     def _reward_elder_safety_dist(self, elder_in_robot_frame, punishment = 50):
         if elder_in_robot_frame[0].min()<self.safe_dist_elder:
             self.curr_reward -= punishment
             self.info['is_done'] = True
             self.info['done_reason'] = 3
+            self.info['is_success'] = 0
     
     def _reward_safe_dist(self, laser_scan, punishment = 0.15):
         if laser_scan.min() < self.safe_dist:

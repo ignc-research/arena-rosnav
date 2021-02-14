@@ -6,6 +6,7 @@ import threading
 from typing import Union
 import rospy
 import tf
+import numpy as np
 from flatland_msgs.srv import MoveModel, MoveModelRequest, SpawnModelRequest, SpawnModel
 from flatland_msgs.srv import StepWorld
 from geometry_msgs.msg import Pose2D, PoseWithCovarianceStamped, PoseStamped
@@ -37,6 +38,10 @@ class RobotManager:
             self.ns = ns
         self.ns_prefix = "/" if ns == "" else "/"+ns+"/"
         # print("ns",f'{self.ns_prefix}flatland_server/step_size')
+
+        self.safe_dist_adult=1
+        self.safe_dist_child=2
+        self.safe_dist_elder=3
 
         self.is_training_mode = rospy.get_param("/train_mode")
         self.step_size = rospy.get_param(f'{self.ns_prefix}flatland_server/step_size') #f'{self.ns_prefix}flatland_server
@@ -71,9 +76,9 @@ class RobotManager:
         self._new_global_path_generated = False
         # a condition variable used for
         self._global_path_con = threading.Condition()
-        # self._static_obstacle_name_list = []
 
     def _spawn_robot(self, robot_yaml_path: str):
+        # print("use _spwan robot")
         request = SpawnModelRequest()
         request.yaml_path = robot_yaml_path
         request.name = "myrobot"
@@ -114,6 +119,7 @@ class RobotManager:
             pose (Pose2D): target postion
         """
         # call service move_model
+        print("use move robot func")
 
         srv_request = MoveModelRequest()
         srv_request.name = self.ROBOT_NAME
@@ -132,13 +138,14 @@ class RobotManager:
                 self._step_world()
 
     def set_start_pos_random(self):
+        print("use set robot start pos random func")
         start_pos = Pose2D()
         start_pos.x, start_pos, start_pos.theta = get_random_pos_on_map(
             self._free_space_indices, self.map, self.ROBOT_RADIUS)
         self.move_robot(start_pos)
 
     def set_start_pos_goal_pos(self, start_pos: Union[Pose2D, None]
-                               = None, goal_pos: Union[Pose2D, None] = None, min_dist=1):
+                               = None, goal_pos: Union[Pose2D, None] = None, min_dist=1, min_dist_human=4, obs_dict=None):
         """set up start position and the goal postion. Path validation checking will be conducted. If it failed, an
         exception will be raised.
 
@@ -146,6 +153,8 @@ class RobotManager:
             start_pos (Union[Pose2D,None], optional): start position. if None, it will be set randomly. Defaults to None.
             goal_pos (Union[Pose2D,None], optional): [description]. if None, it will be set randomly .Defaults to None.
             min_dist (float): minimum distance between start_pos and goal_pos
+            min_dist_human(float): minumumn distance between start_pos and humans
+            obs_dict: observations from the last time step
         Exception:
             Exception("can not generate a path with the given start position and the goal position of the robot")
         """
@@ -153,9 +162,25 @@ class RobotManager:
         def dist(x1, y1, x2, y2):
             return math.sqrt((x1 - x2)**2 + (y1 - y2)**2)
 
+        forbiddenZones=[]
+        if obs_dict is not None:
+            print("calculate the forbidden zones")
+            coordinate_a=obs_dict['adult_coordinates_in_robot_frame'].T
+            for coordinate in coordinate_a:
+                forbiddenZones.append((coordinate[0],coordinate[1],self.safe_dist_adult*1.1))
+            coordinate_c=obs_dict['child_coordinates_in_robot_frame'].T
+            for coordinate in coordinate_c:
+                forbiddenZones.append((coordinate[0],coordinate[1],self.safe_dist_child*1.1))
+            coordinate_e=obs_dict['elder_coordinates_in_robot_frame'].T
+            for coordinate in coordinate_e:
+                forbiddenZones.append((coordinate[0],coordinate[1],self.safe_dist_elder*1.1))
+
+        # coordinates=np.hstack([obs_dict['adult_coordinates_in_robot_frame'] ,obs_dict['child_coordinates_in_robot_frame'] ]
+        # coordinates=np.hstack([coordinates, obs_dict['elder_coordinates_in_robot_frame']])
+
         if start_pos is None or goal_pos is None:
             # if any of them need to be random generated, we set a higher threshold,otherwise only try once
-            max_try_times = 20
+            max_try_times = 40
         else:
             max_try_times = 1
 
@@ -163,11 +188,10 @@ class RobotManager:
         start_pos_ = None
         goal_pos_ = None
         while i_try < max_try_times:
-
             if start_pos is None:
                 start_pos_ = Pose2D()
                 start_pos_.x, start_pos_.y, start_pos_.theta = get_random_pos_on_map(
-                    self._free_space_indices, self.map, self.ROBOT_RADIUS * 2)
+                    self._free_space_indices, self.map, self.ROBOT_RADIUS * 2,forbiddenZones)
             else:
                 start_pos_ = start_pos
             if goal_pos is None:
