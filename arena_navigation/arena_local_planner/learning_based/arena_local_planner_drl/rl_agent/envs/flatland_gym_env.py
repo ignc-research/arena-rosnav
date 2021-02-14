@@ -48,12 +48,12 @@ class FlatlandEnv(gym.Env):
             self.ns_prefix = '/'+ns + '/'
         else:
             self.ns_prefix = '/'
-        
-        if not debug:
-            if train_mode:
-                rospy.init_node(f'train_env_{ns[-1]}')
-            else:
-                rospy.init_node(f'eval_env_{ns[-1]}')
+        #commit for single process, need to be resumed when use multi-process
+        # if not debug:
+        #     if train_mode:
+        #         rospy.init_node(f'train_env_{ns[-1]}')
+        #     else:
+        #         rospy.init_node(f'eval_env_{ns[-1]}')
         # Define action and observation space
         # They must be gym.spaces objects
         self._is_action_space_discrete = is_action_space_discrete

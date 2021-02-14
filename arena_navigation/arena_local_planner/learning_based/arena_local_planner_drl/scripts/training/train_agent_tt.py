@@ -1,17 +1,7 @@
-import os, sys
-# sys.path.insert(0, os.path.abspath(".."))
-sys.path.append('/home/junhui/study/Masterarbeit/arenarosnav/test_ws/src/arena_rosnav')
-sys.path.append('/home/junhui/study/Masterarbeit/arenarosnav/test_ws/src/arena_rosnav/arena_navigation')
-sys.path.append('/home/junhui/study/Masterarbeit/arenarosnav/test_ws/src/arena_rosnav/arena_navigation/arena_local_planner')
-sys.path.append('/home/junhui/study/Masterarbeit/arenarosnav/test_ws/src/arena_rosnav/arena_navigation/arena_local_planner/learning_based/')
-sys.path.append('/home/junhui/study/Masterarbeit/arenarosnav/test_ws/src/arena_rosnav/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl')
-sys.path.append('/home/junhui/study/Masterarbeit/arenarosnav/test_ws/src/arena_rosnav/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/scripts')
-sys.path.append('/home/junhui/study/Masterarbeit/arenarosnav/test_ws/src/arena_rosnav/task_generator')
-sys.path.append('/home/junhui/study/Masterarbeit/arenarosnav/test_ws/src/arena_rosnav/task_generator/task_generator')
+import os
 import rospy
 
 from datetime import datetime as dt
-import time
 
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv, VecNormalize
@@ -43,15 +33,12 @@ reward_fnc = "rule_01"
 discrete_action_space = False
 normalize = True
 start_stage = 1
-train_max_steps_per_episode = 500
-eval_max_steps_per_episode = 500
-goal_radius = 0.25
-task_mode = "random"    # custom, random or staged
+task_mode = "staged"    # custom, random or staged
 normalize = True
 ##########################
 
 
-def get_agent_name(args) -> str:
+def get_agent_name(args):
     """ Function to get agent name to save to/load from file system
     
     Example names:
@@ -63,11 +50,7 @@ def get_agent_name(args) -> str:
     START_TIME = dt.now().strftime("%Y_%m_%d__%H_%M")
 
     if args.custom_mlp:
-        return (
-            "MLP_B_" + args.body 
-            + "_P_" + args.pi 
-            + "_V_" + args.vf + "_" 
-            + args.act_fn + "_" + START_TIME)
+        return "MLP_B_" + args.body + "_P_" + args.pi + "_V_" + args.vf + "_" + args.act_fn + "_" + START_TIME
     if args.load is None:
         return args.agent + "_" + START_TIME
     return args.load
@@ -82,27 +65,12 @@ def get_paths(agent_name: str, args) -> dict:
     dir = rospkg.RosPack().get_path('arena_local_planner_drl')
 
     PATHS = {
-        'model': 
-            os.path.join(
-                dir, 'agents', agent_name),
-        'tb': 
-            os.path.join(
-                dir, 'training_logs', 'tensorboard', agent_name),
-        'eval': 
-            os.path.join(
-                dir, 'training_logs', 'train_eval_log', agent_name),
-        'robot_setting': 
-            os.path.join(
-                rospkg.RosPack().get_path('simulator_setup'),
-                'robot', robot + '.model.yaml'),
-        'robot_as': 
-            os.path.join(
-                rospkg.RosPack().get_path('arena_local_planner_drl'), 
-                'configs', 'default_settings.yaml'),
-        'curriculum': 
-            os.path.join(
-                rospkg.RosPack().get_path('arena_local_planner_drl'), 
-                'configs', 'training_curriculum.yaml')
+        'model' : os.path.join(dir, 'agents', agent_name),
+        'tb' : os.path.join(dir, 'training_logs', 'tensorboard', agent_name),
+        'eval' : os.path.join(dir, 'training_logs', 'train_eval_log', agent_name),
+        'robot_setting' : os.path.join(rospkg.RosPack().get_path('simulator_setup'), 'robot', robot + '.model.yaml'),
+        'robot_as' : os.path.join(rospkg.RosPack().get_path('arena_local_planner_drl'), 'configs', 'default_settings.yaml'),
+        'curriculum' : os.path.join(rospkg.RosPack().get_path('arena_local_planner_drl'), 'configs', 'training_curriculum.yaml')
     }
     # check for mode
     if args.load is None:
@@ -129,9 +97,6 @@ def get_paths(agent_name: str, args) -> dict:
 if __name__ == "__main__":
     args, _ = parse_training_args()
 
-    # if args.debug:
-    #     rospy.init_node("debug_node", disable_signals=True)
-    # else:
     rospy.init_node("train_node")
 
     # generate agent name and model specific paths
@@ -142,46 +107,24 @@ if __name__ == "__main__":
 
     # initialize hyperparameters (save to/ load from json)
     hyperparams_obj = agent_hyperparams(
-        AGENT_NAME, robot, gamma, n_steps, ent_coef, 
-        learning_rate, vf_coef,max_grad_norm, gae_lambda, batch_size, 
-        n_epochs, clip_range, reward_fnc, discrete_action_space, normalize, 
-        task_mode, start_stage, train_max_steps_per_episode,
-        eval_max_steps_per_episode, goal_radius)
-
-    params = initialize_hyperparameters(
-        agent_name=AGENT_NAME, PATHS=PATHS, 
-        hyperparams_obj=hyperparams_obj, load_target=args.load)
+        AGENT_NAME, robot, gamma, n_steps, ent_coef, learning_rate, vf_coef,max_grad_norm, gae_lambda, batch_size, 
+        n_epochs, clip_range, reward_fnc, discrete_action_space, normalize, task_mode, start_stage)
+    params = initialize_hyperparameters(agent_name=AGENT_NAME, PATHS=PATHS, hyperparams_obj=hyperparams_obj, load_target=args.load)
 
     # instantiate gym environment
     n_envs = 1
-    task_manager = get_predefined_task("sim_01", params['task_mode'], params['curr_stage'], PATHS)
+    task_manager = get_predefined_task(params['task_mode'], params['curr_stage'], PATHS)
     env = DummyVecEnv(
-        [lambda:FlatlandEnv(
-                "sim_01", task_manager, 
-                PATHS.get('robot_setting'), PATHS.get('robot_as'), 
-                params['reward_fnc'], params['discrete_action_space'], 
-                goal_radius=params['goal_radius'], 
-                max_steps_per_episode=params['train_max_steps_per_episode'],
-                debug=args.debug
-                )] # goal_radius=params['goal_radius'], #max_steps_per_episode=params['train_max_steps_per_episode']
-                )
+        [lambda: FlatlandEnv(task_manager, PATHS.get('robot_setting'), PATHS.get('robot_as'), params['reward_fnc'], params['discrete_action_space'], goal_radius=1.00, max_steps_per_episode=200)] * n_envs)
     if params['normalize']:
         env = VecNormalize(env, training=True, norm_obs=True, norm_reward=False, clip_reward=15)
 
     # instantiate eval environment
-    trainstage_cb = InitiateNewTrainStage(TaskManagers=task_manager, treshhold_type="rew", rew_threshold=14.5, task_mode=params['task_mode'], verbose=1)
-    eval_env = Monitor(
-                   FlatlandEnv(
-                        "sim_01", task_manager, 
-                        PATHS.get('robot_setting'), PATHS.get('robot_as'), 
-                        params['reward_fnc'], params['discrete_action_space'], 
-                        goal_radius=params['goal_radius'], 
-                        max_steps_per_episode=params['eval_max_steps_per_episode'], 
-                        train_mode=False, debug=args.debug
-                        ),
-                    PATHS.get('eval'), info_keywords=("done_reason",))
-    eval_env.seed(12321)
-    eval_env = DummyVecEnv([lambda:eval_env])
+    trainstage_cb = InitiateNewTrainStage(TaskManager=task_manager, TreshholdType="rew", rew_threshold=14.5, task_mode=params['task_mode'], verbose=1)
+    eval_env = Monitor(FlatlandEnv(
+        task_manager, PATHS.get('robot_setting'), PATHS.get('robot_as'), params['reward_fnc'], params['discrete_action_space'], goal_radius=1.00, max_steps_per_episode=250),
+        PATHS.get('eval'), info_keywords=("done_reason",))
+    eval_env = DummyVecEnv([lambda: eval_env])
     if params['normalize']:
         eval_env = VecNormalize(eval_env, training=False, norm_obs=True, norm_reward=False, clip_reward=15)
     eval_cb = EvalCallback(
@@ -223,11 +166,9 @@ if __name__ == "__main__":
         n_timesteps = 60000000
     else:
         n_timesteps = args.n
-    # print("timesteps",n_timesteps)
+
     # start training
-    start = time.time()
     model.learn(total_timesteps = n_timesteps, callback=eval_cb, reset_num_timesteps = False)
-    print(f'Time passed for {n_timesteps} timesteps: {time.time()-start}s')
 
     # update the timesteps the model has trained in total
     update_total_timesteps_json(hyperparams_obj, n_timesteps, PATHS)
