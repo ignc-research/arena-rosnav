@@ -4,7 +4,7 @@ import rospy
 from typing import Tuple
 
 class RewardCalculator():
-    def __init__(self, robot_radius: float, safe_dist:float, safe_dist_h:float, goal_radius:float, rule:str = 'rule_01' ):
+    def __init__(self, robot_radius: float, safe_dist:float, safe_dist_adult:float, goal_radius:float, rule:str = 'rule_01' ):
     # def __init__(self, robot_radius: float, safe_dist:float, goal_radius:float, rule:str = 'rule_00' ):
         """A class for calculating reward based various rules.
 
@@ -20,8 +20,10 @@ class RewardCalculator():
         self.goal_radius = goal_radius
         self.last_goal_dist = None
         self.safe_dist = safe_dist
-        self.safe_dist_h=safe_dist_h
-        # self._cal_funcs = {'rule_00': RewardCalculator._cal_reward_rule_00, 'rule_01': RewardCalculator._cal_reward_rule_01}
+        self.safe_dist_adult=safe_dist_adult
+        self.safe_dist_child=2
+        self.safe_dist_elder=3
+
         self._cal_funcs = {
             'rule_00': RewardCalculator._cal_reward_rule_00,
             'rule_01': RewardCalculator._cal_reward_rule_01
@@ -39,21 +41,22 @@ class RewardCalculator():
         self.curr_reward = 0
         self.info = {}
     
-    def get_reward(self, laser_scan:np.ndarray, goal_in_robot_frame: Tuple[float,float],  dynamic_obstacles_in_robot_frame:np.ndarray, *args, **kwargs):
+    def get_reward(self, laser_scan:np.ndarray, goal_in_robot_frame: Tuple[float,float],  adult_in_robot_frame:np.ndarray, 
+    child_in_robot_frame:np.ndarray, elder_in_robot_frame:np.ndarray, *args, **kwargs):
         """
 
         Args:
             laser_scan (np.ndarray): 
             goal_in_robot_frame (Tuple[float,float]: position (rho, theta) of the goal in robot frame (Polar coordinate) 
-            dynamic_obstacles_in_robot_frame(np.ndarray)
+            adult_in_robot_frame(np.ndarray)
         """
 
         self._reset()
-        self.cal_func(self,laser_scan,goal_in_robot_frame,dynamic_obstacles_in_robot_frame, *args,**kwargs)
+        self.cal_func(self, laser_scan, goal_in_robot_frame, adult_in_robot_frame, child_in_robot_frame, elder_in_robot_frame, *args,**kwargs)
         return self.curr_reward, self.info
 
 
-    def _cal_reward_rule_00(self, laser_scan: np.ndarray, goal_in_robot_frame: Tuple[float,float],dynamic_obstacles_in_robot_frame:np.ndarray, *args,**kwargs):
+    def _cal_reward_rule_00(self, laser_scan: np.ndarray, goal_in_robot_frame: Tuple[float,float],adult_in_robot_frame:np.ndarray, *args,**kwargs):
 
         self._reward_goal_reached(goal_in_robot_frame)
         self._reward_safe_dist(laser_scan)
@@ -67,7 +70,9 @@ class RewardCalculator():
         self._reward_safe_dist(laser_scan)
         self._reward_collision(laser_scan)
         self._reward_goal_approached2(goal_in_robot_frame)
-        self._reward_human_safety_dist(dynamic_obstacles_in_robot_frame)
+        self._reward_adult_safety_dist(adult_in_robot_frame)
+        self._reward_child_safety_dist(child_in_robot_frame)
+        self._reward_elder_safety_dist(elder_in_robot_frame)
         
 
     def _reward_goal_reached(self,goal_in_robot_frame, reward = 100):
@@ -131,8 +136,20 @@ class RewardCalculator():
             self.info['done_reason'] = 1
             self.info['is_success'] = 0
 
-    def _reward_human_safety_dist(self, human_in_robot_frame, punishment = 50):
-        if human_in_robot_frame[0].min()<self.safe_dist_h:
+    def _reward_adult_safety_dist(self, adult_in_robot_frame, punishment = 50):
+        if adult_in_robot_frame[0].min()<self.safe_dist_adult:
+            self.curr_reward -= punishment
+            self.info['is_done'] = True
+            self.info['done_reason'] = 3
+
+    def _reward_child_safety_dist(self, child_in_robot_frame, punishment = 50):
+        if child_in_robot_frame[0].min()<self.safe_dist_child:
+            self.curr_reward -= punishment
+            self.info['is_done'] = True
+            self.info['done_reason'] = 3
+
+    def _reward_elder_safety_dist(self, elder_in_robot_frame, punishment = 50):
+        if elder_in_robot_frame[0].min()<self.safe_dist_elder:
             self.curr_reward -= punishment
             self.info['is_done'] = True
             self.info['done_reason'] = 3

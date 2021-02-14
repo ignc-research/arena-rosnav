@@ -71,7 +71,7 @@ class FlatlandEnv(gym.Env):
         
 
         self.reward_calculator = RewardCalculator(
-            robot_radius=self._robot_radius, safe_dist=1.1*self._robot_radius, safe_dist_h= self.safe_dist_h,goal_radius=goal_radius, rule=reward_fnc)
+            robot_radius=self._robot_radius, safe_dist=1.1*self._robot_radius, safe_dist_adult= self.safe_dist_h,goal_radius=goal_radius, rule=reward_fnc)
         #     safe_dist = 1.5*self._robot_radius
 
         # self.reward_calculator = RewardCalculator(
@@ -159,7 +159,8 @@ class FlatlandEnv(gym.Env):
 
         # calculate reward
         reward, reward_info = self.reward_calculator.get_reward(
-            obs_dict['laser_scan'], obs_dict['goal_in_robot_frame'], obs_dict['human_in_robot_frame'])
+            obs_dict['laser_scan'], obs_dict['goal_in_robot_frame'], obs_dict['adult_in_robot_frame'],
+            obs_dict['child_in_robot_frame'],obs_dict['elder_in_robot_frame'])
         done = reward_info['is_done']
 
         # print("reward:  {}".format(reward))

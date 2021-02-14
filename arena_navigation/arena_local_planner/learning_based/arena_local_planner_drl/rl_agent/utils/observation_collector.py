@@ -32,13 +32,13 @@ import numpy as np
 
 
 class ObservationCollector():
-    def __init__(self,ns: str, num_lidar_beams:int,lidar_range:float, num_humans:int=8): #
+    def __init__(self,ns: str, num_lidar_beams:int,lidar_range:float, num_humans:int=21): #
         """ a class to collect and merge observations
 
         Args:
             num_lidar_beams (int): [description]
             lidar_range (float): [description]
-            num_humans(int): max observation number of human, default 8
+            num_humans(int): max observation number of human, default 21
         """
         self.ns = ns
         if ns is None or ns == "":
@@ -74,27 +74,38 @@ class ObservationCollector():
         self._scan_sub = message_filters.Subscriber( f'{self.ns_prefix}scan', LaserScan) 
         self._robot_state_sub = message_filters.Subscriber(f'{self.ns_prefix}robot_state', RobotStateStamped) 
         # num_obstacles=21
-        self.obstacle_name_str=rospy.get_param(f'{self.ns_prefix}agent_topic_string')
+        self.human_name_str=rospy.get_param(f'{self.ns_prefix}agent_topic_string')
         self.test_topic_get=rospy.get_published_topics()
         print(self.test_topic_get)
         # for i in range(num_obstacles):
         #     self.obstacle_name_str=self.obstacle_name_str+","+f'{self.ns_prefix}pedsim_agent_{i+1}/dynamic_human'
-        self.obstacles_name_list=self.obstacle_name_str.split(',')[1:]
+        self.human_name_list=self.human_name_str.split(',')[1:]
         # print(self.obstacles_name_list)
 
-        # topic subscriber: human
-        dynamic_obstacles_list=[i for i in self.obstacles_name_list if i.find('dynamic')!=-1]
-        self._dynamic_obstacle = [None]*len(dynamic_obstacles_list)
-        # self.cache = [None]*len(dynamic_obstacles_list)
-        self._human_postion, self._human_vel= [None]*len(dynamic_obstacles_list),  [None]*len(dynamic_obstacles_list)
-        # print('dynamic',dynamic_obstacles_list)
-        for  self.i, dynamic_name in enumerate(dynamic_obstacles_list):
-            # print(dynamic_name)
-            self._dynamic_obstacle[self.i] = message_filters.Subscriber(dynamic_name, Odometry)
-
+        # topic subscriber: different kinds of humans
+        #adult
+        adult_topic_list=[i for i in self.human_name_list if i.find('human')!=-1]
+        self._adult = [None]*len(adult_topic_list)
+        self._adult_postion, self._adult_vel= [None]*len(adult_topic_list),  [None]*len(adult_topic_list)
+        # print('dynamic',adult_topic_list)
+        for  self.i, _adult_name in enumerate(adult_topic_list):
+            # print(_adult_name)
+            self._adult[self.i] = message_filters.Subscriber(_adult_name, Odometry)
+        #child
+        child_topic_list=[i for i in self.human_name_list if i.find('child')!=-1]
+        self._child= [None]*len(child_topic_list)
+        self._child_postion, self._child_vel= [None]*len(child_topic_list),  [None]*len(child_topic_list)
+        for  self.i, _child_name in enumerate(child_topic_list):
+            self._child[self.i] = message_filters.Subscriber(_child_name, Odometry)
+        #elder
+        elder_topic_list=[i for i in self.human_name_list if i.find('elder')!=-1]
+        self._elder= [None]*len(elder_topic_list)
+        self._elder_postion, self._elder_vel= [None]*len(elder_topic_list),  [None]*len(elder_topic_list)
+        for  self.i, _elder_name in enumerate(elder_topic_list):
+            self._elder[self.i] = message_filters.Subscriber(_elder_name, Odometry)
 
         # message_filters.TimeSynchronizer: call callback only when all sensor info are ready
-        self.sychronized_list=[self._scan_sub, self._robot_state_sub]+self._dynamic_obstacle
+        self.sychronized_list=[self._scan_sub, self._robot_state_sub]+self._adult+self._child+self._elder
         self.ts = message_filters.ApproximateTimeSynchronizer(self.sychronized_list,100,slop=0.05) #,allow_headerless=True)
         self.ts.registerCallback(self.callback_observation_received)
     
@@ -128,14 +139,27 @@ class ObservationCollector():
         obs_dict = {}
         obs_dict["laser_scan"] = scan
         obs_dict['goal_in_robot_frame'] = [rho,theta]
-        rho_h, theta_h = [None]*len(self._human_postion), [None]*len(self._human_postion)
-        for  i, position in enumerate(self._human_postion):
+        rho_a, theta_a = [None]*len(self._adult_position), [None]*len(self._adult_position)
+        for  i, position in enumerate(self._adult_position):
             #TODO temporarily use the same fnc of _get_goal_pose_in_robot_frame
-            print("human position",position)
-            rho_h[i], theta_h[i] = ObservationCollector._get_goal_pose_in_robot_frame(position,self._robot_pose)
-            merged_obs = np.hstack([merged_obs, np.array([rho_h[i],theta_h[i]])])
-        obs_dict['human_in_robot_frame'] = np.vstack([np.array(rho_h),np.array(theta_h)])
-        # print('human_in_robot_frame',np.vstack([np.array(rho_h),np.array(theta_h)]))
+            print("adult position",position)
+            rho_a[i], theta_a[i] = ObservationCollector._get_goal_pose_in_robot_frame(position,self._robot_pose)
+            merged_obs = np.hstack([merged_obs, np.array([rho_a[i],theta_a[i]])])
+        obs_dict['adult_in_robot_frame'] = np.vstack([np.array(rho_a),np.array(theta_a)])
+
+        rho_c, theta_c = [None]*len(self._child_position), [None]*len(self._child_position)
+        for  i, position in enumerate(self._child_position):
+            #TODO temporarily use the same fnc of _get_goal_pose_in_robot_frame
+            rho_c[i], theta_c[i] = ObservationCollector._get_goal_pose_in_robot_frame(position,self._robot_pose)
+            merged_obs = np.hstack([merged_obs, np.array([rho_c[i],theta_c[i]])])
+        obs_dict['child_in_robot_frame'] = np.vstack([np.array(rho_c),np.array(theta_c)])
+
+        rho_e, theta_e = [None]*len(self._elder_position), [None]*len(self._elder_position)
+        for  i, position in enumerate(self._elder_position):
+            #TODO temporarily use the same fnc of _get_goal_pose_in_robot_frame
+            rho_e[i], theta_e[i] = ObservationCollector._get_goal_pose_in_robot_frame(position,self._robot_pose)
+            merged_obs = np.hstack([merged_obs, np.array([rho_e[i],theta_e[i]])])
+        obs_dict['elder_in_robot_frame'] = np.vstack([np.array(rho_e),np.array(theta_e)])
         return merged_obs, obs_dict
 
     @staticmethod
@@ -164,8 +188,18 @@ class ObservationCollector():
 
     def callback_dynamic_obstacles(self,msg_human):
         # print(len(msg_human))
-        for i,msg in enumerate(msg_human):
-            self._human_postion[i],self._human_vel[i]=self.process_human_state_msg(msg_human[i])
+        num_adult = len(self._adult)
+        num_child = len(self._child)
+        num_elder = len(self._elder)
+        msg_adult=msg_human[:num_adult]
+        msg_child=msg_human[num_adult:num_adult+num_child]
+        msg_elder=msg_human[num_adult+num_child:]
+        for i,msg in enumerate(msg_adult):
+            self._adult_postion[i],self._adult_vel[i]=self.process_human_state_msg(msg_adult[i])
+        for i,msg in enumerate(msg_child):
+            self._child_postion[i],self._child_vel[i]=self.process_human_state_msg(msg_child[i])
+        for i,msg in enumerate(msg_elder):
+            self._elder_postion[i],self._elder_vel[i]=self.process_human_state_msg(msg_elder[i])
         return
         
     def callback_observation_received(self, *msg):

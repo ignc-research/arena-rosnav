@@ -230,10 +230,10 @@ if __name__ == "__main__":
                 [make_envs(task_managers[i], i, params=params, PATHS=PATHS) 
                     for i in range(args.n_envs)])
 
-    # if params['normalize']:
-    #     env = VecNormalize(
-    #         env, training=True, 
-    #         norm_obs=True, norm_reward=False, clip_reward=15)
+    if params['normalize']:
+        env = VecNormalize(
+            env, training=True, 
+            norm_obs=True, norm_reward=False, clip_reward=15)
 
     # threshold settings for training curriculum
     # type can be either 'succ' or 'rew'
