@@ -20,6 +20,7 @@ import time
 import math 
 # for transformations
 from tf.transformations import *
+import subprocess
 
 from arena_plan_msgs.msg import RobotState, RobotStateStamped
 
@@ -58,13 +59,14 @@ class wp3Env(gym.Env):
             safe_dist = 1.5*self._robot_radius
 
         self.reward_calculator = RewardCalculator(
-             safe_dist=1.1*self._robot_radius, goal_radius=goal_radius)
+             robot_radius=self._robot_radius, safe_dist=1.1*self._robot_radius, goal_radius=goal_radius)
 
         #subscriber to infer callback and out of sleep loop
         #sub robot position and sub global goal 
         self._robot_state_sub = rospy.Subscriber('/odom', Odometry, self.cbRobotPosition)
 
         self._wp4train_sub = rospy.Subscriber('plan_manager/subgoal', PoseStamped, self.cbwp4train)
+        self._globalGoal = rospy.Subscriber('plan_manager/subgoal', PoseStamped, self.cbGlobalGoal)
         self._globalPlan_sub = rospy.Subscriber('plan_manager/globalPlan', Path, self.cbglobalPlan)
         self._wp4train_reached =False
         # action agent publisher
@@ -85,6 +87,7 @@ class wp3Env(gym.Env):
         self._robot_pose = Pose2D()
         self._globalPlan = Path()
         self._subgoal = Pose2D()
+        self.globalGoal = Pose2D()
         self._wp4train = PoseStamped()
         
         self._previous_time = 0
@@ -101,6 +104,9 @@ class wp3Env(gym.Env):
 
     def cbwp4train(self,msg):
         self._wp4train = msg
+
+    def cbGlobalGoal(self,msg):
+        self._globalGoal = msg.pose
        
     def setup_by_configuration(self, robot_yaml_path: str, settings_yaml_path: str):
         """get the configuration from the yaml file, including robot radius, discrete action space and continuous action space.
@@ -141,24 +147,32 @@ class wp3Env(gym.Env):
                 self.action_space = spaces.Box(low=np.array([angular_range[0]]),
                                                high=np.array([angular_range[1]]), dtype=np.float)
 
+    def clear_costmaps(self):
+        bashCommand = "rosservice call /move_base/clear_costmaps"
+        process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
+        output, error = process.communicate()
+        return output, error
+
+
     def _pub_action(self, action):
+        
         action_msg = PoseStamped()
 
         #wait for robot to reach the waypoint first in about 10 steps
         if self._step_counter - self._previous_time > 10:
             self._previous_time = self._step_counter
             _, obs_dict = self.observation_collector.get_observations()
-            self._robot_pose = obs_dict['robot_pose']
-            self._subgoal = obs_dict['subgoal']
-            dist_robot_goal = np.array([self._robot_pose.x - self._subgoal.x, self._robot_pose.y - self._subgoal.y])
-            dist_rg = np.linalg.norm(dist_robot_goal)
+            dist_robot_goal = obs_dict['goal_in_robot_frame']
             
+            #dist_robot_goal = np.array([self._robot_pose.x - self._subgoal.x, self._robot_pose.y - self._subgoal.y])
+            dist_rg = np.linalg.norm(dist_robot_goal)
+            print(dist_rg)
             #todo consider the distance to global path when choosing next optimal waypoint
             #caluclate range with current robot position and transform into posestamped message 
             # robot_position+(angle*range)
             #send a goal message as action, remeber to normalize the quaternions (put orientationw as 1) and set the frame id of the goal! 
-            if dist_rg < 0.5:
-                action_msg.pose = self._subgoal.pose 
+            if dist_robot_goal[0] < 5:
+                action_msg.pose = self._globalGoal 
             else:
                 angle_grad = math.degrees(action[0]) # e.g. 90 degrees
                 action_msg.pose.position.x = self._wp4train.pose.position.x + (self.range_circle*math.cos(angle_grad))         
@@ -201,7 +215,7 @@ class wp3Env(gym.Env):
 
         # calculate reward
         reward, reward_info = self.reward_calculator.get_reward(
-            obs_dict['laser_scan'], obs_dict['goal_in_robot_frame'])
+            obs_dict['laser_scan'], obs_dict['goal_in_robot_frame'],obs_dict['robot_pose'],self._globalPlan)
         done = reward_info['is_done']
 
         print("reward:  {}".format(reward))
@@ -218,7 +232,7 @@ class wp3Env(gym.Env):
         return merged_obs, reward, done, info
 
     def reset(self):
-        
+        self.clear_costmaps()
         #self._previous_time = -100 # some negative number to infer first run
         #self._step_counter = 0
         # set task

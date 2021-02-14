@@ -156,10 +156,10 @@ if __name__ == "__main__":
     # instantiate gym environment
     n_envs = 1
     task = get_predefined_task("random")
-    env = DummyVecEnv([lambda: wp3Env(task, PATHS.get('robot_setting'), PATHS.get('robot_as'), discrete_action_space, goal_radius=1.25, max_steps_per_episode=550)] * n_envs)
+    env = DummyVecEnv([lambda: wp3Env(task, PATHS.get('robot_setting'), PATHS.get('robot_as'), discrete_action_space, goal_radius=1.25, max_steps_per_episode=150)] * n_envs)
    
     # instantiate eval environment
-    eval_env = Monitor(wp3Env(task, PATHS.get('robot_setting'), PATHS.get('robot_as'), discrete_action_space, goal_radius=1.25, max_steps_per_episode=550), PATHS.get('eval'), info_keywords=("done_reason",))
+    eval_env = Monitor(wp3Env(task, PATHS.get('robot_setting'), PATHS.get('robot_as'), discrete_action_space, goal_radius=1.25, max_steps_per_episode=150), PATHS.get('eval'), info_keywords=("done_reason",))
     eval_cb = EvalCallback(eval_env, n_eval_episodes=10, eval_freq=5000, log_path=PATHS.get('eval'), best_model_save_path=PATHS.get('model'), deterministic=True)
 
     # determine mode
