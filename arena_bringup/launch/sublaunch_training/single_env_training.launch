@@ -18,7 +18,12 @@
       <arg name="global_frame_id"   value="$(arg global_frame_id)"/>
       <arg name="odom_frame_id"     value="$(arg odom_frame_id)"/>
     </include>
-  
+
+    <!-- start move base-->
+    <include file="$(find arena_bringup)/launch/sublaunch_training/move_base.launch">
+      <arg name="ns"                value="$(arg ns)"/>
+    </include>
+
     <!-- start plan manager-->
     <include file="$(find arena_bringup)/launch/sublaunch_training/plan_manager.launch">
       <arg name="ns"                value="$(arg ns)"/>
