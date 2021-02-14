@@ -125,13 +125,15 @@ class FlatlandEnv(gym.Env):
 
     def _pub_action(self, action):
         action_msg = Twist()
-        if self._is_action_space_discrete:
-            action_msg.linear.x = self._discrete_acitons[action]['linear']
-            action_msg.angular.z = self._discrete_acitons[action]['angular']
-        else:
-            action_msg.linear.x = action[0]
-            action_msg.angular.z = action[1]
+        action_msg.linear.x = action[0]
+        action_msg.angular.z = action[1]
         self.agent_action_pub.publish(action_msg)
+
+    def _translate_disc_action(self, action):
+        action[0] = self._discrete_acitons[action]['linear']
+        action[1] = self._discrete_acitons[action]['angular']
+
+        return action
 
     def step(self, action):
         """
@@ -139,6 +141,8 @@ class FlatlandEnv(gym.Env):
                         1   -   collision with obstacle
                         2   -   goal reached
         """
+        if self._is_action_space_discrete:
+            action = self._translate_disc_action(action)
         self._pub_action(action)
         self._steps_curr_episode += 1
         # wait for new observations
@@ -148,7 +152,8 @@ class FlatlandEnv(gym.Env):
 
         # calculate reward
         reward, reward_info = self.reward_calculator.get_reward(
-            obs_dict['laser_scan'], obs_dict['goal_in_robot_frame'])
+            obs_dict['laser_scan'], obs_dict['goal_in_robot_frame'], action=action)
+        # print(f"cum_reward: {reward}")
         done = reward_info['is_done']
 
         # print("reward:  {}".format(reward))

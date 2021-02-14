@@ -101,7 +101,7 @@ To load a specific agent you simply use the flag ```--load```, e.g.:
 ```
 train_agent.py --load MLP_ARENA2D_2021_01_19__03_20
 ```
-**Note**: Currently only agents which were trained with PPO given by StableBaselines3 are compatible with the training script. Also when continuing training you have to make sure that given action space (defined in ```../arena_local_planner_drl/configs/default_settings.yaml```) is identical to the previous training circles.
+**Note**: Currently only agents which were trained with PPO given by StableBaselines3 are compatible with the training script. Also when continuing training you have to make sure that given action space (defined in ```../arena_local_planner_drl/configs/default_settings.yaml```) is identical to the previous training cycles.
 
 ##### Training with a custom MLP
 

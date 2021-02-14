@@ -10,7 +10,7 @@ hyperparams = {
     key: None for key in [
         'agent_name', 'robot', 'gamma', 'n_steps', 'ent_coef', 'learning_rate', 'vf_coef', 'max_grad_norm', 'gae_lambda', 'batch_size', 
         'n_epochs', 'clip_range', 'reward_fnc', 'discrete_action_space', 'normalize', 'task_mode', 'curr_stage', 'n_timesteps', 
-        'train_max_steps_per_episode', 'eval_max_steps_per_episode', 'goal_radius'
+        'train_max_steps_per_episode', 'eval_max_steps_per_episode', 'goal_radius', 'n_timesteps'
     ]
 }
 
@@ -145,7 +145,9 @@ def print_hyperparameters(hyperparams: Union[dict, agent_hyperparams]):
 def check_hyperparam_format(loaded_hyperparams: dict, PATHS: dict):
     if not set(hyperparams.keys()) == set(loaded_hyperparams.keys()):
         missing_keys = set(hyperparams.keys()).difference(set(loaded_hyperparams.keys()))
-        raise AssertionError(f"'hyperparameters.json' in {PATHS.get('model')} has unmatching keys, following keys missing: {missing_keys}" )
+        redundant_keys = set(loaded_hyperparams.keys()).difference(set(hyperparams.keys()))
+        raise AssertionError(f"'hyperparameters.json' in {PATHS.get('model')} has unmatching keys, following keys missing: {missing_keys} \n"
+        f"following keys unused: {redundant_keys}")
     if not isinstance(loaded_hyperparams['discrete_action_space'], bool):
         raise TypeError("Parameter 'discrete_action_space' not of type bool")
     if not loaded_hyperparams['task_mode'] in ["custom", "random", "staged"]:
