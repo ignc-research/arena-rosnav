@@ -116,7 +116,7 @@ class ObservationCollector():
         obs_dict['laser_scan'] = scan
         obs_dict['goal_in_robot_frame'] = [rho, theta]
         obs_dict['global_plan'] = self._globalplan
-        obs_dict['robot_pose'] = self._robot_pose
+        obs_dict['robot_pose'] = self.process_global_plan_msg
         return merged_obs, obs_dict
 
     @staticmethod
@@ -141,8 +141,7 @@ class ObservationCollector():
         return
 
     def callback_global_plan(self, msg_global_plan):
-        self._globalplan = map(
-            ObservationCollector.pose3D_to_pose2D, msg_global_plan.poses)
+        self._globalplan = msg_global_plan
         return
 
     def callback_scan(self, msg_laserscan):
@@ -180,6 +179,11 @@ class ObservationCollector():
     def process_subgoal_msg(self, msg_Subgoal):
         pose2d = self.pose3D_to_pose2D(msg_Subgoal.pose)
         return pose2d
+    
+    def process_global_plan_msg(self):
+        global_plan_2d = map(
+            ObservationCollector.pose3D_to_pose2D, self._globalplan.poses)
+        return global_plan_2d
 
     @staticmethod
     def pose3D_to_pose2D(pose3d):

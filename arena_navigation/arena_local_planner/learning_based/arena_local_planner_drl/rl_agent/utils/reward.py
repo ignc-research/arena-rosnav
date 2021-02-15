@@ -3,7 +3,7 @@ from numpy.lib.utils import safe_eval
 import rospy
 from geometry_msgs.msg import Pose2D
 from typing import Tuple
-import scipy as sp
+import scipy.spatial
 
 class RewardCalculator():
     def __init__(self, robot_radius: float, safe_dist:float, goal_radius:float, rule:str = 'rule_00' ):
@@ -170,7 +170,7 @@ class RewardCalculator():
 
     @staticmethod
     def get_min_dist2global_kdtree(global_plan, robot_pose):
-        mytree = sp.spatial.cKDTree(global_plan)
+        mytree = scipy.spatial.cKDTree(global_plan)
         dist, index = mytree.query(robot_pose)
         return dist, index
 
