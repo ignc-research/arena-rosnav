@@ -5,22 +5,13 @@
 
 1:
   static: 0
-  dynamic: 0
+  dynamic: 4
 2:
-  static: 2
-  dynamic: 0
+  static: 1
+  dynamic: 4
 3:
-  static: 4
-  dynamic: 0
+  static: 2
+  dynamic: 6
 4:
   static: 2
-  dynamic: 2
-5:
-  static: 2
-  dynamic: 3
-6:
-  static: 3
-  dynamic: 5
-7:
-  static: 3
-  dynamic: 7
+  dynamic: 8
