@@ -40,8 +40,8 @@ class RobotManager:
         # print("ns",f'{self.ns_prefix}flatland_server/step_size')
 
         self.safe_dist_adult=1.3
-        self.safe_dist_child=2
-        self.safe_dist_elder=3
+        self.safe_dist_child=1.5
+        self.safe_dist_elder=2
 
         self.is_training_mode = rospy.get_param("/train_mode")
         self.step_size = rospy.get_param('/step_size') #f'{self.ns_prefix}flatland_server

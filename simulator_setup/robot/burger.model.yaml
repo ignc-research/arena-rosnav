@@ -61,7 +61,7 @@ plugins:
     frame: laser_link
     topic: scan
     body: base
-    broadcast_tf: true
+    broadcast_tf: false
     origin: [0.0, 0.0, 0.0]
     # range: 3
     #arena

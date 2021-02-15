@@ -18,11 +18,12 @@ class RewardCalculator():
         self.info = {}
         self.robot_radius = robot_radius
         self.goal_radius = goal_radius
+        # print("goal radius",self.goal_radius)
         self.last_goal_dist = None
         self.safe_dist = safe_dist
         self.safe_dist_adult=safe_dist_adult
-        self.safe_dist_child=2
-        self.safe_dist_elder=3
+        self.safe_dist_child=1.5
+        self.safe_dist_elder=2
 
         self._cal_funcs = {
             'rule_00': RewardCalculator._cal_reward_rule_00,
@@ -76,8 +77,9 @@ class RewardCalculator():
         
 
     def _reward_goal_reached(self,goal_in_robot_frame, reward = 100):
+        # print("goal distance", goal_in_robot_frame[0])
 
-        if goal_in_robot_frame[0] < self.goal_radius:
+        if goal_in_robot_frame[0] < self.goal_radius*2.5:
             self.curr_reward = reward
             self.info['is_done'] = True
             self.info['done_reason'] = 2
@@ -136,21 +138,21 @@ class RewardCalculator():
             self.info['done_reason'] = 1
             self.info['is_success'] = 0
 
-    def _reward_adult_safety_dist(self, adult_in_robot_frame, punishment = 50):
+    def _reward_adult_safety_dist(self, adult_in_robot_frame, punishment = 5):
         if adult_in_robot_frame[0].min()<self.safe_dist_adult:
             self.curr_reward -= punishment
             self.info['is_done'] = True
             self.info['done_reason'] = 3
             self.info['is_success'] = 0
 
-    def _reward_child_safety_dist(self, child_in_robot_frame, punishment = 50):
+    def _reward_child_safety_dist(self, child_in_robot_frame, punishment = 5):
         if child_in_robot_frame[0].min()<self.safe_dist_child:
             self.curr_reward -= punishment
             self.info['is_done'] = True
             self.info['done_reason'] = 3
             self.info['is_success'] = 0
 
-    def _reward_elder_safety_dist(self, elder_in_robot_frame, punishment = 50):
+    def _reward_elder_safety_dist(self, elder_in_robot_frame, punishment = 5):
         if elder_in_robot_frame[0].min()<self.safe_dist_elder:
             self.curr_reward -= punishment
             self.info['is_done'] = True

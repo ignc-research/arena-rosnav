@@ -644,7 +644,7 @@ class ObstaclesManager:
         self.agent_topic_str=''
         for i, ped in enumerate(peds):
             elements = [0, 1, 3]
-            probabilities = [0.5, 0.2, 0.3]        
+            probabilities = [0.4, 0.3, 0.3]
             self.__ped_type=np.random.choice(elements, 1, p=probabilities)[0]            
             if  self.__ped_type==0:
                 self.agent_topic_str+=f',{self.ns_prefix}pedsim_agent_{i+1}/dynamic_human'

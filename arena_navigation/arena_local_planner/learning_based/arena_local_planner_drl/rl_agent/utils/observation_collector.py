@@ -32,7 +32,7 @@ import numpy as np
 
 
 class ObservationCollector():
-    def __init__(self,ns: str, num_lidar_beams:int,lidar_range:float, num_humans:int=21): #
+    def __init__(self,ns: str, num_lidar_beams:int,lidar_range:float, num_humans:int=10): #
         """ a class to collect and merge observations
 
         Args:
