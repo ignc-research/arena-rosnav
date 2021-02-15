@@ -1,5 +1,5 @@
 ## Install docker
-https://docs.docker.com/docker-for-mac/install/
+https://github.com/ignc-research/arena-rosnav
 
 ## Build image and setup container
 1. clone the whole repositary
