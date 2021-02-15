@@ -83,15 +83,15 @@ class RewardCalculator():
         
 
     def _reward_goal_reached(self,goal_in_robot_frame, reward = 15, punishment = 15):
-
+        print("goal radius: {}".format(self.goal_radius))
         if goal_in_robot_frame[0] < self.goal_radius:
             self.curr_reward = reward
             self.info['is_done'] = True
             self.info['done_reason'] = 2
-        if goal_in_robot_frame[0] > 15:
-            self.curr_reward -= punishment
-            self.info['is_done'] = True
-            self.info['done_reason'] = 1
+        # if goal_in_robot_frame[0] > 10:
+        #     self.curr_reward -= punishment
+        #     self.info['is_done'] = True
+        #     self.info['done_reason'] = 1
         else:
             self.info['is_done'] = False
 

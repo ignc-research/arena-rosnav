@@ -394,7 +394,7 @@ class NN_tb3():
             action[0] = min(raw_action[0], pref_speed)
             turn_amount = max(min(kp_r * (host_agent.dist_to_goal-0.1), 1.0), 0.0) * raw_action[1]
             action[1] = util.wrap(turn_amount + self.psi)
-        if host_agent.dist_to_goal < 0.3:
+        if host_agent.dist_to_goal < 0.01:
             # current goal, reached, increment for next goal
             print("===============\ngoal reached: "+str([goal_x, goal_y]))
             self.stop_moving_flag = True

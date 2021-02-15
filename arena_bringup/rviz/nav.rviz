@@ -634,6 +634,19 @@ Visualization Manager:
         {}
       Queue Size: 100
       Value: true
+      Class: rviz/Pose
+      Color: 225; 25; 0
+      Enabled: true
+      Head Length: 0.3
+      Head Radius: 0.15000000596046448
+      Name: SubgoalPose
+      Shaft Length: 0.5
+      Shaft Radius: 0.029999999329447746
+      Shape: Arrow
+      Topic: /plan_manager/wp4train
+      Unreliable: false
+      Value: true
+    - Alpha: 1
   Enabled: true
   Global Options:
     Background Color: 0; 0; 0

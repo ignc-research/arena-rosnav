@@ -65,12 +65,12 @@ class wp3Env(gym.Env):
         #sub robot position and sub global goal 
         self._robot_state_sub = rospy.Subscriber('/odom', Odometry, self.cbRobotPosition)
 
-        self._wp4train_sub = rospy.Subscriber('plan_manager/subgoal', PoseStamped, self.cbwp4train)
-        self._globalGoal = rospy.Subscriber('plan_manager/subgoal', PoseStamped, self.cbGlobalGoal)
-        self._globalPlan_sub = rospy.Subscriber('plan_manager/globalPlan', Path, self.cbglobalPlan)
+        self._ref_wp_sub = rospy.Subscriber('/plan_manager/subgoal', PoseStamped, self.cbRefWp)
+        self._globalGoal = rospy.Subscriber('/goal', PoseStamped, self.cbGlobalGoal)
+        self._globalPlan_sub = rospy.Subscriber('/plan_manager/globalPlan', Path, self.cbglobalPlan)
         self._wp4train_reached =False
         # action agent publisher
-        self.agent_action_pub = rospy.Publisher('plan_manager/wp4train', PoseStamped, queue_size=1)
+        self.agent_action_pub = rospy.Publisher('/plan_manager/wp4train', PoseStamped, queue_size=1)
 
         # service clients
         self._is_train_mode = rospy.get_param("train_mode")
@@ -87,8 +87,8 @@ class wp3Env(gym.Env):
         self._robot_pose = Pose2D()
         self._globalPlan = Path()
         self._subgoal = Pose2D()
-        self.globalGoal = Pose2D()
-        self._wp4train = PoseStamped()
+        self._globalGoal = Pose2D()
+        self._ref_wp = PoseStamped()
         
         self._previous_time = 0
         self._step_counter = 0
@@ -102,12 +102,12 @@ class wp3Env(gym.Env):
     def cbglobalPlan(self,msg):
         self._globalPlan = msg
 
-    def cbwp4train(self,msg):
-        self._wp4train = msg
+    def cbRefWp(self,msg):
+        self._ref_wp = msg
 
     def cbGlobalGoal(self,msg):
-        self._globalGoal = msg.pose
-       
+        self._globalGoal.x = msg.pose.position.x
+        self._globalGoal.y = msg.pose.position.y
     def setup_by_configuration(self, robot_yaml_path: str, settings_yaml_path: str):
         """get the configuration from the yaml file, including robot radius, discrete action space and continuous action space.
 
@@ -159,24 +159,29 @@ class wp3Env(gym.Env):
         action_msg = PoseStamped()
 
         #wait for robot to reach the waypoint first in about 10 steps
-        if self._step_counter - self._previous_time > 10:
+        if self._step_counter - self._previous_time > 20:
             self._previous_time = self._step_counter
             _, obs_dict = self.observation_collector.get_observations()
             dist_robot_goal = obs_dict['goal_in_robot_frame']
-            
+        
             #dist_robot_goal = np.array([self._robot_pose.x - self._subgoal.x, self._robot_pose.y - self._subgoal.y])
             dist_rg = np.linalg.norm(dist_robot_goal)
             print(dist_rg)
+            print(dist_robot_goal[0])
             #todo consider the distance to global path when choosing next optimal waypoint
             #caluclate range with current robot position and transform into posestamped message 
             # robot_position+(angle*range)
             #send a goal message as action, remeber to normalize the quaternions (put orientationw as 1) and set the frame id of the goal! 
-            if dist_robot_goal[0] < 5:
-                action_msg.pose = self._globalGoal 
+            if dist_robot_goal[0] < 2:
+                action_msg.pose.position.x = self._ref_wp.pose.position.x    
+                action_msg.pose.position.y = self._ref_wp.pose.position.y   
+                action_msg.pose.orientation.w = 1
+                action_msg.header.frame_id ="map"
+                self.agent_action_pub.publish(action_msg)
             else:
                 angle_grad = math.degrees(action[0]) # e.g. 90 degrees
-                action_msg.pose.position.x = self._wp4train.pose.position.x + (self.range_circle*math.cos(angle_grad))         
-                action_msg.pose.position.y = self._wp4train.pose.position.y + (self.range_circle*math.sin(angle_grad))   
+                action_msg.pose.position.x = self._ref_wp.pose.position.x + (self.range_circle*math.cos(angle_grad))         
+                action_msg.pose.position.y = self._ref_wp.pose.position.y + (self.range_circle*math.sin(angle_grad))   
                 action_msg.pose.orientation.w = 1
                 action_msg.header.frame_id ="map"
                 self.agent_action_pub.publish(action_msg)
@@ -215,7 +220,7 @@ class wp3Env(gym.Env):
 
         # calculate reward
         reward, reward_info = self.reward_calculator.get_reward(
-            obs_dict['laser_scan'], obs_dict['goal_in_robot_frame'],obs_dict['robot_pose'],self._globalPlan)
+            obs_dict['laser_scan'], obs_dict['goal_in_robot_frame'], obs_dict['robot_pose'], self._globalPlan)
         done = reward_info['is_done']
 
         print("reward:  {}".format(reward))
