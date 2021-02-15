@@ -1,5 +1,6 @@
 #! /usr/bin/env python
 import os, sys
+# for me the python path must be added manuelly , could be deleted directly if your machine could identify the corresponding paths
 sys.path.append('/home/junhui/study/Masterarbeit/arenarosnav/test_ws/src/arena_rosnav')
 sys.path.append('/home/junhui/study/Masterarbeit/arenarosnav/test_ws/src/arena_rosnav/arena_navigation')
 sys.path.append('/home/junhui/study/Masterarbeit/arenarosnav/test_ws/src/arena_rosnav/arena_navigation/arena_local_planner')

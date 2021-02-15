@@ -3,7 +3,7 @@ bodies:  # List of named bodies
   - name: base
     pose: [0, 0, 0] 
     type: dynamic  
-    color: [1.0, 1.0, 1.0, 0.75] 
+    color: [1.0, 1.0, 1.0, 0.9] 
     footprints:
       - type: circle
         radius: 0.001
@@ -15,7 +15,7 @@ bodies:  # List of named bodies
   - name: left_leg
     pose: [0, 0, 0] 
     type: dynamic  
-    color: [0.5, 0.5, 0.85, 0.75]
+    color: [0.5, 0.5, 0.85, 0.9]
     footprints:
       - type: circle
         radius: 0.1
@@ -28,7 +28,7 @@ bodies:  # List of named bodies
   - name: right_leg
     pose: [0, 0, 0] 
     type: dynamic  
-    color: [0.5, 0.5, 0.85, 0.75]
+    color: [0.5, 0.5, 0.85, 0.9]
     footprints:
       - type: circle
         radius: 0.1

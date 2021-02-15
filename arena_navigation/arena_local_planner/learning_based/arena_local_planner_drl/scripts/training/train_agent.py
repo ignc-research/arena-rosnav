@@ -1,5 +1,6 @@
 import os, sys
 # sys.path.insert(0, os.path.abspath(".."))
+# for me the python path must be added manuelly , could be deleted directly if your machine could identify the corresponding paths
 sys.path.append('/home/junhui/study/Masterarbeit/arenarosnav/test_ws/src/arena_rosnav')
 sys.path.append('/home/junhui/study/Masterarbeit/arenarosnav/test_ws/src/arena_rosnav/arena_navigation')
 sys.path.append('/home/junhui/study/Masterarbeit/arenarosnav/test_ws/src/arena_rosnav/arena_navigation/arena_local_planner')
@@ -183,6 +184,8 @@ if __name__ == "__main__":
 
     if args.debug:
         rospy.init_node("debug_node", disable_signals=True)
+    else:
+        rospy.init_node("train_node")
         
     # generate agent name and model specific paths
     AGENT_NAME = get_agent_name(args)
@@ -326,8 +329,9 @@ if __name__ == "__main__":
 
     # start training
     start = time.time()
+    # print(start)
     model.learn(
-        total_timesteps = n_timesteps, callback=eval_cb, reset_num_timesteps=True)
+        total_timesteps = n_timesteps, callback=eval_cb, reset_num_timesteps=False)
     print(f'Time passed for {n_timesteps} timesteps: {time.time()-start}s')
 
     # update the timesteps the model has trained in total

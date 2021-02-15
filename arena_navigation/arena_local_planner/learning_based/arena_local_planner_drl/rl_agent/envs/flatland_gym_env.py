@@ -67,8 +67,8 @@ class FlatlandEnv(gym.Env):
         # if safe_dist is None:
         #     safe_dist = 1.5*self._robot_radius
         if safe_dist_h is None:
-            self.safe_dist_h = 1
-        
+            self.safe_dist_h = 1.3
+        # print("using reward system",reward_fnc)
 
         self.reward_calculator = RewardCalculator(
             robot_radius=self._robot_radius, safe_dist=1.1*self._robot_radius, safe_dist_adult= self.safe_dist_h,goal_radius=goal_radius, rule=reward_fnc)
@@ -78,7 +78,7 @@ class FlatlandEnv(gym.Env):
         #     robot_radius=self._robot_radius, safe_dist=1.1*self._robot_radius, goal_radius=goal_radius, rule=reward_fnc)
 
         # action agent publisher
-        self.agent_action_pub = rospy.Publisher(f'{self.ns_prefix}sim_01/cmd_vel', Twist, queue_size=1) 
+        self.agent_action_pub = rospy.Publisher(f'{self.ns_prefix}{self.ns}/cmd_vel', Twist, queue_size=1) 
         # service clients
         self._is_train_mode = rospy.get_param("/train_mode")
         if self._is_train_mode:
@@ -165,7 +165,7 @@ class FlatlandEnv(gym.Env):
             obs_dict['child_in_robot_frame'],obs_dict['elder_in_robot_frame'])
         done = reward_info['is_done']
 
-        # print("reward:  {}".format(reward))
+        print("reward:  {}".format(reward))
         
         # info
         info = {}

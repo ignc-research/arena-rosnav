@@ -65,19 +65,38 @@ class ObservationCollector():
         self._subgoal_sub.registerCallback(self.callback_subgoal)
 
         # service clients
-        self._is_train_mode = rospy.get_param("/train_mode")
+        get_train_mode_try=0
+        max_try=10
+        while(get_train_mode_try<max_try):            
+            try:
+                self._is_train_mode = rospy.get_param("/train_mode")
+                break
+            except KeyError:
+                get_train_mode_try+=1
+                print(f'value not set retry {get_train_mode_try} times')
+        # self._is_train_mode=True
         if self._is_train_mode:
             self._service_name_step=f'{self.ns_prefix}step_world' 
             self._sim_step_client = rospy.ServiceProxy(self._service_name_step, StepWorld)
         
         # message_filter subscriber: laserscan, robot_pose
-        self._scan_sub = message_filters.Subscriber( f'{self.ns_prefix}sim_01/scan', LaserScan)
+        self._scan_sub = message_filters.Subscriber( f'{self.ns_prefix}{self.ns}/scan', LaserScan)
         self._robot_state_sub = message_filters.Subscriber(f'{self.ns_prefix}robot_state', RobotStateStamped)
-        self.human_name_str=rospy.get_param(f'{self.ns_prefix}agent_topic_string')
+        get_agent_topic_try=0
+        max_try=10
+        while(get_agent_topic_try<max_try):            
+            try:
+                self.human_name_str=rospy.get_param(f'{self.ns_prefix}agent_topic_string')
+                break
+            except KeyError:
+                get_agent_topic_try+=1
+                print(f'value not set retry {get_agent_topic_try} times')
+        
         # self.test_topic_get=rospy.get_published_topics()
         # print(self.test_topic_get)
         # for i in range(num_obstacles):
         #     self.obstacle_name_str=self.obstacle_name_str+","+f'{self.ns_prefix}pedsim_agent_{i+1}/dynamic_human'
+        # print(self.human_name_str)
         self.human_name_list=self.human_name_str.split(',')[1:]
         # print(self.human_name_list)
 

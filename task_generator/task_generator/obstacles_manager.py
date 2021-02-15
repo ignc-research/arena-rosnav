@@ -691,7 +691,7 @@ class ObstaclesManager:
             else:
                 break            
         # print("reached here respawn_humans")
-        self.__peds = peds
+        self.__peds = peds        
         rospy.set_param(f'{self.ns_prefix}agent_topic_string', self.agent_topic_str)
         return
 

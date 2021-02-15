@@ -1,5 +1,6 @@
 import os, sys
 # sys.path.insert(0, os.path.abspath(".."))
+# for me the python path must be added manuelly , could be deleted directly if your machine could identify the corresponding paths
 sys.path.append('/home/junhui/study/Masterarbeit/arenarosnav/test_ws/src/arena_rosnav')
 sys.path.append('/home/junhui/study/Masterarbeit/arenarosnav/test_ws/src/arena_rosnav/arena_navigation')
 sys.path.append('/home/junhui/study/Masterarbeit/arenarosnav/test_ws/src/arena_rosnav/arena_navigation/arena_local_planner')
@@ -47,7 +48,6 @@ train_max_steps_per_episode = 500
 eval_max_steps_per_episode = 500
 goal_radius = 0.25
 task_mode = "random"    # custom, random or staged
-normalize = True
 ##########################
 
 
