@@ -10,6 +10,7 @@
         <rosparam file="$(find conventional)/config/global_costmap_params.yaml" command="load" />
 
         <remap from="/clock" to="/$(arg ns)/clock"/>
+        <remap from="/tf"    to="/$(arg ns)/clock"/>
     </node>
 
 </launch>
