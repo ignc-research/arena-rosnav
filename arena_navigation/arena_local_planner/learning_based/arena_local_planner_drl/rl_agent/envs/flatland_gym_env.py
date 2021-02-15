@@ -153,7 +153,7 @@ class FlatlandEnv(gym.Env):
         # calculate reward
         reward, reward_info = self.reward_calculator.get_reward(
             obs_dict['laser_scan'], obs_dict['goal_in_robot_frame'], 
-            action=action, global_plan=obs_dict['global_plan'], robot_state=obs_dict['robot_pose'])
+            action=action, global_plan=obs_dict['global_plan'], robot_pose=obs_dict['robot_pose'])
         # print(f"cum_reward: {reward}")
         done = reward_info['is_done']
 

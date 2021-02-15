@@ -153,7 +153,7 @@ class RewardCalculator():
             ang_vel = action[1]
             reward = ((lin_vel*0.97) + (ang_vel*0.03)) * 0.04
         self.curr_reward -= reward
-        # print(f"reward_distance_traveled: {reward}")
+        # print(f"reward_distance_traveled: {reward}")+
 
         
     def _reward_global_plan(self, global_plan, robot_pose: Pose2D, reward: float=0.1, punishment: float=0.001):
