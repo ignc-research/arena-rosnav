@@ -2,10 +2,11 @@
 
 import rospy
 # import sys
-# from std_msgs.msg import Float32, ColorRGBA, Int32, String
+from std_msgs.msg import Float32, ColorRGBA, Int32, String
 from geometry_msgs.msg import PoseStamped, Twist, Vector3, Point
 from ford_msgs.msg import Clusters
-# from visualization_msgs.msg import Marker, MarkerArray
+from visualization_msgs.msg import Marker, MarkerArray
+from nav_msgs.msg import Odometry
 
 # algorithm slef dependencies
 import os
@@ -32,19 +33,11 @@ from model.ppo import generate_action_no_sampling, transform_buffer
 #     return angle_diff
 
 class NN_tb3():
-    def __init__(self, env, env_config, policy):
+    def __init__(self, env, policy, action_bound):
 
-        # 
-        self.env = env
-        self.env_config = env_config
-        # configure robot
-        self.robot = Robot(env_config, 'robot')
-        self.robot.set_policy(policy)
-
-        self.env.set_robot(self.robot)    #pass robot parameters into env
-        self.ob = env.reset('test',1)     #intial some parameters from .config file such as time_step,success_reward for other instances
+        self.env = env    
         self.policy = policy
-        self.policy.set_env(env) 
+        self.action_bound = action_bound
         # for subscribers
         self.pose = PoseStamped()
         self.vel = Vector3()
@@ -53,29 +46,29 @@ class NN_tb3():
         # for publishers
         self.global_goal = PoseStamped()
         self.goal = PoseStamped()
-        self.desired_position = PoseStamped()
-        self.desired_action = np.zeros((2,))
+        # self.desired_position = PoseStamped() #used for update_action()
+        # self.desired_action = np.zeros((2,))
 
         # # publishers
         self.pub_twist = rospy.Publisher('/cmd_vel',Twist,queue_size=1) 
-        self.pub_pose_marker = rospy.Publisher('',Marker,queue_size=1)
+        self.pub_pose_marker = rospy.Publisher('',Marker,queue_size=1)  #used for visualize_pose()
         # self.pub_agent_markers = rospy.Publisher('~agent_markers',MarkerArray,queue_size=1)
         # self.pub_path_marker = rospy.Publisher('~path_marker',Marker,queue_size=1)
         # self.pub_goal_path_marker = rospy.Publisher('~goal_path_marker',Marker,queue_size=1)
         # # sub
         self.sub_pose = rospy.Subscriber('/odom',Odometry,self.cbPose)
         self.sub_global_goal = rospy.Subscriber('/goal',PoseStamped, self.cbGlobalGoal)
-        # self.sub_subgoal = rospy.Subscriber('~subgoal',PoseStamped, self.cbSubGoal)
+        self.sub_subgoal = rospy.Subscriber('~subgoal',PoseStamped, self.cbSubGoal)
         
         # subgoals
-        self.sub_goal = Vector3()
+        self.sub_goal = Vector3()   # to calculate the distace between robot and goal
 
         # self.sub_clusters = rospy.Subscriber('~clusters',Clusters, self.cbClusters)
 
 
         # control timer
         # self.control_timer = rospy.Timer(rospy.Duration(0.01),self.cbControl)
-        self.nn_timer = rospy.Timer(rospy.Duration(0.3),self.cbComputeActionCrowdNav)
+        self.nn_timer = rospy.Timer(rospy.Duration(0.3),self.cbComputeAction)
 
     def cbGlobalGoal(self,msg):
         self.stop_moving_flag = True
@@ -192,26 +185,29 @@ class NN_tb3():
             self.stop_moving()
             return
 
-    def cbComputeActionCrowdNav(self, event,env,policy,action_bound):
-        obs = env.get_laser_observation()
+    def cbComputeAction(self):
+        obs = self.env.get_laser_observation() #用stage_world1.py里lasertopic获取
         obs_stack = deque([obs, obs, obs])
         # ************************************ Input ************************************
-        # agent: goal, start position
-        input_goal = [self.global_goal.pose.position.x, self.global_goal.pose.position.x]    # [-25,0] is for the cordinate system in circle wolrd
-        input_start_position = [self.pose.pose.position.x, self.pose.pose.position.y, self.psi]    # x, y, theta
+        # goal
+        goal = [self.sub_goal.x, self.sub_goal.y]   #可以直接用此文件的subgoal，stage中的get_local_goal函数没有对self变量进行改变
+        self.env.goal_point = goal
+        # position
+        state = [self.pose.pose.position.x, self.pose.pose.position.y, self.psi]    # x, y, theta
+        self.env.state = state  #get_self_stateGT get_self_state有很多影响
+        # Velocity
+        speed = [self.vel, self.psi]
+        self.env.speed_GT = speed # linear v +angular
+        
+        obs_state_list = [obs_stack, goal, speed]
 
-        env.goal_point = input_goal
-        goal = np.asarray(env.get_local_goal())     # transfer to robot based codinate system
-        speed = np.asarray(env.get_self_speed())
-        state = [obs_stack, goal, speed]
-
-        env.control_pose(input_start_position)
+        self.env.control_pose(state)
 
 
         # ************************************ Output ************************************
         # agent: postion(x,y,theta),velocity(v,angular)
 
-        _,scaled_action =generate_action_no_sampling(env=env, state_list=[state], policy=policy, action_bount = action_bound)  #此处赋值可能有问题
+        _,scaled_action =generate_action_no_sampling(self.env, obs_state_list, self.policy, self.action_bound)  #此处赋值可能有问题
         action = scaled_action[0]
         print('velocity : ', action[0], 'velocity_angular : ', action[1])
 
@@ -284,18 +280,11 @@ def run():
     policy.cpu()    # policy.cuda() for gpu
     state_dict = torch.load(trained_model_file,map_location=torch.device('cpu'))    #torch.load(trained_model_file) for gpu
     policy.load_state_dict(state_dict)
-
-
-    # configure environment / obstacles
-    env_config = configparser.RawConfigParser()
-    env_config.read(env_config_file)
-    env = gym.make('CrowdSim-v0')   #env is inherited from CrowdSim class in crowd_sim.py
-    env.configure(env_config)
   
     rospy.init_node('rl_collision_avoidance_tb3',anonymous=False)
     print('==================================\nrl_collision_avoidance node started')
 
-    nn_tb3 = NN_tb3(env,env_config,policy)
+    nn_tb3 = NN_tb3(env, policy, action_bound)
     rospy.on_shutdown(nn_tb3.on_shutdown)
 
     rospy.spin()
