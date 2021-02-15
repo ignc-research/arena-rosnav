@@ -29,7 +29,7 @@ Train DRL agents on ROS compatible simulations for autonomous navigation in high
 
 
 ### Recent Updates
-
+- 04.02.2021: Added Multiprocessing for training speedup
 - 26.01.2021: Added Scenario Tasks: generate your own scenario by specifying a scenario.json 
 
 
@@ -40,7 +40,8 @@ Train DRL agents on ROS compatible simulations for autonomous navigation in high
 * Full documentation and system design is released this week
 
 ## 1. Installation
-Please refer to [Installation.md](docs/Installation.md) for detailed explanations about the installation process.
+Please refer to [Installation.md](docs/Installation.md) for detailed explanations about the installation process.  
+  If you want to use Docker, please refer to our [Dockerfile](Docker) 
 
 ## 2. Usage
 
