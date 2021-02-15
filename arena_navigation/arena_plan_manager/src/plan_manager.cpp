@@ -140,11 +140,11 @@ void PlanManager::execFSMCallback(const ros::TimerEvent &e)
 
   case GEN_NEW_GLOBAL:
   {
-    if (mode_ == TRAIN)
-    {
-      changeFSMExecState(REPLAN_MID, "FSM");
-      return;
-    }
+    // if (mode_ == TRAIN)
+    // {
+    //   changeFSMExecState(REPLAN_MID, "FSM");
+    //   return;
+    // }
     // set robot start state
     start_state_.reset(new RobotState(cur_state_->pose2d, cur_state_->theta, cur_state_->vel2d, cur_state_->w));
 
