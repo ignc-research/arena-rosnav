@@ -35,3 +35,8 @@
     local-name: ../forks/stable-baselines3
     uri: https://github.com/tuananhroman/stable-baselines3
     version: master
+
+- git:
+    local-name: ../forks/pedsim_ros
+    uri: https://github.com/Sirupli/pedsim_ros
+    version: human_ros
