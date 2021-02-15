@@ -14,6 +14,7 @@ from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Pose2D, PoseStamped, PoseWithCovarianceStamped
 from geometry_msgs.msg import Twist
 from arena_plan_msgs.msg import RobotState, RobotStateStamped
+from nav_msgs.msg import Path
 
 # services
 from flatland_msgs.srv import StepWorld, StepWorldRequest
@@ -55,6 +56,7 @@ class ObservationCollector():
         self._robot_pose = Pose2D()
         self._robot_vel = Twist()
         self._subgoal = Pose2D()
+        self._globalplan = Path()
 
         # message_filter subscriber: laserscan, robot_pose
         self._scan_sub = rospy.Subscriber(
@@ -72,12 +74,16 @@ class ObservationCollector():
         self._subgoal_sub = rospy.Subscriber(
             f"{self.ns_prefix}subgoal", PoseStamped, self.callback_subgoal)
 
+        self._globalplan_sub = rospy.Subscriber(
+                f'{self.ns_prefix}plan_manager/globalPlan', Path, self.callback_global_plan)
+
         # service clients
         self._is_train_mode = rospy.get_param("/train_mode")
         if self._is_train_mode:
             self._service_name_step = f'{self.ns_prefix}step_world'
             self._sim_step_client = rospy.ServiceProxy(
                 self._service_name_step, StepWorld)
+            
 
     def get_observation_space(self):
         return self.observation_space
@@ -107,8 +113,10 @@ class ObservationCollector():
             self._subgoal, self._robot_pose)
         merged_obs = np.hstack([scan, np.array([rho, theta])])
         obs_dict = {}
-        obs_dict["laser_scan"] = scan
+        obs_dict['laser_scan'] = scan
         obs_dict['goal_in_robot_frame'] = [rho, theta]
+        obs_dict['global_plan'] = self._globalplan
+        obs_dict['robot_pose'] = self._robot_pose
         return merged_obs, obs_dict
 
     @staticmethod
@@ -130,7 +138,11 @@ class ObservationCollector():
 
     def callback_subgoal(self, msg_Subgoal):
         self._subgoal = self.process_subgoal_msg(msg_Subgoal)
+        return
 
+    def callback_global_plan(self, msg_global_plan):
+        self._globalplan = map(
+            ObservationCollector.pose3D_to_pose2D, msg_global_plan.poses)
         return
 
     def callback_scan(self, msg_laserscan):
