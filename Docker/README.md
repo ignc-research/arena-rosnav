@@ -1,10 +1,10 @@
 ## Install docker
-https://github.com/ignc-research/arena-rosnav
+https://docs.docker.com/docker-for-mac/install/
 
 ## Build image and setup container
 1. clone the whole repositary
 ```
-git clone https://github.com/Herrsun/arena-rosnav
+https://github.com/ignc-research/arena-rosnav
 ```
 2. Open local terminal under the path where you just clone the repo
 3. Run `docker-compose up -d`
