@@ -8,7 +8,7 @@ from datetime import datetime as dt
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv, VecNormalize
 from stable_baselines3.common.monitor import Monitor
-from stable_baselines3.common.callbacks import EvalCallback
+from stable_baselines3.common.callbacks import EvalCallback, StopTrainingOnRewardThreshold
 from stable_baselines3.common.utils import set_random_seed
 
 from task_generator.task_generator.tasks import *
@@ -233,6 +233,10 @@ if __name__ == "__main__":
         upper_threshold=0.9, lower_threshold=0.6, 
         task_mode=params['task_mode'], verbose=1)
     
+    # stop training on reward threshold callback
+    stoptraining_cb = StopTrainingOnRewardThreshold(
+        reward_threshold=6, task_manager=task_managers[0], verbose=1)
+
     # instantiate eval environment
     # take task_manager from first sim (currently evaluation only provided for single process)
     eval_env = DummyVecEnv(
@@ -248,10 +252,10 @@ if __name__ == "__main__":
     # eval_freq: evaluate the agent every eval_freq train timesteps
     eval_cb = EvalCallback(
         eval_env, 
-        n_eval_episodes=30,         eval_freq=25000, 
+        n_eval_episodes=10,         eval_freq=500, 
         log_path=PATHS.get('eval'), best_model_save_path=PATHS.get('model'), 
-        deterministic=True, 
-        callback_on_eval_end=trainstage_cb)
+        deterministic=True,         callback_on_eval_end=trainstage_cb,
+        callback_on_new_best=stoptraining_cb)
    
     # determine mode
     if args.custom_mlp:
@@ -310,7 +314,7 @@ if __name__ == "__main__":
 
     # set num of timesteps to be generated
     if args.n is None:
-        n_timesteps = 60000000
+        n_timesteps = 20000000
     else:
         n_timesteps = args.n
 
