@@ -9,6 +9,7 @@ import math
 import configparser
 import torch
 import gym
+from crowd_nav.policy.policy_factory import policy_factory
 # 
 from crowd_nav.policy.cadrl import CADRL
 from crowd_nav.policy.lstm_rl import LstmRL
@@ -54,8 +55,6 @@ class TestNode():
         # control loop
         rospy.Timer(rospy.Duration(0.01),self.cbControl)
         rospy.Timer(rospy.Duration(0.1),self.cbComputeActionCrowdNav)
-
-    
 
     def cbClusters(self,msg):
         # print(msg)
@@ -195,6 +194,7 @@ class TestNode():
         self.desired_position.pose.position.y = self.tb3.pose.pose.position.y + (action[1])
 
         self.tb3.update_action(action)
+        print(action.v,action.r)
         self.update_angle2Action()
 
     def visualize_other_agents(self,xs,ys,radii,labels):

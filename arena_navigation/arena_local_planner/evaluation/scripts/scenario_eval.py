@@ -95,7 +95,6 @@ class newBag():
         t_reset = []
         for i in range(len(df_reset)): 
             t_reset.append(df_reset.loc[i, "Time"])
-        # print(t_reset)
 
         pose_x = []
         pose_y = []
@@ -159,7 +158,7 @@ class newBag():
              return 0
 
     def plot_collisions(self, xya, clr):
-        global ax
+        global ax, plot_collisions
         all_cols_x = []
         all_cols_y = []
         all_cols = []
@@ -171,17 +170,19 @@ class newBag():
                 all_cols_x.append(-col_xy[1])
                 all_cols_y.append(col_xy[0])
 
-                circle = plt.Circle((-col_xy[1], col_xy[0]), 0.3, color=clr, fill = True, alpha = 0.3)
-                ax.add_patch(circle)
+                if plot_collisions:
+                    circle = plt.Circle((-col_xy[1], col_xy[0]), 0.3, color=clr, fill = True, alpha = 0.3)
+                    ax.add_patch(circle)
+                    
                 col_exists = True
         
+
         if col_exists:
             self.make_grid([all_cols_x, all_cols_y], clr)
-            # self.make_grid(all_cols, clr)
 
     def evalPath(self, planner, file_name, bags):
         col_xy = []
-        global ax, lgnd, axlim
+        global ax, lgnd, axlim, plot_trj
 
         durations = [] 
         trajs = []
@@ -220,7 +221,7 @@ class newBag():
                 path_length = np.sum(np.sqrt(dist_array)) 
                 # for av
                 trajs.append(path_length)
-                if path_length > 0:
+                if path_length > 0 and plot_trj:
                     ax.plot(y, x, lgnd[planner], alpha=0.2)
 
 
@@ -288,7 +289,7 @@ class newBag():
         plt.ylim(-4,24)
 
     def make_grid(self, acxy, clr):
-        global ax
+        global ax, plot_grid, grid_step
 
         # max grid size
         cx_min = min(acxy[0]) 
@@ -305,18 +306,18 @@ class newBag():
         # grid step even
         grid_even = False
         # dist in m
-        grid_dist = 2
+        # grid_step = 2
         # make grid step even
         while(not grid_even):
-            if rcta_p2_x % grid_dist > 0:
+            if rcta_p2_x % grid_step > 0:
                 rcta_p2_x += 1
-            if rcta_p2_y % grid_dist > 0:
+            if rcta_p2_y % grid_step > 0:
                 rcta_p2_y += 1
-            if (rcta_p2_x % grid_dist + rcta_p2_y % grid_dist) == 0:
+            if (rcta_p2_x % grid_step + rcta_p2_y % grid_step) == 0:
                 grid_even = True
 
 
-        n_grid_cells = (int(rcta_p2_x/grid_dist), int(rcta_p2_y/grid_dist))
+        n_grid_cells = (int(rcta_p2_x/grid_step), int(rcta_p2_y/grid_step))
         # grid  = np.zeros(n_grid_cells, dtype=np.ndarray)
         cells = np.zeros(n_grid_cells, dtype=np.ndarray)
         
@@ -334,32 +335,36 @@ class newBag():
         while not cells_filled: 
 
             # corner pts of each cell
-            x1 = round(grid_dist*i+rcta_p1_x,2)
-            y1 = round(grid_dist*j+rcta_p1_y,2)
+            x1 = round(grid_step*i+rcta_p1_x,2)
+            y1 = round(grid_step*j+rcta_p1_y,2)
 
-            x2 = round(grid_dist*i+rcta_p1_x,2)
-            y2 = round(grid_dist*(j+1)+rcta_p1_y,2)
+            x2 = round(grid_step*i+rcta_p1_x,2)
+            y2 = round(grid_step*(j+1)+rcta_p1_y,2)
 
-            x3 = round(grid_dist*(i+1)+rcta_p1_x,2)
-            y3 = round(grid_dist*(j+1)+rcta_p1_y,2)
+            x3 = round(grid_step*(i+1)+rcta_p1_x,2)
+            y3 = round(grid_step*(j+1)+rcta_p1_y,2)
 
-            x4 = round(grid_dist*(i+1)+rcta_p1_x,2)
-            y4 = round(grid_dist*j+rcta_p1_y,2)
+            x4 = round(grid_step*(i+1)+rcta_p1_x,2)
+            y4 = round(grid_step*j+rcta_p1_y,2)
             
             # add coordinates 
             n_cell += 1
             cells[i][j] = [n_cell ,x1, y1, x2, y2, x3, y3, x4, y4]
 
 
-            # plot coordinates 
-            # circle = plt.Circle((x1, y1), 0.1, color=clr, fill = True, alpha = 1)
-            # ax.add_patch(circle)
-            # circle = plt.Circle((x2, y2), 0.1, color=clr, fill = True, alpha = 1)
-            # ax.add_patch(circle)
-            # circle = plt.Circle((x3, y3), 0.1, color=clr, fill = True, alpha = 1)
-            # ax.add_patch(circle)
-            # circle = plt.Circle((x4, y4), 0.1, color=clr, fill = True, alpha = 1)
-            # ax.add_patch(circle)
+            if plot_grid:
+                # plot coordinates 
+                circle = plt.Circle((x1, y1), 0.1, color=clr, fill = True, alpha = 1)
+                ax.add_patch(circle)
+                circle = plt.Circle((x2, y2), 0.1, color=clr, fill = True, alpha = 1)
+                ax.add_patch(circle)
+                circle = plt.Circle((x3, y3), 0.1, color=clr, fill = True, alpha = 1)
+                ax.add_patch(circle)
+                circle = plt.Circle((x4, y4), 0.1, color=clr, fill = True, alpha = 1)
+                ax.add_patch(circle)
+
+                rcta = plt.Rectangle((rcta_p1_x, rcta_p1_y), rcta_p2_x, rcta_p2_y, linewidth=2, edgecolor=clr, facecolor='none')
+                ax.add_patch(rcta)
             
             i += 1
             # row completed
@@ -372,13 +377,12 @@ class newBag():
                     cells_filled = True
 
 
-        # rcta = plt.Rectangle((rcta_p1_x, rcta_p1_y), rcta_p2_x, rcta_p2_y, linewidth=2, edgecolor=clr, facecolor='none')
-        # ax.add_patch(rcta)
+
 
         self.find_zones(cells,acxy,clr)
 
     def find_zones(self, cells, acxy, clr):
-        global ax
+        global ax, plot_zones
         zones = {}
 
         for i in range(len(acxy[0])):
@@ -410,28 +414,67 @@ class newBag():
                         if cell_nr in zones:
                             zones[cell_nr].append([x,y])
                             # average center
-                            zones[str(cell_nr)+"_r"][0] += x
-                            zones[str(cell_nr)+"_r"][0] /= 2
-                            zones[str(cell_nr)+"_r"][1] += y
-                            zones[str(cell_nr)+"_r"][1] /= 2
+                            zones[str(cell_nr)+"_c"][0] += x
+                            zones[str(cell_nr)+"_c"][0] /= 2
+
+                            zones[str(cell_nr)+"_c"][1] += y
+                            zones[str(cell_nr)+"_c"][1] /= 2
                         else:
                             zones[cell_nr] = [[x,y]]
-                            zones[str(cell_nr)+"_r"] = [x,y]
+                            zones[str(cell_nr)+"_c"] = [x,y]
                         break
 
         col_tol = 5
-        for i in zones:
-           if len(zones[i]) >= col_tol:
-                # print("\n--\n", i)
-                # print(zones[str(i)+"_r"])
-                center = zones[str(i)+"_r"]
-                circle = plt.Circle((center[0], center[1]), 2, color=clr, fill = False, alpha = 1)
-                ax.add_patch(circle)
+        # merged_cells = []
+        # merged_zones = {}
+        if plot_zones:
+            for i in zones:
+                nof_cols = len(zones[i])
+                if nof_cols >= col_tol:
 
+                    center = zones[str(i)+"_c"]
+                    radius = 0.4 + 0.1*nof_cols
+                    circle = plt.Circle((center[0], center[1]), radius, color=clr, fill = False, alpha = 1, lw = 2)
+                    ax.add_patch(circle)
+
+                    # print(i, nof_cols)
         
-                
-                
-            # break
+        merge_complete = False
+
+        for key in zones:
+            print(key)
+        print("---------------------")
+        while not merge_complete:
+            for i in zones.copy():
+                if  str(i)+"_c" in zones:
+                    nof_cols = len(zones[i])
+                    if nof_cols >= col_tol:
+                        center = zones[str(i)+"_c"]
+                        for j in zones.copy():
+                            if  str(j)+"_c" in zones:
+                                nof_cols_2 = len(zones[j])
+                                if nof_cols_2 >= col_tol:
+                                    center_2 = zones[str(j)+"_c"]
+
+                                    if (center[0]-center_2[0])**2 + (center[1]-center_2[1])**2 > 4:
+                                        # center 2 is near center 1
+                                        zones[str(i)+"_c"] = [(x + y)/2 for x, y in zip(zones[str(i)+"_c"], zones[str(j)+"_c"])]
+                                        del zones[str(j)+"_c"]
+                                        merge_complete = True
+                                        break
+
+        for key in zones:
+            print(key)
+
+        if plot_zones:
+            for i in zones:
+                nof_cols = len(zones[i])
+                if nof_cols >= col_tol and str(i)+"_c" in zones:
+
+                    center = zones[str(i)+"_c"]
+                    radius = 0.4 + 0.1*nof_cols
+                    circle = plt.Circle((center[0], center[1]), radius, color=clr, fill = False, alpha = 1, lw = 2)
+                    ax.add_patch(circle)
 
 
                                 
@@ -454,7 +497,7 @@ def plot_dyn_obst(ob_xy):
 
 def read_scn_file(map, ob):
     # gets start / goal of each scenario as global param
-    global start, goal
+    global start, goal, plot_obst
     # find json path
     rospack = rospkg.RosPack()
     json_path = rospack.get_path('simulator_setup')+'/scenarios/eval/'
@@ -486,19 +529,17 @@ def read_scn_file(map, ob):
         ep_y = sp_y + wp_y
         ep   = [ep_x, ep_y]
 
-        plot_dyn_obst(sp)
-        plot_dyn_obst(ep)
-        plot_arrow(sp,wp)
+        if plot_obst:
+            plot_dyn_obst(sp)
+            plot_dyn_obst(ep)
+            plot_arrow(sp,wp)
 
-        # print(sp)
-        # print(ep)
-        # print("------------------------")
         
     start = data["robot"]["start_pos"]
     goal  = data["robot"]["goal_pos"]
 
 def eval_all(a,map,ob,vel):
-    global ax, sm, lgnd, start, goal, axlim
+    global ax, sm, lgnd, start, goal, axlim, plot_sm
     fig, ax = plt.subplots(figsize=(6, 7))
     
     read_scn_file(map, ob)
@@ -506,7 +547,7 @@ def eval_all(a,map,ob,vel):
     mode =  map + "_" + ob + "_" + vel 
     # fig.suptitle(mode, fontsize=16)
     # plot static map
-    if not "empty" in map:
+    if not "empty" in map and plot_sm:
         # img = plt.imread("map_small.png")
         # ax.imshow(img, extent=[-20, 6, -6, 27.3])
         plt.scatter(sm[1], sm[0],s = 0.2 , c = "grey")
@@ -586,14 +627,25 @@ def getMap(msg):
     #             print(i)
     
 def run():
-    global ax, sm, lgnd
+    global ax, sm, lgnd, grid_step
+    global plot_trj, plot_zones, plot_obst, plot_collisions, plot_grid, plot_sm
 
-    lgnd = {}
+    # ToDo: merge nearby zones 
+    # legend
+    lgnd          = {}
     lgnd["arena"] = "tab:purple"
     lgnd["cadrl"] = "tab:red"
     lgnd["dwa"]   = "tab:blue"
     lgnd["mpc"]   = "tab:green"
     lgnd["teb"]   = "tab:orange"
+    # plots
+    grid_step       = 2
+    plot_sm         = False
+    plot_obst       = False
+    plot_trj        = False
+    plot_zones      = True
+    plot_collisions = True
+    plot_grid       = True
     # static map
     rospy.init_node("eval", anonymous=False)
     rospy.Subscriber('/flatland_server/debug/layer/static',MarkerArray, getMap)
@@ -606,7 +658,7 @@ def run():
     # # # start_x = 0
     # # #  10 01
     # eval_all(["arena","cadrl","dwa","mpc","teb"],"map1","10","vel_03")
-    # # 20 01
+    # 20 01
     # eval_all(["arena","cadrl","dwa","mpc","teb"],"map1","20","vel_03")
 
 
@@ -621,7 +673,8 @@ def run():
 
 
 
-    eval_all(["arena","cadrl","dwa","mpc","teb"],"empty","20","vel_03")
+    # eval_all(["arena","cadrl","dwa","mpc","teb"],"empty","20","vel_03")
+    eval_all(["cadrl"],"map1","20","vel_03")
 
     
     
