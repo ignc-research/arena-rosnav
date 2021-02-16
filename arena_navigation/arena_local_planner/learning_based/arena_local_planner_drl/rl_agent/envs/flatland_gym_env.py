@@ -62,10 +62,10 @@ class FlatlandEnv(gym.Env):
 
         # reward calculator
         if safe_dist is None:
-            safe_dist = 1.5*self._robot_radius
+            safe_dist = 1.6*self._robot_radius
 
         self.reward_calculator = RewardCalculator(
-            robot_radius=self._robot_radius, safe_dist=1.1*self._robot_radius, goal_radius=goal_radius, rule=reward_fnc)
+            robot_radius=self._robot_radius, safe_dist=1.2*self._robot_radius, goal_radius=goal_radius, rule=reward_fnc)
 
         # action agent publisher
         self.agent_action_pub = rospy.Publisher(f'{self.ns_prefix}cmd_vel', Twist, queue_size=1)

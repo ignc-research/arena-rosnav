@@ -32,8 +32,8 @@ gae_lambda = 0.95
 batch_size = 15
 n_epochs = 3
 clip_range = 0.2
-reward_fnc = "rule_01"
-discrete_action_space = False
+reward_fnc = "rule_00"
+discrete_action_space = True
 start_stage = 1
 train_max_steps_per_episode = 500
 eval_max_steps_per_episode = 500
@@ -230,12 +230,12 @@ if __name__ == "__main__":
     trainstage_cb = InitiateNewTrainStage(
         TaskManagers=task_managers, 
         treshhold_type="succ", 
-        upper_threshold=0.6, lower_threshold=0.4, 
+        upper_threshold=0.9, lower_threshold=0.6, 
         task_mode=params['task_mode'], verbose=1)
     
     # stop training on reward threshold callback
     stoptraining_cb = StopTrainingOnRewardThreshold(
-        reward_threshold=6, task_manager=task_managers[0], verbose=1)
+        reward_threshold=14, task_manager=task_managers[0], verbose=1)
 
     # instantiate eval environment
     # take task_manager from first sim (currently evaluation only provided for single process)
@@ -252,7 +252,7 @@ if __name__ == "__main__":
     # eval_freq: evaluate the agent every eval_freq train timesteps
     eval_cb = EvalCallback(
         eval_env, 
-        n_eval_episodes=10,         eval_freq=300, 
+        n_eval_episodes=40,         eval_freq=25000, 
         log_path=PATHS.get('eval'), best_model_save_path=PATHS.get('model'), 
         deterministic=True,         callback_on_eval_end=trainstage_cb,
         callback_on_new_best=stoptraining_cb)
@@ -314,7 +314,7 @@ if __name__ == "__main__":
 
     # set num of timesteps to be generated
     if args.n is None:
-        n_timesteps = 20000000
+        n_timesteps = 40000000
     else:
         n_timesteps = args.n
 
