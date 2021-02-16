@@ -41,5 +41,9 @@
       <arg name="timeout_goal"            default="330."/>  <!-- sec, double-->
       <arg name="timeout_subgoal"         default="30."/>   <!-- sec, double-->
     </include>
+
+    <!-- <include file="$(find arena_bringup)/launch/sublaunch_training/test_node.launch">
+      <arg name="ns"                value="$(arg ns)"/>
+    </include> -->
   
   </launch>
