@@ -96,6 +96,8 @@ void PlanManager::odometryCallback(const nav_msgs::OdometryConstPtr &msg)
 
 void PlanManager::execFSMCallback(const ros::TimerEvent &e)
 {
+
+  //std::cout<<"---------------------mode"<<mode_<<std::endl;
   // print state with a fixed rate
   static int fsm_num = 0;
   fsm_num++;
@@ -258,6 +260,8 @@ void PlanManager::execFSMCallback(const ros::TimerEvent &e)
     {
       globalPlan_pub_.publish(planner_collector_->global_path_);
       subgoal_pub_.publish(end_state_->to_PoseStampted());
+      std::cout<< " "<<std::endl;
+      std::cout<< " subgoal= "<<end_state_->to_PoseStampted()<<std::endl;
       visualization_->drawSubgoal(end_state_->to_PoseStampted(), 0.3, Eigen::Vector4d(0, 0, 0, 1.0));
       cout << "MID_REPLAN Success" << endl;
       changeFSMExecState(EXEC_LOCAL, "FSM");
