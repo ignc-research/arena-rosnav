@@ -42,7 +42,7 @@ gae_lambda = 0.95
 batch_size = 15
 n_epochs = 3
 clip_range = 0.2
-reward_fnc = "rule_01"
+reward_fnc = "rule_00"
 discrete_action_space = False
 normalize = True
 start_stage = 1
@@ -155,8 +155,12 @@ def make_envs(task_manager: Union[RandomTask, StagedRandomTask, ManualTask, Scen
     def _init() -> Union[gym.Env, gym.Wrapper]:
         if train:
             # train env
+            # if rank+1 < 10:
+            #     suffix = '0'+str(rank+1)
+            # else:
+            #     suffix = str(rank+1)
             env = FlatlandEnv(
-                f"sim_0{rank+1}", task_manager, 
+                f"sim_{str(rank+1)}", task_manager, 
                 PATHS.get('robot_setting'), PATHS.get('robot_as'), 
                 params['reward_fnc'], params['discrete_action_space'], 
                 goal_radius=params['goal_radius'], 
@@ -166,7 +170,7 @@ def make_envs(task_manager: Union[RandomTask, StagedRandomTask, ManualTask, Scen
             # eval env
             env = Monitor(
                     FlatlandEnv(
-                        f"sim_0{rank+1}", task_manager, 
+                        f"sim_{str(rank+1)}", task_manager, 
                         PATHS.get('robot_setting'), PATHS.get('robot_as'), 
                         params['reward_fnc'], params['discrete_action_space'], 
                         goal_radius=params['goal_radius'], 
@@ -184,8 +188,8 @@ if __name__ == "__main__":
 
     if args.debug:
         rospy.init_node("debug_node", disable_signals=True)
-    else:
-        rospy.init_node("train_node")
+    # else:
+    #     rospy.init_node("train_node")
         
     # generate agent name and model specific paths
     AGENT_NAME = get_agent_name(args)
@@ -194,12 +198,15 @@ if __name__ == "__main__":
     print("________ STARTING TRAINING WITH:  %s ________\n" % AGENT_NAME)
     # check if simulations are booted
     for i in range(args.n_envs):
-        ns = rosnode.get_node_names(namespace='sim_0'+str(i+1))
-        # print(ns)
+        # if i+1 < 10:
+        #     suffix = '0'+str(i+1)
+        # else:
+        #     suffix = str(i+1)
+        ns = rosnode.get_node_names(namespace='sim_'+str(i+1))
         assert (len(ns) > 0
         ), f"Check if {args.n_envs} different simulation environments are running"
         assert (len(ns) > 2
-        ), f"Check if all simulation parts of namespace '{'/sim_0'+str(i+1)}' are running properly"
+        ), f"Check if all simulation parts of namespace '{'/sim_'+str(i+1)}' are running properly"
 
     # initialize hyperparameters (save to/ load from json)
     hyperparams_obj = agent_hyperparams(
@@ -217,9 +224,14 @@ if __name__ == "__main__":
     task_managers=[]
     for i in range(args.n_envs):
         # print("n",args.n_envs)
+        # suffix=''
+        # if i+1 < 10:
+        #     suffix = '0'+str(i+1)
+        # else:
+        #     suffix = str(i+1)
         task_managers.append(
             get_predefined_task(
-                f"sim_0{i+1}", params['task_mode'], params['curr_stage'], PATHS))
+                f"sim_{str(i+1)}", params['task_mode'], params['curr_stage'], PATHS))
 
     # instantiate gym environment
     # when debug run on one process only
