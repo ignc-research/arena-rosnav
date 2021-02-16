@@ -89,7 +89,8 @@ class wp3Env(gym.Env):
         self._subgoal = Pose2D()
         self._globalGoal = Pose2D()
         self._ref_wp = PoseStamped()
-        
+        self._action_msg = PoseStamped()
+        self.firstTime = 0
         self._previous_time = 0
         self._step_counter = 0
         # # get observation
@@ -153,13 +154,39 @@ class wp3Env(gym.Env):
         output, error = process.communicate()
         return output, error
 
+    def _calc_distance(self, goal_pos:Pose2D,robot_pos:Pose2D):
+         y_relative = goal_pos.y - robot_pos.y
+         x_relative = goal_pos.x - robot_pos.x
+        #  d=np.array[x_relative,y_relative]
+        #  dist = np.linalg.norm(d)
+         rho =  (x_relative**2+y_relative**2)**0.5
+         theta = (np.arctan2(y_relative,x_relative)-robot_pos.theta+4*np.pi)%(2*np.pi)-np.pi
+         return rho,theta
 
     def _pub_action(self, action):
-        
-        action_msg = PoseStamped()
+        _, obs_dict = self.observation_collector.get_observations()
+        dist_robot_goal = obs_dict['goal_in_robot_frame']
+        self._robot_pose = obs_dict['robot_pose']
+        #transform action which is a waypoint to 2d to calculate distance robot-wp
+        wp2d = Pose2D()
+        wp2d.x = self._action_msg.pose.position.x
+        wp2d.y = self._action_msg.pose.position.y
+        #calculate distance between robot and waypoint
+        dist_robot_wp = self._calc_distance(wp2d, self._robot_pose)
+       
+        if self.firstTime < 1:
+            angle_grad = math.degrees(action[0]) # e.g. 90 degrees
+            self._action_msg.pose.position.x = self._ref_wp.pose.position.x + (self.range_circle*math.cos(angle_grad))         
+            self._action_msg.pose.position.y = self._ref_wp.pose.position.y + (self.range_circle*math.sin(angle_grad))   
+            self._action_msg.pose.orientation.w = 1
+            self._action_msg.header.frame_id ="map"
+            self.agent_action_pub.publish(self._action_msg)
+            self.firstTime +=1
+            print("distance robot to wp: {}".format(dist_robot_wp[0]))
 
         #wait for robot to reach the waypoint first in about 10 steps
-        if self._step_counter - self._previous_time > 20:
+        #if self._step_counter - self._previous_time > 30:
+        if dist_robot_wp[0] < 0.6:
             self._previous_time = self._step_counter
             _, obs_dict = self.observation_collector.get_observations()
             dist_robot_goal = obs_dict['goal_in_robot_frame']
@@ -173,18 +200,18 @@ class wp3Env(gym.Env):
             # robot_position+(angle*range)
             #send a goal message as action, remeber to normalize the quaternions (put orientationw as 1) and set the frame id of the goal! 
             if dist_robot_goal[0] < 2:
-                action_msg.pose.position.x = self._ref_wp.pose.position.x    
-                action_msg.pose.position.y = self._ref_wp.pose.position.y   
-                action_msg.pose.orientation.w = 1
-                action_msg.header.frame_id ="map"
-                self.agent_action_pub.publish(action_msg)
+                self._action_msg.pose.position.x = self._ref_wp.pose.position.x    
+                self._action_msg.pose.position.y = self._ref_wp.pose.position.y   
+                self._action_msg.pose.orientation.w = 1
+                self._action_msg.header.frame_id ="map"
+                self.agent_action_pub.publish(self._action_msg)
             else:
                 angle_grad = math.degrees(action[0]) # e.g. 90 degrees
-                action_msg.pose.position.x = self._ref_wp.pose.position.x + (self.range_circle*math.cos(angle_grad))         
-                action_msg.pose.position.y = self._ref_wp.pose.position.y + (self.range_circle*math.sin(angle_grad))   
-                action_msg.pose.orientation.w = 1
-                action_msg.header.frame_id ="map"
-                self.agent_action_pub.publish(action_msg)
+                self._action_msg.pose.position.x = self._ref_wp.pose.position.x + (self.range_circle*math.cos(angle_grad))         
+                self._action_msg.pose.position.y = self._ref_wp.pose.position.y + (self.range_circle*math.sin(angle_grad))   
+                self._action_msg.pose.orientation.w = 1
+                self._action_msg.header.frame_id ="map"
+                self.agent_action_pub.publish(self._action_msg)
                 print(angle_grad)
 
             #rospy.sleep(1)
@@ -248,11 +275,14 @@ class wp3Env(gym.Env):
         self.task.reset()
         self.reward_calculator.reset()
         self._steps_curr_episode = 0
+        self.firstTime = 0
         obs, _ = self.observation_collector.get_observations()
         return obs  # reward, done, info can't be included
 
     def close(self):
         pass
+
+
 
 
 if __name__ == '__main__':
