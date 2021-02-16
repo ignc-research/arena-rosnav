@@ -13,9 +13,6 @@
 #include <arena_plan_msgs/RobotStateStamped.h>
 #include <arena_plan_msgs/RobotState.h>
 
-struct RobotState;
-typedef RobotState *RobotStatePtr;
-
 struct RobotState
 {
 
@@ -102,9 +99,9 @@ struct RobotState
 
         return state_stamped;
     }
-
-    RobotState();
-    ~RobotState();
+    ~RobotState(){};
 };
+
+typedef std::shared_ptr<RobotState> RobotStatePtr;
 
 #endif

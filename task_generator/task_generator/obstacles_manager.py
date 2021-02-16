@@ -4,6 +4,7 @@ from typing import Union
 import re
 import yaml
 import os
+import warnings
 from flatland_msgs.srv import DeleteModel, DeleteModelRequest
 from flatland_msgs.srv import SpawnModel, SpawnModelRequest
 from flatland_msgs.srv import MoveModel, MoveModelRequest
@@ -23,31 +24,30 @@ class ObstaclesManager:
     A manager class using flatland provided services to spawn, move and delete obstacles.
     """
 
-    def __init__(self, map_: OccupancyGrid, is_training=True):
+    def __init__(self, ns: str, map_: OccupancyGrid):
         """
         Args:
             map_ (OccupancyGrid):
-            is_training (bool, optional): is it training or testing. Defaults to True.
             plugin_name: The name of the plugin which is used to control the movement of the obstacles, Currently we use "RandomMove" for training and Tween2 for evaluation.
                 The Plugin Tween2 can move the the obstacle along a trajectory which can be assigned by multiple waypoints with a constant velocity.Defaults to "RandomMove".
         """
+        self.ns = ns
+        self.ns_prefix = "/" if ns == '' else "/"+ns+"/"
+
         # a list of publisher to move the obstacle to the start pos.
         self._move_all_obstacles_start_pos_pubs = []
 
         # setup proxy to handle  services provided by flatland
-        rospy.wait_for_service('move_model', timeout=20)
-        rospy.wait_for_service('delete_model', timeout=20)
-        rospy.wait_for_service('spawn_model', timeout=20)
-        if is_training:
-            rospy.wait_for_service('step_world', timeout=20)
+        rospy.wait_for_service(f'{self.ns_prefix}move_model', timeout=20)
+        rospy.wait_for_service(f'{self.ns_prefix}delete_model', timeout=20)
+        rospy.wait_for_service(f'{self.ns_prefix}spawn_model', timeout=20)
         # allow for persistent connections to services
         self._srv_move_model = rospy.ServiceProxy(
-            'move_model', MoveModel, persistent=True)
+            f'{self.ns_prefix}move_model', MoveModel, persistent=True)
         self._srv_delete_model = rospy.ServiceProxy(
-            'delete_model', DeleteModel, persistent=True)
+            f'{self.ns_prefix}delete_model', DeleteModel, persistent=True)
         self._srv_spawn_model = rospy.ServiceProxy(
-            'spawn_model', SpawnModel, persistent=True)
-        # self._srv_sim_step = rospy.ServiceProxy('step_world', StepWorld, persistent=True)
+            f'{self.ns_prefix}spawn_model', SpawnModel, persistent=True)
 
         self.update_map(map_)
         self.obstacle_name_list = []
@@ -329,7 +329,7 @@ class ObstaclesManager:
         move_with_traj['linear_velocity'] = linear_velocity
         # set the topic name for moving the object to the start point.
         # we can not use the flatland provided service to move the object, othewise the Tween2 will not work properly.
-        move_with_traj['move_to_start_pos_topic'] = obstacle_name + \
+        move_with_traj['move_to_start_pos_topic'] = self.ns_prefix + obstacle_name + \
             '/move_to_start_pos'
         move_to_start_pos_pub = rospy.Publisher(
             move_with_traj['move_to_start_pos_topic'], Empty, queue_size=1)
@@ -338,7 +338,7 @@ class ObstaclesManager:
         move_with_traj['mode'] = mode
         move_with_traj['body'] = 'object_with_traj'
         move_with_traj['trigger_zones'] = trigger_zones
-        move_with_traj['robot_odom_topic'] = 'odom'
+        move_with_traj['robot_odom_topic'] = self.ns_prefix + 'odom'
         dict_file['plugins'].append(move_with_traj)
 
         with open(yaml_path, 'w') as fd:
@@ -475,14 +475,24 @@ class ObstaclesManager:
             #     min_obstacle_vert, max_obstacle_vert)
             radius = random.uniform(
                 min_obstacle_radius, max_obstacle_radius)
-
-            for _ in range(num_vertices):
-                angle = 2 * math.pi * random.uniform(0, 1)
-                vert = [math.cos(angle) * radius,
-                        math.sin(angle) * radius]
-                # print(vert)
-                # print(angle)
-                f["points"].append(vert)
+            # When we send the request to ask flatland server to respawn the object with polygon, it will do some checks
+            # one important assert is that the minimum distance should be above this value
+            # https://github.com/erincatto/box2d/blob/75496a0a1649f8ee6d2de6a6ab82ee2b2a909f42/include/box2d/b2_common.h#L65
+            POINTS_MIN_DIST = 0.005*1.1
+            def min_dist_check_passed(points):
+                points_1_x_2 = points[None,...]
+                points_x_1_2 = points[:,None,:]
+                points_dist = ((points_1_x_2-points_x_1_2)**2).sum(axis=2).squeeze()
+                np.fill_diagonal(points_dist,1)
+                min_dist = points_dist.min()
+                return min_dist>POINTS_MIN_DIST
+            points = None
+            while points is None:
+                angles = 2*np.pi*np.random.random(num_vertices)
+                points = np.array([np.cos(angles),np.sin(angles)]).T
+                if not min_dist_check_passed(points):
+                    points = None
+            f['points'] = points.tolist()
 
         body["footprints"].append(f)
         # define dict_file
@@ -509,8 +519,12 @@ class ObstaclesManager:
         response = self._srv_delete_model(srv_request)
 
         if not response.success:
+            """
             raise rospy.ServiceException(
                 f"failed to remove the object with the name: {name}! ")
+            """
+            warnings.warn(
+                f"failed to remove the object with the name: {name}!")
         else:
             rospy.logdebug(f"Removed the obstacle with the name {name}")
 
@@ -539,7 +553,11 @@ class ObstaclesManager:
             topics = rospy.get_published_topics()
             for t in topics:
                 # the format of the topic is (topic_name,message_name)
-                topic_name = t[0]
-                object_name = topic_name.split("/")[-1]
+                topic_name = t[0].split("/")
+                object_name = topic_name[-1]
                 if object_name.startswith(self._obstacle_name_prefix):
-                    self.remove_obstacle(object_name)
+                    if "sim" in self.ns:
+                        if self.ns in topic_name:
+                            self.remove_obstacle(object_name)
+                    else:
+                        self.remove_obstacle(object_name)

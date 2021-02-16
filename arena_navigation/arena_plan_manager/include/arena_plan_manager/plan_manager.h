@@ -75,7 +75,7 @@ private:
     
     ros::Subscriber goal_sub_, odom_sub_;
     
-    
+    ros::Publisher globalPlan_pub_;
     ros::Publisher subgoal_pub_;
 
     ros::Publisher robot_state_pub_;

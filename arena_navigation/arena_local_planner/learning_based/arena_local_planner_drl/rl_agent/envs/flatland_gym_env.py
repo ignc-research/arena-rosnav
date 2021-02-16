@@ -21,7 +21,7 @@ import time
 class FlatlandEnv(gym.Env):
     """Custom Environment that follows gym interface"""
 
-    def __init__(self, task: ABSTask, robot_yaml_path: str, settings_yaml_path: str, reward_fnc: str, is_action_space_discrete, safe_dist: float = None, goal_radius: float = 0.1, max_steps_per_episode=100):
+    def __init__(self, ns: str, task: ABSTask, robot_yaml_path: str, settings_yaml_path: str, reward_fnc: str, is_action_space_discrete, safe_dist: float = None, goal_radius: float = 0.1, max_steps_per_episode=100, train_mode: bool = True, debug: bool = False):
         """Default env
         Flatland yaml node check the entries in the yaml file, therefore other robot related parameters cound only be saved in an other file.
         TODO : write an uniform yaml paser node to handel with multiple yaml files.
@@ -38,14 +38,26 @@ class FlatlandEnv(gym.Env):
             goal_radius (float, optional): [description]. Defaults to 0.1.
         """
         super(FlatlandEnv, self).__init__()
+
+        self.ns = ns
+        # process specific namespace in ros system
+        if ns is not None or ns !="":
+            self.ns_prefix = '/'+ns + '/'
+        else:
+            self.ns_prefix = '/'
+        
+        if not debug:
+            if train_mode:
+                rospy.init_node(f'train_env_{ns[-1]}', disable_signals=False)
+            else:
+                rospy.init_node(f'eval_env_{ns[-1]}', disable_signals=False)
         # Define action and observation space
         # They must be gym.spaces objects
-
         self._is_action_space_discrete = is_action_space_discrete
         self.setup_by_configuration(robot_yaml_path, settings_yaml_path)
         # observation collector
         self.observation_collector = ObservationCollector(
-            self._laser_num_beams, self._laser_max_range)
+            self.ns, self._laser_num_beams, self._laser_max_range)
         self.observation_space = self.observation_collector.get_observation_space()
 
         # reward calculator
@@ -56,11 +68,11 @@ class FlatlandEnv(gym.Env):
             robot_radius=self._robot_radius, safe_dist=1.1*self._robot_radius, goal_radius=goal_radius, rule=reward_fnc)
 
         # action agent publisher
-        self.agent_action_pub = rospy.Publisher('cmd_vel', Twist, queue_size=1)
+        self.agent_action_pub = rospy.Publisher(f'{self.ns_prefix}cmd_vel', Twist, queue_size=1)
         # service clients
-        self._is_train_mode = rospy.get_param("train_mode")
+        self._is_train_mode = rospy.get_param("/train_mode")
         if self._is_train_mode:
-            self._service_name_step = '/step_world'
+            self._service_name_step = f'{self.ns_prefix}step_world'
             self._sim_step_client = rospy.ServiceProxy(
             self._service_name_step, StepWorld)
         self.task = task
@@ -83,9 +95,9 @@ class FlatlandEnv(gym.Env):
                     for footprint in body['footprints']:
                         if footprint['type'] == 'circle':
                             self._robot_radius = footprint.setdefault(
-                                'radius', 0.3)*1.04
+                                'radius', 0.3)*1.05
                         if footprint['radius']:
-                            self._robot_radius = footprint['radius']*1.04
+                            self._robot_radius = footprint['radius']*1.05
             # get laser related information
             for plugin in robot_data['plugins']:
                 if plugin['type'] == 'Laser':
@@ -113,13 +125,15 @@ class FlatlandEnv(gym.Env):
 
     def _pub_action(self, action):
         action_msg = Twist()
-        if self._is_action_space_discrete:
-            action_msg.linear.x = self._discrete_acitons[action]['linear']
-            action_msg.angular.z = self._discrete_acitons[action]['angular']
-        else:
-            action_msg.linear.x = action[0]
-            action_msg.angular.z = action[1]
+        action_msg.linear.x = action[0]
+        action_msg.angular.z = action[1]
         self.agent_action_pub.publish(action_msg)
+
+    def _translate_disc_action(self, action):
+        action[0] = self._discrete_acitons[action]['linear']
+        action[1] = self._discrete_acitons[action]['angular']
+
+        return action
 
     def step(self, action):
         """
@@ -127,6 +141,8 @@ class FlatlandEnv(gym.Env):
                         1   -   collision with obstacle
                         2   -   goal reached
         """
+        if self._is_action_space_discrete:
+            action = self._translate_disc_action(action)
         self._pub_action(action)
         self._steps_curr_episode += 1
         # wait for new observations
@@ -136,19 +152,22 @@ class FlatlandEnv(gym.Env):
 
         # calculate reward
         reward, reward_info = self.reward_calculator.get_reward(
-            obs_dict['laser_scan'], obs_dict['goal_in_robot_frame'])
+            obs_dict['laser_scan'], obs_dict['goal_in_robot_frame'], action=action)
+        # print(f"cum_reward: {reward}")
         done = reward_info['is_done']
 
-        print("reward:  {}".format(reward))
+        # print("reward:  {}".format(reward))
         
         # info
         info = {}
         if done:
             info['done_reason'] = reward_info['done_reason']
+            info['is_success'] = reward_info['is_success']
         else:
             if self._steps_curr_episode == self._max_steps_per_episode:
                 done = True
                 info['done_reason'] = 0
+                info['is_success'] = 0
 
         return merged_obs, reward, done, info
 
@@ -171,7 +190,7 @@ class FlatlandEnv(gym.Env):
 
 if __name__ == '__main__':
 
-    rospy.init_node('flatland_gym_env', anonymous=True)
+    rospy.init_node('flatland_gym_env', anonymous=True, disable_signals=False)
     print("start")
 
     flatland_env = FlatlandEnv()

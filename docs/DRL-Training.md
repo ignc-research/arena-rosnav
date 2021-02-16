@@ -10,6 +10,7 @@ As a fundament for our Deep Reinforcement Learning approaches [StableBaselines3]
 * Load your trained agent to continue training
 * Optionally log training and evaluation data
 * Enable and modify training curriculum
+* Run and evaluate your trained agents
 
 
 ##### Quick Start
@@ -17,7 +18,7 @@ As a fundament for our Deep Reinforcement Learning approaches [StableBaselines3]
 * In one terminnal, start simulation
 
 ```bash
-roslaunch arena_bringup start_arena_flatland.launch  train_mode:=true 	use_viz:=true  task_mode=random
+roslaunch arena_bringup start_training.launch num_envs:=1
 ```
 * In another terminal
 
@@ -31,6 +32,18 @@ python scripts/training/train_agent.py --agent MLP_ARENA2D
 #### Program Arguments
 
 **Generic program call**:
+- Before you can run the training script you need to boot the ros simulation via the dedicated launch file:
+
+```bash
+roslaunch arena_bringup start_training.launch num_envs:={num of parallel envs}
+```
+
+- Optionally you can visualize the training with rviz by calling:
+```bash
+roslaunch arena_bringup visualization_training.launch ns:=sim_0{num of the env}
+```
+
+- Afterwards start the training as follows:
 ```
 train_agent.py [agent flag] [agent_name | unique_agent_name | custom mlp params] [optional flag] [optional flag] ...
 ```
@@ -41,7 +54,6 @@ train_agent.py [agent flag] [agent_name | unique_agent_name | custom mlp params]
 |                      |```--load ```                     | *unique_agent_name* ([see below](#load-a-dnn-for-training))   | loads agent to the given name
 |                      |```--custom-mlp```                | _custom_mlp_params_ ([see below](#training-with-a-custom-mlp))| initializes custom MLP according to given arguments 
 
-_Custom Multilayer Perceptron_ parameters will only be considered when ```--custom-mlp``` was set!
 |  Custom Mlp Flags | Syntax                | Description                                   |
 | ----------------  | ----------------------| ----------------------------------------------|
 |  ```--body ```    | ```{num}-{num}-...``` |architecture of the shared latent network      |
@@ -49,9 +61,12 @@ _Custom Multilayer Perceptron_ parameters will only be considered when ```--cust
 |  ```--vf```       | ```{num}-{num}-...``` |architecture of the latent value network       |
 |  ```--act_fn ```  | ```{relu, sigmoid or tanh}```|activation function to be applied after each hidden layer |
 
+(_Custom Multilayer Perceptron_ parameters will only be considered when ```--custom-mlp``` was set)
+
 |  Optional Flags        | Description                                    |
 | ---------------------- | -----------------------------------------------|
-|  ```--n    {num}```    | timesteps in total to be generated for training|
+|  ```--n_envs    {num}```    | number of parallel environments (defaults to 1)|
+|  ```--n    {num}```    | timesteps in total to be generated for training (defaults to 6*10⁶)|
 |  ```--tb```            | enables tensorboard logging                    |
 |  ```-log```, ```--eval_log```| enables logging of evaluation episodes   |
 |  ```--no-gpu```        | disables training with GPU                     |
@@ -86,7 +101,7 @@ To load a specific agent you simply use the flag ```--load```, e.g.:
 ```
 train_agent.py --load MLP_ARENA2D_2021_01_19__03_20
 ```
-**Note**: currently only agents which were trained with PPO given by StableBaselines3 are compatible with the training script. 
+**Note**: Currently only agents which were trained with PPO given by StableBaselines3 are compatible with the training script. Also when continuing training you have to make sure that given action space (defined in ```../arena_local_planner_drl/configs/default_settings.yaml```) is identical to the previous training cycles.
 
 ##### Training with a custom MLP
 
@@ -139,10 +154,13 @@ Following hyperparameters can be adapted:
 | discrete_action_space | If robot uses discrete action space
 | task_mode | Mode tasks will be generated in (custom, random, staged). In custom mode one can place obstacles manually via Rviz. In random mode there's a fixed number of obstacles which are spawned randomly distributed on the map after each episode. In staged mode the training curriculum will be used to spawn obstacles. ([more info](#training-curriculum))
 | curr_stage | When "staged" training is activated which stage to start the training with.
+| train_max_steps_per_episode | Max timesteps per training episode
+| eval_max_steps_per_episode | Max timesteps per evaluation episode
+| goal_radius | Radius of the goal
 
 ([more information on PPO implementation of SB3](https://stable-baselines3.readthedocs.io/en/master/modules/ppo.html))
 
-**Note**: For now further parameters like _max_steps_per_episode_ or _goal_radius_ have to be changed inline (where FlatlandEnv gets instantiated). _n_eval_episodes_ which will take place after _eval_freq_ timesteps can be changed also (where EvalCallback gets instantiated).
+**Note**: For now _n_eval_episodes_ which take place after _eval_freq_ timesteps can be changed inline (where EvalCallback gets instantiated).
 
 #### Reward Functions
 
@@ -196,7 +214,19 @@ At present one can chose between two reward functions which can be set at the hy
 
 For the purpose of speeding up the training an exemplary training currucilum was implemented. But what exactly is a training curriculum you may ask. We basically divide the training process in difficulty levels, here the so called _stages_, in which the agent will meet an arbitrary number of obstacles depending on its learning progress. Different metrics can be taken into consideration to measure an agents performance.
 
-In our implementation a reward threshold or a certain percentage of successful episodes must be reached to trigger the next stage. The statistics of each evaluation run is calculated and considered. Moreover when a new best mean reward was reached the model will be saved automatically.
+In our implementation a reward threshold or a certain percentage of successful episodes must be reached to trigger the next stage. Though when a certain threshold gets undercut a simpler task is initiated (one lower stage to the current one). The statistics of each evaluation episode is calculated and considered. Moreover when a new best mean reward was reached the model will be saved automatically.
+
+In order to change the evaluation metrics you have to change the parameters of _InitiateNewTrainStage_ (in train_agent.py): 
+```python
+   trainstage_cb = InitiateNewTrainStage(
+        TaskManagers=task_managers, 
+        treshhold_type="succ", 
+        upper_threshold=0.9, lower_threshold=0.6, 
+        (...))
+```
+- ```threshold_type``` can be set either _succ_ - to consider the success rate - or _rew_ - to consider the mean reward - of each evaluation iteration. 
+- When ```upper_threshold``` is reached the next stage gets triggered (in the example above a success rate of 90% has to achieved).
+- When ```lower_threshold``` is undercut the previous stage gets triggered.
 
 Exemplary training curriculum:
 | Stage           | Static Obstacles | Dynamic Obstacles  |
@@ -207,6 +237,9 @@ Exemplary training curriculum:
 | 4               |  0               | 10                 |
 | 5               |  10              | 10                 |
 | 6               |  13              | 13                 |
+
+
+
 
 #### Run the trained agent
 
