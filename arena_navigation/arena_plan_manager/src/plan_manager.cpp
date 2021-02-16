@@ -167,11 +167,11 @@ void PlanManager::execFSMCallback(const ros::TimerEvent &e)
 
   case EXEC_LOCAL:
   {
-    if (mode_ == TRAIN)
-    {
-      //cout<<"EXEC_LOCAL"<<"Train mode"<<endl;
-      return;
-    }
+    // if (mode_ == TRAIN)
+    // {
+    //   //cout<<"EXEC_LOCAL"<<"Train mode"<<endl;
+    //   return;
+    // }
 
     /* check env determine, calculate criterion */
     // fake obstacle info
