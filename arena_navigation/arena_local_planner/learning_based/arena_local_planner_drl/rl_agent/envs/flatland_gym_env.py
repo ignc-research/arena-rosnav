@@ -130,10 +130,11 @@ class FlatlandEnv(gym.Env):
         self.agent_action_pub.publish(action_msg)
 
     def _translate_disc_action(self, action):
-        action[0] = self._discrete_acitons[action]['linear']
-        action[1] = self._discrete_acitons[action]['angular']
-
-        return action
+        new_action = np.array([])
+        new_action = np.append(new_action, self._discrete_acitons[action]['linear'])
+        new_action = np.append(new_action, self._discrete_acitons[action]['angular'])    
+            
+        return new_action
 
     def step(self, action):
         """

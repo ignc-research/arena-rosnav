@@ -6,12 +6,12 @@
 1:
   static: 0
   dynamic: 0
-1:
+2:
   static: 0
   dynamic: 2
-2:
+3:
   static: 1
   dynamic: 4
-3:
+4:
   static: 2
   dynamic: 6
