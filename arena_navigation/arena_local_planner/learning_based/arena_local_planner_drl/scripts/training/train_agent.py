@@ -173,7 +173,7 @@ if __name__ == "__main__":
     args, _ = parse_training_args()
 
     if args.debug:
-        rospy.init_node("debug_node", disable_signals=True)
+        rospy.init_node("debug_node", disable_signals=False)
         
     # generate agent name and model specific paths
     AGENT_NAME = get_agent_name(args)

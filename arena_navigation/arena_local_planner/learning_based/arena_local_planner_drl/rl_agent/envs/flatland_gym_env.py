@@ -48,9 +48,9 @@ class FlatlandEnv(gym.Env):
         
         if not debug:
             if train_mode:
-                rospy.init_node(f'train_env_{ns[-1]}')
+                rospy.init_node(f'train_env_{ns[-1]}', disable_signals=False)
             else:
-                rospy.init_node(f'eval_env_{ns[-1]}')
+                rospy.init_node(f'eval_env_{ns[-1]}', disable_signals=False)
         # Define action and observation space
         # They must be gym.spaces objects
         self._is_action_space_discrete = is_action_space_discrete
@@ -190,7 +190,7 @@ class FlatlandEnv(gym.Env):
 
 if __name__ == '__main__':
 
-    rospy.init_node('flatland_gym_env', anonymous=True)
+    rospy.init_node('flatland_gym_env', anonymous=True, disable_signals=False)
     print("start")
 
     flatland_env = FlatlandEnv()
