@@ -12,6 +12,7 @@
 
 
 #include <arena_plan_manager/robot_state.h>
+#include <arena_plan_msgs/MakeGlobalPlan.h>
 
 class PlanCollector{
 

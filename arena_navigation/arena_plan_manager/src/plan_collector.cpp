@@ -10,8 +10,10 @@ void PlanCollector::initPlanModules(ros::NodeHandle &nh){
 
     goal_=geometry_msgs::PoseStamped();
     
-    std::string global_plan_service_name = "/move_base/NavfnROS/make_plan";  
-    global_plan_client_= nh.serviceClient<nav_msgs::GetPlan>(global_plan_service_name);
+    // std::string global_plan_service_name = "/move_base/NavfnROS/make_plan";  
+    // global_plan_client_= nh.serviceClient<nav_msgs::GetPlan>(global_plan_service_name);
+    std::string global_plan_service_name = "global_kino_make_plan";///move_base/NavfnROS/make_plan";  
+    global_plan_client_= nh.serviceClient<arena_plan_msgs::MakeGlobalPlan>(global_plan_service_name);  
 
     // get plan parameter
     nh.param("/look_ahead_distance", look_ahead_distance_, 1.5);
@@ -19,7 +21,9 @@ void PlanCollector::initPlanModules(ros::NodeHandle &nh){
 }
 
 bool PlanCollector::generate_global_plan(RobotState &start_state,RobotState &end_state){
-    nav_msgs::GetPlan srv;
+    //nav_msgs::GetPlan srv;
+    arena_plan_msgs::MakeGlobalPlan srv;
+
     
     srv.request.start=start_state.to_PoseStampted();
     srv.request.goal=end_state.to_PoseStampted();
