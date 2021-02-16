@@ -192,10 +192,11 @@ class StagedRandomTask(RandomTask):
                 json.dump(hyperparams, target,
                         ensure_ascii=False, indent=4)
 
-
     def _remove_obstacles(self):
         self.obstacles_manager.remove_obstacles()
 
+    def get_num_stages(self):
+        return len(self._stages)
 
 class ScenerioTask(ABSTask):
     def __init__(self, obstacles_manager: ObstaclesManager, robot_manager: RobotManager, scenerios_json_path: str):

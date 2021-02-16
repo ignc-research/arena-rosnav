@@ -57,16 +57,16 @@ class InitiateNewTrainStage(BaseCallback):
                 warnings.warn("Only %d evaluation episodes considered for threshold monitoring," 
                     "results might not represent agent performance well" % EvalObject.n_eval_episodes)
             
+            if ((self.threshhold_type == "rew" and EvalObject.best_mean_reward <= self.lower_threshold) or
+                (self.threshhold_type == "succ" and EvalObject.last_success_rate <= self.lower_threshold)):
+                for task_manager in self.TaskManagers:
+                    task_manager.previous_stage()
+                    
             if ((self.threshhold_type == "rew" and EvalObject.best_mean_reward >= self.upper_threshold) or
                 (self.threshhold_type == "succ" and EvalObject.last_success_rate >= self.upper_threshold)):
                 for task_manager in self.TaskManagers:
                     task_manager.next_stage()
                 EvalObject.best_mean_reward = -np.inf
                 EvalObject.last_success_rate = -np.inf
-
-            if ((self.threshhold_type == "rew" and EvalObject.best_mean_reward <= self.lower_threshold) or
-                (self.threshhold_type == "succ" and EvalObject.last_success_rate <= self.lower_threshold)):
-                for task_manager in self.TaskManagers:
-                    task_manager.previous_stage()
 
         return True
