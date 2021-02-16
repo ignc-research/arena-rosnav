@@ -27,7 +27,9 @@ bool PlanCollector::generate_global_plan(RobotState &start_state,RobotState &end
     //nav_msgs::GetPlan srv;
     std::cout<<"COME to plan global0"<<std::endl;
     arena_plan_msgs::MakeGlobalPlan srv;    
-    std::cout<<"COME to plan global1"<<std::endl;
+    srv.request.start=start_state.to_PoseStampted();
+    srv.request.goal=end_state.to_PoseStampted();
+
     if (global_plan_client_.call(srv))  
     {   std::cout<<"COME to plan global2"<<std::endl;
         // set global_plan

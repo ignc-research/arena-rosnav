@@ -201,7 +201,7 @@ bool InterPlanner::planKinoAstarTraj(const Eigen::Vector2d &start_pos, const Eig
     global_planner_kino_astar_->reset();
     
     // first search
-    status = global_planner_kino_astar_->search(start_pos, start_vel, start_acc, end_pos, end_vel, true);
+    status = global_planner_kino_astar_->search(start_pos, start_vel, start_acc, end_pos, end_vel, false);
 
     if (status == KinodynamicAstar::NO_PATH) {
       // search again
