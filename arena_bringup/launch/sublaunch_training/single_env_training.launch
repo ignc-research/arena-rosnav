@@ -24,6 +24,11 @@
       <arg name="ns"                value="$(arg ns)"/>
     </include> -->
 
+    <!-- use intermediate planner node-->
+    <include file="$(find arena_bringup)/launch/sublaunch_training/intermediate_planner.launch">
+      <arg name="ns"                value="$(arg ns)"/>
+    </include>
+
     <!-- start plan manager-->
     <include file="$(find arena_bringup)/launch/sublaunch_training/plan_manager.launch">
       <arg name="ns"                value="$(arg ns)"/>
