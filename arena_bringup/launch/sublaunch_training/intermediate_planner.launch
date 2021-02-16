@@ -1,5 +1,5 @@
 <launch>
-    <arg name="ns"/>
+    <arg name="ns"              />
     <arg name="max_vel"         value="3.0" />
     <arg name="max_acc"         value="2.0" />
     <arg name="max_jerk"        value="4.0" />

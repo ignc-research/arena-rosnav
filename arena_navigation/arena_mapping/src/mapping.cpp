@@ -6,6 +6,7 @@ void GridMap::initMap(ros::NodeHandle& nh){
 
     /* get parameters*/
     std::string static_map_service_name = "/static_map";  
+    ros::service::waitForService(static_map_service_name);
     static_map_client_= nh.serviceClient<nav_msgs::GetMap>(static_map_service_name);  
     bool is_static_map_avail=get_static_map();
     if (!is_static_map_avail){ROS_ERROR("No static map available, please check map_server.");}
