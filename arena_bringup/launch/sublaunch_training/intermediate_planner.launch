@@ -119,5 +119,7 @@
         <param name="$(arg plan_horizon)/sdf_map/show_occ_time"                 value="false"/>
         <param name="$(arg plan_horizon)/sdf_map/show_esdf_time"                value="false"/>
         
+        <!-- remapping for namespace -->
+        <remap from="/clock" to="/$(arg ns)/clock"/>
     </node>
 </launch>
