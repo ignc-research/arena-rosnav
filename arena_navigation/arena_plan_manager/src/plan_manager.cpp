@@ -77,7 +77,7 @@ void PlanManager::goalCallback(const geometry_msgs::PoseStampedPtr &msg)
   cout << "Goal set!" << endl;
   have_goal_ = true;
   visualization_->drawGoal(end_state_->to_PoseStampted(), 0.5, Eigen::Vector4d(1, 1, 1, 1.0));
-
+  cout << "Goal drawed!" << endl;
   // init start_time for this task
   start_time_ = ros::Time::now();
 }
@@ -142,12 +142,16 @@ void PlanManager::execFSMCallback(const ros::TimerEvent &e)
 
   case GEN_NEW_GLOBAL:
   {
-    // if (mode_ == TRAIN)
-    // {
-    //   changeFSMExecState(REPLAN_MID, "FSM");
-    //   return;
-    // }
-    // set robot start state
+    if (mode_ == TRAIN)
+    { std::cout<<"GOING to plan global0"<<std::endl;
+      start_state_.reset( new RobotState(Eigen::Vector2d::Zero(),0.0,Eigen::Vector2d::Zero(),0.0));
+      std::cout<<"GOING to plan global1"<<std::endl;
+      bool global_plan_success = planner_collector_->generate_global_plan(*start_state_, *end_state_);
+      std::cout<<"GOING to plan global2"<<std::endl;
+      changeFSMExecState(REPLAN_MID, "FSM");
+      return;
+    }
+    //set robot start state
     start_state_.reset(new RobotState(cur_state_->pose2d, cur_state_->theta, cur_state_->vel2d, cur_state_->w));
 
     // execute global planning
@@ -169,11 +173,11 @@ void PlanManager::execFSMCallback(const ros::TimerEvent &e)
 
   case EXEC_LOCAL:
   {
-    // if (mode_ == TRAIN)
-    // {
-    //   //cout<<"EXEC_LOCAL"<<"Train mode"<<endl;
-    //   return;
-    // }
+    if (mode_ == TRAIN)
+    {
+      //cout<<"EXEC_LOCAL"<<"Train mode"<<endl;
+      return;
+    }
 
     /* check env determine, calculate criterion */
     // fake obstacle info

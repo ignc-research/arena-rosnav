@@ -22,16 +22,21 @@ void PlanCollector::initPlanModules(ros::NodeHandle &nh){
 
 bool PlanCollector::generate_global_plan(RobotState &start_state,RobotState &end_state){
     //nav_msgs::GetPlan srv;
+    std::cout<<"COME to plan global0"<<std::endl;
     arena_plan_msgs::MakeGlobalPlan srv;
 
     
     srv.request.start=start_state.to_PoseStampted();
     srv.request.goal=end_state.to_PoseStampted();
     srv.request.tolerance=0.3;
-    if (global_plan_client_.call(srv))
-    {   
+    std::cout<<"COME to plan global1"<<std::endl;
+    std::cout<<srv.request.start<<std::endl;
+    std::cout<<srv.request.goal<<std::endl;
+    if (global_plan_client_.call(srv))  
+    {   std::cout<<"COME to plan global2"<<std::endl;
         // set global_plan
         global_path_=srv.response.plan;
+        std::cout<<"COME to plan global3"<<std::endl;
         
         return true;
     }

@@ -142,7 +142,7 @@ void InterPlanner::goalCallback(const geometry_msgs::PoseStampedPtr& msg){
 }
 
 bool InterPlanner::makeGlobalPlan(arena_plan_msgs::MakeGlobalPlan::Request  &req, arena_plan_msgs::MakeGlobalPlan::Response &res){
-
+  std::cout<<"Service to plan global0"<<std::endl;
   Eigen::Vector2d start_pos,end_pos;
   start_pos(0)  =  req.start.pose.position.x;
   start_pos(1)  =  req.start.pose.position.y;
@@ -156,10 +156,10 @@ bool InterPlanner::makeGlobalPlan(arena_plan_msgs::MakeGlobalPlan::Request  &req
   /* path search */
     int status;
     global_planner_kino_astar_->reset();
-    
+    std::cout<<"Service to plan global1"<<std::endl;
     // first search
     status = global_planner_kino_astar_->search(start_pos, Eigen::Vector2d::Zero(), Eigen::Vector2d::Zero(), end_pos, Eigen::Vector2d::Zero(), true);
-
+    std::cout<<"Service to plan global2"<<std::endl;
     if (status == KinodynamicAstar::NO_PATH) {
       // search again
       std::cout << "[kino replan]: first search fail!" << std::endl;
@@ -417,6 +417,7 @@ void InterPlanner::visualize_path(std::vector<Eigen::Vector2d> path, const ros::
       pose.pose.orientation.w = 1.0;
       gui_path.poses[i]=pose;               //plan.push_back(pose);
   }
+  
   pub.publish(gui_path);
 }
 
