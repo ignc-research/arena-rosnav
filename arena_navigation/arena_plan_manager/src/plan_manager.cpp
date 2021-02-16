@@ -143,8 +143,9 @@ void PlanManager::execFSMCallback(const ros::TimerEvent &e)
   case GEN_NEW_GLOBAL:
   {
     if (mode_ == TRAIN)
-    { std::cout<<"GOING to plan global0"<<std::endl;
-      start_state_.reset( new RobotState(Eigen::Vector2d::Zero(),0.0,Eigen::Vector2d::Zero(),0.0));
+    { 
+      std::cout<<"GOING to plan global0"<<std::endl;
+      start_state_.reset(new RobotState(cur_state_->pose2d, cur_state_->theta, cur_state_->vel2d, cur_state_->w));
       std::cout<<"GOING to plan global1"<<std::endl;
       bool global_plan_success = planner_collector_->generate_global_plan(*start_state_, *end_state_);
       std::cout<<"GOING to plan global2"<<std::endl;
@@ -153,7 +154,7 @@ void PlanManager::execFSMCallback(const ros::TimerEvent &e)
     }
     //set robot start state
     start_state_.reset(new RobotState(cur_state_->pose2d, cur_state_->theta, cur_state_->vel2d, cur_state_->w));
-
+    
     // execute global planning
     bool global_plan_success = planner_collector_->generate_global_plan(*start_state_, *end_state_);
 

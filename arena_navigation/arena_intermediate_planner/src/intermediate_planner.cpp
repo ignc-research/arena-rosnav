@@ -77,20 +77,10 @@ void InterPlanner::init(ros::NodeHandle & nh){
   // publisher
   kino_astar_path_pub_ =public_nh.advertise<nav_msgs::Path>("kino_astar_path", 1);
   kino_astar_traj_pub_ =public_nh.advertise<nav_msgs::Path>("kino_astar_traj", 1);
-  /*
-  astar_path_pub_ =node_.advertise<nav_msgs::Path>("astar_plan", 1);
-  astar_traj_pub_ =node_.advertise<nav_msgs::Path>("astar_traj_plan", 1);
-  kino_astar_path_pub_ =node_.advertise<nav_msgs::Path>("kino_astar_plan", 1);
-  sample_path_pub_ =node_.advertise<nav_msgs::Path>("sample_plan", 1);
-  bspline_esdf_pub_ =node_.advertise<nav_msgs::Path>("bspline_esdf_plan", 1);
-  bspline_astar_pub_ =node_.advertise<nav_msgs::Path>("bspline_astar_plan", 1);
-  global_traj_pub_ =node_.advertise<nav_msgs::Path>("global_traj_plan", 1);
-  global_traj_astar_pub_ =node_.advertise<nav_msgs::Path>("global_traj_astar_plan", 1);
+
   
-  */
-  
- global_plan_service_server_=public_nh.advertiseService("global_kino_make_plan", &InterPlanner::makeGlobalPlan, this);
- visualization_.reset(new PlanningVisualization(node_));
+  global_plan_service_server_=public_nh.advertiseService("global_kino_make_plan", &InterPlanner::makeGlobalPlan, this);
+  visualization_.reset(new PlanningVisualization(node_));
 }
 
 void InterPlanner::odomCallback(const nav_msgs::OdometryConstPtr& msg){
@@ -156,13 +146,13 @@ bool InterPlanner::makeGlobalPlan(arena_plan_msgs::MakeGlobalPlan::Request  &req
   /* path search */
     int status;
     global_planner_kino_astar_->reset();
-    std::cout<<"Service to plan global1"<<std::endl;
+    
     // first search
     status = global_planner_kino_astar_->search(start_pos, Eigen::Vector2d::Zero(), Eigen::Vector2d::Zero(), end_pos, Eigen::Vector2d::Zero(), true);
-    std::cout<<"Service to plan global2"<<std::endl;
+    
     if (status == KinodynamicAstar::NO_PATH) {
       // search again
-      std::cout << "[kino replan]: first search fail!" << std::endl;
+      //std::cout << "[kino replan]: first search fail!" << std::endl;
 
       // retry searching with discontinuous initial state
       global_planner_kino_astar_->reset();
