@@ -4,6 +4,7 @@ import time
 import rosnode
 from typing import Union
 from datetime import datetime as dt
+import warnings
 
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv, VecNormalize
@@ -182,13 +183,23 @@ if __name__ == "__main__":
     print("________ STARTING TRAINING WITH:  %s ________\n" % AGENT_NAME)
 
     # check if simulations are booted
+    timeout = 30
     for i in range(args.n_envs):
-        ns = rosnode.get_node_names(namespace='sim_'+str(i+1))
-        assert (len(ns) > 0
-        ), f"Check if {args.n_envs} different simulation environments are running"
-        assert (len(ns) > 2
-        ), f"Check if all simulation parts of namespace '{'/sim_'+str(i+1)}' are running properly"
+        for k in range(timeout):
+            ns = rosnode.get_node_names(namespace='sim_'+str(i+1))
 
+            if len(ns) < 3:
+                warnings.warn(f"Check if all simulation parts of namespace '{'/sim_'+str(i+1)}' are running properly")
+                warnings.warn(f"Trying to connect again..")
+            else:
+                break
+
+            assert (k < timeout-1
+            ), f"Timeout while trying to connect to nodes of '{'/sim_'+str(i+1)}'"
+
+            time.sleep(1)
+        
+            
     # initialize hyperparameters (save to/ load from json)
     hyperparams_obj = agent_hyperparams(
         AGENT_NAME, robot, gamma, n_steps, ent_coef, 
