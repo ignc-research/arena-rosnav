@@ -1,4 +1,4 @@
-import os
+import os, sys
 import rospy
 import time
 import rosnode
@@ -145,7 +145,7 @@ def make_envs(task_manager: Union[RandomTask, StagedRandomTask, ManualTask, Scen
         if train:
             # train env
             env = FlatlandEnv(
-                f"sim_0{rank+1}", task_manager, 
+                f"sim_{rank+1}", task_manager, 
                 PATHS.get('robot_setting'), PATHS.get('robot_as'), 
                 params['reward_fnc'], params['discrete_action_space'], 
                 goal_radius=params['goal_radius'], 
@@ -155,7 +155,7 @@ def make_envs(task_manager: Union[RandomTask, StagedRandomTask, ManualTask, Scen
             # eval env
             env = Monitor(
                 FlatlandEnv(
-                    f"sim_0{rank+1}", task_manager, 
+                    f"sim_{rank+1}", task_manager, 
                     PATHS.get('robot_setting'), PATHS.get('robot_as'), 
                     params['reward_fnc'], params['discrete_action_space'], 
                     goal_radius=params['goal_radius'], 
@@ -183,11 +183,11 @@ if __name__ == "__main__":
 
     # check if simulations are booted
     for i in range(args.n_envs):
-        ns = rosnode.get_node_names(namespace='sim_0'+str(i+1))
+        ns = rosnode.get_node_names(namespace='sim_'+str(i+1))
         assert (len(ns) > 0
         ), f"Check if {args.n_envs} different simulation environments are running"
         assert (len(ns) > 2
-        ), f"Check if all simulation parts of namespace '{'/sim_0'+str(i+1)}' are running properly"
+        ), f"Check if all simulation parts of namespace '{'/sim_'+str(i+1)}' are running properly"
 
     # initialize hyperparameters (save to/ load from json)
     hyperparams_obj = agent_hyperparams(
@@ -206,7 +206,7 @@ if __name__ == "__main__":
     for i in range(args.n_envs):
         task_managers.append(
             get_predefined_task(
-                f"sim_0{i+1}", params['task_mode'], params['curr_stage'], PATHS))
+                f"sim_{i+1}", params['task_mode'], params['curr_stage'], PATHS))
 
     # instantiate gym environment
     # when debug run on one process only

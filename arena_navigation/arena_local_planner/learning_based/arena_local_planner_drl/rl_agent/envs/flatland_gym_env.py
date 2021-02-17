@@ -41,6 +41,7 @@ class FlatlandEnv(gym.Env):
 
         self.ns = ns
         # process specific namespace in ros system
+        print("namespace", self.ns)
         if ns is not None or ns !="":
             self.ns_prefix = '/'+ns + '/'
         else:
@@ -48,9 +49,9 @@ class FlatlandEnv(gym.Env):
         
         if not debug:
             if train_mode:
-                rospy.init_node(f'train_env_{ns[-1]}', disable_signals=False)
+                rospy.init_node(f'train_env_{self.ns}', disable_signals=False)
             else:
-                rospy.init_node(f'eval_env_{ns[-1]}', disable_signals=False)
+                rospy.init_node(f'eval_env_{self.ns}', disable_signals=False)
         # Define action and observation space
         # They must be gym.spaces objects
         self._is_action_space_discrete = is_action_space_discrete
@@ -157,7 +158,7 @@ class FlatlandEnv(gym.Env):
         # print(f"cum_reward: {reward}")
         done = reward_info['is_done']
 
-        # print("reward:  {}".format(reward))
+        print("reward:  {}".format(reward))
         
         # info
         info = {}
