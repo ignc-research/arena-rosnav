@@ -9,7 +9,7 @@
 
 
     <!-- <param name="use_sim_time" value="true"/> -->
-	  <arg name="ns" default="sim_01"/>
+	  <arg name="ns" default="sim_1"/>
     <!-- <arg name="map_path"/>  -->
     <!-- <arg name="update_rate"/>  -->
 

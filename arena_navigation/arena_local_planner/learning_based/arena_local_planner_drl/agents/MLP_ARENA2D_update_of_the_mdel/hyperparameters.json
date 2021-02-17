@@ -1,5 +1,5 @@
 {
-    "agent_name": "MLP_ARENA2D_2021_02_15__17_19",
+    "agent_name": "MLP_ARENA2D_2021_02_16__00_40",
     "robot": "myrobot",
     "gamma": 0.99,
     "n_steps": 4800,

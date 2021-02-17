@@ -644,8 +644,8 @@ class ObstaclesManager:
         self.agent_topic_str=''
         for i, ped in enumerate(peds):
             elements = [0, 1, 3]
-            probabilities = [1.0, 0.0, 0.0]
-            self.__ped_type=np.random.choice(elements, 1, p=probabilities)[0]            
+            # probabilities = [0.4, 0.3, 0.3] np.random.choice(elements, 1, p=probabilities)[0]
+            self.__ped_type=elements[i%3]
             if  self.__ped_type==0:
                 self.agent_topic_str+=f',{self.ns_prefix}pedsim_agent_{i+1}/dynamic_human'
                 self.__ped_file=os.path.join(rospkg.RosPack().get_path(

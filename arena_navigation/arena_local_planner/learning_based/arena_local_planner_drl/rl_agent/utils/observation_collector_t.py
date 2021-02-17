@@ -71,7 +71,7 @@ class ObservationCollector():
             self._sim_step_client = rospy.ServiceProxy(self._service_name_step, StepWorld)
         
         # message_filter subscriber: laserscan, robot_pose
-        self._scan_sub = message_filters.Subscriber( f'{self.ns_prefix}sim_01/scan', LaserScan)
+        self._scan_sub = message_filters.Subscriber( f'{self.ns_prefix}sim_1/scan', LaserScan)
         self._robot_state_sub = message_filters.Subscriber(f'{self.ns_prefix}robot_state', RobotStateStamped)
         self.human_name_str=rospy.get_param(f'{self.ns_prefix}agent_topic_string')
         # self.test_topic_get=rospy.get_published_topics()
@@ -291,7 +291,7 @@ if __name__ == '__main__':
     rospy.init_node('states', anonymous=True)
     print("start")
 
-    state_collector = ObservationCollector("sim_01/", 360, 10)
+    state_collector = ObservationCollector("sim_1/", 360, 10)
     i = 0
     r = rospy.Rate(100)
     while(i <= 1000):

@@ -33,7 +33,7 @@ from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl
 """ will be used upon initializing new agent """
 robot = "myrobot"
 gamma = 0.99
-n_steps = 4800
+n_steps = 4000
 ent_coef = 0.005
 learning_rate = 3e-4
 vf_coef = 0.2
@@ -42,7 +42,7 @@ gae_lambda = 0.95
 batch_size = 15
 n_epochs = 3
 clip_range = 0.2
-reward_fnc = "rule_00"
+reward_fnc = "rule_01"
 discrete_action_space = False
 normalize = True
 start_stage = 1

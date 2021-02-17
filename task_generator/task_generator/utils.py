@@ -75,7 +75,7 @@ def get_random_pos_on_map(free_space_indices, map_: OccupancyGrid, safe_dist: fl
         pos_valid = is_pos_valid(x_in_meters, y_in_meters)
         if not pos_valid:
             n_check_failed += 1
-            if n_check_failed > 100:
+            if n_check_failed > 1000:
                 raise Exception(
                     "cann't find any no-occupied space please check the map information")
         # in radius

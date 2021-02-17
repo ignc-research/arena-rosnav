@@ -42,7 +42,7 @@
   <!-- map server-->
   <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_path)">
     <!-- In multi-env training /clock not available, since we only want one map_server, it's clock topic is remapped to /clock -->
-    <remap from="/clock" to="/$(arg ns_prefix)_01/clock" />
+    <remap from="/clock" to="/$(arg ns_prefix)_1/clock" />
 
 </node>
 
@@ -52,26 +52,50 @@
 
   <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=1)">
     <!-- <arg name="world_path" value="$(arg world_path)" /> -->
-    <arg name="ns" value="$(arg ns_prefix)_01" />
+    <arg name="ns" value="$(arg ns_prefix)_1" />
   </include>
   <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=2)">
-    <arg name="ns" value="$(arg ns_prefix)_02" />
+    <arg name="ns" value="$(arg ns_prefix)_2" />
     <!-- <arg name="world_path" value="$(arg world_path)" /> -->
   </include>
   <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=3)">
-    <arg name="ns" value="$(arg ns_prefix)_03" />
+    <arg name="ns" value="$(arg ns_prefix)_3" />
     <!-- <arg name="world_path" value="$(arg world_path)" /> -->
   </include>
   <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=4)">
-    <arg name="ns" value="$(arg ns_prefix)_04" />
+    <arg name="ns" value="$(arg ns_prefix)_4" />
     <!-- <arg name="world_path" value="$(arg world_path)" /> -->
   </include>
   <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=5)">
-    <arg name="ns" value="$(arg ns_prefix)_05" />
+    <arg name="ns" value="$(arg ns_prefix)_5" />
     <!-- <arg name="world_path" value="$(arg world_path)" /> -->
   </include>
   <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=6)">
-    <arg name="ns" value="$(arg ns_prefix)_06" />
+    <arg name="ns" value="$(arg ns_prefix)_6" />
+    <!-- <arg name="world_path" value="$(arg world_path)" /> -->
+  </include>
+  <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=7)">
+    <arg name="ns" value="$(arg ns_prefix)_7" />
+    <!-- <arg name="world_path" value="$(arg world_path)" /> -->
+  </include>
+  <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=8)">
+    <arg name="ns" value="$(arg ns_prefix)_8" />
+    <!-- <arg name="world_path" value="$(arg world_path)" /> -->
+  </include>
+  <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=9)">
+    <arg name="ns" value="$(arg ns_prefix)_9" />
+    <!-- <arg name="world_path" value="$(arg world_path)" /> -->
+  </include>
+  <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=10)">
+    <arg name="ns" value="$(arg ns_prefix)_10" />
+    <!-- <arg name="world_path" value="$(arg world_path)" /> -->
+  </include>
+  <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=11)">
+    <arg name="ns" value="$(arg ns_prefix)_11" />
+    <!-- <arg name="world_path" value="$(arg world_path)" /> -->
+  </include>
+  <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=12)">
+    <arg name="ns" value="$(arg ns_prefix)_12" />
     <!-- <arg name="world_path" value="$(arg world_path)" /> -->
   </include>
 </launch>

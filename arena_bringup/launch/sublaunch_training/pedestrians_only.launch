@@ -18,7 +18,7 @@
   <arg name="spawn_period" default="5.0"/>
 
    <!-- main simulator node -->
-  <node name="pedsim_simulator" pkg="pedsim_simulator" type="pedsim_simulator" output="screen" ns="$(arg ns)" launch-prefix="xterm -e gdb -ex run --args">
+  <node name="pedsim_simulator" pkg="pedsim_simulator" type="pedsim_simulator" output="screen" ns="$(arg ns)">
     <param name="scene_file" value="$(arg scene_file)" type="string"/>
     <param name="default_queue_size" value="$(arg default_queue_size)" type="int"/>
     <param name="robot_mode" value="$(arg robot_mode)" type="int"/>

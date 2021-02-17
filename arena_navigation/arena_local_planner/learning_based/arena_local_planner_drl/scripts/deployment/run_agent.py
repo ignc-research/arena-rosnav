@@ -1,4 +1,14 @@
-import os
+import os, sys
+# sys.path.insert(0, os.path.abspath(".."))
+# for me the python path must be added manuelly , could be deleted directly if your machine could identify the corresponding paths
+sys.path.append('/home/junhui/study/Masterarbeit/arenarosnav/test_ws/src/arena_rosnav')
+sys.path.append('/home/junhui/study/Masterarbeit/arenarosnav/test_ws/src/arena_rosnav/arena_navigation')
+sys.path.append('/home/junhui/study/Masterarbeit/arenarosnav/test_ws/src/arena_rosnav/arena_navigation/arena_local_planner')
+sys.path.append('/home/junhui/study/Masterarbeit/arenarosnav/test_ws/src/arena_rosnav/arena_navigation/arena_local_planner/learning_based/')
+sys.path.append('/home/junhui/study/Masterarbeit/arenarosnav/test_ws/src/arena_rosnav/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl')
+sys.path.append('/home/junhui/study/Masterarbeit/arenarosnav/test_ws/src/arena_rosnav/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/scripts')
+sys.path.append('/home/junhui/study/Masterarbeit/arenarosnav/test_ws/src/arena_rosnav/task_generator')
+sys.path.append('/home/junhui/study/Masterarbeit/arenarosnav/test_ws/src/arena_rosnav/task_generator/task_generator')
 import rospy
 import rospkg
 import json
@@ -40,12 +50,12 @@ if __name__ == "__main__":
     print_hyperparameters(params)
 
     # initialize task manager
-    task_manager = get_predefined_task(ns='sim_01', mode='ScenerioTask', PATHS=PATHS)
+    task_manager = get_predefined_task(ns='sim_1', mode='random', PATHS=PATHS)
     
     # initialize gym env
     env = DummyVecEnv(
         [lambda: FlatlandEnv(
-            'sim_01', task_manager, PATHS.get('robot_setting'), PATHS.get('robot_as'), params['reward_fnc'], params['discrete_action_space'], 
+            'sim_1', task_manager, PATHS.get('robot_setting'), PATHS.get('robot_as'), params['reward_fnc'], params['discrete_action_space'], 
             goal_radius=0.50, max_steps_per_episode=max_steps_per_episode, train_mode=False)
         ])
     if params['normalize']:

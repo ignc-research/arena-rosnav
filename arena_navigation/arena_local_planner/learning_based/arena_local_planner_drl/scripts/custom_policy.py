@@ -10,7 +10,7 @@ from torch import nn
 from stable_baselines3.common.policies import ActorCriticPolicy
 from stable_baselines3.common.torch_layers import BaseFeaturesExtractor
 
-_RS = 2  # robot state size
+_RS = 8  # robot state size+ human state size
 
 ROBOT_SETTING_PATH = rospkg.RosPack().get_path('simulator_setup')
 yaml_ROBOT_SETTING_PATH = os.path.join(ROBOT_SETTING_PATH, 'robot', 'myrobot.model.yaml')
@@ -43,6 +43,7 @@ class MLP_ARENA2D(nn.Module):
             last_layer_dim_vf: int = 32,
     ):
         super(MLP_ARENA2D, self).__init__()
+        # print("feature_dim of mlp arena2d",feature_dim)
 
         # Save output dimensions, used to create the distributions
         self.latent_dim_pi = last_layer_dim_pi

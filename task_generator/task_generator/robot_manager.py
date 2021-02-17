@@ -33,15 +33,15 @@ class RobotManager:
         """
         # print("ns is ",ns)
         if ns =='':
-            self.ns="sim_01"
+            self.ns="sim_1"
         else:
             self.ns = ns
         self.ns_prefix = "/" if ns == "" else "/"+ns+"/"
         # print("ns",f'{self.ns_prefix}flatland_server/step_size')
 
-        self.safe_dist_adult=1.3
-        self.safe_dist_child=1.5
-        self.safe_dist_elder=2
+        self.safe_dist_adult=1.0
+        self.safe_dist_child=1.2
+        self.safe_dist_elder=1.5
 
         self.is_training_mode = rospy.get_param("/train_mode")
         self.step_size = rospy.get_param('/step_size') #f'{self.ns_prefix}flatland_server
@@ -167,13 +167,13 @@ class RobotManager:
             print("calculate the forbidden zones")
             coordinate_a=obs_dict['adult_coordinates_in_robot_frame'].T
             for coordinate in coordinate_a:
-                forbiddenZones.append((coordinate[0],coordinate[1],self.safe_dist_adult*1.1))
+                forbiddenZones.append((coordinate[0],coordinate[1],self.safe_dist_adult*1.05))
             coordinate_c=obs_dict['child_coordinates_in_robot_frame'].T
             for coordinate in coordinate_c:
-                forbiddenZones.append((coordinate[0],coordinate[1],self.safe_dist_child*1.1))
+                forbiddenZones.append((coordinate[0],coordinate[1],self.safe_dist_child*1.05))
             coordinate_e=obs_dict['elder_coordinates_in_robot_frame'].T
             for coordinate in coordinate_e:
-                forbiddenZones.append((coordinate[0],coordinate[1],self.safe_dist_elder*1.1))
+                forbiddenZones.append((coordinate[0],coordinate[1],self.safe_dist_elder*1.05))
 
         # coordinates=np.hstack([obs_dict['adult_coordinates_in_robot_frame'] ,obs_dict['child_coordinates_in_robot_frame'] ]
         # coordinates=np.hstack([coordinates, obs_dict['elder_coordinates_in_robot_frame']])

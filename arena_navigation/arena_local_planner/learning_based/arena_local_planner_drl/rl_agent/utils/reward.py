@@ -22,8 +22,8 @@ class RewardCalculator():
         self.last_goal_dist = None
         self.safe_dist = safe_dist
         self.safe_dist_adult=safe_dist_adult
-        self.safe_dist_child=1.5
-        self.safe_dist_elder=2
+        self.safe_dist_child=1.2
+        self.safe_dist_elder=1.5
 
         self._cal_funcs = {
             'rule_00': RewardCalculator._cal_reward_rule_00,
@@ -70,7 +70,7 @@ class RewardCalculator():
         self._reward_goal_reached(goal_in_robot_frame)
         self._reward_safe_dist(laser_scan)
         self._reward_collision(laser_scan)
-        self._reward_goal_approached2(goal_in_robot_frame)
+        self._reward_goal_approached(goal_in_robot_frame)
         self._reward_adult_safety_dist(adult_in_robot_frame)
         self._reward_child_safety_dist(child_in_robot_frame)
         self._reward_elder_safety_dist(elder_in_robot_frame)

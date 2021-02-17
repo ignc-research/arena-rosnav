@@ -32,7 +32,7 @@ import numpy as np
 
 
 class ObservationCollector():
-    def __init__(self,ns: str, num_lidar_beams:int,lidar_range:float, num_humans:int=10): #
+    def __init__(self,ns: str, num_lidar_beams:int,lidar_range:float, num_humans:int=6): #
         """ a class to collect and merge observations
 
         Args:
@@ -163,7 +163,8 @@ class ObservationCollector():
         #     reset_sub()
         # rospy.logdebug(f"Current observation takes {i} steps for Synchronization")
         # print(f"Current observation takes {i} steps for Synchronization")
-        scan = np.array(self._scan.ranges).astype(np.float32)
+        scan = np.array(self._scan.ranges)
+        # print("scan shape",scan.shape)
         rho, theta = ObservationCollector._get_goal_pose_in_robot_frame(
             self._subgoal, self._robot_pose)
         merged_obs = np.hstack([scan, np.array([rho, theta])])
@@ -310,7 +311,7 @@ if __name__ == '__main__':
     rospy.init_node('states', anonymous=True)
     print("start")
 
-    state_collector = ObservationCollector("sim_01/", 360, 10)
+    state_collector = ObservationCollector("sim_1/", 360, 10)
     i = 0
     r = rospy.Rate(100)
     while(i <= 1000):
