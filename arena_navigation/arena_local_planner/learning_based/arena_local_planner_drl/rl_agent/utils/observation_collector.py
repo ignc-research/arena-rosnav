@@ -75,7 +75,7 @@ class ObservationCollector():
             f"{self.ns_prefix}subgoal", PoseStamped, self.callback_subgoal)
 
         self._globalplan_sub = rospy.Subscriber(
-                f'{self.ns_prefix}plan_manager/globalPlan', Path, self.callback_global_plan)
+                f'{self.ns_prefix}globalPlan', Path, self.callback_global_plan)
 
         # service clients
         self._is_train_mode = rospy.get_param("/train_mode")
@@ -115,8 +115,8 @@ class ObservationCollector():
         obs_dict = {}
         obs_dict['laser_scan'] = scan
         obs_dict['goal_in_robot_frame'] = [rho, theta]
-        obs_dict['global_plan'] = self._globalplan
-        obs_dict['robot_pose'] = self.process_global_plan_msg
+        obs_dict['global_plan'] = self.process_global_plan_msg()
+        obs_dict['robot_pose'] = self._robot_pose
         return merged_obs, obs_dict
 
     @staticmethod
@@ -181,9 +181,10 @@ class ObservationCollector():
         return pose2d
     
     def process_global_plan_msg(self):
-        global_plan_2d = map(
-            ObservationCollector.pose3D_to_pose2D, self._globalplan.poses)
-        return global_plan_2d
+        global_plan_2d = list(map(
+            lambda p: ObservationCollector.pose3D_to_pose2D(p.pose), self._globalplan.poses))
+        global_plan_np = np.array(list(map(lambda p2d: [p2d.x,p2d.y], global_plan_2d)))
+        return global_plan_np
 
     @staticmethod
     def pose3D_to_pose2D(pose3d):

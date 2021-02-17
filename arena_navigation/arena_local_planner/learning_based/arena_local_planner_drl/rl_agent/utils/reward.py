@@ -171,6 +171,6 @@ class RewardCalculator():
     @staticmethod
     def get_min_dist2global_kdtree(global_plan, robot_pose):
         mytree = scipy.spatial.cKDTree(global_plan)
-        dist, index = mytree.query(robot_pose)
+        dist, index = mytree.query([robot_pose.x, robot_pose.y])
         return dist, index
 

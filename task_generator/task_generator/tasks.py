@@ -121,7 +121,7 @@ class ManualTask(ABSTask):
 class StagedRandomTask(RandomTask):
     def __init__(self, obstacles_manager: ObstaclesManager, robot_manager: RobotManager, start_stage: int = 1, PATHS=None):
         super().__init__(obstacles_manager, robot_manager)
-        self.curr_stage = start_stage
+        self._curr_stage = start_stage
         self._stages = dict()
         self._PATHS = PATHS
         self._read_stages_from_yaml()
@@ -130,8 +130,8 @@ class StagedRandomTask(RandomTask):
         if not isinstance(start_stage, int):
             raise ValueError(
                 "Given start_stage not an Integer!")
-        if (self.curr_stage < 1 or 
-            self.curr_stage > len(self._stages)):
+        if (self._curr_stage < 1 or 
+            self._curr_stage > len(self._stages)):
             raise IndexError(
                 "Start stage given for training curriculum out of bounds! Has to be between {1 to %d}!" % len(self._stages))
 
@@ -143,27 +143,27 @@ class StagedRandomTask(RandomTask):
         self._initiate_stage()
 
     def next_stage(self):
-        if self.curr_stage < len(self._stages):
-            self.curr_stage = self.curr_stage + 1
+        if self._curr_stage < len(self._stages):
+            self._curr_stage = self._curr_stage + 1
             self._update_curr_stage_json()
             self._initiate_stage()
 
     def previous_stage(self):
-        if self.curr_stage > 1:
-            self.curr_stage = self.curr_stage - 1
+        if self._curr_stage > 1:
+            self._curr_stage = self._curr_stage - 1
             self._update_curr_stage_json()
             self._initiate_stage()
 
     def _initiate_stage(self):
         self._remove_obstacles()
         
-        static_obstacles = self._stages[self.curr_stage]['static']
-        dynamic_obstacles = self._stages[self.curr_stage]['dynamic']
+        static_obstacles = self._stages[self._curr_stage]['static']
+        dynamic_obstacles = self._stages[self._curr_stage]['dynamic']
 
         self.obstacles_manager.register_random_static_obstacles(
-            self._stages[self.curr_stage]['static'])
+            self._stages[self._curr_stage]['static'])
         self.obstacles_manager.register_random_dynamic_obstacles(
-            self._stages[self.curr_stage]['dynamic'])
+            self._stages[self._curr_stage]['dynamic'])
 
         print("Spawning %d static and %d dynamic obstacles!" %
               (static_obstacles, dynamic_obstacles))
@@ -183,7 +183,7 @@ class StagedRandomTask(RandomTask):
         with open(self.json_file, "r") as file:
             hyperparams = json.load(file)
         try:
-            hyperparams['curr_stage'] = self.curr_stage
+            hyperparams['curr_stage'] = self._curr_stage
         except Exception:
             raise Warning(
                 "Parameter 'curr_stage' not found in 'hyperparameters.json'!")
