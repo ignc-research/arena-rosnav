@@ -4,6 +4,7 @@ import rospy
 from geometry_msgs.msg import Pose2D
 from typing import Tuple
 import scipy.spatial
+from rl_agent.utils.debug import timeit
 
 class RewardCalculator():
     def __init__(self, robot_radius: float, safe_dist:float, goal_radius:float, rule:str = 'rule_00' ):
@@ -29,6 +30,7 @@ class RewardCalculator():
             'rule_03': RewardCalculator._cal_reward_rule_03
             }
         self.cal_func = self._cal_funcs[rule]
+        self._tree_cache  = {'id':None,'tree':None}
 
     def reset(self):
         """reset variables related to the episode
@@ -158,7 +160,7 @@ class RewardCalculator():
         
     def _reward_global_plan(self, global_plan, robot_pose: Pose2D, reward: float=0.1, punishment: float=0.001):
         # calculate minimal distance between robot and global path using kdtree search
-        curr_dist_to_path, idx = RewardCalculator.get_min_dist2global_kdtree(
+        curr_dist_to_path, idx = self.get_min_dist2global_kdtree(
             global_plan, robot_pose)
         
         #if the new distance is smaller than the last one, robot gets rewarded, if it is larger, he gets penalized the larger the distance is
@@ -168,9 +170,10 @@ class RewardCalculator():
             self.curr_reward -= punishment*curr_dist_to_path
         
 
-    @staticmethod
-    def get_min_dist2global_kdtree(global_plan, robot_pose):
+    def get_min_dist2global_kdtree(self, global_plan, robot_pose):      
         mytree = scipy.spatial.cKDTree(global_plan)
+        
         dist, index = mytree.query([robot_pose.x, robot_pose.y])
         return dist, index
+
 

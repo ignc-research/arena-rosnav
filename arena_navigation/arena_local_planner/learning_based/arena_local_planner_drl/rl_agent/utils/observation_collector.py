@@ -29,6 +29,7 @@ from tf.transformations import *
 from gym import spaces
 import numpy as np
 
+from rl_agent.utils.debug import timeit 
 
 class ObservationCollector():
     def __init__(self, ns: str, num_lidar_beams: int, lidar_range: float):
@@ -115,7 +116,7 @@ class ObservationCollector():
         obs_dict = {}
         obs_dict['laser_scan'] = scan
         obs_dict['goal_in_robot_frame'] = [rho, theta]
-        obs_dict['global_plan'] = self.process_global_plan_msg()
+        obs_dict['global_plan'] = self._globalplan
         obs_dict['robot_pose'] = self._robot_pose
         return merged_obs, obs_dict
 
@@ -141,7 +142,7 @@ class ObservationCollector():
         return
 
     def callback_global_plan(self, msg_global_plan):
-        self._globalplan = msg_global_plan
+        self._globalplan = ObservationCollector.process_global_plan_msg(msg_global_plan)
         return
 
     def callback_scan(self, msg_laserscan):
@@ -180,9 +181,10 @@ class ObservationCollector():
         pose2d = self.pose3D_to_pose2D(msg_Subgoal.pose)
         return pose2d
     
-    def process_global_plan_msg(self):
+    @staticmethod
+    def process_global_plan_msg(globalplan):
         global_plan_2d = list(map(
-            lambda p: ObservationCollector.pose3D_to_pose2D(p.pose), self._globalplan.poses))
+            lambda p: ObservationCollector.pose3D_to_pose2D(p.pose), globalplan.poses))
         global_plan_np = np.array(list(map(lambda p2d: [p2d.x,p2d.y], global_plan_2d)))
         return global_plan_np
 
