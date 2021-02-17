@@ -1,5 +1,5 @@
 {
-    "agent_name": "MLP_ARENA2D_2021_02_17__18_05",
+    "agent_name": "MLP_ARENA2D_2021_02_17__19_37",
     "robot": "myrobot",
     "gamma": 0.99,
     "n_steps": 4000,
@@ -14,8 +14,8 @@
     "train_max_steps_per_episode": 500,
     "eval_max_steps_per_episode": 500,
     "goal_radius": 0.25,
-    "reward_fnc": "rule_00",
-    "discrete_action_space": true,
+    "reward_fnc": "rule_01",
+    "discrete_action_space": false,
     "normalize": true,
     "task_mode": "random",
     "curr_stage": 1,
