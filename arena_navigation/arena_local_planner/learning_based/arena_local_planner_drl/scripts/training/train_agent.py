@@ -18,7 +18,7 @@ from datetime import datetime as dt
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv, VecNormalize
 from stable_baselines3.common.monitor import Monitor
-from stable_baselines3.common.callbacks import EvalCallback
+from stable_baselines3.common.callbacks import EvalCallback, StopTrainingOnRewardThreshold
 from stable_baselines3.common.utils import set_random_seed
 
 from task_generator.task_generator.tasks import *
@@ -39,11 +39,11 @@ learning_rate = 3e-4
 vf_coef = 0.2
 max_grad_norm = 0.5
 gae_lambda = 0.95
-batch_size = 15
+batch_size = 16
 n_epochs = 3
 clip_range = 0.2
-reward_fnc = "rule_01"
-discrete_action_space = False
+reward_fnc = "rule_00"
+discrete_action_space = True
 normalize = True
 start_stage = 1
 train_max_steps_per_episode = 500
@@ -100,12 +100,10 @@ def get_paths(agent_name: str, args) -> dict:
                 'robot', robot + '.model.yaml'),
         'robot_as': 
             os.path.join(
-                rospkg.RosPack().get_path('arena_local_planner_drl'), 
-                'configs', 'default_settings.yaml'),
+                dir, 'configs', 'default_settings.yaml'),
         'curriculum': 
             os.path.join(
-                rospkg.RosPack().get_path('arena_local_planner_drl'), 
-                'configs', 'training_curriculum.yaml')
+                dir, 'configs', 'training_curriculum.yaml')
     }
     # check for mode
     if args.load is None:
@@ -114,7 +112,8 @@ def get_paths(agent_name: str, args) -> dict:
         if (not os.path.isfile(
                 os.path.join(PATHS.get('model'), AGENT_NAME + ".zip")) 
             and not os.path.isfile(
-                os.path.join(PATHS.get('model'), "best_model.zip"))):
+                os.path.join(PATHS.get('model'), "best_model.zip"))
+            ):
             raise FileNotFoundError(
                 "Couldn't find model named %s.zip' or 'best_model.zip' in '%s'" 
                 % (AGENT_NAME, PATHS.get('model')))
@@ -160,7 +159,7 @@ def make_envs(task_manager: Union[RandomTask, StagedRandomTask, ManualTask, Scen
             # else:
             #     suffix = str(rank+1)
             env = FlatlandEnv(
-                f"sim_{str(rank+1)}", task_manager, 
+                f"sim_{rank+1}", task_manager, 
                 PATHS.get('robot_setting'), PATHS.get('robot_as'), 
                 params['reward_fnc'], params['discrete_action_space'], 
                 goal_radius=params['goal_radius'], 
@@ -169,15 +168,15 @@ def make_envs(task_manager: Union[RandomTask, StagedRandomTask, ManualTask, Scen
         else:
             # eval env
             env = Monitor(
-                    FlatlandEnv(
-                        f"sim_{str(rank+1)}", task_manager, 
-                        PATHS.get('robot_setting'), PATHS.get('robot_as'), 
-                        params['reward_fnc'], params['discrete_action_space'], 
-                        goal_radius=params['goal_radius'], 
-                        max_steps_per_episode=params['eval_max_steps_per_episode'], 
-                        train_mode=False, debug=args.debug
-                        ),
-                    PATHS.get('eval'), info_keywords=("done_reason", "is_success"))
+                FlatlandEnv(
+                    f"sim_{rank+1}", task_manager, 
+                    PATHS.get('robot_setting'), PATHS.get('robot_as'), 
+                    params['reward_fnc'], params['discrete_action_space'], 
+                    goal_radius=params['goal_radius'], 
+                    max_steps_per_episode=params['eval_max_steps_per_episode'], 
+                    train_mode=False, debug=args.debug
+                    ),
+                PATHS.get('eval'), info_keywords=("done_reason", "is_success"))
         env.seed(seed + rank)
         return env
     set_random_seed(seed)
@@ -187,9 +186,7 @@ if __name__ == "__main__":
     args, _ = parse_training_args()
 
     if args.debug:
-        rospy.init_node("debug_node", disable_signals=True)
-    # else:
-    #     rospy.init_node("train_node")
+        rospy.init_node("debug_node", disable_signals=False)
         
     # generate agent name and model specific paths
     AGENT_NAME = get_agent_name(args)
@@ -198,10 +195,6 @@ if __name__ == "__main__":
     print("________ STARTING TRAINING WITH:  %s ________\n" % AGENT_NAME)
     # check if simulations are booted
     for i in range(args.n_envs):
-        # if i+1 < 10:
-        #     suffix = '0'+str(i+1)
-        # else:
-        #     suffix = str(i+1)
         ns = rosnode.get_node_names(namespace='sim_'+str(i+1))
         assert (len(ns) > 0
         ), f"Check if {args.n_envs} different simulation environments are running"
@@ -217,7 +210,7 @@ if __name__ == "__main__":
         eval_max_steps_per_episode, goal_radius)
 
     params = initialize_hyperparameters(
-        agent_name=AGENT_NAME, PATHS=PATHS, 
+        agent_name=AGENT_NAME,           PATHS=PATHS, 
         hyperparams_obj=hyperparams_obj, load_target=args.load)
 
     # task managers for each simulation
@@ -231,19 +224,19 @@ if __name__ == "__main__":
         #     suffix = str(i+1)
         task_managers.append(
             get_predefined_task(
-                f"sim_{str(i+1)}", params['task_mode'], params['curr_stage'], PATHS))
+                f"sim_{i+1}", params['task_mode'], params['curr_stage'], PATHS))
 
     # instantiate gym environment
     # when debug run on one process only
     if not args.debug:
         env = SubprocVecEnv(
-                [make_envs(task_managers[i], i, params=params, PATHS=PATHS) 
-                    for i in range(args.n_envs)], 
-                start_method='fork')
+            [make_envs(task_managers[i], i, params=params, PATHS=PATHS) 
+                for i in range(args.n_envs)], 
+            start_method='fork')
     else:
         env = DummyVecEnv(
-                [make_envs(task_managers[i], i, params=params, PATHS=PATHS) 
-                    for i in range(args.n_envs)])
+            [make_envs(task_managers[i], i, params=params, PATHS=PATHS) 
+                for i in range(args.n_envs)])
 
     if params['normalize']:
         env = VecNormalize(
@@ -255,14 +248,17 @@ if __name__ == "__main__":
     trainstage_cb = InitiateNewTrainStage(
         TaskManagers=task_managers, 
         treshhold_type="succ", 
-        rew_threshold=14.5, succ_rate_threshold=0.90, 
+        upper_threshold=0.9, lower_threshold=0.6, 
         task_mode=params['task_mode'], verbose=1)
     
+    # stop training on reward threshold callback
+    stoptraining_cb = StopTrainingOnRewardThreshold(
+        reward_threshold=14, task_manager=task_managers[0], verbose=1)
+
     # instantiate eval environment
     # take task_manager from first sim (currently evaluation only provided for single process)
     eval_env = DummyVecEnv(
-        [make_envs(task_managers[0], 0, params=params, PATHS=PATHS, train=False)]
-    )
+        [make_envs(task_managers[0], 0, params=params, PATHS=PATHS, train=False)])
 
     if params['normalize']:
         eval_env = VecNormalize(
@@ -274,11 +270,11 @@ if __name__ == "__main__":
     # eval_freq: evaluate the agent every eval_freq train timesteps
     eval_cb = EvalCallback(
         eval_env, 
-        n_eval_episodes=30, eval_freq=25000, 
+        n_eval_episodes=40,         eval_freq=25000, 
         log_path=PATHS.get('eval'), best_model_save_path=PATHS.get('model'), 
-        deterministic=True, 
-        callback_on_new_best=trainstage_cb)
-
+        deterministic=True,         callback_on_eval_end=trainstage_cb,
+        callback_on_new_best=stoptraining_cb)
+   
     # determine mode
     if args.custom_mlp:
         # custom mlp flag
@@ -332,10 +328,11 @@ if __name__ == "__main__":
                 os.path.join(PATHS.get('model'), "best_model.zip")):
             model = PPO.load(
                 os.path.join(PATHS.get('model'), "best_model"), env)
-        model.update_n_envs()
-    # set num of timesteps to be generated robot
+        update_hyperparam_model(model, params, args.n_envs)
+
+    # set num of timesteps to be generated
     if args.n is None:
-        n_timesteps = 60000000
+        n_timesteps = 40000000
     else:
         n_timesteps = args.n
 

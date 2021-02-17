@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 import os, sys
 # sys.path.insert(0, os.path.abspath(".."))
-print(sys.path)
+# print(sys.path)
 from operator import is_
 from random import randint
 import gym
@@ -43,8 +43,8 @@ class FlatlandEnv(gym.Env):
         super(FlatlandEnv, self).__init__()
 
         self.ns = ns
-        # print("namespace",self.ns)
         # process specific namespace in ros system
+        # print("namespace", self.ns)
         if ns is not None or ns !="":
             self.ns_prefix = '/'+ns + '/'
         else:
@@ -52,9 +52,9 @@ class FlatlandEnv(gym.Env):
         #commit for single process, need to be resumed when use multi-process
         if not debug:
             if train_mode:
-                rospy.init_node(f'train_env_{self.ns}')
+                rospy.init_node(f'train_env_{self.ns}', disable_signals=False)
             else:
-                rospy.init_node(f'eval_env_{self.ns}')
+                rospy.init_node(f'eval_env_{self.ns}', disable_signals=False)
         # Define action and observation space
         # They must be gym.spaces objects
         self._is_action_space_discrete = is_action_space_discrete
@@ -138,13 +138,16 @@ class FlatlandEnv(gym.Env):
 
     def _pub_action(self, action):
         action_msg = Twist()
-        if self._is_action_space_discrete:
-            action_msg.linear.x = self._discrete_acitons[action]['linear']
-            action_msg.angular.z = self._discrete_acitons[action]['angular']
-        else:
-            action_msg.linear.x = action[0]
-            action_msg.angular.z = action[1]
+        action_msg.linear.x = action[0]
+        action_msg.angular.z = action[1]
         self.agent_action_pub.publish(action_msg)
+
+    def _translate_disc_action(self, action):
+        new_action = np.array([])
+        new_action = np.append(new_action, self._discrete_acitons[action]['linear'])
+        new_action = np.append(new_action, self._discrete_acitons[action]['angular'])    
+            
+        return new_action
 
     def step(self, action):
         """
@@ -153,6 +156,8 @@ class FlatlandEnv(gym.Env):
                         2   -   goal reached
                         3   -   too close to human
         """
+        if self._is_action_space_discrete:
+            action = self._translate_disc_action(action)
         self._pub_action(action)
         self._steps_curr_episode += 1
         # wait for new observations
@@ -200,7 +205,7 @@ class FlatlandEnv(gym.Env):
 
 if __name__ == '__main__':
 
-    rospy.init_node('flatland_gym_env', anonymous=True)
+    rospy.init_node('flatland_gym_env', anonymous=True, disable_signals=False)
     print("start")
 
     flatland_env = FlatlandEnv()

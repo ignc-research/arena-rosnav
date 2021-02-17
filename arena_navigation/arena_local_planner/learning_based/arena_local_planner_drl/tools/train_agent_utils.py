@@ -3,12 +3,14 @@ import datetime
 import json
 from typing import Union
 
+from stable_baselines3 import PPO
+
 """ dictionary holding the params for key validation when loading from json """
 hyperparams = {
     key: None for key in [
         'agent_name', 'robot', 'gamma', 'n_steps', 'ent_coef', 'learning_rate', 'vf_coef', 'max_grad_norm', 'gae_lambda', 'batch_size', 
         'n_epochs', 'clip_range', 'reward_fnc', 'discrete_action_space', 'normalize', 'task_mode', 'curr_stage', 'n_timesteps', 
-        'train_max_steps_per_episode', 'eval_max_steps_per_episode', 'goal_radius'
+        'train_max_steps_per_episode', 'eval_max_steps_per_episode', 'goal_radius', 'n_timesteps'
     ]
 }
 
@@ -143,9 +145,44 @@ def print_hyperparameters(hyperparams: Union[dict, agent_hyperparams]):
 def check_hyperparam_format(loaded_hyperparams: dict, PATHS: dict):
     if not set(hyperparams.keys()) == set(loaded_hyperparams.keys()):
         missing_keys = set(hyperparams.keys()).difference(set(loaded_hyperparams.keys()))
-        raise AssertionError(f"'hyperparameters.json' in {PATHS.get('model')} has unmatching keys, following keys missing: {missing_keys}" )
+        redundant_keys = set(loaded_hyperparams.keys()).difference(set(hyperparams.keys()))
+        raise AssertionError(f"'hyperparameters.json' in {PATHS.get('model')} has unmatching keys, following keys missing: {missing_keys} \n"
+        f"following keys unused: {redundant_keys}")
     if not isinstance(loaded_hyperparams['discrete_action_space'], bool):
         raise TypeError("Parameter 'discrete_action_space' not of type bool")
     if not loaded_hyperparams['task_mode'] in ["custom", "random", "staged"]:
         raise TypeError("Parameter 'task_mode' has unknown value")
 
+
+def update_hyperparam_model(model: PPO, params: dict, n_envs: int = 1):
+    """
+    Updates parameter of loaded PPO agent
+
+    :param model(object, PPO): loaded PPO agent
+    :param params: dictionary containing loaded hyperparams
+    :param n_envs: number of parallel environments
+    """
+    if model.batch_size != params['batch_size']:
+        model.batch_size = params['batch_size']
+    if model.gamma != params['gamma']:
+        model.gamma = params['gamma']
+    if model.n_steps != params['n_steps']:
+        model.n_steps = params['n_steps']
+    if model.ent_coef != params['ent_coef']:
+        model.ent_coef = params['ent_coef']
+    if model.learning_rate != params['learning_rate']:
+        model.learning_rate = params['learning_rate']
+    if model.vf_coef != params['vf_coef']:
+        model.vf_coef = params['vf_coef']
+    if model.max_grad_norm != params['max_grad_norm']:
+        model.max_grad_norm = params['max_grad_norm']
+    if model.gae_lambda != params['gae_lambda']:
+        model.gae_lambda = params['gae_lambda']
+    if model.n_epochs != params['n_epochs']:
+        model.n_epochs = params['n_epochs']
+    """
+    if model.clip_range != params['clip_range']:
+        model.clip_range = params['clip_range']
+    """
+    if model.n_envs != n_envs:
+        model.update_n_envs()

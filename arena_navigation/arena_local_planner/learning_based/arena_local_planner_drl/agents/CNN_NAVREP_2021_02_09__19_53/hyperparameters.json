@@ -11,13 +11,13 @@
     "batch_size": 15,
     "n_epochs": 3,
     "clip_range": 0.2,
-    "train_max_steps_per_episode": 500,
-    "eval_max_steps_per_episode": 500,
+    "train_max_steps_per_episode": 650,
+    "eval_max_steps_per_episode": 650,
     "goal_radius": 0.25,
     "reward_fnc": "rule_01",
     "discrete_action_space": false,
     "normalize": true,
     "task_mode": "staged",
-    "curr_stage": 5,
-    "n_timesteps": 0
+    "curr_stage": 3,
+    "n_timesteps": 9000000
 }

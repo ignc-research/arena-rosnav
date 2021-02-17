@@ -10,7 +10,7 @@ from torch import nn
 from stable_baselines3.common.policies import ActorCriticPolicy
 from stable_baselines3.common.torch_layers import BaseFeaturesExtractor
 
-_RS = 8  # robot state size+ human state size
+_RS = 2+2*6  # robot state size+ human state size
 
 ROBOT_SETTING_PATH = rospkg.RosPack().get_path('simulator_setup')
 yaml_ROBOT_SETTING_PATH = os.path.join(ROBOT_SETTING_PATH, 'robot', 'myrobot.model.yaml')
@@ -51,21 +51,21 @@ class MLP_ARENA2D(nn.Module):
 
         # Body network
         self.body_net = nn.Sequential(
-            nn.Linear(feature_dim, 64),
+            nn.Linear(_L+_RS, 64),
             nn.ReLU(),
-            nn.Linear(64, 64),
+            nn.Linear(64, feature_dim),
             nn.ReLU()
         )
 
         # Policy network
         self.policy_net = nn.Sequential(
-            nn.Linear(64, last_layer_dim_pi),
+            nn.Linear(feature_dim, last_layer_dim_pi),
             nn.ReLU()
         )
 
         # Value network
         self.value_net = nn.Sequential(
-            nn.Linear(64, last_layer_dim_vf),
+            nn.Linear(feature_dim, last_layer_dim_vf),
             nn.ReLU()
         )
 
