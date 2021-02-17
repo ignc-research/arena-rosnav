@@ -50,21 +50,21 @@ class MLP_ARENA2D(nn.Module):
 
         # Body network
         self.body_net = nn.Sequential(
-            nn.Linear(feature_dim, 64),
-            nn.ReLU(),
             nn.Linear(64, 64),
+            nn.ReLU(),
+            nn.Linear(64, feature_dim),
             nn.ReLU()
         )
 
         # Policy network
         self.policy_net = nn.Sequential(
-            nn.Linear(64, last_layer_dim_pi),
+            nn.Linear(feature_dim, last_layer_dim_pi),
             nn.ReLU()
         )
 
         # Value network
         self.value_net = nn.Sequential(
-            nn.Linear(64, last_layer_dim_vf),
+            nn.Linear(feature_dim, last_layer_dim_vf),
             nn.ReLU()
         )
 
