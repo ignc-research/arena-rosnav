@@ -1,0 +1,45 @@
+version: '3'
+services:
+  training1:
+    build: 
+      context: ./Docker
+      dockerfile: DockerfileForTraining
+    command: tail -f /dev/null
+    volumes: 
+      - .results/training1:/root/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/agents
+    # environment:
+    #   - DISPLAY=novnc:0.0
+    # env_file:
+    #   - ./Docker/ros.env
+    # networks:
+    #   - x11
+    container_name: training1
+
+training2:
+    depends_on:
+      - "training1"
+    build: 
+      context: ./Docker
+      dockerfile: DockerfileForTraining
+    command: tail -f /dev/null
+    volumes: 
+      - .results/training1:/root/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/agents
+    # environment:
+    #   - DISPLAY=novnc:0.0
+    # env_file:
+    #   - ./Docker/ros.env
+    # networks:
+    #   - x11
+    container_name: training1
+
+  novnc:  
+    image: theasp/novnc:latest
+    env_file:
+      - ./Docker/novnc.env
+    ports:
+      - "8080:8080"
+    networks:
+      - x11
+    container_name: novnc
+networks:
+  x11:

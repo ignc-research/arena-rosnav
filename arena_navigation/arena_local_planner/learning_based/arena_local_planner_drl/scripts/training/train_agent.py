@@ -251,7 +251,7 @@ if __name__ == "__main__":
         n_eval_episodes=30,         eval_freq=25000, 
         log_path=PATHS.get('eval'), best_model_save_path=PATHS.get('model'), 
         deterministic=True, 
-        callback_on_eval_end=trainstage_cb)
+    )
    
     # determine mode
     if args.custom_mlp:
