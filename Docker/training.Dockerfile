@@ -59,13 +59,14 @@ RUN . /usr/local/bin/virtualenvwrapper.sh \
 && pip --no-cache-dir install stable-baselines3
 
 # 4. Install Arena-Rosnav repo and compile
-RUN git clone --depth 1 https://github.com/ignc-research/arena-rosnav /root/catkin_ws/src/arena-rosnav \
+RUN git clone https://github.com/Herrsun/arena-rosnav /root/catkin_ws/src/arena-rosnav \
+# RUN git clone https://github.com/ignc-research/arena-rosnav /root/catkin_ws/src/arena-rosnav \
 && . /usr/local/bin/virtualenvwrapper.sh \
 && . /opt/ros/melodic/setup.sh \
 && workon rosnav \
 && pip install -r /root/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/model_based/cadrl_ros/requirements_cadrl.txt \
 && pip install gym \
-&&  cd /root/catkin_ws/src/arena-rosnav \
+&& cd /root/catkin_ws/src/arena-rosnav \
 && rosws update \
 && . /opt/ros/melodic/setup.sh \
 && cd /root/catkin_ws \
@@ -79,10 +80,15 @@ RUN . /root/.bashrc \
 && . geometry2_install.sh
 
 # 6. checkout the drl_multiprocessing branch and catkin_make again
-RUN cd /root/catkin_ws/src/forks/flatland \
+RUN cd /root/catkin_ws/src/arena-rosnav \
+&& git checkout drl_multiprocessing \
+&& rosws update \
+&& cd /root/catkin_ws/src/forks/flatland\
+&& git pull \
 && git checkout dev_multi_lei \
 && cd /root/catkin_ws/src/forks/stable-baselines3 \
-&& pip install -e . \
+&& /root/.python_env/rosnav/bin/pip install -e . \ 
 && echo $'export PYTHONPATH=/root/catkin_ws/src/arena-rosnav/:${PYTHONPATH}' >> /root/.bashrc \
-&& cd /root/catkin_ws/ \
-&& catkin_make -DPYTHON_EXECUTABLE=/usr/bin/python3
+&& . /opt/ros/melodic/setup.sh \
+&& cd /root/catkin_ws \
+&& catkin_make -DPYTHON_EXECUTABLE=/usr/bin/python3 \
