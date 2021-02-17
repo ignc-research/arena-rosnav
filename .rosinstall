@@ -1,22 +1,12 @@
 - git:
     local-name: ../forks/flatland
-    uri: https://github.com/ignc-research/flatland.git
-    version: arena_flatland
-
-#- git:
-#    local-name: ../forks/navigation
-#    uri: https://github.com/ros-planning/navigation.git
-#    version: melodic-devel
-
-#- git:
-#    local-name: ../forks/geometry2
-#    uri: https://github.com/ros/geometry2.git
-#    version: melodic-devel
-
-#- git:
-#    local-name: ../forks/stable-baselines3
-#    uri: https://github.com/DLR-RM/stable-baselines3.git
-#    version: master
+    uri: https://github.com/dangaw255/flatland.git
+    version: behavior_modeling
+    
+- git:
+    local-name: ../forks/pedsim_ros
+    uri: https://github.com/Sirupli/pedsim_ros
+    version: human_ros
 
 - git:
     local-name: ../forks/navigation/local_planner/teb
