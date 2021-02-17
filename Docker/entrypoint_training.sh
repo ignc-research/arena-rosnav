@@ -3,6 +3,7 @@ AGENT_NAME = $1
 NUM_SIM_ENVS $2
 echo "get info of $1"
 echo "get info of $2"
+source `which virtualenvwrapper.sh`
 
 (
     workon rosnav
