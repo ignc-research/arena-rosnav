@@ -36,6 +36,16 @@
       pose: {x: $(arg initial_pose_x), y: $(arg initial_pose_y), theta: $(arg initial_pose_a)}}&quot;"
     />
   
+  <!-- spawn extra model -->
+  <node name="spawn_model2" pkg="rosservice" type="rosservice"
+    args="call --wait /spawn_model &quot;{
+      yaml_path: '$(find simulator_setup)/obstacles/forklift.model.yaml',
+      name: 'forklift',
+      ns: '',
+      pose: {x: 1, y: 1, theta: 0}}&quot;"
+    />
+
+
   <!--  ************** flatland viz  ***************  -->
   <group if="$(arg show_viz)">
     <node name="flatland_viz" pkg="flatland_viz" type="flatland_viz" output="screen" required="false" unless="$(arg use_rviz)"/>
