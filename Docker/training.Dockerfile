@@ -91,4 +91,6 @@ RUN cd /root/catkin_ws/src/arena-rosnav \
 && echo $'export PYTHONPATH=/root/catkin_ws/src/arena-rosnav/:${PYTHONPATH}' >> /root/.bashrc \
 && . /opt/ros/melodic/setup.sh \
 && cd /root/catkin_ws \
-&& catkin_make -DPYTHON_EXECUTABLE=/usr/bin/python3 \
+&& catkin_make -DPYTHON_EXECUTABLE=/usr/bin/python3
+
+ENTRYPOINT ["sh", "/root/catkin_ws/src/arena-rosnav/Docker/entrypoint_training.sh", "$AGENT_NAME", "$NUM_SIM_ENVS"]

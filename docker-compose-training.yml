@@ -4,7 +4,7 @@ services:
     build: 
       context: ./Docker
       dockerfile: training.Dockerfile
-    command: tail -f /dev/null
+    # command: tail -f /dev/
     volumes: 
       - .results/training1:/root/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/agents
     # environment:
