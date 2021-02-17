@@ -68,3 +68,5 @@ class InitiateNewTrainStage(BaseCallback):
                     task_manager.next_stage()
                 EvalObject.best_mean_reward = -np.inf
                 EvalObject.last_success_rate = -np.inf
+
+        return True
