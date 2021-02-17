@@ -2,7 +2,7 @@
 
   <!-- Here are the argument that may be frequently changed -->
   <arg name="ns_prefix" default="sim" />
-  <arg name="num_envs" default="0" />
+  <arg name="num_envs" default="1" />
   <!-- To make the training more efficient make sure this step_size*laser_update_rate == 1  -->
   <arg name="step_size" default="0.1"/>
   <!-- the folder name under the path simulator_setup/maps  -->
@@ -44,7 +44,11 @@
     <!-- In multi-env training /clock not available, since we only want one map_server, it's clock topic is remapped to /clock -->
     <remap from="/clock" to="/$(arg ns_prefix)_01/clock" />
 
-</node>
+  </node>
+
+  <!-- <node name="test"  pkg="arena_plan_manager" type="test_node" output="screen">
+    <remap from="/clock" to="/$(arg ns_prefix)_01/clock" />
+  </node> -->
 
 <!-- set the log format -->
 <env name="ROSCONSOLE_FORMAT" value="[${severity} ${time} ${logger}]: ${message}" />

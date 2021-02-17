@@ -1,0 +1,9 @@
+<launch>
+<!-- <param name="use_sim_time" value="true" /> -->
+<arg name="ns"/>
+<node name="test" ns="$(arg ns)" pkg="arena_plan_manager" type="test_node" output="screen">
+    <!-- In multi-env training /clock not available, since we only want one map_server, it's clock topic is remapped to /clock -->
+    <remap from="/clock" to="/$(arg ns)/clock"/>
+</node>
+
+</launch>

@@ -18,7 +18,17 @@
       <arg name="global_frame_id"   value="$(arg global_frame_id)"/>
       <arg name="odom_frame_id"     value="$(arg odom_frame_id)"/>
     </include>
-  
+
+    <!-- use move base-->
+    <!-- <include file="$(find arena_bringup)/launch/sublaunch_training/move_base.launch">
+      <arg name="ns"                value="$(arg ns)"/>
+    </include> -->
+
+    <!-- use intermediate planner node-->
+    <include file="$(find arena_bringup)/launch/sublaunch_training/intermediate_planner.launch">
+      <arg name="ns"                value="$(arg ns)"/>
+    </include>
+
     <!-- start plan manager-->
     <include file="$(find arena_bringup)/launch/sublaunch_training/plan_manager.launch">
       <arg name="ns"                value="$(arg ns)"/>
@@ -31,5 +41,9 @@
       <arg name="timeout_goal"            default="330."/>  <!-- sec, double-->
       <arg name="timeout_subgoal"         default="30."/>   <!-- sec, double-->
     </include>
+
+    <!-- <include file="$(find arena_bringup)/launch/sublaunch_training/test_node.launch">
+      <arg name="ns"                value="$(arg ns)"/>
+    </include> -->
   
   </launch>

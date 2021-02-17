@@ -37,7 +37,7 @@ void PlanManager::init(ros::NodeHandle &nh)
   odom_sub_ = nh.subscribe("odometry/ground_truth", 1, &PlanManager::odometryCallback, this,ros::TransportHints().tcpNoDelay()); // odom  //odometry/ground_truth
 
   // publisher
-  globalPlan_pub_  = nh.advertise<nav_msgs::Path>("globalPlan",10); // relative name:/ns/node_name/globalPlan
+  global_plan_pub_  = nh.advertise<nav_msgs::Path>("globalPlan",10); // relative name:/ns/node_name/globalPlan
   subgoal_pub_ = nh.advertise<geometry_msgs::PoseStamped>("subgoal", 10); // relative name:/ns/subgoal
   robot_state_pub_ = nh.advertise<arena_plan_msgs::RobotStateStamped>("robot_state", 10);
   /* test purpose*/
@@ -77,7 +77,7 @@ void PlanManager::goalCallback(const geometry_msgs::PoseStampedPtr &msg)
   cout << "Goal set!" << endl;
   have_goal_ = true;
   visualization_->drawGoal(end_state_->to_PoseStampted(), 0.5, Eigen::Vector4d(1, 1, 1, 1.0));
-
+  cout << "Goal drawed!" << endl;
   // init start_time for this task
   start_time_ = ros::Time::now();
 }
@@ -96,6 +96,8 @@ void PlanManager::odometryCallback(const nav_msgs::OdometryConstPtr &msg)
 
 void PlanManager::execFSMCallback(const ros::TimerEvent &e)
 {
+
+  //std::cout<<"---------------------mode"<<mode_<<std::endl;
   // print state with a fixed rate
   static int fsm_num = 0;
   fsm_num++;
@@ -141,13 +143,20 @@ void PlanManager::execFSMCallback(const ros::TimerEvent &e)
   case GEN_NEW_GLOBAL:
   {
     if (mode_ == TRAIN)
-    {
-      changeFSMExecState(REPLAN_MID, "FSM");
+    { 
+      start_state_.reset(new RobotState(cur_state_->pose2d, cur_state_->theta, cur_state_->vel2d, cur_state_->w));
+      bool global_plan_success = planner_collector_->generate_global_plan(*start_state_, *end_state_);
+      if(global_plan_success){
+        global_plan_pub_.publish(planner_collector_->global_path_);
+        changeFSMExecState(REPLAN_MID, "FSM");
+      }else{
+        changeFSMExecState(GEN_NEW_GLOBAL, "FSM");
+      }
       return;
     }
-    // set robot start state
+    //set robot start state
     start_state_.reset(new RobotState(cur_state_->pose2d, cur_state_->theta, cur_state_->vel2d, cur_state_->w));
-
+    
     // execute global planning
     bool global_plan_success = planner_collector_->generate_global_plan(*start_state_, *end_state_);
 
@@ -256,8 +265,10 @@ void PlanManager::execFSMCallback(const ros::TimerEvent &e)
   {
     if (mode_ == TRAIN)
     {
-      globalPlan_pub_.publish(planner_collector_->global_path_);
+      
       subgoal_pub_.publish(end_state_->to_PoseStampted());
+      std::cout<< " "<<std::endl;
+      std::cout<< " subgoal= "<<end_state_->to_PoseStampted()<<std::endl;
       visualization_->drawSubgoal(end_state_->to_PoseStampted(), 0.3, Eigen::Vector4d(0, 0, 0, 1.0));
       cout << "MID_REPLAN Success" << endl;
       changeFSMExecState(EXEC_LOCAL, "FSM");
@@ -270,7 +281,7 @@ void PlanManager::execFSMCallback(const ros::TimerEvent &e)
 
     /* new waypoint generation*/
     bool get_subgoal_success = planner_collector_->generate_subgoal(cur_state_, end_state_, planner_collector_->global_path_, obstacle_info, sensor_info);
-    globalPlan_pub_.publish(planner_collector_->global_path_);    
+  
     if (get_subgoal_success)
     {
       // success: publish new subgoal & going to state EXEC_LOCAL
