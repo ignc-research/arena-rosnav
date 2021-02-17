@@ -67,4 +67,13 @@
   <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=6)">
     <arg name="ns" value="$(arg ns_prefix)_06" />
   </include>
+  <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=7)">
+    <arg name="ns" value="$(arg ns_prefix)_07" />
+  </include>
+  <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=8)">
+    <arg name="ns" value="$(arg ns_prefix)_08" />
+  </include>
+  <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=9)">
+    <arg name="ns" value="$(arg ns_prefix)_09" />
+  </include>
 </launch>
