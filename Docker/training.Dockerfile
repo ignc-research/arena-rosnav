@@ -96,4 +96,6 @@ RUN cd /root/catkin_ws/src/arena-rosnav \
 
 # CMD ["/bin/sh", "tail -f /dev/null"]
 # ENTRYPOINT ["sh", "tail -f /dev/null"]
-ENTRYPOINT ["bin/bash", "/root/catkin_ws/src/arena-rosnav/Docker/entrypoint_training.bash", "$ConfigFile"]
+# RUN ["chmod", "+x", "/root/catkin_ws/src/arena-rosnav/Docker/entrypoint_training.bash"]
+WORKDIR /root/catkin_ws/src/arena-rosnav/Docker/
+ENTRYPOINT . entrypoint_training.bash "$ConfigFile"

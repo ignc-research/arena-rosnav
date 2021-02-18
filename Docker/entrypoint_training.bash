@@ -10,15 +10,16 @@ export PYTHONPATH=//geometry2_ws/devel/lib/python3/dist-packages:${PYTHONPATH}
 export PYTHONPATH=/root/catkin_ws/src/arena-rosnav/:${PYTHONPATH}
 
 JQ_EXEC=`which jq`
+SHELL_FOLDER=$(cd "$(dirname "$0")";pwd)
 
 CONFIG_FILE=$1
 # CONFIG_FILE="config1.json"
 
-AGENT_NAME=$(cat $PWD/configs/${CONFIG_FILE} | ${JQ_EXEC} .input.AGENT_NAME | sed 's/\"//g')
-NUM_SIM_ENVS=$(cat $PWD/configs/${CONFIG_FILE} | ${JQ_EXEC} .input.NUM_SIM_ENVS)
+AGENT_NAME=$(cat $SHELL_FOLDER/configs/${CONFIG_FILE} | ${JQ_EXEC} .input.AGENT_NAME | sed 's/\"//g')
+NUM_SIM_ENVS=$(cat $SHELL_FOLDER/configs/${CONFIG_FILE} | ${JQ_EXEC} .input.NUM_SIM_ENVS)
 
-robot=$(cat $PWD/configs/${CONFIG_FILE} | ${JQ_EXEC} .parameters.robot)
-gamma=$(cat $PWD/configs/${CONFIG_FILE} | ${JQ_EXEC} .parameters.gamma)
+robot=$(cat $SHELL_FOLDER/configs/${CONFIG_FILE} | ${JQ_EXEC} .parameters.robot)
+gamma=$(cat $SHELL_FOLDER/configs/${CONFIG_FILE} | ${JQ_EXEC} .parameters.gamma)
 
 echo "========================="
 echo "AGENT_NAME is : $AGENT_NAME"
