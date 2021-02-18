@@ -1,0 +1,29 @@
+version: '3'
+services:
+  ros:
+    image: arena-ros-training
+    volumes: 
+      - .:/root/catkin_ws/src/arena-rosnav/Docker/
+      - ./../results:/root/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/agents/
+    environment:
+      - DISPLAY=novnc:0.0
+      - AGENT_NAME=DRL_LOCAL_PLANNER 
+      - NUM_SIM_ENVS=1
+      - CONFIG_FILE=rule_01
+    networks:
+      - x11
+    container_name: arena-container
+
+  novnc:  
+    image: theasp/novnc:latest
+    environment:
+      - DISPLAY_WIDTH=1920
+      - DISPLAY_HEIGHT=1080
+      - RUN_XTERM=no
+    ports:
+      - "8080:8080"
+    networks:
+      - x11
+    container_name: novnc
+networks:
+  x11:
