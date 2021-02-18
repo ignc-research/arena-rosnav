@@ -98,6 +98,13 @@ and do some additional configurations for the convenience . You can simply run i
 ```
 After that you can try to import tf in python3 and no error is supposed to be shown up.
 
+* Install MPC-Planner
+
+```
+cd $HOME/catkin_ws/src/forks/navigation/mpc_local_planner
+rosdep install mpc_local_planner
+```
+
 ## Update after developing flatland code
 After changes inside the forks/flatland folder you should do the following steps to fetch the latest version:
 ```
@@ -109,3 +116,6 @@ pull latest ignc-flatland version
 cd src/forks/flatland
 git pull
 ```
+## Notes
+If you develop on the branch drl_multiprocessing, go inside the forks/flatland folder and checkout to the branch dev_multi_lei, afterwards catkin_make.
+
