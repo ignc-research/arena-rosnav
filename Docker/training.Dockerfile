@@ -32,6 +32,7 @@ RUN apt-get -y update && apt-get install -y \
     ros-melodic-navigation \
     ros-melodic-teb-local-planner \
     ros-melodic-mpc-local-planner \
+    jq \
 && echo $'\n\
 source /opt/ros/melodic/setup.sh' >> /root/.bashrc
 
@@ -93,4 +94,6 @@ RUN cd /root/catkin_ws/src/arena-rosnav \
 && cd /root/catkin_ws \
 && catkin_make -DPYTHON_EXECUTABLE=/usr/bin/python3
 
-ENTRYPOINT ["sh", "/root/catkin_ws/src/arena-rosnav/Docker/entrypoint_training.sh", "$AGENT_NAME", "$NUM_SIM_ENVS"]
+# CMD ["/bin/sh", "tail -f /dev/null"]
+# ENTRYPOINT ["sh", "tail -f /dev/null"]
+ENTRYPOINT ["bin/bash", "/root/catkin_ws/src/arena-rosnav/Docker/entrypoint_training.bash", "$ConfigFile"]

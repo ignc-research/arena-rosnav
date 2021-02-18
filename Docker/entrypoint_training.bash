@@ -9,14 +9,23 @@ source /root/catkin_ws/devel/setup.bash
 export PYTHONPATH=//geometry2_ws/devel/lib/python3/dist-packages:${PYTHONPATH}
 export PYTHONPATH=/root/catkin_ws/src/arena-rosnav/:${PYTHONPATH}
 
-# AGENT_NAME=$1
-# NUM_SIM_ENVS=$2
-# CONFIGFILE=$1
-# CONFIGFILE=config1.json
+JQ_EXEC=`which jq`
 
-AGENT_NAME=DRL_LOCAL_PLANNER
-NUM_SIM_ENVS=1
-# CONFIGS= $(cat ./${CONFIGFILE})
+CONFIG_FILE=$1
+# CONFIG_FILE="config1.json"
+
+AGENT_NAME=$(cat $PWD/configs/${CONFIG_FILE} | ${JQ_EXEC} .input.AGENT_NAME | sed 's/\"//g')
+NUM_SIM_ENVS=$(cat $PWD/configs/${CONFIG_FILE} | ${JQ_EXEC} .input.NUM_SIM_ENVS)
+
+robot=$(cat $PWD/configs/${CONFIG_FILE} | ${JQ_EXEC} .parameters.robot)
+gamma=$(cat $PWD/configs/${CONFIG_FILE} | ${JQ_EXEC} .parameters.gamma)
+
+echo "========================="
+echo "AGENT_NAME is : $AGENT_NAME"
+echo "NUM_SIM_ENVS is : $NUM_SIM_ENVS"
+echo "========================="
+echo "robot is : $robot"
+echo "gamma is : $gamma"
 
 
 (
