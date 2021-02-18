@@ -65,7 +65,7 @@ train_agent.py [agent flag] [agent_name | unique_agent_name | custom mlp params]
 
 |  Optional Flags        | Description                                    |
 | ---------------------- | -----------------------------------------------|
-|  ```--config```        | name of json file containing hyperparameter settings (defaults to "default")|
+|  ```--config {json_name}``` | name of json file containing hyperparameter settings (defaults to "default")|
 |  ```--n_envs    {num}```    | number of parallel environments (defaults to 1)|
 |  ```--n    {num}```    | timesteps in total to be generated for training (defaults to 6*10⁶)|
 |  ```--tb```            | enables tensorboard logging                    |
