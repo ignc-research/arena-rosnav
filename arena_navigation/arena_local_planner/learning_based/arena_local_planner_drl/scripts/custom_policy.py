@@ -105,7 +105,7 @@ class MLP_ARENA2D_POLICY(ActorCriticPolicy):
         self.ortho_init = True
 
     def _build_mlp_extractor(self) -> None:
-        self.mlp_extractor = MLP_ARENA2D(self.features_dim)
+        self.mlp_extractor = MLP_ARENA2D(64)
 
 
 class DRL_LOCAL_PLANNER(BaseFeaturesExtractor):
