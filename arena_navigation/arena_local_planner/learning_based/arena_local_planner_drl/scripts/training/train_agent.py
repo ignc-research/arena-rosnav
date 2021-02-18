@@ -305,7 +305,7 @@ if __name__ == "__main__":
     start = time.time()
     model.learn(
         total_timesteps = n_timesteps, callback=eval_cb, reset_num_timesteps=True)
-    print(f'Time passed for {n_timesteps} timesteps: {time.time()-start}s')
+    print(f'Time passed: {time.time()-start}s')
 
     # update the timesteps the model has trained in total
     update_total_timesteps_json(n_timesteps, PATHS)
