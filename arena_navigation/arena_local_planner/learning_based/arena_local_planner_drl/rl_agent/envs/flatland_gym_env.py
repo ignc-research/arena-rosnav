@@ -40,8 +40,8 @@ class FlatlandEnv(gym.Env):
         super(FlatlandEnv, self).__init__()
 
         self.ns = ns
+        
         # process specific namespace in ros system
-        print("namespace", self.ns)
         if ns is not None or ns !="":
             self.ns_prefix = '/'+ns + '/'
         else:
@@ -158,8 +158,6 @@ class FlatlandEnv(gym.Env):
             action=action, global_plan=obs_dict['global_plan'], robot_pose=obs_dict['robot_pose'])
         # print(f"cum_reward: {reward}")
         done = reward_info['is_done']
-
-        print("reward:  {}".format(reward))
         
         # info
         info = {}
