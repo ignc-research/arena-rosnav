@@ -1,6 +1,6 @@
 
 <launch>
-  <arg name="ns" default="sim_01"/>
+  <arg name="ns" default="sim_1"/>
   <arg name="rviz_file"       default="nav_training"/>
   <!-- if true use rviz for visualization otherwise use flatland_viz-->
   <arg name="use_rviz" default="true"/>

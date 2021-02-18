@@ -40,7 +40,7 @@ roslaunch arena_bringup start_training.launch num_envs:={num of parallel envs}
 
 - Optionally you can visualize the training with rviz by calling:
 ```bash
-roslaunch arena_bringup visualization_training.launch ns:=sim_0{num of the env}
+roslaunch arena_bringup visualization_training.launch ns:=sim_{num of the env}
 ```
 
 - Afterwards start the training as follows:

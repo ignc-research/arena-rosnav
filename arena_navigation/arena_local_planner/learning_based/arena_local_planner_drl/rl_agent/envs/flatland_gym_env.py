@@ -41,6 +41,7 @@ class FlatlandEnv(gym.Env):
 
         self.ns = ns
         # process specific namespace in ros system
+        print("namespace", self.ns)
         if ns is not None or ns !="":
             self.ns_prefix = '/'+ns + '/'
         else:
@@ -48,9 +49,9 @@ class FlatlandEnv(gym.Env):
         
         if not debug:
             if train_mode:
-                rospy.init_node(f'train_env_{ns[-1]}', disable_signals=False)
+                rospy.init_node(f'train_env_{self.ns}', disable_signals=False)
             else:
-                rospy.init_node(f'eval_env_{ns[-1]}', disable_signals=False)
+                rospy.init_node(f'eval_env_{self.ns}', disable_signals=False)
         # Define action and observation space
         # They must be gym.spaces objects
         self._is_action_space_discrete = is_action_space_discrete
@@ -62,10 +63,10 @@ class FlatlandEnv(gym.Env):
 
         # reward calculator
         if safe_dist is None:
-            safe_dist = 1.5*self._robot_radius
+            safe_dist = 1.6*self._robot_radius
 
         self.reward_calculator = RewardCalculator(
-            robot_radius=self._robot_radius, safe_dist=1.1*self._robot_radius, goal_radius=goal_radius, rule=reward_fnc)
+            robot_radius=self._robot_radius, safe_dist=1.2*self._robot_radius, goal_radius=goal_radius, rule=reward_fnc)
 
         # action agent publisher
         self.agent_action_pub = rospy.Publisher(f'{self.ns_prefix}cmd_vel', Twist, queue_size=1)
@@ -130,10 +131,11 @@ class FlatlandEnv(gym.Env):
         self.agent_action_pub.publish(action_msg)
 
     def _translate_disc_action(self, action):
-        action[0] = self._discrete_acitons[action]['linear']
-        action[1] = self._discrete_acitons[action]['angular']
-
-        return action
+        new_action = np.array([])
+        new_action = np.append(new_action, self._discrete_acitons[action]['linear'])
+        new_action = np.append(new_action, self._discrete_acitons[action]['angular'])    
+            
+        return new_action
 
     def step(self, action):
         """
@@ -157,7 +159,7 @@ class FlatlandEnv(gym.Env):
         # print(f"cum_reward: {reward}")
         done = reward_info['is_done']
 
-        # print("reward:  {}".format(reward))
+        print("reward:  {}".format(reward))
         
         # info
         info = {}

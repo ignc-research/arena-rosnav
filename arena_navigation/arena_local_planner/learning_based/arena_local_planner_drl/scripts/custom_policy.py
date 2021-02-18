@@ -50,7 +50,7 @@ class MLP_ARENA2D(nn.Module):
 
         # Body network
         self.body_net = nn.Sequential(
-            nn.Linear(_L + _RS, 64),
+            nn.Linear(_L+_RS, 64),
             nn.ReLU(),
             nn.Linear(64, feature_dim),
             nn.ReLU()
