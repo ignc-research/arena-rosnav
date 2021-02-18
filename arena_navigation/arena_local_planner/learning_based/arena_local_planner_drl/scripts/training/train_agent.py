@@ -247,24 +247,24 @@ if __name__ == "__main__":
             "MlpPolicy", env, 
             policy_kwargs = dict(
                 net_arch = args.net_arch, activation_fn = get_act_fn(args.act_fn)), 
-            gamma = gamma,                     n_steps = n_steps, 
-            ent_coef = ent_coef,               learning_rate = learning_rate, 
-            vf_coef = vf_coef,                 max_grad_norm = max_grad_norm, 
-            gae_lambda = gae_lambda,           batch_size = batch_size, 
-            n_epochs = n_epochs,               clip_range = clip_range, 
-            tensorboard_log = PATHS.get('tb'), verbose = 1
+            gamma = params['gamma'],                     n_steps = params['n_steps'], 
+            ent_coef = params['ent_coef'],               learning_rate = params['learning_rate'], 
+            vf_coef = params['vf_coef'],                 max_grad_norm = params['max_grad_norm'], 
+            gae_lambda = params['gae_lambda'],           batch_size = params['batch_size'], 
+            n_epochs = params['n_epochs'],               clip_range = params['clip_range'], 
+            tensorboard_log = PATHS.get('tb'),           verbose = 1
         )
     elif args.agent is not None:
         # predefined agent flag
         if args.agent == "MLP_ARENA2D":
                 model = PPO(
                     MLP_ARENA2D_POLICY, env, 
-                    gamma = gamma,                     n_steps = n_steps, 
-                    ent_coef = ent_coef,               learning_rate = learning_rate, 
-                    vf_coef = vf_coef,                 max_grad_norm = max_grad_norm, 
-                    gae_lambda = gae_lambda,           batch_size = batch_size, 
-                    n_epochs = n_epochs,               clip_range = clip_range, 
-                    tensorboard_log = PATHS.get('tb'), verbose = 1
+                    gamma = params['gamma'],            n_steps = params['n_steps'], 
+                    ent_coef = params['ent_coef'],      learning_rate = params['learning_rate'], 
+                    vf_coef = params['vf_coef'],        max_grad_norm = params['max_grad_norm'], 
+                    gae_lambda = params['gae_lambda'],  batch_size = params['batch_size'], 
+                    n_epochs = params['n_epochs'],      clip_range = params['clip_range'], 
+                    tensorboard_log = PATHS.get('tb'),  verbose = 1
                 )
 
         elif args.agent == "DRL_LOCAL_PLANNER" or args.agent == "CNN_NAVREP":
@@ -276,12 +276,12 @@ if __name__ == "__main__":
             model = PPO(
                 "CnnPolicy", env, 
                 policy_kwargs = policy_kwargs, 
-                gamma = gamma,                     n_steps = n_steps, 
-                ent_coef = ent_coef,               learning_rate = learning_rate, 
-                vf_coef = vf_coef,                 max_grad_norm = max_grad_norm, 
-                gae_lambda = gae_lambda,           batch_size = batch_size, 
-                n_epochs = n_epochs,               clip_range = clip_range, 
-                tensorboard_log = PATHS.get('tb'), verbose = 1
+                gamma = params['gamma'],            n_steps = params['n_steps'], 
+                ent_coef = params['ent_coef'],      learning_rate = params['learning_rate'], 
+                vf_coef = params['vf_coef'],        max_grad_norm = params['max_grad_norm'], 
+                gae_lambda = params['gae_lambda'],  batch_size = params['batch_size'], 
+                n_epochs = params['n_epochs'],      clip_range = params['clip_range'], 
+                tensorboard_log = PATHS.get('tb'),  verbose = 1
             )
     else:
         # load flag

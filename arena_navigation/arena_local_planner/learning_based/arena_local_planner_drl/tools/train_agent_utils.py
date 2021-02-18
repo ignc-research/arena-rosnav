@@ -49,6 +49,7 @@ def initialize_hyperparameters(PATHS: dict, load_target: str, config_name: str='
     if load_target is None:
         hyperparams = load_hyperparameters_json(PATHS=PATHS, from_scratch=True, config_name=config_name)
         hyperparams['agent_name'] = PATHS['model'].split('/')[-1]
+        hyperparams['n_timesteps'] = 0
         write_hyperparameters_json(hyperparams, PATHS)
     else:
         hyperparams = load_hyperparameters_json(PATHS=PATHS)
