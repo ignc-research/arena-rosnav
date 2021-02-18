@@ -94,8 +94,5 @@ RUN cd /root/catkin_ws/src/arena-rosnav \
 && cd /root/catkin_ws \
 && catkin_make -DPYTHON_EXECUTABLE=/usr/bin/python3
 
-# CMD ["/bin/sh", "tail -f /dev/null"]
-# ENTRYPOINT ["sh", "tail -f /dev/null"]
-# RUN ["chmod", "+x", "/root/catkin_ws/src/arena-rosnav/Docker/entrypoint_training.bash"]
 WORKDIR /root/catkin_ws/src/arena-rosnav/Docker/
 ENTRYPOINT . entrypoint_training.bash "$ConfigFile"

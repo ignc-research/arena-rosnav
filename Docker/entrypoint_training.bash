@@ -4,6 +4,7 @@
 export WORKON_HOME=/root/.python_env
 export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python3
 export VIRTUALENVWRAPPER_VIRTUALENV=/usr/local/bin/virtualenv
+source /opt/ros/melodic/setup.bash
 source /usr/local/bin/virtualenvwrapper.sh
 source /root/catkin_ws/devel/setup.bash
 export PYTHONPATH=//geometry2_ws/devel/lib/python3/dist-packages:${PYTHONPATH}
@@ -34,7 +35,7 @@ echo "gamma is : $gamma"
     roslaunch arena_bringup start_training.launch num_envs:=${NUM_SIM_ENVS}
 )&
 (
-    sleep 1
+    sleep 2
     source "/root/.python_env/rosnav/bin/activate"
     roscd arena_local_planner_drl
     python scripts/training/train_agent.py --agent ${AGENT_NAME}
