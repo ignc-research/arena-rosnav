@@ -96,4 +96,4 @@ RUN apt-get install ros-melodic-nlopt \
 && catkin_make -DPYTHON_EXECUTABLE=/usr/bin/python3
 
 WORKDIR /root/catkin_ws/src/arena-rosnav/Docker/
-ENTRYPOINT . entrypoint.bash "$AGENT_NAME" "$NUM_SIM_ENVS" "$CONFIG_FILE"
+ENTRYPOINT . entrypoint.bash "$AGENT_NAME" "$NUM_SIM_ENVS" "$CONFIG_FILE" "$MAP_FOLDER"
