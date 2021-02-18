@@ -13,7 +13,9 @@ def training_args(parser):
                         choices=['MLP_ARENA2D', 'DRL_LOCAL_PLANNER', 'CNN_NAVREP'],
                         help='predefined agent to train')
     group.add_argument('--custom-mlp', action='store_true', help='enables training with custom multilayer perceptron')
-    group.add_argument('--load', type=str, metavar="[agent name]", help='agent to be loaded for training')
+    group.add_argument('--load', type=str, metavar='[agent name]', help='agent to be loaded for training')
+    parser.add_argument('--config', type=str, metavar='[config name]', default='default', help='name of the json file containing' 
+    'the hyperparameters')
     parser.add_argument('--n', type=int, help='timesteps in total to be generated for training')
     parser.add_argument('-log', '--eval_log', action='store_true', help='enables storage of evaluation data')
     parser.add_argument('--tb', action='store_true', help='enables tensorboard logging')

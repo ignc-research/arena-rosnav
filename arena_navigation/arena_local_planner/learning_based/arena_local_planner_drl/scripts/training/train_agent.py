@@ -20,29 +20,6 @@ from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.tools.custom_mlp_utils import *
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.tools.staged_train_callback import InitiateNewTrainStage
 
-##### HYPERPARAMETER #####
-""" will be used upon initializing new agent """
-robot = "myrobot"
-gamma = 0.99
-n_steps = 4800
-ent_coef = 0.005
-learning_rate = 3e-4
-vf_coef = 0.2
-max_grad_norm = 0.5
-gae_lambda = 0.95
-batch_size = 15
-n_epochs = 3
-clip_range = 0.2
-reward_fnc = "rule_00"
-discrete_action_space = True
-start_stage = 1
-train_max_steps_per_episode = 500
-eval_max_steps_per_episode = 500
-goal_radius = 0.25
-task_mode = "staged"    # custom, random or staged
-normalize = True
-##########################
-
 
 def get_agent_name(args) -> str:
     """ Function to get agent name to save to/load from file system
@@ -88,7 +65,10 @@ def get_paths(agent_name: str, args) -> dict:
         'robot_setting': 
             os.path.join(
                 rospkg.RosPack().get_path('simulator_setup'),
-                'robot', robot + '.model.yaml'),
+                'robot', 'myrobot' + '.model.yaml'),
+        'hyperparams':
+            os.path.join(
+                dir, 'configs', 'hyperparameters'),
         'robot_as': 
             os.path.join(
                 dir, 'configs', 'default_settings.yaml'),
@@ -201,16 +181,8 @@ if __name__ == "__main__":
         
             
     # initialize hyperparameters (save to/ load from json)
-    hyperparams_obj = agent_hyperparams(
-        AGENT_NAME, robot, gamma, n_steps, ent_coef, 
-        learning_rate, vf_coef,max_grad_norm, gae_lambda, batch_size, 
-        n_epochs, clip_range, reward_fnc, discrete_action_space, normalize, 
-        task_mode, start_stage, train_max_steps_per_episode,
-        eval_max_steps_per_episode, goal_radius)
-
     params = initialize_hyperparameters(
-        agent_name=AGENT_NAME,           PATHS=PATHS, 
-        hyperparams_obj=hyperparams_obj, load_target=args.load)
+        PATHS=PATHS, load_target=args.load, config_name=args.config)
 
     # task managers for each simulation
     task_managers=[]
