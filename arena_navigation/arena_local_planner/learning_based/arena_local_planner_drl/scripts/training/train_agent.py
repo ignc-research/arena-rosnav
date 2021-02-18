@@ -182,7 +182,7 @@ if __name__ == "__main__":
             
     # initialize hyperparameters (save to/ load from json)
     params = initialize_hyperparameters(
-        PATHS=PATHS, load_target=args.load, config_name=args.config)
+        PATHS=PATHS, load_target=args.load, config_name=args.config, n_envs=args.n_envs)
 
     # task managers for each simulation
     task_managers=[]
@@ -250,7 +250,7 @@ if __name__ == "__main__":
             gamma = params['gamma'],                     n_steps = params['n_steps'], 
             ent_coef = params['ent_coef'],               learning_rate = params['learning_rate'], 
             vf_coef = params['vf_coef'],                 max_grad_norm = params['max_grad_norm'], 
-            gae_lambda = params['gae_lambda'],           batch_size = params['batch_size'], 
+            gae_lambda = params['gae_lambda'],           batch_size = params['m_batch_size'], 
             n_epochs = params['n_epochs'],               clip_range = params['clip_range'], 
             tensorboard_log = PATHS.get('tb'),           verbose = 1
         )
@@ -262,7 +262,7 @@ if __name__ == "__main__":
                     gamma = params['gamma'],            n_steps = params['n_steps'], 
                     ent_coef = params['ent_coef'],      learning_rate = params['learning_rate'], 
                     vf_coef = params['vf_coef'],        max_grad_norm = params['max_grad_norm'], 
-                    gae_lambda = params['gae_lambda'],  batch_size = params['batch_size'], 
+                    gae_lambda = params['gae_lambda'],  batch_size = params['m_batch_size'], 
                     n_epochs = params['n_epochs'],      clip_range = params['clip_range'], 
                     tensorboard_log = PATHS.get('tb'),  verbose = 1
                 )
@@ -279,7 +279,7 @@ if __name__ == "__main__":
                 gamma = params['gamma'],            n_steps = params['n_steps'], 
                 ent_coef = params['ent_coef'],      learning_rate = params['learning_rate'], 
                 vf_coef = params['vf_coef'],        max_grad_norm = params['max_grad_norm'], 
-                gae_lambda = params['gae_lambda'],  batch_size = params['batch_size'], 
+                gae_lambda = params['gae_lambda'],  batch_size = params['m_batch_size'], 
                 n_epochs = params['n_epochs'],      clip_range = params['clip_range'], 
                 tensorboard_log = PATHS.get('tb'),  verbose = 1
             )
