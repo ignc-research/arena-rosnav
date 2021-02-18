@@ -65,6 +65,7 @@ train_agent.py [agent flag] [agent_name | unique_agent_name | custom mlp params]
 
 |  Optional Flags        | Description                                    |
 | ---------------------- | -----------------------------------------------|
+|  ```--config```        | name of json file containing hyperparameter settings (defaults to "default")|
 |  ```--n_envs    {num}```    | number of parallel environments (defaults to 1)|
 |  ```--n    {num}```    | timesteps in total to be generated for training (defaults to 6*10⁶)|
 |  ```--tb```            | enables tensorboard logging                    |
@@ -83,9 +84,9 @@ Currently you can choose between 3 different Deep Neural Networks each of which 
 | DRL_LOCAL_PLANNER | [drl_local_planner](https://github.com/RGring/drl_local_planner_ros_stable_baselines)  |
 | CNN_NAVREP | [NavRep](https://github.com/ethz-asl/navrep) | 
 
-e.g. training with the MLP architecture from arena2D:
+e.g. training with the MLP architecture from Arena2D with config named "Arena2D_1.json":
 ```
-train_agent.py --agent MLP_ARENA2D
+train_agent.py --agent MLP_ARENA2D --config Arena2D_1
 ```
 
 ##### Load a DNN for training
@@ -173,7 +174,7 @@ At present one can chose between two reward functions which can be set at the hy
   
 <table>
 <tr>
-   <th>rule_00</th> <th>rule_01</th>
+   <th>rule_00</th> <th>rule_01</th> <th>rule_02</th> <th>rule_03</th>
 </tr>
 <tr>
    <td>
@@ -207,6 +208,43 @@ At present one can chose between two reward functions which can be set at the hy
 
    *_higher weight applied if robot drives away from goal (to avoid driving unneccessary circles)_
    </td>
+
+   <td>
+
+   | Reward Function at timestep t                                     |  
+   | ----------------------------------------------------------------- |   
+   | <img src="https://latex.codecogs.com/png.latex?r^t&space;=&space;r_{s}^t&space;&plus;&space;r_{c}^t&space;&plus;&space;r_{d}^t&space;&plus;&space;r_{p}^t&space;&plus;&space;r_{m}^t" title="r^t = r_{s}^t + r_{c}^t + r_{d}^t + r_{p}^t + r_{m}^t" />|
+   
+   | reward    | description | value |
+   | --------- | ----------- | ----- |
+   | <img src="https://latex.codecogs.com/gif.latex?r_{s}^t" title="r_{s}^t" /> | success reward | <img src="https://latex.codecogs.com/gif.latex?r_{s}^t&space;=\begin{cases}15&space;&&space;goal\:reached\\0&space;&&space;otherwise\end{cases}" title="r_{s}^t =\begin{cases}15 & goal\:reached\\0 & otherwise\end{cases}" />
+   | <img src="https://latex.codecogs.com/png.latex?r_{c}^t" title="r_{c}^t" /> | collision reward |<img src="https://latex.codecogs.com/png.latex?r_{c}^t&space;=\begin{cases}0&space;&&space;otherwise\\-10&space;&&space;agent\:collides\end{cases}" title="r_{c}^t =\begin{cases}0 & otherwise\\-10 & agent\:collides\end{cases}" />
+   | <img src="https://latex.codecogs.com/png.latex?r_{d}^t" title="r_{d}^t" /> | danger reward | <img src="https://latex.codecogs.com/png.latex?r_{d}^t&space;=\begin{cases}0&space;&&space;otherwise\\-0.15&space;&&space;agent\:oversteps\:safe\:dist\end{cases}" title="r_{d}^t =\begin{cases}0 & otherwise\\-0.15 & agent\:oversteps\:safe\:dist\end{cases}" />
+   | <img src="https://latex.codecogs.com/png.latex?r_{p}^t" title="r_{p}^t" />| progress reward | <img src="https://latex.codecogs.com/png.latex?r_{d}^t&space;=\begin{cases}w_{p}*d^t&space;&&space;d^t>=0,\;d^t=d_{ag}^{t-1}-d_{ag}^{t}\\w_{n}*d^t&space;&&space;else\end{cases}\\&space;w_{p}&space;=&space;0.25&space;\quad&space;w_{n}&space;=&space;0.4&space;\quad&space;d_{ag}:agent\:goal&space;\:&space;distance" title="r_{d}^t =\begin{cases}w_{p}*d^t & d^t>=0,\;d^t=d_{ag}^{t-1}-d_{ag}^{t}\\w_{n}*d^t & else\end{cases}\\ w_{p} = 0.25 \quad w_{n} = 0.4 \quad d_{ag}:agent\:goal \: distance" />(*)
+   | | distance traveled | 
+
+   *_higher weight applied if robot drives away from goal (to avoid driving unneccessary circles)_
+   </td>
+
+   <td>
+
+   | Reward Function at timestep t                                     |  
+   | ----------------------------------------------------------------- |   
+   | <img src="https://latex.codecogs.com/png.latex?r^t&space;=&space;r_{s}^t&space;&plus;&space;r_{c}^t&space;&plus;&space;r_{d}^t&space;&plus;&space;r_{p}^t&space;&plus;&space;r_{m}^t" title="r^t = r_{s}^t + r_{c}^t + r_{d}^t + r_{p}^t + r_{m}^t" />|
+   
+   | reward    | description | value |
+   | --------- | ----------- | ----- |
+   | <img src="https://latex.codecogs.com/gif.latex?r_{s}^t" title="r_{s}^t" /> | success reward | <img src="https://latex.codecogs.com/gif.latex?r_{s}^t&space;=\begin{cases}15&space;&&space;goal\:reached\\0&space;&&space;otherwise\end{cases}" title="r_{s}^t =\begin{cases}15 & goal\:reached\\0 & otherwise\end{cases}" />
+   | <img src="https://latex.codecogs.com/png.latex?r_{c}^t" title="r_{c}^t" /> | collision reward |<img src="https://latex.codecogs.com/png.latex?r_{c}^t&space;=\begin{cases}0&space;&&space;otherwise\\-10&space;&&space;agent\:collides\end{cases}" title="r_{c}^t =\begin{cases}0 & otherwise\\-10 & agent\:collides\end{cases}" />
+   | <img src="https://latex.codecogs.com/png.latex?r_{d}^t" title="r_{d}^t" /> | danger reward | <img src="https://latex.codecogs.com/png.latex?r_{d}^t&space;=\begin{cases}0&space;&&space;otherwise\\-0.15&space;&&space;agent\:oversteps\:safe\:dist\end{cases}" title="r_{d}^t =\begin{cases}0 & otherwise\\-0.15 & agent\:oversteps\:safe\:dist\end{cases}" />
+   | <img src="https://latex.codecogs.com/png.latex?r_{p}^t" title="r_{p}^t" />| progress reward | <img src="https://latex.codecogs.com/png.latex?r_{d}^t&space;=\begin{cases}w_{p}*d^t&space;&&space;d^t>=0,\;d^t=d_{ag}^{t-1}-d_{ag}^{t}\\w_{n}*d^t&space;&&space;else\end{cases}\\&space;w_{p}&space;=&space;0.25&space;\quad&space;w_{n}&space;=&space;0.4&space;\quad&space;d_{ag}:agent\:goal&space;\:&space;distance" title="r_{d}^t =\begin{cases}w_{p}*d^t & d^t>=0,\;d^t=d_{ag}^{t-1}-d_{ag}^{t}\\w_{n}*d^t & else\end{cases}\\ w_{p} = 0.25 \quad w_{n} = 0.4 \quad d_{ag}:agent\:goal \: distance" />(*)
+   | | distance traveled reward | 
+   | | global path reward | 
+
+   *_higher weight applied if robot drives away from goal (to avoid driving unneccessary circles)_
+   </td>
+
+   
 </tr>
 </table>
 
@@ -278,6 +316,6 @@ python run_agent.py --load CNN_NAVREP_2021_01_15__23_28 -s scenario1 --no-gpu
 |Path|Description|
 |-----|-----|
 |```../arena_local_planner_drl/agents```| models and associated hyperparameters.json will be saved to and loaded from here ([uniquely named directory](#load-a-dnn-for-training)) 
-|```../arena_local_planner_drl/configs```| yaml files containing robots action spaces and the training curriculum
+|```../arena_local_planner_drl/configs```| yaml file containing robots action spaces, the training curriculum and hyperparameter jsons used for initialization
 |```../arena_local_planner_drl/training_logs```| tensorboard logs and evaluation logs
 |```../arena_local_planner_drl/scripts```| python file containing the predefined DNN architectures and the training script

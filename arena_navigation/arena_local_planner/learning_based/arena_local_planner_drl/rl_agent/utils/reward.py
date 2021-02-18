@@ -75,7 +75,7 @@ class RewardCalculator():
     def _cal_reward_rule_02(self, laser_scan: np.ndarray, goal_in_robot_frame: Tuple[float,float],*args,**kwargs):
         self._reward_distance_traveled(kwargs['action'])
         self._reward_goal_reached(goal_in_robot_frame, reward=15)
-        self._reward_safe_dist(laser_scan)
+        self._reward_safe_dist(laser_scan, punishment=0.1)
         self._reward_collision(laser_scan, punishment=20)
         self._reward_goal_approached2(goal_in_robot_frame)
 
@@ -83,9 +83,9 @@ class RewardCalculator():
     def _cal_reward_rule_03(self, laser_scan: np.ndarray, goal_in_robot_frame: Tuple[float,float],*args,**kwargs):
         self._reward_distance_traveled(kwargs['action'])
         self._reward_global_plan(kwargs['global_plan'], kwargs['robot_pose'])
-        self._reward_goal_reached(goal_in_robot_frame, reward=10)
-        self._reward_safe_dist(laser_scan)
-        self._reward_collision(laser_scan, punishment=15)
+        self._reward_goal_reached(goal_in_robot_frame, reward=15)
+        self._reward_safe_dist(laser_scan, punishment=0.2)
+        self._reward_collision(laser_scan, punishment=10)
         self._reward_goal_approached2(goal_in_robot_frame)
 
 
@@ -156,7 +156,7 @@ class RewardCalculator():
         # print(f"reward_distance_traveled: {reward}")+
 
         
-    def _reward_global_plan(self, global_plan, robot_pose: Pose2D, reward: float=0.1, punishment: float=0.001):
+    def _reward_global_plan(self, global_plan, robot_pose: Pose2D, reward: float=0.1, punishment: float=0.15):
         # calculate minimal distance between robot and global path using kdtree search
         curr_dist_to_path, idx = self.get_min_dist2global_kdtree(
             global_plan, robot_pose)
