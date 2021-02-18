@@ -65,9 +65,9 @@ train_agent.py [agent flag] [agent_name | unique_agent_name | custom mlp params]
 
 |  Optional Flags        | Description                                    |
 | ---------------------- | -----------------------------------------------|
-|  ```--config {json_name}``` | name of json file containing hyperparameter settings (defaults to "default")|
-|  ```--n_envs    {num}```    | number of parallel environments (defaults to 1)|
-|  ```--n    {num}```    | timesteps in total to be generated for training (defaults to 6*10⁶)|
+|  ```--config {json_name}``` | name of json file containing hyperparameter settings (_defaults to "default"_)|
+|  ```--n_envs    {num}```    | number of parallel environments (_defaults to 1_)|
+|  ```--n    {num}```    | timesteps in total to be generated for training (_defaults to 40*10⁶_)|
 |  ```--tb```            | enables tensorboard logging                    |
 |  ```-log```, ```--eval_log```| enables logging of evaluation episodes   |
 |  ```--no-gpu```        | disables training with GPU                     |
@@ -84,7 +84,7 @@ Currently you can choose between 3 different Deep Neural Networks each of which 
 | DRL_LOCAL_PLANNER | [drl_local_planner](https://github.com/RGring/drl_local_planner_ros_stable_baselines)  |
 | CNN_NAVREP | [NavRep](https://github.com/ethz-asl/navrep) | 
 
-e.g. training with the MLP architecture from Arena2D with config named "Arena2D_1.json":
+e.g. training with the MLP architecture from Arena2D with config named "_Arena2D_1.json_":
 ```
 train_agent.py --agent MLP_ARENA2D --config Arena2D_1
 ```
