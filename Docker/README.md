@@ -1,13 +1,26 @@
 ## Install docker
+Ubuntu:
+  https://cnvrg.io/how-to-setup-docker-and-nvidia-docker-2-0-on-ubuntu-18-04/
+
+  Mac:
 https://docs.docker.com/docker-for-mac/install/
+
+  Windows:
+  https://docs.docker.com/docker-for-windows/install/
+
+### Install docker-compose 
+https://docs.docker.com/compose/install/
 
 ## Build image and setup container
 1. clone the whole repositary
 ```
-git clone https://github.com/Herrsun/arena-rosnav
+git clone https://github.com/ignc-research/arena-rosnav
 ```
 2. Open local terminal under the path where you just clone the repo
-3. Run `docker-compose up -d`
+3. Compose the docker
+```
+docker-compose up -d
+```
 
 ## Start /Enter /Stop the container
 1. Check if the arena-rosnav and novnc container is already started
