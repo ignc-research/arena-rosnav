@@ -29,7 +29,7 @@ Train DRL agents on ROS compatible simulations for autonomous navigation in high
 
 
 ### Recent Updates
-
+- 04.02.2021: Added Multiprocessing for training speedup
 - 26.01.2021: Added Scenario Tasks: generate your own scenario by specifying a scenario.json 
 
 
@@ -40,7 +40,8 @@ Train DRL agents on ROS compatible simulations for autonomous navigation in high
 * Full documentation and system design is released this week
 
 ## 1. Installation
-Please refer to [Installation.md](docs/Installation.md) for detailed explanations about the installation process.
+Please refer to [Installation.md](docs/Installation.md) for detailed explanations about the installation process.  
+  If you want to use Docker, please refer to our [Dockerfile](Docker) 
 
 ## 2. Usage
 
@@ -60,7 +61,7 @@ Please refer to [DRL-Training.md](docs/DRL-Training.md) for detailed explanation
    * map
 
 ```bash
-roslaunch arena_bringup start_arena_flatland.launch train_mode:=false use_viz:=true local_planner:=mpc map_file:=map1 obs_vel:=0.3
+roslaunch arena_bringup start_arena_flatland.launch train_mode:=false use_viz:=true local_planner:=dwa map_file:=map1 obs_vel:=0.3
 ```
 Now you can click on the generate task button in rviz to generator a new random task (random obstacles and goal is published to /goal). It will automatically navigate to that goal, once you start one of our local planners, which are triggered by a new /goal. If you starte with task_mode "manual" you can specify your goal using the specify Flatland Navigation goal (using normal 2D navigation goal will trigger the move_base planner, thus only works with teb and dwa)
 

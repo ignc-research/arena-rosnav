@@ -67,12 +67,13 @@ pip install pyyaml catkin_pkg netifaces pathlib
 ```
 pip install stable-baselines3
 ```
-* Install CADRL dependencies (venv always activated!)
+* (optional) Install CADRL dependencies (venv always activated!) 
 ```
 cd /arena-rosnav/arena_navigation/arena_local_planner/model_based/cadrl_ros
 pip install -r requirements_cadrl.txt
 ```
-
+If you encounter errors, e.g. sopecific versions not found, please manually install the packages with an available version.
+  You only need this to run our cadrl node, if you dont plan to use it, skip this step.
 
 #### 1.3. Install arena-rosnav repo
 * Create a catkin_ws and clone this repo into your catkin_ws 
@@ -97,6 +98,13 @@ and do some additional configurations for the convenience . You can simply run i
 ```
 After that you can try to import tf in python3 and no error is supposed to be shown up.
 
+* Install MPC-Planner
+
+```
+cd $HOME/catkin_ws/src/forks/navigation/mpc_local_planner
+rosdep install mpc_local_planner
+```
+
 ## Update after developing flatland code
 After changes inside the forks/flatland folder you should do the following steps to fetch the latest version:
 ```
@@ -108,3 +116,6 @@ pull latest ignc-flatland version
 cd src/forks/flatland
 git pull
 ```
+## Notes
+If you develop on the branch drl_multiprocessing, go inside the forks/flatland folder and checkout to the branch dev_multi_lei, afterwards catkin_make.
+

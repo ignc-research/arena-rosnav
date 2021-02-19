@@ -22,11 +22,15 @@
 #    local-name: ../forks/navigation/local_planner/teb
 #    uri: https://github.com/rst-tu-dortmund/teb_local_planner
 #    version: melodic-devel
-#- git:
-#    local-name: ../forks/navigation/local_planner/mpc
-#    uri: https://github.com/rst-tu-dortmund/mpc_local_planner
-#    version: master
+- git:
+    local-name: ../forks/navigation/local_planner/mpc
+    uri: https://github.com/rst-tu-dortmund/mpc_local_planner
+    version: master
 - git:
     local-name: ../forks/navigation/msgs/ford
     uri: https://bitbucket.org/acl-swarm/ford_msgs/src/master/
+    version: master
+- git:
+    local-name: ../forks/stable-baselines3
+    uri: https://github.com/tuananhroman/stable-baselines3
     version: master
