@@ -37,7 +37,7 @@ hyperparams = {
     key: None for key in [
         'agent_name','robot', 'batch_size', 'gamma', 'n_steps', 'ent_coef', 'learning_rate', 'vf_coef', 'max_grad_norm', 'gae_lambda', 'm_batch_size', 
         'n_epochs', 'clip_range', 'reward_fnc', 'discrete_action_space', 'normalize', 'task_mode', 'curr_stage', 'train_max_steps_per_episode', 
-        'eval_max_steps_per_episode', 'goal_radius'
+        'eval_max_steps_per_episode', 'goal_radius', 'n_timesteps'
     ]
 }
 
