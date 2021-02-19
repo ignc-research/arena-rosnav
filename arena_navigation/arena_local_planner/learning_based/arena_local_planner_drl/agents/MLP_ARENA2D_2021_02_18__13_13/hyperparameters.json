@@ -1,5 +1,5 @@
 {
-    "agent_name": "CNN_NAVREP_2021_01_15__23_28",
+    "agent_name": "MLP_ARENA2D_2021_02_18__13_13",
     "robot": "myrobot",
     "gamma": 0.99,
     "n_steps": 128,
@@ -12,8 +12,6 @@
     "n_epochs": 4,
     "clip_range": 0.2,
     "reward_fnc": "00",
-    "discrete_action_space": true,
-    "task_mode": "staged",
-    "curr_stage": 1,
+    "discrete_action_space": false,
     "n_timesteps": 0
 }

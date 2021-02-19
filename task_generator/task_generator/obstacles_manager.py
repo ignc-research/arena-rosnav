@@ -324,9 +324,7 @@ class ObstaclesManager:
         if len(self.obstacle_name_list) != 0:
             if prefix_names is None:
                 group_names = '.'
-                re_pattern = "^(?:" + '|'.join(group_names) + r')\w*'
-            else:
-                re_pattern = "^(?:" + '|'.join(prefix_names) + r')\w*'
+            re_pattern = "^(?:" + '|'.join(prefix_names) + r')\w*'
             r = re.compile(re_pattern)
             to_be_removed_obstacles_names = list(
                 filter(r.match, self.obstacle_name_list))

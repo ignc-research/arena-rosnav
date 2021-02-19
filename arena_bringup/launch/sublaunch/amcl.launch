@@ -1,5 +1,5 @@
 <launch>
-    <arg name="scan_topic" default="scan"/>
+    <arg name="scan_topic" default="scan_original"/>
     <arg name="initial_pose_x" default="0.0"/>
     <arg name="initial_pose_y" default="0.0"/>
     <arg name="initial_pose_a" default="0.0"/>

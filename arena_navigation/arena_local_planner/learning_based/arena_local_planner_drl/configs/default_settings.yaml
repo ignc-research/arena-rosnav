@@ -1,7 +1,7 @@
 robot:
   discrete_actions:
     - name: move_forward
-      linear: 2.00
+      linear: 2.75
       angular: 0.0
     - name: move_backward
       linear: -1.5
@@ -22,5 +22,5 @@ robot:
       linear: 0.0
       angular: 0.0
   continuous_actions:
-    linear_range: [0, 3.25]
+    linear_range: [0, 0.3]
     angular_range: [-2.7,2.7]
