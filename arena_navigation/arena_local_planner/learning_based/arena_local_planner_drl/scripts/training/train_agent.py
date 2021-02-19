@@ -144,6 +144,7 @@ def make_envs(task_manager: Union[RandomTask, StagedRandomTask, ManualTask, Scen
                     train_mode=False, debug=args.debug
                     ),
                 PATHS.get('eval'), info_keywords=("done_reason", "is_success"))
+        time.sleep(0.33+(rank*0.01))
         env.seed(seed + rank)
         return env
     set_random_seed(seed)
