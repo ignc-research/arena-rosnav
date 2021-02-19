@@ -25,6 +25,7 @@
 
   <!-- Visualization -->
   <arg name="use_viz"         default="true"/>
+  <param name="train_mode"    value="$(arg train_mode)"/>
   <param name="use_viz"       value="$(arg use_viz)"/>
 
 

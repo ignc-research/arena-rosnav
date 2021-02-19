@@ -217,7 +217,7 @@ class ObstaclesManager:
     def move_all_obstacles_to_start_pos_tween2(self):
         for move_obstacle_start_pos_pub in self._move_all_obstacles_start_pos_pubs:
             move_obstacle_start_pos_pub.publish(Empty())
-            print("moved ")
+            #print("moved ")
 
     def move_obstacle(self, obstacle_name: str, x: float, y: float, theta: float):
         """move the obstacle to a given position

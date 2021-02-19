@@ -14,7 +14,7 @@ from nav_msgs.msg import OccupancyGrid, Path
 
 from .utils import generate_freespace_indices, get_random_pos_on_map
 # for clearing costmap
-from clear_costmap import clear_costmaps
+from .clear_costmap import clear_costmaps
 
 class RobotManager:
     """
