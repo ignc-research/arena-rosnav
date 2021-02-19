@@ -19,14 +19,14 @@ from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl
 ###HYPERPARAMETER###
 robot = "myrobot"
 gamma = 0.99
-n_steps = 500
-ent_coef = 0.01
-learning_rate = 2.5e-4
-vf_coef = 0.5
+n_steps = 4800
+ent_coef = 0.5
+learning_rate = 3e-4
+vf_coef = 0.2
 max_grad_norm = 0.5
 gae_lambda = 0.95
-batch_size = 64
-n_epochs = 4
+batch_size = 15
+n_epochs = 3
 clip_range = 0.2
 reward_fnc = "02"
 discrete_action_space = False

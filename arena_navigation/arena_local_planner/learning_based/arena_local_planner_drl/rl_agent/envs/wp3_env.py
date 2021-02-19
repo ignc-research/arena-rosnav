@@ -200,8 +200,8 @@ class wp3Env(gym.Env):
             # robot_position+(angle*range)
             #send a goal message as action, remeber to normalize the quaternions (put orientationw as 1) and set the frame id of the goal! 
             if dist_robot_goal[0] < 2:
-                self._action_msg.pose.position.x = self._ref_wp.pose.position.x    
-                self._action_msg.pose.position.y = self._ref_wp.pose.position.y   
+                self._action_msg.pose.position.x = self._globalGoal.x 
+                self._action_msg.pose.position.y = self._globalGoal.y 
                 self._action_msg.pose.orientation.w = 1
                 self._action_msg.header.frame_id ="map"
                 self.agent_action_pub.publish(self._action_msg)
