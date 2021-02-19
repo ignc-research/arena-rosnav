@@ -59,6 +59,8 @@ def initialize_hyperparameters(PATHS: dict, load_target: str, config_name: str='
         write_hyperparameters_json(hyperparams, PATHS)
     else:
         hyperparams = load_hyperparameters_json(PATHS=PATHS)
+        check_batch_size(n_envs, hyperparams['batch_size'], hyperparams['m_batch_size'])
+        hyperparams['n_steps'] = int(hyperparams['batch_size'] / n_envs)
     print_hyperparameters(hyperparams)
     return hyperparams
 
@@ -176,6 +178,9 @@ def update_hyperparam_model(model: PPO, params: dict, n_envs: int = 1):
         model.update_n_envs()
 
 def check_batch_size(n_envs: int, batch_size: int, mn_batch_size: int):
+    assert (batch_size>mn_batch_size
+    ), f"Mini batch size {mn_batch_size} is bigger than batch size {batch_size}"
+    
     assert (batch_size%mn_batch_size == 0
     ), f"Batch size {batch_size} isn't divisible by mini batch size {mn_batch_size}"
 
@@ -184,4 +189,3 @@ def check_batch_size(n_envs: int, batch_size: int, mn_batch_size: int):
 
     assert (batch_size%mn_batch_size==0
     ), f"Batch size {batch_size} isn't divisible by mini batch size {mn_batch_size}"
-
