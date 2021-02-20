@@ -29,8 +29,8 @@ if __name__ == "__main__":
     }
     assert os.path.isfile(
         os.path.join(PATHS['model'], 'best_model.zip')), "No model file found in %s" % PATHS['model']
-    assert os.path.isfile(
-        PATHS['scenerios_json_path']), "No scenario file named %s" % PATHS['scenerios_json_path']
+    #assert os.path.isfile(
+     #   PATHS['scenerios_json_path']), "No scenario file named %s" % PATHS['scenerios_json_path']
 
     # initialize hyperparams
     params = load_hyperparameters_json(agent_hyperparams, PATHS)
@@ -39,7 +39,7 @@ if __name__ == "__main__":
     print_hyperparameters(params)
 
     # initialize task manager
-    task_manager = get_predefined_task(mode='ScenerioTask', PATHS=PATHS)
+    task_manager = get_predefined_task(mode='random', PATHS=PATHS)
     # initialize gym env
     env = DummyVecEnv([lambda: FlatlandEnv(
         task_manager, PATHS.get('robot_setting'), PATHS.get('robot_as'), params['reward_fnc'], params['discrete_action_space'], goal_radius=0.50, max_steps_per_episode=100000)])
@@ -51,7 +51,6 @@ if __name__ == "__main__":
     
     env.reset()
     first_obs = True
-    episode = 1
     # iterate through each scenario max_repeat times
     while True:
         if first_obs:
@@ -83,12 +82,9 @@ if __name__ == "__main__":
                 else:
                     done_reason = "goal reached"
                 
-                print("_______________________________________________")
-                print("%d. Episode finished with reward of %f (reason: %s)"% (episode, cum_reward, done_reason))
-                print("_______________________________________________")
+                print("Episode finished with reward of %f (finish reason: %s)"% (cum_reward, done_reason))
             env.reset()
             first_obs = True
-            episode += 1
 
         time.sleep(0.0001)
         if rospy.is_shutdown():

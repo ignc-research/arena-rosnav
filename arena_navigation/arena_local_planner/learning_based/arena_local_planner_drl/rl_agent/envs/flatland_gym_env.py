@@ -21,7 +21,7 @@ import time
 class FlatlandEnv(gym.Env):
     """Custom Environment that follows gym interface"""
 
-    def __init__(self, task: ABSTask, robot_yaml_path: str, settings_yaml_path: str, reward_fnc: str, is_action_space_discrete, safe_dist: float = None, goal_radius: float = 0.1, max_steps_per_episode=100):
+    def __init__(self, task: ABSTask, robot_yaml_path: str, settings_yaml_path: str, is_action_space_discrete, safe_dist: float = None, goal_radius: float = 0.1, max_steps_per_episode=100):
         """Default env
         Flatland yaml node check the entries in the yaml file, therefore other robot related parameters cound only be saved in an other file.
         TODO : write an uniform yaml paser node to handel with multiple yaml files.
@@ -32,7 +32,6 @@ class FlatlandEnv(gym.Env):
             task (ABSTask): [description]
             robot_yaml_path (str): [description]
             setting_yaml_path ([type]): [description]
-            reward_fnc (str): [description]
             is_action_space_discrete (bool): [description]
             safe_dist (float, optional): [description]. Defaults to None.
             goal_radius (float, optional): [description]. Defaults to 0.1.
@@ -50,10 +49,10 @@ class FlatlandEnv(gym.Env):
 
         # reward calculator
         if safe_dist is None:
-            safe_dist = 1.5*self._robot_radius
+            safe_dist = 1.1*self._robot_radius
 
         self.reward_calculator = RewardCalculator(
-            robot_radius=self._robot_radius, safe_dist=1.1*self._robot_radius, goal_radius=goal_radius, rule=reward_fnc)
+            safe_dist=1.1*self._robot_radius, goal_radius=goal_radius)
 
         # action agent publisher
         self.agent_action_pub = rospy.Publisher('cmd_vel', Twist, queue_size=1)
@@ -81,9 +80,7 @@ class FlatlandEnv(gym.Env):
                     for footprint in body['footprints']:
                         if footprint['type'] == 'circle':
                             self._robot_radius = footprint.setdefault(
-                                'radius', 0.3)*1.04
-                        if footprint['radius']:
-                            self._robot_radius = footprint['radius']*1.04
+                                'radius', 0.2)
             # get laser related information
             for plugin in robot_data['plugins']:
                 if plugin['type'] == 'Laser':
