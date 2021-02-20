@@ -164,10 +164,8 @@ class RewardCalculator():
         #if the new distance is smaller than the last one, robot gets rewarded, if it is larger, he gets penalized the larger the distance is
         if curr_dist_to_path >= self.last_dist_to_path:
             self.curr_reward += reward
-            print(f"closer - {reward}")
         else:
             self.curr_reward -= punishment*curr_dist_to_path
-            print(f"further - {punishment*curr_dist_to_path} (distance: {curr_dist_to_path})")
         self.last_dist_to_path = curr_dist_to_path
 
     def get_min_dist2global_kdtree(self, global_plan, robot_pose):      
