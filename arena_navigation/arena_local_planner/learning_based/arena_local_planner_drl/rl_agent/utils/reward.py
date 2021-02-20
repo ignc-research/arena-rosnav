@@ -43,7 +43,7 @@ class RewardCalculator():
         self.curr_reward = 0
         self.info = {}
     
-    def get_reward(self, laser_scan:np.ndarray, goal_in_robot_frame: Tuple[float,float], robot_position: Pose2D(), globalPlan: Path(), *args, **kwargs):
+    def get_reward(self, laser_scan:np.ndarray, goal_in_robot_frame: Tuple[float,float], *args, **kwargs):
         """
 
         Args:
@@ -53,7 +53,7 @@ class RewardCalculator():
         """
 
         self._reset()
-        self.cal_func(self,laser_scan,goal_in_robot_frame, robot_position, globalPlan, *args,**kwargs)
+        self.cal_func(self,laser_scan,goal_in_robot_frame, *args,**kwargs)
         return self.curr_reward, self.info
 
 
@@ -75,18 +75,17 @@ class RewardCalculator():
         self._reward_goal_approached2(goal_in_robot_frame)
 
 
-    def _cal_reward_rule_02(self, laser_scan: np.ndarray, goal_in_robot_frame: Tuple[float,float], robot_position: Pose2D(), globalPlan: Path(), *args,**kwargs):
+    def _cal_reward_rule_02(self, laser_scan: np.ndarray, goal_in_robot_frame: Tuple[float,float], *args,**kwargs):
 
         self._reward_goal_reached(goal_in_robot_frame)
         self._reward_not_moving(goal_in_robot_frame)
         self._reward_safe_dist(laser_scan)
         self._reward_collision(laser_scan)
-        self._reward_goal_approached(goal_in_robot_frame)
-        self._reward_global_plan_followed(goal_in_robot_frame, robot_position, globalPlan.poses)
+        #self._reward_goal_approached(goal_in_robot_frame)
+        #self._reward_global_plan_followed(goal_in_robot_frame, robot_position, globalPlan.poses)
         
 
     def _reward_goal_reached(self,goal_in_robot_frame, reward = 15, punishment = 15):
-        print("goal radius: {}".format(self.goal_radius))
         if goal_in_robot_frame[0] < self.goal_radius:
             self.curr_reward = reward
             self.info['is_done'] = True
