@@ -1,9 +1,18 @@
-# arena-rosnav
+# Waypoint Generator DRL 
+This is the branch to train the wypoint generator. Modifications inside the plan manager to spawn waypoints in train mode and wp3_env.py gym environment introduced to train waypoint generator learn to choose optimal waypoints given a set of possible waypoints inside specific area dependent on the normal subgoal. More information inside the paper. CADRL will execute to navigate to the waypoint until the next wp is spawned.
 
-<p align="center">
-	<img width="300" height="300" src="/img/1training.gif">
-</p>
+### Train 
+1. To train the agent first start simulation in train mode = true and local planner = cadrl
 
+```
+roslaunch arena_bringup start_arena_flatland.launch local_planner:="cadrl" train_mode:=true
+```
+
+2. Start training 
+
+```
+ python wp3_train.py --agent MLP_ARENA2D
+```
 
 ## 0. What is this repository for?
 Train DRL agents on ROS compatible simulations for autonomous navigation in highly dynamic environments. Flatland-DRL integration is inspired by Ronja Gueldenring's work: [drl_local_planner_ros_stable_baselines](https://github.com/RGring/drl_local_planner_ros_stable_baselines.git). Test state of the art local and global planners in ROS environments both in simulation and on real hardware. Following features are included:
@@ -27,6 +36,7 @@ Train DRL agents on ROS compatible simulations for autonomous navigation in high
 * ros navigation stack: http://wiki.ros.org/navigation
 * pedsim(will be integrated): https://github.com/srl-freiburg/pedsim_ros
 * Full documentation and system design is released this week
+
 
 ## 1. Installation
 #### 1.1. Standard ROS setup
