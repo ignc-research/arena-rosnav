@@ -470,7 +470,7 @@ class newBag():
             for i in zones:
                 nof_cols = len(zones[i])
                 if nof_cols >= col_tol and str(i)+"_c" in zones:
-
+                    print()
                     center = zones[str(i)+"_c"]
                     radius = 0.4 + 0.1*nof_cols
                     circle = plt.Circle((center[0], center[1]), radius, color=clr, fill = False, alpha = 1, lw = 2)
