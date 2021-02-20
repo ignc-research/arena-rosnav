@@ -156,7 +156,7 @@ class RewardCalculator():
         # print(f"reward_distance_traveled: {reward}")+
 
         
-    def _reward_global_plan(self, global_plan, robot_pose: Pose2D, reward: float=0.1, punishment: float=0.15):
+    def _reward_global_plan(self, global_plan, robot_pose: Pose2D, reward: float=0.01, punishment: float=0.15):
         # calculate minimal distance between robot and global path using kdtree search
         curr_dist_to_path, idx = self.get_min_dist2global_kdtree(
             global_plan, robot_pose)
@@ -164,9 +164,11 @@ class RewardCalculator():
         #if the new distance is smaller than the last one, robot gets rewarded, if it is larger, he gets penalized the larger the distance is
         if curr_dist_to_path >= self.last_dist_to_path:
             self.curr_reward += reward
+            print(f"closer - {reward}")
         else:
             self.curr_reward -= punishment*curr_dist_to_path
-        
+            print(f"further - {punishment*curr_dist_to_path} (distance: {curr_dist_to_path})")
+        self.last_dist_to_path = curr_dist_to_path
 
     def get_min_dist2global_kdtree(self, global_plan, robot_pose):      
         mytree = scipy.spatial.cKDTree(global_plan)

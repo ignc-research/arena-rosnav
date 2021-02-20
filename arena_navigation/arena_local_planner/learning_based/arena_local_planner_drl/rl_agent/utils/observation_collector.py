@@ -131,9 +131,19 @@ class ObservationCollector():
 
     def call_service_takeSimStep(self):
         request = StepWorldRequest()
+        timeout = 12
         try:
-            response = self._sim_step_client(request)
-            rospy.logdebug("step service=", response)
+            for i in range(timeout):
+                response = self._sim_step_client(request)
+                rospy.logdebug("step service=", response)
+
+                if response.success:
+                    break
+                if i == timeout-1:
+                    raise TimeoutError(
+                        f"Timeout while trying to call '{self.ns_prefix}step_world'")
+                time.sleep(0.33)
+
         except rospy.ServiceException as e:
             rospy.logdebug("step Service call failed: %s" % e)
 

@@ -144,6 +144,7 @@ def make_envs(task_manager: Union[RandomTask, StagedRandomTask, ManualTask, Scen
                     train_mode=False, debug=args.debug
                     ),
                 PATHS.get('eval'), info_keywords=("done_reason", "is_success"))
+        time.sleep(0.33+(rank*0.01))
         env.seed(seed + rank)
         return env
     set_random_seed(seed)
@@ -218,7 +219,7 @@ if __name__ == "__main__":
     
     # stop training on reward threshold callback
     stoptraining_cb = StopTrainingOnRewardThreshold(
-        reward_threshold=13.75, task_manager=task_managers[0], verbose=1)
+        reward_threshold=14, task_manager=task_managers[0], verbose=1)
 
     # instantiate eval environment
     # take task_manager from first sim (currently evaluation only provided for single process)
