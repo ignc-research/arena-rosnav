@@ -2,8 +2,8 @@
     
   <param name="use_sim_time" value="true"/>
 
-  <arg name="noise_model"      default="0"/>
-  <param name="noise_model" value="$(arg noise_model)"/>
+  <arg name="noise_mode"      default="0"/>
+  <param name="noise_mode" value="$(arg noise_mode)"/>
 
   <arg name="delay"      default="1"/>
   <param name="delay" value="$(arg delay)"/>

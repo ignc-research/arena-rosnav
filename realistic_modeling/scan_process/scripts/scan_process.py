@@ -113,7 +113,7 @@ class Scan_process():
 if __name__ == '__main__':
 
     rospy.init_node('noise', anonymous = False)
-    noise_model = rospy.get_param('noise_model')
+    noise_model = rospy.get_param('noise_mode')
     timedelay = rospy.get_param('delay')
     Scan_process = Scan_process(noise_model = noise_model,timedelay = timedelay)
 #    Scan_process = Scan_process()
