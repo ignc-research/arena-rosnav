@@ -5,12 +5,6 @@
     <arg name="global_frame_id"   value="map"/>
     <arg name="odom_frame_id"     value="$(arg ns)_odom"/>
     <arg name="base_frame_id"     value="$(arg ns)_footprint"/>
-    
-  
-    <!-- use simulator and rviz-->
-    <include file="$(find arena_bringup)/launch/sublaunch_training/flatland_simulator.launch">
-        <arg name="ns" value="$(arg ns)"/>
-    </include>
 
     <!-- use fake localization-->
     <include file="$(find arena_bringup)/launch/sublaunch_training/fake_localization.launch">
@@ -41,9 +35,10 @@
       <arg name="timeout_goal"            default="330."/>  <!-- sec, double-->
       <arg name="timeout_subgoal"         default="30."/>   <!-- sec, double-->
     </include>
+    
+    <!-- use simulator and rviz-->
+    <include file="$(find arena_bringup)/launch/sublaunch_training/flatland_simulator.launch">
+        <arg name="ns" value="$(arg ns)"/>
+    </include>
 
-    <!-- <include file="$(find arena_bringup)/launch/sublaunch_training/test_node.launch">
-      <arg name="ns"                value="$(arg ns)"/>
-    </include> -->
-  
   </launch>
