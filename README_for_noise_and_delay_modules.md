@@ -39,7 +39,7 @@ The parameters can be modified in the noise_parameter.json file
 ###3.3 Start-up commands for noise and delay modules
 - In one terminal, start simulation. You can specify the following parameters: 
 
-   * noise_mode:=<0,1,2,3,4>(default 0,means without noise) #Different noises can be selected individually or together.eg.noise_mode:=123 It means that noise mode123 is added at the same time.
+   * noise_mode:=<0,1,2,3,4>(default 0,means without noise) #Different noises can be selected individually or together.eg.noise_mode:=123 It means that noise mode 1and2and3 is added at the same time.
    * delay:=<int> (default 0) # Delay time
 
 ```bash
