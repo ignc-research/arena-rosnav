@@ -30,7 +30,7 @@ class RewardCalculator():
             'rule_01': RewardCalculator._cal_reward_rule_01,
             'rule_02': RewardCalculator._cal_reward_rule_02
             }
-        self.cal_func = self._cal_funcs[rule]
+        self.cal_func = 'rule_00'
 
     def reset(self):
         """reset variables related to the episode

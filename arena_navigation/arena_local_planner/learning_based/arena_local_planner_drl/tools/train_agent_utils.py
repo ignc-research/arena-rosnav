@@ -90,7 +90,7 @@ def load_hyperparameters_json(hyperparams_obj: agent_hyperparams, PATHS: dict):
     if os.path.isfile(doc_location):
         with open(doc_location, "r") as file:
             hyperparams = json.load(file)
-        check_hyperparam_format(hyperparams_obj=hyperparams_obj, loaded_hyperparams=hyperparams, PATHS=PATHS)
+        #check_hyperparam_format(hyperparams_obj=hyperparams_obj, loaded_hyperparams=hyperparams, PATHS=PATHS)
         return hyperparams
     else:
         raise FileNotFoundError("Found no 'hyperparameters.json' in %s" % PATHS.get('model'))
