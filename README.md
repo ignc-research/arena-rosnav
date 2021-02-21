@@ -1,3 +1,12 @@
+# Multiprocessing branch
+This branch is under development to feacilitate multiprocessing and accelerate training and simulation. It works with additional plugins and changes to the flatland repository. If you want to use it, checkout to dev_multi_lei branch in src/forks/flatland folder and pip install -e . inside src/forks/stable-baselines3 folder. 
+
+Afterwards catkin_make inside catkin ws.
+
+Additionally, install nlopt
+```
+sudo apt-get install ros-melodic-nlopt
+```
 # Arena-Rosnav
 
 A flexible, high-performance 2D simulator with configurable agents, multiple sensors, and benchmark scenarios for testing robotic navigation. 
