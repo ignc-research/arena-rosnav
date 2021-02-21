@@ -1,0 +1,49 @@
+<launch>
+
+  <!-- Define laser type-->
+  <arg name="laser_type" default="hokuyo" />
+
+  <!-- laser driver -->
+  <include file="$(find turtlebot_navigation)/laser/driver/$(arg laser_type)_laser.launch" />
+
+  <!-- laser filter (optional) -->
+  <node pkg="laser_filters" type="scan_to_scan_filter_chain"
+      name="laser_filter">
+    <rosparam command="load" file="$(find laser_filters)/laserscan_filter.yaml" />
+  </node>
+
+  <!-- Map server -->
+  <arg name="map_file" default="sarl_star_ros/map/wangtong.yaml"/>
+  <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
+
+  <!-- AMCL -->
+  <arg name="custom_amcl_launch_file" default="$(find turtlebot_navigation)/launch/includes/amcl/$(arg laser_type)_amcl.launch.xml"/>
+
+  <arg name="initial_pose_x" default="-0.5"/>
+  <arg name="initial_pose_y" default="9.6"/>
+  <arg name="initial_pose_a" default="-1.35"/>
+
+  <include file="$(arg custom_amcl_launch_file)">
+    <arg name="initial_pose_x" value="$(arg initial_pose_x)"/>
+    <arg name="initial_pose_y" value="$(arg initial_pose_y)"/>
+    <arg name="initial_pose_a" value="$(arg initial_pose_a)"/>
+  </include>
+
+  <!-- People Detector -->
+  <include file="$(find people_velocity_tracker)/launch/tracked_detector.launch" />
+
+  <!-- Move base -->
+  <arg name="custom_param_file" default="$(find turtlebot_navigation)/param/$(arg laser_type)_costmap_params.yaml"/>
+  <include file="$(find turtlebot_navigation)/launch/includes/$(arg laser_type)_move_base.launch.xml">
+    <arg name="custom_param_file" value="$(arg custom_param_file)"/>
+  </include>
+
+  <!-- SARL_star Planner -->
+  <node pkg="sarl_star_ros" type="sarl_star_node.py" name="sarl_star_node" output="screen" />
+
+  <!-- rviz -->
+  <node pkg="rviz" type="rviz" name="rviz" args="-d $(find sarl_star_ros)/rviz/sarl_crowd_nav.rviz"/>
+
+
+</launch>
+
