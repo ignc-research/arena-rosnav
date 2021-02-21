@@ -37,7 +37,7 @@ hyperparams = {
     key: None for key in [
         'agent_name','robot', 'batch_size', 'gamma', 'n_steps', 'ent_coef', 'learning_rate', 'vf_coef', 'max_grad_norm', 'gae_lambda', 'm_batch_size', 
         'n_epochs', 'clip_range', 'reward_fnc', 'discrete_action_space', 'normalize', 'task_mode', 'curr_stage', 'train_max_steps_per_episode', 
-        'eval_max_steps_per_episode', 'goal_radius', 'n_timesteps'
+        'eval_max_steps_per_episode', 'goal_radius'
     ]
 }
 
@@ -50,16 +50,19 @@ def initialize_hyperparameters(PATHS: dict, load_target: str, config_name: str='
     :param config_name: name of the hyperparameter file in /configs/hyperparameters
     :param n_envs: number of envs
     """
+    # when building new agent
     if load_target is None:
         hyperparams = load_hyperparameters_json(PATHS=PATHS, from_scratch=True, config_name=config_name)
         hyperparams['agent_name'] = PATHS['model'].split('/')[-1]
         hyperparams['n_timesteps'] = 0
-        check_batch_size(n_envs, hyperparams['batch_size'], hyperparams['m_batch_size'])
-        hyperparams['n_steps'] = int(hyperparams['batch_size'] / n_envs)
-        write_hyperparameters_json(hyperparams, PATHS)
     else:
         hyperparams = load_hyperparameters_json(PATHS=PATHS)
-    print_hyperparameters(hyperparams)
+    
+    # dynamically adapt n_steps according to batch size and n envs
+    # then update .json
+    check_batch_size(n_envs, hyperparams['batch_size'], hyperparams['m_batch_size'])
+    hyperparams['n_steps'] = int(hyperparams['batch_size'] / n_envs)
+    write_hyperparameters_json(hyperparams, PATHS)
     return hyperparams
 
 
@@ -174,6 +177,8 @@ def update_hyperparam_model(model: PPO, params: dict, n_envs: int = 1):
     """
     if model.n_envs != n_envs:
         model.update_n_envs()
+    if model.rollout_buffer.buffer_size != params['n_steps']:
+        model.rollout_buffer.buffer_size = params['n_steps']
 
 def check_batch_size(n_envs: int, batch_size: int, mn_batch_size: int):
     assert (batch_size>mn_batch_size
