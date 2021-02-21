@@ -58,7 +58,8 @@ class RewardCalculator():
 
 
     def _cal_reward_rule_00(self, laser_scan: np.ndarray, goal_in_robot_frame: Tuple[float,float],*args,**kwargs):
-
+        self._reward_distance_traveled(kwargs['action'])
+        self._reward_waypoints_set(kwargs['goal_len'], kwargs['action_count'])
         self._reward_goal_reached(goal_in_robot_frame)
         self._reward_not_moving(goal_in_robot_frame)
         self._reward_safe_dist(laser_scan)
@@ -67,7 +68,8 @@ class RewardCalculator():
         
 
     def _cal_reward_rule_01(self, laser_scan: np.ndarray, goal_in_robot_frame: Tuple[float,float],*args,**kwargs):
-        
+        self._reward_distance_traveled(kwargs['action'])
+        self._reward_waypoints_set(kwargs['goal_len'], kwargs['action_count'])
         self._reward_goal_reached(goal_in_robot_frame)
         self._reward_not_moving(goal_in_robot_frame)
         self._reward_safe_dist(laser_scan)
@@ -76,7 +78,8 @@ class RewardCalculator():
 
 
     def _cal_reward_rule_02(self, laser_scan: np.ndarray, goal_in_robot_frame: Tuple[float,float], robot_position: Pose2D(), globalPlan: Path(), *args,**kwargs):
-
+        self._reward_distance_traveled(kwargs['action'])
+        self._reward_waypoints_set(kwargs['goal_len'], kwargs['action_count'])
         self._reward_goal_reached(goal_in_robot_frame)
         self._reward_not_moving(goal_in_robot_frame)
         self._reward_safe_dist(laser_scan)
@@ -173,7 +176,7 @@ class RewardCalculator():
             self.curr_reward -= punishment
     
 
-    def _reward_distance_traveled(self, action = None, punishment = 0.01):
+    def _reward_distance_traveled(self, action = None, punishment = 1):
         if action is None:
             self.curr_reward -= punishment
         else:
@@ -181,5 +184,10 @@ class RewardCalculator():
             ang_vel = action[1]
             reward = ((lin_vel*0.97) + (ang_vel*0.03)) * 0.04
         self.curr_reward -= reward
-        # print(f"reward_distance_traveled: {reward}")
-        
+        print(f"reward_distance_traveled: {reward}")
+        print(" linear velocity in distance reward fct {}".format(lin_vel))
+        print(" angular velocity in distance reward fct {}".format(ang_vel))
+
+    def _reward_waypoints_set(self, goal_len, action_count, punishment = -0.1):
+        if action_count > goal_len:
+            self.curr_reward -= punishment

@@ -68,6 +68,7 @@ class wp3Env(gym.Env):
         self._ref_wp_sub = rospy.Subscriber('/plan_manager/subgoal', PoseStamped, self.cbRefWp)
         self._globalGoal = rospy.Subscriber('/goal', PoseStamped, self.cbGlobalGoal)
         self._globalPlan_sub = rospy.Subscriber('/plan_manager/globalPlan', Path, self.cbglobalPlan)
+        self._twist_sub = rospy.Subscriber('/cmd_vel', Twist, self.cbTwist)
         self._wp4train_reached =False
         # action agent publisher
         self.agent_action_pub = rospy.Publisher('/plan_manager/wp4train', PoseStamped, queue_size=1)
@@ -90,15 +91,23 @@ class wp3Env(gym.Env):
         self._globalGoal = Pose2D()
         self._ref_wp = PoseStamped()
         self._action_msg = PoseStamped()
+        self._robot_twist = [0]*2
         self.firstTime = 0
         self._previous_time = 0
         self._step_counter = 0
+        # for reward to calculate how many actions relative to path length
+        self.goal_len = 0
+        self._action_count = 0
         # # get observation
         # obs=self.observation_collector.get_observations()
 
     def cbRobotPosition(self,msg):
         self._robot_pose.x = msg.pose.pose.position.x
         self._robot_pose.y = msg.pose.pose.position.y
+        
+    def cbTwist(self,msg):
+        self._robot_twist[0]= msg.linear.x
+        self._robot_twist[1] = msg.angular.z    
 
     def cbglobalPlan(self,msg):
         self._globalPlan = msg
@@ -182,6 +191,7 @@ class wp3Env(gym.Env):
             self._action_msg.header.frame_id ="map"
             self.agent_action_pub.publish(self._action_msg)
             self.firstTime +=1
+            self._action_count += 1
             print("distance robot to wp: {}".format(dist_robot_wp[0]))
 
         #wait for robot to reach the waypoint first in about 10 steps
@@ -205,6 +215,7 @@ class wp3Env(gym.Env):
                 self._action_msg.pose.orientation.w = 1
                 self._action_msg.header.frame_id ="map"
                 self.agent_action_pub.publish(self._action_msg)
+                self._action_count += 1
             else:
                 angle_grad = math.degrees(action[0]) # e.g. 90 degrees
                 self._action_msg.pose.position.x = self._ref_wp.pose.position.x + (self.range_circle*math.cos(angle_grad))         
@@ -213,6 +224,7 @@ class wp3Env(gym.Env):
                 self._action_msg.header.frame_id ="map"
                 self.agent_action_pub.publish(self._action_msg)
                 print(angle_grad)
+                self._action_count += 1
 
             #rospy.sleep(1)
             #print("chosen action:  {0}, deegrees:   {1}, sum: {2}, cos(): {3}, robot_position:   {4}".format(action[0], math.degrees(action[0]), (self.range_circle*np.cos(math.degrees(action[0]))),np.cos(math.degrees(action[0])), robot_position ))
@@ -239,15 +251,25 @@ class wp3Env(gym.Env):
         self._pub_action(action)
         ##todo: wait for robot_pos = goal pos
 
+        #in each step, get the robots cmd velocity to get action for reward distance traveled
+        new_action = [0]*2
+        new_action[0] = self._robot_twist[0]
+        new_action[1] = self._robot_twist[1]
         
         # wait for new observations
         s = time.time()
         merged_obs, obs_dict = self.observation_collector.get_observations()
         # print("get observation: {}".format(time.time()-s))
 
+        # get global path once new episode started and round to integer for reward waypoints_set relative to goal distance
+        if self.firstTime < 2:
+            self.goal_len = int(round(obs_dict['goal_in_robot_frame'][0]))
+            
+        print("Goal Length is {}".format(self.goal_len))
+        print("Action Count is {}".format(self._action_count))
         # calculate reward
         reward, reward_info = self.reward_calculator.get_reward(
-            obs_dict['laser_scan'], obs_dict['goal_in_robot_frame'], obs_dict['robot_pose'], self._globalPlan)
+            obs_dict['laser_scan'], obs_dict['goal_in_robot_frame'], obs_dict['robot_pose'], self._globalPlan, action=new_action, goal_len=self.goal_len, action_count= self._action_count)
         done = reward_info['is_done']
 
         print("reward:  {}".format(reward))
@@ -276,6 +298,7 @@ class wp3Env(gym.Env):
         self.reward_calculator.reset()
         self._steps_curr_episode = 0
         self.firstTime = 0
+        self._action_count = 0
         obs, _ = self.observation_collector.get_observations()
         return obs  # reward, done, info can't be included
 

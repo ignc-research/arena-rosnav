@@ -23,4 +23,4 @@ robot:
       angular: 0.0
   continuous_actions:
     linear_range: [0, 0.3]
-    angular_range: [-1.7,1.7]
+    angular_range: [-1,1]
