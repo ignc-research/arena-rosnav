@@ -126,7 +126,6 @@ class RosNav():
         # print(twist)
         self.pub_twist.publish(twist)
     
-    
     # marker
     def visualize_path(self):
             # pose arrow

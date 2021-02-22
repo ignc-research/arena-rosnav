@@ -65,7 +65,6 @@ class Robot(object):
         return np.linalg.norm(np.array(self.get_position()) - np.array(self.get_goal_position())) < GOAL_TOLERANCE
         #      || (position - goal position) ||
 
-
 class Human(object):
     def __init__(self, px, py, vx, vy):
         self.radius = HUMAN_RADIUS
@@ -80,7 +79,8 @@ class RobotAction(object):
     def __init__(self):
         self.Is_goal_received = False
         self.IsAMCLReceived = False
-        self.IsObReceived = False
+        # self.IsObReceived = False canon
+        self.IsObReceived = True
         self.Is_gc_Received = False
         self.getStartPoint = False
         self.Is_goal_reached = False
@@ -94,8 +94,10 @@ class RobotAction(object):
         self.gy = None
         self.v_pref = None
         self.theta = None
-        self.humans = None
-        self.ob = None
+        # self.humans = None canon
+        self.humans = list()
+        # self.ob = None canon
+        self.ob = list()
         self.state = None
         self.cmd_vel = Twist()
         self.plan_counter = 0
@@ -150,7 +152,6 @@ class RobotAction(object):
         self.vx = output_vel[0]
         self.vy = output_vel[1]
 
-
     def update_humans(self, msg):
         # observable state: px,py,vx,vy,radius
         self.IsObReceived = True
@@ -168,7 +169,6 @@ class RobotAction(object):
         self.received_gx = msg.pose.position.x
         self.received_gy = msg.pose.position.y
 
-        
     def get_gc(self, msg):
         if not self.Is_gc_Received:
             policy.gc = msg.data
@@ -261,8 +261,9 @@ class RobotAction(object):
                 self.ob = [ObservableState(FAKE_HUMAN_PX, FAKE_HUMAN_PY, 0, 0, HUMAN_RADIUS)]
 
             self.state = JointState(robot.get_full_state(), self.ob)
+            print(robot.get_full_state())
             action = policy.predict(self.state)  # max_action
-            self.cmd_vel.linear.x = action.v
+            self.cmd_vel.linear.x = 0.5*action.v
             self.cmd_vel.linear.y = 0
             self.cmd_vel.linear.z = 0
             self.cmd_vel.angular.x = 0
@@ -313,12 +314,14 @@ if __name__ == '__main__':
     env = gym.make('CrowdSim-v0')
     env.configure(env_config)
     env.discomfort_dist = DISCOMFORT_DIST
-    policy = policy_factory[policy]()
+
     policy_config = configparser.RawConfigParser()
     policy_config.read(policy_config_file)
+
+    # use constant velocity model to predict next state
+    policy = policy_factory[policy]()
     policy.configure(policy_config)
     policy.with_costmap = True
-    # use constant velocity model to predict next state
     policy.query_env = False 
     policy.get_model().load_state_dict(torch.load(model_weights))
     policy.set_phase(phase)
@@ -334,14 +337,24 @@ if __name__ == '__main__':
     robot_act = RobotAction()
     listener_v = tf.TransformListener()
 
+
     while not rospy.is_shutdown():
+
+
+        print(" ---------------------------- ")
+        print("goal reached",robot_act.Is_goal_reached)
+        print("goal received",robot_act.Is_goal_received)
+        print("amcl received",robot_act.IsAMCLReceived)
+        print("obs received",robot_act.IsObReceived)
+
         if robot_act.Is_goal_reached:
             finish_travel_time = rospy.get_time()
             t = finish_travel_time - begin_travel_time
             rospy.loginfo("Goal is reached. Travel time: %s s." % t)
-            break
+            # break
 
         # wait for msgs of goal, AMCL and ob
+
         if robot_act.Is_goal_received and robot_act.IsAMCLReceived and robot_act.IsObReceived:
 
             # travel time

@@ -15,7 +15,7 @@ from crowd_nav.policy.cadrl import CADRL
 from crowd_nav.policy.lstm_rl import LstmRL
 from crowd_nav.policy.sarl import SARL
 from crowd_sim.envs.utils.robot import Robot
-
+from crowd_sim.envs.utils.state import JointState
 
 # prototype
 from visualization_msgs.msg import Marker, MarkerArray
@@ -110,17 +110,22 @@ class TestNode():
         return phi
     
     def cbControl(self,event):
+        holonomic = False
         twist = Twist()
         if not self.tb3.goalReached():
-            # abs(self.angle2Action) > 0.1 and
-            vel = np.array([self.tb3.raw_action[0],self.tb3.raw_action[1]])
-            if abs(self.angle2Action) < math.pi/2:
-                twist.linear.x = 0.3*np.linalg.norm(vel)
-            else:
-                twist.linear.x = 0.1*np.linalg.norm(vel)
+            if holonomic:
+                # abs(self.angle2Action) > 0.1 and
+                vel = np.array([self.tb3.raw_action[0],self.tb3.raw_action[1]])
+                if abs(self.angle2Action) < math.pi/2:
+                    twist.linear.x = 0.3*np.linalg.norm(vel)
+                else:
+                    twist.linear.x = 0.1*np.linalg.norm(vel)
 
-            twist.angular.z = self.max_yaw(self.angle2Action)
-            
+                twist.angular.z = self.max_yaw(self.angle2Action)
+            else:
+                 twist.linear.x = self.tb3.raw_action.v/3
+                 twist.angular.z = self.tb3.raw_action.r 
+        # print(twist)
         self.tb3.pub_twist.publish(twist)
 
     def update_angle2Action(self):
@@ -194,8 +199,14 @@ class TestNode():
         self.desired_position.pose.position.y = self.tb3.pose.pose.position.y + (action[1])
 
         self.tb3.update_action(action)
-        print(action.v,action.r)
+        # print(action.v,action.r)
+        print(action)
         self.update_angle2Action()
+
+
+        # state   = JointState(self.robot.get_full_state(), self.ob)
+        # action  = self.policy.predict(state)
+
 
     def visualize_other_agents(self,xs,ys,radii,labels):
             markers = MarkerArray()
@@ -246,28 +257,27 @@ def run():
 
     policy_name = "sarl"
 
-    device = 'cpu'
-    phase = 'test'
+    device  = 'cpu'
+    phase   = 'test'
 
     select_policy       = {"cadrl":CADRL(),"lstm":LstmRL(),"sarl":SARL()}
     # the path of training result which contains configs and rl mode
     env_config_file     = 'crowd_nav/data/output/env.config'             #path beginging without slash
     policy_config_file  = 'crowd_nav/data/output/policy.config'
     model_weights       = 'crowd_nav/data/output/rl_model_'+policy_name+'.pth'
-    # print(model_weights)
-    # select policy
-    policy          = select_policy[policy_name]     #{SARL(),CADRL(),LstmRL()}
-    policy_config   =  configparser.RawConfigParser()
+    policy_config       =  configparser.RawConfigParser()
     policy_config.read(policy_config_file)
+
+    policy = select_policy[policy_name]     #{SARL(),CADRL(),LstmRL()}
     policy.configure(policy_config)
     policy.get_model().load_state_dict(torch.load(model_weights))
     policy.set_device(device)
     policy.set_phase(phase)
 
     # configure environment / obstacles
-    env_config = configparser.RawConfigParser()
+    env_config  = configparser.RawConfigParser()
     env_config.read(env_config_file)
-    env = gym.make('CrowdSim-v0')   #env is inherited from CrowdSim class in crowd_sim.py
+    env         = gym.make('CrowdSim-v0')   #env is inherited from CrowdSim class in crowd_sim.py
     env.configure(env_config)
 
 
