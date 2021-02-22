@@ -269,7 +269,7 @@ void PlanManager::execFSMCallback(const ros::TimerEvent &e)
       subgoal_pub_.publish(end_state_->to_PoseStampted());
       std::cout<< " "<<std::endl;
       std::cout<< " subgoal= "<<end_state_->to_PoseStampted()<<std::endl;
-      visualization_->drawSubgoal(end_state_->to_PoseStampted(), 0.3, Eigen::Vector4d(0, 0, 0, 1.0));
+      //visualization_->drawSubgoal(end_state_->to_PoseStampted(), 0.3, Eigen::Vector4d(0, 0, 0, 1.0));
       cout << "MID_REPLAN Success" << endl;
       changeFSMExecState(EXEC_LOCAL, "FSM");
       return;
