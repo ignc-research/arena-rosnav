@@ -145,11 +145,12 @@ def check_hyperparam_format(loaded_hyperparams: dict, PATHS: dict):
         raise TypeError("Parameter 'task_mode' has unknown value")
 
 
-def update_hyperparam_model(model: PPO, params: dict, n_envs: int = 1):
+def update_hyperparam_model(model: PPO, PATHS: dict, params: dict, n_envs: int = 1):
     """
     Updates parameter of loaded PPO agent
 
     :param model(object, PPO): loaded PPO agent
+    :param PATHS: program relevant paths
     :param params: dictionary containing loaded hyperparams
     :param n_envs: number of parallel environments
     """
@@ -179,6 +180,8 @@ def update_hyperparam_model(model: PPO, params: dict, n_envs: int = 1):
         model.update_n_envs()
     if model.rollout_buffer.buffer_size != params['n_steps']:
         model.rollout_buffer.buffer_size = params['n_steps']
+    if model.tensorboard_log != PATHS['tb']:
+        model.tensorboard_log = PATHS['tb']
 
 def check_batch_size(n_envs: int, batch_size: int, mn_batch_size: int):
     assert (batch_size>mn_batch_size

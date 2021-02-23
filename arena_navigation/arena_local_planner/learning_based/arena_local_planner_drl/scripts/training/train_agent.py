@@ -294,7 +294,7 @@ if __name__ == "__main__":
                 os.path.join(PATHS.get('model'), "best_model.zip")):
             model = PPO.load(
                 os.path.join(PATHS.get('model'), "best_model"), env)
-        update_hyperparam_model(model, params, args.n_envs)
+        update_hyperparam_model(model, PATHS, params, args.n_envs)
 
     # set num of timesteps to be generated
     if args.n is None:
