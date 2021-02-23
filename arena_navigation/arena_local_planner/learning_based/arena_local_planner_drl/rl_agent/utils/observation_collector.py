@@ -49,7 +49,7 @@ class ObservationCollector():
         self._flag_all_received=False
 
         self._scan = LaserScan()
-        self._robot_pose = Pose2D()
+        self._robot_pose = PoseStamped()
         self._robot_vel = Twist()
         self._subgoal =  Pose2D()
         self._globalPlan = Path()
