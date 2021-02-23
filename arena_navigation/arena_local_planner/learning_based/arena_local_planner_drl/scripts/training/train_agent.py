@@ -219,7 +219,7 @@ if __name__ == "__main__":
     
     # stop training on reward threshold callback
     stoptraining_cb = StopTrainingOnRewardThreshold(
-        reward_threshold=14, task_manager=task_managers[0], verbose=1)
+        reward_threshold=13, task_manager=task_managers[0], verbose=1)
 
     # instantiate eval environment
     # take task_manager from first sim (currently evaluation only provided for single process)
