@@ -164,11 +164,13 @@ class FlatlandEnv(gym.Env):
         if done:
             info['done_reason'] = reward_info['done_reason']
             info['is_success'] = reward_info['is_success']
-        else:
-            if self._steps_curr_episode == self._max_steps_per_episode:
-                done = True
-                info['done_reason'] = 0
-                info['is_success'] = 0
+            self.reward_calculator.kdtree = None
+
+        if self._steps_curr_episode > self._max_steps_per_episode:
+            done = True
+            info['done_reason'] = 0
+            info['is_success'] = 0
+            self.reward_calculator.kdtree = None
 
         return merged_obs, reward, done, info
 

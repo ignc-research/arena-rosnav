@@ -30,7 +30,8 @@ class RewardCalculator():
             'rule_03': RewardCalculator._cal_reward_rule_03
             }
         self.cal_func = self._cal_funcs[rule]
-        self._tree_cache  = {'id':None,'tree':None}
+        self.kdtree = None
+
 
     def reset(self):
         """reset variables related to the episode
@@ -158,20 +159,22 @@ class RewardCalculator():
         
     def _reward_global_plan(self, global_plan, robot_pose: Pose2D, reward: float=0.01, punishment: float=0.15):
         # calculate minimal distance between robot and global path using kdtree search
-        curr_dist_to_path, idx = self.get_min_dist2global_kdtree(
-            global_plan, robot_pose)
-        
-        #if the new distance is smaller than the last one, robot gets rewarded, if it is larger, he gets penalized the larger the distance is
-        if curr_dist_to_path >= self.last_dist_to_path:
-            self.curr_reward += reward
-        else:
-            self.curr_reward -= punishment*curr_dist_to_path
-        self.last_dist_to_path = curr_dist_to_path
+        if global_plan is not None:
+            curr_dist_to_path, idx = self.get_min_dist2global_kdtree(
+                global_plan, robot_pose)
+            
+            #if the new distance is smaller than the last one, robot gets rewarded, if it is larger, he gets penalized the larger the distance is
+            if curr_dist_to_path >= self.last_dist_to_path:
+                self.curr_reward += reward
+            else:
+                self.curr_reward -= punishment*curr_dist_to_path
+            self.last_dist_to_path = curr_dist_to_path
 
-    def get_min_dist2global_kdtree(self, global_plan, robot_pose):      
-        mytree = scipy.spatial.cKDTree(global_plan)
+    def get_min_dist2global_kdtree(self, global_plan, robot_pose):
+        if self.kdtree is None:      
+            self.kdtree = scipy.spatial.cKDTree(global_plan)
         
-        dist, index = mytree.query([robot_pose.x, robot_pose.y])
+        dist, index = self.kdtree.query([robot_pose.x, robot_pose.y])
         return dist, index
 
 
