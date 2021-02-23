@@ -160,7 +160,7 @@ class RewardCalculator():
         
     def _reward_global_plan(self, global_plan, robot_pose: Pose2D, reward: float=0.01, punishment: float=0.15):
         # calculate minimal distance between robot and global path using kdtree search
-        if global_plan is not None:
+        if global_plan is not None and len(global_plan) != 0:
             curr_dist_to_path, idx = self.get_min_dist2global_kdtree(
                 global_plan, robot_pose)
             
