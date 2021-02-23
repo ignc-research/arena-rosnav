@@ -57,7 +57,7 @@ class ObservationCollector():
         self._robot_pose = Pose2D()
         self._robot_vel = Twist()
         self._subgoal = Pose2D()
-        self._globalplan = Path()
+        self._globalplan = np.array([])
 
         # message_filter subscriber: laserscan, robot_pose
         self._scan_sub = rospy.Subscriber(

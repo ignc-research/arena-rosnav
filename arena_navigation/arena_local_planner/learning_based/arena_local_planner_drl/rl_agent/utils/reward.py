@@ -82,6 +82,7 @@ class RewardCalculator():
 
 
     def _cal_reward_rule_03(self, laser_scan: np.ndarray, goal_in_robot_frame: Tuple[float,float],*args,**kwargs):
+        self._reward_not_moving(goal_in_robot_frame, 0.01)
         self._reward_distance_traveled(kwargs['action'])
         self._reward_global_plan(kwargs['global_plan'], kwargs['robot_pose'])
         self._reward_goal_reached(goal_in_robot_frame, reward=15)
