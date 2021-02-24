@@ -28,6 +28,8 @@ class RewardCalculator():
         self.last_dist_to_path = None
         self.safe_dist = safe_dist
 
+        self.kdtree = None
+
         self._cal_funcs = {
             'rule_00': RewardCalculator._cal_reward_rule_00,
             'rule_01': RewardCalculator._cal_reward_rule_01,
