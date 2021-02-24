@@ -25,7 +25,8 @@ if __name__ == "__main__":
         'model': os.path.join(dir, 'agents', args.load),
         'robot_setting' : os.path.join(rospkg.RosPack().get_path('simulator_setup'), 'robot', 'myrobot.model.yaml'),
         'robot_as' : os.path.join(rospkg.RosPack().get_path('arena_local_planner_drl'), 'configs', 'default_settings.yaml'),
-        'scenerios_json_path' : os.path.join(rospkg.RosPack().get_path('simulator_setup'), 'scenerios', args.scenario+'.json')
+        'scenerios_json_path' : os.path.join(rospkg.RosPack().get_path('simulator_setup'), 'scenerios', args.scenario+'.json'),
+        'curriculum': os.path.join(dir, 'configs', 'training_curriculum.yaml')
     }
 
     assert os.path.isfile(
@@ -40,7 +41,7 @@ if __name__ == "__main__":
     print_hyperparameters(params)
 
     # initialize task manager
-    task_manager = get_predefined_task(ns='sim_1', mode='ScenerioTask', PATHS=PATHS)
+    task_manager = get_predefined_task(ns='sim_1', mode='staged', start_stage=4, PATHS=PATHS)
     
     # initialize gym env
     env = DummyVecEnv(
