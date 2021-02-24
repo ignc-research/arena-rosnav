@@ -34,11 +34,10 @@ class RewardCalculator():
             'rule_00': RewardCalculator._cal_reward_rule_00,
             'rule_01': RewardCalculator._cal_reward_rule_01,
             'rule_02': RewardCalculator._cal_reward_rule_02,
-            'rule_03': RewardCalculator._cal_reward_rule_03
+            'rule_03': RewardCalculator._cal_reward_rule_03,
+            'rule_04': RewardCalculator._cal_reward_rule_04
             }
         self.cal_func = self._cal_funcs[rule]
-        
-
 
     def reset(self):
         """reset variables related to the episode
@@ -123,6 +122,27 @@ class RewardCalculator():
             kwargs['action'])
         self._reward_global_plan(
             kwargs['global_plan'], kwargs['robot_pose'])
+        self._reward_goal_reached(
+            goal_in_robot_frame, reward=15)
+        self._reward_safe_dist(
+            laser_scan, punishment=0.2)
+        self._reward_collision(
+            laser_scan, punishment=10)
+        self._reward_goal_approached2(
+            goal_in_robot_frame)
+
+    
+    def _cal_reward_rule_04(self, 
+                            laser_scan: np.ndarray, 
+                            goal_in_robot_frame: Tuple[float,float],
+                            *args,**kwargs):
+        self._reward_distance_traveled(
+            kwargs['action'])
+        if laser_scan.min() > self.safe_dist:
+            self._reward_global_plan(
+                kwargs['global_plan'], kwargs['robot_pose'])
+        else:
+            self.last_dist_to_path = None
         self._reward_goal_reached(
             goal_in_robot_frame, reward=15)
         self._reward_safe_dist(
