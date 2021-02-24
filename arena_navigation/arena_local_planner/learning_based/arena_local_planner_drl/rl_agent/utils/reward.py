@@ -121,7 +121,7 @@ class RewardCalculator():
         self._reward_distance_traveled(
             kwargs['action'])
         self._reward_global_plan(
-            kwargs['global_plan'], kwargs['robot_pose'])
+            kwargs['global_plan'], kwargs['robot_pose'], reward_factor=0.4)
         self._reward_goal_reached(
             goal_in_robot_frame, reward=15)
         self._reward_safe_dist(
@@ -232,7 +232,7 @@ class RewardCalculator():
         else:
             lin_vel = action[0]
             ang_vel = action[1]
-            reward = ((lin_vel*0.97) + (ang_vel*0.03)) * 0.04
+            reward = ((lin_vel*0.97) + (ang_vel*0.03)) * 0.03
         self.curr_reward -= reward
         # print(f"reward_distance_traveled: {reward}")+
 
@@ -240,8 +240,8 @@ class RewardCalculator():
     def _reward_global_plan(self, 
                             global_plan: np.array, 
                             robot_pose: Pose2D, 
-                            reward_factor: float=0.1, 
-                            penalty_factor: float=0.15):
+                            reward_factor: float=0.25, 
+                            penalty_factor: float=0.25):
         # calculate minimal distance between robot and global path using kdtree search
         if global_plan is not None and len(global_plan) != 0:
             curr_dist_to_path, idx = self.get_min_dist2global_kdtree(
