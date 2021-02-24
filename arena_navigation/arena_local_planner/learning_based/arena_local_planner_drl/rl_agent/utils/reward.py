@@ -120,7 +120,7 @@ class RewardCalculator():
         self._reward_distance_traveled(
             kwargs['action'])
         self._reward_global_plan(
-            kwargs['global_plan'], kwargs['robot_pose'], punishment=0.05)
+            kwargs['global_plan'], kwargs['robot_pose'])
         self._reward_goal_reached(
             goal_in_robot_frame, reward=15)
         self._reward_safe_dist(
