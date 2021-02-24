@@ -53,6 +53,7 @@ class ObservationCollector():
         self._robot_vel = Twist()
         self._subgoal =  Pose2D()
         self._globalPlan = Path()
+        self._globalGoal = PoseStamped()
         
 
         # message_filter subscriber: laserscan, robot_pose
@@ -67,7 +68,10 @@ class ObservationCollector():
         #TODO should we synchoronize it with other topics
         self._subgoal_sub = message_filters.Subscriber('plan_manager/subgoal', PoseStamped) #self._subgoal_sub = rospy.Subscriber("subgoal", PoseStamped, self.callback_subgoal)
         self._subgoal_sub.registerCallback(self.callback_subgoal)
-        
+
+
+        self.sub_global_goal = rospy.Subscriber('/goal',PoseStamped, self.callback_globalGoal)
+ 
         # service clients
         self._service_name_step='step_world'
         self._sim_step_client = rospy.ServiceProxy(self._service_name_step, StepWorld)
@@ -89,6 +93,7 @@ class ObservationCollector():
         # rospy.logdebug(f"Current observation takes {i} steps for Synchronization")
         #print(f"Current observation takes {i} steps for Synchronization")
         scan=self._scan.ranges.astype(np.float32)
+        rho_goal, theta_goal = ObservationCollector._get_goal_pose_in_robot_frame(self._globalGoal,self._subgoal)
         rho, theta = ObservationCollector._get_goal_pose_in_robot_frame(self._subgoal,self._robot_pose)
         merged_obs = np.hstack([scan, np.array([rho,theta])])
         obs_dict = {}
@@ -96,6 +101,7 @@ class ObservationCollector():
         obs_dict['goal_in_robot_frame'] = [rho,theta]
         obs_dict['subgoal'] = self._subgoal
         obs_dict['robot_pose'] = self._robot_pose
+        obs_dict['global_in_subgoal_frame'] = [rho_goal,theta_goal]
         return merged_obs, obs_dict
     
     @staticmethod
@@ -116,6 +122,11 @@ class ObservationCollector():
             rospy.logdebug("step service=",response)
         except rospy.ServiceException as e:
             rospy.logdebug("step Service call failed: %s"%e)
+
+    def callback_globalGoal(self,msg_Subgoal):
+        self._globalGoal=self.process_subgoal_msg(msg_Subgoal)
+        
+        return
 
     def callback_subgoal(self,msg_Subgoal):
         self._subgoal=self.process_subgoal_msg(msg_Subgoal)

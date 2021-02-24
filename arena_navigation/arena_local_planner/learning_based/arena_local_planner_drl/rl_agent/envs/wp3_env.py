@@ -180,9 +180,15 @@ class wp3Env(gym.Env):
          theta = (np.arctan2(y_relative,x_relative)-robot_pos.theta+4*np.pi)%(2*np.pi)-np.pi
          return rho,theta
 
+    def find_angle_diff(angle_1, angle_2):
+        angle_diff_raw = angle_1 - angle_2
+        angle_diff = (angle_diff_raw + np.pi) % (2 * np.pi) - np.pi
+        return angle_diff
+
     def _pub_action(self, action):
         _, obs_dict = self.observation_collector.get_observations()
         dist_robot_goal = obs_dict['goal_in_robot_frame']
+        dist_global_sub = obs_dict['global_in_subgoal_frame']
         #self._robot_pose = obs_dict['robot_pose']
         #transform action which is a waypoint to 2d to calculate distance robot-wp
         wp2d = Pose2D()
@@ -193,7 +199,7 @@ class wp3Env(gym.Env):
         robot_pos =  Pose2D()
         robot_pos.x = self._robot_pose.pose.position.x 
         robot_pos.y = self._robot_pose.pose.position.y
-
+    
         #calculate distance between robot and waypoint
         dist_robot_wp = self._calc_distance(wp2d, robot_pos)
         self._action_msg.pose.orientation.z =  0 
@@ -201,31 +207,36 @@ class wp3Env(gym.Env):
         self._action_msg.header.frame_id ="map"
         
         
+        #angle_difference = self.find_angle_diff(angle_normal_quaternion, angle_goal)
 
+        print("angle distance sub to global is {}".format(dist_global_sub[1]))
         circle.header.frame_id ="map"
         circle.header.stamp = rospy.Time.now()
         
-                ## Visualization
-        i = -1.7
-        while (i < 1.7):
+        ## Visualization
+        i = -2
+        while (i < 2):
             point = PoseStamped()
             q = self._robot_pose.pose.orientation
-            angle_grad = np.arctan2(2.0*(np.sin(i)*np.cos(i)+q.x*q.y), 1-2*(q.y*q.y+np.sin(i)*np.cos(i))) # bounded by [-pi, pi]
+            robot_angle = np.arctan2(2.0*(q.w*q.z + q.x*q.y), 1-2*(q.y*q.y+q.z*q.z)) # bounded by [-pi/2(1.6), pi/2(1.6)]
+            #angle_grad =  np.arctan2(2.0*(np.sin(i)*np.cos(i)+ q.x*q.y), 1-2*(q.y*q.y+np.sin(i)*np.cos(i))) # bounded by [-pi, pi]
+            angle_grad = i + robot_angle 
             point.pose.position.x = self._ref_wp.pose.position.x + (self.range_circle*math.cos(angle_grad))         
             point.pose.position.y = self._ref_wp.pose.position.y + (self.range_circle*math.sin(angle_grad))
             point.pose.orientation.w=1
             point.header.frame_id="map"
             circle.poses.append(point)
-            i += 0.1
+            i += 0.2
         
         self.circle_pub.publish(circle)
 
        
         if self.firstTime < 1:
             #angle_grad = math.degrees(action[0]) # e.g. 90 degrees
+            
             q = self._robot_pose.pose.orientation
-            angle_grad = np.arctan2(2.0*(np.sin(i)*np.cos(i)+q.x*q.y), 1-2*(q.y*q.y+np.sin(i)*np.cos(i))) # bounded by [-pi, pi]
-
+            robot_angle = np.arctan2(2.0*(q.w*q.z + q.x*q.y), 1-2*(q.y*q.y+q.z*q.z))
+            angle_grad = action[0] + robot_angle 
             self._action_msg.pose.position.x = self._ref_wp.pose.position.x + (self.range_circle*math.cos(angle_grad))         
             self._action_msg.pose.position.y = self._ref_wp.pose.position.y + (self.range_circle*math.sin(angle_grad))
 
@@ -261,7 +272,8 @@ class wp3Env(gym.Env):
                 self._action_count += 1
             else:
                 q = self._robot_pose.pose.orientation
-                angle_grad = np.arctan2(2.0*(np.sin(i)*np.cos(i)+q.x*q.y), 1-2*(q.y*q.y+np.sin(i)*np.cos(i))) # bounded by [-pi, pi]
+                robot_angle = np.arctan2(2.0*(q.w*q.z + q.x*q.y), 1-2*(q.y*q.y+q.z*q.z))
+                angle_grad = action[0] + robot_angle 
                 self._action_msg.pose.position.x = self._ref_wp.pose.position.x + (self.range_circle*math.cos(angle_grad))         
                 self._action_msg.pose.position.y = self._ref_wp.pose.position.y + (self.range_circle*math.sin(angle_grad))   
                 self._action_msg.pose.orientation.w = 1
