@@ -43,7 +43,7 @@
       name: 'forklift',
       ns: '',
       pose: {x: 1, y: 1, theta: 0}}&quot;"
-    />
+  />
 
 
   <!--  ************** flatland viz  ***************  -->
