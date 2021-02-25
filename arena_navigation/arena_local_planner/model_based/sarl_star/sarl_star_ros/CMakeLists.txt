@@ -9,7 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   geometry_msgs
-  people_msgs
+  #people_msgs
   visualization_msgs
   message_generation
 )
