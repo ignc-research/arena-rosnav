@@ -73,7 +73,7 @@ generate_messages(
    DEPENDENCIES
    std_msgs
    geometry_msgs
-   people_msgs
+   #people_msgs
    visualization_msgs
 
 )
