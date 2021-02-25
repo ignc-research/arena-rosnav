@@ -14,7 +14,7 @@ from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.tools.train_agent_utils import *
 
 ### HYPERPARAMETERS ###
-max_steps_per_episode = 250
+max_steps_per_episode = 2000
 
 if __name__ == "__main__":
     args, _ = parse_run_agent_args()
