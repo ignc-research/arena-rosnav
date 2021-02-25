@@ -5,6 +5,7 @@ from typing import Tuple
 from geometry_msgs.msg import Pose2D
 from nav_msgs.msg import Path
 import scipy
+import math
  
 
 
@@ -43,7 +44,10 @@ class RewardCalculator():
         self.curr_reward = 0
         self.info = {}
     
-    def get_reward(self, laser_scan:np.ndarray, goal_in_robot_frame: Tuple[float,float], robot_position: Pose2D(), globalPlan: Path(), *args, **kwargs):
+    def get_reward(self, laser_scan:np.ndarray, 
+                    goal_in_robot_frame: Tuple[float,float],
+                    robot_position: Pose2D(),
+                    globalPlan: Path(), *args, **kwargs):
         """
 
         Args:
@@ -57,7 +61,7 @@ class RewardCalculator():
         return self.curr_reward, self.info
 
 
-    def _cal_reward_rule_00(self, laser_scan: np.ndarray, goal_in_robot_frame: Tuple[float,float],*args,**kwargs):
+    def _cal_reward_rule_00(self, laser_scan: np.ndarray, goal_in_robot_frame: Tuple[float,float],robot_position:Pose2D(), globalPlan: Path(),*args,**kwargs):
         self._reward_distance_traveled(kwargs['action'])
         self._reward_waypoints_set(kwargs['goal_len'], kwargs['action_count'])
         self._reward_goal_reached(goal_in_robot_frame)
@@ -65,6 +69,7 @@ class RewardCalculator():
         self._reward_safe_dist(laser_scan)
         self._reward_collision(laser_scan)
         self._reward_goal_approached(goal_in_robot_frame)
+        #self._reward_waypoint_on_global(globalPlan, kwargs['subgoal'])
         
 
     def _cal_reward_rule_01(self, laser_scan: np.ndarray, goal_in_robot_frame: Tuple[float,float],*args,**kwargs):
@@ -184,10 +189,21 @@ class RewardCalculator():
             ang_vel = action[1]
             reward = ((lin_vel*0.97) + (ang_vel*0.03)) * 0.04
         self.curr_reward -= reward
-        print(f"reward_distance_traveled: {reward}")
-        print(" linear velocity in distance reward fct {}".format(lin_vel))
-        print(" angular velocity in distance reward fct {}".format(ang_vel))
+        # print(f"reward_distance_traveled: {reward}")
+        # print(" linear velocity in distance reward fct {}".format(lin_vel))
+        # print(" angular velocity in distance reward fct {}".format(ang_vel))
 
     def _reward_waypoints_set(self, goal_len, action_count, punishment = -0.1):
         if action_count > goal_len:
             self.curr_reward -= punishment
+
+    def _reward_waypoint_on_global(self, globalPlan, subgoal, reward = 1):
+        # if waypoint is on global path then give additional reward
+        # ! code not efficient since it searches the whole global path array, needs optimization
+        i = 0
+        while i < len(globalPlan.poses)/100:    
+            if (math.isclose(subgoal.x, globalPlan.poses[i].pose.position.x, rel_tol=0.4) and math.isclose(subgoal.y, globalPlan.poses[i].pose.position.y, rel_tol=0.4)): 
+                self.curr_reward += reward
+            i += 1
+                
+            

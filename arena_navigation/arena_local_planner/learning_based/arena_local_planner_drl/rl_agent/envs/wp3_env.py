@@ -187,8 +187,6 @@ class wp3Env(gym.Env):
 
     def _pub_action(self, action):
 
-
-        
         _, obs_dict = self.observation_collector.get_observations()
         dist_robot_goal = obs_dict['goal_in_robot_frame']
         dist_global_sub = obs_dict['global_in_subgoal_frame']
@@ -216,7 +214,7 @@ class wp3Env(gym.Env):
         circle.header.frame_id ="map"
         circle.header.stamp = rospy.Time.now()
         
-        ## Visualization
+        ## Draw circle
         i = -2
         j = 0
         while (i < 2):
@@ -242,33 +240,10 @@ class wp3Env(gym.Env):
             i += 0.2
             j += 1
         
+        #visualize circle by publishing all poses to /zViz topic
         self.circle_pub.publish(circle)
-        j=0
-
-
-        # while (j < len(circle.poses)):
-            
-        #     if circle.poses[j].pose.position.x == self._globalGoal.x and circle.poses[j].pose.position.y == self._globalGoal.y:
-               
-        #         self._action_msg.pose.position.x = self._globalGoal.x 
-        #         self._action_msg.pose.position.y = self._globalGoal.y 
-        #         self._action_msg.pose.orientation.w = 1
-
-
-
-
-        # while (j < len(circle.poses)):
-        #     if ((math.isclose(circle.poses[j].position.x, self._globalGoal.x, rel_tol=0.2)) and (math.isclose(circle.poses[j].position.y, self._globalGoal.y, rel_tol=0.2))):
-                
-        #         self._action_msg.pose.position.x = self._globalGoal.x 
-        #         self._action_msg.pose.position.y = self._globalGoal.y 
-        #         self._action_msg.pose.orientation.w = 1
-
-        #         self.agent_action_pub.publish(self._action_msg)
-        #         self._action_count += 1
-
-
        
+       # First spawn 
         if self.firstTime < 1:
             #angle_grad = math.degrees(action[0]) # e.g. 90 degrees
             
@@ -287,7 +262,7 @@ class wp3Env(gym.Env):
             
        
 
-        #wait for robot to reach the waypoint first in about 10 steps
+        #wait for robot to reach the waypoint first
         #if self._step_counter - self._previous_time > 30:
         if dist_robot_wp[0] < 0.6:
             self._previous_time = self._step_counter
@@ -323,18 +298,6 @@ class wp3Env(gym.Env):
                 
                 self._action_count += 1
 
-            #rospy.sleep(1)
-            #print("chosen action:  {0}, deegrees:   {1}, sum: {2}, cos(): {3}, robot_position:   {4}".format(action[0], math.degrees(action[0]), (self.range_circle*np.cos(math.degrees(action[0]))),np.cos(math.degrees(action[0])), robot_position ))
-
-            # while (math.isclose(self._robot_pose.x, action_msg.pose.position.x, rel_tol=0.2) and math.isclose(self._robot_pose.y, action_msg.pose.position.y, rel_tol=0.2)) == False :
-            #     #log laserscan and write into history buffer
-            #     print("positions not the same")
-            #     print(self._robot_pose.x)
-            #     print(action_msg.pose.position.x)
-            #     print(self._robot_pose.y)
-            #     print(action_msg.pose.position.y)
-            #     print((math.isclose(self._robot_pose.x, action_msg.pose.position.x, rel_tol=0.2) and math.isclose(self._robot_pose.y, action_msg.pose.position.y, rel_tol=0.5)))
-            #     #time.sleep(1)
     def step(self, action):
         
         """
@@ -364,9 +327,17 @@ class wp3Env(gym.Env):
             
         print("Goal Length is {}".format(self.goal_len))
         print("Action Count is {}".format(self._action_count))
-        # calculate reward
+        # provide reward calculator with the data to calculate reward
         reward, reward_info = self.reward_calculator.get_reward(
-            obs_dict['laser_scan'], obs_dict['goal_in_robot_frame'], obs_dict['robot_pose'], self._globalPlan, action=new_action, goal_len=self.goal_len, action_count= self._action_count)
+            obs_dict['laser_scan'], 
+            obs_dict['goal_in_robot_frame'],
+            obs_dict['robot_pose'], 
+            self._globalPlan, 
+            action=new_action, 
+            goal_len=self.goal_len, 
+            action_count= self._action_count,
+            subgoal=self._action_msg.pose.position)
+
         done = reward_info['is_done']
 
         print("reward:  {}".format(reward))
