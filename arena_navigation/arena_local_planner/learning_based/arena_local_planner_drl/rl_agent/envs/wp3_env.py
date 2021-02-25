@@ -206,6 +206,7 @@ class wp3Env(gym.Env):
         self._action_msg.pose.orientation.z =  0 
         self._action_msg.pose.orientation.w = 1
         self._action_msg.header.frame_id ="map"
+
         
         
         #angle_difference = self.find_angle_diff(angle_normal_quaternion, angle_goal)
@@ -227,6 +228,7 @@ class wp3Env(gym.Env):
             point.pose.position.y = self._ref_wp.pose.position.y + (self.range_circle*math.sin(angle_grad))
             point.pose.orientation.w=1
             point.header.frame_id="map"
+            point.header.stamp = rospy.Time.now()
             circle.poses.append(point)
             # if circle touches the global goal, immediately place subgoal on global goal
             if ((math.isclose(circle.poses[j].pose.position.x, self._globalGoal.x, rel_tol=0.2)) and (math.isclose(circle.poses[j].pose.position.y, self._globalGoal.y, rel_tol=0.2))):
@@ -234,7 +236,7 @@ class wp3Env(gym.Env):
                 self._action_msg.pose.position.x = self._globalGoal.x 
                 self._action_msg.pose.position.y = self._globalGoal.y 
                 self._action_msg.pose.orientation.w = 1
-
+                self._action_msg.header.stamp = rospy.Time.now()
                 self.agent_action_pub.publish(self._action_msg)
                 self._action_count += 1
             i += 0.2
@@ -253,7 +255,7 @@ class wp3Env(gym.Env):
             angle_grad = action[0] + robot_angle 
             self._action_msg.pose.position.x = self._ref_wp.pose.position.x + (self.range_circle*math.cos(angle_grad))         
             self._action_msg.pose.position.y = self._ref_wp.pose.position.y + (self.range_circle*math.sin(angle_grad))
-
+            self._action_msg.header.stamp = rospy.Time.now()
             self.agent_action_pub.publish(self._action_msg)
             self.firstTime +=1
             self._action_count += 1
@@ -282,7 +284,7 @@ class wp3Env(gym.Env):
                 self._action_msg.pose.position.x = self._globalGoal.x 
                 self._action_msg.pose.position.y = self._globalGoal.y 
                 self._action_msg.pose.orientation.w = 1
-
+                self._action_msg.header.stamp = rospy.Time.now()
                 self.agent_action_pub.publish(self._action_msg)
                 self._action_count += 1
             else:
@@ -292,6 +294,7 @@ class wp3Env(gym.Env):
                 self._action_msg.pose.position.x = self._ref_wp.pose.position.x + (self.range_circle*math.cos(angle_grad))         
                 self._action_msg.pose.position.y = self._ref_wp.pose.position.y + (self.range_circle*math.sin(angle_grad))   
                 self._action_msg.pose.orientation.w = 1
+                self._action_msg.header.stamp = rospy.Time.now()
                 print("action message looks like {}".format(self._action_msg))
                 self.agent_action_pub.publish(self._action_msg)
                 print(angle_grad)

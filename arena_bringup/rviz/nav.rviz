@@ -21,6 +21,7 @@ Panels:
         - /Marker2
         - /Marker3
         - /Path2
+        - /Odometry2
       Splitter Ratio: 0.6526610255241394
     Tree Height: 896
   - Class: rviz/Selection
@@ -670,7 +671,7 @@ Visualization Manager:
       Axes Radius: 0.10000000149011612
       Class: rviz/Pose
       Color: 255; 25; 0
-      Enabled: true
+      Enabled: false
       Head Length: 0.30000001192092896
       Head Radius: 0.10000000149011612
       Name: Pose
@@ -679,13 +680,13 @@ Visualization Manager:
       Shape: Arrow
       Topic: /goal
       Unreliable: false
-      Value: true
+      Value: false
     - Alpha: 1
       Axes Length: 1
       Axes Radius: 0.10000000149011612
       Class: rviz/Pose
       Color: 255; 25; 0
-      Enabled: true
+      Enabled: false
       Head Length: 0.30000001192092896
       Head Radius: 0.10000000149011612
       Name: Pose
@@ -694,13 +695,13 @@ Visualization Manager:
       Shape: Arrow
       Topic: /goal
       Unreliable: false
-      Value: true
+      Value: false
     - Alpha: 1
       Axes Length: 1
       Axes Radius: 0.10000000149011612
       Class: rviz/Pose
       Color: 255; 25; 0
-      Enabled: true
+      Enabled: false
       Head Length: 0.30000001192092896
       Head Radius: 0.10000000149011612
       Name: Pose
@@ -709,7 +710,7 @@ Visualization Manager:
       Shape: Arrow
       Topic: /plan_manager/subgoal
       Unreliable: false
-      Value: true
+      Value: false
     - Angle Tolerance: 0.10000000149011612
       Class: rviz/Odometry
       Covariance:
@@ -728,7 +729,7 @@ Visualization Manager:
           Value: true
         Value: true
       Enabled: true
-      Keep: 100
+      Keep: 20
       Name: Odometry
       Position Tolerance: 0.10000000149011612
       Shape:
