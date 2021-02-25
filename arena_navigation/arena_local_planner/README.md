@@ -10,24 +10,20 @@ Arena-Rosnav uses Flatland as the core simulator and is a modular high-level lib
 | *Training Stage* | *Deployment Stage* |
 
 
-## What is this branch for?
+## Local-Planner
 
-In ROS, robot navigation is realized by the global and local planner. The idea of this repository is to implement various local planners and evaluate them in a consistent way.  We want to use already existing local planners for ROS such as dwa, teb, mpc etc and also implement some obstacle avoidance approaches which are inherently not designed for ROS.
-
+In ROS, robot navigation is realized by the global and local planner. The idea of this repository is to implement various local planners and evaluate them in a consistent way.  We want to use already existing local planners for ROS such as dwa, teb, mpc etc and also implement some obstacle avoidance approaches which are not inherently available in ROS.
 
 ## 2. Usage
 
 ````
-start_flatland.launch will start several other sublaunch files and some neccesary ros packages:
-   1. **start simulator node**: start flatland, load robot model
-   2. **start map server node**: load map, which will provide occupancy grid used for mapping functions later
-   3. **start fake localization**: which will provide static tf map_to_odom, in order to have localization of the robot.
-   4. **start task generator node**: which provide task generation service for rviz_plugin(Generate Task)
-   5. **start plan manager node**: provide manager for robot state estimation, mapping, global planner and local planner,  which is the key for navigation framework. The move_base is contained, because currently we need its global_planner and mapping functions, later they won't be needed.
-   6. **/train_mode/**: 
-   * if true, the simulator(flatland) will provide a *step_world service* and the simulator will update its simulation when he receives a *step_world service request*.
-   * if true, the plan manager will generate subgoal topic always as goal(global goal) topic.
-   * if false, you can also use move_base action triggered by rviz_plugin button *2D Navigation Goal*. 
+How to start:
+   start flatland with default map and planner
+   1. roslaunch arena_bringup start_arena_flatland.launch       
+   start flatland chosing a local planner and a map 
+   2. roslaunch arena_bringup start_arena_flatland.launch map_file:="map_empty" local_planner:="teb"     
+
+It should be noted that certain planners may need an individual environment to run. The environmets tested with these planners can be found in the "env" folder. 
 
 ### 2.3. [Quick start] test DRL training
 Export turtlebot model for simulation 

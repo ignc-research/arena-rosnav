@@ -249,15 +249,15 @@ def run():
     device = 'cpu'
     phase = 'test'
 
-    select_policy = {"cadrl":CADRL(),"lstm":LstmRL(),"sarl":SARL()}
+    select_policy       = {"cadrl":CADRL(),"lstm":LstmRL(),"sarl":SARL()}
     # the path of training result which contains configs and rl mode
-    env_config_file = 'crowd_nav/data/output/env.config'             #path beginging without slash
-    policy_config_file = 'crowd_nav/data/output/policy.config'
-    model_weights = 'crowd_nav/data/output/rl_model_'+policy_name+'.pth'
+    env_config_file     = 'crowd_nav/data/output/env.config'             #path beginging without slash
+    policy_config_file  = 'crowd_nav/data/output/policy.config'
+    model_weights       = 'crowd_nav/data/output/rl_model_'+policy_name+'.pth'
     # print(model_weights)
     # select policy
-    policy = select_policy[policy_name]     #{SARL(),CADRL(),LstmRL()}
-    policy_config = configparser.RawConfigParser()
+    policy          = select_policy[policy_name]     #{SARL(),CADRL(),LstmRL()}
+    policy_config   =  configparser.RawConfigParser()
     policy_config.read(policy_config_file)
     policy.configure(policy_config)
     policy.get_model().load_state_dict(torch.load(model_weights))

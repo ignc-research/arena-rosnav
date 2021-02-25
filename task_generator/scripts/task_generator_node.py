@@ -38,6 +38,7 @@ class TaskGenerator:
             self.task_generator_srv_ = rospy.Service(
                 'task_generator', Empty, self.reset_srv_callback)
         self.err_g = 100
+        
         rospy.Timer(rospy.Duration(0.5),self.goal_reached)
 
 

@@ -26,8 +26,6 @@ class sensor():
         self.obstacles_static = {}
 
         self.cluster = Clusters()
-        self.n_obst = 32
-        
         self.obst_topics_dyn = []
         self.obst_topics_static = []
         # pub
