@@ -23,6 +23,10 @@ from model.net import MLPPolicy, CNNPolicy
 from circle_world import StageWorld
 from model.ppo import generate_action_no_sampling, transform_buffer
 
+# for stage world
+from sensor_msgs.msg import LaserScan
+import tf
+import copy
 
 # PED_RADIUS = 0.3
 # # angle_1 - angle_2
@@ -33,9 +37,12 @@ from model.ppo import generate_action_no_sampling, transform_buffer
 #     return angle_diff
 
 class NN_tb3():
-    def __init__(self, env, policy, action_bound):
-
-        self.env = env    
+    def __init__(self, policy, action_bound, OBS_SIZE, index, num_env):
+        self.beam_mum = OBS_SIZE
+        self.laser_cb_num = 0
+        self.scan = None
+        self.env={"index": 0}
+  
         self.policy = policy
         self.action_bound = action_bound
         # for subscribers
@@ -50,21 +57,21 @@ class NN_tb3():
         # self.desired_action = np.zeros((2,))
 
         # # publishers
-        self.pub_twist = rospy.Publisher('/cmd_vel',Twist,queue_size=1) 
-        self.pub_pose_marker = rospy.Publisher('',Marker,queue_size=1)  #used for visualize_pose()
+        self.pub_twist = rospy.Publisher('/cmd_vel',Twist,queue_size=1)
+        # self.pub_pose_marker = rospy.Publisher('',Marker,queue_size=1)  #used for visualize_pose()
         # self.pub_agent_markers = rospy.Publisher('~agent_markers',MarkerArray,queue_size=1)
         # self.pub_path_marker = rospy.Publisher('~path_marker',Marker,queue_size=1)
         # self.pub_goal_path_marker = rospy.Publisher('~goal_path_marker',Marker,queue_size=1)
         # # sub
         self.sub_pose = rospy.Subscriber('/odom',Odometry,self.cbPose)
-        self.sub_global_goal = rospy.Subscriber('/goal',PoseStamped, self.cbGlobalGoal)
-        self.sub_subgoal = rospy.Subscriber('~subgoal',PoseStamped, self.cbSubGoal)
+        # self.sub_global_goal = rospy.Subscriber('/goal',PoseStamped, self.cbGlobalGoal)
+        self.sub_subgoal = rospy.Subscriber('/plan_manager/subgoal',PoseStamped, self.cbSubGoal)
+        self.laser_sub = rospy.Subscriber('/scan', LaserScan, self.laser_scan_callback)
         
         # subgoals
         self.sub_goal = Vector3()   # to calculate the distace between robot and goal
 
         # self.sub_clusters = rospy.Subscriber('~clusters',Clusters, self.cbClusters)
-
 
         # control timer
         # self.control_timer = rospy.Timer(rospy.Duration(0.01),self.cbControl)
@@ -185,30 +192,82 @@ class NN_tb3():
             self.stop_moving()
             return
 
-    def cbComputeAction(self):
-        obs = self.env.get_laser_observation() #用stage_world1.py里lasertopic获取
+    def laser_scan_callback(self, scan):
+        self.scan_param = [scan.angle_min, scan.angle_max, scan.angle_increment, scan.time_increment,
+                            scan.scan_time, scan.range_min, scan.range_max]
+        self.scan = np.array(scan.ranges)
+        self.laser_cb_num += 1
+
+    def get_laser_observation(self):
+        scan = copy.deepcopy(self.scan)
+        scan[np.isnan(scan)] = 6.0
+        scan[np.isinf(scan)] = 6.0
+        raw_beam_num = len(scan)
+        sparse_beam_num = self.beam_mum
+        step = float(raw_beam_num) / sparse_beam_num
+        sparse_scan_left = []
+        index = 0.
+        for x in range(int(sparse_beam_num / 2)):
+            sparse_scan_left.append(scan[int(index)])
+            index += step
+        sparse_scan_right = []
+        index = raw_beam_num - 1.
+        for x in range(int(sparse_beam_num / 2)):
+            sparse_scan_right.append(scan[int(index)])
+            index -= step
+        scan_sparse = np.concatenate((sparse_scan_left, sparse_scan_right[::-1]), axis=0)
+        return scan_sparse / 6.0 - 0.5
+    def control_vel(self, action):
+        move_cmd = Twist()
+        move_cmd.linear.x = action[0]
+        move_cmd.linear.y = 0.
+        move_cmd.linear.z = 0.
+        move_cmd.angular.x = 0.
+        move_cmd.angular.y = 0.
+        move_cmd.angular.z = action[1]
+        self.pub_twist(move_cmd)
+
+    def control_pose(self, pose):
+        pose_cmd = Pose()
+        assert len(pose)==3
+        pose_cmd.position.x = pose[0]
+        pose_cmd.position.y = pose[1]
+        pose_cmd.position.z = 0
+
+        qtn = tf.transformations.quaternion_from_euler(0, 0, pose[2], 'rxyz')
+        pose_cmd.orientation.x = qtn[0]
+        pose_cmd.orientation.y = qtn[1]
+        pose_cmd.orientation.z = qtn[2]
+        pose_cmd.orientation.w = qtn[3]
+        self.cmd_pose.publish(pose_cmd)
+
+    def cbComputeAction(self, event):
+        while self.scan is None:
+            pass
+        obs = self.get_laser_observation() #用stage_world1.py里lasertopic获取
         obs_stack = deque([obs, obs, obs])
         # ************************************ Input ************************************
         # goal
         goal = [self.sub_goal.x, self.sub_goal.y]   #可以直接用此文件的subgoal，stage中的get_local_goal函数没有对self变量进行改变
-        self.env.goal_point = goal
+        self.goal_point = goal
         # position
         state = [self.pose.pose.position.x, self.pose.pose.position.y, self.psi]    # x, y, theta
-        self.env.state = state  #get_self_stateGT get_self_state有很多影响
+        self.state = state  #get_self_stateGT get_self_state有很多影响
         # Velocity
         speed = [self.vel, self.psi]
-        self.env.speed_GT = speed # linear v +angular
+        self.speed_GT = speed # linear v +angular
         
         obs_state_list = [obs_stack, goal, speed]
 
-        self.env.control_pose(state)
+        # self.control_pose(state)
 
 
         # ************************************ Output ************************************
         # agent: postion(x,y,theta),velocity(v,angular)
 
-        _,scaled_action =generate_action_no_sampling(self.env, obs_state_list, self.policy, self.action_bound)  #此处赋值可能有问题
+        _,scaled_action =generate_action_no_sampling(self.env, obs_state_list, self.policy, self.action_bound)
         action = scaled_action[0]
+        self.control_vel(action)
         print('velocity : ', action[0], 'velocity_angular : ', action[1])
 
 
@@ -263,19 +322,19 @@ class NN_tb3():
         rospy.loginfo("Stopped %s's velocity.")
 
 def run():
+    
 
     # Set parameters of env
     LASER_HIST = 3
-    NUM_ENV = 10    # the number of agents in the environment
-    OBS_SIZE = 512  # number of leaserbeam
+    NUM_ENV = 1    # the number of agents in the environment
+    OBS_SIZE = 360  # number of leaserbeam
     action_bound = [[0, -1], [1, 1]]    # the limitation of velocity
 
     # Set env and agent policy
-    env = StageWorld(OBS_SIZE, index=0, num_env=NUM_ENV)    #index is useful for parallel programming, 0 is for the first agent
-    env.reset_world()
-    env.reset_pose()
+    # env = StageWorld(OBS_SIZE, index=0, num_env=NUM_ENV)    #index is useful for parallel programming, 0 is for the first agent
 
-    trained_model_file = 'policy/stage2.pth'
+    trained_model_file = os.path.dirname(__file__) + '/policy/stage2.pth'
+    # trained_model_file = '/policy/stage2.pth'
     policy = CNNPolicy(frames=LASER_HIST, action_space=2) 
     policy.cpu()    # policy.cuda() for gpu
     state_dict = torch.load(trained_model_file,map_location=torch.device('cpu'))    #torch.load(trained_model_file) for gpu
@@ -284,7 +343,7 @@ def run():
     rospy.init_node('rl_collision_avoidance_tb3',anonymous=False)
     print('==================================\nrl_collision_avoidance node started')
 
-    nn_tb3 = NN_tb3(env, policy, action_bound)
+    nn_tb3 = NN_tb3(policy, action_bound, OBS_SIZE, index=0, num_env=NUM_ENV)
     rospy.on_shutdown(nn_tb3.on_shutdown)
 
     rospy.spin()
