@@ -12,7 +12,7 @@ import time # for debuging
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Pose2D,PoseStamped, PoseWithCovarianceStamped
 from geometry_msgs.msg import Twist
-from arena_plan_msgs.msg import RobotState,RobotStateStamped
+from arena_plan_msgs.msg import RobotState, RobotStateStamped
 from nav_msgs.msg import Path
 
 # services

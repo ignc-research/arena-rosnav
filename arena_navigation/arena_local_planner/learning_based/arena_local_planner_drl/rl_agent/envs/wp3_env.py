@@ -7,10 +7,10 @@ from gym.spaces import space
 from typing import Union
 from stable_baselines3.common.env_checker import check_env
 import yaml
-from rl_agent.utils.observation_collector import ObservationCollector
-from rl_agent.utils.reward import RewardCalculator
-from rl_agent.utils.debug import timeit
-from task_generator.tasks import ABSTask
+from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.rl_agent.utils.observation_collector import ObservationCollector
+from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.rl_agent.utils.reward import RewardCalculator
+from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.rl_agent.utils.debug import timeit
+from task_generator.tasks import ABSTask 
 import numpy as np
 import rospy
 import quaternion
@@ -186,6 +186,9 @@ class wp3Env(gym.Env):
         return angle_diff
 
     def _pub_action(self, action):
+
+
+        
         _, obs_dict = self.observation_collector.get_observations()
         dist_robot_goal = obs_dict['goal_in_robot_frame']
         dist_global_sub = obs_dict['global_in_subgoal_frame']
@@ -215,6 +218,7 @@ class wp3Env(gym.Env):
         
         ## Visualization
         i = -2
+        j = 0
         while (i < 2):
             point = PoseStamped()
             q = self._robot_pose.pose.orientation
@@ -226,13 +230,48 @@ class wp3Env(gym.Env):
             point.pose.orientation.w=1
             point.header.frame_id="map"
             circle.poses.append(point)
+            # if circle touches the global goal, immediately place subgoal on global goal
+            if ((math.isclose(circle.poses[j].pose.position.x, self._globalGoal.x, rel_tol=0.2)) and (math.isclose(circle.poses[j].pose.position.y, self._globalGoal.y, rel_tol=0.2))):
+                
+                self._action_msg.pose.position.x = self._globalGoal.x 
+                self._action_msg.pose.position.y = self._globalGoal.y 
+                self._action_msg.pose.orientation.w = 1
+
+                self.agent_action_pub.publish(self._action_msg)
+                self._action_count += 1
             i += 0.2
+            j += 1
         
         self.circle_pub.publish(circle)
+        j=0
+
+
+        # while (j < len(circle.poses)):
+            
+        #     if circle.poses[j].pose.position.x == self._globalGoal.x and circle.poses[j].pose.position.y == self._globalGoal.y:
+               
+        #         self._action_msg.pose.position.x = self._globalGoal.x 
+        #         self._action_msg.pose.position.y = self._globalGoal.y 
+        #         self._action_msg.pose.orientation.w = 1
+
+
+
+
+        # while (j < len(circle.poses)):
+        #     if ((math.isclose(circle.poses[j].position.x, self._globalGoal.x, rel_tol=0.2)) and (math.isclose(circle.poses[j].position.y, self._globalGoal.y, rel_tol=0.2))):
+                
+        #         self._action_msg.pose.position.x = self._globalGoal.x 
+        #         self._action_msg.pose.position.y = self._globalGoal.y 
+        #         self._action_msg.pose.orientation.w = 1
+
+        #         self.agent_action_pub.publish(self._action_msg)
+        #         self._action_count += 1
+
 
        
         if self.firstTime < 1:
             #angle_grad = math.degrees(action[0]) # e.g. 90 degrees
+            
             
             q = self._robot_pose.pose.orientation
             robot_angle = np.arctan2(2.0*(q.w*q.z + q.x*q.y), 1-2*(q.y*q.y+q.z*q.z))
@@ -246,6 +285,7 @@ class wp3Env(gym.Env):
             print("distance robot to wp: {}".format(dist_robot_wp[0]))
             
             
+       
 
         #wait for robot to reach the waypoint first in about 10 steps
         #if self._step_counter - self._previous_time > 30:
