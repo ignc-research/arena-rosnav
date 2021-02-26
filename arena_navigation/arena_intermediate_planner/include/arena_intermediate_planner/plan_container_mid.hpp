@@ -269,7 +269,7 @@ public:
         double cos_theta_last=vec_two_landmark.dot(vec_to_last_landmark)/(vec_to_last_landmark.norm()*vec_two_landmark.norm());
         double cos_theta_next=vec_two_landmark.dot(vec_to_next_landmark)/(vec_to_next_landmark.norm()*vec_two_landmark.norm());
         
-        if(cos_theta_next>0.995 && cos_theta_last<0) // 0.995 means value of cos(5 degree ) 
+        if((cos_theta_next>0.980 && cos_theta_last<0)|| (cos_theta_last*cos_theta_next<0)) // 0.995 means value of cos(5 degree ) 
         {
           id_last_landmark_++;
         }

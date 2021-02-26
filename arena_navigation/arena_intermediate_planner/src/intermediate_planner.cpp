@@ -513,7 +513,7 @@ bool InterPlanner::optimizePath(double ts,std::vector<Eigen::Vector2d> point_set
       
       trial_num++;
       ts=trial_num*ts0;
-      std::cout<<"Optimizing time:"<<trial_num<<"ts="<<ts<<"**********************"<<std::endl;
+      //std::cout<<"Optimizing time:"<<trial_num<<"ts="<<ts<<"**********************"<<std::endl;
       // init B-spline control points
       Eigen::MatrixXd ctrl_pts;
       UniformBspline::parameterizeToBspline(ts, point_set, start_end_derivatives, ctrl_pts);
@@ -547,7 +547,7 @@ bool InterPlanner::optimizePath(double ts,std::vector<Eigen::Vector2d> point_set
 
         if (!pos.checkFeasibility(ratio, false))
         {
-            std::cout << "Need to reallocate time." << std::endl;
+            //std::cout << "Need to reallocate time." << std::endl;
             Eigen::MatrixXd optimal_control_points;
             flag_step_2_success = refineTrajAlgo(pos, start_end_derivatives, ratio, ts, optimal_control_points);
             if (flag_step_2_success){
@@ -588,7 +588,7 @@ bool InterPlanner::optimizePath(double ts,std::vector<Eigen::Vector2d> point_set
           double tn = pos.getTimeSum();
 
           
-          std::cout << "[kino replan]: Reallocate ratio: " << tn / to << std::endl;
+          //std::cout << "[kino replan]: Reallocate ratio: " << tn / to << std::endl;
           if (tn / to > 3.0) ROS_ERROR("reallocate error.");
 
           bspline_traj=pos;
