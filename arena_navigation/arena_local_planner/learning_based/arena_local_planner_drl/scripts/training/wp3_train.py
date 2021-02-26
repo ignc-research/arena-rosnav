@@ -28,7 +28,7 @@ gae_lambda = 0.95
 batch_size = 15
 n_epochs = 3
 clip_range = 0.2
-reward_fnc = "01"
+reward_fnc = "02"
 discrete_action_space = False
 ####################
 

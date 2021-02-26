@@ -108,7 +108,7 @@ class ObstaclesManager:
                 raise rospy.ServiceException(f" failed to register obstacles")
         return self
 
-    def register_random_obstacles(self, num_obstacles: int, p_dynamic=0.5):
+    def register_random_obstacles(self, num_obstacles: int, p_dynamic=1):
         """register static or dynamic obstacles.
 
         Args:
@@ -143,7 +143,7 @@ class ObstaclesManager:
             self.register_obstacles(1, model_path, "dynamic")
             os.remove(model_path)
 
-    def register_random_static_obstacles(self, num_obstacles: int, num_vertices_min=3, num_vertices_max=6, min_obstacle_radius=0.5, max_obstacle_radius=2):
+    def register_random_static_obstacles(self, num_obstacles: int, num_vertices_min=3, num_vertices_max=5, min_obstacle_radius=0.2, max_obstacle_radius=1):
         """register static obstacles with polygon shape.
 
         Args:

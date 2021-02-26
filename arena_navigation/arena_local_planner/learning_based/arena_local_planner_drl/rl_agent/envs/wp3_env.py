@@ -211,7 +211,7 @@ class wp3Env(gym.Env):
         
         #angle_difference = self.find_angle_diff(angle_normal_quaternion, angle_goal)
 
-        print("angle distance sub to global is {}".format(dist_global_sub[1]))
+        #print("angle distance sub to global is {}".format(dist_global_sub[1]))
         circle.header.frame_id ="map"
         circle.header.stamp = rospy.Time.now()
         
@@ -259,7 +259,7 @@ class wp3Env(gym.Env):
             self.agent_action_pub.publish(self._action_msg)
             self.firstTime +=1
             self._action_count += 1
-            print("distance robot to wp: {}".format(dist_robot_wp[0]))
+            #print("distance robot to wp: {}".format(dist_robot_wp[0]))
             
             
        
@@ -273,8 +273,8 @@ class wp3Env(gym.Env):
         
             #dist_robot_goal = np.array([self._robot_pose.x - self._subgoal.x, self._robot_pose.y - self._subgoal.y])
             dist_rg = np.linalg.norm(dist_robot_goal)
-            print(dist_rg)
-            print(dist_robot_goal[0])
+            #print(dist_rg)
+            #print(dist_robot_goal[0])
             
             #todo consider the distance to global path when choosing next optimal waypoint
             #caluclate range with current robot position and transform into posestamped message 
@@ -295,9 +295,9 @@ class wp3Env(gym.Env):
                 self._action_msg.pose.position.y = self._ref_wp.pose.position.y + (self.range_circle*math.sin(angle_grad))   
                 self._action_msg.pose.orientation.w = 1
                 self._action_msg.header.stamp = rospy.Time.now()
-                print("action message looks like {}".format(self._action_msg))
+                #print("action message looks like {}".format(self._action_msg))
                 self.agent_action_pub.publish(self._action_msg)
-                print(angle_grad)
+                #print(angle_grad)
                 
                 self._action_count += 1
 
@@ -328,14 +328,14 @@ class wp3Env(gym.Env):
         if self.firstTime < 2:
             self.goal_len = int(round(obs_dict['goal_in_robot_frame'][0]))
             
-        print("Goal Length is {}".format(self.goal_len))
-        print("Action Count is {}".format(self._action_count))
+        # print("Goal Length is {}".format(self.goal_len))
+        # print("Action Count is {}".format(self._action_count))
         # provide reward calculator with the data to calculate reward
         reward, reward_info = self.reward_calculator.get_reward(
             obs_dict['laser_scan'], 
             obs_dict['goal_in_robot_frame'],
-            obs_dict['robot_pose'], 
-            self._globalPlan, 
+            robot_pose=obs_dict['robot_pose'], 
+            globalPlan=self._globalPlan, 
             action=new_action, 
             goal_len=self.goal_len, 
             action_count= self._action_count,

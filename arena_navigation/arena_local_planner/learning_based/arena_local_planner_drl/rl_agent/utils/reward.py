@@ -45,9 +45,7 @@ class RewardCalculator():
         self.info = {}
     
     def get_reward(self, laser_scan:np.ndarray, 
-                    goal_in_robot_frame: Tuple[float,float],
-                    robot_position: Pose2D(),
-                    globalPlan: Path(), *args, **kwargs):
+                    goal_in_robot_frame: Tuple[float,float], *args, **kwargs):
         """
 
         Args:
@@ -57,13 +55,13 @@ class RewardCalculator():
         """
 
         self._reset()
-        self.cal_func(self,laser_scan,goal_in_robot_frame, robot_position, globalPlan, *args,**kwargs)
+        self.cal_func(self,laser_scan,goal_in_robot_frame, *args,**kwargs)
         return self.curr_reward, self.info
 
 
-    def _cal_reward_rule_00(self, laser_scan: np.ndarray, goal_in_robot_frame: Tuple[float,float],robot_position:Pose2D(), globalPlan: Path(),*args,**kwargs):
+    def _cal_reward_rule_00(self, laser_scan: np.ndarray, goal_in_robot_frame: Tuple[float,float],*args,**kwargs):
         self._reward_distance_traveled(kwargs['action'])
-        self._reward_waypoints_set(kwargs['goal_len'], kwargs['action_count'])
+        #self._reward_waypoints_set(kwargs['goal_len'], kwargs['action_count'])
         self._reward_goal_reached(goal_in_robot_frame)
         self._reward_not_moving(goal_in_robot_frame)
         self._reward_safe_dist(laser_scan)
@@ -74,7 +72,7 @@ class RewardCalculator():
 
     def _cal_reward_rule_01(self, laser_scan: np.ndarray, goal_in_robot_frame: Tuple[float,float],*args,**kwargs):
         self._reward_distance_traveled(kwargs['action'])
-        self._reward_waypoints_set(kwargs['goal_len'], kwargs['action_count'])
+        #self._reward_waypoints_set(kwargs['goal_len'], kwargs['action_count'])
         self._reward_goal_reached(goal_in_robot_frame)
         self._reward_not_moving(goal_in_robot_frame)
         self._reward_safe_dist(laser_scan)
@@ -82,15 +80,15 @@ class RewardCalculator():
         self._reward_goal_approached2(goal_in_robot_frame)
 
 
-    def _cal_reward_rule_02(self, laser_scan: np.ndarray, goal_in_robot_frame: Tuple[float,float], robot_position: Pose2D(), globalPlan: Path(), *args,**kwargs):
+    def _cal_reward_rule_02(self, laser_scan: np.ndarray, goal_in_robot_frame: Tuple[float,float], *args,**kwargs):
         self._reward_distance_traveled(kwargs['action'])
-        self._reward_waypoints_set(kwargs['goal_len'], kwargs['action_count'])
+        #self._reward_waypoints_set(kwargs['goal_len'], kwargs['action_count']) #! neds refinement
         self._reward_goal_reached(goal_in_robot_frame)
         self._reward_not_moving(goal_in_robot_frame)
         self._reward_safe_dist(laser_scan)
         self._reward_collision(laser_scan)
         self._reward_goal_approached(goal_in_robot_frame)
-        self._reward_global_plan_followed(goal_in_robot_frame, robot_position, globalPlan.poses)
+        #self._reward_global_plan(kwargs['robot_pose'], kwargs['globalPlan']) #! needs refinement
         
 
     def _reward_goal_reached(self,goal_in_robot_frame, reward = 15, punishment = 15):
@@ -153,35 +151,49 @@ class RewardCalculator():
         if laser_scan.min() < self.safe_dist:
             self.curr_reward -= punishment
 
-    def _reward_global_plan_followed(self, goal_in_robot_frame, robot_position, globalPlan,  reward = 0.3, punishment = 0.0001):
-        """
-            make sure robots keeps following global path ensure distance to global path is low
-        """
-        #calculate minimal distance between robot and global path using kdtree search
-        new_dist2global, dist2global_index = self.get_min_dist2global_kdtree(globalPlan, robot_position)
-        print("newdist2globalpath: {}".format(new_dist2global))
-        #if the new distance is smaller than the last one, robot gets rewarded, if it is larger, he gets penalized the larger the distance is    
-        if new_dist2global < self.last_dist2global:
-            reward += reward
-            self.last_dist2global = new_dist2global
-            print("reward because nearer to global path")
-        else:
-            reward -= punishment*new_dist2global
-            print("punish because to far from global path")
-    
-    def get_min_dist2global_kdtree(globalPlan ,robot_position):
 
-        mytree = scipy.spatial.cKDTree(globalPlan.pose)
-        dist, index = mytree.query(robot_position)
+    def _reward_global_plan(self, 
+                            global_plan: np.array, 
+                            robot_pose: Pose2D, 
+                            reward_factor: float=0.65, 
+                            penalty_factor: float=0.65):
+        # calculate minimal distance between robot and global path using kdtree search
+        if global_plan is not None and len(global_plan) != 0:
+            curr_dist_to_path, idx = self.get_min_dist2global_kdtree(
+                global_plan, robot_pose)
+            
+            if self.last_dist_to_path is not None:
+                if curr_dist_to_path < self.last_dist_to_path:
+                    w = reward_factor
+                else:
+                    w = penalty_factor
+
+                self.curr_reward += w * (self.last_dist_to_path - curr_dist_to_path)
+            self.last_dist_to_path = curr_dist_to_path
+
+
+    def get_min_dist2global_kdtree(self, 
+                                   global_plan: np.array, 
+                                   robot_pose: Pose2D):
+        if self.kdtree is None:      
+            self.kdtree = scipy.spatial.cKDTree(global_plan)
+        
+        dist, index = self.kdtree.query([robot_pose.x, robot_pose.y])
         return dist, index
 
-    def _reward_not_moving(self, goal_in_robot_frame, punishment = 0.01):
+
+    def _reward_not_moving(self, goal_in_robot_frame, punishment = 1):
         # punishment for not moving
         if self.last_goal_dist == goal_in_robot_frame[0]:
             self.curr_reward -= punishment
+
+        if self.curr_reward < -30:
+            self.info['is_done'] = True
+            self.info['done_reason'] = 1
+            self.info['is_success'] = 0
     
 
-    def _reward_distance_traveled(self, action = None, punishment = 1):
+    def _reward_distance_traveled(self, action = None, punishment = 0.1):
         if action is None:
             self.curr_reward -= punishment
         else:
@@ -193,7 +205,7 @@ class RewardCalculator():
         # print(" linear velocity in distance reward fct {}".format(lin_vel))
         # print(" angular velocity in distance reward fct {}".format(ang_vel))
 
-    def _reward_waypoints_set(self, goal_len, action_count, punishment = -0.1):
+    def _reward_waypoints_set(self, goal_len, action_count, punishment = -0.01):
         if action_count > goal_len:
             self.curr_reward -= punishment
 
