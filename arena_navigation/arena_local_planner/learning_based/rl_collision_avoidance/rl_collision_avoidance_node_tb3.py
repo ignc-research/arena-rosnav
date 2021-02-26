@@ -37,11 +37,12 @@ import copy
 #     return angle_diff
 
 class NN_tb3():
-    def __init__(self, policy, action_bound, OBS_SIZE, index, num_env):
+    def __init__(self, env, policy, action_bound, OBS_SIZE, index, num_env):
         self.beam_mum = OBS_SIZE
         self.laser_cb_num = 0
         self.scan = None
-        self.env={"index": 0}
+        self.env = env
+        self.env.index = 0
   
         self.policy = policy
         self.action_bound = action_bound
@@ -74,7 +75,7 @@ class NN_tb3():
         # self.sub_clusters = rospy.Subscriber('~clusters',Clusters, self.cbClusters)
 
         # control timer
-        # self.control_timer = rospy.Timer(rospy.Duration(0.01),self.cbControl)
+        self.control_timer = rospy.Timer(rospy.Duration(0.01),self.cbControl)
         self.nn_timer = rospy.Timer(rospy.Duration(0.3),self.cbComputeAction)
 
     def cbGlobalGoal(self,msg):
@@ -102,7 +103,7 @@ class NN_tb3():
 
     def cbVel(self, msg):
         self.vel = msg.twist.twist.linear
-
+        self.vel_angular = msg.twist.twist.angular.z
     def cbClusters(self,msg):
         other_agents = []
 
@@ -225,10 +226,10 @@ class NN_tb3():
         move_cmd.angular.x = 0.
         move_cmd.angular.y = 0.
         move_cmd.angular.z = action[1]
-        self.pub_twist(move_cmd)
+        self.pub_twist.publish(move_cmd)
 
     def control_pose(self, pose):
-        pose_cmd = Pose()
+        pose_cmd = PoseStamped.Pose()
         assert len(pose)==3
         pose_cmd.position.x = pose[0]
         pose_cmd.position.y = pose[1]
@@ -246,18 +247,18 @@ class NN_tb3():
             pass
         obs = self.get_laser_observation() #用stage_world1.py里lasertopic获取
         obs_stack = deque([obs, obs, obs])
-        # ************************************ Input ************************************
+        # ************************************ Inpsut ************************************
         # goal
-        goal = [self.sub_goal.x, self.sub_goal.y]   #可以直接用此文件的subgoal，stage中的get_local_goal函数没有对self变量进行改变
+        goal = np.asarray([self.sub_goal.x, self.sub_goal.y])   #可以直接用此文件的subgoal，stage中的get_local_goal函数没有对self变量进行改变
         self.goal_point = goal
         # position
         state = [self.pose.pose.position.x, self.pose.pose.position.y, self.psi]    # x, y, theta
         self.state = state  #get_self_stateGT get_self_state有很多影响
         # Velocity
-        speed = [self.vel, self.psi]
-        self.speed_GT = speed # linear v +angular
+        speed = np.asarray([self.vel.x, self.vel_angular],dtype='float64')
+        # self.speed_GT = np.asarray(speed) # linear v +angular
         
-        obs_state_list = [obs_stack, goal, speed]
+        obs_state_list = [[obs_stack, goal, speed]]
 
         # self.control_pose(state)
 
@@ -327,11 +328,11 @@ def run():
     # Set parameters of env
     LASER_HIST = 3
     NUM_ENV = 1    # the number of agents in the environment
-    OBS_SIZE = 360  # number of leaserbeam
+    OBS_SIZE = 512  # number of leaserbeam
     action_bound = [[0, -1], [1, 1]]    # the limitation of velocity
 
     # Set env and agent policy
-    # env = StageWorld(OBS_SIZE, index=0, num_env=NUM_ENV)    #index is useful for parallel programming, 0 is for the first agent
+    env = StageWorld(OBS_SIZE, index=0, num_env=NUM_ENV)    #index is useful for parallel programming, 0 is for the first agent
 
     trained_model_file = os.path.dirname(__file__) + '/policy/stage2.pth'
     # trained_model_file = '/policy/stage2.pth'
@@ -343,7 +344,7 @@ def run():
     rospy.init_node('rl_collision_avoidance_tb3',anonymous=False)
     print('==================================\nrl_collision_avoidance node started')
 
-    nn_tb3 = NN_tb3(policy, action_bound, OBS_SIZE, index=0, num_env=NUM_ENV)
+    nn_tb3 = NN_tb3(env, policy, action_bound, OBS_SIZE, index=0, num_env=NUM_ENV)
     rospy.on_shutdown(nn_tb3.on_shutdown)
 
     rospy.spin()

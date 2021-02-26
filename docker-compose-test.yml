@@ -1,27 +1,22 @@
 version: '3'
 services:
-  ros:
+  ros-test:
     image: llalal/arena-rosnav:rl-collision-avoidance
-    build: ./Docker
     command: tail -f /dev/null
-    volumes: 
-      - .:/root/catkin_ws/src/arena-rosnav
     environment:
-      - DISPLAY=novnc:0.0
+      - DISPLAY=novnc-test:0.0
     env_file:
       - ./Docker/ros.env
     networks:
-      - x11
-    container_name: arena-rosnav
+      - x11-test
   
-  novnc:  
+  novnc-test:  
     image: theasp/novnc:latest
     env_file:
       - ./Docker/novnc.env
     ports:
-      - "8080:8080"
+      - "8090:8080"
     networks:
-      - x11
-    container_name: novnc
+      - x11-test
 networks:
-  x11:
+  x11-test:
