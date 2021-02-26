@@ -52,11 +52,11 @@ class wpEnv(gym.Env):
         else:
             self.ns_prefix = '/'
         
-        # if not debug:
-        #     if train_mode:
-        #         rospy.init_node(f'train_env_{self.ns}', disable_signals=False)
-        #     else:
-        #         rospy.init_node(f'eval_env_{self.ns}', disable_signals=False)
+        if not debug:
+            if train_mode:
+                rospy.init_node(f'traintrain_env_{self.ns}', disable_signals=False)
+            else:
+                rospy.init_node(f'evaleval_env_{self.ns}', disable_signals=False)
         # Define action and observation space
         # They must be gym.spaces objects
         self._is_action_space_discrete = is_action_space_discrete
@@ -290,6 +290,8 @@ class wpEnv(gym.Env):
         """
         self._step_counter += 1
         self._pub_action(action)
+        self._steps_curr_episode += 1
+
         ##todo: wait for robot_pos = goal pos
 
         #in each step, get the robots cmd velocity to get action for reward distance traveled

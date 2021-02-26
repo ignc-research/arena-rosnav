@@ -41,7 +41,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: ""
+    SyncSource: LaserScan
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -335,7 +335,7 @@ Visualization Manager:
       Marker Topic: flatland_server/debug/model/myrobot
       Name: my_robot
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
       Value: true
     - Class: rviz/TF
@@ -373,7 +373,7 @@ Visualization Manager:
       Marker Topic: flatland_server/debug/model/walker_model0
       Name: walker
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -557,7 +557,7 @@ Visualization Manager:
       Marker Topic: flatland_server/debug/model/obstacle_random_dynamic_00
       Name: MarkerArray
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
       Value: true
     - Alpha: 1
@@ -604,7 +604,7 @@ Visualization Manager:
       Marker Topic: planning_vis/goal
       Name: Marker
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
       Value: true
     - Class: rviz/Marker
@@ -622,6 +622,36 @@ Visualization Manager:
       Namespaces:
         {}
       Queue Size: 100
+      Value: true
+    - Alpha: 1
+      Axes Length: 1
+      Axes Radius: 0.10000000149011612
+      Class: rviz/Pose
+      Color: 255; 25; 0
+      Enabled: true
+      Head Length: 0.30000001192092896
+      Head Radius: 0.10000000149011612
+      Name: Pose
+      Shaft Length: 1
+      Shaft Radius: 0.05000000074505806
+      Shape: Arrow
+      Topic: /sim_1/goal
+      Unreliable: false
+      Value: true
+    - Alpha: 1
+      Axes Length: 1
+      Axes Radius: 0.10000000149011612
+      Class: rviz/Pose
+      Color: 255; 25; 0
+      Enabled: true
+      Head Length: 0.30000001192092896
+      Head Radius: 0.10000000149011612
+      Name: Pose
+      Shaft Length: 1
+      Shaft Radius: 0.05000000074505806
+      Shape: Arrow
+      Topic: /sim_1/subgoal
+      Unreliable: false
       Value: true
   Enabled: true
   Global Options:
@@ -659,11 +689,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 30.92484474182129
+      Scale: 23.948200225830078
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
-      X: 2.9913482666015625
-      Y: -0.8713787198066711
+      X: 10.79599380493164
+      Y: 6.775496959686279
     Saved: ~
 Window Geometry:
   Displays:
@@ -682,4 +712,4 @@ Window Geometry:
     collapsed: false
   Width: 1165
   X: 83
-  Y: 26
+  Y: 0

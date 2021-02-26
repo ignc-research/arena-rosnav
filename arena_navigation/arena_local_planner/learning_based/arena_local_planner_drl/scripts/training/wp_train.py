@@ -153,7 +153,7 @@ def make_envs(task_manager: Union[RandomTask, StagedRandomTask, ManualTask, Scen
 if __name__ == "__main__":
     args, _ = parse_training_args()
 
-    rospy.init_node("test")
+
 
     if args.debug:
         rospy.init_node("debug_node", disable_signals=False)

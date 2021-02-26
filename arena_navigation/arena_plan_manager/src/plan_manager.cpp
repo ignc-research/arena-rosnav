@@ -257,7 +257,7 @@ void PlanManager::execFSMCallback(const ros::TimerEvent &e)
       if(mode_==TRAIN){
         subgoal_pub_.publish(planner_collector_->subgoal_);
         //subgoal_pub_.publish(end_state_->to_PoseStampted());
-        //visualization_->drawSubgoal(end_state_->to_PoseStampted(), 0.3, Eigen::Vector4d(0, 0, 0, 1.0));
+        visualization_->drawSubgoal(end_state_->to_PoseStampted(), 0.3, Eigen::Vector4d(0, 0, 0, 1.0));
         cout<<"MID_REPLAN Success"<<endl;
         global_plan_pub_.publish(planner_collector_->global_path_);
         double dist_to_goal=1.0;

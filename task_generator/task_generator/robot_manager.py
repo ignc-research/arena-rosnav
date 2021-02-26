@@ -220,11 +220,11 @@ class RobotManager:
         goal.header.frame_id = "map"
         goal.pose.position.x = x
         goal.pose.position.y = y
-        quaternion = tf.transformations.quaternion_from_euler(0, 0, 0)
-        goal.pose.orientation.w = quaternion[0]
-        goal.pose.orientation.x = quaternion[1]
-        goal.pose.orientation.y = quaternion[2]
-        goal.pose.orientation.z = quaternion[3]
+        #quaternion = tf.transformations.quaternion_from_euler(0, 0, 0)
+        goal.pose.orientation.w = 1
+        goal.pose.orientation.x = 0
+        goal.pose.orientation.y = 0
+        goal.pose.orientation.z = 0
         self._goal_pub.publish(goal)
         # self._validate_path()
 
