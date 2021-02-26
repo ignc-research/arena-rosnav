@@ -101,6 +101,7 @@ void InterPlanner::init(ros::NodeHandle & nh){
   vis_subgoal_pub_ = node_.advertise<visualization_msgs::Marker>("vis_subgoal", 20);
   vis_global_path_pub_=node_.advertise<nav_msgs::Path>("vis_global_path_pub_", 1);
   kino_astar_waypoints_pub_ = node_.advertise<visualization_msgs::Marker>("vis_landmarks_", 20);
+  vis_local_traj_pub_=node_.advertise<nav_msgs::Path>("vis_local_traj", 1);
 
   /* service server */
   global_plan_service_server_=public_nh.advertiseService("global_kino_make_plan", &InterPlanner::makeGlobalPlanService, this);
@@ -928,6 +929,9 @@ bool InterPlanner::makeGlobalPlan(Eigen::Vector2d start_pos,Eigen::Vector2d end_
   // get plan
   OptimizerType type_optimizer=InterPlanner::OptimizerType::GRADIENT_ESDF;
   bool success;
+  // adjust start and target pt to be in free space
+  adjustStartAndTargetPoint(start_pos,end_pos);
+
   success=planKinoAstarTraj(start_pos, Eigen::Vector2d::Zero(), Eigen::Vector2d::Zero(), end_pos, Eigen::Vector2d::Zero(),type_optimizer);
   
   if(success){
@@ -1042,7 +1046,11 @@ bool InterPlanner::makeSubgoal(Eigen::Vector2d curr_pos, Eigen::Vector2d curr_ve
   bool success;
   // get initial local target
   Eigen::Vector2d local_target=global_data_.getLocalTarget(curr_pos);
-
+  
+  // make the local target not on obstacle
+  if(!adjustStartAndTargetPoint(local_target,curr_pos)){
+    return false;
+  }
   // std::vector<Eigen::Vector2d> landmarks=global_data_.getLandmarks();
   // for(size_t i=0;i<landmarks.size();++i){
   //   std::cout<<"landmarks:"<<landmarks[i]<<std::endl;
@@ -1063,11 +1071,41 @@ bool InterPlanner::makeSubgoal(Eigen::Vector2d curr_pos, Eigen::Vector2d curr_ve
     std::vector<Eigen::Vector2d> point_set;
     point_set.push_back(mid_data_.subgoal_);
     visualizePoints(point_set,0.8,Eigen::Vector4d(0.5, 0.5, 1, 1.0),vis_subgoal_pub_);
+    visualizePath(mid_data_.getTraj(),vis_local_traj_pub_);
     return true;
   }
 
   return false;
 }
+
+bool InterPlanner::adjustStartAndTargetPoint( Eigen::Vector2d &target_pt, Eigen::Vector2d &start_pt)
+{   
+    double step_size=0.1;
+
+    if(checkCollision(start_pt)){
+      ROS_WARN("This start point is insdide an obstacle.");
+      do
+        {
+            start_pt = (start_pt - target_pt).normalized() * step_size + start_pt;
+            if (!grid_map_->isInMap(start_pt))
+                return false;
+        } while (checkCollision(start_pt));
+    }
+
+    if(checkCollision(target_pt)){
+      ROS_WARN("This target point is insdide an obstacle.");
+      do
+        {
+            target_pt = (target_pt - start_pt).normalized() * step_size + target_pt;
+            if (!grid_map_->isInMap(target_pt))
+                return false;
+        } while (checkCollision(target_pt));
+    }
+
+    return true;
+}
+
+
 
 
 int main(int argc, char **argv){

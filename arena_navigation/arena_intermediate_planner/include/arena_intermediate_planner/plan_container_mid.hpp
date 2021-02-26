@@ -305,10 +305,26 @@ public:
 struct MidData{
   UniformBspline subgoal_traj_;
   Eigen::Vector2d subgoal_;
+  
 
   Eigen::Vector2d getSubgoal(){
     return subgoal_;
   }
+
+  std::vector<Eigen::Vector2d>  getTraj(){
+    double t_start, t_end;
+    double delta_t=0.01;
+    subgoal_traj_.getTimeSpan(t_start, t_end);
+    std::vector<Eigen::Vector2d> point_set;
+     for (double t = t_start; t < t_end; t += delta_t) 
+    {
+      Eigen::Vector2d pos_t = subgoal_traj_.evaluateDeBoor(t);
+      point_set.push_back(pos_t);
+    }
+    return point_set;
+
+  }
+  
   MidData(){}
   ~MidData(){}
 };

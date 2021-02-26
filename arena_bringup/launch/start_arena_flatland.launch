@@ -2,7 +2,7 @@
     
   <param name="use_sim_time" value="true"/>
 
-  <arg name="local_planner"   default="teb"/>
+  <arg name="local_planner"   default="cadrl"/> <!-- teb -->
   <arg name="rviz_file"       default="nav_LP"/>
 
   <arg name="train_mode"      default="false"/>

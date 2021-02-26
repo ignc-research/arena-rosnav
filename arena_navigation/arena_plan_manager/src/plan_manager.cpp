@@ -33,7 +33,7 @@ void PlanManager::init(ros::NodeHandle& nh) {
     odom_sub_ = public_node.subscribe("odometry/ground_truth", 1, &PlanManager::odometryCallback, this); // odom  //odometry/ground_truth
 
     // // publisher
-    global_plan_pub_ = nh.advertise<nav_msgs::Path>("globalPlan", 10, true);        // relative name:/ns/node_name/globalPlan
+    global_plan_pub_ = public_node.advertise<nav_msgs::Path>("globalPlan", 10, true);        // relative name:/ns/node_name/globalPlan
     subgoal_pub_  = public_node.advertise<geometry_msgs::PoseStamped>("subgoal",10);// relative name:/ns/node_name/subgoal
     robot_state_pub_  = public_node.advertise<arena_plan_msgs::RobotStateStamped>("robot_state",10);
 }

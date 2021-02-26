@@ -7,6 +7,8 @@ Panels:
         - /obstacles1/dynamic1
         - /Map2
         - /Plan Manager1
+        - /Plan Manager1/local_traj1
+        - /Walkers1
       Splitter Ratio: 0.4374079406261444
     Tree Height: 797
   - Class: rviz/Selection
@@ -833,9 +835,9 @@ Visualization Manager:
           Enabled: false
           Invert Rainbow: false
           Max Color: 255; 255; 255
-          Max Intensity: 0
+          Max Intensity: 1
           Min Color: 0; 0; 0
-          Min Intensity: 0
+          Min Intensity: 1
           Name: local esdf
           Position Transformer: XYZ
           Queue Size: 10
@@ -860,7 +862,7 @@ Visualization Manager:
           Color: 255; 255; 255
           Color Transformer: Intensity
           Decay Time: 0
-          Enabled: false
+          Enabled: true
           Invert Rainbow: false
           Max Color: 255; 255; 255
           Max Intensity: 0
@@ -877,7 +879,7 @@ Visualization Manager:
           Unreliable: false
           Use Fixed Frame: true
           Use rainbow: true
-          Value: false
+          Value: true
       Enabled: true
       Name: Map
     - Class: rviz/Group
@@ -902,7 +904,30 @@ Visualization Manager:
           Radius: 0.029999999329447746
           Shaft Diameter: 0.10000000149011612
           Shaft Length: 0.10000000149011612
-          Topic: /plan_manager/globalPlan
+          Topic: /globalPlan
+          Unreliable: false
+          Value: true
+        - Alpha: 1
+          Buffer Length: 1
+          Class: rviz/Path
+          Color: 85; 170; 255
+          Enabled: true
+          Head Diameter: 0.30000001192092896
+          Head Length: 0.20000000298023224
+          Length: 0.30000001192092896
+          Line Style: Billboards
+          Line Width: 0.30000001192092896
+          Name: local_traj
+          Offset:
+            X: 0
+            Y: 0
+            Z: 0
+          Pose Color: 255; 85; 255
+          Pose Style: None
+          Radius: 0.029999999329447746
+          Shaft Diameter: 0.10000000149011612
+          Shaft Length: 0.10000000149011612
+          Topic: /plan_manager/vis_local_traj
           Unreliable: false
           Value: true
         - Class: rviz/Marker
@@ -931,6 +956,102 @@ Visualization Manager:
           Value: true
       Enabled: true
       Name: Plan Manager
+    - Class: rviz/Group
+      Displays:
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /flatland_server/debug/model/walker_model4
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /flatland_server/debug/model/walker_model3
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /flatland_server/debug/model/walker_model1
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /flatland_server/debug/model/walker_model0
+          Name: MarkerArray
+          Namespaces:
+            {}
+          Queue Size: 100
+          Value: true
+      Enabled: true
+      Name: Walkers
+    - Class: rviz/Group
+      Displays:
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /flatland_server/debug/model/random_model6
+          Name: MarkerArray
+          Namespaces:
+            {}
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /flatland_server/debug/model/random_model5
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /flatland_server/debug/model/random_model4
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /flatland_server/debug/model/random_model3
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /flatland_server/debug/model/random_model2
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /flatland_server/debug/model/random_model1
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /flatland_server/debug/model/random_model0
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+      Enabled: true
+      Name: RandomObs
   Enabled: true
   Global Options:
     Background Color: 0; 0; 0
@@ -966,11 +1087,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 20.606414794921875
+      Scale: 21.464656829833984
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
-      X: 8.264899253845215
-      Y: 2.990236282348633
+      X: 10.32609748840332
+      Y: 0.436614990234375
     Saved: ~
 Window Geometry:
   Displays:

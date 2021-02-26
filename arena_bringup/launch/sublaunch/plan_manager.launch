@@ -10,12 +10,16 @@
     <arg name="timeout_subgoal"   />
 
     <!-- For planner and b-spline and optimizer -->
+    
+    <arg name="obstacles_inflation"     value="0.8" />
     <arg name="max_vel"                 value="3.0" />
     <arg name="max_acc"                 value="2.0" />
     <arg name="max_jerk"                value="4.0" />
     <arg name="lambda_heu"              value="0.1" />
     <arg name="plan_horizon"            value=""/>      <!-- For naming -->
     
+
+
     <!-- move_base plan manager: which provide basic global planner and cost map -->
     <arg name="local_planner" default="cadrl"/>
     <include file="$(find arena_bringup)/launch/sublaunch/move_base/move_base_$(arg local_planner).launch"/>
@@ -117,7 +121,7 @@
         <param name="$(arg plan_horizon)/sdf_map/local_update_range_y"          value="10.0" />    <!-- update range -->
         <param name="$(arg plan_horizon)/sdf_map/local_map_margin"              value="0.0"/>     <!-- Keep in history range -->
 
-        <param name="$(arg plan_horizon)/sdf_map/obstacles_inflation"           value="0.3" /> 
+        <param name="$(arg plan_horizon)/sdf_map/obstacles_inflation"           value="$(arg obstacles_inflation)" /> 
         <param name="$(arg plan_horizon)/sdf_map/local_bound_inflate"           value="0.0"/>
         
         <!-- local fusion -->
