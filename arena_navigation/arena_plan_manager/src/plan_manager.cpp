@@ -142,18 +142,18 @@ void PlanManager::execFSMCallback(const ros::TimerEvent &e)
 
   case GEN_NEW_GLOBAL:
   {
-    if (mode_ == TRAIN)
-    { 
-      start_state_.reset(new RobotState(cur_state_->pose2d, cur_state_->theta, cur_state_->vel2d, cur_state_->w));
-      bool global_plan_success = planner_collector_->generate_global_plan(*start_state_, *end_state_);
-      if(global_plan_success){
-        global_plan_pub_.publish(planner_collector_->global_path_);
-        changeFSMExecState(REPLAN_MID, "FSM");
-      }else{
-        changeFSMExecState(GEN_NEW_GLOBAL, "FSM");
-      }
-      return;
-    }
+    // if (mode_ == TRAIN)
+    // { 
+    //   start_state_.reset(new RobotState(cur_state_->pose2d, cur_state_->theta, cur_state_->vel2d, cur_state_->w));
+    //   bool global_plan_success = planner_collector_->generate_global_plan(*start_state_, *end_state_);
+    //   if(global_plan_success){
+    //     global_plan_pub_.publish(planner_collector_->global_path_);
+    //     changeFSMExecState(REPLAN_MID, "FSM");
+    //   }else{
+    //     changeFSMExecState(GEN_NEW_GLOBAL, "FSM");
+    //   }
+    //   return;
+    // }
     //set robot start state
     start_state_.reset(new RobotState(cur_state_->pose2d, cur_state_->theta, cur_state_->vel2d, cur_state_->w));
     
@@ -176,21 +176,21 @@ void PlanManager::execFSMCallback(const ros::TimerEvent &e)
 
   case EXEC_LOCAL:
   {
-    if (mode_ == TRAIN)
-    {
-      //cout<<"EXEC_LOCAL"<<"Train mode"<<endl;
-      return;
-    }
+    // if (mode_ == TRAIN)
+    // {
+    //   //cout<<"EXEC_LOCAL"<<"Train mode"<<endl;
+    //   return;
+    // }
 
     /* check env determine, calculate criterion */
     // fake obstacle info
-    //double dist_to_obstacle;
-    //random_device rd;
-    //uniform_real_distribution<double> rand_obstacle;
-    //uniform_real_distribution<double> rand_goal;
-    //rand_obstacle = uniform_real_distribution<double>(0.0, 3.0 );
-    //default_random_engine eng(rd());
-    //dist_to_obstacle=rand_obstacle(eng);
+    double dist_to_obstacle;
+    random_device rd;
+    uniform_real_distribution<double> rand_obstacle;
+    uniform_real_distribution<double> rand_goal;
+    rand_obstacle = uniform_real_distribution<double>(0.0, 3.0 );
+    default_random_engine eng(rd());
+    dist_to_obstacle=rand_obstacle(eng);
 
     // calculate: distance to (global) goal
     double dist_to_goal;
@@ -199,11 +199,16 @@ void PlanManager::execFSMCallback(const ros::TimerEvent &e)
     // calculate: distance to (mid horizon) subgoal
     double dist_to_subgoal;
     dist_to_subgoal = (cur_state_->pose2d - planner_collector_->subgoal_state_->pose2d).norm();
-
-    // calculate: timecot to avoid task takes too much time
-    double time_cost_goal = ros::Time::now().toSec() - start_time_.toSec();
-    double time_cost_subgoal = ros::Time::now().toSec() - subgoal_start_time_.toSec();
-
+    // timeout: avoid task too much time 
+      double timeout_goal,timeout_subgoal;
+      timeout_goal=60*5;
+      timeout_subgoal=60*1;
+      double time_cost_goal=ros::Time::now().toSec()-start_time_.toSec();
+      double time_cost_subgoal=ros::Time::now().toSec()-subgoal_start_time_.toSec();
+    
+    // tolerance goal, torlerance subgoal
+      double tolerance_goal=0.5;
+      double tolerance_subgoal=0.3;
     /* check state_transfer: Goal Criterion */
     // check if reached goal
     if (dist_to_goal < tolerance_approach_)
@@ -233,46 +238,41 @@ void PlanManager::execFSMCallback(const ros::TimerEvent &e)
       return;
     }
 
-    // check if subgoal distance to current robot position is too far away
-    if (dist_to_subgoal > look_ahead_distance_)
-    {
-      // if the robot stopped at a pos far from subgoal, then won't replan mid, but wait for timeout and global replan
-      bool robot_stopped = cur_state_->vel2d.norm() < 0.1;
-      if (!robot_stopped)
-      {
-        changeFSMExecState(REPLAN_MID, "FSM");
+      // check if need mid_horizon replan 
+      if(dist_to_subgoal>2 || dist_to_subgoal<0.2){
+        if(cur_state_->vel2d.norm()>0.1){
+          // if the robot stay, then won't replan mid
+          changeFSMExecState(REPLAN_MID, "FSM");
+        }
+      }else{
+        //cout<<"Normal:Exec local"<<endl;
+        return;
       }
-      return;
-    }
 
-    // check if subgoal is reached. If reached then replan
-    if (dist_to_subgoal < tolerance_approach_)
-    {
-      changeFSMExecState(REPLAN_MID, "FSM");
-      return;
+      break;
     }
-    else
-    {
-
-      //cout<<"Normal:Exec local"<<endl;
-      return;
-    }
-
-    break;
-  }
 
   case REPLAN_MID:
   {
-    if (mode_ == TRAIN)
-    {
+      if(mode_==TRAIN){
+        subgoal_pub_.publish(planner_collector_->subgoal_);
+        //subgoal_pub_.publish(end_state_->to_PoseStampted());
+        //visualization_->drawSubgoal(end_state_->to_PoseStampted(), 0.3, Eigen::Vector4d(0, 0, 0, 1.0));
+        cout<<"MID_REPLAN Success"<<endl;
+        global_plan_pub_.publish(planner_collector_->global_path_);
+        double dist_to_goal=1.0;
+        double obstacle_info=1.0;
+        double sensor_info=1.0;
+        bool get_subgoal_success = planner_collector_->generate_subgoal(cur_state_,end_state_, planner_collector_->global_path_,obstacle_info,sensor_info);
       
-      subgoal_pub_.publish(end_state_->to_PoseStampted());
-      std::cout<< " "<<std::endl;
-      std::cout<< " subgoal= "<<end_state_->to_PoseStampted()<<std::endl;
-      //visualization_->drawSubgoal(end_state_->to_PoseStampted(), 0.3, Eigen::Vector4d(0, 0, 0, 1.0));
-      cout << "MID_REPLAN Success" << endl;
-      changeFSMExecState(EXEC_LOCAL, "FSM");
-      return;
+        if (get_subgoal_success) {
+        // success: publish new subgoal & going to state EXEC_LOCAL
+          subgoal_pub_.publish(planner_collector_->subgoal_);
+          //wp4train_pup_.publish(planner_collector_->subgoal_);
+          //visualization_->drawSubgoal(planner_collector_->subgoal_, 0.3, Eigen::Vector4d(0, 0, 0, 1.0));
+          changeFSMExecState(EXEC_LOCAL, "FSM"); 
+          }
+        return;
     }
     /* get current state info */
     //RobotStatePtr mid_start_state=new RobotState(cur_state_->pose2d,cur_state_->theta,cur_state_->vel2d,cur_state_->w);
