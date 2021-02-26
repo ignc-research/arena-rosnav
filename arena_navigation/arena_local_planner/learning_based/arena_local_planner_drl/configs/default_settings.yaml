@@ -22,5 +22,5 @@ robot:
       linear: 0.0
       angular: 0.0
   continuous_actions:
-    linear_range: [0, 3.25]
+    linear_range: [0, 0.3]
     angular_range: [-2.7,2.7]

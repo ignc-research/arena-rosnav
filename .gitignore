@@ -45,6 +45,9 @@ build/
 # python
 __pycache__
 
+# bags
+*.bag
+*.csv
 
 #vscode
 .vscode/

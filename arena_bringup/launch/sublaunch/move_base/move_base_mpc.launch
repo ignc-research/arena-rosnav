@@ -4,7 +4,6 @@
   <arg name="model" default="burger"/>
   <arg name="cmd_vel_topic" default="/cmd_vel" />
   <arg name="odom_topic" default="odom" />
-  <arg name="move_forward_only" default="false"/>
 
  
   <!-- move_base -->
@@ -14,7 +13,6 @@
     <rosparam file="$(find conventional)/config/local_costmap_params.yaml" command="load" />
     <rosparam file="$(find conventional)/config/global_costmap_params.yaml" command="load" />
     <rosparam file="$(find mpc_local_planner_examples)/cfg/diff_drive/mpc_local_planner_params_minimum_time.yaml" command="load" />
-    <!-- <rosparam file="$(find conventional)/config/move_base_params.yaml" command="load" /> -->
  
     <!-- planner params --> 
     <rosparam file="$(find conventional)/config/base_local_planner_params.yaml" command="load" />
@@ -26,6 +24,8 @@
     <param name="base_local_planner" value="mpc_local_planner/MpcLocalPlannerROS" />
     <param name="controller_frequency" value="5.0" />
     <param name="controller_patience" value="15.0" />
+    <param name="planner_frequency" value="1.0" />
+
     
 
   </node>

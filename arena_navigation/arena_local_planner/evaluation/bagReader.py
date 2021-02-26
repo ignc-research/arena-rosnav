@@ -6,23 +6,28 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import math
+import rospy
+from visualization_msgs.msg import Marker, MarkerArray
 # 
 class newBag():
     def __init__(self,bag_name):
-        # self.bag = rosbag.Bag(bag_name)
         self.bag = bagreader(bag_name)
-        self.rbag = rosbag.Bag(bag_name)
+        # self.rbag = rosbag.Bag(bag_name)
 
 
     def printBag(self,df):
         for col in df.columns:
             print(col)
 
+    def collision(self):
+        n_col = 0
 
     def getPos_tb3(self,topic):
         pose_x = []
         pose_y = []
         t = []
+        dist = []
+        
         odom_csv = self.bag.message_by_topic(topic)
         df_odom = pd.read_csv(odom_csv, error_bad_lines=False)
 
@@ -32,24 +37,6 @@ class newBag():
             pose_x.append(df_odom.loc[i, "pose.pose.position.x"])
             pose_y.append(df_odom.loc[i, "pose.pose.position.y"])
         return t, pose_x, pose_y
-
-    def makeDF_obst(self,topic):
-        pos_x = []
-        pos_y = []
-        vel = []
-        for topic, msg, t in self.rbag.read_messages(topics=[topic]):
-            if len(msg.mean_points)>0:
-                # print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-                tmp_x = []
-                tmp_y = []
-                for arr in msg.mean_points:
-                    tmp_x.append(arr.x)
-                    tmp_y.append(arr.y)
-                pos_x.append(tmp_x)
-                pos_y.append(tmp_y)
-                # pos.append()
-        pos = [pos_x, pos_y]        
-        return pos, vel
 
     def evalPath(self):
         t, pose_x, pose_y = self.getPos_tb3("/odom")
@@ -66,40 +53,32 @@ class newBag():
 
         return [duration, path_length, av_vel,len(t)]
 
-    
-
 
 
 
 #  run code
+def getMap(msg):
+    points_x = []
+    points_y = []
+    print(msg.markers[0])
+    for p in msg.markers[0].points:
+        points_x.append(p.x)
+        points_y.append(-p.y)
+    plt.scatter(points_y, points_x)
+    plt.show()
+
 def run():
-    bag = newBag("bags/teb.bag")
-    eval = bag.evalPath()
+    rospy.init_node('eval',anonymous=False)
+    print("node on")
+
+    rospy.Subscriber('/flatland_server/debug/layer/static',MarkerArray,getMap)
+    # bag = newBag("bags/teb.bag")
+    # eval = bag.evalPath()
     # print(eval)
 
 
 
-
-
-    #*****************  
-    # pos_arr, vel_arr = bag.makeDF_obst("/obst_odom")
-    # print(pos_arr)
-    # xn = []
-    # yn = pos_arr[1]
-    # idx = 0
-    # for x in pos_arr[0]:
-    #     for i in x:
-    #        xn.append(i)
-    # for y in pos_arr[1]:
-    #     for i in x:
-    #        xn.append(i)
-
-    # for x, y in zip(pos_arr[0], pos_arr[1]):
-    #     for xi,yi in zip(x,y):
-    #         xn.append(xi)
-    #         yn.append(yi)
-    # print(xn)
-    # print(yn)
+    rospy.spin()
 
 
 if __name__=="__main__":

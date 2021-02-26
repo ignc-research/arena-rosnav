@@ -1,9 +1,11 @@
 
 <launch>
-    <arg name="scenerios_json_path" default="$(find arena_bringup)/../simulator_setup/scenerios/empty_map_obs20.json"/>
+
+    <arg name="scenerios_json_path" default="$(find simulator_setup)/scenarios/empty_map.json"/>
+
     <arg name="auto_reset" default="true" />
     <arg name="task_mode" default="ScenerioTask"/>
-    <arg name="delta" default="0.1"/>
+    <arg name="delta" default="0.7"/>
     <!--  ************** task generator  ***************  -->
     <node pkg="task_generator" name="task_generator_node" type="task_generator_node.py" output="screen">
         <param name="scenerios_json_path" value="$(arg scenerios_json_path)"/>

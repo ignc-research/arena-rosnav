@@ -23,7 +23,6 @@ class StopReset(Exception):
 
 class ABSTask(ABC):
     """An abstract class, all tasks must implement reset function.
-
     """
 
     def __init__(self, obstacles_manager: ObstaclesManager, robot_manager: RobotManager):
@@ -44,6 +43,43 @@ class ABSTask(ABC):
         with self._map_lock:
             self.obstacles_manager.update_map(map_)
             self.robot_manager.update_map(map_)
+
+class LoadTask(ABSTask):
+    """ Evertime the start position and end position of the robot is reset.
+    """
+
+    def __init__(self, obstacles_manager: ObstaclesManager, robot_manager: RobotManager):
+        super().__init__(obstacles_manager, robot_manager)
+
+    def reset(self):
+        """[summary]
+        """
+        with self._map_lock:
+            max_fail_times = 3
+            fail_times = 0
+            while fail_times < max_fail_times:
+                try:
+                    pose = Pose2D()
+                    pose.x = 0; pose.y = 0
+                    goal = Pose2D()
+                    goal.x = 22; goal.y = -1
+
+
+                    start_pos, goal_pos = self.robot_manager.set_start_pos_goal_pos(pose, goal)
+                    self.obstacles_manager.reset_pos_obstacles_random(
+                        forbidden_zones=[
+                            (start_pos.x,
+                                start_pos.y,
+                                self.robot_manager.ROBOT_RADIUS),
+                            (goal_pos.x,
+                                goal_pos.y,
+                                self.robot_manager.ROBOT_RADIUS)])
+                    break
+                except rospy.ServiceException as e:
+                    rospy.logwarn(repr(e))
+                    fail_times += 1
+            if fail_times == max_fail_times:
+                raise Exception("reset error!")
 
 
 class RandomTask(ABSTask):
@@ -97,8 +133,7 @@ class ManualTask(ABSTask):
                 self.robot_manager.set_start_pos_random()
                 with self._manual_goal_con:
                     # the user has 60s to set the goal, otherwise all objects will be reset.
-                    self._manual_goal_con.wait_for(
-                        self._new_goal_received, timeout=60)
+                    self._manual_goal_con.wait_for(self._new_goal_received, timeout=60)
                     if not self._new_goal_received:
                         raise Exception(
                             "TimeOut, User does't provide goal position!")
@@ -106,6 +141,7 @@ class ManualTask(ABSTask):
                         self._new_goal_received = False
                     try:
                         # in this step, the validation of the path will be checked
+                        
                         self.robot_manager.publish_goal(
                             self._goal.x, self._goal.y, self._goal.theta)
                     except Exception as e:
@@ -192,7 +228,8 @@ class ScenerioTask(ABSTask):
         """
         super().__init__(obstacles_manager, robot_manager)
         json_path = Path(scenerios_json_path)
-        assert json_path.is_file() and json_path.suffix == ".json"
+        print(scenerios_json_path)
+        # assert json_path.is_file() and json_path.suffix == ".json"
         json_data = json.load(json_path.open())
         self._scenerios_data = json_data["scenerios"]
         # current index of the scenerio
@@ -216,16 +253,20 @@ class ScenerioTask(ABSTask):
             robot_start_pos = robot_data["start_pos"]
             robot_goal_pos = robot_data["goal_pos"]
             info["robot_goal_pos"] = robot_goal_pos
+            
             self.robot_manager.set_start_pos_goal_pos(
                 Pose2D(*robot_start_pos), Pose2D(*robot_goal_pos))
             self._num_repeats_curr_scene += 1
             info['num_repeats_curr_scene'] = self._num_repeats_curr_scene
             info['max_repeats_curr_scene'] = self._max_repeats_curr_scene
+
         return info
 
     def _set_new_scenerio(self):
         try:
             while True:
+                if self._num_repeats_curr_scene - self._num_repeats_curr_scene < 0:
+                            break
                 self._idx_curr_scene += 1
                 scenerio_data = self._scenerios_data[self._idx_curr_scene]
                 scenerio_name = scenerio_data['scene_name']
@@ -369,7 +410,9 @@ def get_predefined_task(mode="random", start_stage: int = 1, PATHS: dict = None)
     # obstacles_manager.register_obstacles(3, os.path.join(
     # models_folder_path, "obstacles", 'random.model.yaml'), 'static')
     # generate 5 static or dynamic obstaticles
+
     # obstacles_manager.register_random_obstacles(20, 0.4)
+
 
     # TODO In the future more Task will be supported and the code unrelated to
     # Tasks will be moved to other classes or functions.
@@ -382,10 +425,12 @@ def get_predefined_task(mode="random", start_stage: int = 1, PATHS: dict = None)
         obstacles_manager.register_random_obstacles(20, 0.4)
         task = ManualTask(obstacles_manager, robot_manager)
         print("manual tasks requested")
+
     if mode == "staged":
         task = StagedRandomTask(
             obstacles_manager, robot_manager, start_stage, PATHS)
     if mode == "ScenerioTask":
         task = ScenerioTask(obstacles_manager, robot_manager,
                             PATHS['scenerios_json_path'])
+
     return task

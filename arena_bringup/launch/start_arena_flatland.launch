@@ -1,11 +1,13 @@
 <launch>
     
   <param name="use_sim_time" value="true"/>
-  
-  <arg name="local_planner"   default="dwa"/>
-  <arg name="rviz_file"       default="nav"/>
+
+  <arg name="local_planner"   default="teb"/>
+  <arg name="rviz_file"       default="nav_LP"/>
+
   <arg name="train_mode"      default="false"/>
-  <param name="train_mode"    value="$(arg train_mode)"/>
+  <arg name="disable_scenario"    default="true"/>
+  <arg name="scenario_file"   default="empty_map.json"/>
 
 
 
@@ -23,11 +25,9 @@
 
   <!-- Visualization -->
   <arg name="use_viz"         default="true"/>
+  <param name="train_mode"    value="$(arg train_mode)"/>
   <param name="use_viz"       value="$(arg use_viz)"/>
 
-  <!-- Obstacle parameters -->
-  <arg name="obs_vel"       default="0.3"/>
-  <param name="obs_vel"     value="$(arg obs_vel)"/>
 
   <!-- <arg name="scan_topic" default="scan"/> default laser topic in flatland -->
   
@@ -35,7 +35,7 @@
   <include file="$(find arena_bringup)/launch/sublaunch/flatland_simulator.launch">
     <arg name="world_path"      value="$(arg world_path)"/>
 
-    <arg name="update_rate"     default="50.0"/>
+    <arg name="update_rate"     default="60.0"/>
     <arg name="step_size"       default="0.05"/>
 
     <arg name="show_viz"        default="true"/>
@@ -60,7 +60,10 @@
   </include>
 
   <!-- start task_generator node -->
-  <include file="$(find arena_bringup)/launch/sublaunch/task_generator.launch" unless="$(arg train_mode)">
+  <include file="$(find arena_bringup)/launch/sublaunch/task_generator.launch" unless="$(arg disable_scenario)">
+   <arg name="scenerios_json_path" value="$(find simulator_setup)/scenerios/$(arg scenario_file)"/>
+  </include>
+   <include file="$(find arena_bringup)/launch/sublaunch/sensor_sim.launch" unless="$(arg disable_scenario)">
   </include>
 
   <!-- start plan manager-->

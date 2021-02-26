@@ -1,0 +1,8 @@
+<launch>
+    <node pkg="scenario_police_node" type="scenario_police_node.py" name="scenario_police_node" output="screen" ns="/scenario_police_node">
+        
+
+
+    </node>
+
+</launch>

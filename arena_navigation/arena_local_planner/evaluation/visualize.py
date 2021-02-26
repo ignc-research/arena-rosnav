@@ -34,7 +34,6 @@ class viz():
 
         # visualization
         self.path_marker = Marker()
-
         # Clusters
         self.current_clusters = Clusters()
 

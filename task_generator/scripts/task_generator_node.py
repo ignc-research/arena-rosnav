@@ -5,9 +5,14 @@ import rospy
 from std_srvs.srv import Empty, EmptyResponse
 from nav_msgs.msg import Odometry
 from task_generator.tasks import get_predefined_task
-
+from std_msgs.msg import Int16
+# for clearing costmap
+from clear_costmap import clear_costmaps
 class TaskGenerator:
     def __init__(self):
+        #
+        self.sr = rospy.Publisher('/scenario_reset', Int16, queue_size=1)
+        self.nr = 0
         mode = rospy.get_param("~task_mode")
         scenerios_json_path = rospy.get_param("~scenerios_json_path")
         paths = {"scenerios_json_path": scenerios_json_path}
@@ -32,19 +37,39 @@ class TaskGenerator:
             # declare new service task_generator, request are handled in callback task generate
             self.task_generator_srv_ = rospy.Service(
                 'task_generator', Empty, self.reset_srv_callback)
+        self.err_g = 100
+        
+        rospy.Timer(rospy.Duration(0.5),self.goal_reached)
+
+
+    def goal_reached(self,event):
+
+        if self.err_g < self.delta_:
+            print(self.err_g)
+            self.reset_task()
+
+    # def clear_costmaps(self):
+    #     bashCommand = "rosservice call /move_base/clear_costmaps"
+    #     process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
+    #     output, error = process.communicate()
+    #     print([output, error])
 
     def reset_srv_callback(self, req):
         rospy.loginfo("Task Generator received task-reset request!")
         self.task.reset()
         return EmptyResponse()
 
+
     def reset_task(self):
         info = self.task.reset()
+        # clear_costmaps()
         if info is not None:
             self.curr_goal_pos_ = info['robot_goal_pos']
         rospy.loginfo("".join(["="]*80))
         rospy.loginfo("goal reached and task reset!")
         rospy.loginfo("".join(["="]*80))
+        self.sr.publish(self.nr)
+        self.nr += 1
 
     def check_robot_pos_callback(self, odom_msg: Odometry):
         robot_pos = odom_msg.pose.pose.position
@@ -53,8 +78,8 @@ class TaskGenerator:
         goal_x = self.curr_goal_pos_[0]
         goal_y = self.curr_goal_pos_[1]
 
-        if (robot_x-goal_x)**2+(robot_y-goal_y)**2 < self.delta_**2:
-            self.reset_task()
+        self.err_g = (robot_x-goal_x)**2+(robot_y-goal_y)**2
+           
 
 
 if __name__ == '__main__':

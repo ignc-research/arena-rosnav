@@ -2,25 +2,14 @@
 
 import rospy
 # import sys
-# from std_msgs.msg import Float32, ColorRGBA, Int32, String
+from std_msgs.msg import ColorRGBA
 from geometry_msgs.msg import PoseStamped, Twist, Vector3, Point
 from ford_msgs.msg import Clusters
-# from visualization_msgs.msg import Marker, MarkerArray
+from visualization_msgs.msg import Marker, MarkerArray
 
 import numpy as np
-# import numpy.matlib
-# import pickle
-# from matplotlib import cm
-# import matplotlib.pyplot as plt
-# import copy
-# import os
-# import time
-# import random
-# import math
-
-# import rospkg
+import math
 from nav_msgs.msg import Odometry
-
 import configparser
 import torch
 import gym
@@ -53,6 +42,9 @@ class NN_tb3():
         self.ob = env.reset('test',1)     #intial some parameters from .config file such as time_step,success_reward for other instances
         self.policy = policy
         self.policy.set_env(env) 
+        # for action
+        self.angle2Action = 0
+        self.distance = 0
         # for subscribers
         self.pose = PoseStamped()
         self.vel = Vector3()
@@ -66,14 +58,14 @@ class NN_tb3():
 
         # # publishers
         self.pub_twist = rospy.Publisher('/cmd_vel',Twist,queue_size=1) 
-        self.pub_pose_marker = rospy.Publisher('',Marker,queue_size=1)
+        # self.pub_pose_marker = rospy.Publisher('',Marker,queue_size=1)
         # self.pub_agent_markers = rospy.Publisher('~agent_markers',MarkerArray,queue_size=1)
-        # self.pub_path_marker = rospy.Publisher('~path_marker',Marker,queue_size=1)
+        self.pub_path_marker = rospy.Publisher('/action',Marker,queue_size=1)
         # self.pub_goal_path_marker = rospy.Publisher('~goal_path_marker',Marker,queue_size=1)
         # # sub
         self.sub_pose = rospy.Subscriber('/odom',Odometry,self.cbPose)
         self.sub_global_goal = rospy.Subscriber('/goal',PoseStamped, self.cbGlobalGoal)
-        # self.sub_subgoal = rospy.Subscriber('~subgoal',PoseStamped, self.cbSubGoal)
+        self.sub_subgoal = rospy.Subscriber('/plan_manager/subgoal',PoseStamped, self.cbSubGoal)
         
         # subgoals
         self.sub_goal = Vector3()
@@ -82,9 +74,17 @@ class NN_tb3():
 
 
         # control timer
-        # self.control_timer = rospy.Timer(rospy.Duration(0.01),self.cbControl)
-        self.nn_timer = rospy.Timer(rospy.Duration(0.3),self.cbComputeActionCrowdNav)
+        self.control_timer = rospy.Timer(rospy.Duration(0.2),self.cbControl)
+        self.nn_timer = rospy.Timer(rospy.Duration(0.01),self.cbComputeActionCrowdNav)
 
+    def update_angle2Action(self):
+        # action vector
+        v_a = np.array([self.desired_position.pose.position.x-self.pose.pose.position.x,self.desired_position.pose.position.y-self.pose.pose.position.y])
+        # pose direction
+        e_dir = np.array([math.cos(self.psi), math.sin(self.psi)])
+        # angle: <v_a, e_dir>
+        self.angle2Action = np.math.atan2(np.linalg.det([v_a,e_dir]),np.dot(v_a,e_dir))
+        
     def cbGlobalGoal(self,msg):
         self.stop_moving_flag = True
         self.new_global_goal_received = True
@@ -97,15 +97,31 @@ class NN_tb3():
         print("new goal: "+str([self.goal.pose.position.x,self.goal.pose.position.y])) 
 
     def cbSubGoal(self,msg):
+        # update subGoal
         self.sub_goal.x = msg.pose.position.x
         self.sub_goal.y = msg.pose.position.y
-        # print "new subgoal: "+str(self.sub_goal)
+     
+
+    def goalReached(self):
+        # check if near to global goal
+        if self.distance > 0.3:
+            return False
+        else:
+            return True
 
     def cbPose(self, msg):
+        # update robot vel (vx,vy)
         self.cbVel(msg)
+        # get pose angle
         q = msg.pose.pose.orientation
         self.psi = np.arctan2(2.0*(q.w*q.z + q.x*q.y), 1-2*(q.y*q.y+q.z*q.z)) # bounded by [-pi, pi]
         self.pose = msg.pose
+        self.visualize_path()
+
+        v_p = msg.pose.pose.position
+        v_g = self.sub_goal
+        v_pg = np.array([v_g.x-v_p.x,v_g.y-v_p.y])
+        self.distance = np.linalg.norm(v_pg)
         # self.visualize_pose(msg.pose.pose.position,msg.pose.pose.orientation)
 
     def cbVel(self, msg):
@@ -145,67 +161,33 @@ class NN_tb3():
     def update_action(self, action):
         # print 'update action'
         self.desired_action = action
-        self.desired_position.pose.position.x = self.pose.pose.position.x + 1*action[0]*np.cos(action[1])
-        self.desired_position.pose.position.y = self.pose.pose.position.y + 1*action[0]*np.sin(action[1])
+        # self.desired_position.pose.position.x = self.pose.pose.position.x + 1*action[0]*np.cos(action[1])
+        # self.desired_position.pose.position.y = self.pose.pose.position.y + 1*action[0]*np.sin(action[1])
+        self.desired_position.pose.position.x = self.pose.pose.position.x + (action[0])
+        self.desired_position.pose.position.y = self.pose.pose.position.y + (action[1])
+        # print(action[0])
 
     def cbControl(self, event):
-
-        if self.goal.header.stamp == rospy.Time(0) or self.stop_moving_flag and not self.new_global_goal_received:
-            self.stop_moving()
-            return
-        elif self.operation_mode.mode==self.operation_mode.NN:
-            desired_yaw = self.desired_action[1]
-            yaw_error = desired_yaw - self.psi
-            if abs(yaw_error) > np.pi:
-                yaw_error -= np.sign(yaw_error)*2*np.pi
-
-            gain = 1.3 # canon: 2
-            vw = gain*yaw_error
-
-            use_d_min = True
-            if False: # canon: True
-                # use_d_min = True
-                # print "vmax:", self.find_vmax(self.d_min,yaw_error)
-                vx = min(self.desired_action[0], self.find_vmax(self.d_min,yaw_error))
-            else:
-                vx = self.desired_action[0]
-      
-            twist = Twist()
-            twist.angular.z = vw
-            twist.linear.x = vx
-            self.pub_twist.publish(twist)
-            self.visualize_action(use_d_min)
-            return
-
-        elif self.operation_mode.mode == self.operation_mode.SPIN_IN_PLACE:
-            print('Spinning in place.')
-            self.stop_moving_flag = False
-            angle_to_goal = np.arctan2(self.global_goal.pose.position.y - self.pose.pose.position.y, \
-                self.global_goal.pose.position.x - self.pose.pose.position.x) 
-            global_yaw_error = self.psi - angle_to_goal
-            if abs(global_yaw_error) > 0.5:
-                vx = 0.0
-                vw = 1.0
-                twist = Twist()
-                twist.angular.z = vw
-                twist.linear.x = vx
-                self.pub_twist.publish(twist)
-                # print twist
-            else:
-                print('Done spinning in place')
-                self.operation_mode.mode = self.operation_mode.NN
-                # self.new_global_goal_received = False
-            return
-        else:
-            self.stop_moving()
-            return
-
+ 
+        twist = Twist()
+        if not self.goalReached():
+            if abs(self.angle2Action) > 0.1 and self.angle2Action > 0:
+                twist.angular.z = -0.3
+                print("spinning in place +")
+            elif abs(self.angle2Action) > 0.1 and self.angle2Action < 0:
+                twist.angular.z = 0.3
+                print("spinning in place -")
+            # else:
+            vel = np.array([self.desired_action[0],self.desired_action[1]])
+            twist.linear.x = 0.1*np.linalg.norm(vel)
+        self.pub_twist.publish(twist)
+        
     def cbComputeActionCrowdNav(self, event):
         robot_x = self.pose.pose.position.x
         robot_y = self.pose.pose.position.y
         # goal
-        goal_x = self.global_goal.pose.position.x
-        goal_y = self.global_goal.pose.position.x
+        goal_x = self.sub_goal.x
+        goal_y = self.sub_goal.y
         # velocity
         robot_vx = self.vel.x
         robot_vy = self.vel.y
@@ -239,49 +221,48 @@ class NN_tb3():
         # ************************************ Output ************************************
         # get action info
         action = self.robot.act(self.ob)
-        position = self.robot.get_observable_state()
-        print('\n---------\nrobot position (X,Y):', position.position)
-        print(action)
-        print(theta)
+
+        # print('\n---------\nrobot position (X,Y):', position.position)
+        # print(action)
+        # print(theta)
                     
 
 
-        # self.update_action(action)
-
+        self.update_action(action)
+        self.update_angle2Action()
+   
     def update_subgoal(self,subgoal):
         self.goal.pose.position.x = subgoal[0]
         self.goal.pose.position.y = subgoal[1]
 
-    def visualize_pose(self,pos,orientation):
-        # Yellow Box for Vehicle
+    def visualize_path(self):
         marker = Marker()
         marker.header.stamp = rospy.Time.now()
         marker.header.frame_id = 'map'
-        marker.ns = 'agent'
+        marker.ns = 'path_arrow'
         marker.id = 0
-        marker.type = marker.CUBE
+        marker.type = marker.ARROW
         marker.action = marker.ADD
-        marker.pose.position = pos
-        marker.pose.orientation = orientation
-        marker.scale = Vector3(x=0.7,y=0.42,z=1)
-        marker.color = ColorRGBA(r=1.0,g=1.0,a=1.0)
-        marker.lifetime = rospy.Duration(1.0)
-        self.pub_pose_marker.publish(marker)
+        marker.points.append(self.pose.pose.position)
+        marker.points.append(self.desired_position.pose.position)
+        marker.scale = Vector3(x=0.1,y=0.2,z=0.2)
+        marker.color = ColorRGBA(b=1.0,a=1.0)
+        marker.lifetime = rospy.Duration(1)
+        self.pub_path_marker.publish(marker)
 
-        # Red track for trajectory over time
-        marker = Marker()
-        marker.header.stamp = rospy.Time.now()
-        marker.header.frame_id = 'map'
-        marker.ns = 'agent'
-        marker.id = self.num_poses
-        marker.type = marker.CUBE
-        marker.action = marker.ADD
-        marker.pose.position = pos
-        marker.pose.orientation = orientation
-        marker.scale = Vector3(x=0.2,y=0.2,z=0.2)
-        marker.color = ColorRGBA(r=1.0,a=1.0)
-        marker.lifetime = rospy.Duration(10.0)
-        self.pub_pose_marker.publish(marker)
+        # # Display BLUE DOT at NN desired position
+        # marker = Marker()
+        # marker.header.stamp = rospy.Time.now()
+        # marker.header.frame_id = 'map'
+        # marker.ns = 'path_trail'
+        # marker.id = self.num_poses
+        # marker.type = marker.CUBE
+        # marker.action = marker.ADD
+        # marker.pose.position = copy.deepcopy(self.pose.pose.position)
+        # marker.scale = Vector3(x=0.2,y=0.2,z=0.2)
+        # marker.color = ColorRGBA(g=0.0,r=0,b=1.0,a=0.3)
+        # marker.lifetime = rospy.Duration(60)
+        # self.pub_path_marker.publish(marker)
 
     def on_shutdown(self):
         rospy.loginfo("[%s] Shutting down.")

@@ -20,10 +20,6 @@ void PlanManager::init(ros::NodeHandle& nh) {
     nh.param("timeout_goal", timeout_goal_, 300.);         //sec
     nh.param("timeout_subgoal", timeout_subgoal_, 60.);    //sec
 
-
-
-
-
     
 
     /* initialize main modules */
@@ -103,7 +99,7 @@ void PlanManager::execFSMCallback(const ros::TimerEvent& e) {
   if (fsm_num == 100) {
     printFSMExecState();
     if (!have_odom_) cout << "no odom." << endl;
-    if (!have_goal_) cout << "wait for goal." << endl;
+    // if (!have_goal_) cout << "wait for goal." << endl;
     fsm_num = 0;
   }
 
@@ -218,6 +214,7 @@ void PlanManager::execFSMCallback(const ros::TimerEvent& e) {
           return; 
       }
 
+
       // check if subgoal is reached. If reached then replan
       if(dist_to_subgoal<tolerance_approach_){
           changeFSMExecState(REPLAN_MID, "FSM");
@@ -225,6 +222,7 @@ void PlanManager::execFSMCallback(const ros::TimerEvent& e) {
       }else{
         
         //cout<<"Normal:Exec local"<<endl;
+
         return;
       }
 
@@ -253,7 +251,7 @@ void PlanManager::execFSMCallback(const ros::TimerEvent& e) {
         visualization_->drawSubgoal(planner_collector_->subgoal_, 0.3, Eigen::Vector4d(0, 0, 0, 1.0));
         // reset subgoal start time(be used for timeout criterion)
         subgoal_start_time_=ros::Time::now();
-        cout<<"MID_REPLAN Success"<<endl;
+        // cout<<"MID_REPLAN Success"<<endl;
 
         
         changeFSMExecState(EXEC_LOCAL, "FSM");
@@ -271,13 +269,13 @@ void PlanManager::changeFSMExecState(FSM_EXEC_STATE new_state, std::string pos_c
   string state_str[5] = {"INIT", "WAIT_GOAL", "GEN_NEW_GLOBAL", "REPLAN_MID", "EXEC_LOCAL" };
   int    pre_s        = int(exec_state_);
   exec_state_         = new_state;
-  cout << "[" + pos_call + "]: from " + state_str[pre_s] + " to " + state_str[int(new_state)] << endl;
+  // cout << "[" + pos_call + "]: from " + state_str[pre_s] + " to " + state_str[int(new_state)] << endl;
 }
 
 void PlanManager::printFSMExecState() {
   string state_str[5] =  {"INIT", "WAIT_GOAL", "GEN_NEW_GLOBAL", "REPLAN_MID", "EXEC_LOCAL" };
 
-  cout << "[FSM]: state: " + state_str[int(exec_state_)] << endl;
+  // cout << "[FSM]: state: " + state_str[int(exec_state_)] << endl;
 }
 
 

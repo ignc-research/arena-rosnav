@@ -13,7 +13,8 @@ from geometry_msgs.msg import Pose2D, PoseWithCovarianceStamped, PoseStamped
 from nav_msgs.msg import OccupancyGrid, Path
 
 from .utils import generate_freespace_indices, get_random_pos_on_map
-
+# for clearing costmap
+from .clear_costmap import clear_costmaps
 
 class RobotManager:
     """
@@ -114,12 +115,11 @@ class RobotManager:
 
     def set_start_pos_random(self):
         start_pos = Pose2D()
-        start_pos.x, start_pos, start_pos.theta = get_random_pos_on_map(
+        start_pos.x, start_pos.y, start_pos.theta = get_random_pos_on_map(
             self._free_space_indices, self.map, self.ROBOT_RADIUS)
         self.move_robot(start_pos)
 
-    def set_start_pos_goal_pos(self, start_pos: Union[Pose2D, None]
-                               = None, goal_pos: Union[Pose2D, None] = None, min_dist=1):
+    def set_start_pos_goal_pos(self, start_pos: Union[Pose2D, None] = None, goal_pos: Union[Pose2D, None] = None, min_dist=1):
         """set up start position and the goal postion. Path validation checking will be conducted. If it failed, an
         exception will be raised.
 
@@ -231,6 +231,8 @@ class RobotManager:
         goal.pose.orientation.x = quaternion[1]
         goal.pose.orientation.y = quaternion[2]
         goal.pose.orientation.z = quaternion[3]
+        
+        clear_costmaps()
         self._goal_pub.publish(goal)
         # self._validate_path()
 
