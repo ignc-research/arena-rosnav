@@ -51,6 +51,9 @@ include_directories(
   ${EIGEN3_INCLUDE_DIR}
 )
 
+# this is important to find eigen path
+set(Eigen3_INCLUDE_DIRS ${EIGEN3_INCLUDE_DIR})
+
 
 add_executable(plan_manager_node
     #src/plan_manager_node.cpp 
