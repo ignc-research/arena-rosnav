@@ -55,8 +55,10 @@ Eigen::MatrixXd BsplineOptimizerESDF::BsplineOptimizeTraj(const Eigen::MatrixXd&
   setBsplineInterval(ts);
   setCostFunction(cost_function);
   setTerminateCond(max_num_id, max_time_id);
-
+  ROS_WARN_STREAM("************************ WARNING_1 *******************************");
   optimize();
+  ROS_WARN_STREAM("************************ WARNING_2 *******************************");
+
   return this->control_points_;
 }
 
@@ -121,6 +123,7 @@ void BsplineOptimizerESDF::optimize() {
   } else {
     variable_num_ = std::max(0, dim_ * (pt_num - 2 * order_)) ;
   }
+  ROS_WARN_STREAM("************************ WARNING_3 *******************************");
 
   /* do optimization using NLopt slover */
   nlopt::opt opt(nlopt::algorithm(isQuadratic() ? algorithm1_ : algorithm2_), variable_num_);
@@ -129,6 +132,7 @@ void BsplineOptimizerESDF::optimize() {
   opt.set_maxtime(max_iteration_time_[max_time_id_]);
   opt.set_xtol_rel(1e-5);
 
+  ROS_WARN_STREAM("************************ WARNING_4 *******************************");
   std::vector<double> q(variable_num_);
   for (int i = order_; i < pt_num; ++i) {
     if (!(cost_function_ & ENDPOINT) && i >= pt_num - order_) continue;
@@ -136,6 +140,7 @@ void BsplineOptimizerESDF::optimize() {
       q[dim_ * (i - order_) + j] = control_points_(j, i);
     }
   }
+  ROS_WARN_STREAM("************************ WARNING_5 *******************************");
 
   if (dim_ != 1) {
     std::vector<double> lb(variable_num_), ub(variable_num_);
@@ -148,6 +153,7 @@ void BsplineOptimizerESDF::optimize() {
     opt.set_upper_bounds(ub);
   }
 
+  ROS_WARN_STREAM("************************ WARNING_6 *******************************");
   try {
     // cout << fixed << setprecision(7);
     // vec_time_.clear();
@@ -157,6 +163,7 @@ void BsplineOptimizerESDF::optimize() {
     double        final_cost;
     nlopt::result result = opt.optimize(q, final_cost);
 
+  ROS_WARN_STREAM("************************ WARNING_7 *******************************");
     /* retrieve the optimization result */
     // cout << "Min cost:" << min_cost_ << endl;
   } catch (std::exception& e) {
@@ -171,6 +178,8 @@ void BsplineOptimizerESDF::optimize() {
     }
   }
 
+  ROS_WARN_STREAM("************************ WARNING_3 *******************************");
+  
   if (!(cost_function_ & GUIDE)) ROS_INFO_STREAM("iter num: " << iter_num_);
 }
 
