@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # ros
 import rospy
-from geometry_msgs.msg import PoseStamped, Twist, Vector3, Pose2D()
+from geometry_msgs.msg import PoseStamped, Twist, Vector3, Pose2D
 from nav_msgs.msg import Odometry, Path
 from sensor_msgs.msg import LaserScan
 # viz
@@ -42,9 +42,8 @@ class StateProvider():
         # subs
         self._robot_state_sub = rospy.Subscriber('/odom', Odometry, self.cbRobotPosition)
         self._ref_wp_sub = rospy.Subscriber('/plan_manager/subgoal', PoseStamped, self.cbSubGoal)
-        self._globalGoal = rospy.Subscriber('/goal', PoseStamped, self.cbGlobalGoal)
-        self._globalPlan_sub = rospy.Subscriber('/plan_manager/globalPlan', Path, self.cbglobalPlan)
-        self._twist_sub = rospy.Subscriber('/cmd_vel', Twist, self.cbTwist)
+        self._globalGoal_sub = rospy.Subscriber('/goal', PoseStamped, self.cbGlobalGoal)
+        self._globalPlan_sub = rospy.Subscriber('/plan_manager/globalPlan', Path, self.cbglobalPlan)   #todo in plan_manager.cpp publish the global plan
         self.subGoal_sub = rospy.Subscriber('/plan_manager/subgoal',PoseStamped, self.cbSubGoal)
         
         # pubs
@@ -58,6 +57,10 @@ class StateProvider():
         self._robot_pose.pose.position.x = msg.pose.pose.position.x
         self._robot_pose.pose.position.y = msg.pose.pose.position.y
         self._robot_pose.pose.orientation = msg.pose.pose.orientation
+        
+        self.distance2GlobalGoal.x = self.provideDistance2Goal(self._globalGoal)[0]              #distance to goal
+        self.distance2GlobalGoal.theta = self.provideDistance2Goal(self._globalGoal)[1]          #angle to goal
+        self.distance2global_pub.publish(self.distance2GlobalGoal)         
 
 
     def cbSubGoal(self,msg):
@@ -74,19 +77,18 @@ class StateProvider():
 
     def cbglobalPlan(self,msg):
         self._globalPlan = msg
-        self.globalGoal_pub.publish(self._globalPlan)
+        self.globalPlan_pub.publish(self._globalPlan)
  
-        
-    def cbTwist(self,msg):
-        self._robot_twist[0]= msg.linear.x
-        self._robot_twist[1] = msg.angular.z    
 
-    def provideDistance2Goal(self, goal: PoseStamped()):
+
+    
+    def provideDistance2Goal(self, goal):
         robotdistance2d = self.pose3D_to_pose2D(self._robot_pose.pose)
         goal = self.pose3D_to_pose2D(goal.pose)
         return self._calc_distance(goal,robotdistance2d)
-
-    def _calc_distance(self, goal_pos:Pose2D,robot_pos:Pose2D):
+        
+    @staticmethod
+    def _calc_distance(goal_pos:Pose2D,robot_pos:Pose2D):
          y_relative = goal_pos.y - robot_pos.y
          x_relative = goal_pos.x - robot_pos.x
         #  d=np.array[x_relative,y_relative]
@@ -107,7 +109,7 @@ class StateProvider():
         return pose2d
 
 
-    def goalReached(self, distance: Pose2D()):
+    def goalReached(self, distance:Pose2D):
         # how far away from goal?
         if distance.x > 0.3:
             return False
@@ -117,12 +119,11 @@ class StateProvider():
 
 def run():
 
-    rospy.init_node('state provider',anonymous=False)
+    rospy.init_node('stateprovider',anonymous=False)
 
     print('==================================\nStateProvider Node Started\n==================================')
 
     state_provider = StateProvider()
-    rospy.on_shutdown(state_provider.on_shutdown)
 
     rospy.spin()
 
