@@ -30,7 +30,7 @@
         <remap from="~safe_actions" to="local_path_finder/safe_actions"/>
         <remap from="~planner_mode" to="planner_fsm/mode"/>
         <remap from="~goal" to="/goal"/>
-        <remap from="~subgoal" to="/plan_manager/subgoal"/>
+        <remap from="~subgoal" to="/subgoal"/>
         <remap from="~clusters" to="/obst_odom"/>
         <remap from="~peds" to="ped_manager/ped_recent"/>
         
