@@ -65,7 +65,6 @@ private:
 
     /* timing */
     ros::Time goal_start_time_;
-    ros::Time subgoal_start_time_;
     ros::Time landmark_start_time_;
 
     double landmark_timeout_;
@@ -75,7 +74,7 @@ private:
     /* ROS utils */
     ros::NodeHandle node_;
     
-    ros::Timer exec_timer_;//, safety_timer_, vis_timer_;
+    ros::Timer exec_timer_, safety_timer_;// vis_timer_;
     
     // subscriber
     ros::Subscriber goal_sub_, odom_sub_;
@@ -96,7 +95,7 @@ private:
     void odometryCallback(const nav_msgs::OdometryConstPtr& msg);
     
     void execFSMCallback(const ros::TimerEvent& e);
-    //void checkCollisionCallback(const ros::TimerEvent& e);
+    void checkCollisionCallback(const ros::TimerEvent& e);
 
     
     void publishGlobalPath(const std::vector<Eigen::Vector2d> & global_path);

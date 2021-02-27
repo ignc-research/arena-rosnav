@@ -12,8 +12,7 @@ void PlanManager::init(ros::NodeHandle& nh) {
     public_node.param("/train_mode", train_mode, false);
     mode_=train_mode?TRAIN:TEST;
     node_.param("/timeout_goal",    timeout_goal_, 300.0);      //sec
-    node_.param("/timeout_subgoal", timeout_subgoal_, 3.0); //sec
-    node_.param("/dist_tolerance", dist_tolerance_, 0.5);
+    node_.param("/dist_tolerance", dist_tolerance_, 1.5);
     node_.param("/dist_lookahead", dist_lookahead_, 3.0);
 
     /* initialize inter planner modules */
@@ -27,7 +26,8 @@ void PlanManager::init(ros::NodeHandle& nh) {
     
     // /* callback */
     exec_timer_   = node_.createTimer(ros::Duration(0.01), &PlanManager::execFSMCallback, this);
-    
+    safety_timer_ = node_.createTimer(ros::Duration(0.05), &PlanManager::checkCollisionCallback, this);
+
     // // subscriber
     goal_sub_ =public_node.subscribe("goal", 1, &PlanManager::goalCallback, this);
     odom_sub_ = public_node.subscribe("odometry/ground_truth", 1, &PlanManager::odometryCallback, this); // odom  //odometry/ground_truth
@@ -193,9 +193,8 @@ void PlanManager::execFSMCallback(const ros::TimerEvent& e){
 
     /* --------------Case4:REPLAN_MID ---------------*/
     case REPLAN_MID: {
-      //set subgoal time counter(time driven event)
-      subgoal_start_time_=ros::Time::now();
-
+  
+      /* landmark timeout check */
       double time_cost_landmark=ros::Time::now().toSec()-landmark_start_time_.toSec();
 
       if(time_cost_landmark>landmark_timeout_){
@@ -203,9 +202,6 @@ void PlanManager::execFSMCallback(const ros::TimerEvent& e){
         changeFSMExecState(GEN_NEW_GLOBAL, "FSM");
         break;
       }
-
-      // get subgoal
-      bool get_subgoal_success=inter_planner_->makeSubgoal(odom_pt_, odom_vel_,timeout_subgoal_);
 
       // reset landmark start time if target landmark is changed
       if((curr_landmark_-inter_planner_->global_data_.getCurrentLandmark()).norm()>1.0){
@@ -218,6 +214,9 @@ void PlanManager::execFSMCallback(const ros::TimerEvent& e){
         // reset curr_landmark_
         curr_landmark_=curr_landmark;
       }
+
+      /* get subgoal */
+      bool get_subgoal_success=inter_planner_->makeSubgoal(odom_pt_, odom_vel_,3.0);
 
       if(get_subgoal_success){
         if(mode_==TRAIN)
@@ -246,14 +245,13 @@ void PlanManager::execFSMCallback(const ros::TimerEvent& e){
       }
 
       // distance to (global) goal
-      double dist_to_goal;
+      double dist_to_goal, dist_to_subgoal;
       dist_to_goal=(odom_pt_-end_pt_).norm();
+      dist_to_subgoal=(odom_pt_-inter_planner_->mid_data_.getSubgoal()).norm();
 
       
       double time_cost_goal=ros::Time::now().toSec()-goal_start_time_.toSec();
-      double time_cost_subgoal=ros::Time::now().toSec()-subgoal_start_time_.toSec();
-      
-
+     
       if(dist_to_goal<dist_tolerance_){
         have_goal_=false;
         cout<<"[Plan Manager]reached to goal success"<<endl;
@@ -268,15 +266,27 @@ void PlanManager::execFSMCallback(const ros::TimerEvent& e){
         return;
       }
 
-      /* subgoal replan: time driven event */
-      if(time_cost_subgoal>timeout_subgoal_){
-        ROS_INFO("[Plan Manager] REPLAN_MID replan is a time-driven event now");
+      if(dist_to_subgoal<dist_tolerance_*1.5){
+        cout<<"[Plan Manager]reached to subgoal success, to REPLAN_MID"<<endl;
         changeFSMExecState(REPLAN_MID, "FSM");
         return;
       }
     }
   }
 }
+
+void PlanManager::checkCollisionCallback(const ros::TimerEvent& e) {
+  Eigen::Vector2d subgoal=inter_planner_->mid_data_.getSubgoal();
+  bool is_collid=inter_planner_->checkColiisionSegment(odom_pt_,subgoal);
+
+  if(is_collid){
+    ROS_INFO("[Plan Manager] Current local traj is in collision, to REPLAN_MID");
+    if (exec_state_ == EXEC_LOCAL) {
+          changeFSMExecState(REPLAN_MID, "SAFETY");
+    }
+  }
+}
+
 
 /* helper functions */
 void PlanManager::changeFSMExecState(FSM_EXEC_STATE new_state, std::string pos_call) {

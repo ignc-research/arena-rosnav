@@ -151,6 +151,8 @@ public:
     /* helper */
     bool checkCollision(const Eigen::Vector2d &pos);
 
+    bool checkColiisionSegment(Eigen::Vector2d pt2, Eigen::Vector2d pt1);
+
     bool findCollisionWithinSegment(const Eigen::Vector2d &pt1,const Eigen::Vector2d &pt2,vector<Eigen::Vector2d> &inter_points);
 
     bool getPointSet(const vector<Eigen::Vector2d> &path, vector<Eigen::Vector2d> &point_set, double &ts);
