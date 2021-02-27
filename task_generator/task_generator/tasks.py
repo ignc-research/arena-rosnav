@@ -220,36 +220,36 @@ class StagedRandomTask(RandomTask):
         self.obstacles_manager.remove_obstacles()
 
 
-class ScenerioTask(ABSTask):
-    def __init__(self, obstacles_manager: ObstaclesManager, robot_manager: RobotManager, scenerios_json_path: str):
-        """ The scenerio_json_path only has the "Scenerios" section, which contains a list of scenerios
+class ScenarioTask(ABSTask):
+    def __init__(self, obstacles_manager: ObstaclesManager, robot_manager: RobotManager, scenarios_json_path: str):
+        """ The scenario_json_path only has the "Scenarios" section, which contains a list of scenarios
         Args:
-            scenerios_json_path (str): [description]
+            scenarios_json_path (str): [description]
         """
         super().__init__(obstacles_manager, robot_manager)
-        json_path = Path(scenerios_json_path)
-        print(scenerios_json_path)
+        json_path = Path(scenarios_json_path)
+        print(scenarios_json_path)
         # assert json_path.is_file() and json_path.suffix == ".json"
         json_data = json.load(json_path.open())
-        self._scenerios_data = json_data["scenerios"]
-        # current index of the scenerio
+        self._scenarios_data = json_data["scenarios"]
+        # current index of the scenario
         self._idx_curr_scene = -1
-        # The times of current scenerio repeated
+        # The times of current scenario repeated
         self._num_repeats_curr_scene = -1
-        # The times of current scenerio need to be repeated
+        # The times of current scenario need to be repeated
         self._max_repeats_curr_scene = 0
 
     def reset(self):
         info = {}
         with self._map_lock:
             if self._idx_curr_scene == -1 or self._num_repeats_curr_scene == self._max_repeats_curr_scene:
-                self._set_new_scenerio()
-                info["new_scenerio_loaded"] = True
+                self._set_new_scenario()
+                info["new_scenario_loaded"] = True
             else:
-                info["new_scenerio_loaded"] = False
+                info["new_scenario_loaded"] = False
                 self.obstacles_manager.move_all_obstacles_to_start_pos_tween2()
             # reset robot
-            robot_data = self._scenerios_data[self._idx_curr_scene]['robot']
+            robot_data = self._scenarios_data[self._idx_curr_scene]['robot']
             robot_start_pos = robot_data["start_pos"]
             robot_goal_pos = robot_data["goal_pos"]
             info["robot_goal_pos"] = robot_goal_pos
@@ -262,20 +262,20 @@ class ScenerioTask(ABSTask):
 
         return info
 
-    def _set_new_scenerio(self):
+    def _set_new_scenario(self):
         try:
             while True:
                 if self._num_repeats_curr_scene - self._num_repeats_curr_scene < 0:
                             break
                 self._idx_curr_scene += 1
-                scenerio_data = self._scenerios_data[self._idx_curr_scene]
-                scenerio_name = scenerio_data['scene_name']
-                # use can set "repeats" to a non-positive value to disable the scenerio
-                if scenerio_data["repeats"] > 0:
+                scenario_data = self._scenarios_data[self._idx_curr_scene]
+                scenario_name = scenario_data['scene_name']
+                # use can set "repeats" to a non-positive value to disable the scenario
+                if scenario_data["repeats"] > 0:
                     # set obstacles
                     self.obstacles_manager.remove_obstacles()
-                    watchers_dict = scenerio_data.setdefault('watchers', [])
-                    for obstacle_name, obstacle_data in scenerio_data["static_obstacles"].items():
+                    watchers_dict = scenario_data.setdefault('watchers', [])
+                    for obstacle_name, obstacle_data in scenario_data["static_obstacles"].items():
                         if obstacle_data['shape'] == 'circle':
                             self.obstacles_manager.register_static_obstacle_circle(obstacle_data['x'],obstacle_data['y'],obstacle_data['radius'])
                         # vertices uses global coordinate system, the order of the vertices is doesn't matter
@@ -287,7 +287,7 @@ class ScenerioTask(ABSTask):
                         else:
                             raise ValueError(f"Shape {obstacle_data['shape']} is not supported, supported shape 'circle' OR 'polygon'")
 
-                    for obstacle_name, obstacle_data in scenerio_data["dynamic_obstacles"].items():
+                    for obstacle_name, obstacle_data in scenario_data["dynamic_obstacles"].items():
                         # currently dynamic obstacle only has circle shape
                         obstacle_radius = obstacle_data["obstacle_radius"]
                         linear_velocity = obstacle_data['linear_velocity']
@@ -301,27 +301,27 @@ class ScenerioTask(ABSTask):
                             for trigger in obstacle_data['triggers']:
                                 if trigger not in watchers_dict:
                                     raise ValueError(
-                                        f"For dynamic obstacle [{obstacle_name}] the trigger: {trigger} not found in the corresponding 'watchers' dict for scene {scenerio_name} ")
+                                        f"For dynamic obstacle [{obstacle_name}] the trigger: {trigger} not found in the corresponding 'watchers' dict for scene {scenario_name} ")
                                 trigger_zones.append(
                                     watchers_dict[trigger]['pos']+[watchers_dict[trigger]['range']])
                         self.obstacles_manager.register_dynamic_obstacle_circle_tween2(
                             obstacle_name, obstacle_radius, linear_velocity, start_pos, waypoints, is_waypoint_relative, mode, trigger_zones)
                     # self.robot_
-                    robot_data = scenerio_data["robot"]
+                    robot_data = scenario_data["robot"]
                     robot_start_pos = robot_data["start_pos"]
                     robot_goal_pos = robot_data["goal_pos"]
                     self.robot_manager.set_start_pos_goal_pos(
                         Pose2D(*robot_start_pos), Pose2D(*robot_goal_pos))
 
                     self._num_repeats_curr_scene = 0
-                    self._max_repeats_curr_scene = scenerio_data["repeats"]
+                    self._max_repeats_curr_scene = scenario_data["repeats"]
                     break
 
         except IndexError as e:
-            raise StopReset("All scenerios have been evaluated!") from e
+            raise StopReset("All scenarios have been evaluated!") from e
 
     @staticmethod
-    def generate_scenerios_json_example(dst_json_path: str):
+    def generate_scenarios_json_example(dst_json_path: str):
         dst_json_path_ = Path(dst_json_path)
         dst_json_path_.parent.mkdir(parents=True, exist_ok=True)
         json_data = {}
@@ -368,7 +368,7 @@ class ScenerioTask(ABSTask):
         scene2['robot'] = scene2_robot
         scene2['watchers'] = {'watcher_1': {
             'pos': [1, 1], 'range': 4}, 'watcher_2': {'pos': [1, 1], 'range': 4}}
-        json_data['scenerios'] = [scene1, scene2]
+        json_data['scenarios'] = [scene1, scene2]
         json.dump(json_data, dst_json_path_.open('w'), indent=4)
 
 
@@ -429,8 +429,8 @@ def get_predefined_task(mode="random", start_stage: int = 1, PATHS: dict = None)
     if mode == "staged":
         task = StagedRandomTask(
             obstacles_manager, robot_manager, start_stage, PATHS)
-    if mode == "ScenerioTask":
-        task = ScenerioTask(obstacles_manager, robot_manager,
-                            PATHS['scenerios_json_path'])
+    if mode == "ScenarioTask":
+        task = ScenarioTask(obstacles_manager, robot_manager,
+                            PATHS['scenarios_json_path'])
 
     return task

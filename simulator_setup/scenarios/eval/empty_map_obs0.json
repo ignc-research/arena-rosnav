@@ -1,5 +1,5 @@
 {
-    "scenerios": [
+    "scenarios": [
         {
             "scene_name": "scenario_1",
             "repeats": 30,

@@ -1,5 +1,5 @@
 {
-    "scenerios": [
+    "scenarios": [
         {
             "scene_name": "obstacle_map_0",
             "repeats": 30,
