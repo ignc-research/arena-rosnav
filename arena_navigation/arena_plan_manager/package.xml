@@ -68,8 +68,12 @@
   <exec_depend>sensor_msgs</exec_depend>
   <exec_depend>std_msgs</exec_depend>
   <depend>arena_plan_msgs</depend>
-  <depend>plan_visualization</depend>
+  <depend>arena_mapping</depend>
   <depend>arena_fake_localization</depend>
+  <depend>arena_intermediate_planner</depend>
+  <depend>arena_path_search</depend>
+
+  
 
 
   <!-- The export tag contains other, unspecified, tags -->
