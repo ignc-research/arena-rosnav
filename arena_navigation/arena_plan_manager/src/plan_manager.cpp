@@ -137,8 +137,8 @@ void PlanManager::execFSMCallback(const ros::TimerEvent& e){
   fsm_num++;
   if (fsm_num == 100) {
     printFSMExecState();
-    if (!have_odom_) cout << "[Plan Manager]no odom." << endl;
-    if (!have_goal_) cout << "[Plan Manager]wait for goal." << endl;
+    // if (!have_odom_) cout << "[Plan Manager]no odom." << endl;
+    // if (!have_goal_) cout << "[Plan Manager]wait for goal." << endl;
     fsm_num = 0;
   }
 
@@ -226,7 +226,7 @@ void PlanManager::execFSMCallback(const ros::TimerEvent& e){
           publishSubgoal(inter_planner_->mid_data_.getSubgoal());
         }
 
-        cout<<"[Plan Manager]MID_REPLAN Success"<<endl;
+        // cout<<"[Plan Manager]MID_REPLAN Success"<<endl;
         changeFSMExecState(EXEC_LOCAL, "FSM");
       }else{
         ROS_WARN("[Plan Manager] Replan mid failed, no subgoal generated");
@@ -254,7 +254,7 @@ void PlanManager::execFSMCallback(const ros::TimerEvent& e){
      
       if(dist_to_goal<dist_tolerance_){
         have_goal_=false;
-        cout<<"[Plan Manager]reached to goal success"<<endl;
+        // cout<<"[Plan Manager]reached to goal success"<<endl;
         changeFSMExecState(WAIT_GOAL, "FSM");
         return;
       }
@@ -267,7 +267,7 @@ void PlanManager::execFSMCallback(const ros::TimerEvent& e){
       }
 
       if(dist_to_subgoal<dist_tolerance_*1.5){
-        cout<<"[Plan Manager]reached to subgoal success, to REPLAN_MID"<<endl;
+        // cout<<"[Plan Manager]reached to subgoal success, to REPLAN_MID"<<endl;
         changeFSMExecState(REPLAN_MID, "FSM");
         return;
       }
@@ -293,13 +293,13 @@ void PlanManager::changeFSMExecState(FSM_EXEC_STATE new_state, std::string pos_c
   string state_str[5] = {"INIT", "WAIT_GOAL", "GEN_NEW_GLOBAL", "REPLAN_MID", "EXEC_LOCAL" };
   int    pre_s        = int(exec_state_);
   exec_state_         = new_state;
-  cout << "[" + pos_call + "]: from " + state_str[pre_s] + " to " + state_str[int(new_state)] << endl;
+  // cout << "[" + pos_call + "]: from " + state_str[pre_s] + " to " + state_str[int(new_state)] << endl;
 }
 
 void PlanManager::printFSMExecState() {
   string state_str[5] =  {"INIT", "WAIT_GOAL", "GEN_NEW_GLOBAL", "REPLAN_MID", "EXEC_LOCAL" };
 
-  cout << "[FSM]: state: " + state_str[int(exec_state_)] << endl;
+  // cout << "[FSM]: state: " + state_str[int(exec_state_)] << endl;
 }
 
 
