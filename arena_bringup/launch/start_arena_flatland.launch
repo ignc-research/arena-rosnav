@@ -36,12 +36,12 @@
   <include file="$(find arena_bringup)/launch/sublaunch/flatland_simulator.launch">
     <arg name="world_path"      value="$(arg world_path)"/>
 
-    <arg name="update_rate"     default="60.0"/>
-    <arg name="step_size"       default="0.05"/>
+    <arg name="update_rate"     default="1000.0"/>
+    <arg name="step_size"       default="0.005"/>
 
     <arg name="show_viz"        default="true"/>
 
-    <arg name="viz_pub_rate"    default="30.0"/>
+    <arg name="viz_pub_rate"    default="50.0"/>
     <arg name="use_rviz"        default="$(arg use_viz)"/>  
     <arg name="train_mode"      value="$(arg train_mode)"/>
     <arg name="rviz_file"       value="$(arg rviz_file)"/>
@@ -79,7 +79,6 @@
     <arg name="dist_lookahead"          default="3.0" /><!-- meter, double-->
     <arg name="dist_tolerance"          default="1.0" /><!-- meter, double-->
     <arg name="timeout_goal"            default="300.0" />  <!-- Timeout for plan manager fsm             sec, double-->
-    <arg name="timeout_subgoal"         default="3.0" />    <!-- Period for time-driven subgoal generator  sec, double-->
   </include>
 
   
