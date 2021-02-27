@@ -61,7 +61,7 @@
 
   <!-- start task_generator node -->
   <include file="$(find arena_bringup)/launch/sublaunch/task_generator.launch" unless="$(arg disable_scenario)">
-   <arg name="scenerios_json_path" value="$(find simulator_setup)/scenerios/$(arg scenario_file)"/>
+   <arg name="scenerios_json_path" value="$(find simulator_setup)/scenarios/$(arg scenario_file)"/>
   </include>
    <include file="$(find arena_bringup)/launch/sublaunch/sensor_sim.launch" unless="$(arg disable_scenario)">
   </include>

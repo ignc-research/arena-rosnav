@@ -10,7 +10,7 @@ Panels:
         - /Plan Manager1/local_traj1
         - /Walkers1
       Splitter Ratio: 0.4374079406261444
-    Tree Height: 797
+    Tree Height: 1145
   - Class: rviz/Selection
     Name: Selection
   - Class: rviz/Tool Properties
@@ -935,7 +935,7 @@ Visualization Manager:
           Marker Topic: /plan_manager/vis_goal
           Name: goal
           Namespaces:
-            "": true
+            {}
           Queue Size: 100
           Value: true
         - Class: rviz/Marker
@@ -943,7 +943,7 @@ Visualization Manager:
           Marker Topic: /plan_manager/vis_subgoal
           Name: subgoal
           Namespaces:
-            "": true
+            {}
           Queue Size: 100
           Value: true
         - Class: rviz/Marker
@@ -951,7 +951,7 @@ Visualization Manager:
           Marker Topic: /plan_manager/vis_landmarks_
           Name: landmarks
           Namespaces:
-            "": true
+            {}
           Queue Size: 100
           Value: true
       Enabled: true
@@ -963,7 +963,7 @@ Visualization Manager:
           Marker Topic: /flatland_server/debug/model/walker_model4
           Name: MarkerArray
           Namespaces:
-            "": true
+            {}
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -971,7 +971,7 @@ Visualization Manager:
           Marker Topic: /flatland_server/debug/model/walker_model3
           Name: MarkerArray
           Namespaces:
-            "": true
+            {}
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -979,7 +979,7 @@ Visualization Manager:
           Marker Topic: /flatland_server/debug/model/walker_model1
           Name: MarkerArray
           Namespaces:
-            "": true
+            {}
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -1007,7 +1007,7 @@ Visualization Manager:
           Marker Topic: /flatland_server/debug/model/random_model5
           Name: MarkerArray
           Namespaces:
-            "": true
+            {}
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -1015,7 +1015,7 @@ Visualization Manager:
           Marker Topic: /flatland_server/debug/model/random_model4
           Name: MarkerArray
           Namespaces:
-            "": true
+            {}
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -1023,7 +1023,7 @@ Visualization Manager:
           Marker Topic: /flatland_server/debug/model/random_model3
           Name: MarkerArray
           Namespaces:
-            "": true
+            {}
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -1031,7 +1031,7 @@ Visualization Manager:
           Marker Topic: /flatland_server/debug/model/random_model2
           Name: MarkerArray
           Namespaces:
-            "": true
+            {}
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -1039,7 +1039,7 @@ Visualization Manager:
           Marker Topic: /flatland_server/debug/model/random_model1
           Name: MarkerArray
           Namespaces:
-            "": true
+            {}
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -1047,7 +1047,7 @@ Visualization Manager:
           Marker Topic: /flatland_server/debug/model/random_model0
           Name: MarkerArray
           Namespaces:
-            "": true
+            {}
           Queue Size: 100
           Value: true
       Enabled: true
@@ -1077,7 +1077,7 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Angle: -7.84500789642334
+      Angle: -7.870006561279297
       Class: rviz/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
@@ -1087,19 +1087,19 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 21.464656829833984
+      Scale: 24.040414810180664
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
-      X: 10.32609748840332
-      Y: 0.436614990234375
+      X: 10.665765762329102
+      Y: 7.094140529632568
     Saved: ~
 Window Geometry:
   Displays:
     collapsed: false
-  Height: 1020
+  Height: 1368
   Hide Left Dock: false
   Hide Right Dock: false
-  QMainWindow State: 000000ff00000000fd00000004000000000000023b000003a6fc0200000005fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000198000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000003b000003a6000000c700ffffff000000010000010f00000270fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000002800000270000000a000fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004a00000003efc0100000002fb0000000800540069006d00650000000000000004a00000024400fffffffb0000000800540069006d006501000000000000045000000000000000000000053f000003a600000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd00000004000000000000017700000502fc0200000005fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000198000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000003b00000502000000c700ffffff000000010000010f00000270fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000002800000270000000a000fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004a00000003efc0100000002fb0000000800540069006d00650000000000000004a00000024400fffffffb0000000800540069006d00650100000000000004500000000000000000000003100000050200000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Time:
@@ -1108,6 +1108,6 @@ Window Geometry:
     collapsed: false
   Views:
     collapsed: false
-  Width: 1920
-  X: 0
+  Width: 1165
+  X: 1
   Y: 31
