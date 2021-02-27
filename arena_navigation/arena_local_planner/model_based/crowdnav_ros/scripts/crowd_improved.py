@@ -26,8 +26,8 @@ from std_msgs.msg import ColorRGBA
 
 class TestNode():
     def __init__(self, env, env_config, policy):
-        self.tb3 = RosNav('/goal','/plan_manager/subgoal')
-        # self.tb3 = RosNav('/goal','/goal')
+        self.tb3 = RosNav('/lp_goal','/lp_goal')
+        # self.tb3 = RosNav('/goal','/plan_manager/subgoal')
         self.desired_speed = 0.3
         self.angle2Action = 0.0
 
@@ -50,7 +50,7 @@ class TestNode():
         self.other_agents_state = {}
         self.desired_position = PoseStamped()
 
-
+        self.pub_goal = rospy.Publisher('/lp_goal',PoseStamped,queue_size=1)
 
         # control loop
         rospy.Timer(rospy.Duration(0.01),self.cbControl)
@@ -110,7 +110,7 @@ class TestNode():
         return phi
     
     def cbControl(self,event):
-        holonomic = False
+        holonomic = True
         twist = Twist()
         if not self.tb3.goalReached():
             if holonomic:
@@ -140,6 +140,14 @@ class TestNode():
         self.visualize_action()
 
     def cbComputeActionCrowdNav(self,event):
+
+        goal = PoseStamped()
+        goal.header.frame_id = "map"
+        goal.header.stamp = rospy.Time.now()
+        goal.pose.position.x = -2.5
+        goal.pose.position.y = -3
+        self.pub_goal.publish(goal)
+
         robot_x = self.tb3.pose.pose.position.x
         robot_y = self.tb3.pose.pose.position.y
         # goal
@@ -251,7 +259,7 @@ class TestNode():
 def run():
     
     # start node
-    rospy.init_node("crowd_test", anonymous=False)
+    rospy.init_node("crowd_impr", anonymous=False)
     # rospy.sleep(0.1) # sometimes node isnt recognized
     print('==================================\ncrowd-node started\n==================================')
 

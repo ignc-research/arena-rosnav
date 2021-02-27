@@ -382,7 +382,7 @@ class newBag():
         self.find_zones(cells,acxy,clr)
 
     def find_zones(self, cells, acxy, clr):
-        global ax, plot_zones
+        global ax, plot_zones, grid_step
         zones = {}
 
         for i in range(len(acxy[0])):
@@ -420,64 +420,98 @@ class newBag():
                             zones[str(cell_nr)+"_c"][1] += y
                             zones[str(cell_nr)+"_c"][1] /= 2
                         else:
-                            zones[cell_nr] = [[x,y]]
+                            zones[cell_nr]           = [[x,y]]
                             zones[str(cell_nr)+"_c"] = [x,y]
                         break
 
-        col_tol = 5
-        # merged_cells = []
-        # merged_zones = {}
-        if plot_zones:
-            for i in zones:
-                nof_cols = len(zones[i])
-                if nof_cols >= col_tol:
 
-                    center = zones[str(i)+"_c"]
-                    radius = 0.4 + 0.1*nof_cols
-                    circle = plt.Circle((center[0], center[1]), radius, color=clr, fill = False, alpha = 1, lw = 2)
-                    ax.add_patch(circle)
 
                     # print(i, nof_cols)
         
-        merge_complete = False
 
-        for key in zones:
-            print(key)
         print("---------------------")
-        while not merge_complete:
-            for i in zones.copy():
-                if  str(i)+"_c" in zones:
-                    nof_cols = len(zones[i])
-                    if nof_cols >= col_tol:
-                        center = zones[str(i)+"_c"]
-                        for j in zones.copy():
-                            if  str(j)+"_c" in zones:
-                                nof_cols_2 = len(zones[j])
-                                if nof_cols_2 >= col_tol:
-                                    center_2 = zones[str(j)+"_c"]
 
-                                    if (center[0]-center_2[0])**2 + (center[1]-center_2[1])**2 > 4:
-                                        # center 2 is near center 1
-                                        zones[str(i)+"_c"] = [(x + y)/2 for x, y in zip(zones[str(i)+"_c"], zones[str(j)+"_c"])]
-                                        del zones[str(j)+"_c"]
-                                        merge_complete = True
-                                        break
+        # for key in filtered_zones:
+        #     print(key)
 
-        for key in zones:
-            print(key)
+        rows = np.shape(cells)[0]
+
+        self.merge_zones(zones, clr, rows)
+
+    def merge_zones(self, zones, clr, rows):
+
+        col_tol = 5
+        filtered_zones = {}
 
         if plot_zones:
             for i in zones:
                 nof_cols = len(zones[i])
-                if nof_cols >= col_tol and str(i)+"_c" in zones:
-                    print()
+                
+                if nof_cols > 0 and isinstance(i, str):
+                    filtered_zones[i] = zones[i]
+                    filtered_zones[i+"n"] = nof_cols
+
+                if nof_cols >= col_tol:
                     center = zones[str(i)+"_c"]
                     radius = 0.4 + 0.1*nof_cols
                     circle = plt.Circle((center[0], center[1]), radius, color=clr, fill = False, alpha = 1, lw = 2)
                     ax.add_patch(circle)
 
+        print(filtered_zones)
+        merged = []
+        while True:
+            for i in filtered_zones:
 
-                                
+                if "c" in i and not "n" in i: 
+                    center = filtered_zones[i]
+
+                    # construct adjacent cells
+                    k = int(i.replace("_c",""))
+
+                    # adjacent cells
+                    # left right
+                    left_cell  = k - 1
+                    right_cell = k + 1
+                    # top bot
+                    top_cell   = k + rows
+                    bot_cell   = k - rows
+                    # diagonal
+                    top_right  = k + rows + 1
+                    top_left   = k + rows - 1
+                    bot_right  = k - rows + 1
+                    bot_left   = k - rows - 1
+
+                    # print(i, center)
+                    adj_cells = [left_cell, right_cell, top_cell, bot_cell, top_right, top_left, bot_right, bot_left]
+
+                    for ad in adj_cells:
+                        key  = str(ad)+"_c"
+                        # check if 
+                        if key in filtered_zones:
+                            ad_c = filtered_zones[key]
+
+                            dist = math.sqrt((ad_c[0] - center[0])**2 + (ad_c[1] - center[1])**2)
+                            if dist < grid_step:
+                                print(i,key)
+                                print(dist)
+                                cm_x = (ad_c[0] + center[0])/2
+                                cm_y = (ad_c[1] + center[1])/2
+
+                                print(cm_x,ad_c[0],center[0])
+                                print(cm_y,ad_c[1],center[1])
+                                merged.append([cm_x, cm_y])
+
+            break
+
+        # if plot_zones:
+        #     for i in merged:
+        #         radius = 1
+        #         circle = plt.Circle((i[0], i[1]), radius, color=clr, fill = False, alpha = 1, lw = 2)
+        #         ax.add_patch(circle)
+    # def merge_closest_elements(self, arr):
+
+
+
 
 def plot_arrow(start,end):
     global ax
@@ -645,7 +679,7 @@ def run():
     plot_trj        = False
     plot_zones      = True
     plot_collisions = True
-    plot_grid       = True
+    plot_grid       = False
     # static map
     rospy.init_node("eval", anonymous=False)
     rospy.Subscriber('/flatland_server/debug/layer/static',MarkerArray, getMap)
@@ -674,7 +708,7 @@ def run():
 
 
     # eval_all(["arena","cadrl","dwa","mpc","teb"],"empty","20","vel_03")
-    eval_all(["cadrl"],"map1","20","vel_03")
+    eval_all(["arena","cadrl","dwa","mpc","teb"],"empty","10","vel_03")
 
     
     

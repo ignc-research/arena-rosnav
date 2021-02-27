@@ -250,6 +250,7 @@ class RobotAction(object):
             self.Is_goal_reached = True
 
         else:
+            self.Is_goal_reached = False
             """
             self state: FullState(px, py, vx, vy, radius, gx, gy, v_pref, theta)
             ob:[ObservableState(px1, py1, vx1, vy1, radius1),
@@ -261,7 +262,7 @@ class RobotAction(object):
                 self.ob = [ObservableState(FAKE_HUMAN_PX, FAKE_HUMAN_PY, 0, 0, HUMAN_RADIUS)]
 
             self.state = JointState(robot.get_full_state(), self.ob)
-            print(robot.get_full_state())
+
             action = policy.predict(self.state)  # max_action
             self.cmd_vel.linear.x = 0.5*action.v
             self.cmd_vel.linear.y = 0
@@ -269,6 +270,9 @@ class RobotAction(object):
             self.cmd_vel.angular.x = 0
             self.cmd_vel.angular.y = 0
             self.cmd_vel.angular.z = action.r
+
+            print(self.cmd_vel.linear.x, self.cmd_vel.angular.z)
+
 
         ########### for debug ##########
         # dist_to_goal = np.linalg.norm(np.array(robot.get_position()) - np.array(robot.get_goal_position()))
@@ -283,11 +287,9 @@ class RobotAction(object):
 
 
         # publish velocity
-        print(self.cmd_vel)
         self.cmd_vel_pub.publish(self.cmd_vel)
         self.plan_counter += 1
         self.visualize_action()
-
 
 if __name__ == '__main__':
     begin_travel = False

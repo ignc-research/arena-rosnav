@@ -18,6 +18,7 @@ class TaskGenerator:
         paths = {"scenerios_json_path": scenerios_json_path}
         self.task = get_predefined_task(mode, PATHS=paths)
 
+
         # if auto_reset is set to true, the task generator will automatically reset the task
         # this can be activated only when the mode set to 'ScenerioTask'
         auto_reset = rospy.get_param("~auto_reset")
@@ -33,13 +34,17 @@ class TaskGenerator:
             self.reset_task()
             self.robot_pos_sub_ = rospy.Subscriber(
                 robot_odom_topic_name, Odometry, self.check_robot_pos_callback)
+
+            rospy.Timer(rospy.Duration(0.5),self.goal_reached)
+            
         else:
             # declare new service task_generator, request are handled in callback task generate
-            self.task_generator_srv_ = rospy.Service(
-                'task_generator', Empty, self.reset_srv_callback)
+            self.reset_task()
+            # self.task_generator_srv_ = rospy.Service(
+            #     'task_generator', Empty, self.reset_srv_callback)
+                
         self.err_g = 100
         
-        rospy.Timer(rospy.Duration(0.5),self.goal_reached)
 
 
     def goal_reached(self,event):

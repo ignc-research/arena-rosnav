@@ -113,13 +113,20 @@ class TestNode():
         twist = Twist()
         if not self.tb3.goalReached():
             # abs(self.angle2Action) > 0.1 and
-            vel = np.array([self.tb3.raw_action[0],self.tb3.raw_action[1]])
-            if abs(self.angle2Action) < math.pi/2:
-                twist.linear.x = 0.3*np.linalg.norm(vel)
+            unicycle = False
+            if unicycle:
+                twist.angular.z = self.tb3.raw_action[1]/2
+                twist.linear.x = self.tb3.raw_action[0]*0.3
             else:
-                twist.linear.x = 0.1*np.linalg.norm(vel)
+                vel = np.array([self.tb3.raw_action[0],self.tb3.raw_action[1]])
+                if abs(self.angle2Action) < math.pi/2:
+                    twist.linear.x = 0.3*np.linalg.norm(vel)
+                else:
+                    twist.linear.x = 0.1*np.linalg.norm(vel)
 
-            twist.angular.z = self.max_yaw(self.angle2Action)
+                twist.angular.z = self.max_yaw(self.angle2Action)
+
+
             
         self.tb3.pub_twist.publish(twist)
 
@@ -155,7 +162,7 @@ class TestNode():
         # velocity
         obstacle_vx = [0.0,0.0,0.0,0.0,0.0]
         obstacle_vy = [0.0,0.0,0.0,0.0,0.0]
-        obstacle_radius = 6
+        obstacle_radius = 0.3
         if True:
             for prop in self.other_agents_state:
                 if prop == "pos":
@@ -194,7 +201,8 @@ class TestNode():
         self.desired_position.pose.position.y = self.tb3.pose.pose.position.y + (action[1])
 
         self.tb3.update_action(action)
-        print(action.v,action.r)
+        # print(action.v,action.r)
+        print(action)
         self.update_angle2Action()
 
     def visualize_other_agents(self,xs,ys,radii,labels):
