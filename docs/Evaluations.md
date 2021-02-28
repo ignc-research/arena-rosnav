@@ -1,5 +1,26 @@
 ## Evaluations
 We provide tools to evaluate the planners.
+
+
+## Update 28.02.2021
+Test subsampling
+* Compile the project using following command
+```
+catkin_make -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=/usr/bin/python3
+```
+
+* Install CADRL dependencies (venv always activated!)
+* Create a new venv:
+```
+mkvirtualenv --python=python3.6 cadrl
+```
+* Activate your venv with workon cadrl and install the dependencies:
+```
+cd /arena-rosnav/arena_navigation/arena_local_planner/env/requirements_cadrl.txt
+pip install -r requirements_cadrl.txt
+```
+
+
 ### Usage
 #### 1) Start Simulation
 ```
@@ -26,7 +47,7 @@ When using "teb", "dwa" or "mpc" you need to start the scenario by manually putt
 
 #### 2) Record Rosbags
 ```
-rosbag record -o cadrl_map1_ob10_vel_01 /scenario_reset -e "(.*)police(.*)"
+rosbag record -o cadrl_map1_ob10_vel_01 /scenario_reset /subgoal /goal /globalPlan -e "(.*)police(.*)"
 ```
 Explanation:
 * this command will record all topics necessary for evaluation
