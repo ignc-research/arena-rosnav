@@ -25,7 +25,7 @@ pip install -r requirements_cadrl.txt
 #### 1) Start Simulation
 In a terminal, activate your cadrl venv, source devel/setup.zsh and start the simulation:
 ```
-roslaunch arena_bringup start_arena_flatland.launch disable_scenario:="false" map_file:="map1" scenario_file:="eval/obstacle_map1_obs10.json" local_planner:="teb"
+roslaunch arena_bringup start_arena_flatland.launch disable_scenario:="false" map_file:="map1" scenario_file:="eval/obstacle_map1_obs10.json" local_planner:="cadrl"
 ```
 Explanation:
 * disable_scenario:="false": to start a scenario (otherwise only the map will be loaded without additional obstacles / goals)
