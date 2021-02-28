@@ -34,7 +34,7 @@ void PlanManager::init(ros::NodeHandle& nh) {
 
     // // publisher
     global_plan_pub_ = public_node.advertise<nav_msgs::Path>("globalPlan", 10, true);        // relative name:/ns/node_name/globalPlan
-    subgoal_pub_  = public_node.advertise<geometry_msgs::PoseStamped>("subgoal",10);// relative name:/ns/node_name/subgoal
+    subgoal_pub_  = public_node.advertise<geometry_msgs::PoseStamped>("subgoal1",10);// relative name:/ns/node_name/subgoal
     robot_state_pub_  = public_node.advertise<arena_plan_msgs::RobotStateStamped>("robot_state",10);
 }
   

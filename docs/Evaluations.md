@@ -1,9 +1,29 @@
 ## Evaluations
 We provide tools to evaluate the planners.
+
+## Update 28.02.2021
+To test the ESDF WP-Generator, stay on this branch, to test simple subsampling, switch to branch z_eval_subsampling and go to the docs/evaluation.md
+* Compile the project using following command
+```
+catkin_make -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=/usr/bin/python3
+```
+
+* Install CADRL dependencies (venv always activated!)
+* Create a new venv:
+```
+mkvirtualenv --python=python3.6 cadrl
+```
+* Activate your venv with workon cadrl and install the dependencies:
+```
+cd /arena-rosnav/arena_navigation/arena_local_planner/env/requirements_cadrl.txt
+pip install -r requirements_cadrl.txt
+```
+
+
 ### Usage
 #### 1) Start Simulation
 ```
-roslaunch arena_bringup start_arena_flatland.launch disable_scenario:="false" map_file:="map1" scenario_file:="eval/obstacle_map1_obs10.json" local_planner:="teb"
+roslaunch arena_bringup start_arena_flatland.launch disable_scenario:="false" map_file:="map1" scenario_file:="eval/obstacle_map1_obs10.json" local_planner:="cadrl"
 ```
 Explanation:
 * disable_scenario:="false": to start a scenario (otherwise only the map will be loaded without additional obstacles / goals)
@@ -26,14 +46,14 @@ When using "teb", "dwa" or "mpc" you need to start the scenario by manually putt
 
 #### 2) Record Rosbags
 ```
-rosbag record -o cadrl_map1_ob10_vel_01 /scenario_reset -e "(.*)police(.*)"
+rosbag record -o cadrl_map1_ob10_vel_01 /scenario_reset /subgoal /goal /globalPlan -e "(.*)police(.*)"
 ```
 Explanation:
 * this command will record all topics necessary for evaluation
 * -e "(.*)police(.*)": records all topics containing "police"
 * cadrl_map1_ob10_vel_01: name of bag file, in this example the cadrl planner was recorded in map1 with 10 obstacles with lin_vel = 0.1
 
-#### After one test run is over, stop the rosbag command and go to the scenario.json files. Change the linear velocity of every dynamic obstacle in the scenario.json file and start from step 1) again. (start simulation and start rosbag command again). If there are any issues while recording and you want to record a new recording, just stop the rosbag command and simulation and start over again. The rosbags will be saved as a new file. 
+#### After one test run is over, stop the rosbag command and go to the scenario.json files. Change the linear velocity of every dynamic obstacle in the scenario.json file and start from step 1) again. (start simulation and start rosbag command again). If there are any issues while recording and you want to record a new recording, just stop the rosbag command and simulation and start over again. The rosbags will be saved as a new file inside the current repository. 
 
 #### If you want to check the current scenario progress:
 ```

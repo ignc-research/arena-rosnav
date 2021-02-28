@@ -10,7 +10,7 @@ Panels:
         - /Plan Manager1/local_traj1
         - /Walkers1
       Splitter Ratio: 0.4374079406261444
-    Tree Height: 1145
+    Tree Height: 896
   - Class: rviz/Selection
     Name: Selection
   - Class: rviz/Tool Properties
@@ -375,7 +375,7 @@ Visualization Manager:
               Marker Topic: /flatland_server/debug/model/obstacle_circle_static_00
               Name: 0
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -383,7 +383,7 @@ Visualization Manager:
               Marker Topic: /flatland_server/debug/model/obstacle_circle_static_01
               Name: 1
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -391,7 +391,7 @@ Visualization Manager:
               Marker Topic: /flatland_server/debug/model/obstacle_circle_static_02
               Name: 2
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -399,7 +399,7 @@ Visualization Manager:
               Marker Topic: /flatland_server/debug/model/obstacle_circle_static_03
               Name: 3
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -407,7 +407,7 @@ Visualization Manager:
               Marker Topic: /flatland_server/debug/model/obstacle_circle_static_04
               Name: 4
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -415,7 +415,7 @@ Visualization Manager:
               Marker Topic: /flatland_server/debug/model/obstacle_circle_static_05
               Name: 5
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -423,7 +423,7 @@ Visualization Manager:
               Marker Topic: /flatland_server/debug/model/obstacle_circle_static_06
               Name: 6
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -431,7 +431,7 @@ Visualization Manager:
               Marker Topic: /flatland_server/debug/model/obstacle_circle_static_07
               Name: 7
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -439,7 +439,7 @@ Visualization Manager:
               Marker Topic: /flatland_server/debug/model/obstacle_circle_static_08
               Name: 8
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -447,7 +447,7 @@ Visualization Manager:
               Marker Topic: /flatland_server/debug/model/obstacle_circle_static_09
               Name: 9
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -455,7 +455,7 @@ Visualization Manager:
               Marker Topic: /flatland_server/debug/model/obstacle_circle_static_10
               Name: 10
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -463,7 +463,7 @@ Visualization Manager:
               Marker Topic: /flatland_server/debug/model/obstacle_circle_static_11
               Name: 11
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -471,7 +471,7 @@ Visualization Manager:
               Marker Topic: /flatland_server/debug/model/obstacle_circle_static_12
               Name: 12
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -479,7 +479,7 @@ Visualization Manager:
               Marker Topic: /flatland_server/debug/model/obstacle_circle_static_13
               Name: 13
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -487,7 +487,7 @@ Visualization Manager:
               Marker Topic: /flatland_server/debug/model/obstacle_circle_static_14
               Name: 14
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -495,7 +495,7 @@ Visualization Manager:
               Marker Topic: /flatland_server/debug/model/obstacle_circle_static_15
               Name: 15
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -503,7 +503,7 @@ Visualization Manager:
               Marker Topic: /flatland_server/debug/model/obstacle_circle_static_16
               Name: 16
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -511,7 +511,7 @@ Visualization Manager:
               Marker Topic: /flatland_server/debug/model/obstacle_circle_static_17
               Name: 17
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -519,7 +519,7 @@ Visualization Manager:
               Marker Topic: /flatland_server/debug/model/obstacle_circle_static_18
               Name: 18
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -527,7 +527,7 @@ Visualization Manager:
               Marker Topic: /flatland_server/debug/model/obstacle_circle_static_19
               Name: 19
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -535,7 +535,7 @@ Visualization Manager:
               Marker Topic: /flatland_server/debug/model/obstacle_circle_static_20
               Name: 20
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -543,7 +543,7 @@ Visualization Manager:
               Marker Topic: /flatland_server/debug/model/obstacle_circle_static_21
               Name: 21
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -551,7 +551,7 @@ Visualization Manager:
               Marker Topic: /flatland_server/debug/model/obstacle_circle_static_22
               Name: 22
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -559,7 +559,7 @@ Visualization Manager:
               Marker Topic: /flatland_server/debug/model/obstacle_circle_static_23
               Name: 23
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -579,7 +579,7 @@ Visualization Manager:
               Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_00
               Name: 0
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -587,7 +587,7 @@ Visualization Manager:
               Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_01
               Name: 1
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -595,7 +595,7 @@ Visualization Manager:
               Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_02
               Name: 2
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -603,7 +603,7 @@ Visualization Manager:
               Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_03
               Name: 3
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -611,7 +611,7 @@ Visualization Manager:
               Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_04
               Name: 4
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -619,7 +619,7 @@ Visualization Manager:
               Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_05
               Name: 5
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -627,7 +627,7 @@ Visualization Manager:
               Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_06
               Name: 6
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -635,7 +635,7 @@ Visualization Manager:
               Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_07
               Name: 7
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -643,7 +643,7 @@ Visualization Manager:
               Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_08
               Name: 8
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -651,7 +651,7 @@ Visualization Manager:
               Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_09
               Name: 9
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -699,7 +699,7 @@ Visualization Manager:
               Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_05
               Name: 15
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -862,7 +862,7 @@ Visualization Manager:
           Color: 255; 255; 255
           Color Transformer: Intensity
           Decay Time: 0
-          Enabled: true
+          Enabled: false
           Invert Rainbow: false
           Max Color: 255; 255; 255
           Max Intensity: 0
@@ -879,7 +879,7 @@ Visualization Manager:
           Unreliable: false
           Use Fixed Frame: true
           Use rainbow: true
-          Value: true
+          Value: false
       Enabled: true
       Name: Map
     - Class: rviz/Group
@@ -935,7 +935,7 @@ Visualization Manager:
           Marker Topic: /plan_manager/vis_goal
           Name: goal
           Namespaces:
-            {}
+            "": true
           Queue Size: 100
           Value: true
         - Class: rviz/Marker
@@ -943,7 +943,7 @@ Visualization Manager:
           Marker Topic: /plan_manager/vis_subgoal
           Name: subgoal
           Namespaces:
-            {}
+            "": true
           Queue Size: 100
           Value: true
         - Class: rviz/Marker
@@ -951,7 +951,7 @@ Visualization Manager:
           Marker Topic: /plan_manager/vis_landmarks_
           Name: landmarks
           Namespaces:
-            {}
+            "": true
           Queue Size: 100
           Value: true
       Enabled: true
@@ -1052,6 +1052,21 @@ Visualization Manager:
           Value: true
       Enabled: true
       Name: RandomObs
+    - Alpha: 1
+      Axes Length: 1
+      Axes Radius: 0.10000000149011612
+      Class: rviz/Pose
+      Color: 255; 25; 0
+      Enabled: true
+      Head Length: 0.30000001192092896
+      Head Radius: 0.10000000149011612
+      Name: Pose
+      Shaft Length: 1
+      Shaft Radius: 0.05000000074505806
+      Shape: Arrow
+      Topic: /subgoal
+      Unreliable: false
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 0; 0; 0
@@ -1096,10 +1111,10 @@ Visualization Manager:
 Window Geometry:
   Displays:
     collapsed: false
-  Height: 1368
+  Height: 1125
   Hide Left Dock: false
   Hide Right Dock: false
-  QMainWindow State: 000000ff00000000fd00000004000000000000017700000502fc0200000005fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000198000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000003b00000502000000c700ffffff000000010000010f00000270fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000002800000270000000a000fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004a00000003efc0100000002fb0000000800540069006d00650000000000000004a00000024400fffffffb0000000800540069006d00650100000000000004500000000000000000000003100000050200000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd0000000400000000000001770000040bfc0200000005fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000198000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000003d0000040b000000c900ffffff000000010000010f00000270fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000002800000270000000a400fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004a00000003efc0100000002fb0000000800540069006d00650000000000000004a0000002eb00fffffffb0000000800540069006d00650100000000000004500000000000000000000003100000040b00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Time:
@@ -1110,4 +1125,4 @@ Window Geometry:
     collapsed: false
   Width: 1165
   X: 1
-  Y: 31
+  Y: 0
