@@ -23,6 +23,7 @@ pip install -r requirements_cadrl.txt
 
 ### Usage
 #### 1) Start Simulation
+In a terminal, activate your cadrl venv, source devel/setup.zsh and start the simulation:
 ```
 roslaunch arena_bringup start_arena_flatland.launch disable_scenario:="false" map_file:="map1" scenario_file:="eval/obstacle_map1_obs10.json" local_planner:="teb"
 ```
@@ -46,6 +47,7 @@ rostopic list
 When using "teb", "dwa" or "mpc" you need to start the scenario by manually putting a "2D Nav Goal" once. After each reset the goal will automatically set. If everything worked you can continue to step 2)
 
 #### 2) Record Rosbags
+In another terminal record rosbags:
 ```
 rosbag record -o cadrl_map1_ob10_vel_01 /scenario_reset /subgoal /goal /globalPlan -e "(.*)police(.*)"
 ```
