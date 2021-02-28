@@ -164,7 +164,6 @@ class NN_tb3():
             pref_speed = np.linalg.norm(np.array([v_x, v_y]))
             goal_x = x + 5.0; goal_y = y + 5.0
             
-
             v_x = 3*v_x; v_y = 3*v_y
             # if pref_speed < 0.2:
             #     pref_speed = 0; v_x = 0; v_y = 0
