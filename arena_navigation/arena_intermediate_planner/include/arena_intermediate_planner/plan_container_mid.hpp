@@ -305,10 +305,15 @@ public:
 struct MidData{
   UniformBspline subgoal_traj_;
   Eigen::Vector2d subgoal_;
+  Eigen::Vector2d subgoal_traj_end_;
   
 
   Eigen::Vector2d getSubgoal(){
     return subgoal_;
+  }
+
+  Eigen::Vector2d getTrajEndPoint(){
+    return subgoal_traj_end_;
   }
 
   std::vector<Eigen::Vector2d>  getTraj(){

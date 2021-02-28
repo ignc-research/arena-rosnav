@@ -712,6 +712,22 @@ bool InterPlanner::checkCollision(const Eigen::Vector2d &pos){
   return is_occ;
 }
 
+bool InterPlanner::checkColiisionSegment(Eigen::Vector2d pt1, Eigen::Vector2d pt2){
+    double dist=(pt1-pt2).norm();                            // distance start pt to end pt
+    double dist_step=grid_map_->getResolution()*2;           // collision check step distance
+    int id_num = floor(dist / dist_step) + 1;
+
+    Eigen::Vector2d inter_pt;
+    for (int j = 1; j < id_num; ++j)
+    {
+      inter_pt = pt1 * (1.0 - double(j) / id_num) + pt2 * double(j) / id_num;
+      if(checkCollision(inter_pt)){
+        return true;
+      }    
+    }
+    return false;
+}
+
 bool InterPlanner::findCollisionWithinSegment(const Eigen::Vector2d &pt1,const Eigen::Vector2d &pt2,vector<Eigen::Vector2d> & inter_points){
   double dist=(pt1-pt2).norm();                            // distance start pt to end pt
   double dist_step=grid_map_->getResolution()*4;                 // collision check step distance
@@ -1065,8 +1081,11 @@ bool InterPlanner::makeSubgoal(Eigen::Vector2d curr_pos, Eigen::Vector2d curr_ve
   if(success){
     //double T_subgoal=3.0;
     // select the pt at 3s on the traj
-    mid_data_.subgoal_=mid_data_.subgoal_traj_.evaluateDeBoorT(T_subgoal);
-
+    double tm_start,tm_end;
+    mid_data_.subgoal_traj_.getTimeSpan(tm_start, tm_end);
+    mid_data_.subgoal_=mid_data_.subgoal_traj_.evaluateDeBoor(tm_start+0.5*(tm_end-tm_start));
+    mid_data_.subgoal_traj_end_=mid_data_.subgoal_traj_.evaluateDeBoor(tm_end);
+    
     // visualize subgoal
     std::vector<Eigen::Vector2d> point_set;
     point_set.push_back(mid_data_.subgoal_);

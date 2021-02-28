@@ -7,13 +7,12 @@
     <arg name="dist_lookahead"    />
     <arg name="dist_tolerance"    />
     <arg name="timeout_goal"      />
-    <arg name="timeout_subgoal"   />
 
     <!-- For planner and b-spline and optimizer -->
     
     <arg name="obstacles_inflation"     value="0.3" />
     <arg name="max_vel"                 value="3.0" />
-    <arg name="max_acc"                 value="2.0" />
+    <arg name="max_acc"                 value="3.0" />
     <arg name="max_jerk"                value="4.0" />
     <arg name="lambda_heu"              value="0.1" />
     <arg name="plan_horizon"            value=""/>      <!-- For naming -->
@@ -39,13 +38,13 @@
         
 
         <!-- Global plan: Subgoal and landmark -->
-        <param name="$(arg plan_horizon)/subgoal/dist_tolerance"                value="$(arg dist_tolerance)" />
+        <param name="$(arg plan_horizon)/subgoal/dist_tolerance"                value="2.0" /> <!--"$(arg dist_tolerance)"-->
         <param name="$(arg plan_horizon)/subgoal/dist_lookahead"                value="$(arg dist_lookahead)" />
        
         
         <!-- b-spline -->
-        <param name="$(arg plan_horizon)/b_spline/max_vel"                      value="$(arg max_vel)"/>
-        <param name="$(arg plan_horizon)/b_spline/max_acc"                      value="$(arg max_acc)"/>
+        <param name="$(arg plan_horizon)/b_spline/max_vel"                      value="$(arg max_vel)" />
+        <param name="$(arg plan_horizon)/b_spline/max_acc"                      value="$(arg max_acc)" />
         <param name="$(arg plan_horizon)/b_spline/max_jerk"                     value="$(arg max_jerk)"/>
         <param name="$(arg plan_horizon)/b_spline/control_points_distance"      value="0.5"           type="double"/>
         <param name="$(arg plan_horizon)/b_spline/feasibility_tolerance"        value="0.05"          type="double"/>
@@ -56,11 +55,11 @@
         <param name="$(arg plan_horizon)/optimization_astar/lambda_smooth"            value="1.0" type="double"/> <!-- 1.0   -->
         <param name="$(arg plan_horizon)/optimization_astar/lambda_collision"         value="0.5" type="double"/>
         <param name="$(arg plan_horizon)/optimization_astar/lambda_feasibility"       value="0.3" type="double"/>
-        <param name="$(arg plan_horizon)/optimization_astar/lambda_fitness"           value="1.0" type="double"/> <!-- 1.0   -->
+        <param name="$(arg plan_horizon)/optimization_astar/lambda_fitness"           value="1.0" type="double"/> 
         
         <param name="$(arg plan_horizon)/optimization_astar/dist0"                    value="0.5" type="double"/>
-        <param name="$(arg plan_horizon)/optimization_astar/max_vel"                  value="$(arg max_vel)" type="double"/>
-        <param name="$(arg plan_horizon)/optimization_astar/max_acc"                  value="$(arg max_acc)" type="double"/>
+        <param name="$(arg plan_horizon)/optimization_astar/max_vel"                  value="$(arg max_vel)" type="double"/>  <!--"$(arg max_vel)" -->
+        <param name="$(arg plan_horizon)/optimization_astar/max_acc"                  value="$(arg max_acc)" type="double"/> <!--"$(arg max_acc)" -->
         <param name="$(arg plan_horizon)/optimization_astar/order"                    value="3" type="int"/>
         
 
@@ -100,8 +99,8 @@
         <!-- kino astar -->
         <param name="$(arg plan_horizon)/kino_astar/max_tau"                    value="0.6"/>
         <param name="$(arg plan_horizon)/kino_astar/init_max_tau"               value="0.8"/>
-        <param name="$(arg plan_horizon)/kino_astar/max_vel"                    value="$(arg max_vel)"/>
-        <param name="$(arg plan_horizon)/kino_astar/max_acc"                    value="$(arg max_acc)"/>
+        <param name="$(arg plan_horizon)/kino_astar/max_vel"                    value="3.0"/>  <!--"$(arg max_vel)" -->
+        <param name="$(arg plan_horizon)/kino_astar/max_acc"                    value="3.0"/> <!--"$(arg max_acc)" -->
         <param name="$(arg plan_horizon)/kino_astar/w_time"                     value="10.0"/>
         
         <param name="$(arg plan_horizon)/kino_astar/horizon"                    value="100" />
