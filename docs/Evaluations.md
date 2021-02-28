@@ -49,7 +49,7 @@ When using "teb", "dwa" or "mpc" you need to start the scenario by manually putt
 #### 2) Record Rosbags
 In another terminal record rosbags:
 ```
-rosbag record -o cadrl_map1_ob10_vel_01 /scenario_reset /subgoal /goal /globalPlan -e "(.*)police(.*)"
+rosbag record -o cadrl_map1_ob10_vel_01 /scenario_reset -e "(.*)police(.*)"
 ```
 Explanation:
 * this command will record all topics necessary for evaluation
