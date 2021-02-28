@@ -43,7 +43,7 @@ class StateProvider():
         self.list_of_lists = [[-0.3,11.5], [3, 10.7], [8.78, 9.78], [12.2, 9.1], [16.2, 8.3], [18.42, 6.96], [20.77, 5.47], [23, 0.95]]
         self.wps = []
 
-        self.navgoal_pub = rospy.Publisher('/subgoal', PoseStamped, queue_size=1)
+        self.navgoal_pub = rospy.Publisher('/subgoal_wpg', PoseStamped, queue_size=1)
 
         # subs
         self._robot_state_sub = rospy.Subscriber('/odom', Odometry, self.cbRobotPosition)
