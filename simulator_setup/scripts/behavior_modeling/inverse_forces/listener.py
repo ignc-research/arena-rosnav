@@ -52,7 +52,7 @@ class Listener:
     def vis_forces(self, F_obstacle, F_goal):
         obstacle_marker = self.create_custom_marker(F_obstacle, 1, 239, 41, 41)
         self.pub_F_obstacle.publish(obstacle_marker)
-        goal_marker = self.create_custom_marker(F_goal, 2, 204, 41, 204)
+        goal_marker = self.create_custom_marker(F_goal, 2, 138, 226, 52)
         self.pub_F_goal.publish(goal_marker)
 
     def odom_callback(self, odometry):

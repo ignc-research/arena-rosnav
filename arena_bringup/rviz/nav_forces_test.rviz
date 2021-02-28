@@ -24,7 +24,6 @@ Panels:
         - /PointStamped1
         - /PointStamped2
         - /Marker5
-        - /Marker5/Status1
         - /Marker6
       Splitter Ratio: 0.6526610255241394
     Tree Height: 759
@@ -641,7 +640,7 @@ Visualization Manager:
       Value: true
     - Alpha: 1
       Class: rviz/PointStamped
-      Color: 204; 41; 204
+      Color: 138; 226; 52
       Enabled: true
       History Length: 1
       Name: PointStamped
@@ -672,7 +671,7 @@ Visualization Manager:
       Marker Topic: /force_goal_marker
       Name: Marker
       Namespaces:
-        {}
+        my_namespace: true
       Queue Size: 100
       Value: true
   Enabled: true
