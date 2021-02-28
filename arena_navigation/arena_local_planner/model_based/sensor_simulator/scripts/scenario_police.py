@@ -84,7 +84,7 @@ class police():
         self.sg_received = True
     
     def cb_subgoal_wpg(self, msg):
-        self.subgoal_wpg = msg
+        self.subgoal_wgp = msg
         self.sg_wpg_received = True
 
     def get_pm_path(self,msg):

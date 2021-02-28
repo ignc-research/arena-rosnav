@@ -25,10 +25,14 @@ from sklearn.cluster import AgglomerativeClustering
 class newBag():
     def __init__(self, planner, file_name, bag_name):
         # bag topics
-        odom_topic      = "/sensorsim/police/odom"
-        collision_topic = "/sensorsim/police/collision"
-        subgoal_topic   = "/sensorsim/police/subgoal"
-        wpg_topic       = "/sensorsim/police/subgaol_wpg"
+        self.odom_topic      = "/sensorsim/police/odom"
+        self.collision_topic = "/sensorsim/police/collision"
+        self.subgoal_topic   = "/sensorsim/police/subgoal"
+        self.gp_topic       = "/sensorsim/police/gplan"
+        self.wpg_topic       = "/sensorsim/police/subgaol_wpg"
+
+
+        print(self.gp_topic)
 
 
 
@@ -39,7 +43,7 @@ class newBag():
         # eval bags
         # self.bag = bagreader(bag_name)
         self.bag = bagreader("/home/teham/arena_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/bags/scenarios/wpg/wpg_2.bag")
-        eps = self.split_runs(odom_topic, collision_topic, subgoal_topic)
+        eps = self.split_runs()
         # self.evalPath(planner,file_name,eps)
 
 
@@ -77,10 +81,10 @@ class newBag():
         # plt.show()
         return 
 
-    def split_runs(self,odom_topic,collision_topic, subgoal_topic):
+    def split_runs(self):
         # get odometry
         
-        odom_csv = self.bag.message_by_topic(odom_topic)
+        odom_csv = self.bag.message_by_topic(self.odom_topic)
         df_odom = pd.read_csv(odom_csv, error_bad_lines=False)
 
 
@@ -88,13 +92,21 @@ class newBag():
 
         # get collision time
         try:
-            # check if collision was published
-            collision_csv = self.bag.message_by_topic(collision_topic)
-            df_collision  = pd.read_csv(collision_csv, error_bad_lines=False)
+            # # check if collision was published
+            # collision_csv = self.bag.message_by_topic(self.collision_topic)
+            # df_collision  = pd.read_csv(collision_csv, error_bad_lines=False)
 
-            #check if subgoals in bag
-            goals_csv  = self.bag.message_by_topic(subgoal_topic)
-            df_subgoal = pd.read_csv(goals_csv, error_bad_lines=False)
+            # #check if subgoals in bag
+            # goals_csv  = self.bag.message_by_topic(self.subgoal_topic)
+            # df_subgoal = pd.read_csv(goals_csv, error_bad_lines=False)
+
+            csv  = self.bag.message_by_topic(self.gp_topic)
+            df_goal = pd.read_csv(csv, error_bad_lines=False)
+
+            # csv2  = self.bag.message_by_topic(self.wpg_topic)
+            # df_goal2 = pd.read_csv(csv2, error_bad_lines=False)
+
+            # print(df_goal)
 
 
         except Exception as e:
@@ -103,7 +115,7 @@ class newBag():
             df_subgoal   = []
         t_col = []
         t_sg = []
-
+        return
 
         for i in range(len(df_subgoal)): 
             t_col.append(df_subgoal.loc[i, "Time"])
