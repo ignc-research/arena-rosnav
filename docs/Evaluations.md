@@ -22,6 +22,7 @@ pip install -r requirements_cadrl.txt
 
 ### Usage
 #### 1) Start Simulation
+Inside a terminal, activate your cadrl venv, source your devel/setup.zsh and start the sim:
 ```
 roslaunch arena_bringup start_arena_flatland.launch disable_scenario:="false" map_file:="map1" scenario_file:="eval/obstacle_map1_obs10.json" local_planner:="cadrl"
 ```
@@ -52,6 +53,7 @@ Once the simulation started successfully, the robot will move towards the origin
   Explanation: 
   * will subsample the global path and spawn waypoint on path. If you test with 20 obstacles, use state_provider_obs20.py in the same folder.
   * Same files are used for empty and map1 
+  * the robot will move to all waypoints until it reaches the global goal, then its position is resetted 
 
 #### 4) Record Rosbags
 After the robot moves towards the waypoints, record the parameters with:
