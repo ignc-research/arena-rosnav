@@ -2,7 +2,7 @@
 We provide tools to evaluate the planners.
 
 ## Update 28.02.2021
-To test the ESDF WP-Generator, stay on this branch, to test simple subsampling, switch to branch z_eval_subsampling and go to the docs/evaluation.md
+Test subsampling
 * Compile the project using following command
 ```
 catkin_make -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=/usr/bin/python3
@@ -32,7 +32,7 @@ Explanation:
 * local_planner:="teb": choose between "dwa", "teb", "mpc", "cadrl"
 * in order to change the velocity of the dynamic obstacles, the scenario file must be edited
 
-#### 3) Verify the simulation
+#### 2) Verify the simulation
 
 Once the simulation is started, you need to check if these three topics are published:
 ``` 
@@ -42,9 +42,19 @@ rostopic list
 * /sensorsim/police/collision
 * /sensorsim/police/odom
 
-When using "teb", "dwa" or "mpc" you need to start the scenario by manually putting a "2D Nav Goal" once. After each reset the goal will automatically set. If everything worked you can continue to step 2)
 
-#### 2) Record Rosbags
+#### 3) Start Subsampling Node
+Once the simulation started successfully, the robot will move towards the origin. Wait for about 5 seconds and 
+* open another terminal, activate venv, source devel/setup.zsh and move to the folder arena-rosnav/state_provider. Then run
+  ```
+  python state_provider_obs5.py
+  ```
+  Explanation: 
+  * will subsample the global path and spawn waypoint on path. If you test with 20 obstacles, use state_provider_obs20.
+  * Same files are used for empty and map1 
+
+#### 4) Record Rosbags
+After the robot moves towards the waypoints, record the parameters with:
 ```
 rosbag record -o cadrl_map1_ob10_vel_01 /scenario_reset /subgoal /goal /globalPlan -e "(.*)police(.*)"
 ```
