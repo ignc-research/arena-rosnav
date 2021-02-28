@@ -50,7 +50,7 @@ Once the simulation started successfully, the robot will move towards the origin
   python state_provider_obs5.py
   ```
   Explanation: 
-  * will subsample the global path and spawn waypoint on path. If you test with 20 obstacles, use state_provider_obs20.
+  * will subsample the global path and spawn waypoint on path. If you test with 20 obstacles, use state_provider_obs20.py in the same folder.
   * Same files are used for empty and map1 
 
 #### 4) Record Rosbags
