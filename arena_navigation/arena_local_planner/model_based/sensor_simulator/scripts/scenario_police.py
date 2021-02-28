@@ -16,9 +16,10 @@ class police():
         self.n_replan_mb = 0
         self.collision_flag = False
 
-        self.odom = Odometry()
-        self.cluster = Clusters()
-        self.subgoal = PoseStamped()
+        self.odom        = Odometry()
+        self.cluster     = Clusters()
+        self.subgoal     = PoseStamped()
+        self.subgoal_wgp = PoseStamped()
         self.global_path = Path()
         self.gp_received = False
 
@@ -68,7 +69,7 @@ class police():
 
     def cb_global_path(self, msg):
         self.global_path = msg
-        self.gp_received = False
+        self.gp_received = True
 
     def cb_odom(self, msg):
         self.odom = msg
@@ -92,8 +93,10 @@ class police():
         
         self.pub_odom.publish(self.odom)
         self.pub_subg.publish(self.subgoal)
-        self.pub_subgp.publish(self.global_path)
-        print(len(self.global_path.poses))
+
+        if self.gp_received:
+            self.pub_subgp.publish(self.global_path)
+            self.gp_received = False
 
         # print(self.subgoal)
 
