@@ -15,7 +15,7 @@ mkvirtualenv --python=python3.6 cadrl
 ```
 * Activate your venv with workon cadrl and install the dependencies:
 ```
-cd /arena-rosnav/arena_navigation/arena_local_planner/env/requirements_cadrl.txt
+cd /arena-rosnav/arena_navigation/arena_local_planner/env
 pip install -r requirements_cadrl.txt
 ```
 
