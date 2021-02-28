@@ -7,6 +7,7 @@ from std_msgs.msg import Int16
 from visualization_msgs.msg import Marker
 from nav_msgs.msg import Path, Odometry
 from ford_msgs.msg import Clusters
+from geometry_msgs.msg import PoseStamped
 # 
 class police():
     def __init__(self):
@@ -15,8 +16,12 @@ class police():
         self.n_replan_mb = 0
         self.collision_flag = False
 
-        self.odom = Odometry()
-        self.cluster = Clusters()
+        self.odom        = Odometry()
+        self.cluster     = Clusters()
+        self.subgoal     = PoseStamped()
+        self.subgoal_wgp = PoseStamped()
+        self.global_path = Path()
+        self.gp_received = False
 
         self.update_cluster = True
 
@@ -27,6 +32,8 @@ class police():
         # rospy.Subscriber('/move_base/DWAPlannerROS/global_plan',Path, self.get_mb_path)
         # rospy.Subscriber('/move_base/TebLocalPlannerROS/global_plan',Path, self.get_mb_path)
         rospy.Subscriber('/odom',Odometry, self.cb_odom)
+        rospy.Subscriber('/subgoal',PoseStamped, self.cb_goal)
+        rospy.Subscriber('/globalPlan',Path, self.cb_global_path)
         # rospy.Subscriber('/obst_odom',Clusters, self.cb_cluster)
 
 
@@ -35,6 +42,8 @@ class police():
         # self.pub_mb_replan = rospy.Publisher('police/mb_replanned', Int16, queue_size=10)
         # self.pub_pb_replan = rospy.Publisher('police/pm_replanned', Int16, queue_size=10)
         self.pub_odom = rospy.Publisher('police/odom', Odometry, queue_size=10)
+        self.pub_subg = rospy.Publisher('police/subgoal', PoseStamped, queue_size=10)
+        self.pub_subgp = rospy.Publisher('police/gplan', Path, queue_size=10)
         # self.pub_obst_odom = rospy.Publisher('police/obst_odom',Clusters,queue_size=1)
 
 
@@ -58,8 +67,16 @@ class police():
 
         #self.cluster = msg
 
-    def cb_odom(self,msg):
+    def cb_global_path(self, msg):
+        self.global_path = msg
+        self.gp_received = True
+
+    def cb_odom(self, msg):
         self.odom = msg
+
+    def cb_goal(self, msg):
+        self.subgoal = msg
+       
 
     def get_pm_path(self,msg):
         self.n_replan_pm += 1
@@ -75,6 +92,14 @@ class police():
         # self.update_cluster = True
         
         self.pub_odom.publish(self.odom)
+        self.pub_subg.publish(self.subgoal)
+
+        if self.gp_received:
+            self.pub_subgp.publish(self.global_path)
+            self.gp_received = False
+
+        # print(self.subgoal)
+
         # self.pub_mb_replan.publish(self.n_replan_mb)
         # self.pub_pb_replan.publish(self.n_replan_pm)
 
