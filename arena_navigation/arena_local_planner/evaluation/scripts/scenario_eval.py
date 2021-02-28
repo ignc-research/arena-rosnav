@@ -25,17 +25,24 @@ from sklearn.cluster import AgglomerativeClustering
 class newBag():
     def __init__(self, planner, file_name, bag_name):
         # bag topics
-        odom_topic="/sensorsim/police/odom"
-        collision_topic="/sensorsim/police/collision"
+        odom_topic      = "/sensorsim/police/odom"
+        collision_topic = "/sensorsim/police/collision"
+        subgoal_topic   = "/sensorsim/police/subgoal"
+        wpg_topic       = "/sensorsim/police/subgaol_wpg"
+
+
+
         # 
         self.col_zones = []
         self.nc_total = 0
         self.nc_curr = 0
         # eval bags
-        self.bag = bagreader(bag_name)
-        eps = self.split_runs(odom_topic, collision_topic)
-        self.evalPath(planner,file_name,eps)
-        # return
+        # self.bag = bagreader(bag_name)
+        self.bag = bagreader("/home/teham/arena_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/bags/scenarios/wpg/wpg_2.bag")
+        eps = self.split_runs(odom_topic, collision_topic, subgoal_topic)
+        # self.evalPath(planner,file_name,eps)
+
+
 
     def make_txt(self,file,msg,ron="a"):
         # f = open(file, ron)
@@ -70,24 +77,40 @@ class newBag():
         # plt.show()
         return 
 
-    def split_runs(self,odom_topic,collision_topic):
+    def split_runs(self,odom_topic,collision_topic, subgoal_topic):
         # get odometry
         
         odom_csv = self.bag.message_by_topic(odom_topic)
         df_odom = pd.read_csv(odom_csv, error_bad_lines=False)
 
+
+        # print("done")
+
         # get collision time
         try:
             # check if collision was published
             collision_csv = self.bag.message_by_topic(collision_topic)
-            df_collision = pd.read_csv(collision_csv, error_bad_lines=False)
+            df_collision  = pd.read_csv(collision_csv, error_bad_lines=False)
+
+            #check if subgoals in bag
+            goals_csv  = self.bag.message_by_topic(subgoal_topic)
+            df_subgoal = pd.read_csv(goals_csv, error_bad_lines=False)
+
+
         except Exception as e:
             # otherwise run had zero collisions
             df_collision = []
+            df_subgoal   = []
         t_col = []
+        t_sg = []
+
+
+        for i in range(len(df_subgoal)): 
+            t_col.append(df_subgoal.loc[i, "Time"])
 
         for i in range(len(df_collision)): 
-            t_col.append(df_collision.loc[i, "Time"])
+            t_sg.append(df_collision.loc[i, "Time"])   
+            
         self.nc_total = len(t_col)
         # get reset time
         reset_csv = self.bag.message_by_topic("/scenario_reset")
@@ -572,7 +595,7 @@ def read_scn_file(map, ob):
     start = data["robot"]["start_pos"]
     goal  = data["robot"]["goal_pos"]
 
-def eval_all(a,map,ob,vel):
+def eval_all(a,map,ob,vel,):
     global ax, sm, lgnd, start, goal, axlim, plot_sm
     fig, ax = plt.subplots(figsize=(6, 7))
     
@@ -708,7 +731,7 @@ def run():
 
 
     # eval_all(["arena","cadrl","dwa","mpc","teb"],"empty","20","vel_03")
-    eval_all(["arena","cadrl","dwa","mpc","teb"],"empty","10","vel_03")
+    eval_all(["arena"],"empty","10","vel_03")
 
     
     

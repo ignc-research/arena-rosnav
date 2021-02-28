@@ -36,8 +36,8 @@
   <include file="$(find arena_bringup)/launch/sublaunch/flatland_simulator.launch">
     <arg name="world_path"      value="$(arg world_path)"/>
 
-    <arg name="update_rate"     default="60.0"/>
-    <arg name="step_size"       default="0.05"/>
+    <arg name="update_rate"     default="400.0"/>
+    <arg name="step_size"       default="0.005"/>
 
     <arg name="show_viz"        default="true"/>
 
