@@ -76,7 +76,7 @@
 
     <arg name="dist_lookahead"          default="3.0" /><!-- meter, double-->
     <arg name="dist_tolerance"          default="1.0" /><!-- meter, double-->
-    <arg name="timeout_goal"            default="300.0" />  <!-- Timeout for plan manager fsm             sec, double-->
+    <arg name="timeout_goal"            default="1000.0" />  <!-- Timeout for plan manager fsm             sec, double-->
     <arg name="timeout_subgoal"         default="3.0" />    <!-- Period for time-driven subgoal generator  sec, double-->
   </include>
 
