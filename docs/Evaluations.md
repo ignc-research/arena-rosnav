@@ -58,7 +58,7 @@ Once the simulation started successfully, the robot will move towards the origin
 #### 4) Record Rosbags
 After the robot moves towards the waypoints, record the parameters with:
 ```
-rosbag record -o cadrl_map1_ob10_vel_01 /scenario_reset /subgoal /goal /globalPlan -e "(.*)police(.*)"
+rosbag record -o cadrl_map1_ob10_vel_01 /scenario_reset -e "(.*)police(.*)"
 ```
 Explanation:
 * this command will record all topics necessary for evaluation
