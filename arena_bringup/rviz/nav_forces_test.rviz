@@ -25,6 +25,8 @@ Panels:
         - /PointStamped2
         - /Marker5
         - /Marker6
+        - /Marker7
+        - /Marker8
       Splitter Ratio: 0.6526610255241394
     Tree Height: 759
   - Class: rviz/Selection
@@ -669,6 +671,22 @@ Visualization Manager:
     - Class: rviz/Marker
       Enabled: true
       Marker Topic: /force_goal_marker
+      Name: Marker
+      Namespaces:
+        my_namespace: true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /v_now_marker
+      Name: Marker
+      Namespaces:
+        my_namespace: true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /v_prev_marker
       Name: Marker
       Namespaces:
         my_namespace: true
