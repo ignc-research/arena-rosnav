@@ -120,9 +120,9 @@ class RobotManager:
             # a necessaray procedure to let the flatland publish the
             # laser,odom's Transformation, which are needed for creating
             # global path
-            assert self.step_size * \
-                self.LASER_UPDATE_RATE == 1, f"TO run the traning successfully, make sure the laser_update_rate*step_size == 1 \
-                \n\tcurrent step_size:\t {self.step_size}\n\tcurrent laser's update rate:\t {self.LASER_UPDATE_RATE} "
+            # assert self.step_size * \
+            #     self.LASER_UPDATE_RATE == 1, f"TO run the traning successfully, make sure the laser_update_rate*step_size == 1 \
+            #     \n\tcurrent step_size:\t {self.step_size}\n\tcurrent laser's update rate:\t {self.LASER_UPDATE_RATE} "
             for _ in range(math.ceil(1/(self.step_size*self.LASER_UPDATE_RATE))):
                 self._step_world()
 

@@ -52,6 +52,9 @@ class FlatlandEnv(gym.Env):
                 rospy.init_node(f'train_env_{self.ns}', disable_signals=False)
             else:
                 rospy.init_node(f'eval_env_{self.ns}', disable_signals=False)
+
+        self._action_timeout = (1/rospy.get_param("/robot_action_rate"))*0.5
+
         # Define action and observation space
         # They must be gym.spaces objects
         self._is_action_space_discrete = is_action_space_discrete
@@ -147,10 +150,14 @@ class FlatlandEnv(gym.Env):
             action = self._translate_disc_action(action)
         self._pub_action(action)
         self._steps_curr_episode += 1
+
+        # apply action time horizon
+        if self._is_train_mode:
+            self._sim_step_client(self._action_timeout)
+
         # wait for new observations
-        s = time.time()
         merged_obs, obs_dict = self.observation_collector.get_observations()
-        # print("get observation: {}".format(time.time()-s))
+
 
         # calculate reward
         reward, reward_info = self.reward_calculator.get_reward(

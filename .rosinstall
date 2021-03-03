@@ -1,7 +1,7 @@
 - git:
     local-name: ../forks/flatland
-    uri: https://github.com/ignc-research/flatland.git
-    version: dev_multi_lei
+    uri: https://github.com/tuananhroman/flatland
+    version: dev_multi_tuan_anh
 
 #- git:
 #    local-name: ../forks/navigation

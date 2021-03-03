@@ -4,7 +4,7 @@
   <arg name="ns_prefix" default="sim" />
   <arg name="num_envs" default="1" />
   <!-- To make the training more efficient make sure this step_size*laser_update_rate == 1  -->
-  <arg name="step_size" default="0.1"/>
+  <arg name="step_size" default="0.025"/>
   <!-- the folder name under the path simulator_setup/maps  -->
   <arg name="map_folder_name" default="map_empty" />
 
@@ -37,6 +37,9 @@
   <param name="tolerance_approach"    value="$(arg tolerance_approach)"/>
   <param name="timeout_goal"          value="$(arg timeout_goal)"/>
   <param name="timeout_subgoal"       value="$(arg timeout_subgoal)"/>
+  <param name="robot_action_rate"     value="10"/>
+  <param name="laser_update_rate"     value="10"/>
+
 
 
   <!-- map server-->

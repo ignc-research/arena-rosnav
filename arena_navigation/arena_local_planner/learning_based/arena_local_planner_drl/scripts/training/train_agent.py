@@ -74,7 +74,7 @@ def get_paths(agent_name: str, args) -> dict:
                 dir, 'configs', 'default_settings.yaml'),
         'curriculum': 
             os.path.join(
-                dir, 'configs', 'training_curriculum.yaml')
+                dir, 'configs', 'training_curriculum_map1small.yaml')
     }
     # check for mode
     if args.load is None:
@@ -218,7 +218,7 @@ if __name__ == "__main__":
     
     # stop training on reward threshold callback
     stoptraining_cb = StopTrainingOnRewardThreshold(
-        reward_threshold=13, task_manager=task_managers[0], verbose=1)
+        reward_threshold=14, task_manager=task_managers[0], verbose=1)
 
     # instantiate eval environment
     # take task_manager from first sim (currently evaluation only provided for single process)
