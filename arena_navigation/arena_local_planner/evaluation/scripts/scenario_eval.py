@@ -28,23 +28,16 @@ class newBag():
         self.odom_topic      = "/sensorsim/police/odom"
         self.collision_topic = "/sensorsim/police/collision"
         self.subgoal_topic   = "/sensorsim/police/subgoal"
-        self.gp_topic       = "/sensorsim/police/gplan"
-        self.wpg_topic       = "/sensorsim/police/subgaol_wpg"
+        self.gp_topic        = "/sensorsim/police/gplan"
+        self.wpg_topic       = "/sensorsim/police/subgoal_wpg"
 
-
-        print(self.gp_topic)
-
-
-
-        # 
         self.col_zones = []
         self.nc_total = 0
         self.nc_curr = 0
         # eval bags
-        # self.bag = bagreader(bag_name)
-        self.bag = bagreader("/home/teham/arena_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/bags/scenarios/wpg/wpg_2.bag")
+        self.bag = bagreader(bag_name)
         eps = self.split_runs()
-        # self.evalPath(planner,file_name,eps)
+        self.evalPath(planner,file_name,eps)
 
 
 
@@ -88,46 +81,53 @@ class newBag():
         df_odom = pd.read_csv(odom_csv, error_bad_lines=False)
 
 
-        # print("done")
+        df_collision = []
+        df_subg      = []
+        df_gp        = []
+        df_wpg       = []
 
-        # get collision time
+        # get topics
         try:
-            # # check if collision was published
-            # collision_csv = self.bag.message_by_topic(self.collision_topic)
-            # df_collision  = pd.read_csv(collision_csv, error_bad_lines=False)
+            # check if collision was published
+            collision_csv = self.bag.message_by_topic(self.collision_topic)
+            df_collision  = pd.read_csv(collision_csv, error_bad_lines=False)
 
-            # #check if subgoals in bag
-            # goals_csv  = self.bag.message_by_topic(self.subgoal_topic)
-            # df_subgoal = pd.read_csv(goals_csv, error_bad_lines=False)
+            #check if subgoals in bag
+            subg_csv = self.bag.message_by_topic(self.subgoal_topic)
+            df_subg  = pd.read_csv(subg_csv, error_bad_lines=False)
 
-            csv  = self.bag.message_by_topic(self.gp_topic)
-            df_goal = pd.read_csv(csv, error_bad_lines=False)
+            gp       = self.bag.message_by_topic(self.gp_topic)
+            df_gp    = pd.read_csv(gp, error_bad_lines=False)
 
-            # csv2  = self.bag.message_by_topic(self.wpg_topic)
-            # df_goal2 = pd.read_csv(csv2, error_bad_lines=False)
+            wpg      = self.bag.message_by_topic(self.wpg_topic)
+            df_wpg   = pd.read_csv(wpg, error_bad_lines=False)
 
             # print(df_goal)
 
 
         except Exception as e:
             # otherwise run had zero collisions
-            df_collision = []
-            df_subgoal   = []
-        t_col = []
-        t_sg = []
-        return
+            print(e)
 
-        for i in range(len(df_subgoal)): 
-            t_col.append(df_subgoal.loc[i, "Time"])
+
+        if len(df_subg) > 0:
+            subg_exists = True
+        if len(df_gp) > 0:
+            gp_exists = True
+        if len(df_wpg) > 0:
+            wpg_exists = True
+
+        t_col = []
+   
 
         for i in range(len(df_collision)): 
-            t_sg.append(df_collision.loc[i, "Time"])   
+            t_col.append(df_collision.loc[i, "Time"])   
             
         self.nc_total = len(t_col)
         # get reset time
-        reset_csv = self.bag.message_by_topic("/scenario_reset")
-        df_reset = pd.read_csv(reset_csv, error_bad_lines=False)
-        t_reset = []
+        reset_csv   = self.bag.message_by_topic("/scenario_reset")
+        df_reset    = pd.read_csv(reset_csv, error_bad_lines=False)
+        t_reset     = []
         for i in range(len(df_reset)): 
             t_reset.append(df_reset.loc[i, "Time"])
 
@@ -141,7 +141,17 @@ class newBag():
         col_xy = []
         nc = 0
 
+        # print(len(df_gp))
 
+        # for i in range(len(df_wpg)):
+        #     print(i)
+        #     print(df_wpg.loc[i, "pose.position.x"])
+
+        # for i in df_gp.columns:
+        #     print(i)
+
+
+        subgoals = {}
         for i in range(len(df_odom)): 
             current_time = df_odom.loc[i, "Time"]
             x = df_odom.loc[i, "pose.pose.position.x"]
@@ -149,6 +159,7 @@ class newBag():
             y = df_odom.loc[i, "pose.pose.position.y"]
             y = round(y,2)
             reset = t_reset[n]
+
             # check if respawned
             # if current_time > reset-6 and n < len(t_reset)-1 and x<0:
             global start
@@ -168,8 +179,6 @@ class newBag():
                 pose_x.append(x)
                 pose_y.append(y)
             elif x < start_x:
-                # print("run_"+str(n))
-                # print("x:",x,"y",y)
                 pose_x.append(x)
                 pose_y.append(y)
 
@@ -196,12 +205,10 @@ class newBag():
         global ax, plot_collisions
         all_cols_x = []
         all_cols_y = []
-        all_cols = []
         col_exists = False
 
         for run_a in xya:
             for col_xy in run_a:
-                # all_cols.append(col_xy)
                 all_cols_x.append(-col_xy[1])
                 all_cols_y.append(col_xy[0])
 
@@ -279,7 +286,6 @@ class newBag():
 
                 col_xy.append(bags[run][3])
 
-                # self.update_zones(bags[run][3])
 
 
 
@@ -546,8 +552,6 @@ class newBag():
     # def merge_closest_elements(self, arr):
 
 
-
-
 def plot_arrow(start,end):
     global ax
     # ax.arrow(-start[1], start[0], -end[1], end[0], head_width=0.05, head_length=0.1, fc='k', ec='k')
@@ -570,8 +574,9 @@ def read_scn_file(map, ob):
     # find json path
     rospack = rospkg.RosPack()
     json_path = rospack.get_path('simulator_setup')+'/scenarios/eval/'
-    # print(json_path)
+
     for file in os.listdir(json_path):
+        print(map, file, ob)
         if file.endswith(".json") and map in file and ob in file:
             jf = file
     # read file
@@ -607,11 +612,11 @@ def read_scn_file(map, ob):
     start = data["robot"]["start_pos"]
     goal  = data["robot"]["goal_pos"]
 
-def eval_all(a,map,ob,vel,):
+def eval_all(a,map,ob,vel,run=""):
     global ax, sm, lgnd, start, goal, axlim, plot_sm
     fig, ax = plt.subplots(figsize=(6, 7))
     
-    read_scn_file(map, ob)
+    read_scn_file(map, ob) 
 
     mode =  map + "_" + ob + "_" + vel 
     # fig.suptitle(mode, fontsize=16)
@@ -627,15 +632,24 @@ def eval_all(a,map,ob,vel,):
     parent_path = str(os.path.abspath(os.path.join(cur_path, os.pardir)))
     bag_path    = parent_path + "/bags/scenarios/"
 
-    # print(cur_path)
-    for planner in a:
-        curr_bag = bag_path + planner
+    
+    if run == "":
+        for planner in a:
+            curr_bag = bag_path + planner
+            for file in os.listdir(curr_bag):
+                if file.endswith(".bag") and map in file and ob in file and vel in file:
+                    fn = planner + mode
+                    # print(fn)
+                    
+                    newBag(planner, fn, curr_bag + "/" + file)
+
+    else:
+        curr_bag = bag_path + run
         for file in os.listdir(curr_bag):
-            if file.endswith(".bag") and map in file and ob in file and vel in file:
-                fn = planner + mode
-                # print(fn)
-                
-                newBag(planner, fn, curr_bag + "/" + file)
+                if file.endswith(".bag") and map in file and ob in file and vel in file:
+                    fn = run + "_" + mode
+                    newBag(a[0], fn, curr_bag + "/" + file)
+                    # print(fn)
     
     # dhow legend labels once per planner
     legend_elements = []
@@ -647,23 +661,12 @@ def eval_all(a,map,ob,vel,):
     
     ax.set_ylim([start[0]-1, goal[0]+1])
 
-    # if "map" in map:
-    #     ax.set_xlim([start[0]-1, goal[0]+1])
-    # else:
-    #     ax.set_xlim([start[0]-1, goal[0]+1])
-
-
-    # print(start)
-    # print(goal)
-
-    # ax.set_xlim([-axlim["y_max"], axlim["y_min"]])
-    # ax.set_ylim([axlim["x_min"], axlim["x_max"]])
-
     ax.set_xlim([-16, 3])
     ax.set_ylim([-4, 24])
 
 
-    plt.savefig('../plots/'+mode+'.pdf')
+
+    plt.savefig('../plots/' + mode + run.replace("/", "_") + '.pdf')
 
 def getMap(msg):
     global ax, sm
@@ -676,24 +679,7 @@ def getMap(msg):
             points_y.append(-p.y+6)
     # plt.scatter(points_y, points_x)
     sm = [points_x, points_y]
-    # plt.show()
 
-    # map_obs ={}
-    # obc = 0
-    # for i in range(len(points_x)):
-    #     # x = points_x[i]
-    #     # y = points_y[i]
-    #     # if obc not in map_obs[obc]:
-    #     #     map_obs[obc] = []
-
-    #     # map_obs[obc] = map_obs[obc].append([points_x, points_y])
-    #     if i < len(points_x)-1:
-    #         dx = points_x[i+1] -  points_x[i]
-    #         dy = points_y[i+1] -  points_y[i]
-    #         dp = math.sqrt(dx**2+dy**2)
-
-    #         if dp > 1:
-    #             print(i)
     
 def run():
     global ax, sm, lgnd, grid_step
@@ -710,8 +696,8 @@ def run():
     # plots
     grid_step       = 2
     plot_sm         = False
-    plot_obst       = False
-    plot_trj        = False
+    plot_obst       = True
+    plot_trj        = True
     plot_zones      = True
     plot_collisions = True
     plot_grid       = False
@@ -743,8 +729,14 @@ def run():
 
 
     # eval_all(["arena","cadrl","dwa","mpc","teb"],"empty","20","vel_03")
-    eval_all(["arena"],"empty","10","vel_03")
 
+    # eval_all(["cadrl"],"empty","obs20","vel_01","run2_28_2/cadrl_drl")
+    # eval_all(["cadrl"],"empty","20","vel_03","")
+
+    eval_all(["cadrl"],"empty","20","vel_03")
+    eval_all(["cadrl"],"empty","obs20","vel_02","run2_28_2/esdf")
+    eval_all(["cadrl"],"empty","obs20","vel_02","run2_28_2/subsample")
+    eval_all(["cadrl"],"empty","obs20","vel_01","run2_28_2/cadrl_drl")
     
     
     plt.show()
