@@ -644,10 +644,10 @@ def eval_all(a,map,ob,vel,run=""):
     # return
     cur_path    = str(pathlib.Path().absolute()) 
     parent_path = str(os.path.abspath(os.path.join(cur_path, os.pardir)))
-    bag_path    = parent_path + "/bags/scenarios/run2_28_2/"
+    bag_path    = parent_path + "/bags/scenarios/" + run
 
     
-    if run == "":
+    if True:
         for planner in a:
             curr_bag = bag_path + planner
             for file in os.listdir(curr_bag):
@@ -715,7 +715,7 @@ def run():
     plot_sm         = False
     plot_obst       = True
     plot_trj        = True
-    plot_zones      = True
+    plot_zones      = False
     plot_collisions = True
     plot_grid       = False
     # static map
@@ -763,32 +763,32 @@ def run():
 
     # empty map 
     # 20
-    eval_all(["esdf","subsample"],"empty","20","vel_01")
-    eval_all(["esdf","subsample"],"empty","20","vel_02")
-    eval_all(["esdf","subsample"],"empty","20","vel_03")
+    eval_all(["esdf","subsample"],"empty","20","vel_01","run2_28_2/")
+    eval_all(["esdf","subsample"],"empty","20","vel_02","run2_28_2/")
+    eval_all(["esdf","subsample"],"empty","20","vel_03","run2_28_2/")
     # 10
-    eval_all(["esdf","subsample"],"empty","10","vel_01")
-    eval_all(["esdf","subsample"],"empty","10","vel_02")
-    eval_all(["esdf","subsample"],"empty","10","vel_03")
+    eval_all(["esdf","subsample"],"empty","10","vel_01","run2_28_2/")
+    eval_all(["esdf","subsample"],"empty","10","vel_02","run2_28_2/")
+    eval_all(["esdf","subsample"],"empty","10","vel_03","run2_28_2/")
     # 5
-    eval_all(["esdf","subsample"],"empty","5","vel_01")
-    eval_all(["esdf","subsample"],"empty","5","vel_02")
-    eval_all(["esdf","subsample"],"empty","5","vel_03")
+    eval_all(["esdf","subsample"],"empty","5","vel_01","run2_28_2/")
+    eval_all(["esdf","subsample"],"empty","5","vel_02","run2_28_2/")
+    eval_all(["esdf","subsample"],"empty","5","vel_03","run2_28_2/")
 
 
     # map 1 
     # 20
-    eval_all(["esdf","subsample"],"map","20","vel_01")
-    eval_all(["esdf","subsample"],"map","20","vel_02")
-    eval_all(["esdf","subsample"],"map","20","vel_03")
+    eval_all(["esdf","subsample"],"map1","20","vel_01","run2_28_2/")
+    eval_all(["esdf","subsample"],"map1","20","vel_02","run2_28_2/")
+    eval_all(["esdf","subsample"],"map1","20","vel_03","run2_28_2/")
     # 10
-    eval_all(["esdf","subsample"],"map","10","vel_01")
-    eval_all(["esdf","subsample"],"map","10","vel_02")
-    eval_all(["esdf","subsample"],"map","10","vel_03")
+    eval_all(["esdf","subsample"],"map1","10","vel_01","run2_28_2/")
+    eval_all(["esdf","subsample"],"map1","10","vel_02","run2_28_2/")
+    eval_all(["esdf","subsample"],"map1","10","vel_03","run2_28_2/")
     # 5
-    eval_all(["esdf","subsample"],"map","5","vel_01")
-    eval_all(["esdf","subsample"],"map","5","vel_02")
-    eval_all(["esdf","subsample"],"map","5","vel_03")
+    eval_all(["esdf","subsample"],"map1","5","vel_01","run2_28_2/")
+    eval_all(["esdf","subsample"],"map1","5","vel_02","run2_28_2/")
+    eval_all(["esdf","subsample"],"map1","5","vel_03","run2_28_2/")
     
     plt.show()
     rospy.spin()
