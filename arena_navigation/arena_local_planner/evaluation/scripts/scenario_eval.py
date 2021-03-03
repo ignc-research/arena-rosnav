@@ -42,37 +42,11 @@ class newBag():
 
 
     def make_txt(self,file,msg,ron="a"):
-        # f = open(file, ron)
-        # f.write(msg)
-        # f.close()
-        return
-
-    def make_heat_map(self,xy):
-        # fig, ax = plt.subplots(figsize=(6, 7))
-        # data = np.zeros((33, 25))
-
-        # for xya in xy:
-        #     for pos in xya:
-        #         y = -int(round(pos[0], 0))
-        #         x = int(round(pos[1], 0))
-        #         data[x,y] += 1
-        # #         # print(data[x,y])
-        # # heat_map = sb.heatmap(data,  cmap="YlGnBu")
-        # # heat_map.invert_yaxis()
-        # # plt.show()
-
-        # # delta = 0.025
-        # # x = y = np.arange(-3.0, 3.0, delta)
-        # # X, Y = np.meshgrid(x, y)
-        # # Z1 = np.exp(-X**2 - Y**2)
-        # # Z2 = np.exp(-(X - 1)**2 - (Y - 1)**2)
-        # # Z = (Z1 - Z2) * 2
-
-        # im = ax.imshow(data, interpolation='bilinear', cmap=cm.RdYlGn,
-        #        origin='lower', extent=[-3, 3, -3, 3]
-        #        ,vmax=abs(data).max(), vmin=-abs(data).max())
-        # plt.show()
-        return 
+        file = file.replace("/","_") + ".txt"
+        f = open(file, ron)
+        f.write(msg)
+        f.close()
+        # return
 
     def split_runs(self):
         # get odometry
@@ -110,13 +84,6 @@ class newBag():
             print(e)
 
 
-        if len(df_subg) > 0:
-            subg_exists = True
-        if len(df_gp) > 0:
-            gp_exists = True
-        if len(df_wpg) > 0:
-            wpg_exists = True
-
         t_col = []
    
 
@@ -131,9 +98,20 @@ class newBag():
         for i in range(len(df_reset)): 
             t_reset.append(df_reset.loc[i, "Time"])
 
+        # subgoals
+        sg_n = 0
+        subgoal_x = []
+        subgoal_y = []
+
+        # wpg
+        wpg_n = 0
+        wpg_x = []
+        wpg_y = []
+
         pose_x = []
         pose_y = []
         t = []
+
         bags = {}
         # run idx
         n = 0
@@ -141,17 +119,8 @@ class newBag():
         col_xy = []
         nc = 0
 
-        # print(len(df_gp))
-
-        # for i in range(len(df_wpg)):
-        #     print(i)
-        #     print(df_wpg.loc[i, "pose.position.x"])
-
-        # for i in df_gp.columns:
-        #     print(i)
 
 
-        subgoals = {}
         for i in range(len(df_odom)): 
             current_time = df_odom.loc[i, "Time"]
             x = df_odom.loc[i, "pose.pose.position.x"]
@@ -160,20 +129,29 @@ class newBag():
             y = round(y,2)
             reset = t_reset[n]
 
+            # print(reset)
+
             # check if respawned
-            # if current_time > reset-6 and n < len(t_reset)-1 and x<0:
             global start
             start_x = start[0] + 0.5
+
             if current_time > reset-6 and n < len(t_reset)-1 and x < start_x:
                 n += 1
                 # store the run
-                bags["run_"+str(n)] = [pose_x,pose_y,t,col_xy]
+                bags["run_"+str(n)] = [pose_x, pose_y, t, col_xy, subgoal_x, subgoal_y, wpg_x, wpg_y]
 
                 # reset 
-                pose_x = []
-                pose_y = []
-                t = []
-                col_xy = []
+                wpg_x     = []
+                wpg_y     = []
+
+                subgoal_x = []
+                subgoal_y = []
+
+                pose_x    = []
+                pose_y    = []
+                t         = []
+
+                col_xy    = []
    
             if  len(pose_x) > 0:
                 pose_x.append(x)
@@ -191,8 +169,36 @@ class newBag():
                     col_xy.append([x,y])
                     nc += 1
 
+            # check for goals
+            if len(df_subg) > 0:
+                sg_t = round(df_subg.loc[sg_n, "Time"],3)
+                sg_x = round(df_subg.loc[sg_n, "pose.position.x"],3)
+                sg_y = round(df_subg.loc[sg_n, "pose.position.y"],3)
+
+                if current_time > sg_t and sg_n < len(df_subg) - 1:
+
+                    subgoal_x.append(sg_x)
+                    subgoal_y.append(sg_y)
+
+                    sg_n += 1
+
+            if len(df_wpg) > 0:
+                wp_t = round(df_wpg.loc[wpg_n, "Time"],3)
+                wp_x = round(df_wpg.loc[wpg_n, "pose.position.x"],3)
+                wp_y = round(df_wpg.loc[wpg_n, "pose.position.y"],3)
+
+                if current_time > wp_t and wpg_n < len(df_wpg) - 1:
+
+                    wpg_x.append(wp_x)
+                    wpg_y.append(wp_y)
+
+                    wpg_n += 1
+
+
+        # remove first 
         if "run_1" in bags:    
             bags.pop("run_1")
+
         return bags
     
     def average(self,lst): 
@@ -240,12 +246,24 @@ class newBag():
         axlim["y_max"] = -100
 
         for run in bags:
-            if run != "nrun_30":
+            if run != "nrun_2":
                 pose_x = bags[run][0]
                 pose_y = bags[run][1]
+                sg_x   = bags[run][4]
+                sg_y   = bags[run][5]
+                wp_x   = bags[run][6]
+                wp_y   = bags[run][7]
 
-                x = np.array(pose_x)
-                y = -np.array(pose_y)
+                x    =  np.array(pose_x)
+                y    = -np.array(pose_y)
+                sg_x =  np.array(sg_x)
+                sg_y = -np.array(sg_y)
+                wp_x =  np.array(wp_x)
+                wp_y = -np.array(wp_y)
+
+                print(wp_x)
+                print(wp_y)
+
                 # x
                 if min(pose_x) < axlim["x_min"]:
                     axlim["x_min"] = min(pose_x)
@@ -265,6 +283,8 @@ class newBag():
                 trajs.append(path_length)
                 if path_length > 0 and plot_trj:
                     ax.plot(y, x, lgnd[planner], alpha=0.2)
+                    ax.plot(sg_y, sg_x, "^", color='k', alpha=0.05)
+                    ax.plot(wp_y, wp_x, "s", color='g', alpha=0.05)
 
 
                 duration = t[len(t)-1] - t[0]
@@ -308,7 +328,6 @@ class newBag():
         self.make_txt(file_name,msg_col)
 
         self.plot_collisions(col_xy,lgnd[planner])
-        # self.fit_cluster(col_xy)
 
     def fit_cluster(self,ca):
 
@@ -417,9 +436,6 @@ class newBag():
                 if n == rows*cols:
                     cells_filled = True
 
-
-
-
         self.find_zones(cells,acxy,clr)
 
     def find_zones(self, cells, acxy, clr):
@@ -498,7 +514,7 @@ class newBag():
                     circle = plt.Circle((center[0], center[1]), radius, color=clr, fill = False, alpha = 1, lw = 2)
                     ax.add_patch(circle)
 
-        print(filtered_zones)
+        # print(filtered_zones)
         merged = []
         while True:
             for i in filtered_zones:
@@ -533,13 +549,13 @@ class newBag():
 
                             dist = math.sqrt((ad_c[0] - center[0])**2 + (ad_c[1] - center[1])**2)
                             if dist < grid_step:
-                                print(i,key)
-                                print(dist)
+                                # print(i,key)
+                                # print(dist)
                                 cm_x = (ad_c[0] + center[0])/2
                                 cm_y = (ad_c[1] + center[1])/2
 
-                                print(cm_x,ad_c[0],center[0])
-                                print(cm_y,ad_c[1],center[1])
+                                # print(cm_x,ad_c[0],center[0])
+                                # print(cm_y,ad_c[1],center[1])
                                 merged.append([cm_x, cm_y])
 
             break
@@ -549,7 +565,6 @@ class newBag():
         #         radius = 1
         #         circle = plt.Circle((i[0], i[1]), radius, color=clr, fill = False, alpha = 1, lw = 2)
         #         ax.add_patch(circle)
-    # def merge_closest_elements(self, arr):
 
 
 def plot_arrow(start,end):
@@ -576,7 +591,6 @@ def read_scn_file(map, ob):
     json_path = rospack.get_path('simulator_setup')+'/scenarios/eval/'
 
     for file in os.listdir(json_path):
-        print(map, file, ob)
         if file.endswith(".json") and map in file and ob in file:
             jf = file
     # read file
@@ -680,7 +694,6 @@ def getMap(msg):
     # plt.scatter(points_y, points_x)
     sm = [points_x, points_y]
 
-    
 def run():
     global ax, sm, lgnd, grid_step
     global plot_trj, plot_zones, plot_obst, plot_collisions, plot_grid, plot_sm
@@ -733,10 +746,10 @@ def run():
     # eval_all(["cadrl"],"empty","obs20","vel_01","run2_28_2/cadrl_drl")
     # eval_all(["cadrl"],"empty","20","vel_03","")
 
-    eval_all(["cadrl"],"empty","20","vel_03")
+    # eval_all(["mpc"],"empty","20","vel_03")
     eval_all(["cadrl"],"empty","obs20","vel_02","run2_28_2/esdf")
-    eval_all(["cadrl"],"empty","obs20","vel_02","run2_28_2/subsample")
-    eval_all(["cadrl"],"empty","obs20","vel_01","run2_28_2/cadrl_drl")
+    eval_all(["cadrl"],"empty","obs5","vel_02","run2_28_2/subsample")
+    # eval_all(["cadrl"],"empty","obs20","vel_01","run2_28_2/cadrl_drl")
     
     
     plt.show()
