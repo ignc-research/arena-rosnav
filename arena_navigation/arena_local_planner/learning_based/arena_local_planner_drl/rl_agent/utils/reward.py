@@ -24,11 +24,13 @@ class RewardCalculator():
             'rule_01': RewardCalculator._cal_reward_rule_01
             }
         self.cal_func = self._cal_funcs[rule]
+        self.previous_distance = 0
 
     def reset(self):
         """reset variables related to the episode
         """
         self.last_goal_dist = None
+        self.step_counter = 0
 
     def _reset(self):
         """reset variables related to current step
@@ -38,7 +40,6 @@ class RewardCalculator():
     
     def get_reward(self, laser_scan:np.ndarray, goal_in_robot_frame: Tuple[float,float], *args, **kwargs):
         """
-
         Args:
             laser_scan (np.ndarray): 
             goal_in_robot_frame (Tuple[float,float]: position (rho, theta) of the goal in robot frame (Polar coordinate)  
@@ -55,6 +56,8 @@ class RewardCalculator():
         self._reward_safe_dist(laser_scan)
         self._reward_collision(laser_scan)
         self._reward_goal_approached(goal_in_robot_frame)
+        self._reward_goal_approached3(goal_in_robot_frame)
+        self._reward_step_penalty()
         
 
     def _cal_reward_rule_01(self, laser_scan: np.ndarray, goal_in_robot_frame: Tuple[float,float],*args,**kwargs):
@@ -63,9 +66,11 @@ class RewardCalculator():
         self._reward_safe_dist(laser_scan)
         self._reward_collision(laser_scan)
         self._reward_goal_approached2(goal_in_robot_frame)
+        self._reward_goal_approached3(goal_in_robot_frame)
+        self._reward_step_penalty()
         
 
-    def _reward_goal_reached(self,goal_in_robot_frame, reward = 15):
+    def _reward_goal_reached(self, goal_in_robot_frame, reward = 15):
 
         if goal_in_robot_frame[0] < self.goal_radius:
             self.curr_reward = reward
@@ -74,7 +79,26 @@ class RewardCalculator():
         else:
             self.info['is_done'] = False
 
+    def _reward_step_penalty(self):
+        '''
+        time penalty
+        '''
+        time_penalty = 0.01
+        self.curr_reward -= time_penalty  
 
+    def _reward_goal_approached3(self, goal_in_robot_frame, circle_radius = 3.5, tolerance=1e-3):
+        '''
+         add a standard normal reward signal field around goal
+         give a punishment to be static inner circle (avoid agent exploit reward filed)
+        '''
+        distance = goal_in_robot_frame[0]
+        signal = round((1/(np.sqrt(2*np.pi)*4) * np.exp(-distance**2/(2*4)) ) * 0.5 , 3) 
+        if np.abs(distance-self.previous_distance) < tolerance:
+            self.curr_reward -= signal
+        else:
+            self.curr_reward += signal
+        self.previous_distance = distance
+    
     def _reward_goal_approached(self, goal_in_robot_frame,reward = 1, punishment = 0.0001):
         if self.last_goal_dist is not None:
             #goal_in_robot_frame : [rho, theta]

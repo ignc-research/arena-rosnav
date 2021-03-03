@@ -4,7 +4,6 @@ angles==1.9.12
 astunparse==1.6.3
 base-local-planner==1.16.7
 bleach==1.5.0
-bondpy==1.8.5
 cachetools==4.2.0
 camera-calibration==1.15.0
 camera-calibration-parsers==1.11.13

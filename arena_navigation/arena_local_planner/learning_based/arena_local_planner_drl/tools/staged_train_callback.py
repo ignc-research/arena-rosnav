@@ -1,5 +1,5 @@
 from stable_baselines3.common.callbacks import BaseCallback
-from task_generator.task_generator.tasks import StagedRandomTask
+from task_generator.tasks import StagedRandomTask
 
 class InitiateNewTrainStage(BaseCallback):
     """
