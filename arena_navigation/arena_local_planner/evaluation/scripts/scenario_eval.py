@@ -261,8 +261,8 @@ class newBag():
                 wp_x =  np.array(wp_x)
                 wp_y = -np.array(wp_y)
 
-                print(wp_x)
-                print(wp_y)
+                # print(wp_x)
+                # print(wp_y)
 
                 # x
                 if min(pose_x) < axlim["x_min"]:
@@ -644,7 +644,7 @@ def eval_all(a,map,ob,vel,run=""):
     # return
     cur_path    = str(pathlib.Path().absolute()) 
     parent_path = str(os.path.abspath(os.path.join(cur_path, os.pardir)))
-    bag_path    = parent_path + "/bags/scenarios/"
+    bag_path    = parent_path + "/bags/scenarios/run2_28_2/"
 
     
     if run == "":
@@ -680,7 +680,7 @@ def eval_all(a,map,ob,vel,run=""):
 
 
 
-    plt.savefig('../plots/' + mode + run.replace("/", "_") + '.pdf')
+    plt.savefig('../plots/' + mode + run.replace("/", "_") + '.png')
 
 def getMap(msg):
     global ax, sm
@@ -701,11 +701,15 @@ def run():
     # ToDo: merge nearby zones 
     # legend
     lgnd          = {}
-    lgnd["arena"] = "tab:purple"
-    lgnd["cadrl"] = "tab:red"
-    lgnd["dwa"]   = "tab:blue"
-    lgnd["mpc"]   = "tab:green"
-    lgnd["teb"]   = "tab:orange"
+    # lgnd["arena"] = "tab:purple"
+    # lgnd["cadrl"] = "tab:red"
+    # lgnd["dwa"]   = "tab:blue"
+    # lgnd["mpc"]   = "tab:green"
+    # lgnd["teb"]   = "tab:orange"
+
+    lgnd["esdf"] = "tab:red"
+    lgnd["subsample"] = "tab:grey"
+
     # plots
     grid_step       = 2
     plot_sm         = False
@@ -743,14 +747,48 @@ def run():
 
     # eval_all(["arena","cadrl","dwa","mpc","teb"],"empty","20","vel_03")
 
+    
+
+    # run 2 ----------------------------------------------------------------------
+
+    
     # eval_all(["cadrl"],"empty","obs20","vel_01","run2_28_2/cadrl_drl")
     # eval_all(["cadrl"],"empty","20","vel_03","")
 
     # eval_all(["mpc"],"empty","20","vel_03")
-    eval_all(["cadrl"],"empty","obs20","vel_02","run2_28_2/esdf")
-    eval_all(["cadrl"],"empty","obs5","vel_02","run2_28_2/subsample")
+    # eval_all(["cadrl"],"empty","obs20","vel_02","run2_28_2/esdf")
+    # eval_all(["cadrl"],"empty","obs5","vel_02","run2_28_2/subsample")
     # eval_all(["cadrl"],"empty","obs20","vel_01","run2_28_2/cadrl_drl")
-    
+
+
+    # empty map 
+    # 20
+    eval_all(["esdf","subsample"],"empty","20","vel_01")
+    eval_all(["esdf","subsample"],"empty","20","vel_02")
+    eval_all(["esdf","subsample"],"empty","20","vel_03")
+    # 10
+    eval_all(["esdf","subsample"],"empty","10","vel_01")
+    eval_all(["esdf","subsample"],"empty","10","vel_02")
+    eval_all(["esdf","subsample"],"empty","10","vel_03")
+    # 5
+    eval_all(["esdf","subsample"],"empty","5","vel_01")
+    eval_all(["esdf","subsample"],"empty","5","vel_02")
+    eval_all(["esdf","subsample"],"empty","5","vel_03")
+
+
+    # map 1 
+    # 20
+    eval_all(["esdf","subsample"],"map","20","vel_01")
+    eval_all(["esdf","subsample"],"map","20","vel_02")
+    eval_all(["esdf","subsample"],"map","20","vel_03")
+    # 10
+    eval_all(["esdf","subsample"],"map","10","vel_01")
+    eval_all(["esdf","subsample"],"map","10","vel_02")
+    eval_all(["esdf","subsample"],"map","10","vel_03")
+    # 5
+    eval_all(["esdf","subsample"],"map","5","vel_01")
+    eval_all(["esdf","subsample"],"map","5","vel_02")
+    eval_all(["esdf","subsample"],"map","5","vel_03")
     
     plt.show()
     rospy.spin()
