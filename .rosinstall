@@ -5,8 +5,8 @@
     
 - git:
     local-name: ../forks/pedsim_ros
-    uri: https://github.com/Sirupli/pedsim_ros
-    version: human_ros
+    uri: https://github.com/dangaw255/pedsim_ros
+    version: behavior_modeling
 
 - git:
     local-name: ../forks/navigation/local_planner/teb
