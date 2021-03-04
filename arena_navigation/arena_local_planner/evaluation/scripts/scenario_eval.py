@@ -46,7 +46,16 @@ class newBag():
 
     def make_txt(self,file,msg,ron="a"):
         file = file.replace("/","_") + ".txt"
+        # write all modes in same scenario file
+        file = file.replace("arena","")
+        file = file.replace("cadrl","")
+        file = file.replace("dwa","")
+        file = file.replace("teb","")
+        file = file.replace("mpc","")
+        file = file.replace("esdf","")
+        file = file.replace("subsample","")
         file = "quantitative/" + file
+        
         f = open(file, ron)
         f.write(msg)
         f.close()
@@ -300,6 +309,8 @@ class newBag():
                     ax.plot(y, x, lgnd[planner], alpha=0.2)
                     ax.plot(sg_y, sg_x, "^", color='k', alpha=0.05)
                     ax.plot(wp_y, wp_x, "s", color='g', alpha=0.05)
+                    ax.set_xlabel("x")
+                    ax.set_ylabel("y")
 
 
                 duration = t[len(t)-1] - t[0]
@@ -320,7 +331,7 @@ class newBag():
                 n_run = run.replace("run_","")
                 n_run = int(n_run)
                 print(n_run)
-                self.plot_global_plan(n_run)
+                # self.plot_global_plan(n_run)
                 self.make_txt(file_name, "\n"+cr)
 
                 col_xy.append(bags[run][3])
@@ -692,10 +703,10 @@ def eval_all(a,map,ob,vel,run=""):
 
     ax.legend(handles=legend_elements, loc=0)
     
-    ax.set_ylim([start[0]-1, goal[0]+1])
+    # ax.set_ylim([start[0]-1, goal[0]+1])
 
-    ax.set_xlim([-16, 3])
-    ax.set_ylim([-4, 24])
+    # ax.set_xlim([-16, 3])
+    # ax.set_ylim([-4, 24])
 
 
 
@@ -720,20 +731,20 @@ def run():
     # ToDo: merge nearby zones 
     # legend
     lgnd          = {}
-    # lgnd["arena"] = "tab:purple"
-    # lgnd["cadrl"] = "tab:red"
-    # lgnd["dwa"]   = "tab:blue"
-    # lgnd["mpc"]   = "tab:green"
-    # lgnd["teb"]   = "tab:orange"
+    lgnd["arena"] = "tab:purple"
+    lgnd["cadrl"] = "tab:red"
+    lgnd["dwa"]   = "tab:blue"
+    lgnd["mpc"]   = "tab:green"
+    lgnd["teb"]   = "tab:orange"
 
-    lgnd["esdf"] = "tab:red"
-    lgnd["subsample"] = "tab:grey"
+    # lgnd["esdf"] = "tab:red"
+    # lgnd["subsample"] = "tab:grey"
 
     # plots
     grid_step       = 2
     plot_sm         = False
     plot_obst       = True
-    plot_trj        = False
+    plot_trj        = True
     plot_zones      = False
     plot_collisions = True
     plot_grid       = False
@@ -763,47 +774,47 @@ def run():
 
 
 
-    # eval_all(["cadrl"],"map1","5","vel_01")
-    # # 10 01
-    # eval_all(["cadrl"],"map1","10","vel_01")
-    # # 20 01
-    # eval_all(["cadrl"],"map1","20","vel_01")
+    eval_all(["arena","cadrl","dwa","mpc","teb"],"map1","5","vel_01")
+    # 10 01
+    eval_all(["arena","cadrl","dwa","mpc","teb"],"map1","10","vel_01")
+    # 20 01
+    eval_all(["arena","cadrl","dwa","mpc","teb"],"map1","20","vel_01")
     
 
-    # eval_all(["cadrl"],"map1","5","vel_02")
-    # # 10 01
-    # eval_all(["cadrl"],"map1","10","vel_02")
-    # # 20 01
-    # eval_all(["cadrl"],"map1","20","vel_02")
+    eval_all(["arena","cadrl","dwa","mpc","teb"],"map1","5","vel_02")
+    # 10 01
+    eval_all(["arena","cadrl","dwa","mpc","teb"],"map1","10","vel_02")
+    # 20 01
+    eval_all(["arena","cadrl","dwa","mpc","teb"],"map1","20","vel_02")
 
 
-    # eval_all(["cadrl"],"map1","5","vel_03")
-    # # 10 01
-    # eval_all(["cadrl"],"map1","10","vel_03")
-    # # 20 01
-    # eval_all(["cadrl"],"map1","20","vel_03")
+    eval_all(["arena","cadrl","dwa","mpc","teb"],"map1","5","vel_03")
+    # 10 01
+    eval_all(["arena","cadrl","dwa","mpc","teb"],"map1","10","vel_03")
+    # 20 01
+    eval_all(["arena","cadrl","dwa","mpc","teb"],"map1","20","vel_03")
 
 
-    # #  5 01
-    # eval_all(["cadrl"],"empty","5","vel_01")
-    # # 10 01
-    # eval_all(["cadrl"],"empty","10","vel_01")
-    # # 20 01
-    # eval_all(["cadrl"],"empty","20","vel_01")
+    #  5 01
+    eval_all(["arena","cadrl","dwa","mpc","teb"],"empty","5","vel_01")
+    # 10 01
+    eval_all(["arena","cadrl","dwa","mpc","teb"],"empty","10","vel_01")
+    # 20 01
+    eval_all(["arena","cadrl","dwa","mpc","teb"],"empty","20","vel_01")
 
-    # #  5 01
-    # eval_all(["cadrl"],"empty","5","vel_02")    
-    # #  10 01
-    # eval_all(["cadrl"],"empty","10","vel_02")    
-    # #  20 01
-    # eval_all(["cadrl"],"empty","20","vel_02")
+    #  5 01
+    eval_all(["arena","cadrl","dwa","mpc","teb"],"empty","5","vel_02")    
+    #  10 01
+    eval_all(["arena","cadrl","dwa","mpc","teb"],"empty","10","vel_02")    
+    #  20 01
+    eval_all(["arena","cadrl","dwa","mpc","teb"],"empty","20","vel_02")
 
-    # #  5 01
-    # eval_all(["cadrl"],"empty","5","vel_03")    
-    # #  10 01
-    # eval_all(["cadrl"],"empty","10","vel_03")    
-    # #  20 01
-    # eval_all(["cadrl"],"empty","20","vel_03")
+    #  5 01
+    eval_all(["arena","cadrl","dwa","mpc","teb"],"empty","5","vel_03")    
+    #  10 01
+    eval_all(["arena","cadrl","dwa","mpc","teb"],"empty","10","vel_03")    
+    #  20 01
+    eval_all(["arena","cadrl","dwa","mpc","teb"],"empty","20","vel_03")
 
 
 
@@ -829,7 +840,7 @@ def run():
     # # 20
     # eval_all(["esdf","subsample"],"map1","20","vel_01","run2_28_2/")
     # eval_all(["esdf","subsample"],"map1","20","vel_02","run2_28_2/")
-    eval_all(["esdf","subsample"],"map1","20","vel_03","run2_28_2/")
+    # eval_all(["esdf","subsample"],"map1","20","vel_03","run2_28_2/")
     # # 10
     # eval_all(["esdf","subsample"],"map1","10","vel_01","run2_28_2/")
     # eval_all(["esdf","subsample"],"map1","10","vel_02","run2_28_2/")
@@ -844,7 +855,7 @@ def run():
 
 
 if __name__=="__main__":
-    # run()
+    run()
 
     # example
     # csv_dir = "../bags/scenarios/run2_28_2/subsample/cadrl_map1_obs20_vel_03_subsampling"
