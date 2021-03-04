@@ -2,6 +2,13 @@
     
   <param name="use_sim_time" value="true"/>
   
+
+  <arg name="noise_mode"      default="0"/>
+  <param name="noise_mode" value="$(arg noise_mode)"/>
+
+  <arg name="delay"      default="1"/>
+  <param name="delay" value="$(arg delay)"/>
+
   <arg name="local_planner"   default="dwa"/>
   <arg name="rviz_file"       default="nav"/>
   <arg name="train_mode"      default="false"/>
@@ -76,6 +83,9 @@
     <arg name="timeout_subgoal"         default="30."/>   <!-- sec, double-->
   </include>
 
+  <!-- start scan_noise node -->
+  <include file="$(find arena_bringup)/launch/sublaunch/scan_process.launch">
+  </include>
   
     
 </launch>

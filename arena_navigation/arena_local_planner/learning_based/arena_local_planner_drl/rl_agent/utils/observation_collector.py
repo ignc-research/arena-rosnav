@@ -27,11 +27,12 @@ from tf.transformations import *
 from gym import spaces
 import numpy as np
 
-
+#helper python
+from rl_agent.utils.noise import Noise
 
 
 class ObservationCollector():
-    def __init__(self,num_lidar_beams:int,lidar_range:float):
+    def __init__(self,num_lidar_beams:int,lidar_range:float,noise_model = [0]):
         """ a class to collect and merge observations
 
         Args:
@@ -68,12 +69,13 @@ class ObservationCollector():
         self._subgoal_sub.registerCallback(self.callback_subgoal)
         
         # service clients
-        self._is_train_mode = rospy.get_param("train_mode")
-        if self._is_train_mode:
-            self._service_name_step='step_world'
-            self._sim_step_client = rospy.ServiceProxy(self._service_name_step, StepWorld)
+        self._service_name_step='step_world'
+        self._sim_step_client = rospy.ServiceProxy(self._service_name_step, StepWorld)
 
-
+        self._noise_model = noise_model                                        # 0 means no more noise
+        self._noise_model = [1]
+        if 0 not in self._noise_model:                 
+            self.Noise_Generation = Noise(noise_mode = self._noise_model)
     
     def get_observation_space(self):
         return self.observation_space
@@ -81,20 +83,23 @@ class ObservationCollector():
     def get_observations(self):
         # reset flag 
         self._flag_all_received=False
-        if self._is_train_mode: 
+        
         # sim a step forward until all sensor msg uptodate
-            i=0
-            while(self._flag_all_received==False):
-                self.call_service_takeSimStep()
-                i+=1
+        i=0
+        while(self._flag_all_received==False):
+            self.call_service_takeSimStep()
+            i+=1
         # rospy.logdebug(f"Current observation takes {i} steps for Synchronization")
         #print(f"Current observation takes {i} steps for Synchronization")
+        if 0 not in self._noise_model:
+                self._scan.ranges = self.Noise_Generation.add_noise(self._scan)
         scan=self._scan.ranges.astype(np.float32)
         rho, theta = ObservationCollector._get_goal_pose_in_robot_frame(self._subgoal,self._robot_pose)
         merged_obs = np.hstack([scan, np.array([rho,theta])])
         obs_dict = {}
         obs_dict["laser_scan"] = scan
         obs_dict['goal_in_robot_frame'] = [rho,theta]
+        #print("THIS IS A TEST")
         return merged_obs, obs_dict
     
     @staticmethod
