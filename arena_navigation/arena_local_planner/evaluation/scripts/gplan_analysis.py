@@ -22,7 +22,7 @@ def gplan_to_df(gplan_csv, reset_csv): # takes csv file names as arguments
         strings = [[re.sub("x:", "", i[0]),i[1]] for i in strings] #  remove "x:" and return [x,y]
         strings = [[np.float(coord) for coord in i] for i in strings] # convert from string to float
         global_plan["pos"].append([[coords[1]*(-1),coords[0]] for coords in strings]) # append the position list to dictionary, x and y inverted to match ros
-        global_plan["time"].append(gplan.loc[t,"Time"]) # append the time to the dictionary
+        global_plan["time"].append(np.float(gplan.loc[t,"Time"])) # append the time to the dictionary
 
     global_plan_df = pd.DataFrame.from_dict(global_plan) # create pandas dataframe from dict
     reset = pd.read_csv(reset_csv)
@@ -34,9 +34,10 @@ def gplan_to_df(gplan_csv, reset_csv): # takes csv file names as arguments
 def plot_run(global_plan_df,run = 1, color = "blue"):
     replannings = len(global_plan_df.loc[lambda global_plan_df: global_plan_df["run"] == run, "pos"]) # number of replannings
     for x in range(len(global_plan_df.loc[lambda global_plan_df: global_plan_df["run"] == run, "pos"])): # select global plans of the run
-        plt.plot(*zip(*global_plan_df.loc[x, "pos"]), alpha = 1/(replannings-x+1), c = color, lw = 3) # need to zip those x,y pairs
-    plt.show()
-    print("Number of replannings during this run: " + str(replannings)) # print number of replannings
+        # plt.plot(*zip(*global_plan_df.loc[x, "pos"]), alpha = 1/(replannings-x+1), c = color, lw = 1) # need to zip those x,y pairs
+        plt.plot(*zip(*global_plan_df.loc[x, "pos"]), alpha = 0.2, c = color, lw = 1) # need to zip those x,y pairs
+    # plt.show()
+    # print("Number of replannings during this run: " + str(replannings)) # print number of replannings
 
 def is_run(time,resets): # function for assigning the run/episode
     for j in range(len(resets)):
@@ -46,13 +47,11 @@ def is_run(time,resets): # function for assigning the run/episode
         if time >= resets.loc[j,"Time"]:
             continue
         else:
-            return resets.loc[j-1,"data"]
+            return resets.loc[j,"data"]
             break
 
+    
 
-
-# file_dir = "../bags/scenarios/run2_28_2/esdf/cadrl_map_empty_obs20_vel_02_esdf/" das funktioniert
-# file_dir = "../bags/scenarios/run2_28_2/esdf/cadrl_map_empty_obs5_vel_02_esdf/" # das geht nicht
-# esdf = gplan_to_df(file_dir+"sensorsim-police-gplan.csv",file_dir+"scenario_reset.csv")
-# plot_run(esdf, 10)
-
+# example
+#esdf = gplan_to_df("sensorsim-police-gplan.csv","scenario_reset.csv")
+#plot_run(esdf, 10)
