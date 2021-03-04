@@ -39,9 +39,7 @@ class newBag():
         # global apth
         self.plot_gp = True
 
-        self.col_zones = []
         self.nc_total = 0
-        self.nc_curr = 0
         # eval bags
         self.bag = bagreader(bag_name)
         eps = self.split_runs()
@@ -275,8 +273,6 @@ class newBag():
         durations = [] 
         trajs = []
         vels  = []
-
-        col_zones = []
 
         self.make_txt(file_name, "\n"+"Evaluation of "+planner+":")
         axlim = {}
