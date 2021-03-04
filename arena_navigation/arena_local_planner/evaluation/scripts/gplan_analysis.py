@@ -31,13 +31,16 @@ def gplan_to_df(gplan_csv, reset_csv): # takes csv file names as arguments
 
     return global_plan_df # return cleaned and structured pandas dataframe
 
-def plot_run(global_plan_df,run = 1, color = "blue"):
-    replannings = len(global_plan_df.loc[lambda global_plan_df: global_plan_df["run"] == run, "pos"]) # number of replannings
-    for x in range(len(global_plan_df.loc[lambda global_plan_df: global_plan_df["run"] == run, "pos"])): # select global plans of the run
-        # plt.plot(*zip(*global_plan_df.loc[x, "pos"]), alpha = 1/(replannings-x+1), c = color, lw = 1) # need to zip those x,y pairs
-        plt.plot(*zip(*global_plan_df.loc[x, "pos"]), alpha = 0.2, c = color, lw = 1) # need to zip those x,y pairs
+def plot_run(global_plan_df,run = 1, color = "tab:cyan"):
+    run_df = global_plan_df.loc[lambda global_plan_df: global_plan_df["run"] == run,:]
+    replannings = len(run_df) # number of replannings
+    for x in range(len(run_df)): # select global plans of the run
+        plt.plot(*zip(*run_df.loc[run_df.index[x],"pos"]), alpha = np.exp(-x), c = color, lw = 3, ls = "dashed") # need to zip those x,y pairs
+        #plt.scatter(*zip(*run_df.loc[run_df.index[x],"pos"][0::100]), alpha = x/len(run_df), c = color, marker = "x", s = 100) # plot marks on global path for every gp
+    # plt.scatter(*zip(*run_df.loc[run_df.index[0],"pos"][0::100]), alpha = 1, c = color, marker = "o", s = 50) # plot marks for only last global plan
     # plt.show()
-    # print("Number of replannings during this run: " + str(replannings)) # print number of replannings
+    print("Number of replannings during this run: " + str(replannings)) # print number of replannings
+
 
 def is_run(time,resets): # function for assigning the run/episode
     for j in range(len(resets)):

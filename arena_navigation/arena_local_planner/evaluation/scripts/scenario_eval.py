@@ -34,6 +34,8 @@ class newBag():
         self.subgoal_topic   = "/sensorsim/police/subgoal"
         self.gp_topic        = "/sensorsim/police/gplan"
         self.wpg_topic       = "/sensorsim/police/subgoal_wpg"
+        # global apth
+        self.plot_gp = True
 
         self.col_zones = []
         self.nc_total = 0
@@ -132,7 +134,7 @@ class newBag():
         col_xy = []
         nc = 0
 
-
+        global start, select_run
 
         for i in range(len(df_odom)): 
             current_time = df_odom.loc[i, "Time"]
@@ -145,13 +147,13 @@ class newBag():
             # print(reset)
 
             # check if respawned
-            global start, select_run
+            
             start_x = start[0] + 0.5
 
             if current_time > reset-6 and n < len(t_reset)-1 and x < start_x:
                 n += 1
                 # store the run
-                if n in select_run:
+                if n in select_run or len(select_run) == 0:
                     bags["run_"+str(n)] = [pose_x, pose_y, t, col_xy, subgoal_x, subgoal_y, wpg_x, wpg_y]
 
                 # reset 
@@ -167,46 +169,48 @@ class newBag():
 
                 col_xy    = []
    
-            if  len(pose_x) > 0:
-                pose_x.append(x)
-                pose_y.append(y)
-            elif x < start_x:
-                pose_x.append(x)
-                pose_y.append(y)
+            if n+1 in select_run or len(select_run) == 0:
 
-            t.append(current_time)
-            # get trajectory
+                if  len(pose_x) > 0:
+                    pose_x.append(x)
+                    pose_y.append(y)
+                elif x < start_x:
+                    pose_x.append(x)
+                    pose_y.append(y)
 
-            # check for col
-            if len(t_col) > nc:
-                if current_time >= t_col[nc]:
-                    col_xy.append([x,y])
-                    nc += 1
+                t.append(current_time)
+                # get trajectory
 
-            # check for goals
-            if len(df_subg) > 0:
-                sg_t = round(df_subg.loc[sg_n, "Time"],3)
-                sg_x = round(df_subg.loc[sg_n, "pose.position.x"],3)
-                sg_y = round(df_subg.loc[sg_n, "pose.position.y"],3)
+                # check for col
+                if len(t_col) > nc:
+                    if current_time >= t_col[nc]:
+                        col_xy.append([x,y])
+                        nc += 1
 
-                if current_time > sg_t and sg_n < len(df_subg) - 1:
+                # check for goals
+                if len(df_subg) > 0:
+                    sg_t = round(df_subg.loc[sg_n, "Time"],3)
+                    sg_x = round(df_subg.loc[sg_n, "pose.position.x"],3)
+                    sg_y = round(df_subg.loc[sg_n, "pose.position.y"],3)
 
-                    subgoal_x.append(sg_x)
-                    subgoal_y.append(sg_y)
+                    if current_time > sg_t and sg_n < len(df_subg) - 1:
 
-                    sg_n += 1
+                        subgoal_x.append(sg_x)
+                        subgoal_y.append(sg_y)
 
-            if len(df_wpg) > 0:
-                wp_t = round(df_wpg.loc[wpg_n, "Time"],3)
-                wp_x = round(df_wpg.loc[wpg_n, "pose.position.x"],3)
-                wp_y = round(df_wpg.loc[wpg_n, "pose.position.y"],3)
+                        sg_n += 1
 
-                if current_time > wp_t and wpg_n < len(df_wpg) - 1:
+                if len(df_wpg) > 0:
+                    wp_t = round(df_wpg.loc[wpg_n, "Time"],3)
+                    wp_x = round(df_wpg.loc[wpg_n, "pose.position.x"],3)
+                    wp_y = round(df_wpg.loc[wpg_n, "pose.position.y"],3)
 
-                    wpg_x.append(wp_x)
-                    wpg_y.append(wp_y)
+                    if current_time > wp_t and wpg_n < len(df_wpg) - 1:
 
-                    wpg_n += 1
+                        wpg_x.append(wp_x)
+                        wpg_y.append(wp_y)
+
+                        wpg_n += 1
 
 
         # remove first 
@@ -227,9 +231,10 @@ class newBag():
         if plot_gp:
             csv_dir = self.csv_dir 
             # print(csv_dir+"/scenario_reset.csv")
-            if os.path.isfile(csv_dir+"/sensorsim-police-gplan.csv") and os.path.isfile(csv_dir+"/scenario_reset.csv"): 
-                esdf    = gplan.gplan_to_df(csv_dir+"/sensorsim-police-gplan.csv", csv_dir+"/scenario_reset.csv")
-                gplan.plot_run(esdf, run_n)
+            if os.path.isfile(csv_dir+"/sensorsim-police-gplan.csv") and os.path.isfile(csv_dir+"/scenario_reset.csv") and self.plot_gp: 
+                esdf = gplan.gplan_to_df(csv_dir+"/sensorsim-police-gplan.csv", csv_dir+"/scenario_reset.csv")
+                gplan.plot_run(esdf, run_n, "tab:cyan")
+                self.plot_gp = False
 
     def plot_collisions(self, xya, clr):
         global ax, plot_collisions
@@ -254,7 +259,7 @@ class newBag():
 
     def evalPath(self, planner, file_name, bags):
         col_xy = []
-        global ax, lgnd, axlim, plot_trj
+        global ax, lgnd, axlim, plot_trj, plot_subgoals
 
         durations = [] 
         trajs = []
@@ -270,7 +275,7 @@ class newBag():
         axlim["y_max"] = -100
 
         for run in bags:
-            if run != "nrun_2":
+            if run != "nrun_2/":
                 
 
                 pose_x = bags[run][0]
@@ -309,11 +314,11 @@ class newBag():
                 trajs.append(path_length)
                 if path_length > 0 and plot_trj:
                     ax.plot(y, x, lgnd[planner], alpha=0.2)
-                    ax.plot(sg_y, sg_x, "^", color='k', alpha=0.05)
-                    ax.plot(wp_y, wp_x, "s", color='g', alpha=0.05)
-                    ax.set_xlabel("x")
-                    ax.set_ylabel("y")
-
+                    ax.set_xlabel("x in [m]")
+                    ax.set_ylabel("y in [m]")
+                if plot_subgoals:
+                    ax.plot(sg_y, sg_x, "^", color='k', alpha=0.1)
+                    ax.plot(wp_y, wp_x, "s", color='g', alpha=0.1)
 
                 duration = t[len(t)-1] - t[0]
                 # for av
@@ -658,7 +663,7 @@ def read_scn_file(map, ob):
     start = data["robot"]["start_pos"]
     goal  = data["robot"]["goal_pos"]
 
-def eval_all(a,map,ob,vel,run=""):
+def eval_all(a,map,ob,vel,run="all_runs/",saved_name=""):
     global ax, sm, lgnd, start, goal, axlim, plot_sm
     fig, ax = plt.subplots(figsize=(6, 7))
     
@@ -678,24 +683,20 @@ def eval_all(a,map,ob,vel,run=""):
     parent_path = str(os.path.abspath(os.path.join(cur_path, os.pardir)))
     bag_path    = parent_path + "/bags/scenarios/" + run
 
-    
-    if True:
-        for planner in a:
-            curr_bag = bag_path + planner
-            for file in os.listdir(curr_bag):
-                if file.endswith(".bag") and map in file and ob in file and vel in file:
-                    fn = planner + "_" + mode
-                    # print(fn)
-                    
-                    newBag(planner, fn, curr_bag + "/" + file)
 
-    else:
-        curr_bag = bag_path + run
+    for planner in a:
+        curr_bag = bag_path + planner
         for file in os.listdir(curr_bag):
-                if file.endswith(".bag") and map in file and ob in file and vel in file:
-                    fn = run + "_" + mode
-                    newBag(a[0], fn, curr_bag + "/" + file)
-                    # print(fn)
+            if file.endswith(".bag") and map in file and ob in file and vel in file:
+                fn = planner + "_" + mode
+                if "subsample" not in fn or "esdf" not in fn:
+                    fn.replace("02","03")
+                # print(fn)
+                
+                newBag(planner, fn, curr_bag + "/" + file)
+
+
+                # print(fn)
     
     # dhow legend labels once per planner
     legend_elements = []
@@ -710,9 +711,16 @@ def eval_all(a,map,ob,vel,run=""):
     # ax.set_xlim([-16, 3])
     # ax.set_ylim([-4, 24])
 
+    # plt.gca().set_axis_off()
+    plt.subplots_adjust(top = 1, bottom = 0, right = 1, left = 0, 
+                hspace = 0, wspace = 0)
+    # plt.margins(0,0)
+    # plt.gca().xaxis.set_major_locator(plt.NullLocator())
+    # plt.gca().yaxis.set_major_locator(plt.NullLocator())
+    plt.savefig('../plots/' + saved_name + mode + '.pdf', bbox_inches = 'tight', pad_inches = 0)
 
 
-    plt.savefig('../plots/' + mode + run.replace("/", "_") + '.png')
+    # plt.savefig('../plots/' + saved_name + mode + '.png')
 
 def getMap(msg):
     global ax, sm
@@ -728,23 +736,23 @@ def getMap(msg):
 
 def run():
     global ax, sm, lgnd, grid_step, select_run
-    global plot_trj, plot_zones, plot_obst, plot_collisions, plot_grid, plot_sm, plot_gp
+    global plot_trj, plot_zones, plot_obst, plot_collisions, plot_grid, plot_sm, plot_gp, plot_subgoals
     select_run = []
     # ToDo: merge nearby zones 
     # legend
     lgnd          = {}
-    # lgnd["arena"] = "tab:purple"
-    # lgnd["cadrl"] = "tab:red"
-    # lgnd["dwa"]   = "tab:blue"
-    # lgnd["mpc"]   = "tab:green"
-    # lgnd["teb"]   = "tab:orange"
+    lgnd["arena"] = "tab:purple"
+    lgnd["cadrl"] = "tab:red"
+    lgnd["dwa"]   = "tab:blue"
+    lgnd["mpc"]   = "tab:green"
+    lgnd["teb"]   = "tab:orange"
 
-    lgnd["esdf"] = "tab:red"
+    lgnd["esdf"] = "tab:brown"
     lgnd["subsample"] = "tab:grey"
 
     # plots
     grid_step       = 2
-    plot_sm         = False
+    plot_sm         = True
     plot_obst       = True
     plot_trj        = True
     plot_zones      = False
@@ -825,39 +833,102 @@ def run():
 
     # # empty map 
     # # 20
-    # eval_all(["esdf","subsample"],"empty","20","vel_01","run2_28_2/") ------------ all runs
-    # eval_all(["esdf","subsample"],"empty","20","vel_02","run2_28_2/")
-    # eval_all(["esdf","subsample"],"empty","20","vel_03","run2_28_2/")
+    # eval_all(["esdf","subsample"],"empty","20","vel_01","run_2/") ------------ all runs
+    # eval_all(["esdf","subsample"],"empty","20","vel_02","run_2/")
+    # eval_all(["esdf","subsample"],"empty","20","vel_03","run_2/")
     # # 10
-    # eval_all(["esdf","subsample"],"empty","10","vel_01","run2_28_2/")
-    # eval_all(["esdf","subsample"],"empty","10","vel_02","run2_28_2/")
-    # eval_all(["esdf","subsample"],"empty","10","vel_03","run2_28_2/")
+    # eval_all(["esdf","subsample"],"empty","10","vel_01","run_2/")
+    # eval_all(["esdf","subsample"],"empty","10","vel_02","run_2/")
+    # eval_all(["esdf","subsample"],"empty","10","vel_03","run_2/")
     # # 5
-    # eval_all(["esdf","subsample"],"empty","5","vel_01","run2_28_2/")
-    # eval_all(["esdf","subsample"],"empty","5","vel_02","run2_28_2/")
-    # eval_all(["esdf","subsample"],"empty","5","vel_03","run2_28_2/")
+    # eval_all(["esdf","subsample"],"empty","5","vel_01","run_2/")
+    # eval_all(["esdf","subsample"],"empty","5","vel_02","run_2/")
+    # eval_all(["esdf","subsample"],"empty","5","vel_03","run_2/")
 
 
     # # # map 1 
     # # # 20
-    # eval_all(["esdf","subsample"],"map1","20","vel_01","run2_28_2/")
-    # eval_all(["esdf","subsample"],"map1","20","vel_02","run2_28_2/")
-    # eval_all(["esdf","subsample"],"map1","20","vel_03","run2_28_2/")
+    # eval_all(["esdf","subsample"],"map1","20","vel_01","run_2/")
+    # eval_all(["esdf","subsample"],"map1","20","vel_02","run_2/")
+    # eval_all(["esdf","subsample"],"map1","20","vel_03","run_2/")
     # # # 10
-    # eval_all(["esdf","subsample"],"map1","10","vel_01","run2_28_2/")
-    # eval_all(["esdf","subsample"],"map1","10","vel_02","run2_28_2/")
-    # eval_all(["esdf","subsample"],"map1","10","vel_03","run2_28_2/")
+    # eval_all(["esdf","subsample"],"map1","10","vel_01","run_2/")
+    # eval_all(["esdf","subsample"],"map1","10","vel_02","run_2/")
+    # eval_all(["esdf","subsample"],"map1","10","vel_03","run_2/")
     # # # 5
-    # eval_all(["esdf","subsample"],"map1","5","vel_01","run2_28_2/")
-    # eval_all(["esdf","subsample"],"map1","5","vel_02","run2_28_2/")
-    # eval_all(["esdf","subsample"],"map1","5","vel_03","run2_28_2/")
+    # eval_all(["esdf","subsample"],"map1","5","vel_01","run_2/")
+    # eval_all(["esdf","subsample"],"map1","5","vel_02","run_2/")
+    # eval_all(["esdf","subsample"],"map1","5","vel_03","run_2/")
     
 
 
+    select_run = [5,10,15,20,25]
+    plot_zones    = False
+    plot_subgoals = True
 
-    eval_all(["subsample"],"empty","20","vel_02","run2_28_2/")
+
+    # # 1- 6
+    # lgnd = {}
+    # lgnd["subsample"] = "tab:purple"
+    # eval_all(["subsample"],"empty","20" ,"vel_02",saved_name="01_")
+    # lgnd = {}
+    # lgnd["esdf"]      = "tab:blue"
+    # eval_all(["esdf"],"empty","20","vel_02",saved_name="02_")
+    # lgnd = {}
+    # lgnd["cadrl"]     = "tab:red"
+    # eval_all(["cadrl"],"empty","20","vel_02",saved_name="03_")
 
 
+    # lgnd = {}
+    # lgnd["subsample"] = "tab:purple"
+    # eval_all(["subsample"],"map1","20" ,"vel_02",saved_name="04_")
+    # lgnd = {}
+    # lgnd["esdf"]      = "tab:blue"
+    # eval_all(["esdf"],"map1","20","vel_02",saved_name="05_")
+    # lgnd = {}
+    # lgnd["cadrl"]     = "tab:red"
+    # eval_all(["cadrl"],"map1","20","vel_02",saved_name="06_")
+
+
+
+
+    # # 7 - 12
+    
+    # lgnd = {}
+    # lgnd["cadrl"]     = "tab:red"
+    # lgnd["esdf"]      = "tab:brown"
+    # lgnd["subsample"] = "tab:grey"
+
+    # eval_all(["subsample","esdf","cadrl"],"empty","5" ,"vel_02",saved_name="07_")
+    # eval_all(["subsample","esdf","cadrl"],"empty","10","vel_02",saved_name="08_")
+    # eval_all(["subsample","esdf","cadrl"],"empty","20","vel_02",saved_name="09_")
+
+    # eval_all(["subsample","esdf","cadrl"],"map1","5" ,"vel_02",saved_name="10_")
+    # eval_all(["subsample","esdf","cadrl"],"map1","10","vel_02",saved_name="11_")
+    # eval_all(["subsample","esdf","cadrl"],"map1","20","vel_02",saved_name="12_")
+
+
+    # 13 - 18
+
+    select_run = []
+    plot_zones    = True
+    plot_subgoals = False
+
+    lgnd          = {}
+    lgnd["cadrl"] = "tab:red"
+    lgnd["teb"]   = "tab:orange"
+    lgnd["mpc"]   = "tab:green"
+
+    lgnd["esdf"] = "tab:blue"
+    lgnd["subsample"] = "tab:purple"
+
+    eval_all(["subsample","esdf","cadrl","teb","mpc"],"empty","5" ,"vel_02",saved_name="13_")
+    eval_all(["subsample","esdf","cadrl","teb","mpc"],"empty","10","vel_02",saved_name="14_")
+    eval_all(["subsample","esdf","cadrl","teb","mpc"],"empty","20","vel_02",saved_name="15_")
+
+    eval_all(["subsample","esdf","cadrl","teb","mpc"],"map1","5" ,"vel_02",saved_name="16_")
+    eval_all(["subsample","esdf","cadrl","teb","mpc"],"map1","10","vel_02",saved_name="17_")
+    eval_all(["subsample","esdf","cadrl","teb","mpc"],"map1","20","vel_02",saved_name="18_")
 
     plt.show()
     rospy.spin()
@@ -867,12 +938,12 @@ if __name__=="__main__":
     run()
 
     # example
-    # csv_dir = "../bags/scenarios/run2_28_2/subsample/cadrl_map1_obs20_vel_03_subsampling"
+    # csv_dir = "../bags/scenarios/run_2/subsample/cadrl_map1_obs20_vel_03_subsampling"
     # print(csv_dir+"/scenario_reset.csv")
     # esdf    = gplan.gplan_to_df(csv_dir+"/sensorsim-police-gplan.csv",csv_dir+"/scenario_reset.csv")
     # gplan.plot_run(esdf, 5)
 
-    # file_dir = "../bags/scenarios/run2_28_2/subsample/cadrl_map1_ob20_vel_03_subsampling/"
+    # file_dir = "../bags/scenarios/run_2/subsample/cadrl_map1_ob20_vel_03_subsampling/"
     # esdf = gplan.gplan_to_df(file_dir+"sensorsim-police-gplan.csv",file_dir+"scenario_reset.csv")
     # gplan.plot_run(esdf, 10)
 

@@ -1,0 +1,92 @@
+
+Evaluation of cadrl:
+Evaluation of cadrl:
+run_5: [179.5, 35.68, 0.199, 0]
+run_10: [188.5, 37.387, 0.198, 4]
+run_15: [231.5, 46.693, 0.202, 4]
+run_20: [232.5, 45.719, 0.197, 7]
+run_25: [204.5, 40.591, 0.198, 8]
+----------------------   cadrl summary: ----------------------
+average time:        207.3 s
+average path length: 41.214 m
+average velocity:    0.199  m/s
+total number of collisions: 33
+
+Evaluation of cadrl:
+run_5: [179.5, 35.68, 0.199, 0]
+run_10: [188.5, 37.387, 0.198, 4]
+run_15: [231.5, 46.693, 0.202, 4]
+run_20: [232.5, 45.719, 0.197, 7]
+run_25: [204.5, 40.591, 0.198, 8]
+----------------------   cadrl summary: ----------------------
+average time:        207.3 s
+average path length: 41.214 m
+average velocity:    0.199  m/s
+total number of collisions: 33
+
+Evaluation of cadrl:
+run_5: [179.5, 35.68, 0.199, 0]
+run_10: [188.5, 37.387, 0.198, 4]
+run_15: [231.5, 46.693, 0.202, 4]
+run_20: [232.5, 45.719, 0.197, 7]
+run_25: [204.5, 40.591, 0.198, 8]
+----------------------   cadrl summary: ----------------------
+average time:        207.3 s
+average path length: 41.214 m
+average velocity:    0.199  m/s
+total number of collisions: 33
+
+Evaluation of cadrl:
+run_5: [179.5, 35.68, 0.199, 0]
+run_10: [188.5, 37.387, 0.198, 4]
+run_15: [231.5, 46.693, 0.202, 4]
+run_20: [232.5, 45.719, 0.197, 7]
+run_25: [204.5, 40.591, 0.198, 8]
+----------------------   cadrl summary: ----------------------
+average time:        207.3 s
+average path length: 41.214 m
+average velocity:    0.199  m/s
+total number of collisions: 33
+
+Evaluation of arena:
+Evaluation of cadrl:
+run_5: [179.5, 35.68, 0.199, 0]
+run_10: [188.5, 37.387, 0.198, 4]
+run_15: [231.5, 46.693, 0.202, 4]
+run_20: [232.5, 45.719, 0.197, 7]
+run_25: [204.5, 40.591, 0.198, 8]
+----------------------   cadrl summary: ----------------------
+average time:        207.3 s
+average path length: 41.214 m
+average velocity:    0.199  m/s
+total number of collisions: 33
+
+Evaluation of arena:
+run_5: [159.5, 30.342, 0.19, 9]
+run_10: [169.95, 30.989, 0.182, 11]
+----------------------   arena summary: ----------------------
+average time:        164.725 s
+average path length: 30.665 m
+average velocity:    0.186  m/s
+total number of collisions: 25
+
+Evaluation of cadrl:
+run_5: [179.5, 35.68, 0.199, 0]
+run_10: [188.5, 37.387, 0.198, 4]
+run_15: [231.5, 46.693, 0.202, 4]
+run_20: [232.5, 45.719, 0.197, 7]
+run_25: [204.5, 40.591, 0.198, 8]
+----------------------   cadrl summary: ----------------------
+average time:        207.3 s
+average path length: 41.214 m
+average velocity:    0.199  m/s
+total number of collisions: 33
+
+Evaluation of arena:
+run_5: [159.5, 30.342, 0.19, 9]
+run_10: [169.95, 30.989, 0.182, 11]
+----------------------   arena summary: ----------------------
+average time:        164.725 s
+average path length: 30.665 m
+average velocity:    0.186  m/s
+total number of collisions: 25
