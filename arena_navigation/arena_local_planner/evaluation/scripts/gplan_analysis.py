@@ -35,7 +35,7 @@ def plot_run(global_plan_df,run = 1, color = "blue"):
     replannings = len(global_plan_df.loc[lambda global_plan_df: global_plan_df["run"] == run, "pos"]) # number of replannings
     for x in range(len(global_plan_df.loc[lambda global_plan_df: global_plan_df["run"] == run, "pos"])): # select global plans of the run
         plt.plot(*zip(*global_plan_df.loc[x, "pos"]), alpha = 1/(replannings-x+1), c = color, lw = 3) # need to zip those x,y pairs
-    # plt.show()
+    plt.show()
     print("Number of replannings during this run: " + str(replannings)) # print number of replannings
 
 def is_run(time,resets): # function for assigning the run/episode
@@ -48,4 +48,11 @@ def is_run(time,resets): # function for assigning the run/episode
         else:
             return resets.loc[j-1,"data"]
             break
+
+
+
+# file_dir = "../bags/scenarios/run2_28_2/esdf/cadrl_map_empty_obs20_vel_02_esdf/"
+file_dir = "../bags/scenarios/run2_28_2/esdf/cadrl_map_empty_ob5_vel_02_esdf/"
+esdf = gplan_to_df(file_dir+"sensorsim-police-gplan.csv",file_dir+"scenario_reset.csv")
+plot_run(esdf, 10)
 

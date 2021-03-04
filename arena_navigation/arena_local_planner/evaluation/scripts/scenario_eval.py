@@ -44,7 +44,6 @@ class newBag():
         self.evalPath(planner,file_name,eps)
 
 
-
     def make_txt(self,file,msg,ron="a"):
         file = file.replace("/","_") + ".txt"
         file = "quantitative/" + file
@@ -216,9 +215,10 @@ class newBag():
         global plot_gp
 
         if plot_gp:
-            csv_dir = self.csv_dir
-            esdf    = gplan.gplan_to_df(csv_dir+"sensorsim-police-gplan.csv",csv_dir+"scenario_reset.csv")
-            gplan.plot_run(esdf, run_n)
+            csv_dir = self.csv_dir 
+            # print(csv_dir+"/scenario_reset.csv")
+            # esdf    = gplan.gplan_to_df(csv_dir+"/sensorsim-police-gplan.csv",csv_dir+"/scenario_reset.csv")
+            # gplan.plot_run(esdf, run_n)
 
     def plot_collisions(self, xya, clr):
         global ax, plot_collisions
@@ -260,6 +260,8 @@ class newBag():
 
         for run in bags:
             if run != "nrun_2":
+                
+
                 pose_x = bags[run][0]
                 pose_y = bags[run][1]
                 sg_x   = bags[run][4]
@@ -315,6 +317,10 @@ class newBag():
 
                 cr = run+": "+str([duration, path_length, av_vel, n_col])
                 # print(cr)
+                n_run = run.replace("run_","")
+                n_run = int(n_run)
+                print(n_run)
+                self.plot_global_plan(n_run)
                 self.make_txt(file_name, "\n"+cr)
 
                 col_xy.append(bags[run][3])
@@ -341,7 +347,6 @@ class newBag():
         self.make_txt(file_name,msg_col)
 
         self.plot_collisions(col_xy,lgnd[planner])
-        # self.plot_global_plan()
 
     def fit_cluster(self,ca):
 
@@ -715,24 +720,24 @@ def run():
     # ToDo: merge nearby zones 
     # legend
     lgnd          = {}
-    lgnd["arena"] = "tab:purple"
-    lgnd["cadrl"] = "tab:red"
-    lgnd["dwa"]   = "tab:blue"
-    lgnd["mpc"]   = "tab:green"
-    lgnd["teb"]   = "tab:orange"
+    # lgnd["arena"] = "tab:purple"
+    # lgnd["cadrl"] = "tab:red"
+    # lgnd["dwa"]   = "tab:blue"
+    # lgnd["mpc"]   = "tab:green"
+    # lgnd["teb"]   = "tab:orange"
 
-    # lgnd["esdf"] = "tab:red"
-    # lgnd["subsample"] = "tab:grey"
+    lgnd["esdf"] = "tab:red"
+    lgnd["subsample"] = "tab:grey"
 
     # plots
     grid_step       = 2
     plot_sm         = False
     plot_obst       = True
-    plot_trj        = True
+    plot_trj        = False
     plot_zones      = False
     plot_collisions = True
     plot_grid       = False
-    plot_gp         = False
+    plot_gp         = True
     # static map
     rospy.init_node("eval", anonymous=False)
     rospy.Subscriber('/flatland_server/debug/layer/static',MarkerArray, getMap)
@@ -758,68 +763,52 @@ def run():
 
 
 
-    eval_all(["cadrl"],"map1","5","vel_01")
-    # 10 01
-    eval_all(["cadrl"],"map1","10","vel_01")
-    # 20 01
-    eval_all(["cadrl"],"map1","20","vel_01")
+    # eval_all(["cadrl"],"map1","5","vel_01")
+    # # 10 01
+    # eval_all(["cadrl"],"map1","10","vel_01")
+    # # 20 01
+    # eval_all(["cadrl"],"map1","20","vel_01")
     
 
-    eval_all(["cadrl"],"map1","5","vel_02")
-    # 10 01
-    eval_all(["cadrl"],"map1","10","vel_02")
-    # 20 01
-    eval_all(["cadrl"],"map1","20","vel_02")
+    # eval_all(["cadrl"],"map1","5","vel_02")
+    # # 10 01
+    # eval_all(["cadrl"],"map1","10","vel_02")
+    # # 20 01
+    # eval_all(["cadrl"],"map1","20","vel_02")
 
 
-    eval_all(["cadrl"],"map1","5","vel_03")
-    # 10 01
-    eval_all(["cadrl"],"map1","10","vel_03")
-    # 20 01
-    eval_all(["cadrl"],"map1","20","vel_03")
+    # eval_all(["cadrl"],"map1","5","vel_03")
+    # # 10 01
+    # eval_all(["cadrl"],"map1","10","vel_03")
+    # # 20 01
+    # eval_all(["cadrl"],"map1","20","vel_03")
 
 
-    #  5 01
-    eval_all(["cadrl"],"empty","5","vel_01")
-    # 10 01
-    eval_all(["cadrl"],"empty","10","vel_01")
-    # 20 01
-    eval_all(["cadrl"],"empty","20","vel_01")
+    # #  5 01
+    # eval_all(["cadrl"],"empty","5","vel_01")
+    # # 10 01
+    # eval_all(["cadrl"],"empty","10","vel_01")
+    # # 20 01
+    # eval_all(["cadrl"],"empty","20","vel_01")
 
-    #  5 01
-    eval_all(["cadrl"],"empty","5","vel_02")    
-    #  10 01
-    eval_all(["cadrl"],"empty","10","vel_02")    
-    #  20 01
-    eval_all(["cadrl"],"empty","20","vel_02")
+    # #  5 01
+    # eval_all(["cadrl"],"empty","5","vel_02")    
+    # #  10 01
+    # eval_all(["cadrl"],"empty","10","vel_02")    
+    # #  20 01
+    # eval_all(["cadrl"],"empty","20","vel_02")
 
-    #  5 01
-    eval_all(["cadrl"],"empty","5","vel_03")    
-    #  10 01
-    eval_all(["cadrl"],"empty","10","vel_03")    
-    #  20 01
-    eval_all(["cadrl"],"empty","20","vel_03")
-
-
-
+    # #  5 01
+    # eval_all(["cadrl"],"empty","5","vel_03")    
+    # #  10 01
+    # eval_all(["cadrl"],"empty","10","vel_03")    
+    # #  20 01
+    # eval_all(["cadrl"],"empty","20","vel_03")
 
 
 
-    # eval_all(["arena","cadrl","dwa","mpc","teb"],"empty","20","vel_03")
-
-    
 
     # run 2 ----------------------------------------------------------------------
-
-    
-    # eval_all(["cadrl"],"empty","obs20","vel_01","run2_28_2/cadrl_drl")
-    # eval_all(["cadrl"],"empty","20","vel_03","")
-
-    # eval_all(["mpc"],"empty","20","vel_03")
-    # eval_all(["cadrl"],"empty","obs20","vel_02","run2_28_2/esdf")
-    # eval_all(["cadrl"],"empty","obs5","vel_02","run2_28_2/subsample")
-    # eval_all(["cadrl"],"empty","obs20","vel_01","run2_28_2/cadrl_drl")
-
 
     # empty map 
     # 20
@@ -840,7 +829,7 @@ def run():
     # # 20
     # eval_all(["esdf","subsample"],"map1","20","vel_01","run2_28_2/")
     # eval_all(["esdf","subsample"],"map1","20","vel_02","run2_28_2/")
-    # eval_all(["esdf","subsample"],"map1","20","vel_03","run2_28_2/")
+    eval_all(["esdf","subsample"],"map1","20","vel_03","run2_28_2/")
     # # 10
     # eval_all(["esdf","subsample"],"map1","10","vel_01","run2_28_2/")
     # eval_all(["esdf","subsample"],"map1","10","vel_02","run2_28_2/")
@@ -855,7 +844,16 @@ def run():
 
 
 if __name__=="__main__":
-    run()
+    # run()
 
     # example
+    csv_dir = "../bags/scenarios/run2_28_2/subsample/cadrl_map1_obs20_vel_03_subsampling"
+    print(csv_dir+"/scenario_reset.csv")
+    esdf    = gplan.gplan_to_df(csv_dir+"/sensorsim-police-gplan.csv",csv_dir+"/scenario_reset.csv")
+    gplan.plot_run(esdf, 5)
+    plt.show()
+
+    file_dir = "../bags/scenarios/run2_28_2/esdf/cadrl_map_empty_obs20_vel_02_esdf/"
+    esdf = gplan_to_df(file_dir+"sensorsim-police-gplan.csv",file_dir+"scenario_reset.csv")
+    plot_run(esdf, 10)
 
