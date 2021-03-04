@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 from matplotlib.pyplot import figure
 from matplotlib.patches import Polygon
+from matplotlib._png import read_png
 import matplotlib.cm as cm
 # calc
 import numpy as np
@@ -710,22 +711,33 @@ def eval_all(a,map,ob,vel,run="all_runs/",saved_name=""):
     
     # dhow legend labels once per planner
     
-    # legend_elements = []
-    # for l in lgnd:
-    #         el = Line2D([0], [0], color=lgnd[l], lw=4, label=l)
-    #         legend_elements.append(el)
-
-    # ax.legend(handles=legend_elements, loc=0)
+    legend_elements = []
+    el = Line2D([0], [0], color="tab:cyan", lw=4, label="Global Plan")
+    legend_elements.append(el)
+    for l in lgnd:
+            clr = lgnd[l]
+            if l == "cadrl":
+                l = "STH-WP"
+            if l == "esdf":
+                l = "LM-WP"
+            if l == "subsample":
+                l = "SUB-WP"
+            el = Line2D([0], [0], color=clr, lw=4, label=l)
+            legend_elements.append(el)
+    ax.legend(handles=legend_elements, loc=0)
     
     # ax.set_ylim([start[0]-1, goal[0]+1])
 
     # ax.set_xlim([-16, 3])
     # ax.set_ylim([-4, 24])
 
-    # plt.gca().set_axis_off()
-    plt.subplots_adjust(top = 1, bottom = 0, right = 1, left = 0, 
-                hspace = 0, wspace = 0)
 
+    # legend = plt.imread("legend/legend1_4.png")
+    # imbox = OffsetImage(legend,zoom="0.5")
+    # xy = [100,200]
+    # ab = AnnotationBox(imbox,xy,xybox=(0,0),boxcoords="op")
+
+    plt.subplots_adjust(top = 1, bottom = 0, right = 1, left = 0, hspace = 0, wspace = 0)
     plt.savefig('../plots/' + saved_name + mode + '.pdf', bbox_inches = 'tight', pad_inches = 0)
 
 
