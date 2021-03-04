@@ -51,8 +51,8 @@ def is_run(time,resets): # function for assigning the run/episode
 
 
 
-# file_dir = "../bags/scenarios/run2_28_2/esdf/cadrl_map_empty_obs20_vel_02_esdf/"
-file_dir = "../bags/scenarios/run2_28_2/esdf/cadrl_map_empty_obs5_vel_02_esdf/"
+# file_dir = "../bags/scenarios/run2_28_2/esdf/cadrl_map_empty_obs20_vel_02_esdf/" das funktioniert
+file_dir = "../bags/scenarios/run2_28_2/esdf/cadrl_map_empty_obs5_vel_02_esdf/" # das geht nicht
 esdf = gplan_to_df(file_dir+"sensorsim-police-gplan.csv",file_dir+"scenario_reset.csv")
 plot_run(esdf, 10)
 

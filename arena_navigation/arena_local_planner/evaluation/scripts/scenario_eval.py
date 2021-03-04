@@ -847,13 +847,13 @@ if __name__=="__main__":
     # run()
 
     # example
-    csv_dir = "../bags/scenarios/run2_28_2/subsample/cadrl_map1_obs20_vel_03_subsampling"
-    print(csv_dir+"/scenario_reset.csv")
-    esdf    = gplan.gplan_to_df(csv_dir+"/sensorsim-police-gplan.csv",csv_dir+"/scenario_reset.csv")
-    gplan.plot_run(esdf, 5)
-    plt.show()
+    # csv_dir = "../bags/scenarios/run2_28_2/subsample/cadrl_map1_obs20_vel_03_subsampling"
+    # print(csv_dir+"/scenario_reset.csv")
+    # esdf    = gplan.gplan_to_df(csv_dir+"/sensorsim-police-gplan.csv",csv_dir+"/scenario_reset.csv")
+    # gplan.plot_run(esdf, 5)
+    # plt.show()
 
-    file_dir = "../bags/scenarios/run2_28_2/esdf/cadrl_map_empty_obs20_vel_02_esdf/"
-    esdf = gplan_to_df(file_dir+"sensorsim-police-gplan.csv",file_dir+"scenario_reset.csv")
-    plot_run(esdf, 10)
+    # file_dir = "../bags/scenarios/run2_28_2/esdf/cadrl_map_empty_obs20_vel_02_esdf/"
+    # esdf = gplan_to_df(file_dir+"sensorsim-police-gplan.csv",file_dir+"scenario_reset.csv")
+    # plot_run(esdf, 10)
 
