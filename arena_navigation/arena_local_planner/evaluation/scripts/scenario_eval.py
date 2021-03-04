@@ -20,10 +20,14 @@ from visualization_msgs.msg import Marker, MarkerArray
 import pathlib
 import os
 from sklearn.cluster import AgglomerativeClustering
+# gplan
+import gplan_analysis as gplan
 
 # 
 class newBag():
     def __init__(self, planner, file_name, bag_name):
+        # csv dir
+        self.csv_dir = bag_name.replace(".bag","")
         # bag topics
         self.odom_topic      = "/sensorsim/police/odom"
         self.collision_topic = "/sensorsim/police/collision"
@@ -43,6 +47,7 @@ class newBag():
 
     def make_txt(self,file,msg,ron="a"):
         file = file.replace("/","_") + ".txt"
+        file = "quantitative/" + file
         f = open(file, ron)
         f.write(msg)
         f.close()
@@ -207,6 +212,14 @@ class newBag():
         else:
              return 0
 
+    def plot_global_plan(self,run_n):
+        global plot_gp
+
+        if plot_gp:
+            csv_dir = self.csv_dir
+            esdf    = gplan.gplan_to_df(csv_dir+"sensorsim-police-gplan.csv",csv_dir+"scenario_reset.csv")
+            gplan.plot_run(esdf, run_n)
+
     def plot_collisions(self, xya, clr):
         global ax, plot_collisions
         all_cols_x = []
@@ -328,6 +341,7 @@ class newBag():
         self.make_txt(file_name,msg_col)
 
         self.plot_collisions(col_xy,lgnd[planner])
+        # self.plot_global_plan()
 
     def fit_cluster(self,ca):
 
@@ -652,7 +666,7 @@ def eval_all(a,map,ob,vel,run=""):
             curr_bag = bag_path + planner
             for file in os.listdir(curr_bag):
                 if file.endswith(".bag") and map in file and ob in file and vel in file:
-                    fn = planner + mode
+                    fn = planner + "_" + mode
                     # print(fn)
                     
                     newBag(planner, fn, curr_bag + "/" + file)
@@ -696,19 +710,19 @@ def getMap(msg):
 
 def run():
     global ax, sm, lgnd, grid_step
-    global plot_trj, plot_zones, plot_obst, plot_collisions, plot_grid, plot_sm
+    global plot_trj, plot_zones, plot_obst, plot_collisions, plot_grid, plot_sm, plot_gp
 
     # ToDo: merge nearby zones 
     # legend
     lgnd          = {}
-    # lgnd["arena"] = "tab:purple"
-    # lgnd["cadrl"] = "tab:red"
-    # lgnd["dwa"]   = "tab:blue"
-    # lgnd["mpc"]   = "tab:green"
-    # lgnd["teb"]   = "tab:orange"
+    lgnd["arena"] = "tab:purple"
+    lgnd["cadrl"] = "tab:red"
+    lgnd["dwa"]   = "tab:blue"
+    lgnd["mpc"]   = "tab:green"
+    lgnd["teb"]   = "tab:orange"
 
-    lgnd["esdf"] = "tab:red"
-    lgnd["subsample"] = "tab:grey"
+    # lgnd["esdf"] = "tab:red"
+    # lgnd["subsample"] = "tab:grey"
 
     # plots
     grid_step       = 2
@@ -718,19 +732,18 @@ def run():
     plot_zones      = False
     plot_collisions = True
     plot_grid       = False
+    plot_gp         = False
     # static map
     rospy.init_node("eval", anonymous=False)
     rospy.Subscriber('/flatland_server/debug/layer/static',MarkerArray, getMap)
     
 
-    # # start_x = 0.5
     # # map
     # #  5 01
     # eval_all(["arena","cadrl","dwa","mpc","teb"],"map1","5","vel_03")
-    # # # start_x = 0
-    # # #  10 01
+    # # 10 01
     # eval_all(["arena","cadrl","dwa","mpc","teb"],"map1","10","vel_03")
-    # 20 01
+    # # 20 01
     # eval_all(["arena","cadrl","dwa","mpc","teb"],"map1","20","vel_03")
 
 
@@ -739,8 +752,55 @@ def run():
     # eval_all(["arena","cadrl","dwa","mpc","teb"],"empty","5","vel_03")    
     # #  10 01
     # eval_all(["arena","cadrl","dwa","mpc","teb"],"empty","10","vel_03")    
-    #  20 01
+    # #  20 01
     # eval_all(["arena","cadrl","dwa","mpc","teb"],"empty","20","vel_03")
+
+
+
+
+    eval_all(["cadrl"],"map1","5","vel_01")
+    # 10 01
+    eval_all(["cadrl"],"map1","10","vel_01")
+    # 20 01
+    eval_all(["cadrl"],"map1","20","vel_01")
+    
+
+    eval_all(["cadrl"],"map1","5","vel_02")
+    # 10 01
+    eval_all(["cadrl"],"map1","10","vel_02")
+    # 20 01
+    eval_all(["cadrl"],"map1","20","vel_02")
+
+
+    eval_all(["cadrl"],"map1","5","vel_03")
+    # 10 01
+    eval_all(["cadrl"],"map1","10","vel_03")
+    # 20 01
+    eval_all(["cadrl"],"map1","20","vel_03")
+
+
+    #  5 01
+    eval_all(["cadrl"],"map1","5","vel_01")
+    # 10 01
+    eval_all(["cadrl"],"map1","10","vel_01")
+    # 20 01
+    eval_all(["cadrl"],"map1","20","vel_01")
+
+    #  5 01
+    eval_all(["cadrl"],"empty","5","vel_02")    
+    #  10 01
+    eval_all(["cadrl"],"empty","10","vel_02")    
+    #  20 01
+    eval_all(["cadrl"],"empty","20","vel_02")
+
+    #  5 01
+    eval_all(["cadrl"],"empty","5","vel_03")    
+    #  10 01
+    eval_all(["cadrl"],"empty","10","vel_03")    
+    #  20 01
+    eval_all(["cadrl"],"empty","20","vel_03")
+
+
 
 
 
@@ -763,32 +823,32 @@ def run():
 
     # empty map 
     # 20
-    eval_all(["esdf","subsample"],"empty","20","vel_01","run2_28_2/")
-    eval_all(["esdf","subsample"],"empty","20","vel_02","run2_28_2/")
-    eval_all(["esdf","subsample"],"empty","20","vel_03","run2_28_2/")
-    # 10
-    eval_all(["esdf","subsample"],"empty","10","vel_01","run2_28_2/")
-    eval_all(["esdf","subsample"],"empty","10","vel_02","run2_28_2/")
-    eval_all(["esdf","subsample"],"empty","10","vel_03","run2_28_2/")
-    # 5
-    eval_all(["esdf","subsample"],"empty","5","vel_01","run2_28_2/")
-    eval_all(["esdf","subsample"],"empty","5","vel_02","run2_28_2/")
-    eval_all(["esdf","subsample"],"empty","5","vel_03","run2_28_2/")
+    # eval_all(["esdf","subsample"],"empty","20","vel_01","run2_28_2/")
+    # eval_all(["esdf","subsample"],"empty","20","vel_02","run2_28_2/")
+    # eval_all(["esdf","subsample"],"empty","20","vel_03","run2_28_2/")
+    # # 10
+    # eval_all(["esdf","subsample"],"empty","10","vel_01","run2_28_2/")
+    # eval_all(["esdf","subsample"],"empty","10","vel_02","run2_28_2/")
+    # eval_all(["esdf","subsample"],"empty","10","vel_03","run2_28_2/")
+    # # 5
+    # eval_all(["esdf","subsample"],"empty","5","vel_01","run2_28_2/")
+    # eval_all(["esdf","subsample"],"empty","5","vel_02","run2_28_2/")
+    # eval_all(["esdf","subsample"],"empty","5","vel_03","run2_28_2/")
 
 
-    # map 1 
-    # 20
-    eval_all(["esdf","subsample"],"map1","20","vel_01","run2_28_2/")
-    eval_all(["esdf","subsample"],"map1","20","vel_02","run2_28_2/")
-    eval_all(["esdf","subsample"],"map1","20","vel_03","run2_28_2/")
-    # 10
-    eval_all(["esdf","subsample"],"map1","10","vel_01","run2_28_2/")
-    eval_all(["esdf","subsample"],"map1","10","vel_02","run2_28_2/")
-    eval_all(["esdf","subsample"],"map1","10","vel_03","run2_28_2/")
-    # 5
-    eval_all(["esdf","subsample"],"map1","5","vel_01","run2_28_2/")
-    eval_all(["esdf","subsample"],"map1","5","vel_02","run2_28_2/")
-    eval_all(["esdf","subsample"],"map1","5","vel_03","run2_28_2/")
+    # # map 1 
+    # # 20
+    # eval_all(["esdf","subsample"],"map1","20","vel_01","run2_28_2/")
+    # eval_all(["esdf","subsample"],"map1","20","vel_02","run2_28_2/")
+    # eval_all(["esdf","subsample"],"map1","20","vel_03","run2_28_2/")
+    # # 10
+    # eval_all(["esdf","subsample"],"map1","10","vel_01","run2_28_2/")
+    # eval_all(["esdf","subsample"],"map1","10","vel_02","run2_28_2/")
+    # eval_all(["esdf","subsample"],"map1","10","vel_03","run2_28_2/")
+    # # 5
+    # eval_all(["esdf","subsample"],"map1","5","vel_01","run2_28_2/")
+    # eval_all(["esdf","subsample"],"map1","5","vel_02","run2_28_2/")
+    # eval_all(["esdf","subsample"],"map1","5","vel_03","run2_28_2/")
     
     plt.show()
     rospy.spin()
@@ -796,4 +856,6 @@ def run():
 
 if __name__=="__main__":
     run()
+
+    # example
 
