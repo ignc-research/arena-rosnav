@@ -780,11 +780,11 @@ def run():
 
 
     #  5 01
-    eval_all(["cadrl"],"map1","5","vel_01")
+    eval_all(["cadrl"],"empty","5","vel_01")
     # 10 01
-    eval_all(["cadrl"],"map1","10","vel_01")
+    eval_all(["cadrl"],"empty","10","vel_01")
     # 20 01
-    eval_all(["cadrl"],"map1","20","vel_01")
+    eval_all(["cadrl"],"empty","20","vel_01")
 
     #  5 01
     eval_all(["cadrl"],"empty","5","vel_02")    
