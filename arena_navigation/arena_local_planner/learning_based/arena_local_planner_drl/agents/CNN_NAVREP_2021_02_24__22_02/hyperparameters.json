@@ -3,7 +3,7 @@
     "robot": "myrobot",
     "batch_size": 19200,
     "gamma": 0.99,
-    "n_steps": 4800,
+    "n_steps": 19200,
     "ent_coef": 0.005,
     "learning_rate": 0.0003,
     "vf_coef": 0.2,

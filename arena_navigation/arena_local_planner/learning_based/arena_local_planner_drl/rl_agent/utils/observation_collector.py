@@ -70,20 +70,31 @@ class ObservationCollector():
             f'{self.ns_prefix}clock', Clock, self.callback_clock, tcp_nodelay=True)
 
         # message_filter subscriber: laserscan, robot_pose
-        self._scan_sub = rospy.Subscriber(
-            f'{self.ns_prefix}scan', LaserScan, self.callback_scan, tcp_nodelay=True)
-        self._robot_state_sub = rospy.Subscriber(
-            f'{self.ns_prefix}robot_state', RobotStateStamped, self.callback_robot_state, tcp_nodelay=True)
-        
-        self._sub_flags = {"scan_updated": False, "robot_state_updated": False}
-        self._sub_flags_con = threading.Condition()
+        self._is_train_mode = rospy.get_param("/train_mode")
+        if self._is_train_mode:
+            self._scan_sub = rospy.Subscriber(
+                f'{self.ns_prefix}scan', LaserScan, self.callback_scan, tcp_nodelay=True)
+            self._robot_state_sub = rospy.Subscriber(
+                f'{self.ns_prefix}robot_state', RobotStateStamped, self.callback_robot_state, tcp_nodelay=True)
+            
+            self._sub_flags = {"scan_updated": False, "robot_state_updated": False}
+            self._sub_flags_con = threading.Condition()
 
-        # self._scan_sub = message_filters.Subscriber(f'{self.ns_prefix}scan', LaserScan)
-        # self._robot_state_sub = message_filters.Subscriber(f'{self.ns_prefix}robot_state', RobotStateStamped)
-        
-        # # message_filters.TimeSynchronizer: call callback only when all sensor info are ready
-        # self.ts = message_filters.ApproximateTimeSynchronizer([self._scan_sub, self._robot_state_sub], 30, slop=0.01)
-        # self.ts.registerCallback(self.callback_observation_received)
+            # synchronization parameters
+            self.max_deque_size = 10
+            self._sync_slop = 0.1
+
+            self._laser_deque = deque()
+            self._rs_deque = deque()
+
+            self.first_obs = True
+        else:
+            self._scan_sub = message_filters.Subscriber(f'{self.ns_prefix}scan', LaserScan)
+            self._robot_state_sub = message_filters.Subscriber(f'{self.ns_prefix}robot_state', RobotStateStamped)
+            
+            # message_filters.TimeSynchronizer: call callback only when all sensor info are ready
+            self.ts = message_filters.ApproximateTimeSynchronizer([self._scan_sub, self._robot_state_sub], 40, slop=0.07)
+            self.ts.registerCallback(self.callback_observation_received)
        
         self._subgoal_sub = rospy.Subscriber(
             f"{self.ns_prefix}subgoal", PoseStamped, self.callback_subgoal)
@@ -92,53 +103,53 @@ class ObservationCollector():
                 f'{self.ns_prefix}globalPlan', Path, self.callback_global_plan)
 
         # service clients
-        self._is_train_mode = rospy.get_param("/train_mode")
         if self._is_train_mode:
             self._service_name_step = f'{self.ns_prefix}step_world'
             self._sim_step_client = rospy.ServiceProxy(
                 self._service_name_step, StepWorld)
-        
-        # synchronization parameters
-        self.max_deque_size = 10
-        self._sync_slop = 0.05
-
-        self._laser_deque = deque()
-        self._rs_deque = deque()
-
-        self.first_obs = True
 
     def get_observation_space(self):
         return self.observation_space
 
+    @timeit
     def get_observations(self):
-        def all_sub_received():
-            ans = True
-            for k, v in self._sub_flags.items():
-                if v is not True:
-                    ans = False
-                    break
-            return ans
-
-        def reset_sub():
-            self._sub_flags = dict((k, False) for k in self._sub_flags.keys())
-
-        self.obs_received = False
         if self._is_train_mode:
-            if self.first_obs:
-                self.call_service_takeSimStep(self._laser_update_time)
-                self.first_obs = False
-            
-            self.call_service_takeSimStep(self._obs_timeout)
-            
-        with self._sub_flags_con:
-            while not all_sub_received:
-                rospy.sleep(0.00001)
+            def all_sub_received():
+                ans = True
+                for k, v in self._sub_flags.items():
+                    if v is not True:
+                        ans = False
+                        break
+                return ans
 
-        laser_scan, robot_pose = self.get_sync_obs()
-        if laser_scan is not None and robot_pose is not None:
-            self._scan = laser_scan
-            self._robot_pose = robot_pose
+            def reset_sub():
+                self._sub_flags = dict((k, False) for k in self._sub_flags.keys())
+
+            if self._is_train_mode:
+                if self.first_obs:
+                    self.call_service_takeSimStep(self._laser_update_time)
+                    self.first_obs = False
+                
+                self.call_service_takeSimStep(self._obs_timeout)
+                
+            with self._sub_flags_con:
+                while not all_sub_received:
+                    time.sleep(0.00001)
+            reset_sub()
+
+            laser_scan, robot_pose = self.get_sync_obs()
+            if laser_scan is not None and robot_pose is not None:
+                #print("Synced successfully")
+                self._scan = laser_scan
+                self._robot_pose = robot_pose
+            #else:
+                #print("Not synced")
             
+        else:
+            while not self.obs_received:
+                rospy.sleep(0.00001)
+            self.obs_received = False
+
         # rospy.logdebug(f"Current observation takes {i} steps for Synchronization")
         #print(f"Current observation takes {i} steps for Synchronization")
         scan = self._scan.ranges.astype(np.float32)
@@ -164,7 +175,7 @@ class ObservationCollector():
                  robot_pos.theta+4*np.pi) % (2*np.pi)-np.pi
         return rho, theta
 
-    staticmethod
+    @staticmethod
     def is_synchronized(self, msg_Laser: LaserScan, msg_Robotpose: RobotStateStamped):
         laser_stamp = round(msg_Laser.header.stamp.to_sec(), 4)
         robot_stamp = round(msg_Robotpose.header.stamp.to_sec(), 4)
@@ -254,7 +265,7 @@ class ObservationCollector():
             self._sub_flags['robot_state_updated'] = True
             self._sub_flags_con.notify()
 
-    def callback_observation_received(self,msg_LaserScan,msg_RobotStateStamped):
+    def callback_observation_received(self, msg_LaserScan, msg_RobotStateStamped):
         # process sensor msg
         self._scan = self.process_scan_msg(msg_LaserScan)
         self._robot_pose, self._robot_vel = self.process_robot_state_msg(msg_RobotStateStamped)

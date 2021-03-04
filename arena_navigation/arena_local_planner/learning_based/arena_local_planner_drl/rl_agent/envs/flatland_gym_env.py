@@ -59,6 +59,7 @@ class FlatlandEnv(gym.Env):
         # They must be gym.spaces objects
         self._is_action_space_discrete = is_action_space_discrete
         self.setup_by_configuration(robot_yaml_path, settings_yaml_path)
+        
         # observation collector
         self.observation_collector = ObservationCollector(
             self.ns, self._laser_num_beams, self._laser_max_range)
@@ -71,10 +72,14 @@ class FlatlandEnv(gym.Env):
         self.reward_calculator = RewardCalculator(
             robot_radius=self._robot_radius, safe_dist=1.2*self._robot_radius, goal_radius=goal_radius, rule=reward_fnc)
 
-        # action agent publisher
-        self.agent_action_pub = rospy.Publisher(f'{self.ns_prefix}cmd_vel', Twist, queue_size=1)
-        # service clients
         self._is_train_mode = rospy.get_param("/train_mode")
+        # action agent publisher
+        if self._is_train_mode:
+            self.agent_action_pub = rospy.Publisher(f'{self.ns_prefix}cmd_vel', Twist, queue_size=1)
+        else:
+            self.agent_action_pub = rospy.Publisher(f'{self.ns_prefix}cmd_vel_pub', Twist, queue_size=1)
+
+        # service clients
         if self._is_train_mode:
             self._service_name_step = f'{self.ns_prefix}step_world'
             self._sim_step_client = rospy.ServiceProxy(
@@ -157,7 +162,6 @@ class FlatlandEnv(gym.Env):
 
         # wait for new observations
         merged_obs, obs_dict = self.observation_collector.get_observations()
-
 
         # calculate reward
         reward, reward_info = self.reward_calculator.get_reward(
