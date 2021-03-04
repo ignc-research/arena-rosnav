@@ -6,6 +6,7 @@ import pandas as pd
 import json
 import rospkg
 # for plots
+import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 from matplotlib.pyplot import figure
@@ -22,7 +23,7 @@ import os
 from sklearn.cluster import AgglomerativeClustering
 # gplan
 import gplan_analysis as gplan
-
+matplotlib.rcParams.update({'font.size': 18})
 # 
 class newBag():
     def __init__(self, planner, file_name, bag_name):
@@ -228,13 +229,22 @@ class newBag():
     def plot_global_plan(self,run_n):
         global plot_gp
 
-        if plot_gp:
+        if plot_gp and self.plot_gp:
             csv_dir = self.csv_dir 
             # print(csv_dir+"/scenario_reset.csv")
-            if os.path.isfile(csv_dir+"/sensorsim-police-gplan.csv") and os.path.isfile(csv_dir+"/scenario_reset.csv") and self.plot_gp: 
+            if os.path.isfile(csv_dir+"/sensorsim-police-gplan.csv") and os.path.isfile(csv_dir+"/scenario_reset.csv"): 
                 esdf = gplan.gplan_to_df(csv_dir+"/sensorsim-police-gplan.csv", csv_dir+"/scenario_reset.csv")
                 gplan.plot_run(esdf, run_n, "tab:cyan")
                 self.plot_gp = False
+            # else:
+            #     if "empty" in csv_dir:
+            #         csv_dir = "../bags/scenarios/run_2/subsample/cadrl_vel_03_empty_obs20"
+            #         esdf = gplan.gplan_to_df(csv_dir+"/sensorsim-police-gplan.csv", csv_dir+"/scenario_reset.csv")
+            #     else:
+            #         csv_dir = "../bags/scenarios/run_2/subsample/cadrl_map1_ob20_vel_03_subsampling"
+            #         esdf = gplan.gplan_to_df(csv_dir+"/sensorsim-police-gplan.csv", csv_dir+"/scenario_reset.csv")
+            #     gplan.plot_run(esdf, run_n, "tab:cyan")
+            #     self.plot_gp = False
 
     def plot_collisions(self, xya, clr):
         global ax, plot_collisions
@@ -699,12 +709,13 @@ def eval_all(a,map,ob,vel,run="all_runs/",saved_name=""):
                 # print(fn)
     
     # dhow legend labels once per planner
-    legend_elements = []
-    for l in lgnd:
-            el = Line2D([0], [0], color=lgnd[l], lw=4, label=l)
-            legend_elements.append(el)
+    
+    # legend_elements = []
+    # for l in lgnd:
+    #         el = Line2D([0], [0], color=lgnd[l], lw=4, label=l)
+    #         legend_elements.append(el)
 
-    ax.legend(handles=legend_elements, loc=0)
+    # ax.legend(handles=legend_elements, loc=0)
     
     # ax.set_ylim([start[0]-1, goal[0]+1])
 
@@ -714,9 +725,7 @@ def eval_all(a,map,ob,vel,run="all_runs/",saved_name=""):
     # plt.gca().set_axis_off()
     plt.subplots_adjust(top = 1, bottom = 0, right = 1, left = 0, 
                 hspace = 0, wspace = 0)
-    # plt.margins(0,0)
-    # plt.gca().xaxis.set_major_locator(plt.NullLocator())
-    # plt.gca().yaxis.set_major_locator(plt.NullLocator())
+
     plt.savefig('../plots/' + saved_name + mode + '.pdf', bbox_inches = 'tight', pad_inches = 0)
 
 
@@ -867,7 +876,7 @@ def run():
     plot_subgoals = True
 
 
-    # # 1- 6
+    # 1- 6
     # lgnd = {}
     # lgnd["subsample"] = "tab:purple"
     # eval_all(["subsample"],"empty","20" ,"vel_02",saved_name="01_")
@@ -890,22 +899,6 @@ def run():
     # eval_all(["cadrl"],"map1","20","vel_02",saved_name="06_")
 
 
-
-
-    # # 7 - 12
-    
-    # lgnd = {}
-    # lgnd["cadrl"]     = "tab:red"
-    # lgnd["esdf"]      = "tab:brown"
-    # lgnd["subsample"] = "tab:grey"
-
-    # eval_all(["subsample","esdf","cadrl"],"empty","5" ,"vel_02",saved_name="07_")
-    # eval_all(["subsample","esdf","cadrl"],"empty","10","vel_02",saved_name="08_")
-    # eval_all(["subsample","esdf","cadrl"],"empty","20","vel_02",saved_name="09_")
-
-    # eval_all(["subsample","esdf","cadrl"],"map1","5" ,"vel_02",saved_name="10_")
-    # eval_all(["subsample","esdf","cadrl"],"map1","10","vel_02",saved_name="11_")
-    # eval_all(["subsample","esdf","cadrl"],"map1","20","vel_02",saved_name="12_")
 
 
     # 13 - 18
