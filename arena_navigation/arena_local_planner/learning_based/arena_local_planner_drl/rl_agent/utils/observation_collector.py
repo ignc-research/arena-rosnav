@@ -73,7 +73,7 @@ class ObservationCollector():
         self._sim_step_client = rospy.ServiceProxy(self._service_name_step, StepWorld)
 
         self._noise_model = noise_model                                        # 0 means no more noise
-        self._noise_model = [1]
+        #self._noise_model = [1]
         if 0 not in self._noise_model:                 
             self.Noise_Generation = Noise(noise_mode = self._noise_model)
     
