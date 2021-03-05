@@ -55,11 +55,11 @@ class FlatlandEnv(gym.Env):
             else:
                 rospy.init_node(f'eval_env_{self.ns}', disable_signals=False)
 
-        self._action_timeout = (1/rospy.get_param("/robot_action_rate"))*0.1
-
         # Define action and observation space
         # They must be gym.spaces objects
+        self._is_train_mode = rospy.get_param("/train_mode")
         self._is_action_space_discrete = is_action_space_discrete
+        
         self.setup_by_configuration(robot_yaml_path, settings_yaml_path)
         
         # observation collector
@@ -74,7 +74,6 @@ class FlatlandEnv(gym.Env):
         self.reward_calculator = RewardCalculator(
             robot_radius=self._robot_radius, safe_dist=1.2*self._robot_radius, goal_radius=goal_radius, rule=reward_fnc)
 
-        self._is_train_mode = rospy.get_param("/train_mode")
         # action agent publisher
         if self._is_train_mode:
             self.agent_action_pub = rospy.Publisher(f'{self.ns_prefix}cmd_vel', Twist, queue_size=1)
@@ -157,18 +156,6 @@ class FlatlandEnv(gym.Env):
             action = self._translate_disc_action(action)
         self._pub_action(action)
         self._steps_curr_episode += 1
-
-        # apply action time horizon
-        # if self._is_train_mode:
-        #     self._sim_step_client(self._action_timeout)
-        # else:
-        #     try:
-        #         rospy.wait_for_message(
-        #             f"{self.ns_prefix}next_cycle", Bool, 
-        #             timeout=self._action_timeout/self.observation_collector._real_second_in_sim)
-        #     except Exception:
-        #         print("Timeout while receiving trigger")
-        #         pass
 
         # wait for new observations
         merged_obs, obs_dict = self.observation_collector.get_observations()

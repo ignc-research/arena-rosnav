@@ -64,17 +64,13 @@ class ObservationCollector():
         self._obs_timeout = (1/rospy.get_param("/robot_action_rate"))*0.65
 
         self._clock = Clock()
-
         self._scan = LaserScan()
         self._robot_pose = Pose2D()
         self._robot_vel = Twist()
         self._subgoal = Pose2D()
         self._globalplan = np.array([])
 
-        self._clock_sub = rospy.Subscriber(
-            f'{self.ns_prefix}clock', Clock, self.callback_clock, tcp_nodelay=True)
-
-        # message_filter subscriber: laserscan, robot_pose
+        # train mode?
         self._is_train_mode = rospy.get_param("/train_mode")
 
         #if self._is_train_mode:
@@ -93,7 +89,9 @@ class ObservationCollector():
         self._laser_deque = deque()
         self._rs_deque = deque()
 
-        self.first_obs = True
+        # subscriptions
+        self._clock_sub = rospy.Subscriber(
+            f'{self.ns_prefix}clock', Clock, self.callback_clock, tcp_nodelay=True)
        
         self._subgoal_sub = rospy.Subscriber(
             f"{self.ns_prefix}subgoal", PoseStamped, self.callback_subgoal)
@@ -107,6 +105,7 @@ class ObservationCollector():
             self._sim_step_client = rospy.ServiceProxy(
                 self._service_name_step, StepWorld)
 
+        self.first_obs = True
         self.last = 0
 
     def get_observation_space(self):
@@ -114,7 +113,10 @@ class ObservationCollector():
 
     def get_observations(self):
         # apply action time horizon
-        if not self._is_train_mode:
+        timer = self._clock
+        if self._is_train_mode:
+            self.call_service_takeSimStep(self._action_frequency)
+        else:
             timer = self._clock
             try:
                 rospy.wait_for_message(
@@ -135,10 +137,6 @@ class ObservationCollector():
 
         # def reset_sub():
         #     self._sub_flags = dict((k, False) for k in self._sub_flags.keys())
-        
-        timer = self._clock
-        if self._is_train_mode:
-            self.call_service_takeSimStep(self._action_frequency)
             
         # with self._sub_flags_con:
         #     while not all_sub_received:
@@ -154,6 +152,7 @@ class ObservationCollector():
         #         time.sleep((self._obs_timeout/self._real_second_in_sim)/10)
         #         i += 1
 
+        # try to retrieve earliest sync'ed obs
         laser_scan, robot_pose = self.get_sync_obs()
         if laser_scan is not None and robot_pose is not None:
             # print("Synced successfully")
@@ -173,6 +172,7 @@ class ObservationCollector():
         rho, theta = ObservationCollector._get_goal_pose_in_robot_frame(
             self._subgoal, self._robot_pose)
         merged_obs = np.hstack([scan, np.array([rho, theta])])
+        
         obs_dict = {}
         obs_dict['laser_scan'] = scan
         obs_dict['goal_in_robot_frame'] = [rho, theta]
