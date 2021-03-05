@@ -2580,3 +2580,75 @@ average time:        79.093 s
 average path length: 29.914 m
 average velocity:    0.378  m/s
 total number of collisions: 0
+
+Evaluation of subsample:
+run_5: [154.0, 45.417, 0.295, 22]
+run_10: [183.5, 52.086, 0.284, 19]
+run_15: [154.5, 45.299, 0.293, 15]
+run_20: [133.05, 39.201, 0.295, 16]
+run_25: [151.95, 44.808, 0.295, 21]
+----------------------   subsample summary: ----------------------
+average time:        155.4 s
+average path length: 45.362 m
+average velocity:    0.292  m/s
+total number of collisions: 108
+
+Evaluation of esdf:
+run_5: [123.0, 35.468, 0.288, 7]
+run_10: [110.0, 32.364, 0.294, 6]
+run_15: [116.95, 34.792, 0.297, 7]
+run_20: [114.5, 33.818, 0.295, 7]
+run_25: [115.0, 33.844, 0.294, 5]
+----------------------   esdf summary: ----------------------
+average time:        115.89 s
+average path length: 34.057 m
+average velocity:    0.294  m/s
+total number of collisions: 40
+
+Evaluation of cadrl:
+run_5: [188.0, 37.548, 0.2, 13]
+run_10: [191.0, 36.304, 0.19, 10]
+run_15: [182.5, 36.323, 0.199, 7]
+run_20: [191.0, 36.215, 0.19, 5]
+run_25: [290.0, 53.381, 0.184, 12]
+----------------------   cadrl summary: ----------------------
+average time:        208.5 s
+average path length: 39.954 m
+average velocity:    0.193  m/s
+total number of collisions: 57
+
+Evaluation of subsample:
+run_5: [154.0, 45.417, 0.295, 22]
+run_10: [183.5, 52.086, 0.284, 19]
+run_15: [154.5, 45.299, 0.293, 15]
+run_20: [133.05, 39.201, 0.295, 16]
+run_25: [151.95, 44.808, 0.295, 21]
+----------------------   subsample summary: ----------------------
+average time:        155.4 s
+average path length: 45.362 m
+average velocity:    0.292  m/s
+total number of collisions: 108
+
+Evaluation of esdf:
+run_5: [123.0, 35.468, 0.288, 7]
+run_10: [110.0, 32.364, 0.294, 6]
+run_15: [116.95, 34.792, 0.297, 7]
+run_20: [114.5, 33.818, 0.295, 7]
+run_25: [115.0, 33.844, 0.294, 5]
+----------------------   esdf summary: ----------------------
+average time:        115.89 s
+average path length: 34.057 m
+average velocity:    0.294  m/s
+total number of collisions: 40
+
+Evaluation of cadrl:
+run_5: [188.0, 37.548, 0.2, 13]
+run_10: [191.0, 36.304, 0.19, 10]
+run_15: [182.5, 36.323, 0.199, 7]
+run_20: [191.0, 36.215, 0.19, 5]
+run_25: [290.0, 53.381, 0.184, 12]
+----------------------   cadrl summary: ----------------------
+average time:        208.5 s
+average path length: 39.954 m
+average velocity:    0.193  m/s
+total number of collisions: 57

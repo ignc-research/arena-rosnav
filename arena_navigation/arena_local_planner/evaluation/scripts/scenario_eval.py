@@ -225,7 +225,7 @@ class newBag():
         else:
              return 0
 
-    def plot_global_plan(self,run_n):
+    def plot_global_plan(self,run_n,pwp):
         global plot_gp
 
         if plot_gp and self.plot_gp:
@@ -233,17 +233,17 @@ class newBag():
             # print(csv_dir+"/scenario_reset.csv")
             if os.path.isfile(csv_dir+"/sensorsim-police-gplan.csv") and os.path.isfile(csv_dir+"/scenario_reset.csv"): 
                 esdf = gplan.gplan_to_df(csv_dir+"/sensorsim-police-gplan.csv", csv_dir+"/scenario_reset.csv")
+                gplan.plot_run(esdf, run_n, "tab:cyan",pwp)
+                self.plot_gp = False
+            else:
+                if "empty" in csv_dir:
+                    csv_dir = "../bags/scenarios/run_2/subsample/cadrl_vel_03_empty_obs20"
+                    esdf = gplan.gplan_to_df(csv_dir+"/sensorsim-police-gplan.csv", csv_dir+"/scenario_reset.csv")
+                else:
+                    csv_dir = "../bags/scenarios/run_2/subsample/cadrl_map1_ob20_vel_03_subsampling"
+                    esdf = gplan.gplan_to_df(csv_dir+"/sensorsim-police-gplan.csv", csv_dir+"/scenario_reset.csv")
                 gplan.plot_run(esdf, run_n, "tab:cyan")
                 self.plot_gp = False
-            # else:
-            #     if "empty" in csv_dir:
-            #         csv_dir = "../bags/scenarios/run_2/subsample/cadrl_vel_03_empty_obs20"
-            #         esdf = gplan.gplan_to_df(csv_dir+"/sensorsim-police-gplan.csv", csv_dir+"/scenario_reset.csv")
-            #     else:
-            #         csv_dir = "../bags/scenarios/run_2/subsample/cadrl_map1_ob20_vel_03_subsampling"
-            #         esdf = gplan.gplan_to_df(csv_dir+"/sensorsim-police-gplan.csv", csv_dir+"/scenario_reset.csv")
-            #     gplan.plot_run(esdf, run_n, "tab:cyan")
-            #     self.plot_gp = False
 
     def plot_collisions(self, xya, clr):
         global ax, plot_collisions
@@ -323,9 +323,16 @@ class newBag():
                     ax.plot(y, x, lgnd[planner], alpha=0.2)
                     ax.set_xlabel("x in [m]")
                     ax.set_ylabel("y in [m]")
+
+                pwp = True
                 if plot_subgoals:
-                    ax.plot(sg_y, sg_x, "^", color='k', alpha=0.1)
-                    ax.plot(wp_y, wp_x, "s", color='g', alpha=0.1)
+                    if len(wp_y) > 0 and len(wp_x) > 0:
+                        pwp = False
+                        ax.plot(wp_y, wp_x, "s", color='g', alpha=0.1)
+                    elif len(sg_y) > 0 and len(sg_x) > 0:
+                        pwp = False
+                        ax.plot(sg_y, sg_x, "^", color='k', alpha=0.1)
+                    
 
                 duration = t[len(t)-1] - t[0]
                 # for av
@@ -344,7 +351,7 @@ class newBag():
                 # plot global plan
                 n_run = run.replace("run_","")
                 n_run = int(n_run)
-                self.plot_global_plan(n_run)
+                self.plot_global_plan(n_run,pwp)
 
                 self.make_txt(file_name, "\n"+cr)
 
@@ -712,13 +719,19 @@ def eval_all(a,map,ob,vel,run="all_runs/",saved_name=""):
     legend_elements.append(el)
     for l in lgnd:
             clr = lgnd[l]
+            mrk = ""
             if l == "cadrl":
                 l = "STH-WP"
             if l == "esdf":
                 l = "LM-WP"
             if l == "subsample":
                 l = "SUB-WP"
-            el = Line2D([0], [0], color=clr, lw=4, label=l)
+            if "_" in clr:
+                clr = lgnd[l].split("_")[1]
+                mrk = lgnd[l].split("_")[0]
+                el = Line2D([0], [0], color=clr, lw=4, label=l, marker = mrk, linestyle='None')
+            else:
+                el = Line2D([0], [0], color=clr, lw=4, label=l, marker = mrk)
             legend_elements.append(el)
     ax.legend(handles=legend_elements, loc=0)
     
@@ -884,27 +897,33 @@ def run():
     plot_subgoals = True
 
 
-    # 1- 6
-    # lgnd = {}
-    # lgnd["subsample"] = "tab:purple"
-    # eval_all(["subsample"],"empty","20" ,"vel_02",saved_name="01_")
-    # lgnd = {}
-    # lgnd["esdf"]      = "tab:blue"
-    # eval_all(["esdf"],"empty","20","vel_02",saved_name="02_")
-    # lgnd = {}
-    # lgnd["cadrl"]     = "tab:red"
-    # eval_all(["cadrl"],"empty","20","vel_02",saved_name="03_")
+    1- 6
+    lgnd = {}
+    lgnd["subsample"] = "tab:purple"
+    lgnd["waypoints"] = "s_tab:green"
+    eval_all(["subsample"],"empty","20" ,"vel_02",saved_name="01_")
+    lgnd = {}
+    lgnd["esdf"]      = "tab:blue"
+    lgnd["waypoints"] = "^_tab:grey"
+    eval_all(["esdf"],"empty","20","vel_02",saved_name="02_")
+    lgnd = {}
+    lgnd["cadrl"]     = "tab:red"
+    lgnd["waypoints"] = "o_tab:cyan"
+    eval_all(["cadrl"],"empty","20","vel_02",saved_name="03_")
 
 
-    # lgnd = {}
-    # lgnd["subsample"] = "tab:purple"
-    # eval_all(["subsample"],"map1","20" ,"vel_02",saved_name="04_")
-    # lgnd = {}
-    # lgnd["esdf"]      = "tab:blue"
-    # eval_all(["esdf"],"map1","20","vel_02",saved_name="05_")
-    # lgnd = {}
-    # lgnd["cadrl"]     = "tab:red"
-    # eval_all(["cadrl"],"map1","20","vel_02",saved_name="06_")
+    lgnd = {}
+    lgnd["subsample"] = "tab:purple"
+    lgnd["waypoints"] = "s_tab:green"
+    eval_all(["subsample"],"map1","20" ,"vel_02",saved_name="04_")
+    lgnd = {}
+    lgnd["esdf"]      = "tab:blue"
+    lgnd["waypoints"] = "^_tab:grey"
+    eval_all(["esdf"],"map1","20","vel_02",saved_name="05_")
+    lgnd = {}
+    lgnd["cadrl"]     = "tab:red"
+    lgnd["waypoints"] = "o_tab:cyan"
+    eval_all(["cadrl"],"map1","20","vel_02",saved_name="06_")
 
 
 
@@ -923,13 +942,13 @@ def run():
     lgnd["esdf"] = "tab:blue"
     lgnd["subsample"] = "tab:purple"
 
-    eval_all(["subsample","esdf","cadrl","teb","mpc"],"empty","5" ,"vel_02",saved_name="13_")
-    eval_all(["subsample","esdf","cadrl","teb","mpc"],"empty","10","vel_02",saved_name="14_")
-    eval_all(["subsample","esdf","cadrl","teb","mpc"],"empty","20","vel_02",saved_name="15_")
+    # eval_all(["subsample","esdf","cadrl","teb","mpc"],"empty","5" ,"vel_02",saved_name="13_")
+    # eval_all(["subsample","esdf","cadrl","teb","mpc"],"empty","10","vel_02",saved_name="14_")
+    # eval_all(["subsample","esdf","cadrl","teb","mpc"],"empty","20","vel_02",saved_name="15_")
 
-    eval_all(["subsample","esdf","cadrl","teb","mpc"],"map1","5" ,"vel_02",saved_name="16_")
-    eval_all(["subsample","esdf","cadrl","teb","mpc"],"map1","10","vel_02",saved_name="17_")
-    eval_all(["subsample","esdf","cadrl","teb","mpc"],"map1","20","vel_02",saved_name="18_")
+    # eval_all(["subsample","esdf","cadrl","teb","mpc"],"map1","5" ,"vel_02",saved_name="16_")
+    # eval_all(["subsample","esdf","cadrl","teb","mpc"],"map1","10","vel_02",saved_name="17_")
+    # eval_all(["subsample","esdf","cadrl","teb","mpc"],"map1","20","vel_02",saved_name="18_")
 
     plt.show()
     rospy.spin()
