@@ -25,7 +25,7 @@ pip install -r requirements_cadrl.txt
 #### 1) Start Simulation
 In a terminal, activate your cadrl venv, source devel/setup.zsh and start the simulation:
 ```
-roslaunch arena_bringup start_arena_flatland.launch disable_scenario:="false" map_file:="map1" scenario_file:="eval/obstacle_map1_obs10.json" local_planner:="teb"
+roslaunch arena_bringup start_arena_flatland.launch disable_scenario:="false" map_file:="map1" scenario_file:="eval/obstacle_map1_obs10.json" local_planner:="cadrl"
 ```
 Explanation:
 * disable_scenario:="false": to start a scenario (otherwise only the map will be loaded without additional obstacles / goals)
@@ -49,7 +49,7 @@ When using "teb", "dwa" or "mpc" you need to start the scenario by manually putt
 #### 2) Record Rosbags
 In another terminal record rosbags:
 ```
-rosbag record -o cadrl_map1_ob10_vel_01 /scenario_reset /subgoal /goal /globalPlan -e "(.*)police(.*)"
+rosbag record -o cadrl_map1_ob10_vel_01 /scenario_reset -e "(.*)police(.*)"
 ```
 Explanation:
 * this command will record all topics necessary for evaluation

@@ -21,7 +21,10 @@ class police():
         self.subgoal     = PoseStamped()
         self.subgoal_wgp = PoseStamped()
         self.global_path = Path()
+
         self.gp_received = False
+        self.sg_received = False
+        self.sg_wpg_received = False
 
         self.update_cluster = True
 
@@ -32,7 +35,8 @@ class police():
         # rospy.Subscriber('/move_base/DWAPlannerROS/global_plan',Path, self.get_mb_path)
         # rospy.Subscriber('/move_base/TebLocalPlannerROS/global_plan',Path, self.get_mb_path)
         rospy.Subscriber('/odom',Odometry, self.cb_odom)
-        rospy.Subscriber('/subgoal',PoseStamped, self.cb_goal)
+        rospy.Subscriber('/subgoal',PoseStamped, self.cb_subgoal)
+        rospy.Subscriber('/subgoal_wpg',PoseStamped, self.cb_subgoal_wpg)
         rospy.Subscriber('/globalPlan',Path, self.cb_global_path)
         # rospy.Subscriber('/obst_odom',Clusters, self.cb_cluster)
 
@@ -43,6 +47,7 @@ class police():
         # self.pub_pb_replan = rospy.Publisher('police/pm_replanned', Int16, queue_size=10)
         self.pub_odom = rospy.Publisher('police/odom', Odometry, queue_size=10)
         self.pub_subg = rospy.Publisher('police/subgoal', PoseStamped, queue_size=10)
+        self.pub_subg_wpg = rospy.Publisher('police/subgoal_wpg', PoseStamped, queue_size=10)
         self.pub_subgp = rospy.Publisher('police/gplan', Path, queue_size=10)
         # self.pub_obst_odom = rospy.Publisher('police/obst_odom',Clusters,queue_size=1)
 
@@ -74,9 +79,13 @@ class police():
     def cb_odom(self, msg):
         self.odom = msg
 
-    def cb_goal(self, msg):
-        self.subgoal = msg
-       
+    def cb_subgoal(self, msg):
+        self.subgoal = msg    
+        self.sg_received = True
+    
+    def cb_subgoal_wpg(self, msg):
+        self.subgoal_wgp = msg
+        self.sg_wpg_received = True
 
     def get_pm_path(self,msg):
         self.n_replan_pm += 1
@@ -92,7 +101,17 @@ class police():
         # self.update_cluster = True
         
         self.pub_odom.publish(self.odom)
-        self.pub_subg.publish(self.subgoal)
+
+
+
+
+        if self.sg_received:
+            self.pub_subg.publish(self.subgoal)
+            self.sg_received = False
+
+        if self.sg_wpg_received:
+            self.pub_subg_wpg.publish(self.subgoal_wgp)
+            self.sg_wpg_received = False
 
         if self.gp_received:
             self.pub_subgp.publish(self.global_path)
