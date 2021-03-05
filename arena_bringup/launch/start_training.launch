@@ -5,7 +5,7 @@
   <arg name="num_envs" default="1" />
   <!-- To make the training more efficient make sure this step_size*laser_update_rate == 1  -->
   <arg name="step_size" default="0.01"/>
-  <arg name="update_rate" default="500"/>
+  <arg name="update_rate" default="100"/>
   <!-- train mode  -->
   <arg name="train_mode"       default="true"/>
   <!-- the folder name under the path simulator_setup/maps  -->

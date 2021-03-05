@@ -48,8 +48,8 @@ class ActionPublisher():
                 continue
 
             self._pub_cmd_vel.publish(self._action)
-
             self._pub_cycle_trigger.publish(self._signal)
+            
             print(f"Published same action: {last_action==self._action}")
             last_action = self._action
             

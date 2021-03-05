@@ -115,12 +115,14 @@ class ObservationCollector():
     def get_observations(self):
         # apply action time horizon
         if not self._is_train_mode:
+            timer = self._clock
             try:
                 rospy.wait_for_message(
                     f"{self.ns_prefix}next_cycle", Bool)
             except Exception:
                 #print("Timeout while receiving trigger")
                 pass
+            print(f"Waiting for trigger: {self._clock - timer}s (sim time)")
 
         # if self._is_train_mode:
         # def all_sub_received():
@@ -143,14 +145,14 @@ class ObservationCollector():
         #         time.sleep(0.00001)
         #     reset_sub()
 
-        else:
-            i = 0
-            while len(self._laser_deque) == 0 or len(self._rs_deque) == 0:
-                if i == 10:
-                    #print(f"Timeout after {self._obs_timeout/self._real_second_in_sim*i} sim sec")
-                    break
-                time.sleep((self._obs_timeout/self._real_second_in_sim)/10)
-                i += 1
+        # else:
+        #     i = 0
+        #     while len(self._laser_deque) == 0 or len(self._rs_deque) == 0:
+        #         if i == 10:
+        #             print(f"Timeout after {self._obs_timeout/self._real_second_in_sim*i} sim sec")
+        #             break
+        #         time.sleep((self._obs_timeout/self._real_second_in_sim)/10)
+        #         i += 1
 
         laser_scan, robot_pose = self.get_sync_obs()
         if laser_scan is not None and robot_pose is not None:
@@ -160,7 +162,7 @@ class ObservationCollector():
         # else:
         #     print("Not synced")
         
-        # print(f"Time between obs: {self._clock - self.last}")
+        print(f"Time between obs: {self._clock - self.last}")
         self.last = self._clock
         # else:
         #     while not self.obs_received:
@@ -180,7 +182,7 @@ class ObservationCollector():
         self._laser_deque.clear()
         self._rs_deque.clear()
 
-        #print(f"Get_obs took {self._clock - timer} (sim time)")
+        # print(f"Get_obs took {self._clock - timer} (sim time)")
         return merged_obs, obs_dict
 
     @staticmethod

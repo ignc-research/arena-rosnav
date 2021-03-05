@@ -70,9 +70,9 @@ if __name__ == "__main__":
             first_obs = False
             cum_reward = 0.0
 
-        timer = time.time()
+        # timer = time.time()
         action, _ = agent.predict(obs, deterministic=True)
-        print(f"Action predict time: {(time.time()-timer)*2.5} (sim time)")
+        # print(f"Action predict time: {(time.time()-timer)*2.5} (sim time)")
 
         # clip action
         if not params['discrete_action_space']:
