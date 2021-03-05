@@ -83,6 +83,7 @@ class ObservationCollector():
         # self._sub_flags_con = threading.Condition()
 
         # synchronization parameters
+        self._first_sync_obs = True     # whether to return first sync'd obs or most recent
         self.max_deque_size = 10
         self._sync_slop = 0.05
 
@@ -117,7 +118,6 @@ class ObservationCollector():
         if self._is_train_mode:
             self.call_service_takeSimStep(self._action_frequency)
         else:
-            timer = self._clock
             try:
                 rospy.wait_for_message(
                     f"{self.ns_prefix}next_cycle", Bool)
@@ -172,7 +172,7 @@ class ObservationCollector():
         rho, theta = ObservationCollector._get_goal_pose_in_robot_frame(
             self._subgoal, self._robot_pose)
         merged_obs = np.hstack([scan, np.array([rho, theta])])
-        
+
         obs_dict = {}
         obs_dict['laser_scan'] = scan
         obs_dict['goal_in_robot_frame'] = [rho, theta]
@@ -205,31 +205,31 @@ class ObservationCollector():
         laser_scan = None
         robot_pose = None
 
-        # while len(self._rs_deque) > 0 and len(self._laser_deque) > 0:
+        while len(self._rs_deque) > 0 and len(self._laser_deque) > 0:
         #print(f"laser deque: {len(self._laser_deque)}, robot state deque: {len(self._rs_deque)}")
-        if len(self._laser_deque) == 0 or len(self._rs_deque) == 0:
-            return laser_scan, robot_pose
+            laser_scan_msg = self._laser_deque.popleft()
+            robot_pose_msg = self._rs_deque.popleft()
+            
+            laser_stamp = laser_scan_msg.header.stamp.to_sec()
+            robot_stamp = robot_pose_msg.header.stamp.to_sec()
 
-        laser_scan_msg = self._laser_deque.popleft()
-        robot_pose_msg = self._rs_deque.popleft()
-        
-        laser_stamp = laser_scan_msg.header.stamp.to_sec()
-        robot_stamp = robot_pose_msg.header.stamp.to_sec()
+            while not abs(laser_stamp - robot_stamp) <= self._sync_slop:
+                if laser_stamp > robot_stamp:
+                    if len(self._rs_deque) == 0:
+                        return laser_scan, robot_pose
+                    robot_pose_msg = self._rs_deque.popleft()
+                    robot_stamp = robot_pose_msg.header.stamp.to_sec()
+                else:
+                    if len(self._laser_deque) == 0:
+                        return laser_scan, robot_pose
+                    laser_scan_msg = self._laser_deque.popleft()
+                    laser_stamp = laser_scan_msg.header.stamp.to_sec()
 
-        while not abs(laser_stamp - robot_stamp) <= self._sync_slop:
-            if laser_stamp > robot_stamp:
-                if len(self._rs_deque) == 0:
-                    return laser_scan, robot_pose
-                robot_pose_msg = self._rs_deque.popleft()
-                robot_stamp = robot_pose_msg.header.stamp.to_sec()
-            else:
-                if len(self._laser_deque) == 0:
-                    return laser_scan, robot_pose
-                laser_scan_msg = self._laser_deque.popleft()
-                laser_stamp = laser_scan_msg.header.stamp.to_sec()
+            laser_scan = self.process_scan_msg(laser_scan_msg)
+            robot_pose, _ = self.process_robot_state_msg(robot_pose_msg)
 
-        laser_scan = self.process_scan_msg(laser_scan_msg)
-        robot_pose, _ = self.process_robot_state_msg(robot_pose_msg)
+            if self._first_sync_obs:
+                break
         
         #print(f"Laser_stamp: {laser_stamp}, Robot_stamp: {robot_stamp}")
         return laser_scan, robot_pose
