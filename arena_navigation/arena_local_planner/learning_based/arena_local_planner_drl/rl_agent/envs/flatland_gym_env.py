@@ -15,8 +15,10 @@ import numpy as np
 import rospy
 from geometry_msgs.msg import Twist
 from flatland_msgs.srv import StepWorld, StepWorldRequest
+from std_msgs.msg import Bool
 import time
 
+from rl_agent.utils.debug import timeit 
 
 class FlatlandEnv(gym.Env):
     """Custom Environment that follows gym interface"""
@@ -53,7 +55,7 @@ class FlatlandEnv(gym.Env):
             else:
                 rospy.init_node(f'eval_env_{self.ns}', disable_signals=False)
 
-        self._action_timeout = (1/rospy.get_param("/robot_action_rate"))*0.5
+        self._action_timeout = (1/rospy.get_param("/robot_action_rate"))*0.1
 
         # Define action and observation space
         # They must be gym.spaces objects
@@ -157,8 +159,16 @@ class FlatlandEnv(gym.Env):
         self._steps_curr_episode += 1
 
         # apply action time horizon
-        if self._is_train_mode:
-            self._sim_step_client(self._action_timeout)
+        # if self._is_train_mode:
+        #     self._sim_step_client(self._action_timeout)
+        # else:
+        #     try:
+        #         rospy.wait_for_message(
+        #             f"{self.ns_prefix}next_cycle", Bool, 
+        #             timeout=self._action_timeout/self.observation_collector._real_second_in_sim)
+        #     except Exception:
+        #         print("Timeout while receiving trigger")
+        #         pass
 
         # wait for new observations
         merged_obs, obs_dict = self.observation_collector.get_observations()

@@ -4,8 +4,8 @@
   <arg name="ns_prefix" default="sim" />
   <arg name="num_envs" default="1" />
   <!-- To make the training more efficient make sure this step_size*laser_update_rate == 1  -->
-  <arg name="step_size" default="0.02"/>
-  <arg name="update_rate" default="200"/>
+  <arg name="step_size" default="0.01"/>
+  <arg name="update_rate" default="500"/>
   <!-- train mode  -->
   <arg name="train_mode"       default="true"/>
   <!-- the folder name under the path simulator_setup/maps  -->
@@ -50,10 +50,10 @@
     <remap from="/clock" to="/$(arg ns_prefix)_1/clock" />
   </node>
 
-  <group if="$(eval arg('train_mode') == false)">
+  <!-- <group if="$(eval arg('train_mode') == false)"> -->
   <!-- makes sure that action's will be published according to sim time in eval mode-->
-    <node name="action_publisher" pkg="arena_local_planner_drl" type="action_publisher.py"/>
-  </group>
+    <!-- <node name="action_publisher" pkg="arena_local_planner_drl" type="action_publisher.py"/>
+  </group> -->
 
   <!-- set the log format -->
   <env name="ROSCONSOLE_FORMAT" value="[${severity} ${time} ${logger}]: ${message}" />
