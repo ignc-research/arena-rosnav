@@ -60,7 +60,6 @@ class ActionPublisher():
 
     def callback_receive_cmd_vel(self, msg_cmd_vel: Twist):
         self._action = msg_cmd_vel
-        self._first_action = False
 
     def callback_clock(self, msg_clock: Clock):
         self._clock = msg_clock.clock.to_sec()

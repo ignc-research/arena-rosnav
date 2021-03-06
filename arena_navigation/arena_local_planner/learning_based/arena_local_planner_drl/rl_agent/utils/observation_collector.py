@@ -73,15 +73,6 @@ class ObservationCollector():
         # train mode?
         self._is_train_mode = rospy.get_param("/train_mode")
 
-        #if self._is_train_mode:
-        self._scan_sub = rospy.Subscriber(
-            f'{self.ns_prefix}scan', LaserScan, self.callback_scan, tcp_nodelay=True)
-        self._robot_state_sub = rospy.Subscriber(
-            f'{self.ns_prefix}robot_state', RobotStateStamped, self.callback_robot_state, tcp_nodelay=True)
-        
-        # self._sub_flags = {"scan_updated": False, "robot_state_updated": False}
-        # self._sub_flags_con = threading.Condition()
-
         # synchronization parameters
         self._first_sync_obs = True     # whether to return first sync'd obs or most recent
         self.max_deque_size = 10
@@ -91,6 +82,12 @@ class ObservationCollector():
         self._rs_deque = deque()
 
         # subscriptions
+        self._scan_sub = rospy.Subscriber(
+            f'{self.ns_prefix}scan', LaserScan, self.callback_scan, tcp_nodelay=True)
+
+        self._robot_state_sub = rospy.Subscriber(
+            f'{self.ns_prefix}robot_state', RobotStateStamped, self.callback_robot_state, tcp_nodelay=True)
+        
         self._clock_sub = rospy.Subscriber(
             f'{self.ns_prefix}clock', Clock, self.callback_clock, tcp_nodelay=True)
        
@@ -108,6 +105,7 @@ class ObservationCollector():
 
         self.first_obs = True
         self.last = 0
+        self.last_r = 0
 
     def get_observation_space(self):
         return self.observation_space
@@ -124,49 +122,21 @@ class ObservationCollector():
             except Exception:
                 #print("Timeout while receiving trigger")
                 pass
-            print(f"Waiting for trigger: {self._clock - timer}s (sim time)")
+            # print(f"Waiting for trigger: {self._clock - timer}s (sim time)")
 
-        # if self._is_train_mode:
-        # def all_sub_received():
-        #     ans = True
-        #     for k, v in self._sub_flags.items():
-        #         if v is not True:
-        #             ans = False
-        #             break
-        #     return ans
-
-        # def reset_sub():
-        #     self._sub_flags = dict((k, False) for k in self._sub_flags.keys())
-            
-        # with self._sub_flags_con:
-        #     while not all_sub_received:
-        #         time.sleep(0.00001)
-        #     reset_sub()
-
-        # else:
-        #     i = 0
-        #     while len(self._laser_deque) == 0 or len(self._rs_deque) == 0:
-        #         if i == 10:
-        #             print(f"Timeout after {self._obs_timeout/self._real_second_in_sim*i} sim sec")
-        #             break
-        #         time.sleep((self._obs_timeout/self._real_second_in_sim)/10)
-        #         i += 1
-
-        # try to retrieve earliest sync'ed obs
+        # try to retrieve sync'ed obs
         laser_scan, robot_pose = self.get_sync_obs()
         if laser_scan is not None and robot_pose is not None:
-            # print("Synced successfully")
+            print("Synced successfully")
             self._scan = laser_scan
             self._robot_pose = robot_pose
-        # else:
-        #     print("Not synced")
+        else:
+            print("Not synced")
         
-        print(f"Time between obs: {self._clock - self.last}")
+        # print(f"Time between obs: {self._clock - self.last}s (sim time)")
+        # print(f"Time between obs: {time.time() - self.last_r}s (calculated sim time)")
         self.last = self._clock
-        # else:
-        #     while not self.obs_received:
-        #         rospy.sleep(0.00001)
-        #     self.obs_received = False
+        self.last_r = time.time()
 
         scan = self._scan.ranges.astype(np.float32)
         rho, theta = ObservationCollector._get_goal_pose_in_robot_frame(
@@ -182,7 +152,7 @@ class ObservationCollector():
         self._laser_deque.clear()
         self._rs_deque.clear()
 
-        # print(f"Get_obs took {self._clock - timer} (sim time)")
+        # print(f"Get_obs: {self._clock - timer} (sim time)")
         return merged_obs, obs_dict
 
     @staticmethod
@@ -205,8 +175,8 @@ class ObservationCollector():
         laser_scan = None
         robot_pose = None
 
-        while len(self._rs_deque) > 0 and len(self._laser_deque) > 0:
         #print(f"laser deque: {len(self._laser_deque)}, robot state deque: {len(self._rs_deque)}")
+        while len(self._rs_deque) > 0 and len(self._laser_deque) > 0:
             laser_scan_msg = self._laser_deque.popleft()
             robot_pose_msg = self._rs_deque.popleft()
             

@@ -155,6 +155,7 @@ class FlatlandEnv(gym.Env):
         if self._is_action_space_discrete:
             action = self._translate_disc_action(action)
         self._pub_action(action)
+        print(f"Linear: {action[0]}, Angular: {action[1]}")
         self._steps_curr_episode += 1
 
         # wait for new observations
