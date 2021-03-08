@@ -1,0 +1,63 @@
+# Person
+bodies:  # List of named bodies
+  - name: base
+    pose: [0, 0, 0] 
+    type: dynamic  
+    color: [1.0, 1.0, 1.0, 0.75] 
+    footprints:
+      - type: circle
+        radius: 0.001
+        center: [0, 0]
+        density: 0
+        layers: []
+        collision: false
+
+  - name: left_leg
+    pose: [0, 0, 0] 
+    type: dynamic  
+    color: [0.66, 0.0, 0, 0.75] 
+    footprints:
+      - type: circle
+        radius: 0.1
+        center: [0.0, 0]
+        density: 1
+        # layers: ["2d", "ped"]
+        layers: ["ped"]
+        collision: false
+
+  - name: right_leg
+    pose: [0, 0, 0] 
+    type: dynamic  
+    color: [0.66, 0.0, 0, 0.75] 
+    footprints:
+      - type: circle
+        radius: 0.1
+        center: [-0.0, 0]
+        density: 1
+        # layers: ["2d", "ped"]
+        layers: ["ped"]
+        collision: false
+
+plugins:
+  - type: PedsimMovement
+    name: pedsim_movement
+    agent_topic: /pedsim_simulator/simulated_agents
+    base_body: base
+    left_leg_body: left_leg
+    right_leg_body: right_leg
+    update_rate: 40
+    toggle_leg_movement: false
+    leg_offset: 0.0 
+    var_leg_offset: 0.0
+    step_time: 0.3 #(in sec)
+    var_step_time: 0.1
+    leg_radius: 0.2 
+    var_leg_radius: 0.03
+    enabled: true
+
+  # - type: ModelTfPublisher
+  #   name: tf_publisher_
+  #   exclude: ["left_leg", "right_leg"]
+  #   publish_tf_world: true
+
+

@@ -38,7 +38,7 @@
   
   <?ignore
   <!-- spawn extra model -->
-  <node name="spawn_model2" pkg="rosservice" type="rosservice"
+  <node name="spawn_model_2" pkg="rosservice" type="rosservice"
     args="call --wait /spawn_model &quot;{
       yaml_path: '$(find simulator_setup)/obstacles/forklift.model.yaml',
       name: 'forklift',

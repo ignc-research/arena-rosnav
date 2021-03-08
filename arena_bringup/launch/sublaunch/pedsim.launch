@@ -1,6 +1,6 @@
 <launch>
   <!-- <arg name="scene_file" default="$(find simulator_setup)/maps/social_contexts.xml"/> -->
-  <arg name="scene_file" default="$(find simulator_setup)/maps/pedsim_scenario.xml"/>
+  <arg name="scene_file" default="$(find simulator_setup)/pedsim_scenarios/empty.xml"/>
   <arg name="default_queue_size" default="10"/>
   <arg name="robot_mode" default="1"/>
   <arg name="enable_groups" default="false"/>
