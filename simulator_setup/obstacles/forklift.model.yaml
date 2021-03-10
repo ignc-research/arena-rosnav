@@ -4,7 +4,7 @@ bodies:
 
     footprints:
       - type: polygon
-        points: [[-0.35, -1], [-0.35, 0.25], [0.35, 0.25], [0.35, -1]]
+        points: [[-0.5, 0.3], [0.5, 0.3], [0.5, -0.3], [-0.5, -0.3]]
         density: 1
 
   - name: left_fork
@@ -12,7 +12,7 @@ bodies:
 
     footprints:
       - type: polygon
-        points: [[-0.35, 0.25], [-0.35, 1], [-0.25, 1], [-0.25, 0.25]]
+        points: [[0.5, 0.3], [1.1, 0.3], [1.1, 0.1], [0.5, 0.1]]
         density: 1
 
   - name: right_fork
@@ -20,7 +20,7 @@ bodies:
 
     footprints:
       - type: polygon
-        points: [[0.35, 0.25], [0.35, 1], [0.25, 1], [0.25, 0.25]]
+        points: [[0.5, -0.1], [1.1, -0.1], [1.1, -0.3], [0.5, -0.3]]
         density: 1
 
 joints:
@@ -28,16 +28,16 @@ joints:
     name: left_fork_weld
     bodies:
       - name: base
-        anchor: [-0.35, 0.25]
+        anchor: [0.5, 0.3]
       - name: left_fork
-        anchor: [-0.35, 0.25]
+        anchor: [0.5, 0.3]
   - type: weld
     name: right_fork_weld
     bodies:
       - name: base
-        anchor: [0.35, 0.25]
+        anchor: [0.5, -0.3]
       - name: right_fork
-        anchor: [0.35, 0.25]
+        anchor: [0.5, -0.3]
 
 plugins:
   # - type: Tween2
@@ -47,10 +47,15 @@ plugins:
   #   waypoints: [[1, 1, 0], [2, 2, 0], [2, 3, 0], [2, 10, 0]]
   #   trigger_zones: []
 
-  - type: SocialForce
-    name: SocialForce
-    body: base
-    goal_pose: [7, 4, 0]
+  # - type: SocialForce
+  #   name: SocialForce
+  #   body: base
+  #   goal_pose: [7, 4, 0]
+
+  - type: VehicleMovement
+    name: vehicle_movement
+    agent_topic: /pedsim_simulator/simulated_agents
+    base_body: base
 
   # - type: Tween
   #   name: Tween 

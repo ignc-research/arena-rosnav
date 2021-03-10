@@ -89,9 +89,9 @@ void PlanManager::execFSMCallback(const ros::TimerEvent& e) {
   static int fsm_num = 0;
   fsm_num++;
   if (fsm_num == 100) {
-    printFSMExecState();
-    if (!have_odom_) cout << "no odom." << endl;
-    if (!have_goal_) cout << "wait for goal." << endl;
+    // printFSMExecState();
+    // if (!have_odom_) cout << "no odom." << endl;
+    // if (!have_goal_) cout << "wait for goal." << endl;
     fsm_num = 0;
   }
 

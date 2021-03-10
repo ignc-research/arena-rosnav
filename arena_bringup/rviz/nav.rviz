@@ -23,6 +23,7 @@ Panels:
         - /Marker4
         - /MarkerArray23
         - /MarkerArray24
+        - /MarkerArray25
       Splitter Ratio: 0.6526610255241394
     Tree Height: 759
   - Class: rviz/Selection
@@ -638,7 +639,7 @@ Visualization Manager:
       Value: true
     - Class: rviz/MarkerArray
       Enabled: true
-      Marker Topic: /flatland_server/debug/model/person_0
+      Marker Topic: /flatland_server/debug/model/person_1
       Name: MarkerArray
       Namespaces:
         "": true
@@ -646,7 +647,15 @@ Visualization Manager:
       Value: true
     - Class: rviz/MarkerArray
       Enabled: true
-      Marker Topic: /flatland_server/debug/model/person_1
+      Marker Topic: /flatland_server/debug/model/person_2
+      Name: MarkerArray
+      Namespaces:
+        "": true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /flatland_server/debug/model/person_3
       Name: MarkerArray
       Namespaces:
         "": true
@@ -688,7 +697,7 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 44.484371185302734
+      Scale: 37.92409133911133
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
       X: 2.7693135738372803

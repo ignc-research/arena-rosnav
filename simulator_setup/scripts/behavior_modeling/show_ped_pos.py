@@ -20,7 +20,15 @@ class Listener:
             social_state = agent_state.social_state
             x = agent_state.pose.position.x
             y = agent_state.pose.position.y
-            self.stdscr.addstr(i, 0, "id: {} state: {:20} x: {:2.2f} y: {:2.2f} ".format(id, social_state, x, y))
+            desired_force = agent_state.forces.desired_force
+            desired_force = np.array([desired_force.x, desired_force.y])
+            desired_force_magnitude = np.linalg.norm(desired_force)
+            social_force = agent_state.forces.social_force
+            social_force = np.array([social_force.x, social_force.y])
+            social_force_magnitude = np.linalg.norm(social_force)
+            combined_forces = desired_force + social_force
+            combined_forces_magnitude = np.linalg.norm(combined_forces)
+            self.stdscr.addstr(i, 0, "id: {} state: {:20} x: {:2.2f} y: {:2.2f} desired: {:2.2f} social: {:2.2f} combined: {:2.2f}".format(id, social_state, x, y, desired_force_magnitude, social_force_magnitude, combined_forces_magnitude))
         self.stdscr.refresh()
         
     def listen(self):
