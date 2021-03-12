@@ -70,7 +70,8 @@ class NN_tb3():
         self.laser_sub = rospy.Subscriber('/scan', LaserScan, self.laser_scan_callback)
         
         # subgoals
-        self.sub_goal = Vector3()   # to calculate the distace between robot and goal
+        self.sub_goal = Vector3()
+        self.sub_goal.x = self.sub_goal.y = None
 
         # self.sub_clusters = rospy.Subscriber('~clusters',Clusters, self.cbClusters)
 
@@ -196,7 +197,10 @@ class NN_tb3():
     def laser_scan_callback(self, scan):
         self.scan_param = [scan.angle_min, scan.angle_max, scan.angle_increment, scan.time_increment,
                             scan.scan_time, scan.range_min, scan.range_max]
-        self.scan = np.array(scan.ranges)
+        # self.scan_param = [scan.angle_min, scan.angle_max, scan.angle_increment, scan.time_increment,
+        #                     scan.scan_time, scan.range_min, 6.0]
+        # self.scan = np.array(scan.ranges)
+        self.scan = np.ones((512,)) * 6
         self.laser_cb_num += 1
 
     def get_laser_observation(self):
@@ -221,7 +225,7 @@ class NN_tb3():
     def control_vel(self, action):
         move_cmd = Twist()
         move_cmd.linear.x = action[0]
-        move_cmd.linear.y = 0.
+        move_cmd.linear.y = 0.  # it's not necessary
         move_cmd.linear.z = 0.
         move_cmd.angular.x = 0.
         move_cmd.angular.y = 0.
@@ -242,18 +246,25 @@ class NN_tb3():
         pose_cmd.orientation.w = qtn[3]
         self.cmd_pose.publish(pose_cmd)
 
+    def get_local_goal(self):
+        [x, y, theta] = self.state  # self position based on map
+        [goal_x, goal_y] = [self.sub_goal.x, self.sub_goal.y]  #sub goal based on map
+        local_x = (goal_x - x) * np.cos(theta) + (goal_y - y) * np.sin(theta)
+        local_y = -(goal_x - x) * np.sin(theta) + (goal_y - y) * np.cos(theta)
+        return [local_x, local_y]  # return subgoal position based on robot
+
     def cbComputeAction(self, event):
-        while self.scan is None:
+        while self.scan is None or self.sub_goal.x is None:
             pass
-        obs = self.get_laser_observation() #用stage_world1.py里lasertopic获取
+        obs = self.get_laser_observation() 
         obs_stack = deque([obs, obs, obs])
         # ************************************ Inpsut ************************************
-        # goal
-        goal = np.asarray([self.sub_goal.x, self.sub_goal.y])   #可以直接用此文件的subgoal，stage中的get_local_goal函数没有对self变量进行改变
-        self.goal_point = goal
         # position
         state = [self.pose.pose.position.x, self.pose.pose.position.y, self.psi]    # x, y, theta
-        self.state = state  #get_self_stateGT get_self_state有很多影响
+        self.state = state
+
+        # goal
+        goal = np.asarray(self.get_local_goal()) 
         # Velocity
         speed = np.asarray([self.vel.x, self.vel_angular],dtype='float64')
         # self.speed_GT = np.asarray(speed) # linear v +angular
