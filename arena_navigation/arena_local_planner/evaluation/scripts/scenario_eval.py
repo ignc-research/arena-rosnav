@@ -28,7 +28,11 @@ matplotlib.rcParams.update({'font.size': 18})
 # 
 class newBag():
     def __init__(self, planner, file_name, bag_name):
+        # planner
+        self.planner = planner
+        self.file_name = file_name
         # csv dir
+        self.bag_name = bag_name
         self.csv_dir = bag_name.replace(".bag","")
         # bag topics
         self.odom_topic      = "/sensorsim/police/odom"
@@ -45,6 +49,10 @@ class newBag():
         eps = self.split_runs()
         self.evalPath(planner,file_name,eps)
 
+
+    def make_json(self, data):
+        with open("quantitative/" + self.file_name + ".json", 'w') as outfile:
+            json.dump(data, outfile, indent=2)
 
     def make_txt(self,file,msg,ron="a"):
         file = file.replace("/","_") + ".txt"
@@ -217,6 +225,10 @@ class newBag():
         if "run_1" in bags:    
             bags.pop("run_1")
 
+        df = pd.DataFrame(data=bags)
+        run_csv = self.csv_dir + "/" + self.csv_dir.rsplit('/', 1)[-1] + ".csv"
+        df.to_csv(run_csv,index=False)   
+        print("csv created in: " + self.csv_dir)    
         return bags
     
     def average(self,lst): 
@@ -268,7 +280,7 @@ class newBag():
 
     def evalPath(self, planner, file_name, bags):
         col_xy = []
-        global ax, lgnd, axlim, plot_trj, plot_subgoals
+        global ax, lgnd, axlim, plot_trj, plot_subgoals, plot_gp, plot_collisions
 
         durations = [] 
         trajs = []
@@ -280,6 +292,13 @@ class newBag():
         axlim["x_max"] = -100
         axlim["y_min"] = 100
         axlim["y_max"] = -100
+
+        json_data              = {}
+        json_data['run']       = []
+        json_data['time']      = []
+        json_data['path']      = []
+        json_data['velocity']  = []
+        json_data['collision'] = []
 
         for run in bags:
             if run != "nrun_2/":
@@ -320,7 +339,7 @@ class newBag():
                 # for av
                 trajs.append(path_length)
                 if path_length > 0 and plot_trj:
-                    ax.plot(y, x, lgnd[planner], alpha=0.2)
+                    ax.plot(y, x, lgnd, alpha=0.2)
                     ax.set_xlabel("x in [m]")
                     ax.set_ylabel("y in [m]")
 
@@ -351,11 +370,20 @@ class newBag():
                 # plot global plan
                 n_run = run.replace("run_","")
                 n_run = int(n_run)
-                self.plot_global_plan(n_run,pwp)
+                if plot_gp:
+                    self.plot_global_plan(n_run,pwp)
 
+                # append current run to txt
                 self.make_txt(file_name, "\n"+cr)
 
                 col_xy.append(bags[run][3])
+
+                # prepare dict for json
+                json_data['run'].append(run)
+                json_data['time'].append(duration)
+                json_data['path'].append(path_length)
+                json_data['velocity'].append(av_vel)
+                json_data['collision'].append(n_col)
 
 
 
@@ -371,14 +399,17 @@ class newBag():
         print("average path length: ", round(self.average(trajs),3), "m")
         print("average velocity:    ", round(self.average(vels),3), " m/s")
         print("total collisions:    ",   str(self.nc_total))
-
+        
+        # average to txt (summary)
         self.make_txt(file_name,msg_planner)
         self.make_txt(file_name,msg_at)
         self.make_txt(file_name,msg_ap)
         self.make_txt(file_name,msg_av)
         self.make_txt(file_name,msg_col)
 
-        self.plot_collisions(col_xy,lgnd[planner])
+        self.make_json(json_data)
+        if plot_collisions:
+            self.plot_collisions(col_xy,lgnd)
 
     def fit_cluster(self,ca):
 
@@ -782,13 +813,13 @@ def run():
 
     # plots
     grid_step       = 2
-    plot_sm         = True
-    plot_obst       = True
-    plot_trj        = True
+    plot_sm         = False
+    plot_obst       = False
+    plot_trj        = False
     plot_zones      = False
-    plot_collisions = True
+    plot_collisions = False
     plot_grid       = False
-    plot_gp         = True
+    plot_gp         = False
     # static map
     rospy.init_node("eval", anonymous=False)
     rospy.Subscriber('/flatland_server/debug/layer/static',MarkerArray, getMap)
@@ -863,7 +894,7 @@ def run():
 
     # # empty map 
     # # 20
-    # eval_all(["esdf","subsample"],"empty","20","vel_01","run_2/") ------------ all runs
+    # eval_all(["esdf","subsample"],"empty","20","vel_01","run_2/") 
     # eval_all(["esdf","subsample"],"empty","20","vel_02","run_2/")
     # eval_all(["esdf","subsample"],"empty","20","vel_03","run_2/")
     # # 10
@@ -892,38 +923,38 @@ def run():
     
 
 
-    select_run = [5,10,15,20,25]
-    plot_zones    = False
-    plot_subgoals = True
+    # select_run = [5,10,15,20,25]
+    # plot_zones    = False
+    # plot_subgoals = True
 
 
-    1- 6
-    lgnd = {}
-    lgnd["subsample"] = "tab:purple"
-    lgnd["waypoints"] = "s_tab:green"
-    eval_all(["subsample"],"empty","20" ,"vel_02",saved_name="01_")
-    lgnd = {}
-    lgnd["esdf"]      = "tab:blue"
-    lgnd["waypoints"] = "^_tab:grey"
-    eval_all(["esdf"],"empty","20","vel_02",saved_name="02_")
-    lgnd = {}
-    lgnd["cadrl"]     = "tab:red"
-    lgnd["waypoints"] = "o_tab:cyan"
-    eval_all(["cadrl"],"empty","20","vel_02",saved_name="03_")
+    # 1- 6
+    # lgnd = {}
+    # lgnd["subsample"] = "tab:purple"
+    # lgnd["waypoints"] = "s_tab:green"
+    # eval_all(["subsample"],"empty","20" ,"vel_02",saved_name="01_")
+    # lgnd = {}
+    # lgnd["esdf"]      = "tab:blue"
+    # lgnd["waypoints"] = "^_tab:grey"
+    # eval_all(["esdf"],"empty","20","vel_02",saved_name="02_")
+    # lgnd = {}
+    # lgnd["cadrl"]     = "tab:red"
+    # lgnd["waypoints"] = "o_tab:cyan"
+    # eval_all(["cadrl"],"empty","20","vel_02",saved_name="03_")
 
 
-    lgnd = {}
-    lgnd["subsample"] = "tab:purple"
-    lgnd["waypoints"] = "s_tab:green"
-    eval_all(["subsample"],"map1","20" ,"vel_02",saved_name="04_")
-    lgnd = {}
-    lgnd["esdf"]      = "tab:blue"
-    lgnd["waypoints"] = "^_tab:grey"
-    eval_all(["esdf"],"map1","20","vel_02",saved_name="05_")
-    lgnd = {}
-    lgnd["cadrl"]     = "tab:red"
-    lgnd["waypoints"] = "o_tab:cyan"
-    eval_all(["cadrl"],"map1","20","vel_02",saved_name="06_")
+    # lgnd = {}
+    # lgnd["subsample"] = "tab:purple"
+    # lgnd["waypoints"] = "s_tab:green"
+    # eval_all(["subsample"],"map1","20" ,"vel_02",saved_name="04_")
+    # lgnd = {}
+    # lgnd["esdf"]      = "tab:blue"
+    # lgnd["waypoints"] = "^_tab:grey"
+    # eval_all(["esdf"],"map1","20","vel_02",saved_name="05_")
+    # lgnd = {}
+    # lgnd["cadrl"]     = "tab:red"
+    # lgnd["waypoints"] = "o_tab:cyan"
+    # eval_all(["cadrl"],"map1","20","vel_02",saved_name="06_")
 
 
 
@@ -950,9 +981,43 @@ def run():
     # eval_all(["subsample","esdf","cadrl","teb","mpc"],"map1","10","vel_02",saved_name="17_")
     # eval_all(["subsample","esdf","cadrl","teb","mpc"],"map1","20","vel_02",saved_name="18_")
 
+
+
+
+
+    # all runs ------------------------------
+    planner = ["subsample","esdf","cadrl","teb","mpc"]
+    # empty map 
+    # 20
+    eval_all(planner,"empty","20","vel_01") 
+    eval_all(planner,"empty","20","vel_02")
+    eval_all(planner,"empty","20","vel_03")
+    # 10
+    eval_all(planner,"empty","10","vel_01")
+    eval_all(planner,"empty","10","vel_02")
+    eval_all(planner,"empty","10","vel_03")
+    # 5
+    eval_all(planner,"empty","5","vel_01")
+    eval_all(planner,"empty","5","vel_02")
+    eval_all(planner,"empty","5","vel_03")
+
+
+    # map 1 
+    # 20
+    eval_all(planner,"map1","20","vel_01")
+    eval_all(planner,"map1","20","vel_02")
+    eval_all(planner,"map1","20","vel_03")
+    # 10
+    eval_all(planner,"map1","10","vel_01")
+    eval_all(planner,"map1","10","vel_02")
+    eval_all(planner,"map1","10","vel_03")
+    # 5
+    eval_all(planner,"map1","5","vel_01")
+    eval_all(planner,"map1","5","vel_02")
+    eval_all(planner,"map1","5","vel_03")
+
     plt.show()
     rospy.spin()
-
 
 if __name__=="__main__":
     run()
