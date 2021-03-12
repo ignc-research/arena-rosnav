@@ -199,8 +199,8 @@ class NN_tb3():
                             scan.scan_time, scan.range_min, scan.range_max]
         # self.scan_param = [scan.angle_min, scan.angle_max, scan.angle_increment, scan.time_increment,
         #                     scan.scan_time, scan.range_min, 6.0]
-        # self.scan = np.array(scan.ranges)
-        self.scan = np.ones((512,)) * 6
+        self.scan = np.array(scan.ranges)
+        # self.scan = np.ones((512,)) * 6
         self.laser_cb_num += 1
 
     def get_laser_observation(self):

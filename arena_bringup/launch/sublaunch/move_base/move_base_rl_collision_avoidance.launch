@@ -13,7 +13,7 @@
     <rosparam file="$(find conventional)/config/tb3/costmap_common_params_$(arg model).yaml" command="load" ns="local_costmap" />
     <rosparam file="$(find conventional)/config/tb3/local_costmap_params.yaml" command="load" />
     <rosparam file="$(find conventional)/config/tb3/global_costmap_params.yaml" command="load" />
-    <rosparam file="$(find conventional)/config/tb3/move_base_params.yaml" command="load" />
+    <rosparam file="$(find conventional)/config/tb3/move_base_params.yaml" command="load" /> -->
  
 
     <rosparam file="$(find conventional)/config/tb3/dwa_local_planner_params_burger.yaml" command="load" />
@@ -25,6 +25,7 @@
     <param name="planner_frequency" value="0.0" />
 
   </node>
+
   <node pkg="rl_collision_avoidance" type="rl_collision_avoidance_node_tb3.py" name="rl_collision_avoidance" output="screen">
         
     </node>
