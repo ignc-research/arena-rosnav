@@ -51,7 +51,15 @@ class newBag():
 
 
     def make_json(self, data):
-        with open("quantitative/" + self.file_name + ".json", 'w') as outfile:
+        fn = self.file_name
+        fa = fn.split("_")
+
+        # adjust file name
+        if "0" not in fa[2]:
+            fa[2] = "0" + fa[2]
+        fn = fa[0] + "_" + fa[1] + "_" + "obs" + fa[2] + "_" + fa[3].replace("_","") + fa[4]
+
+        with open("quantitative/" + fn + ".json", 'w') as outfile:
             json.dump(data, outfile, indent=2)
 
     def make_txt(self,file,msg,ron="a"):
@@ -258,7 +266,7 @@ class newBag():
                 self.plot_gp = False
 
     def plot_collisions(self, xya, clr):
-        global ax, plot_collisions
+        global ax, plot_collisions, lgnd
         all_cols_x = []
         all_cols_y = []
         col_exists = False
@@ -286,7 +294,7 @@ class newBag():
         trajs = []
         vels  = []
 
-        self.make_txt(file_name, "\n"+"Evaluation of "+planner+":")
+        # self.make_txt(file_name, "\n"+"Evaluation of "+planner+":") --txt
         axlim = {}
         axlim["x_min"] = 100
         axlim["x_max"] = -100
@@ -339,7 +347,7 @@ class newBag():
                 # for av
                 trajs.append(path_length)
                 if path_length > 0 and plot_trj:
-                    ax.plot(y, x, lgnd, alpha=0.2)
+                    ax.plot(y, x, lgnd[planner], alpha=0.2)
                     ax.set_xlabel("x in [m]")
                     ax.set_ylabel("y in [m]")
 
@@ -374,7 +382,7 @@ class newBag():
                     self.plot_global_plan(n_run,pwp)
 
                 # append current run to txt
-                self.make_txt(file_name, "\n"+cr)
+                # self.make_txt(file_name, "\n"+cr) -- txt
 
                 col_xy.append(bags[run][3])
 
@@ -401,15 +409,15 @@ class newBag():
         print("total collisions:    ",   str(self.nc_total))
         
         # average to txt (summary)
-        self.make_txt(file_name,msg_planner)
-        self.make_txt(file_name,msg_at)
-        self.make_txt(file_name,msg_ap)
-        self.make_txt(file_name,msg_av)
-        self.make_txt(file_name,msg_col)
+        # self.make_txt(file_name,msg_planner) -- txt
+        # self.make_txt(file_name,msg_at)
+        # self.make_txt(file_name,msg_ap)
+        # self.make_txt(file_name,msg_av)
+        # self.make_txt(file_name,msg_col)
 
         self.make_json(json_data)
         if plot_collisions:
-            self.plot_collisions(col_xy,lgnd)
+            self.plot_collisions(col_xy,lgnd[planner])
 
     def fit_cluster(self,ca):
 
