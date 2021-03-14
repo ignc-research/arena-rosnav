@@ -133,7 +133,7 @@ class ObservationCollector():
         # else:
         #     print("Not synced")
         
-        print(f"Time between obs: {self._clock - self.last}s (sim time)")
+        # print(f"Time between obs: {self._clock - self.last}s (sim time)")
         # print(f"Time between obs: {time.time() - self.last_r}s (calculated sim time)")
         self.last = self._clock
         self.last_r = time.time()
