@@ -59,9 +59,9 @@ class ObservationCollector():
         # for frequency controlling
         self._real_second_in_sim = rospy.get_param("/step_size")*rospy.get_param("/update_rate")
         self._laser_update_time = 1/rospy.get_param("/laser_update_rate")
-        self._action_frequency = 1/rospy.get_param("/laser_update_rate")
-        self._action_timeout = (1/rospy.get_param("/robot_action_rate"))*0.2
-        self._obs_timeout = (1/rospy.get_param("/robot_action_rate"))*0.65
+        self._action_frequency = 1/rospy.get_param("/robot_action_rate")
+        self._action_timeout = self._action_frequency*0.2
+        self._obs_timeout = self._action_frequency*0.65
 
         self._clock = Clock()
         self._scan = LaserScan()
@@ -92,10 +92,10 @@ class ObservationCollector():
             f'{self.ns_prefix}clock', Clock, self.callback_clock, tcp_nodelay=True)
        
         self._subgoal_sub = rospy.Subscriber(
-            f"{self.ns_prefix}subgoal", PoseStamped, self.callback_subgoal)
+            f'{self.ns_prefix}subgoal', PoseStamped, self.callback_subgoal)
 
         self._globalplan_sub = rospy.Subscriber(
-                f'{self.ns_prefix}globalPlan', Path, self.callback_global_plan)
+            f'{self.ns_prefix}globalPlan', Path, self.callback_global_plan)
 
         # service clients
         if self._is_train_mode:
@@ -127,13 +127,13 @@ class ObservationCollector():
         # try to retrieve sync'ed obs
         laser_scan, robot_pose = self.get_sync_obs()
         if laser_scan is not None and robot_pose is not None:
-            print("Synced successfully")
+            # print("Synced successfully")
             self._scan = laser_scan
             self._robot_pose = robot_pose
-        else:
-            print("Not synced")
+        # else:
+        #     print("Not synced")
         
-        # print(f"Time between obs: {self._clock - self.last}s (sim time)")
+        print(f"Time between obs: {self._clock - self.last}s (sim time)")
         # print(f"Time between obs: {time.time() - self.last_r}s (calculated sim time)")
         self.last = self._clock
         self.last_r = time.time()

@@ -7,6 +7,7 @@ import time
 
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv, VecNormalize
+from stable_baselines3.common.evaluation import evaluate_policy
 
 from task_generator.task_generator.tasks import get_predefined_task
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.rl_agent.envs.flatland_gym_env import FlatlandEnv
@@ -56,6 +57,13 @@ if __name__ == "__main__":
     # load agent
     agent = PPO.load(os.path.join(PATHS['model'], "best_model.zip"), env)
     
+    # evaluate_policy(
+    #     model=agent,
+    #     env=env,
+    #     n_eval_episodes=1000,
+    #     deterministic=True,
+    # )
+
     env.reset()
     first_obs = True
 
@@ -97,7 +105,7 @@ if __name__ == "__main__":
             env.reset()
             first_obs = True
 
-        #time.sleep(0.0001)
+        time.sleep(0.001)
         if rospy.is_shutdown():
             print('shutdown')
             break

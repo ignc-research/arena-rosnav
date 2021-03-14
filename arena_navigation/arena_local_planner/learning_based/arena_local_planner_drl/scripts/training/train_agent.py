@@ -247,12 +247,12 @@ if __name__ == "__main__":
             "MlpPolicy", env, 
             policy_kwargs = dict(
                 net_arch = args.net_arch, activation_fn = get_act_fn(args.act_fn)), 
-            gamma = params['gamma'],                     n_steps = params['n_steps'], 
-            ent_coef = params['ent_coef'],               learning_rate = params['learning_rate'], 
-            vf_coef = params['vf_coef'],                 max_grad_norm = params['max_grad_norm'], 
-            gae_lambda = params['gae_lambda'],           batch_size = params['m_batch_size'], 
-            n_epochs = params['n_epochs'],               clip_range = params['clip_range'], 
-            tensorboard_log = PATHS.get('tb'),           verbose = 1
+            gamma = params['gamma'],            n_steps = params['n_steps'], 
+            ent_coef = params['ent_coef'],      learning_rate = params['learning_rate'], 
+            vf_coef = params['vf_coef'],        max_grad_norm = params['max_grad_norm'], 
+            gae_lambda = params['gae_lambda'],  batch_size = params['m_batch_size'], 
+            n_epochs = params['n_epochs'],      clip_range = params['clip_range'], 
+            tensorboard_log = PATHS.get('tb'),  verbose = 1
         )
     elif args.agent is not None:
         # predefined agent flag
