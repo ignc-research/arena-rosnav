@@ -125,7 +125,7 @@ class StagedRandomTask(RandomTask):
         super().__init__(obstacles_manager, robot_manager)
         self.ns = ns
         self.ns_prefix = "/" if ns == '' else "/"+ns+"/"
-        
+
         self._curr_stage = start_stage
         self._stages = dict()
         self._PATHS = PATHS
@@ -185,8 +185,8 @@ class StagedRandomTask(RandomTask):
         self.obstacles_manager.register_random_dynamic_obstacles(
             self._stages[self._curr_stage]['dynamic'])
 
-        print("Spawning %d static and %d dynamic obstacles!" %
-              (static_obstacles, dynamic_obstacles))
+        print(
+            f"Stage {self._curr_stage}: Spawning {static_obstacles} static and {dynamic_obstacles} dynamic obstacles!")
 
     def _read_stages_from_yaml(self):
         file_location = self._PATHS.get('curriculum')
