@@ -74,7 +74,7 @@ def get_paths(agent_name: str, args) -> dict:
                 dir, 'configs', 'default_settings.yaml'),
         'curriculum': 
             os.path.join(
-                dir, 'configs', 'training_curriculum_map1small.yaml')
+                dir, 'configs', 'training_curriculum.yaml')
     }
     # check for mode
     if args.load is None:

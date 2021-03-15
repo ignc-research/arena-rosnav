@@ -1,7 +1,7 @@
 {
     "agent_name": "",
     "robot": "myrobot",
-    "batch_size": 19200,
+    "batch_size": 24000,
     "gamma": 0.99,
     "n_steps": 4800,
     "ent_coef": 0.005,
@@ -15,9 +15,9 @@
     "train_max_steps_per_episode": 550,
     "eval_max_steps_per_episode": 550,
     "goal_radius": 0.25,
-    "reward_fnc": "rule_04",
+    "reward_fnc": "rule_02",
     "discrete_action_space": false,
-    "normalize": false,
+    "normalize": true,
     "task_mode": "staged",
     "curr_stage": 1
 }
