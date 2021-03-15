@@ -8,12 +8,11 @@ from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env.subproc_vec_env import SubprocVecEnv
 from stable_baselines3.common.vec_env.vec_normalize import VecNormalize
 from stable_baselines3.common.callbacks import EvalCallback, StopTrainingOnRewardThreshold
-from rl_agent.envs import build_env
-from rl_agent.model.build import build_model
-from task_generator import build_tasks
+from rl_agent.envs import build_env,build_env_wrapper
+from rl_agent.model import build_model
 from rl_agent.config import get_cfg
 import rospy
-from tools.argsparser import parse_run_agent_args
+from task_generator import  build_task_wrapper
 from rl_agent.utils.debug import timeit
 
 
@@ -35,13 +34,17 @@ def setup_config(args):
     # set current output dir
     # currently based on the feature extractor name and time
     import datetime
-    curr_time_str = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+    curr_time_str = datetime.datetime.now().strftime("%__Y_%m_%d_%H_%M_%S")
     feature_extractor_name = cfg.NET_ARCH.FEATURE_EXTRACTOR.NAME
     output_dir  = os.path.join(cfg.OUTPUT_DIR_ROOT,feature_extractor_name+curr_time_str)
     os.makedirs(output_dir)
     cfg.OUTPUT_DIR = output_dir
-    
+    print("Training logs will be written to the directory: ")
+    print(f"\t\t\t{cfg.OUTPUT_DIR}") 
     cfg.freeze()
+
+    with open(os.path.join(cfg.OUTPUT_DIR,"Hyperparams.yaml"),"w") as f:
+        cfg.dump(stream=f)
     return cfg
 
 def get_namespaces():
@@ -56,37 +59,31 @@ def get_namespaces():
     return ns_list
 
 
-def make_envs(cfg,args:argparse.Namespace,namespaces:List[str]):
+def make_envs(cfg,args:argparse.Namespace, namespaces:List[str]):
 
-    def build_env_wrapper(task,ns,train_mode,debug):
-        def wrappee():
-            env = build_env(cfg,task,ns,train_mode=train_mode,debug=debug)
-            return env
-        return wrappee
-
-
-
-
-    training_env_list = []
-    tasks = build_tasks(cfg,namespaces)
+    task_wraps = [build_task_wrapper(cfg,ns) for ns in namespaces]
+    train_env_wraps = [build_env_wrapper(cfg,task,ns,True,args.debug) for task,ns in zip(task_wraps[:-1],namespaces[:-1])]
+    
 
     if args.debug:
-        VecENV = DummyVecEnv
+        train_env = DummyVecEnv(train_env_wraps)
     else:
-        VecENV = SubprocVecEnv
-    training_env = VecENV([build_env_wrapper(task,ns,True,args.debug) for task,ns in zip(tasks,namespaces)],
-        start_method='fork')
-    # evaluation environment on flatland is the first environment
+        train_env = SubprocVecEnv(train_env_wraps,start_method='fork')
+
+
+    
+    eval_env=  build_env(cfg,task_wraps[-1],namespaces[-1],train_mode=False,debug=args.debug)
     output_dir = cfg.OUTPUT_DIR
-    eval_env = lambda: Monitor(build_env(cfg,tasks[0],namespaces[0],train_mode=False,debug=args.debug),
-        output_dir,
-        info_keywords=("done_reason", "is_success"))
-    eval_env = VecENV([eval_env],start_method='fork')
+    eval_env = DummyVecEnv([lambda:Monitor(eval_env,output_dir,info_keywords=("done_reason", "is_success"))])
+
+
+   
+
     if cfg.INPUT.NORM:
-        training_env  = VecNormalize(training_env,training=True,norm_obs=True,norm_reward=False,clip_reward=15)
+        train_env  = VecNormalize(train_env,training=True,norm_obs=True,norm_reward=False,clip_reward=15)
 
         eval_env = VecNormalize(eval_env,training=False,norm_obs=True,norm_reward=False,clip_reward=15)
-    return training_env,eval_env
+    return train_env,eval_env
 
 def build_eval_callback(cfg,eval_env):
     if cfg.EVAL.STOP_TRAINING_ON_REWARD is None:
@@ -112,7 +109,7 @@ def main():
     cfg = setup_config(args)
     namespaces = get_namespaces()
     training_env,eval_env = make_envs(cfg,args,namespaces)
-    model = build_model(cfg,training_env,tensorboard_log=cfg.OUTPUT_DIR)
+    model = build_model(cfg,training_env,tensorboard_log=cfg.OUTPUT_DIR,debug=args.debug)
     eval_callback = build_eval_callback(cfg,eval_env=eval_env)
     model.learn(
         total_timesteps = cfg.TRAINING.N_TIMESTEPS, callback=eval_callback, reset_num_timesteps=True)

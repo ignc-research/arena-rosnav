@@ -1,6 +1,7 @@
 import os
 from abc import ABC, abstractmethod
 from threading import Condition, Lock
+from rl_agent.config.config import CfgNode, configurable
 
 import rospy
 import rospkg
@@ -15,13 +16,13 @@ from rospy.exceptions import ROSException
 from .obstacles_manager import ObstaclesManager
 from .robot_manager import RobotManager
 from pathlib import Path
-
+from .build import TASK_REGISTRY
 
 class StopReset(Exception):
     """Raised when The Task can not be reset anymore """
 
 
-class ABSTask(ABC):
+class ABCTask(ABC):
     """An abstract class, all tasks must implement reset function.
 
     """
@@ -46,12 +47,23 @@ class ABSTask(ABC):
             self.robot_manager.update_map(map_)
 
 
-class RandomTask(ABSTask):
+@TASK_REGISTRY.register()
+class RandomTask(ABCTask):
     """ Evertime the start position and end position of the robot is reset.
     """
-
+    @configurable
     def __init__(self, obstacles_manager: ObstaclesManager, robot_manager: RobotManager):
         super().__init__(obstacles_manager, robot_manager)
+
+    @classmethod
+    def from_config(cls, cfg:CfgNode,ns):
+        # TODO in future use cfg to build obstacles and robot's manager
+        obstacles_manager, robot_manager = _get_obs_robot_manager(ns)
+        obstacles_manager.register_random_obstacles(20, 0.4)
+        return {
+            'obstacles_manager':obstacles_manager,
+            'robot_manager': robot_manager
+        }
 
     def reset(self):
         """[summary]
@@ -77,8 +89,8 @@ class RandomTask(ABSTask):
             if fail_times == max_fail_times:
                 raise Exception("reset error!")
 
-
-class ManualTask(ABSTask):
+@TASK_REGISTRY.register()
+class ManualTask(ABCTask):
     """randomly spawn obstacles and user can mannually set the goal postion of the robot
     """
 
@@ -117,8 +129,9 @@ class ManualTask(ABSTask):
             self._new_goal_received = True
         self._manual_goal_con.notify()
 
-
+@TASK_REGISTRY.register()
 class StagedRandomTask(RandomTask):
+    @configurable
     def __init__(self, obstacles_manager: ObstaclesManager, robot_manager: RobotManager, start_stage: int = 1, PATHS=None):
         super().__init__(obstacles_manager, robot_manager)
         self._curr_stage = start_stage
@@ -141,6 +154,10 @@ class StagedRandomTask(RandomTask):
         assert os.path.isfile(self.json_file), "Found no 'hyperparameters.json' at %s" % json_file
 
         self._initiate_stage()
+    @classmethod
+    def from_config(cls,cfg):
+        #TODO 
+        pass
 
     def next_stage(self):
         if self._curr_stage < len(self._stages):
@@ -197,8 +214,8 @@ class StagedRandomTask(RandomTask):
 
     def get_num_stages(self):
         return len(self._stages)
-
-class ScenerioTask(ABSTask):
+# @TASK_REGISTRY.register()
+class ScenerioTask(ABCTask):
     def __init__(self, obstacles_manager: ObstaclesManager, robot_manager: RobotManager, scenerios_json_path: str):
         """ The scenerio_json_path only has the "Scenerios" section, which contains a list of scenerios
         Args:
@@ -215,6 +232,7 @@ class ScenerioTask(ABSTask):
         self._num_repeats_curr_scene = -1
         # The times of current scenerio need to be repeated
         self._max_repeats_curr_scene = 0
+
 
     def reset(self):
         info = {}
@@ -390,3 +408,20 @@ def get_predefined_task(ns: str, mode="random", start_stage: int = 1, PATHS: dic
         task = ScenerioTask(obstacles_manager, robot_manager,
                             PATHS['scenerios_json_path'])
     return task
+
+
+
+def _get_obs_robot_manager(ns):
+    service_client_get_map = rospy.ServiceProxy('/static_map', GetMap)
+    map_response = service_client_get_map()
+
+    # use rospkg to get the path where the model config yaml file stored
+    models_folder_path = rospkg.RosPack().get_path('simulator_setup')
+    # robot's yaml file is needed to get its radius.
+    robot_manager = RobotManager(ns, map_response.map, os.path.join(
+        models_folder_path, 'robot', "myrobot.model.yaml"))
+
+    obstacles_manager = ObstaclesManager(ns, map_response.map)
+    return obstacles_manager,robot_manager
+
+

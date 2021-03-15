@@ -1,4 +1,5 @@
 #! /usr/bin/env python
+from copy import Error
 import threading
 from typing import Tuple
 
@@ -32,7 +33,9 @@ import numpy as np
 
 from std_msgs.msg import Bool
 
-from rl_agent.utils.debug import timeit 
+from rl_agent.utils.debug import timeit
+import os
+
 
 class ObservationCollector():
     def __init__(self, ns: str, num_lidar_beams: int, lidar_range: float):
@@ -48,6 +51,9 @@ class ObservationCollector():
         else:
             self.ns_prefix = "/"+ns+"/"
 
+        #
+        self.initialized = False
+        self.pid = os.getpid()
         # define observation_space
         self.observation_space = ObservationCollector._stack_spaces((
             spaces.Box(low=0, high=lidar_range, shape=(
@@ -56,12 +62,31 @@ class ObservationCollector():
             spaces.Box(low=-np.pi, high=np.pi, shape=(1,), dtype=np.float32)
         ))
 
-        # for frequency controlling
-        self._real_second_in_sim = rospy.get_param("/step_size")*rospy.get_param("/update_rate")
-        self._laser_update_time = 1/rospy.get_param("/laser_update_rate")
-        self._action_frequency = 1/rospy.get_param("/laser_update_rate")
-        self._action_timeout = (1/rospy.get_param("/robot_action_rate"))*0.2
-        self._obs_timeout = (1/rospy.get_param("/robot_action_rate"))*0.65
+        max_tries = 10
+
+        # try:
+
+        while max_tries > 0:
+            try:
+
+                step_size = rospy.get_param("/step_size")
+                update_rate = rospy.get_param("/update_rate")
+                rospy.logdebug(f"step_size:\t{step_size}")
+                rospy.logdebug(f"update_rate:\t{update_rate}")
+                # DEBUG
+                self._real_second_in_sim = step_size*update_rate
+                self._laser_update_time = 1 / \
+                    rospy.get_param("/laser_update_rate")
+                self._action_frequency = 1 / \
+                    rospy.get_param("/laser_update_rate")
+                self._action_timeout = (
+                    1/rospy.get_param("/robot_action_rate"))*0.2
+                self._obs_timeout = (
+                    1/rospy.get_param("/robot_action_rate"))*0.65
+                break
+            except Exception:
+                time.sleep(0.5)
+                max_tries -= 1
 
         self._clock = Clock()
         self._scan = LaserScan()
@@ -87,15 +112,15 @@ class ObservationCollector():
 
         self._robot_state_sub = rospy.Subscriber(
             f'{self.ns_prefix}robot_state', RobotStateStamped, self.callback_robot_state, tcp_nodelay=True)
-        
+
         self._clock_sub = rospy.Subscriber(
             f'{self.ns_prefix}clock', Clock, self.callback_clock, tcp_nodelay=True)
-       
+
         self._subgoal_sub = rospy.Subscriber(
             f"{self.ns_prefix}subgoal", PoseStamped, self.callback_subgoal)
 
         self._globalplan_sub = rospy.Subscriber(
-                f'{self.ns_prefix}globalPlan', Path, self.callback_global_plan)
+            f'{self.ns_prefix}globalPlan', Path, self.callback_global_plan)
 
         # service clients
         if self._is_train_mode:
@@ -113,26 +138,37 @@ class ObservationCollector():
     def get_observations(self):
         # apply action time horizon
         timer = self._clock
-        if self._is_train_mode:
-            self.call_service_takeSimStep(self._action_frequency)
-        else:
-            try:
-                rospy.wait_for_message(
-                    f"{self.ns_prefix}next_cycle", Bool)
-            except Exception:
-                #print("Timeout while receiving trigger")
-                pass
-            # print(f"Waiting for trigger: {self._clock - timer}s (sim time)")
 
-        # try to retrieve sync'ed obs
-        laser_scan, robot_pose = self.get_sync_obs()
-        if laser_scan is not None and robot_pose is not None:
-            print("Synced successfully")
-            self._scan = laser_scan
-            self._robot_pose = robot_pose
+        if not self.initialized:
+            steps = 10
         else:
-            print("Not synced")
-        
+            steps = 1
+
+        while steps > 0:
+            if self._is_train_mode:
+                self.call_service_takeSimStep(self._action_frequency)
+                # time.sleep(1)
+            else:
+                try:
+                    rospy.wait_for_message(
+                        f"{self.ns_prefix}next_cycle", Bool)
+                except Exception:
+                    #print("Timeout while receiving trigger")
+                    pass
+                # print(f"Waiting for trigger: {self._clock - timer}s (sim time)")
+
+            # try to retrieve sync'ed obs
+            laser_scan, robot_pose = self.get_sync_obs()
+            if laser_scan is not None and robot_pose is not None:
+                rospy.logdebug(f"PID:\t{self.pid}\tSynced successfully")
+                self._scan = laser_scan
+                self._robot_pose = robot_pose
+                self.initialized = True
+                break
+            else:
+                rospy.logdebug(f"PID:\t{self.pid}\tNot synced")
+                steps -= 1
+
         # print(f"Time between obs: {self._clock - self.last}s (sim time)")
         # print(f"Time between obs: {time.time() - self.last_r}s (calculated sim time)")
         self.last = self._clock
@@ -176,10 +212,13 @@ class ObservationCollector():
         robot_pose = None
 
         #print(f"laser deque: {len(self._laser_deque)}, robot state deque: {len(self._rs_deque)}")
+        rospy.logdebug(
+            f"PID:\t{self.pid} laser_cache:\t{len(self._laser_deque)}\t rs_cache:\t{len(self._rs_deque)} ")
+
         while len(self._rs_deque) > 0 and len(self._laser_deque) > 0:
             laser_scan_msg = self._laser_deque.popleft()
             robot_pose_msg = self._rs_deque.popleft()
-            
+
             laser_stamp = laser_scan_msg.header.stamp.to_sec()
             robot_stamp = robot_pose_msg.header.stamp.to_sec()
 
@@ -200,7 +239,7 @@ class ObservationCollector():
 
             if self._first_sync_obs:
                 break
-        
+
         #print(f"Laser_stamp: {laser_stamp}, Robot_stamp: {robot_stamp}")
         return laser_scan, robot_pose
 
@@ -213,7 +252,7 @@ class ObservationCollector():
         try:
             for i in range(timeout):
                 response = self._sim_step_client(request)
-                rospy.logdebug("step service=", response)
+                rospy.logdebug("step service= {}".format(response.success))
 
                 if response.success:
                     break
@@ -234,7 +273,8 @@ class ObservationCollector():
         return
 
     def callback_global_plan(self, msg_global_plan):
-        self._globalplan = ObservationCollector.process_global_plan_msg(msg_global_plan)
+        self._globalplan = ObservationCollector.process_global_plan_msg(
+            msg_global_plan)
         return
 
     def callback_scan(self, msg_laserscan):
@@ -251,7 +291,7 @@ class ObservationCollector():
         if len(self._rs_deque) == self.max_deque_size:
             self._rs_deque.popleft()
         self._rs_deque.append(msg_robotstate)
-        
+
         # self._robot_pose, self._robot_vel = self.process_robot_state_msg(
         #     msg_robotstate)
         # with self._sub_flags_con:
@@ -261,7 +301,8 @@ class ObservationCollector():
     def callback_observation_received(self, msg_LaserScan, msg_RobotStateStamped):
         # process sensor msg
         self._scan = self.process_scan_msg(msg_LaserScan)
-        self._robot_pose, self._robot_vel = self.process_robot_state_msg(msg_RobotStateStamped)
+        self._robot_pose, self._robot_vel = self.process_robot_state_msg(
+            msg_RobotStateStamped)
         self.obs_received = True
         return
 
@@ -289,12 +330,13 @@ class ObservationCollector():
     def process_subgoal_msg(self, msg_Subgoal):
         pose2d = self.pose3D_to_pose2D(msg_Subgoal.pose)
         return pose2d
-    
+
     @staticmethod
     def process_global_plan_msg(globalplan):
         global_plan_2d = list(map(
             lambda p: ObservationCollector.pose3D_to_pose2D(p.pose), globalplan.poses))
-        global_plan_np = np.array(list(map(lambda p2d: [p2d.x,p2d.y], global_plan_2d)))
+        global_plan_np = np.array(
+            list(map(lambda p2d: [p2d.x, p2d.y], global_plan_2d)))
         return global_plan_np
 
     @staticmethod
