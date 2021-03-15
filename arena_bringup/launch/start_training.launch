@@ -27,22 +27,31 @@
   <arg name="viz_pub_rate" default="30" />
 
   <!--  PARAMS DON'T CHANGE THEM  -->
-  <param name="update_rate" value="$(arg update_rate)" />
-  <param name="use_sim_time" value="true" />
-  <param name="train_mode" value="$(arg train_mode)" />
-  <param name="num_envs" value="$(arg num_envs)" />
-  <param name="step_size" value="$(arg step_size)" /> 
-  <param name="obs_vel" value="$(arg obs_vel)" /> 
-  <arg name="map_path" default="$(find simulator_setup)/maps/$(arg map_folder_name)/map.yaml" />
-  <param name="world_path" value="$(find simulator_setup)/maps/$(arg map_folder_name)/map.world.yaml" />
-  <param name="show_viz" value="$(arg show_viz)"/>
-  <param name="viz_pub_rate" value="$(arg viz_pub_rate)"/>
+  <param name="update_rate"           value="$(arg update_rate)" />
+  <param name="use_sim_time"          value="true" />
+  <param name="train_mode"            value="$(arg train_mode)" />
+  <param name="num_envs"              value="$(arg num_envs)" />
+  <param name="step_size"             value="$(arg step_size)" /> 
+  <param name="obs_vel"               value="$(arg obs_vel)" /> 
+  <arg name="map_path"                default="$(find simulator_setup)/maps/$(arg map_folder_name)/map.yaml" />
+  <param name="world_path"            value="$(find simulator_setup)/maps/$(arg map_folder_name)/map.world.yaml" />
+  <param name="show_viz"              value="$(arg show_viz)"/>
+  <param name="viz_pub_rate"          value="$(arg viz_pub_rate)"/>
   <param name="look_ahead_distance"   value="$(arg look_ahead_distance)"/>
   <param name="tolerance_approach"    value="$(arg tolerance_approach)"/>
   <param name="timeout_goal"          value="$(arg timeout_goal)"/>
   <param name="timeout_subgoal"       value="$(arg timeout_subgoal)"/>
   <param name="robot_action_rate"     value="10"/>
   <param name="laser_update_rate"     value="10"/>
+  <!-- a list of parameters if not set training scripts may not be started successfully -->
+  <param name="enable_statistics"     value="false"/>
+  <param name="statistics_window_min_elements"     value="10"/>
+  <param name="statistics_window_max_elements"     value="100"/>
+  <param name="statistics_window_min_size"     value="4"/>
+  <param name="statistics_window_max_size"     value="64"/>
+  <param name="tcp_keepalive"         value="true"/>
+  
+
 
   <!-- map server-->
   <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_path)">
