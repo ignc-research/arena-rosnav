@@ -217,6 +217,7 @@ if __name__ == "__main__":
     # threshold settings for training curriculum
     # type can be either 'succ' or 'rew'
     trainstage_cb = InitiateNewTrainStage(
+        n_envs=args.n_envs,
         treshhold_type="succ", 
         upper_threshold=0.85, lower_threshold=0.6, 
         task_mode=params['task_mode'], verbose=1)
