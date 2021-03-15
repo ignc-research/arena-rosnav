@@ -184,7 +184,8 @@ class RewardCalculator():
         if self.last_goal_dist is not None:
             #goal_in_robot_frame : [rho, theta]
             
-            # higher negative weight when moving away from goal (to avoid driving unnecessary circles when train in contin. action space)
+            # higher negative weight when moving away from goal 
+            # (to avoid driving unnecessary circles when train in contin. action space)
             if (self.last_goal_dist - goal_in_robot_frame[0]) > 0:
                 w = reward_factor
             else:

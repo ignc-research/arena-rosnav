@@ -58,10 +58,7 @@ class ObservationCollector():
 
         # for frequency controlling
         self._real_second_in_sim = rospy.get_param("/step_size")*rospy.get_param("/update_rate")
-        self._laser_update_time = 1/rospy.get_param("/laser_update_rate")
         self._action_frequency = 1/rospy.get_param("/robot_action_rate")
-        self._action_timeout = self._action_frequency*0.2
-        self._obs_timeout = self._action_frequency*0.65
 
         self._clock = Clock()
         self._scan = LaserScan()
