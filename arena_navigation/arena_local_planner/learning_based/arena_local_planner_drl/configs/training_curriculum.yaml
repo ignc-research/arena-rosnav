@@ -15,3 +15,6 @@
 4:
   static: 1
   dynamic: 6
+5:
+  static: 2
+  dynamic: 6

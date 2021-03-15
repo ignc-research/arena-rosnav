@@ -204,16 +204,21 @@ if __name__ == "__main__":
                 for i in range(args.n_envs)])
 
     if params['normalize']:
-        env = VecNormalize(
-            env, training=True, 
-            norm_obs=True, norm_reward=False, clip_reward=15)
+        try:
+            load_path = os.path.join(PATHS['model'], 'vec_normalize.pkl')
+            env = VecNormalize.load(
+                load_path=load_path, venv=env)
+            print("Loaded saved VecNormalize")
+        except Exception:
+            env = VecNormalize(
+                env, training=True, 
+                norm_obs=True, norm_reward=False, clip_reward=15)
 
     # threshold settings for training curriculum
     # type can be either 'succ' or 'rew'
     trainstage_cb = InitiateNewTrainStage(
-        TaskManagers=task_managers, 
         treshhold_type="succ", 
-        upper_threshold=0.9, lower_threshold=0.6, 
+        upper_threshold=0.85, lower_threshold=0.6, 
         task_mode=params['task_mode'], verbose=1)
     
     # stop training on reward threshold callback
@@ -226,16 +231,20 @@ if __name__ == "__main__":
         [make_envs(task_managers[0], 0, params=params, PATHS=PATHS, train=False)])
 
     if params['normalize']:
-        eval_env = VecNormalize(
-            eval_env, training=False, 
-            norm_obs=True, norm_reward=False, clip_reward=15)
+        try:
+            eval_env = VecNormalize.load(
+                load_path=load_path, venv=eval_env)
+        except Exception:
+            eval_env = VecNormalize(
+                eval_env, training=True, 
+                norm_obs=True, norm_reward=False, clip_reward=15)
     
     # evaluation settings
     # n_eval_episodes: number of episodes to evaluate agent on
     # eval_freq: evaluate the agent every eval_freq train timesteps
     eval_cb = EvalCallback(
-        eval_env, 
-        n_eval_episodes=40,         eval_freq=25000, 
+        eval_env=eval_env,          train_env=env,
+        n_eval_episodes=10,         eval_freq=1, 
         log_path=PATHS.get('eval'), best_model_save_path=PATHS.get('model'), 
         deterministic=True,         callback_on_eval_end=trainstage_cb,
         callback_on_new_best=stoptraining_cb)

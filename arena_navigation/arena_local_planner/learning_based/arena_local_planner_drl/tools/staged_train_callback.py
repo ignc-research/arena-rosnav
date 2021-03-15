@@ -1,7 +1,9 @@
 import warnings
 import rospy
 import numpy as np
+
 from typing import List
+from std_msgs.msg import Bool
 from stable_baselines3.common.callbacks import BaseCallback, EvalCallback
 from task_generator.task_generator.tasks import StagedRandomTask
 
@@ -19,15 +21,15 @@ class InitiateNewTrainStage(BaseCallback):
     :param verbose:
     """
     def __init__(self, 
-                TaskManagers: List[StagedRandomTask], 
-                treshhold_type: str, 
+                n_envs: int = 1, 
+                treshhold_type: str = "succ", 
                 upper_threshold: float = 0, 
                 lower_threshold: float = 0, 
                 task_mode: str = "staged", 
                 verbose = 0):
 
         super(InitiateNewTrainStage, self).__init__(verbose = verbose)
-        self.TaskManagers = TaskManagers
+        self.n_envs = n_envs
         self.threshhold_type = treshhold_type
 
         assert (self.threshhold_type == "rew" or self.threshhold_type == "succ"
@@ -47,10 +49,26 @@ class InitiateNewTrainStage(BaseCallback):
         self.verbose = verbose
         self.activated = bool(task_mode == "staged")
 
+        if self.activated:
+            rospy.set_param("/last_stage_reached", False)
+            self._instantiate_publishers()
+
+            self._trigger = Bool()
+            self._trigger.data = True
+
+    def _instantiate_publishers(self):
+        self._publishers_next = []
+        self._publishers_previous = []
+
+        for env_num in range(self.n_envs):
+            self._publishers_next.append(
+                rospy.Publisher(f"/sim_{env_num+1}/next_stage", Bool, queue_size=1))
+            self._publishers_previous.append(
+                rospy.Publisher(f"/sim_{env_num+1}/previous_stage", Bool, queue_size=1))
+
     def _on_step(self, EvalObject: EvalCallback) -> bool:
         assert (isinstance(EvalObject, EvalCallback)
         ), f"InitiateNewTrainStage must be called within EvalCallback"
-    
 
         if self.activated:
             if EvalObject.n_eval_episodes < 20:
@@ -59,13 +77,14 @@ class InitiateNewTrainStage(BaseCallback):
             
             if ((self.threshhold_type == "rew" and EvalObject.best_mean_reward <= self.lower_threshold) or
                 (self.threshhold_type == "succ" and EvalObject.last_success_rate <= self.lower_threshold)):
-                for task_manager in self.TaskManagers:
-                    task_manager.previous_stage()
-                    
+                for pub in self._publishers_previous:
+                    pub.publish(self._trigger)
+
             if ((self.threshhold_type == "rew" and EvalObject.best_mean_reward >= self.upper_threshold) or
                 (self.threshhold_type == "succ" and EvalObject.last_success_rate >= self.upper_threshold)):
-                if self.TaskManagers[0]._curr_stage != self.TaskManagers[0].get_num_stages():
-                    for task_manager in self.TaskManagers:
-                        task_manager.next_stage()
+                for pub in self._publishers_next:
+                    pub.publish(self._trigger)
+                
+                if not rospy.get_param("/last_stage_reached"):
                     EvalObject.best_mean_reward = -np.inf
                     EvalObject.last_success_rate = -np.inf

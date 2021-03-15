@@ -12,6 +12,8 @@ from nav_msgs.srv import GetMap
 from geometry_msgs.msg import Pose2D
 from rospy.exceptions import ROSException
 
+from std_msgs.msg import Bool
+
 from .obstacles_manager import ObstaclesManager
 from .robot_manager import RobotManager
 from pathlib import Path
@@ -119,8 +121,11 @@ class ManualTask(ABSTask):
 
 
 class StagedRandomTask(RandomTask):
-    def __init__(self, obstacles_manager: ObstaclesManager, robot_manager: RobotManager, start_stage: int = 1, PATHS=None):
+    def __init__(self, ns: str, obstacles_manager: ObstaclesManager, robot_manager: RobotManager, start_stage: int = 1, PATHS=None):
         super().__init__(obstacles_manager, robot_manager)
+        self.ns = ns
+        self.ns_prefix = "/" if ns == '' else "/"+ns+"/"
+        
         self._curr_stage = start_stage
         self._stages = dict()
         self._PATHS = PATHS
@@ -140,19 +145,34 @@ class StagedRandomTask(RandomTask):
             self._PATHS.get('model'), "hyperparameters.json")
         assert os.path.isfile(self.json_file), "Found no 'hyperparameters.json' at %s" % json_file
 
+        # subs for triggers
+        self._sub_next = rospy.Subscriber(f"{self.ns_prefix}next_stage", Bool, self.next_stage)
+        self._sub_previous = rospy.Subscriber(f"{self.ns_prefix}previous_stage", Bool, self.previous_stage)
+
         self._initiate_stage()
 
-    def next_stage(self):
+    def next_stage(self, msg: Bool):
         if self._curr_stage < len(self._stages):
             self._curr_stage = self._curr_stage + 1
             self._update_curr_stage_json()
             self._initiate_stage()
 
-    def previous_stage(self):
+            if self._curr_stage == len(self._stages):
+                rospy.set_param("/last_stage_reached", True)
+        else:
+            print(
+                f"INFO: Tried to trigger next stage but already reached last one ({self.ns_prefix})")
+
+    def previous_stage(self, msg: Bool):
         if self._curr_stage > 1:
+            rospy.set_param("/last_stage_reached", False)
+
             self._curr_stage = self._curr_stage - 1
             self._update_curr_stage_json()
             self._initiate_stage()
+        else:
+            print(
+                f"INFO: Tried to trigger previous stage but already reached first one ({self.ns_prefix})")
 
     def _initiate_stage(self):
         self._remove_obstacles()
@@ -195,8 +215,6 @@ class StagedRandomTask(RandomTask):
     def _remove_obstacles(self):
         self.obstacles_manager.remove_obstacles()
 
-    def get_num_stages(self):
-        return len(self._stages)
 
 class ScenerioTask(ABSTask):
     def __init__(self, obstacles_manager: ObstaclesManager, robot_manager: RobotManager, scenerios_json_path: str):
@@ -385,7 +403,7 @@ def get_predefined_task(ns: str, mode="random", start_stage: int = 1, PATHS: dic
         print("manual tasks requested")
     if mode == "staged":
         task = StagedRandomTask(
-            obstacles_manager, robot_manager, start_stage, PATHS)
+            ns, obstacles_manager, robot_manager, start_stage, PATHS)
     if mode == "ScenerioTask":
         task = ScenerioTask(obstacles_manager, robot_manager,
                             PATHS['scenerios_json_path'])
