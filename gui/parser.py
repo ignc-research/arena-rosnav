@@ -343,8 +343,14 @@ with open('output/new_scenario.json') as file:
 # when ready -> validate the json: https://jsonformatter.curiousconcept.com/
 
 # TODO NEXT notes:
-# !0) comment the code, clear out the prints, make a readme file with all the rules, make a video explaining each step, push the code in a new branch in git
-# !1) allow different types of obstacles -> mark them with different colors -> Question: where does the type goes in the json file?
+# -1) save better the images in between in the output folder & get rid of the error in the console (no error when run on Windows!?)
+# -> consider also doing more error check here in parser.py (for example what will happen if the user said 10 obstacles, but drew only 5)
+# !0) comment the code, clear out the prints, make a readme file with all the rules, make a video explaining each step
+# -> update the readme with options how to run from different OS
+# !1) allow different types of obstacles -> mark them with different colors -> Question: where does the type go in the json file?
+# -> include ("type" : "circle",) in the json file -> then modify task.py, obstacles_manager.py (f["type"] = "circle")
+# -> connect with another student -> include more obstacle types?
+# -> allow a default type = circle!
 # 2) sometimes an error occurs, when it is clicked somewhere in between?
 # 3) different motions per obstacle -> input field vs. dropdown box
 # 4) make the window not resizable or resizable (but everyhting should still work fine!)

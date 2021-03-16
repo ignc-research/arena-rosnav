@@ -1,4 +1,4 @@
-# VIS Project WS2021 - A drawing panel for easily designing scenarios
+# Drawing panel for designing scenarios easily
 
 ### Requirements
 1. Install Ubuntu 18.04.
