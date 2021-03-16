@@ -8,7 +8,7 @@ arena_local_planner_drl_root= rospkg.RosPack().get_path('arena_local_planner_drl
 
 _C = CN()
 
-_C.OUTPUT_DIR_ROOT = os.path.join(arena_local_planner_drl_root,'Ouput')
+_C.OUTPUT_DIR_ROOT = os.path.join(arena_local_planner_drl_root,'ouput')
 
 
 
