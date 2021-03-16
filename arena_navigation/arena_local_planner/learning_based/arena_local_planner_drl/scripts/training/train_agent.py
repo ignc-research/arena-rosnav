@@ -150,18 +150,19 @@ def make_envs(rank: int,
     set_random_seed(seed)
     return _init
 
-def wait_for_nodes(n_envs: int, timeout: int=30):
+def wait_for_nodes(n_envs: int, timeout: int=30, nodes_per_ns: int=3):
     """
     Checks for timeout seconds if all nodes to corresponding namespace are online.
     
-    :param n_envs: (int) numer of virtual environments
+    :param n_envs: (int) number of virtual environments
     :param timeout: (int) seconds to wait for each ns
+    :param nodes_per_ns: (int) usual number of nodes per ns 
     """
     for i in range(n_envs):
         for k in range(timeout):
             ns = rosnode.get_node_names(namespace='sim_'+str(i+1))
 
-            if len(ns) < 3:
+            if len(ns) < nodes_per_ns:
                 warnings.warn(f"Check if all simulation parts of namespace '{'/sim_'+str(i+1)}' are running properly")
                 warnings.warn(f"Trying to connect again..")
             else:
@@ -220,7 +221,7 @@ if __name__ == "__main__":
     eval_env = DummyVecEnv(
         [make_envs(0, params=params, PATHS=PATHS, train=False)])
 
-    # try to load vec_normalize obj (contains statistics like moving avg)
+    # try to load most recent vec_normalize obj (contains statistics like moving avg)
     if params['normalize']:
         load_path = os.path.join(PATHS['model'], 'vec_normalize.pkl')
         if os.path.isfile(load_path):
