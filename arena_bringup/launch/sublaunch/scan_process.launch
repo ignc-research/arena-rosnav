@@ -1,0 +1,9 @@
+
+<launch>
+    
+    <!--  ************** task generator  ***************  -->
+    <node pkg="scan_process" name="scan_process" type="scan_process.py" output="screen"> 
+
+    </node>
+
+</launch>
