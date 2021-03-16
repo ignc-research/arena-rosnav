@@ -62,6 +62,7 @@ def initialize_hyperparameters(PATHS: dict, load_target: str, config_name: str='
     check_batch_size(n_envs, hyperparams['batch_size'], hyperparams['m_batch_size'])
     hyperparams['n_steps'] = int(hyperparams['batch_size'] / n_envs)
     write_hyperparameters_json(hyperparams, PATHS)
+    print_hyperparameters(hyperparams)
     return hyperparams
 
 
