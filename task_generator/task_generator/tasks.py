@@ -154,11 +154,12 @@ class StagedRandomTask(RandomTask):
     def next_stage(self, msg: Bool):
         if self._curr_stage < len(self._stages):
             self._curr_stage = self._curr_stage + 1
-            self._update_curr_stage_json()
             self._initiate_stage()
 
-            if self._curr_stage == len(self._stages):
-                rospy.set_param("/last_stage_reached", True)
+            if self.ns == "sim_1":
+                self._update_curr_stage_json()
+                if self._curr_stage == len(self._stages):
+                    rospy.set_param("/last_stage_reached", True)
         else:
             print(
                 f"INFO: Tried to trigger next stage but already reached last one ({self.ns_prefix})")
