@@ -150,6 +150,27 @@ def make_envs(rank: int,
     set_random_seed(seed)
     return _init
 
+def wait_for_nodes(n_envs: int, timeout: int=30):
+    """
+    Checks for timeout seconds if all nodes to corresponding namespace are online.
+    
+    :param n_envs: (int) numer of virtual environments
+    :param timeout: (int) seconds to wait for each ns
+    """
+    for i in range(n_envs):
+        for k in range(timeout):
+            ns = rosnode.get_node_names(namespace='sim_'+str(i+1))
+
+            if len(ns) < 3:
+                warnings.warn(f"Check if all simulation parts of namespace '{'/sim_'+str(i+1)}' are running properly")
+                warnings.warn(f"Trying to connect again..")
+            else:
+                break
+
+            assert (k < timeout-1
+            ), f"Timeout while trying to connect to nodes of '{'/sim_'+str(i+1)}'"
+
+            time.sleep(1)
 
 if __name__ == "__main__":
     args, _ = parse_training_args()
@@ -164,27 +185,13 @@ if __name__ == "__main__":
     print("________ STARTING TRAINING WITH:  %s ________\n" % AGENT_NAME)
 
     # check if simulations are booted
-    timeout = 30
-    for i in range(args.n_envs):
-        for k in range(timeout):
-            ns = rosnode.get_node_names(namespace='sim_'+str(i+1))
-
-            if len(ns) < 3:
-                warnings.warn(f"Check if all simulation parts of namespace '{'/sim_'+str(i+1)}' are running properly")
-                warnings.warn(f"Trying to connect again..")
-            else:
-                break
-
-            assert (k < timeout-1
-            ), f"Timeout while trying to connect to nodes of '{'/sim_'+str(i+1)}'"
-
-            time.sleep(1)
+    wait_for_nodes(n_envs=args.n_envs, timeout=5)
         
     # initialize hyperparameters (save to/ load from json)
     params = initialize_hyperparameters(
         PATHS=PATHS, load_target=args.load, config_name=args.config, n_envs=args.n_envs)
 
-    # instantiate gym environment
+    # instantiate train environment
     # when debug run on one process only
     if not args.debug:
         env = SubprocVecEnv(
@@ -195,17 +202,6 @@ if __name__ == "__main__":
         env = DummyVecEnv(
             [make_envs(i, params=params, PATHS=PATHS) 
                 for i in range(args.n_envs)])
-
-    if params['normalize']:
-        try:
-            load_path = os.path.join(PATHS['model'], 'vec_normalize.pkl')
-            env = VecNormalize.load(
-                load_path=load_path, venv=env)
-            print("Loaded saved VecNormalize")
-        except Exception:
-            env = VecNormalize(
-                env, training=True, 
-                norm_obs=True, norm_reward=False, clip_reward=15)
 
     # threshold settings for training curriculum
     # type can be either 'succ' or 'rew'
@@ -224,11 +220,18 @@ if __name__ == "__main__":
     eval_env = DummyVecEnv(
         [make_envs(0, params=params, PATHS=PATHS, train=False)])
 
+    # try to load vec_normalize obj (contains statistics like moving avg)
     if params['normalize']:
-        try:
+        load_path = os.path.join(PATHS['model'], 'vec_normalize.pkl')
+        if os.path.isfile(load_path):
+            env = VecNormalize.load(
+                load_path=load_path, venv=env)
             eval_env = VecNormalize.load(
                 load_path=load_path, venv=eval_env)
-        except Exception:
+        else:
+            env = VecNormalize(
+                env, training=True, 
+                norm_obs=True, norm_reward=False, clip_reward=15)
             eval_env = VecNormalize(
                 eval_env, training=True, 
                 norm_obs=True, norm_reward=False, clip_reward=15)
