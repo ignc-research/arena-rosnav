@@ -51,7 +51,7 @@ class ObstaclesManager:
 
         self.update_map(map_)
         self.obstacle_name_list = []
-        self._obstacle_name_prefix = 'obstacle'
+        self._obstacle_name_prefix = self.ns+'_obstacle'
         # remove all existing obstacles generated before create an instance of this class
         self.remove_obstacles()
 
