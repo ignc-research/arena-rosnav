@@ -55,7 +55,16 @@ class FlatlandEnv(gym.Env):
         super(FlatlandEnv, self).__init__()
 
         self.ns = ns
-        
+        try:
+            # given every environment enough time to initialize, if we dont put sleep,
+            # the training script may crush.
+            ns_int = int(ns.split("_")[1])
+            time.sleep(ns_int*2)
+        except Exception:
+            rospy.logwarn(f"Can't not determinate the number of the environment, training script may crush!")
+            pass
+
+
         # process specific namespace in ros system
         if ns is not None or ns !="":
             self.ns_prefix = '/'+ns + '/'
