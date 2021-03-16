@@ -12,7 +12,6 @@ from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.callbacks import EvalCallback, StopTrainingOnRewardThreshold
 from stable_baselines3.common.utils import set_random_seed
 
-from task_generator.task_generator.tasks import *
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.scripts.custom_policy import *
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.rl_agent.envs.flatland_gym_env import FlatlandEnv
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.tools.argsparser import parse_training_args
@@ -104,8 +103,7 @@ def get_paths(agent_name: str, args) -> dict:
     return PATHS
 
 
-def make_envs(task_manager: Union[RandomTask, StagedRandomTask, ManualTask, ScenerioTask], 
-              rank: int, 
+def make_envs(rank: int, 
               params: dict, 
               seed: int=0, 
               PATHS: dict=None, 
@@ -113,7 +111,6 @@ def make_envs(task_manager: Union[RandomTask, StagedRandomTask, ManualTask, Scen
     """
     Utility function for multiprocessed env
     
-    :param task_manager: (Object) interface for managing the tasks
     :param rank: (int) index of the subprocess
     :param params: (dict) hyperparameters of agent to be trained
     :param seed: (int) the inital seed for RNG
@@ -126,22 +123,26 @@ def make_envs(task_manager: Union[RandomTask, StagedRandomTask, ManualTask, Scen
         if train:
             # train env
             env = FlatlandEnv(
-                f"sim_{rank+1}", task_manager, 
+                f"sim_{rank+1}", 
                 PATHS.get('robot_setting'), PATHS.get('robot_as'), 
                 params['reward_fnc'], params['discrete_action_space'], 
                 goal_radius=params['goal_radius'], 
                 max_steps_per_episode=params['train_max_steps_per_episode'],
-                debug=args.debug)
+                debug=args.debug, 
+                task_mode=params['task_mode'], curr_stage=params['curr_stage'], 
+                PATHS=PATHS)
         else:
             # eval env
             env = Monitor(
                 FlatlandEnv(
-                    f"sim_{rank+1}", task_manager, 
+                    f"sim_{rank+1}",
                     PATHS.get('robot_setting'), PATHS.get('robot_as'), 
                     params['reward_fnc'], params['discrete_action_space'], 
                     goal_radius=params['goal_radius'], 
                     max_steps_per_episode=params['eval_max_steps_per_episode'], 
-                    train_mode=False, debug=args.debug
+                    train_mode=False, debug=args.debug, 
+                    task_mode=params['task_mode'], curr_stage=params['curr_stage'],
+                    PATHS=PATHS
                     ),
                 PATHS.get('eval'), info_keywords=("done_reason", "is_success"))
         env.seed(seed + rank)
@@ -179,28 +180,20 @@ if __name__ == "__main__":
 
             time.sleep(1)
         
-            
     # initialize hyperparameters (save to/ load from json)
     params = initialize_hyperparameters(
         PATHS=PATHS, load_target=args.load, config_name=args.config, n_envs=args.n_envs)
-
-    # task managers for each simulation
-    task_managers=[]
-    for i in range(args.n_envs):
-        task_managers.append(
-            get_predefined_task(
-                f"sim_{i+1}", params['task_mode'], params['curr_stage'], PATHS))
 
     # instantiate gym environment
     # when debug run on one process only
     if not args.debug:
         env = SubprocVecEnv(
-            [make_envs(task_managers[i], i, params=params, PATHS=PATHS) 
+            [make_envs(i, params=params, PATHS=PATHS) 
                 for i in range(args.n_envs)], 
             start_method='fork')
     else:
         env = DummyVecEnv(
-            [make_envs(task_managers[i], i, params=params, PATHS=PATHS) 
+            [make_envs(i, params=params, PATHS=PATHS) 
                 for i in range(args.n_envs)])
 
     if params['normalize']:
@@ -224,12 +217,12 @@ if __name__ == "__main__":
     
     # stop training on reward threshold callback
     stoptraining_cb = StopTrainingOnRewardThreshold(
-        reward_threshold=14, task_manager=task_managers[0], verbose=1)
+        reward_threshold=14, verbose=1)
 
     # instantiate eval environment
     # take task_manager from first sim (currently evaluation only provided for single process)
     eval_env = DummyVecEnv(
-        [make_envs(task_managers[0], 0, params=params, PATHS=PATHS, train=False)])
+        [make_envs(0, params=params, PATHS=PATHS, train=False)])
 
     if params['normalize']:
         try:
@@ -245,7 +238,7 @@ if __name__ == "__main__":
     # eval_freq: evaluate the agent every eval_freq train timesteps
     eval_cb = EvalCallback(
         eval_env=eval_env,          train_env=env,
-        n_eval_episodes=10,         eval_freq=1, 
+        n_eval_episodes=10,         eval_freq=10, 
         log_path=PATHS.get('eval'), best_model_save_path=PATHS.get('model'), 
         deterministic=True,         callback_on_eval_end=trainstage_cb,
         callback_on_new_best=stoptraining_cb)

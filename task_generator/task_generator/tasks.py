@@ -394,17 +394,21 @@ def get_predefined_task(ns: str, mode="random", start_stage: int = 1, PATHS: dic
     # Tasks will be moved to other classes or functions.
     task = None
     if mode == "random":
+        rospy.set_param("/task_mode", "random")
         obstacles_manager.register_random_obstacles(20, 0.4)
         task = RandomTask(obstacles_manager, robot_manager)
         print("random tasks requested")
     if mode == "manual":
+        rospy.set_param("/task_mode", "manual")
         obstacles_manager.register_random_obstacles(20, 0.4)
         task = ManualTask(obstacles_manager, robot_manager)
         print("manual tasks requested")
     if mode == "staged":
+        rospy.set_param("/task_mode", "staged")
         task = StagedRandomTask(
             ns, obstacles_manager, robot_manager, start_stage, PATHS)
     if mode == "ScenerioTask":
+        rospy.set_param("/task_mode", "scenario")
         task = ScenerioTask(obstacles_manager, robot_manager,
                             PATHS['scenerios_json_path'])
     return task

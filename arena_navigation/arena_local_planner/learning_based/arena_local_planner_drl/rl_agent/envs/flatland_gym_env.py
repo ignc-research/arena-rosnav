@@ -18,16 +18,29 @@ from flatland_msgs.srv import StepWorld, StepWorldRequest
 from std_msgs.msg import Bool
 import time
 
-from rl_agent.utils.debug import timeit 
+from rl_agent.utils.debug import timeit
+from task_generator.task_generator.tasks import *
 
 class FlatlandEnv(gym.Env):
     """Custom Environment that follows gym interface"""
 
-    def __init__(self, ns: str, task: ABSTask, robot_yaml_path: str, settings_yaml_path: str, reward_fnc: str, is_action_space_discrete, safe_dist: float = None, goal_radius: float = 0.1, max_steps_per_episode=100, train_mode: bool = True, debug: bool = False):
+    def __init__(self, 
+                 ns: str,  
+                 robot_yaml_path: str, 
+                 settings_yaml_path: str, 
+                 reward_fnc: str, 
+                 is_action_space_discrete, 
+                 safe_dist: float = None, 
+                 goal_radius: float = 0.1, 
+                 max_steps_per_episode=100, 
+                 train_mode: bool = True, 
+                 debug: bool = False,
+                 task_mode: str = "staged",
+                 PATHS: dict = dict(),
+                 *args, **kwargs):
         """Default env
         Flatland yaml node check the entries in the yaml file, therefore other robot related parameters cound only be saved in an other file.
         TODO : write an uniform yaml paser node to handel with multiple yaml files.
-
 
 
         Args:
@@ -85,12 +98,14 @@ class FlatlandEnv(gym.Env):
             self._service_name_step = f'{self.ns_prefix}step_world'
             self._sim_step_client = rospy.ServiceProxy(
             self._service_name_step, StepWorld)
-        self.task = task
+        
+        # instantiate task manager
+        self.task = get_predefined_task(
+            ns, mode=task_mode, start_stage=kwargs['curr_stage'], PATHS=PATHS)
+
         self._steps_curr_episode = 0
         self._max_steps_per_episode = max_steps_per_episode
-        # # get observation
-        # obs=self.observation_collector.get_observations()
-
+ 
     def setup_by_configuration(self, robot_yaml_path: str, settings_yaml_path: str):
         """get the configuration from the yaml file, including robot radius, discrete action space and continuous action space.
 
