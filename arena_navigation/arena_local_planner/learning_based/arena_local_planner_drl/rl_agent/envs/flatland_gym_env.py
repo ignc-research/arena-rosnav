@@ -54,10 +54,10 @@ class FlatlandEnv(gym.Env):
 
         import os
         ns_int = int(ns.split("_")[1])
-        print(f"PID:\t{os.getpid()} start sleeping")
-        time.sleep(ns_int*0.1)
-        print(f"PID:\t{os.getpid()} slept {ns_int*0.2}") 
-        
+        rospy.loginfo(f"ENV {ns} with PID: \t{os.getpid()} is waiting for initialization")
+        # if we dont put a sleep, the training environment may crush, trust me!
+        time.sleep(ns_int*2)
+        rospy.loginfo(f"Initializing ENV {ns} ...") 
         if debug:
             log_level = rospy.DEBUG
         else:

@@ -134,7 +134,7 @@ class ObstaclesManager:
             linear_velocity: the maximum linear velocity
         """
         num_dynamic_obstalces = int(num_obstacles*p_dynamic)
-        max_linear_velocity = rospy.get_param("obs_vel")
+        max_linear_velocity = rospy.get_param("/obs_vel")
         self.register_random_dynamic_obstacles(
             num_dynamic_obstalces, max_linear_velocity)
         self.register_random_static_obstacles(
