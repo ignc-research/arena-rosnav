@@ -1,22 +1,23 @@
 import os
+from PIL import Image # if necessary run $ python3 -m pip install --upgrade Pillow
 
 # IDEA: from 6 txt files make 1 json file
 # parse a txt file: https://www.vipinajayakumar.com/parsing-text-with-python/; https://www.pythontutorial.net/python-basics/python-read-text-file/ (from here is the idea with the lines taken)
 
 # check if all 6 files exist and are not empty! (to not trow an error, but print a message if that is the case)
-my_path = ['output/data.txt', 'output/obstacle.txt', 'output/watcher.txt', 'output/vector.txt', 'output/robot.txt', 'output/motion.txt']
+my_path = ['output/internal/data.txt', 'output/internal/obstacle.txt', 'output/internal/watcher.txt', 'output/internal/vector.txt', 'output/internal/robot.txt', 'output/internal/motion.txt']
 for my_file in my_path:
     if not (os.path.exists(my_file) and os.path.getsize(my_file) > 0):
         print('File ' + my_file + ' does not exist or is empty!')
         os._exit(0)
 
 print('/**************** parsing data.txt *******************/') # done!
-with open('output/data.txt') as file:
+with open('output/internal/data.txt') as file:
     file_contents = file.read()
     print(file_contents)
 
 lines = []
-with open('output/data.txt') as file:
+with open('output/internal/data.txt') as file:
     lines = file.readlines()
 
 # Attention: the form of data.txt was slightly changed to make parsing easier
@@ -89,12 +90,12 @@ print('Obstacle-watchers connections:' + str(obstacle_watcher_connections))
 print('Obstacle-watchers connections:' + str(obstacle_watcher_connections_2))
 
 print('/**************** parsing obstacle.txt ***************/') # done!
-with open('output/obstacle.txt') as file:
+with open('output/internal/obstacle.txt') as file:
     file_contents = file.read()
     print(file_contents)
 
 lines_obstacles = []
-with open('output/obstacle.txt') as file:
+with open('output/internal/obstacle.txt') as file:
     lines_obstacles = file.readlines()
 
 # data from obstacle.txt
@@ -113,12 +114,12 @@ for line in lines_obstacles:
 print('Obstacles:' + str(obstacles))
 
 print('/**************** parsing watcher.txt ****************/') # done!
-with open('output/watcher.txt') as file:
+with open('output/internal/watcher.txt') as file:
     file_contents = file.read()
     print(file_contents)
 
 lines_watchers = []
-with open('output/watcher.txt') as file:
+with open('output/internal/watcher.txt') as file:
     lines_watchers = file.readlines()
 
 # data from watcher.txt
@@ -135,12 +136,12 @@ for line in lines_watchers:
 print('Watchers:' + str(watchers))
 
 print('/**************** parsing vector.txt *****************/') # done!
-with open('output/vector.txt') as file:
+with open('output/internal/vector.txt') as file:
     file_contents = file.read()
     print(file_contents)
 
 lines_vectors = []
-with open('output/vector.txt') as file:
+with open('output/internal/vector.txt') as file:
     lines_vectors = file.readlines()
 
 # data from vector.txt
@@ -187,12 +188,12 @@ print('End positions:' + str(end_pos))
 print('Waypoints:' + str(waypoints))
 
 print('/**************** parsing robot.txt ****************/') # done!
-with open('output/robot.txt') as file:
+with open('output/internal/robot.txt') as file:
     file_contents = file.read()
     print(file_contents)
 
 lines_robot = []
-with open('output/robot.txt') as file:
+with open('output/internal/robot.txt') as file:
     lines_robot = file.readlines()
 
 # data from robot.txt
@@ -212,12 +213,12 @@ for line in lines_robot:
 print('Robot start and end position:' + str(robot))
 
 print('/**************** parsing motion.txt ****************/') # done!
-with open('output/motion.txt') as file:
+with open('output/internal/motion.txt') as file:
     file_contents = file.read()
     print(file_contents)
 
 lines_motion = []
-with open('output/motion.txt') as file:
+with open('output/internal/motion.txt') as file:
     lines_motion = file.readlines()
 
 # data from robot.txt
@@ -338,15 +339,52 @@ print('/**************** new_scenario.json *****************/')
 # print the final version of the json file
 with open('output/new_scenario.json') as file:
     file_contents = file.read()
-    print(file_contents) # still empty
+    print(file_contents)
 
 # when ready -> validate the json: https://jsonformatter.curiousconcept.com/
 
+print('/**************** user_data.json & scenario.png *****************/')
+### save only the relevant to the user data in a new txt file (user_data.json), from where the user could easily check his/hers inputs
+# TODO NEXT: Map resolution, Obstacle velocities, Obstacle-watchers connections from data.txt and the motions from motion.txt in a nicer form
+# TODO NEXT: also obstacle type!?!?
+fob = open('output/user_data.txt','w')
+fob.write('Map resolution:\n' + str(map_res) + "\n")
+fob.write('Map origin:\n' + str(map_origin) + "\n")
+fob.write('ObstacleID - ObstacleType - Velocity - WatchersIDs - Motion:\n')
+i = 0
+for obstacle in obstacles:
+    fob.write(str(i) + ' - ' + str(obstacle[3]) + ' - ' + str(obstacle_vel[i]) + ' - ')
+    j = 0
+    for watcher in obstacle_watcher_connections_2[i]:
+        fob.write(str(watcher))
+        if j < (len(obstacle_watcher_connections_2[i]) - 1):
+            fob.write(', ')
+        j += 1
+    fob.write(' - ' + motion[i] + '\n')
+    i += 1
+fob.close()
+# print the content
+with open('output/user_data.txt') as file:
+    file_contents = file.read()
+    print(file_contents)
+
+### save further more the resulted scenario as an image (so only the map with everything on it), to be able later to compare the resulted map with the ones in rviz
+# ready.png image should be cut/cropped according to the relative map position and size
+im = Image.open(r"output/internal/ready.png") 
+width, height = im.size # size of orginal image: (800,600)=the size of the kivy window
+# cropped image of the following dimension
+left = image_corners[0][0]
+top = height - image_corners[2][1]
+right = image_corners[2][0]
+bottom = height - image_corners[0][1]
+im_scenario = im.crop((left, top, right, bottom))
+im_scenario.save("output/scenario.png")
+im_scenario.show() # show the image
+
 # TODO NEXT notes:
-# -1) save better the images in between in the output folder & get rid of the error in the console (no error when run on Windows!?)
-# -> consider also doing more error check here in parser.py (for example what will happen if the user said 10 obstacles, but drew only 5)
+# -1) get rid of the error in the console (no error when run on Windows!?) & do more error checks here (for example what will happen if the user said 10 obstacles, but drew only 5)
 # !0) comment the code, clear out the prints, make a readme file with all the rules, make a video explaining each step
-# -> update the readme with options how to run from different OS
+# -> update the readme with options how to run from different OS; with the new output structure
 # !1) allow different types of obstacles -> mark them with different colors -> Question: where does the type go in the json file?
 # -> include ("type" : "circle",) in the json file -> then modify task.py, obstacles_manager.py (f["type"] = "circle")
 # -> connect with another student -> include more obstacle types?
@@ -361,3 +399,4 @@ with open('output/new_scenario.json') as file:
 # TODO TEST the code with different maps in rviz:
 # - tested with map_small.png and map.png and it works!
 # ?- from the console ros topic list echo set goal; in rviz from the map check (x,y)
+

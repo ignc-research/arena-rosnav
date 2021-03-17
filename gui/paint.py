@@ -48,7 +48,7 @@ class MyPaintWidgetCircleObstacle(Widget): # obstacle
     def on_touch_down(self, touch):
         # form: height_top\nheight_bottom\nwidth_top\nwidth_bottom # internal.txt
         lines = []
-        with open('output/internal.txt') as file:
+        with open('output/internal/internal.txt') as file:
             lines = file.readlines()
         
         if (touch.y < float(lines[0]) and touch.y > float(lines[1]) and touch.x < float(lines[2]) and touch.x > float(lines[3])):
@@ -68,7 +68,7 @@ class MyPaintWidgetCircleObstacle(Widget): # obstacle
     def on_touch_move(self, touch):
         # form: height_top\nheight_bottom\nwidth_top\nwidth_bottom # internal.txt
         lines = []
-        with open('output/internal.txt') as file:
+        with open('output/internal/internal.txt') as file:
             lines = file.readlines()
         
         if (touch.y < float(lines[0]) and touch.y > float(lines[1]) and touch.x < float(lines[2]) and touch.x > float(lines[3])):
@@ -143,14 +143,14 @@ class MyPaintWidgetCircleObstacle(Widget): # obstacle
     def on_touch_up(self, touch):
         # form: height_top\nheight_bottom\nwidth_top\nwidth_bottom # internal.txt
         lines = []
-        with open('output/internal.txt') as file:
+        with open('output/internal/internal.txt') as file:
             lines = file.readlines()
         
         # check if the positions are inside the 4 corners of the image
         if (touch.y < float(lines[0]) and touch.y > float(lines[1]) and touch.x < float(lines[2]) and touch.x > float(lines[3])):
         #if (touch.x > 144.33781190019192 and touch.x < 655.6621880998081 and touch.y > 200 and touch.y < 600): # ((144.33781190019192, 200), (144.33781190019192, 600), (655.6621880998081, 600), (655.6621880998081, 200))
             # save the obstacle positions (x,y,radius) in a txt file
-            fob = open('output/obstacle.txt','a') # 'w'=write (overrides the content every time), better use 'a'=append but make sure the file is at first empty
+            fob = open('output/internal/obstacle.txt','a') # 'w'=write (overrides the content every time), better use 'a'=append but make sure the file is at first empty
             d_last = touch.ud['ellipse'].size[0]
             x_pos_last = touch.ud['ellipse'].pos[0]
             y_pos_last = touch.ud['ellipse'].pos[1]
@@ -170,7 +170,7 @@ class MyPaintWidgetCircleObstacle(Widget): # obstacle
                 fob.write(',default' + "\n")
 
             # put numbers in the green circles and then separately ask the user for the velocity of every obstacle in a text field
-            count = self.file_len('output/obstacle.txt') # a counter for all on_touch_down events for this class MyPaintWidgetCircleObstacle -> idea: count the lines from obstacle.txt
+            count = self.file_len('output/internal/obstacle.txt') # a counter for all on_touch_down events for this class MyPaintWidgetCircleObstacle -> idea: count the lines from obstacle.txt
             #label_num = Label(text=str(count), pos=(x_pos_last, y_pos_last), size=(d_last, d_last), color=(0,1,0), disabled_color=(0,1,0)) # place the number in the middle of the circle # right
             label_num = Label(text=str(count), pos=(x_pos_last+d_last/2, y_pos_last+d_last/2), size=(1, 1), color=(0,1,0), disabled_color=(0,1,0)) # place the number in the middle of the circle # right
             self.add_widget(label_num)
@@ -189,7 +189,7 @@ class MyPaintWidgetCircleWatcher(Widget): # watcher (bigger then the obstacle)
     def on_touch_down(self, touch):
         # form: height_top\nheight_bottom\nwidth_top\nwidth_bottom # internal.txt
         lines = []
-        with open('output/internal.txt') as file:
+        with open('output/internal/internal.txt') as file:
             lines = file.readlines()
         
         if (touch.y < float(lines[0]) and touch.y > float(lines[1]) and touch.x < float(lines[2]) and touch.x > float(lines[3])):
@@ -205,7 +205,7 @@ class MyPaintWidgetCircleWatcher(Widget): # watcher (bigger then the obstacle)
     def on_touch_move(self, touch):
         # form: height_top\nheight_bottom\nwidth_top\nwidth_bottom # internal.txt
         lines = []
-        with open('output/internal.txt') as file:
+        with open('output/internal/internal.txt') as file:
             lines = file.readlines()
         
         if (touch.y < float(lines[0]) and touch.y > float(lines[1]) and touch.x < float(lines[2]) and touch.x > float(lines[3])):
@@ -236,13 +236,13 @@ class MyPaintWidgetCircleWatcher(Widget): # watcher (bigger then the obstacle)
     def on_touch_up(self, touch):
         # form: height_top\nheight_bottom\nwidth_top\nwidth_bottom # internal.txt
         lines = []
-        with open('output/internal.txt') as file:
+        with open('output/internal/internal.txt') as file:
             lines = file.readlines()
         
         # check if the positions are inside the 4 corners of the image
         if (touch.y < float(lines[0]) and touch.y > float(lines[1]) and touch.x < float(lines[2]) and touch.x > float(lines[3])):
             # save the watcher positions (x,y,radius) in a txt file
-            fob = open('output/watcher.txt','a') # 'w'=write (overrides the content every time), better use 'a'=append but make sure the file is at first empty
+            fob = open('output/internal/watcher.txt','a') # 'w'=write (overrides the content every time), better use 'a'=append but make sure the file is at first empty
             d_last = touch.ud['ellipse2'].size[0]
             x_pos_last = touch.ud['ellipse2'].pos[0]
             y_pos_last = touch.ud['ellipse2'].pos[1]
@@ -250,7 +250,7 @@ class MyPaintWidgetCircleWatcher(Widget): # watcher (bigger then the obstacle)
 
             # IDEA: give also the watchers an ID and then separately ask the user in a text field to connect the obstacles to the watchers
             # TODO NEXT: might be a problem if the center of the watcher is placed under the obstacle, it will not be visible
-            count = self.file_len('output/watcher.txt') # count the lines from watcher.txt
+            count = self.file_len('output/internal/watcher.txt') # count the lines from watcher.txt
             label_num = Label(text=str(count), pos=(x_pos_last, y_pos_last), size=(d_last, d_last), color=(0,0,1), disabled_color=(0,0,1)) # place the number in the middle of the circle
             self.add_widget(label_num)
 
@@ -261,7 +261,7 @@ class MyPaintWidgetLine(Widget):
     def on_touch_down(self, touch): # lines = vectors/trajectories with start and end position
         # form: height_top\nheight_bottom\nwidth_top\nwidth_bottom # internal.txt
         lines = []
-        with open('output/internal.txt') as file:
+        with open('output/internal/internal.txt') as file:
             lines = file.readlines()
         
         if (touch.y < float(lines[0]) and touch.y > float(lines[1]) and touch.x < float(lines[2]) and touch.x > float(lines[3])):
@@ -269,30 +269,30 @@ class MyPaintWidgetLine(Widget):
                 Color(1, 0, 0)
                 touch.ud['line'] = Line(points=(touch.x, touch.y)) # TODO: make the lines smooth!
             # save the vector positions start(x,y), end(x,y) in a txt file
-            fob = open('output/vector.txt','a') # 'w'=write (overrides the content every time), better use 'a'=append but make sure the file is at first empty
+            fob = open('output/internal/vector.txt','a') # 'w'=write (overrides the content every time), better use 'a'=append but make sure the file is at first empty
             fob.write('vector start (x,y): ' + str(touch.x) + ',' + str(touch.y) + "\n")
             fob.close()
     
     def on_touch_move(self, touch):
         # form: height_top\nheight_bottom\nwidth_top\nwidth_bottom # internal.txt
         lines = []
-        with open('output/internal.txt') as file:
+        with open('output/internal/internal.txt') as file:
             lines = file.readlines()
         
         if (touch.y < float(lines[0]) and touch.y > float(lines[1]) and touch.x < float(lines[2]) and touch.x > float(lines[3])):
             touch.ud['line'].points += [touch.x, touch.y]
-            #fob = open('output/vector.txt','a') # TEST
+            #fob = open('output/internal/vector.txt','a') # TEST
             #fob.write('vector test (x,y): ' + str(touch.x) + ',' + str(touch.y) + "\n") # TEST
     
     def on_touch_up(self, touch):
         # form: height_top\nheight_bottom\nwidth_top\nwidth_bottom # internal.txt
         lines = []
-        with open('output/internal.txt') as file:
+        with open('output/internal/internal.txt') as file:
             lines = file.readlines()
         
         if (touch.y < float(lines[0]) and touch.y > float(lines[1]) and touch.x < float(lines[2]) and touch.x > float(lines[3])):
             # save the vector positions start(x,y), end(x,y) in a txt file
-            fob = open('output/vector.txt','a') # 'w'=write (overrides the content every time), better use 'a'=append but make sure the file is at first empty
+            fob = open('output/internal/vector.txt','a') # 'w'=write (overrides the content every time), better use 'a'=append but make sure the file is at first empty
             fob.write('vector end (x,y): ' + str(touch.x) + ',' + str(touch.y) + "\n")
             fob.close()
 
@@ -308,22 +308,22 @@ class MyPaintWidgetRobot(Widget): # for drawing two circles with a constant smal
     def on_touch_down(self, touch): # lines = vectors/trajectories with start and end position
         # form: height_top\nheight_bottom\nwidth_top\nwidth_bottom # internal.txt
         lines = []
-        with open('output/internal.txt') as file:
+        with open('output/internal/internal.txt') as file:
             lines = file.readlines()
         
         if (touch.y < float(lines[0]) and touch.y > float(lines[1]) and touch.x < float(lines[2]) and touch.x > float(lines[3])):
             # try to contol the user to click only twice! -> nothing will happen after the second click!
-            fob = open('output/robot.txt','a') # 'w'=write (overrides the content every time), better use 'a'=append but make sure the file is at first empty
-            if self.file_len('output/robot.txt') < 2:
+            fob = open('output/internal/robot.txt','a') # 'w'=write (overrides the content every time), better use 'a'=append but make sure the file is at first empty
+            if self.file_len('output/internal/robot.txt') < 2:
                 with self.canvas:
                     Color(0, 1, 1)
                     d = 20.
                     Ellipse(pos=(touch.x - d / 2, touch.y - d / 2), size=(d, d)) # should be shiftet, because the position specifies the bottom left corner of the ellipse’s bounding box
             
             # save x and y positions of both start and end drawn circles in another txt file
-            if self.file_len('output/robot.txt') == 0:
+            if self.file_len('output/internal/robot.txt') == 0:
                 fob.write('robot start position (x,y): ' + str(touch.x) + ',' + str(touch.y) + "\n")
-            if self.file_len('output/robot.txt') == 1:
+            if self.file_len('output/internal/robot.txt') == 1:
                 fob.write('robot end position (x,y): ' + str(touch.x) + ',' + str(touch.y) + "\n")
             fob.close()
 
@@ -354,6 +354,11 @@ class MyPaintApp(App):
                     shutil.rmtree(file_path)
             except Exception as e:
                 print('Failed to delete %s. Reason: %s' % (file_path, e))
+        # generate the internal folder
+        parent_dir = "output"
+        directory = "internal"
+        path = os.path.join(parent_dir, directory)
+        os.mkdir(path) 
 
     def build(self):
 
@@ -469,7 +474,7 @@ class MyPaintApp(App):
         # save the the 4 corners, where the image is visualized, but in another form in another txt file that is just for internal use and is not necessary to be parserd later with parser.py
         # form: height_top\nheight_bottom\nwidth_top\nwidth_bottom
         # used as a internal restriction to allow the user to draw only on the uploaded image
-        fob = open('output/internal.txt','w') # 'w'=write (overrides the content every time)
+        fob = open('output/internal/internal.txt','w') # 'w'=write (overrides the content every time)
         fob.write(str(image_corners[1][1]) + '\n' + str(image_corners[0][1]) + '\n' + str(image_corners[2][0]) + '\n' + str(image_corners[0][0]))
         fob.close()
 
@@ -513,16 +518,16 @@ class MyPaintApp(App):
         width_btn_obstacle_type = 140
         dropdown_obstacle_type = DropDown() # drop-down menu with different motions
         btn_cleaner = Button(text='cleaner (blue)', size_hint_y=None, height=height_btn_obstacle_type)
-        btn_cleaner.bind(on_release=lambda btn: dropdown_obstacle_type.select(btn_cleaner.text), on_press=lambda x: self.button_obstacle_type_cleaner_callback_down(mainbutton_obstacle_type, self.parent, wimg_input_map, parent_draw, layout_btn, layout_origin, layout_res))
+        btn_cleaner.bind(on_release=lambda btn: dropdown_obstacle_type.select(btn_cleaner.text), on_press=lambda x: self.button_obstacle_type_cleaner_callback_down(mainbutton_obstacle_type, self.parent, wimg_input_map, parent_draw, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return))
         dropdown_obstacle_type.add_widget(btn_cleaner)
         btn_random = Button(text='random (orange)', size_hint_y=None, height=height_btn_obstacle_type)
-        btn_random.bind(on_release=lambda btn: dropdown_obstacle_type.select(btn_random.text), on_press=lambda x: self.button_obstacle_type_random_callback_down(mainbutton_obstacle_type, self.parent, wimg_input_map, parent_draw, layout_btn, layout_origin, layout_res))
+        btn_random.bind(on_release=lambda btn: dropdown_obstacle_type.select(btn_random.text), on_press=lambda x: self.button_obstacle_type_random_callback_down(mainbutton_obstacle_type, self.parent, wimg_input_map, parent_draw, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return))
         dropdown_obstacle_type.add_widget(btn_random)
         btn_turtlebot = Button(text='turtlebot (pink)', size_hint_y=None, height=height_btn_obstacle_type)
-        btn_turtlebot.bind(on_release=lambda btn: dropdown_obstacle_type.select(btn_turtlebot.text), on_press=lambda x: self.button_obstacle_type_turtlebot_callback_down(mainbutton_obstacle_type, self.parent, wimg_input_map, parent_draw, layout_btn, layout_origin, layout_res))
+        btn_turtlebot.bind(on_release=lambda btn: dropdown_obstacle_type.select(btn_turtlebot.text), on_press=lambda x: self.button_obstacle_type_turtlebot_callback_down(mainbutton_obstacle_type, self.parent, wimg_input_map, parent_draw, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return))
         dropdown_obstacle_type.add_widget(btn_turtlebot)
         btn_walker = Button(text='walker (purple)', size_hint_y=None, height=height_btn_obstacle_type)
-        btn_walker.bind(on_release=lambda btn: dropdown_obstacle_type.select(btn_walker.text), on_press=lambda x: self.button_obstacle_type_walker_callback_down(mainbutton_obstacle_type, self.parent, wimg_input_map, parent_draw, layout_btn, layout_origin, layout_res))
+        btn_walker.bind(on_release=lambda btn: dropdown_obstacle_type.select(btn_walker.text), on_press=lambda x: self.button_obstacle_type_walker_callback_down(mainbutton_obstacle_type, self.parent, wimg_input_map, parent_draw, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return))
         dropdown_obstacle_type.add_widget(btn_walker)
         mainbutton_obstacle_type = Button(text='obstacle type', size_hint=(None, None), size=(width_btn_obstacle_type,height_btn_obstacle_type), pos=(width_left_border, window_sizes[1]-height_up_border-height_layout_num_obstacles-height_layout_res-height_layout_origin-height_btn_obstacle_type/2)) #size_hint_y=None
         mainbutton_obstacle_type.bind(on_release=dropdown_obstacle_type.open)
@@ -549,10 +554,10 @@ class MyPaintApp(App):
         button3 = Button(text='Click when ready\nwith the waypoints', font_size=14)
         button4 = Button(text='Click when ready\nwith robot start\nand end position\n-> Done! :)', font_size=14)
 
-        button.bind(on_press=lambda x: self.button_callback(self.parent, parent_draw, button, button2, mainbutton_obstacle_type, wimg_input_map, layout_btn, layout_origin, layout_res, textinput_res, textinput_origin, textinput_num_obstacles, image_corners, scale, scale2, scale_total, width_left_border, height_up_border, height_layout_btn, textinput_velocity_list, textinput_obstacle_watchers_connection_list, mainbutton_motion_list))
-        button2.bind(on_press=lambda x: self.button2_callback(self.parent, parent_draw, button2, button3, layout_btn, wimg_input_map, textinput_num_obstacles, textinput_velocity_list, textinput_obstacle_watchers_connection_list, mainbutton_motion_list))
-        button3.bind(on_press=lambda x: self.button3_callback(self.parent, parent_draw, button3, button4, layout_btn, wimg_input_map))
-        button4.bind(on_press=lambda x: self.button4_callback(self.parent, parent_draw, button4, layout_btn))
+        button.bind(on_press=lambda x: self.button_callback(self.parent, parent_draw, button, button2, mainbutton_obstacle_type, wimg_input_map, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return, textinput_res, textinput_origin, textinput_num_obstacles, image_corners, scale, scale2, scale_total, width_left_border, height_up_border, height_layout_btn, textinput_velocity_list, textinput_obstacle_watchers_connection_list, mainbutton_motion_list))
+        button2.bind(on_press=lambda x: self.button2_callback(self.parent, parent_draw, button2, button3, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return, mainbutton_obstacle_type, wimg_input_map, textinput_num_obstacles, textinput_velocity_list, textinput_obstacle_watchers_connection_list, mainbutton_motion_list))
+        button3.bind(on_press=lambda x: self.button3_callback(self.parent, parent_draw, button3, button4, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return, mainbutton_obstacle_type, wimg_input_map))
+        button4.bind(on_press=lambda x: self.button4_callback(self.parent, parent_draw, button4, layout_btn, button_return, mainbutton_obstacle_type))
         
         #button.disabled = True # at first should be disabled
         button2.disabled = True # at first should be disabled
@@ -581,7 +586,7 @@ class MyPaintApp(App):
 
     # IDEA: save as image -> load back -> then delete the first widget (that is how the drawings won't disappear) and enable the next widget
     # IDEA: make a button (click when ready with the obstacles => save the positions and radius), then draw the watchers and again click and last draw the lines
-    def button_callback(self, parent, parent_draw, button, button2, mainbutton_obstacle_type, wimg_input_map, layout_btn, layout_origin, layout_res, textinput_res, textinput_origin, textinput_num_obstacles, image_corners, scale, scale2, scale_total, width_left_border, height_up_border, height_layout_btn, textinput_velocity_list, textinput_obstacle_watchers_connection_list, mainbutton_motion_list):
+    def button_callback(self, parent, parent_draw, button, button2, mainbutton_obstacle_type, wimg_input_map, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return, textinput_res, textinput_origin, textinput_num_obstacles, image_corners, scale, scale2, scale_total, width_left_border, height_up_border, height_layout_btn, textinput_velocity_list, textinput_obstacle_watchers_connection_list, mainbutton_motion_list):
         print('The button <%s> is being pressed' % ' '.join(button.text.split('\n')))
         # the number of obstacles can not be changed once the button "done" has been clicked
         textinput_num_obstacles.disabled = True # disable the button, should be clicked only once!
@@ -606,7 +611,7 @@ class MyPaintApp(App):
 
         # save the data from the text areas also to a txt file
         # at this place in the code are they for sure not empty and are their final version
-        fob = open('output/data.txt','w') # 'w'=write (overrides the content every time)
+        fob = open('output/internal/data.txt','w') # 'w'=write (overrides the content every time)
         fob.write('Image corners:\n' + str(image_corners[0][0]) + ',' + str(image_corners[0][1]) + '\n' + str(image_corners[1][0]) + ',' + str(image_corners[1][1]) + '\n' + str(image_corners[2][0]) + ',' + str(image_corners[2][1]) + '\n' + str(image_corners[3][0]) + ',' + str(image_corners[3][1]) + '\nPositions scale:\n' + str(scale[0]) + ',' + str(scale[1]) + ',' + str(scale2[0]) + ',' + str(scale2[1]) + ',' + str(scale_total[0]) + ',' + str(scale_total[1]) + '\nMap resolution:\n' + str(textinput_res.text) + '\nMap origin:\n' +  str(textinput_origin.text))
 
         parent.remove_widget(wimg_input_map) # !
@@ -618,8 +623,11 @@ class MyPaintApp(App):
         parent.remove_widget(layout_btn)
         parent.remove_widget(layout_origin)
         parent.remove_widget(layout_res)
+        parent.remove_widget(layout_num_obstacles)
+        parent.remove_widget(button_return)
+        parent.remove_widget(mainbutton_obstacle_type)
 
-        parent.export_to_png("output/obstacles.png")
+        parent.export_to_png("output/internal/obstacles.png")
         for child in parent_draw.children: # !
             parent_draw.remove_widget(child)
         parent.remove_widget(parent_draw)
@@ -632,19 +640,22 @@ class MyPaintApp(App):
         parent.add_widget(layout_origin)
         parent.add_widget(layout_res)
         parent.add_widget(label_connect)
+        parent.add_widget(layout_num_obstacles)
+        parent.add_widget(button_return)
+        parent.add_widget(mainbutton_obstacle_type)
         parent.add_widget(scrollable_area) # for Idea 1
         #parent.add_widget(scrollable_areas[0]) # for Idea 2 with the dropdown boxes
         #parent.add_widget(scrollable_areas[1]) # for Idea 2 with the dropdown boxes
 
-        wimg_obstacles = Image(source='output/obstacles.png', size=(parent.width, parent.height))
+        wimg_obstacles = Image(source='output/internal/obstacles.png', size=(parent.width, parent.height))
         parent.add_widget(wimg_obstacles)
         button.disabled = True # disable the button, should be clicked only once!
         button2.disabled = False # enable the next button
-        mainbutton_obstacle_type.disabled = True # the dropdown button should not be change anymore
+        mainbutton_obstacle_type.disabled = True # the dropdown button should not be changed anymore
 
-    def button2_callback(self, parent, parent_draw, button2, button3, layout_btn, wimg_input_map, textinput_num_obstacles, textinput_velocity_list, textinput_obstacle_watchers_connection_list, mainbutton_motion_list):
+    def button2_callback(self, parent, parent_draw, button2, button3, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return, mainbutton_obstacle_type, wimg_input_map, textinput_num_obstacles, textinput_velocity_list, textinput_obstacle_watchers_connection_list, mainbutton_motion_list):
         # should be done here and not in button_callback, because there the button values are still not visible!
-        fob = open('output/data.txt','a') # 'a'=append
+        fob = open('output/internal/data.txt','a') # 'a'=append
         fob.write('\nObstacle velocities:\n')
         for i in range(int(textinput_num_obstacles.text)):
             #fob.write(str(globals()['textinput_velocity_%s' % i].text))
@@ -659,7 +670,7 @@ class MyPaintApp(App):
         fob.close()
 
         # save the motion values in a file (again assume that the order is right and it starts with the motion for obstacle 0)
-        fob = open('output/motion.txt','w') # the button is clicked only once
+        fob = open('output/internal/motion.txt','w') # the button is clicked only once
         max_obstacles = 20
         cur_obstacles = int(textinput_num_obstacles.text)
         if cur_obstacles <= max_obstacles:
@@ -675,48 +686,84 @@ class MyPaintApp(App):
         fob.close()
 
         print('The button <%s> is being pressed' % ' '.join(button2.text.split('\n')))
+
         parent.remove_widget(wimg_input_map) # !
         parent.remove_widget(layout_btn)
-        parent.export_to_png("output/watchers_obstacles.png")
+        parent.remove_widget(layout_origin)
+        parent.remove_widget(layout_res)
+        parent.remove_widget(layout_num_obstacles)
+        parent.remove_widget(button_return)
+        parent.remove_widget(mainbutton_obstacle_type)
+
+        parent.export_to_png("output/internal/watchers_obstacles.png")
         for child in parent_draw.children:
             parent_draw.remove_widget(child)
         parent.remove_widget(parent_draw)
+
         parent.add_widget(wimg_input_map) # !
         parent_draw.add_widget(self.painter_line)
         parent.add_widget(parent_draw)
         parent.add_widget(layout_btn)
-        wimg_watchers_obstacles = Image(source='output/watchers_obstacles.png', size=(parent.width, parent.height))
+        parent.add_widget(layout_origin)
+        parent.add_widget(layout_res)
+        parent.add_widget(layout_num_obstacles)
+        parent.add_widget(button_return)
+        parent.add_widget(mainbutton_obstacle_type)
+
+        wimg_watchers_obstacles = Image(source='output/internal/watchers_obstacles.png', size=(parent.width, parent.height))
         parent.add_widget(wimg_watchers_obstacles)
         button2.disabled = True # disable the button, should be clicked only once!
         button3.disabled = False # enable the next button
 
-    def button3_callback(self, parent, parent_draw, button3, button4, layout_btn, wimg_input_map):
+    def button3_callback(self, parent, parent_draw, button3, button4, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return, mainbutton_obstacle_type, wimg_input_map):
         print('The button <%s> is being pressed' % ' '.join(button3.text.split('\n')))
+
         parent.remove_widget(wimg_input_map) # !
         parent.remove_widget(layout_btn)
-        parent.export_to_png("output/watchers_obstacles_waypoints.png")
+        parent.remove_widget(layout_origin)
+        parent.remove_widget(layout_res)
+        parent.remove_widget(layout_num_obstacles)
+        parent.remove_widget(button_return)
+        parent.remove_widget(mainbutton_obstacle_type)
+
+        parent.export_to_png("output/internal/watchers_obstacles_waypoints.png")
         for child in parent_draw.children:
             parent_draw.remove_widget(child)
         parent.remove_widget(parent_draw)
+
         parent.add_widget(wimg_input_map) # !
         parent_draw.add_widget(self.painter_robot)
         parent.add_widget(parent_draw)
         parent.add_widget(layout_btn)
-        wimg_watchers_obstacles_waypoints = Image(source='output/watchers_obstacles_waypoints.png', size=(parent.width, parent.height))
+        parent.add_widget(layout_origin)
+        parent.add_widget(layout_res)
+        parent.add_widget(layout_num_obstacles)
+        parent.add_widget(button_return)
+        parent.add_widget(mainbutton_obstacle_type)
+
+        wimg_watchers_obstacles_waypoints = Image(source='output/internal/watchers_obstacles_waypoints.png', size=(parent.width, parent.height))
         parent.add_widget(wimg_watchers_obstacles_waypoints)
         button3.disabled = True # disable the button, should be clicked only once!
         button4.disabled = False # enable the next button
         
 
-    def button4_callback(self, parent, parent_draw, button4, layout_btn):
+    def button4_callback(self, parent, parent_draw, button4, layout_btn, button_return, mainbutton_obstacle_type):
         print('The button <%s> is being pressed' % ' '.join(button4.text.split('\n')))
+
         parent.remove_widget(layout_btn)
-        parent.export_to_png("output/ready.png")
+        parent.remove_widget(button_return)
+        parent.remove_widget(mainbutton_obstacle_type)
+
+        parent.export_to_png("output/internal/ready.png")
         for child in parent_draw.children:
             parent_draw.remove_widget(child)
         parent.remove_widget(parent_draw)
+
         parent.add_widget(layout_btn)
-        wimg_ready = Image(source='output/ready.png', size=(parent.width, parent.height))
+        parent.add_widget(button_return)
+        parent.add_widget(mainbutton_obstacle_type)
+
+        wimg_ready = Image(source='output/internal/ready.png', size=(parent.width, parent.height))
         parent.add_widget(wimg_ready)
         button4.disabled = True # disable the button, should be clicked only once!
         label_done = Label(text='Done! Run parser.py and see the generated json file in the output folder!', pos=(Window.size[1]*1.7/3,Window.size[1]-60)) # write a label, that the image and the json are ready (generated in the root folder)
@@ -724,7 +771,7 @@ class MyPaintApp(App):
         # TODO: maybe even terminate?
         # As a next step -> the python script parser.py should be run
 
-    def button_obstacle_type(self, mainbutton_obstacle_type, parent, wimg_input_map, parent_draw, layout_btn, layout_origin, layout_res, color_r_temp, color_g_temp, color_b_temp):
+    def button_obstacle_type(self, mainbutton_obstacle_type, parent, wimg_input_map, parent_draw, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return, color_r_temp, color_g_temp, color_b_temp):
         global counter
         counter += 1
         
@@ -734,13 +781,15 @@ class MyPaintApp(App):
         parent.remove_widget(layout_btn)
         parent.remove_widget(layout_origin)
         parent.remove_widget(layout_res)
+        parent.remove_widget(layout_num_obstacles)
+        parent.remove_widget(button_return)
         parent.remove_widget(mainbutton_obstacle_type) # important so that the chosen type could be refreshed into the dropdown button !
 
         # delete the image when done, it should be just temporary, so that a new image with the same name could be later saved again ! (still another method is used)
-        #if os.path.exists("output/obstacles_temp.png"):
-        #    os.remove("output/obstacles_temp.png")
-        #parent.export_to_png("output/obstacles_temp.png")
-        parent.export_to_png("output/obstacles_temp__" + str(counter) + ".png")
+        #if os.path.exists("output/internal/obstacles_temp.png"):
+        #    os.remove("output/internal/obstacles_temp.png")
+        #parent.export_to_png("output/internal/obstacles_temp.png")
+        parent.export_to_png("output/internal/obstacles_temp__" + str(counter) + ".png")
         for child in parent_draw.children: # !
             parent_draw.remove_widget(child)
         parent.remove_widget(parent_draw)
@@ -755,9 +804,9 @@ class MyPaintApp(App):
         
         parent.add_widget(wimg_input_map) # !
 
-        #wimg_obstacles_temp = Image(source='output/obstacles_temp.png', size=(parent.width, parent.height))
+        #wimg_obstacles_temp = Image(source='output/internal/obstacles_temp.png', size=(parent.width, parent.height))
         # the problem with the line above if that the name of the image file is always the same !? (so it interprets it as the same widget? it didn't help to delete the image when done!?)
-        wimg_obstacles_temp = Image(source="output/obstacles_temp__" + str(counter) + ".png", size=(parent.width, parent.height))
+        wimg_obstacles_temp = Image(source="output/internal/obstacles_temp__" + str(counter) + ".png", size=(parent.width, parent.height))
         parent.add_widget(wimg_obstacles_temp)
 
         parent_draw.add_widget(painter_circle_obstacle_new)
@@ -765,41 +814,43 @@ class MyPaintApp(App):
         parent.add_widget(layout_btn)
         parent.add_widget(layout_origin)
         parent.add_widget(layout_res)
+        parent.add_widget(layout_num_obstacles)
+        parent.add_widget(button_return)
         parent.add_widget(mainbutton_obstacle_type) # !
 
         # Important: because of multiple obstacle types, the return button should be updated!
 
-    def button_obstacle_type_cleaner_callback_down(self, mainbutton_obstacle_type, parent, wimg_input_map, parent_draw, layout_btn, layout_origin, layout_res):
+    def button_obstacle_type_cleaner_callback_down(self, mainbutton_obstacle_type, parent, wimg_input_map, parent_draw, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return):
         print('Obstacle type was chosen - cleaner')
         # blue
         color_r_temp = 0
         color_g_temp = 0
         color_b_temp = 1
-        self.button_obstacle_type(mainbutton_obstacle_type, parent, wimg_input_map, parent_draw, layout_btn, layout_origin, layout_res, color_r_temp, color_g_temp, color_b_temp)
+        self.button_obstacle_type(mainbutton_obstacle_type, parent, wimg_input_map, parent_draw, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return, color_r_temp, color_g_temp, color_b_temp)
 
-    def button_obstacle_type_random_callback_down(self, mainbutton_obstacle_type, parent, wimg_input_map, parent_draw, layout_btn, layout_origin, layout_res):
+    def button_obstacle_type_random_callback_down(self, mainbutton_obstacle_type, parent, wimg_input_map, parent_draw, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return):
         print('Obstacle type was chosen - random')
         # orange
         color_r_temp = 1
         color_g_temp = 0.5
         color_b_temp = 0
-        self.button_obstacle_type(mainbutton_obstacle_type, parent, wimg_input_map, parent_draw, layout_btn, layout_origin, layout_res, color_r_temp, color_g_temp, color_b_temp)
+        self.button_obstacle_type(mainbutton_obstacle_type, parent, wimg_input_map, parent_draw, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return, color_r_temp, color_g_temp, color_b_temp)
 
-    def button_obstacle_type_turtlebot_callback_down(self, mainbutton_obstacle_type, parent, wimg_input_map, parent_draw, layout_btn, layout_origin, layout_res):
+    def button_obstacle_type_turtlebot_callback_down(self, mainbutton_obstacle_type, parent, wimg_input_map, parent_draw, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return):
         print('Obstacle type was chosen - turtlebot')
         # pink
         color_r_temp = 1
         color_g_temp = 0
         color_b_temp = 0.5
-        self.button_obstacle_type(mainbutton_obstacle_type, parent, wimg_input_map, parent_draw, layout_btn, layout_origin, layout_res, color_r_temp, color_g_temp, color_b_temp)
+        self.button_obstacle_type(mainbutton_obstacle_type, parent, wimg_input_map, parent_draw, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return, color_r_temp, color_g_temp, color_b_temp)
 
-    def button_obstacle_type_walker_callback_down(self, mainbutton_obstacle_type, parent, wimg_input_map, parent_draw, layout_btn, layout_origin, layout_res):
+    def button_obstacle_type_walker_callback_down(self, mainbutton_obstacle_type, parent, wimg_input_map, parent_draw, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return):
         print('Obstacle type was chosen - walker')
         # purple
         color_r_temp = 0.5
         color_g_temp = 0
         color_b_temp = 0.5
-        self.button_obstacle_type(mainbutton_obstacle_type, parent, wimg_input_map, parent_draw, layout_btn, layout_origin, layout_res, color_r_temp, color_g_temp, color_b_temp)
+        self.button_obstacle_type(mainbutton_obstacle_type, parent, wimg_input_map, parent_draw, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return, color_r_temp, color_g_temp, color_b_temp)
 
     # return button -> return one step (so if now drawing lines is turned on, after the button is clicked, start fresh with the lines, so delete all lines (and update/restart the coresponding txt file!))
     def button_return_callback_down(self, parent, parent_draw, button, button2, button3, button4, painter_circle_obstacle, painter_circle_watcher, painter_line, painter_robot):
@@ -812,8 +863,8 @@ class MyPaintApp(App):
             parent_draw.add_widget(painter_circle_obstacle_new)
             
             # IDEA 1: a single obstacle type
-            #if os.path.exists("output/obstacle.txt"):
-            #    os.remove("output/obstacle.txt") # reset the txt-file
+            #if os.path.exists("output/internal/obstacle.txt"):
+            #    os.remove("output/internal/obstacle.txt") # reset the txt-file
 
             # IDEA 2: multiple obstacle types -> delete only the last lines with the last obstacle type from the txt file
 
@@ -825,8 +876,8 @@ class MyPaintApp(App):
 
             lines_obstacles = []
             last_type_clicked = 'default'
-            if os.path.exists("output/obstacle.txt"):
-                with open('output/obstacle.txt', "r") as file:
+            if os.path.exists("output/internal/obstacle.txt"):
+                with open('output/internal/obstacle.txt', "r") as file:
                     lines_obstacles = file.readlines()
                 last_type_clicked = lines_obstacles[len(lines_obstacles)-1].split('obstacle (x,y,radius,type): ')[1].split(',')[3].split('\n')[0]
             lines_remove = []
@@ -846,8 +897,8 @@ class MyPaintApp(App):
             bool_test = 0
             # do not delete every obstacle from the current type, but the last obstacles with the current type (so type 1, type 2, type 1, return will leave type 1, type 2 (only without the second type 1))
             # -> important, otherwise the new following index will be wrong, because deleted from the file, but not from the map, because already saved as an image
-            if os.path.exists("output/obstacle.txt"):
-                with open('output/obstacle.txt', "w") as file:
+            if os.path.exists("output/internal/obstacle.txt"):
+                with open('output/internal/obstacle.txt', "w") as file:
                     for line in lines_obstacles:
                         count += 1
                         # start from the last line and delete only until a new type comes
@@ -865,8 +916,8 @@ class MyPaintApp(App):
                 parent_draw.remove_widget(child)
             painter_circle_watcher_new = MyPaintWidgetCircleWatcher() # generate another widget with the same behaviour!
             parent_draw.add_widget(painter_circle_watcher_new)
-            if os.path.exists("output/watcher.txt"):
-                os.remove("output/watcher.txt") # reset the txt-file
+            if os.path.exists("output/internal/watcher.txt"):
+                os.remove("output/internal/watcher.txt") # reset the txt-file
         elif button3.disabled == False:
             print('Drawing vectors is enabled -> return to the beginning of this stage!')
             parent.remove_widget(painter_line)
@@ -874,8 +925,8 @@ class MyPaintApp(App):
                 parent_draw.remove_widget(child)
             painter_line_new = MyPaintWidgetLine() # generate another widget with the same behaviour!
             parent_draw.add_widget(painter_line_new)
-            if os.path.exists("output/vector.txt"):
-                os.remove("output/vector.txt") # reset the txt-file
+            if os.path.exists("output/internal/vector.txt"):
+                os.remove("output/internal/vector.txt") # reset the txt-file
         elif button4.disabled == False:
             print('Drawing robot positions is enabled -> return to the beginning of this stage!')
             parent.remove_widget(painter_robot)
@@ -883,8 +934,8 @@ class MyPaintApp(App):
                 parent_draw.remove_widget(child)
             painter_robot_new = MyPaintWidgetRobot() # generate another widget with the same behaviour!
             parent_draw.add_widget(painter_robot_new)
-            if os.path.exists("output/robot.txt"):
-                os.remove("output/robot.txt") # reset the txt-file
+            if os.path.exists("output/internal/robot.txt"):
+                os.remove("output/internal/robot.txt") # reset the txt-file
         else:
             print('All done, nothing to return!')
     
