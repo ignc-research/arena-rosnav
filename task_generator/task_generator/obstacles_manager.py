@@ -12,6 +12,7 @@ from flatland_msgs.srv import StepWorld
 from nav_msgs.msg import OccupancyGrid
 from geometry_msgs.msg import Pose2D
 import numpy as np
+from rospy.rostime import Time
 from std_msgs.msg import Empty
 import rospy
 import rospkg
@@ -51,7 +52,7 @@ class ObstaclesManager:
 
         self.update_map(map_)
         self.obstacle_name_list = []
-        self._obstacle_name_prefix = self.ns+'_obstacle'
+        self._obstacle_name_prefix = 'obstacle'
         # remove all existing obstacles generated before create an instance of this class
         self.remove_obstacles()
 
@@ -80,7 +81,10 @@ class ObstaclesManager:
             model_yaml_file_path), "The yaml file path must be absolute path, otherwise flatland can't find it"
 
         # the name of the model yaml file have the format {model_name}.model.yaml
+        # we added environments's namespace as the prefix in the model_name to make sure the every environment has it's own temporary model file
         model_name = os.path.basename(model_yaml_file_path).split('.')[0]
+        # But we don't want to keep it in the name of the topic otherwise it won't be easy to visualize them in riviz
+        model_name = model_name.replace(self.ns,'')
         name_prefix = self._obstacle_name_prefix + '_' + model_name
         count_same_type = sum(
             1 if obstacle_name.startswith(name_prefix) else 0
@@ -133,7 +137,7 @@ class ObstaclesManager:
             linear_velocity: the maximum linear velocity
         """
         num_dynamic_obstalces = int(num_obstacles*p_dynamic)
-        max_linear_velocity = rospy.get_param("obs_vel")
+        max_linear_velocity = rospy.get_param("/obs_vel")
         self.register_random_dynamic_obstacles(
             num_dynamic_obstalces, max_linear_velocity)
         self.register_random_static_obstacles(
@@ -189,9 +193,9 @@ class ObstaclesManager:
         self.register_obstacles(1, model_path, start_pos)
         os.remove(model_path)
 
-    def register_static_obstacle_circle(self,x,y,circle):
-        model_path= self._generate_static_obstacle_circle_yaml(circle)
-        self.register_obstacles(1, model_path, [x,y,0])
+    def register_static_obstacle_circle(self, x, y, circle):
+        model_path = self._generate_static_obstacle_circle_yaml(circle)
+        self.register_obstacles(1, model_path, [x, y, 0])
         os.remove(model_path)
 
     def register_dynamic_obstacle_circle_tween2(self, obstacle_name: str, obstacle_radius: float, linear_velocity: float, start_pos: Pose2D, waypoints: list, is_waypoint_relative: bool = True,  mode: str = "yoyo", trigger_zones: list = []):
@@ -217,7 +221,6 @@ class ObstaclesManager:
     def move_all_obstacles_to_start_pos_tween2(self):
         for move_obstacle_start_pos_pub in self._move_all_obstacles_start_pos_pubs:
             move_obstacle_start_pos_pub.publish(Empty())
-            print("moved ")
 
     def move_obstacle(self, obstacle_name: str, x: float, y: float, theta: float):
         """move the obstacle to a given position
@@ -299,7 +302,7 @@ class ObstaclesManager:
         tmp_folder_path = os.path.join(rospkg.RosPack().get_path(
             'simulator_setup'), 'tmp_random_obstacles')
         os.makedirs(tmp_folder_path, exist_ok=True)
-        tmp_model_name = "dynamic_with_traj.model.yaml"
+        tmp_model_name = self.ns+"_dynamic_with_traj.model.yaml"
         yaml_path = os.path.join(tmp_folder_path, tmp_model_name)
         # define body
         body = {}
@@ -350,7 +353,7 @@ class ObstaclesManager:
         tmp_folder_path = os.path.join(rospkg.RosPack().get_path(
             'simulator_setup'), 'tmp_random_obstacles')
         os.makedirs(tmp_folder_path, exist_ok=True)
-        tmp_model_name = "polygon_static.model.yaml"
+        tmp_model_name = self.ns+"_polygon_static.model.yaml"
         yaml_path = os.path.join(tmp_folder_path, tmp_model_name)
         # define body
         body = {}
@@ -384,12 +387,12 @@ class ObstaclesManager:
             yaml.dump(dict_file, fd)
         return yaml_path, obstacle_center
 
-    def _generate_static_obstacle_circle_yaml(self,radius):
+    def _generate_static_obstacle_circle_yaml(self, radius):
         # since flatland  can only config the model by parsing the yaml file, we need to create a file for every random obstacle
         tmp_folder_path = os.path.join(rospkg.RosPack().get_path(
             'simulator_setup'), 'tmp_random_obstacles')
         os.makedirs(tmp_folder_path, exist_ok=True)
-        tmp_model_name = "circle_static.model.yaml"
+        tmp_model_name = self.ns+"_circle_static.model.yaml"
         yaml_path = os.path.join(tmp_folder_path, tmp_model_name)
         # define body
         body = {}
@@ -441,9 +444,9 @@ class ObstaclesManager:
             'simulator_setup'), 'tmp_random_obstacles')
         os.makedirs(tmp_folder_path, exist_ok=True)
         if is_dynamic:
-            tmp_model_name = "random_dynamic.model.yaml"
+            tmp_model_name = self.ns+"_random_dynamic.model.yaml"
         else:
-            tmp_model_name = "random_static.model.yaml"
+            tmp_model_name = self.ns+"_random_static.model.yaml"
         yaml_path = os.path.join(tmp_folder_path, tmp_model_name)
         # define body
         body = {}
@@ -479,17 +482,19 @@ class ObstaclesManager:
             # one important assert is that the minimum distance should be above this value
             # https://github.com/erincatto/box2d/blob/75496a0a1649f8ee6d2de6a6ab82ee2b2a909f42/include/box2d/b2_common.h#L65
             POINTS_MIN_DIST = 0.005*1.1
+
             def min_dist_check_passed(points):
-                points_1_x_2 = points[None,...]
-                points_x_1_2 = points[:,None,:]
-                points_dist = ((points_1_x_2-points_x_1_2)**2).sum(axis=2).squeeze()
-                np.fill_diagonal(points_dist,1)
+                points_1_x_2 = points[None, ...]
+                points_x_1_2 = points[:, None, :]
+                points_dist = ((points_1_x_2-points_x_1_2)
+                               ** 2).sum(axis=2).squeeze()
+                np.fill_diagonal(points_dist, 1)
                 min_dist = points_dist.min()
-                return min_dist>POINTS_MIN_DIST
+                return min_dist > POINTS_MIN_DIST
             points = None
             while points is None:
                 angles = 2*np.pi*np.random.random(num_vertices)
-                points = np.array([np.cos(angles),np.sin(angles)]).T
+                points = np.array([np.cos(angles), np.sin(angles)]).T
                 if not min_dist_check_passed(points):
                     points = None
             f['points'] = points.tolist()
@@ -548,16 +553,32 @@ class ObstaclesManager:
             self.obstacle_name_list = list(
                 set(self.obstacle_name_list)-set(to_be_removed_obstacles_names))
         else:
-            # it possible that in flatland there are still obstacles remaining when we create an instance of
-            # this class.
-            topics = rospy.get_published_topics()
-            for t in topics:
-                # the format of the topic is (topic_name,message_name)
-                topic_name = t[0].split("/")
-                object_name = topic_name[-1]
-                if object_name.startswith(self._obstacle_name_prefix):
-                    if "sim" in self.ns:
-                        if self.ns in topic_name:
-                            self.remove_obstacle(object_name)
-                    else:
-                        self.remove_obstacle(object_name)
+            # # it possible that in flatland there are still obstacles remaining when we create an instance of
+            # # this class.
+            max_tries = 5
+            while max_tries > 0:
+                
+                # some time the returned topices is not iterable
+                try:
+                    topics = rospy.get_published_topics()
+                    for t in topics:
+                        # sometimes the returned topics are very weired!!!!! Maybe a bug of rospy
+                            # the format of the topic is (topic_name,message_name)
+                            topic_components = t[0].split("/")
+                            # like "/.*/"
+                            if len(topic_components)<3:
+                                continue
+                            _,topic_ns,*_,topic_name = topic_components
+                            if topic_ns == self.ns and topic_name.startswith(self._obstacle_name_prefix):
+                                self.remove_obstacle(topic_name)
+                    break
+                except Exception as e:
+                    max_tries -= 1
+                    rospy.logwarn(
+                        f"Can not get publised topics, will try more {max_tries} times.")
+                    import time
+                    time.sleep(1)
+            if max_tries == 0:
+                rospy.logwarn(
+                    "Can not get publised topics with 'rospy.get_published_topics'")
+            # pass
