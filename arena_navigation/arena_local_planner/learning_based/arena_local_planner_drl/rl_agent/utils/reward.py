@@ -136,7 +136,7 @@ class RewardCalculator():
                             *args,**kwargs):
         if laser_scan.min() > self.safe_dist:
             self._reward_global_plan(
-                kwargs['global_plan'], kwargs['robot_pose'], penalty_factor=0.4)
+                kwargs['global_plan'], kwargs['robot_pose'], reward_factor=0.1, penalty_factor=0.175)
         else:
             self.last_dist_to_path = None
         self._reward_goal_reached(
@@ -231,7 +231,7 @@ class RewardCalculator():
         else:
             lin_vel = action[0]
             ang_vel = action[1]
-            reward = ((lin_vel*0.97) + (ang_vel*0.03)) * 0.02
+            reward = ((lin_vel*0.97) + (ang_vel*0.03)) * 0.005
         self.curr_reward -= reward
         # print(f"reward_distance_traveled: {reward}")+
 

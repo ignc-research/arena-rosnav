@@ -8,7 +8,7 @@
   dynamic: 0
 2:
   static: 0
-  dynamic: 2
+  dynamic: 4
 3:
   static: 1
   dynamic: 4
@@ -16,5 +16,5 @@
   static: 1
   dynamic: 6
 5:
-  static: 2
-  dynamic: 6
+  static: 1
+  dynamic: 8
