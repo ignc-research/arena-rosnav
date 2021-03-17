@@ -1,4 +1,3 @@
-from numpy.lib.function_base import _i0_2
 from .config import CfgNode as CN
 import os
 import rospkg
@@ -8,7 +7,7 @@ arena_local_planner_drl_root= rospkg.RosPack().get_path('arena_local_planner_drl
 
 _C = CN()
 
-_C.OUTPUT_DIR_ROOT = os.path.join(arena_local_planner_drl_root,'ouput')
+_C.OUTPUT_DIR_ROOT = os.path.join(arena_local_planner_drl_root,'output')
 
 
 

@@ -5,8 +5,8 @@ import os
 import copy
 from stable_baselines3.common.vec_env.dummy_vec_env import DummyVecEnv
 from stable_baselines3.common.monitor import Monitor
-# from stable_baselines3.common.vec_env.subproc_vec_env import SubprocVecEnv
-from rl_agent.envs import build_env, build_env_wrapper, SubprocVecEnv
+from stable_baselines3.common.vec_env.subproc_vec_env import SubprocVecEnv
+from rl_agent.envs import build_env, build_env_wrapper  # SubprocVecEnv
 from stable_baselines3.common.vec_env.vec_normalize import VecNormalize
 from stable_baselines3.common.callbacks import EvalCallback, StopTrainingOnRewardThreshold
 from rl_agent.model import build_model
@@ -73,7 +73,7 @@ def make_envs(cfg, args: argparse.Namespace, namespaces: List[str]):
         train_env = DummyVecEnv(train_env_wraps)
     else:
         train_env = SubprocVecEnv(
-            train_env_wraps, start_method='fork', delay_ms=3)
+            train_env_wraps, start_method='fork')
 
     eval_env = build_env(
         cfg, task_wraps[-1], namespaces[-1], train_mode=False, debug=args.debug)

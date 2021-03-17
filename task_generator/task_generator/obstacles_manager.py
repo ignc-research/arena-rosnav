@@ -81,7 +81,10 @@ class ObstaclesManager:
             model_yaml_file_path), "The yaml file path must be absolute path, otherwise flatland can't find it"
 
         # the name of the model yaml file have the format {model_name}.model.yaml
+        # we added environments's namespace as the prefix in the model_name to make sure the every environment has it's own temporary model file
         model_name = os.path.basename(model_yaml_file_path).split('.')[0]
+        # But we don't want to keep it in the name of the topic otherwise it won't be easy to visualize them in riviz
+        model_name = model_name.replace(self.ns,'')
         name_prefix = self._obstacle_name_prefix + '_' + model_name
         count_same_type = sum(
             1 if obstacle_name.startswith(name_prefix) else 0
@@ -561,10 +564,13 @@ class ObstaclesManager:
                     for t in topics:
                         # sometimes the returned topics are very weired!!!!! Maybe a bug of rospy
                             # the format of the topic is (topic_name,message_name)
-                            topic_name = t[0].split("/")
-                            object_name = topic_name[-1]
-                            if object_name.startswith(self._obstacle_name_prefix) and self.ns in object_name:
-                                self.remove_obstacle(object_name)
+                            topic_components = t[0].split("/")
+                            # like "/.*/"
+                            if len(topic_components)<3:
+                                continue
+                            _,topic_ns,*_,topic_name = topic_components
+                            if topic_ns == self.ns and topic_name.startswith(self._obstacle_name_prefix):
+                                self.remove_obstacle(topic_name)
                     break
                 except Exception as e:
                     max_tries -= 1
