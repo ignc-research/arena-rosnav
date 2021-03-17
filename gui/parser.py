@@ -1,5 +1,6 @@
 import os
 from PIL import Image # if necessary run $ python3 -m pip install --upgrade Pillow
+# it also may be necessary to install xclip if an error in the console is received -> do $ sudo apt-get install xclip
 
 # IDEA: from 6 txt files make 1 json file
 # parse a txt file: https://www.vipinajayakumar.com/parsing-text-with-python/; https://www.pythontutorial.net/python-basics/python-read-text-file/ (from here is the idea with the lines taken)
@@ -8,7 +9,7 @@ from PIL import Image # if necessary run $ python3 -m pip install --upgrade Pill
 my_path = ['output/internal/data.txt', 'output/internal/obstacle.txt', 'output/internal/watcher.txt', 'output/internal/vector.txt', 'output/internal/robot.txt', 'output/internal/motion.txt']
 for my_file in my_path:
     if not (os.path.exists(my_file) and os.path.getsize(my_file) > 0):
-        print('File ' + my_file + ' does not exist or is empty!')
+        print('ERROR: File ' + my_file + ' does not exist or is empty!')
         os._exit(0)
 
 print('/**************** parsing data.txt *******************/') # done!
@@ -74,6 +75,16 @@ for line in lines:
         obstacle_watcher_connections_2.append(temp_array) # assume the ordering is right starting from 0
         print('Single obstacle-watchers connections: ' + str(line))
 
+# check if the amount of obstacles given in the text area, is the same as the actually drawn, also as the same as the drawn lines etc.
+# obstacle.txt_lines == vector.txt_lines/2 == motion.txt_lines == data.txt_obstacle-vel.lines == data.txt_obst-watch-con.lines
+length_right = len(obstacle_vel) # == len(obstacle_watcher_connections_2)
+
+# calculate the amount of all watchers given in the text fileds
+watchers_all_amount = 0
+for connection in obstacle_watcher_connections_2:
+    for watcher in connection:
+        watchers_all_amount += 1
+
 # DEBUGGING
 print('Image corners:' + str(image_corners))
 #print('First value:' + str(image_corners[0]))
@@ -98,6 +109,10 @@ lines_obstacles = []
 with open('output/internal/obstacle.txt') as file:
     lines_obstacles = file.readlines()
 
+if len(lines_obstacles) != length_right:
+    print('ERROR: Unmatching amount of obstacles given in the text field and drawn on the map! The scenario is incorrect, make a new one!')
+    os._exit(0)
+
 # data from obstacle.txt
 obstacles = [] # form: [(x_center, y_center, radius, type), ...]
 
@@ -107,8 +122,6 @@ for line in lines_obstacles:
     count += 1
     #print(f'line {count}: {line}')
     obstacles.append((float(line.split('obstacle (x,y,radius,type): ')[1].split(',')[0]), float(line.split('obstacle (x,y,radius,type): ')[1].split(',')[1]), float(line.split('obstacle (x,y,radius,type): ')[1].split(',')[2]), line.split('obstacle (x,y,radius,type): ')[1].split(',')[3].split('\n')[0]))
-
-# TODO: what to do with the obstacle type?
 
 # DEBUGGING
 print('Obstacles:' + str(obstacles))
@@ -121,6 +134,11 @@ with open('output/internal/watcher.txt') as file:
 lines_watchers = []
 with open('output/internal/watcher.txt') as file:
     lines_watchers = file.readlines()
+
+# check if the amount of watchers drawn on the map is the same as the amount of all watchers from the obstacle-watchers-connections given in the text fields
+if watchers_all_amount != len(lines_watchers):
+    print('ERROR: Unmatching amount of watchers given in the text fields and drawn on the map! The scenario is incorrect, make a new one!')
+    os._exit(0)
 
 # data from watcher.txt
 watchers = [] # form: [(x_center, y_center, radius), ...]
@@ -143,6 +161,10 @@ with open('output/internal/vector.txt') as file:
 lines_vectors = []
 with open('output/internal/vector.txt') as file:
     lines_vectors = file.readlines()
+
+if int(len(lines_vectors)/2) != length_right:
+    print('ERROR: Unmatching amount of obstacles and waypoints! The scenario is incorrect, make a new one!')
+    os._exit(0)
 
 # data from vector.txt
 start_pos = [] # form: [(x, y), ...]
@@ -196,6 +218,10 @@ lines_robot = []
 with open('output/internal/robot.txt') as file:
     lines_robot = file.readlines()
 
+if len(lines_robot) != 2:
+    print('ERROR: Not complete information amount the robot start and end position! The scenario is incorrect, make a new one!')
+    os._exit(0)
+
 # data from robot.txt
 robot = [] # form: [(x_start, y_start),(x_end, y_end)]
 
@@ -220,6 +246,10 @@ with open('output/internal/motion.txt') as file:
 lines_motion = []
 with open('output/internal/motion.txt') as file:
     lines_motion = file.readlines()
+
+if len(lines_motion) != length_right or len(obstacle_vel) != length_right or len(obstacle_watcher_connections_2) != length_right:
+    print('ERROR: Unmatching amount of obstacles and motions! The scenario is incorrect, make a new one!')
+    os._exit(0)
 
 # data from robot.txt
 motion = [] # form: [motion_obstacle_0, motion-obstacle_1, ...]
@@ -271,11 +301,13 @@ for obstacle in obstacles:
     waypoint_y = str((waypoints[i][1][1])*scale_y*flip_y_axis) # scale and flip? are only relevant!
     watcher_num = str(i)
     move = str(motion[i])
+    obstacle_type = str(obstacle[3]) # obstacle default type = "circle" # TODO NEXT
 
     # since the order of the obstacles is given in the window, it is here assumed that the obstacle velocities and the obstacle-watchers connections are written in the right order
     obstacles_json += '\n\t\t\t\t"dynamic_obs_' + obstacle_num + '": {\n\t\t\t\t\t'
     obstacles_json += '"obstacle_radius": ' + obstacle_radius + ',\n\t\t\t\t\t'
     obstacles_json += '"linear_velocity": ' + lin_velocity + ',\n\t\t\t\t\t'
+    obstacles_json += '"type": "' + obstacle_type + '",\n\t\t\t\t\t'
     obstacles_json += '"start_pos": [\n\t\t\t\t\t\t' + start_pos_x + ',\n\t\t\t\t\t\t' + start_pos_y + ',\n\t\t\t\t\t\t0'
     obstacles_json += '\n\t\t\t\t\t],\n\t\t\t\t\t"waypoints": [\n\t\t\t\t\t\t[\n\t\t\t\t\t\t\t'
     obstacles_json += waypoint_x + ',\n\t\t\t\t\t\t\t' + waypoint_y + ',\n\t\t\t\t\t\t\t0' # Idea 1 for the waypoints (see above for the explanaition)
@@ -345,20 +377,19 @@ with open('output/new_scenario.json') as file:
 
 print('/**************** user_data.json & scenario.png *****************/')
 ### save only the relevant to the user data in a new txt file (user_data.json), from where the user could easily check his/hers inputs
-# TODO NEXT: Map resolution, Obstacle velocities, Obstacle-watchers connections from data.txt and the motions from motion.txt in a nicer form
-# TODO NEXT: also obstacle type!?!?
+# -> map resolution, obstacle velocities, obstacle-watchers connections from data.txt, the motions from motion.txt and obstacle types from obstacle.txt in a nicer form
 fob = open('output/user_data.txt','w')
 fob.write('Map resolution:\n' + str(map_res) + "\n")
 fob.write('Map origin:\n' + str(map_origin) + "\n")
 fob.write('ObstacleID - ObstacleType - Velocity - WatchersIDs - Motion:\n')
 i = 0
 for obstacle in obstacles:
-    fob.write(str(i) + ' - ' + str(obstacle[3]) + ' - ' + str(obstacle_vel[i]) + ' - ')
+    fob.write(str(i) + ' - ' + str(obstacle[3]) + ' - ' + str(obstacle_vel[i]) + ' - ') # TODO: adjust the obstacle type
     j = 0
     for watcher in obstacle_watcher_connections_2[i]:
         fob.write(str(watcher))
         if j < (len(obstacle_watcher_connections_2[i]) - 1):
-            fob.write(', ')
+            fob.write(',')
         j += 1
     fob.write(' - ' + motion[i] + '\n')
     i += 1
@@ -382,19 +413,15 @@ im_scenario.save("output/scenario.png")
 im_scenario.show() # show the image
 
 # TODO NEXT notes:
-# -1) get rid of the error in the console (no error when run on Windows!?) & do more error checks here (for example what will happen if the user said 10 obstacles, but drew only 5)
-# !0) comment the code, clear out the prints, make a readme file with all the rules, make a video explaining each step
-# -> update the readme with options how to run from different OS; with the new output structure
-# !1) allow different types of obstacles -> mark them with different colors -> Question: where does the type go in the json file?
-# -> include ("type" : "circle",) in the json file -> then modify task.py, obstacles_manager.py (f["type"] = "circle")
-# -> connect with another student -> include more obstacle types?
-# -> allow a default type = circle!
-# 2) sometimes an error occurs, when it is clicked somewhere in between?
-# 3) different motions per obstacle -> input field vs. dropdown box
-# 4) make the window not resizable or resizable (but everyhting should still work fine!)
-# 5) obstacles animation, dynamisch hin und her bewegen
+# !0) comment the code, clear out the prints, make a video explaining each step; update the readme file
+# !1) different types of obstacles are allowed:
+# -> include "type" in the json file -> then modify task.py, obstacles_manager.py so that this info could be read
+# -> connect with another student -> include more obstacle types like human etc. (for human there should be also the parameter talking etc.)?
+# 2) different motions per obstacle -> input field vs. dropdown box
+# 3) make the window not resizable or resizable (but everyhting should still work fine!) - for now the window is not resizable and it's fine
+# 4) animation of the obstacle how it moves from one point to another
 # -> man kann am Rand eine hard coded Simulation in demselben map von einem obstacle mit Geschwindigkeit zB 0.3 visualizieren, damit der Nutzer Gefuehl bekommen kann, wie schnell das eigentlich ist
-# ?6) Rand von watcher zu rot machen, wenn es zu srash wird; die Robotergeschwindigkeit ist hard coded zu 0.3, man kann also berechnen, wann wird der ROboter der watcher aktivieren; also weiteres, letztes Button "simulate if colision"; man braucht dafuer aber noch global path -> nur mit box2d sim engine machbar
+# ?5) Rand von watcher zu rot machen, wenn es zu srash wird; die Robotergeschwindigkeit ist hard coded zu 0.3, man kann also berechnen, wann wird der ROboter der watcher aktivieren; also weiteres, letztes Button "simulate if colision"; man braucht dafuer aber noch global path -> nur mit box2d sim engine machbar
 
 # TODO TEST the code with different maps in rviz:
 # - tested with map_small.png and map.png and it works!

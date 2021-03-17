@@ -33,7 +33,11 @@ color_r = 1
 color_g = 0
 color_b = 0
 counter = 0
-obstacle_type = [('cleaner', (0, 0, 1)), ('random', (1, 0.5, 0)), ('turtlebot', (1, 0, 0.5)), ('walker', (0.5, 0, 0.5))]
+type_change = 0
+obstacle_type = [('circle', (1, 0, 0)), ('cleaner', (0, 0, 1)), ('random', (1, 0.5, 0)), ('turtlebot', (1, 0, 0.5)), ('walker', (0.5, 0, 0.5))]
+obstacle_start_pos_ok = 1
+watcher_start_pos_ok = 1
+line_start_pos_ok = 1
 
 class MyPaintWidgetCircleObstacle(Widget): # obstacle
 
@@ -51,19 +55,26 @@ class MyPaintWidgetCircleObstacle(Widget): # obstacle
         with open('output/internal/internal.txt') as file:
             lines = file.readlines()
         
-        if (touch.y < float(lines[0]) and touch.y > float(lines[1]) and touch.x < float(lines[2]) and touch.x > float(lines[3])):
-           # the radius of the ellipse is changable by the user
-            with self.canvas:
-                #Color(1, 0, 0)
-                Color(color_r, color_g, color_b)
-                d = 20.
-                #touch.ud['line'] = Line(points=(touch.x, touch.y)) # for debugging
-                touch.ud['ellipse'] = Ellipse(pos=(touch.x - d / 2, touch.y - d / 2), size=(d, d)) # should be shiftet, because the position specifies the bottom left corner of the ellipse’s bounding box
-            #print('Touch event for placing the obstacle with center at: (' + str(touch.x - d / 2) + ', ' + str(touch.y - d / 2) + ')')
-            
-            # TODO IDEA: check somehow where the click is made, if on top of buttons for example do not do anything etc. (if touch.grab_current is self)
-            # TODO IDEA: make here a text area for the obstacle velocity, which was just drawn, the text area will appear every time on the same place -> problem text area not aditable
-            # TODO IDEA: try to write the velocity itself in the circles, but maybe difficult later to match the circles with the velocity
+        # Important: check if the start of the movement was outside the borders, if so do also nothing if the mouse is clicked outside but moved inside of the borders! (otherwise error, since touch.ud['ellipse'], touch.ud['ellipse2'] etc. will not be defined)
+        global obstacle_start_pos_ok
+        if not(touch.y < float(lines[0]) and touch.y > float(lines[1]) and touch.x < float(lines[2]) and touch.x > float(lines[3])):
+            obstacle_start_pos_ok = 0
+            return
+        else:
+            obstacle_start_pos_ok = 1
+
+        # the radius of the ellipse is changable by the user
+        with self.canvas:
+            #Color(1, 0, 0)
+            Color(color_r, color_g, color_b)
+            d = 20.
+            #touch.ud['line'] = Line(points=(touch.x, touch.y)) # for debugging
+            touch.ud['ellipse'] = Ellipse(pos=(touch.x - d / 2, touch.y - d / 2), size=(d, d)) # should be shiftet, because the position specifies the bottom left corner of the ellipse’s bounding box
+        #print('Touch event for placing the obstacle with center at: (' + str(touch.x - d / 2) + ', ' + str(touch.y - d / 2) + ')')
+        
+        # TODO IDEA: check somehow where the click is made, if on top of buttons for example do not do anything etc. (if touch.grab_current is self)
+        # TODO IDEA: make here a text area for the obstacle velocity, which was just drawn, the text area will appear every time on the same place -> problem text area not aditable
+        # TODO IDEA: try to write the velocity itself in the circles, but maybe difficult later to match the circles with the velocity
 
     def on_touch_move(self, touch):
         # form: height_top\nheight_bottom\nwidth_top\nwidth_bottom # internal.txt
@@ -71,74 +82,77 @@ class MyPaintWidgetCircleObstacle(Widget): # obstacle
         with open('output/internal/internal.txt') as file:
             lines = file.readlines()
         
-        if (touch.y < float(lines[0]) and touch.y > float(lines[1]) and touch.x < float(lines[2]) and touch.x > float(lines[3])):
-            #touch.ud['line'].points += [touch.x, touch.y] # for debigging
-            # ! in this way the circle could be moved to a new position, as long as the mouse remains clicked!
-            #d = 20.
-            #touch.ud['ellipse'].pos = (touch.x - d / 2, touch.y - d / 2)
-            # in this way the radius is canged to the new value if the circle is dragged (the user clicks and moves the mouse)
-            #touch.ud['ellipse'].size = (50,50)
-            # IDEA: ellipse takes the bottom left corner as input -> try to scale it, while the user is moving the mouse;
-            # Idea 1 (implemented only for 1.Q and commented after that, for the others is still a TODO ): consider the 4 corners (move in +x&+y, +x&-y, -x&+y, -x&-y direction) -> move slowly: scale the distace between on_touch_down and current on_touch_move
-            # Idea 2 (implemented): no matter of the direction, to which the mouse is dragged, the circle will become bigger without changing the position of the center (for this solution is no if-else needed)
-            d_before = touch.ud['ellipse'].size[0]
-            x_pos_before = touch.ud['ellipse'].pos[0]
-            y_pos_before = touch.ud['ellipse'].pos[1]
-            touch_x_before = x_pos_before + d_before / 2
-            touch_y_before = y_pos_before + d_before / 2
-            # start (0,0) is the bottom left window corner
-            # TODO IDEA: small amount of 1.Q-4.Q (a little bit at the beginning and a little bit at the end) use to move the block in x and y
-            if (touch.x-touch_x_before) > 0:
-                # moved left
-                #if (touch.y-touch_y_before) > -10 and (touch.y-touch_y_before) < 10: # TODO: as the first of three posibilities -> difficult to train!
-                #    # move exactly to the right # NEW
-                #    print("between 1.Q & 4.Q -> move right")
-                #    # the circle will be moved to the new position, as long as the mouse remains clicked!
-                #    touch.ud['ellipse'].pos = (touch.x - d_before / 2, touch.y - d_before / 2)
-                if (touch.y-touch_y_before) > 0:
-                    # moved up
-                    print("1.Q")
-                    d_now = touch.x-touch_x_before # it doesn't matter if we take x or y, since we work with circles
-                    print("new radius: " + str(d_now))
-                    touch.ud['ellipse'].size = (d_now,d_now)
-                    # only in this situation is not necessary to change the value of touch.ud['ellipse'].pos since the right corner is per default taken
-                    # ! this way the circle will become bigger without the center being changed
-                    x_pos_now = touch_x_before - d_now / 2
-                    y_pos_now = touch_y_before - d_now / 2
-                    touch.ud['ellipse'].pos = (x_pos_now, y_pos_now)
-                else:
-                    # moved down
-                    print("4.Q")
-                    d_now = touch.x-touch_x_before
-                    print("new radius: " + str(d_now))
-                    touch.ud['ellipse'].size = (d_now,d_now)
-                    # the value of touch.ud['ellipse'].pos should be change -> the bottom corner of the new circle should be calculated; move from top left to bottom left -> so change only y
-                    # ! this way the circle will become bigger without the center being changed
-                    x_pos_now = touch_x_before - d_now / 2
-                    y_pos_now = touch_y_before - d_now / 2
-                    touch.ud['ellipse'].pos = (x_pos_now, y_pos_now)
+        global obstacle_start_pos_ok
+        if not(touch.y < float(lines[0]) and touch.y > float(lines[1]) and touch.x < float(lines[2]) and touch.x > float(lines[3])) or obstacle_start_pos_ok == 0:
+            return
+        
+        #touch.ud['line'].points += [touch.x, touch.y] # for debigging
+        # ! in this way the circle could be moved to a new position, as long as the mouse remains clicked!
+        #d = 20.
+        #touch.ud['ellipse'].pos = (touch.x - d / 2, touch.y - d / 2)
+        # in this way the radius is canged to the new value if the circle is dragged (the user clicks and moves the mouse)
+        #touch.ud['ellipse'].size = (50,50)
+        # IDEA: ellipse takes the bottom left corner as input -> try to scale it, while the user is moving the mouse;
+        # Idea 1 (implemented only for 1.Q and commented after that, for the others is still a TODO ): consider the 4 corners (move in +x&+y, +x&-y, -x&+y, -x&-y direction) -> move slowly: scale the distace between on_touch_down and current on_touch_move
+        # Idea 2 (implemented): no matter of the direction, to which the mouse is dragged, the circle will become bigger without changing the position of the center (for this solution is no if-else needed)
+        d_before = touch.ud['ellipse'].size[0]
+        x_pos_before = touch.ud['ellipse'].pos[0]
+        y_pos_before = touch.ud['ellipse'].pos[1]
+        touch_x_before = x_pos_before + d_before / 2
+        touch_y_before = y_pos_before + d_before / 2
+        # start (0,0) is the bottom left window corner
+        # TODO IDEA: small amount of 1.Q-4.Q (a little bit at the beginning and a little bit at the end) use to move the block in x and y
+        if (touch.x-touch_x_before) > 0:
+            # moved left
+            #if (touch.y-touch_y_before) > -10 and (touch.y-touch_y_before) < 10: # TODO: as the first of three posibilities -> difficult to train!
+            #    # move exactly to the right # NEW
+            #    print("between 1.Q & 4.Q -> move right")
+            #    # the circle will be moved to the new position, as long as the mouse remains clicked!
+            #    touch.ud['ellipse'].pos = (touch.x - d_before / 2, touch.y - d_before / 2)
+            if (touch.y-touch_y_before) > 0:
+                # moved up
+                print("1.Q")
+                d_now = touch.x-touch_x_before # it doesn't matter if we take x or y, since we work with circles
+                print("new radius: " + str(d_now))
+                touch.ud['ellipse'].size = (d_now,d_now)
+                # only in this situation is not necessary to change the value of touch.ud['ellipse'].pos since the right corner is per default taken
+                # ! this way the circle will become bigger without the center being changed
+                x_pos_now = touch_x_before - d_now / 2
+                y_pos_now = touch_y_before - d_now / 2
+                touch.ud['ellipse'].pos = (x_pos_now, y_pos_now)
             else:
-                # moved right
-                if (touch.y-touch_y_before) > 0:
-                    # moved up
-                    print("2.Q")
-                    d_now = touch_x_before-touch.x
-                    print("new radius: " + str(d_now))
-                    touch.ud['ellipse'].size = (d_now,d_now)
-                    # ! this way the circle will become bigger without the center being changed
-                    x_pos_now = touch_x_before - d_now / 2
-                    y_pos_now = touch_y_before - d_now / 2
-                    touch.ud['ellipse'].pos = (x_pos_now, y_pos_now)
-                else:
-                    # moved down
-                    print("3.Q")
-                    d_now = touch_x_before-touch.x
-                    print("new radius: " + str(d_now))
-                    touch.ud['ellipse'].size = (d_now,d_now)
-                    # ! this way the circle will become bigger without the center being changed
-                    x_pos_now = touch_x_before - d_now / 2
-                    y_pos_now = touch_y_before - d_now / 2
-                    touch.ud['ellipse'].pos = (x_pos_now, y_pos_now)
+                # moved down
+                print("4.Q")
+                d_now = touch.x-touch_x_before
+                print("new radius: " + str(d_now))
+                touch.ud['ellipse'].size = (d_now,d_now)
+                # the value of touch.ud['ellipse'].pos should be change -> the bottom corner of the new circle should be calculated; move from top left to bottom left -> so change only y
+                # ! this way the circle will become bigger without the center being changed
+                x_pos_now = touch_x_before - d_now / 2
+                y_pos_now = touch_y_before - d_now / 2
+                touch.ud['ellipse'].pos = (x_pos_now, y_pos_now)
+        else:
+            # moved right
+            if (touch.y-touch_y_before) > 0:
+                # moved up
+                print("2.Q")
+                d_now = touch_x_before-touch.x
+                print("new radius: " + str(d_now))
+                touch.ud['ellipse'].size = (d_now,d_now)
+                # ! this way the circle will become bigger without the center being changed
+                x_pos_now = touch_x_before - d_now / 2
+                y_pos_now = touch_y_before - d_now / 2
+                touch.ud['ellipse'].pos = (x_pos_now, y_pos_now)
+            else:
+                # moved down
+                print("3.Q")
+                d_now = touch_x_before-touch.x
+                print("new radius: " + str(d_now))
+                touch.ud['ellipse'].size = (d_now,d_now)
+                # ! this way the circle will become bigger without the center being changed
+                x_pos_now = touch_x_before - d_now / 2
+                y_pos_now = touch_y_before - d_now / 2
+                touch.ud['ellipse'].pos = (x_pos_now, y_pos_now)
 
     def on_touch_up(self, touch):
         # form: height_top\nheight_bottom\nwidth_top\nwidth_bottom # internal.txt
@@ -147,35 +161,38 @@ class MyPaintWidgetCircleObstacle(Widget): # obstacle
             lines = file.readlines()
         
         # check if the positions are inside the 4 corners of the image
-        if (touch.y < float(lines[0]) and touch.y > float(lines[1]) and touch.x < float(lines[2]) and touch.x > float(lines[3])):
+        global obstacle_start_pos_ok
+        if not (touch.y < float(lines[0]) and touch.y > float(lines[1]) and touch.x < float(lines[2]) and touch.x > float(lines[3])) or obstacle_start_pos_ok == 0:
         #if (touch.x > 144.33781190019192 and touch.x < 655.6621880998081 and touch.y > 200 and touch.y < 600): # ((144.33781190019192, 200), (144.33781190019192, 600), (655.6621880998081, 600), (655.6621880998081, 200))
-            # save the obstacle positions (x,y,radius) in a txt file
-            fob = open('output/internal/obstacle.txt','a') # 'w'=write (overrides the content every time), better use 'a'=append but make sure the file is at first empty
-            d_last = touch.ud['ellipse'].size[0]
-            x_pos_last = touch.ud['ellipse'].pos[0]
-            y_pos_last = touch.ud['ellipse'].pos[1]
-            fob.write('obstacle (x,y,radius,type): ' + str(x_pos_last+d_last/2) + ',' + str(y_pos_last+d_last/2) + ',' + str(d_last/2)) # center and radius # should be called here in on_touch_up so that the data is right!
-            # the center is in (x_pos_last+d_last/2, y_pos_last+d_last/2) ! -> then the radius is also not d_last, but d_last/2 !
-            # save also the color of the obstacle or even directly the type of the obstacle
-            global color_r
-            global color_g
-            global color_b
-            #fob.write(', ' + str(color_r) + ', ' + str(color_g) + ', ' + str(color_b)) # write the color
-            type_unknown = 1
-            for obst_type in obstacle_type:
-                if (obst_type[1][0] == color_r) and (obst_type[1][1] == color_g) and (obst_type[1][2] == color_b):
-                    fob.write(',' + obst_type[0] + "\n") # write directly the obstacle type
-                    type_unknown = 0
-            if type_unknown == 1:
-                fob.write(',default' + "\n")
-
-            # put numbers in the green circles and then separately ask the user for the velocity of every obstacle in a text field
-            count = self.file_len('output/internal/obstacle.txt') # a counter for all on_touch_down events for this class MyPaintWidgetCircleObstacle -> idea: count the lines from obstacle.txt
-            #label_num = Label(text=str(count), pos=(x_pos_last, y_pos_last), size=(d_last, d_last), color=(0,1,0), disabled_color=(0,1,0)) # place the number in the middle of the circle # right
-            label_num = Label(text=str(count), pos=(x_pos_last+d_last/2, y_pos_last+d_last/2), size=(1, 1), color=(0,1,0), disabled_color=(0,1,0)) # place the number in the middle of the circle # right
-            self.add_widget(label_num)
+            return
         
-            fob.close()
+        # save the obstacle positions (x,y,radius) in a txt file
+        fob = open('output/internal/obstacle.txt','a') # 'w'=write (overrides the content every time), better use 'a'=append but make sure the file is at first empty
+        d_last = touch.ud['ellipse'].size[0]
+        x_pos_last = touch.ud['ellipse'].pos[0]
+        y_pos_last = touch.ud['ellipse'].pos[1]
+        fob.write('obstacle (x,y,radius,type): ' + str(x_pos_last+d_last/2) + ',' + str(y_pos_last+d_last/2) + ',' + str(d_last/2)) # center and radius # should be called here in on_touch_up so that the data is right!
+        # the center is in (x_pos_last+d_last/2, y_pos_last+d_last/2) ! -> then the radius is also not d_last, but d_last/2 !
+        # save also the color of the obstacle or even directly the type of the obstacle
+        global color_r
+        global color_g
+        global color_b
+        #fob.write(', ' + str(color_r) + ', ' + str(color_g) + ', ' + str(color_b)) # write the color
+        type_unknown = 1
+        for obst_type in obstacle_type:
+            if (obst_type[1][0] == color_r) and (obst_type[1][1] == color_g) and (obst_type[1][2] == color_b):
+                fob.write(',' + obst_type[0] + "\n") # write directly the obstacle type
+                type_unknown = 0
+        if type_unknown == 1:
+            fob.write(',circle' + "\n") # the default type is 'circle'
+
+        # put numbers in the green circles and then separately ask the user for the velocity of every obstacle in a text field
+        count = self.file_len('output/internal/obstacle.txt') # a counter for all on_touch_down events for this class MyPaintWidgetCircleObstacle -> idea: count the lines from obstacle.txt
+        #label_num = Label(text=str(count), pos=(x_pos_last, y_pos_last), size=(d_last, d_last), color=(0,1,0), disabled_color=(0,1,0)) # place the number in the middle of the circle # right
+        label_num = Label(text=str(count), pos=(x_pos_last+d_last/2, y_pos_last+d_last/2), size=(1, 1), color=(0,1,0), disabled_color=(0,1,0)) # place the number in the middle of the circle # right
+        self.add_widget(label_num)
+    
+        fob.close()
 
 class MyPaintWidgetCircleWatcher(Widget): # watcher (bigger then the obstacle)
 
@@ -192,15 +209,21 @@ class MyPaintWidgetCircleWatcher(Widget): # watcher (bigger then the obstacle)
         with open('output/internal/internal.txt') as file:
             lines = file.readlines()
         
-        if (touch.y < float(lines[0]) and touch.y > float(lines[1]) and touch.x < float(lines[2]) and touch.x > float(lines[3])):
-            # the radius of the ellipse is changable by the user (by moving the mouse while clicked)
-            # TODO: would be better if it was a circle without a filling -> draw a circumference (not possible in kivy??)
-            with self.canvas:
-                Color(1, 1, 0)
-                d = 50.
-                # should be shiftet, because the position specifies the bottom left corner of the ellipse’s bounding box
-                #Ellipse(pos=(touch.x - d / 2, touch.y - d / 2), size=(d, d))
-                touch.ud['ellipse2'] = Ellipse(pos=(touch.x - d / 2, touch.y - d / 2), size=(d, d))
+        global watcher_start_pos_ok
+        if not(touch.y < float(lines[0]) and touch.y > float(lines[1]) and touch.x < float(lines[2]) and touch.x > float(lines[3])):
+             watcher_start_pos_ok = 0
+             return
+        else:
+            watcher_start_pos_ok = 1
+        
+        # the radius of the ellipse is changable by the user (by moving the mouse while clicked)
+        # TODO: would be better if it was a circle without a filling -> draw a circumference (not possible in kivy??)
+        with self.canvas:
+            Color(1, 1, 0)
+            d = 50.
+            # should be shiftet, because the position specifies the bottom left corner of the ellipse’s bounding box
+            #Ellipse(pos=(touch.x - d / 2, touch.y - d / 2), size=(d, d))
+            touch.ud['ellipse2'] = Ellipse(pos=(touch.x - d / 2, touch.y - d / 2), size=(d, d))
 
     def on_touch_move(self, touch):
         # form: height_top\nheight_bottom\nwidth_top\nwidth_bottom # internal.txt
@@ -208,30 +231,33 @@ class MyPaintWidgetCircleWatcher(Widget): # watcher (bigger then the obstacle)
         with open('output/internal/internal.txt') as file:
             lines = file.readlines()
         
-        if (touch.y < float(lines[0]) and touch.y > float(lines[1]) and touch.x < float(lines[2]) and touch.x > float(lines[3])):
-            # Idea 2: no matter of the direction, to which the mouse is dragged, the circle will become bigger without changing the position of the center (for this solution is no if-else needed)
-            d_before = touch.ud['ellipse2'].size[0]
-            x_pos_before = touch.ud['ellipse2'].pos[0]
-            y_pos_before = touch.ud['ellipse2'].pos[1]
-            touch_x_before = x_pos_before + d_before / 2
-            touch_y_before = y_pos_before + d_before / 2
-            # start (0,0) is the bottom left window corner
-            if (touch.x-touch_x_before) > 0: # it doesn't matter if we take x or y, since we work with circles
-                # moved left
-                d_now = touch.x-touch_x_before
-                print("new radius: " + str(d_now))
-                touch.ud['ellipse2'].size = (d_now,d_now)
-                x_pos_now = touch_x_before - d_now / 2
-                y_pos_now = touch_y_before - d_now / 2
-                touch.ud['ellipse2'].pos = (x_pos_now, y_pos_now)
-            else:
-                # moved right
-                d_now = touch_x_before-touch.x
-                print("new radius: " + str(d_now))
-                touch.ud['ellipse2'].size = (d_now,d_now)
-                x_pos_now = touch_x_before - d_now / 2
-                y_pos_now = touch_y_before - d_now / 2
-                touch.ud['ellipse2'].pos = (x_pos_now, y_pos_now)
+        global watcher_start_pos_ok
+        if not(touch.y < float(lines[0]) and touch.y > float(lines[1]) and touch.x < float(lines[2]) and touch.x > float(lines[3])) or watcher_start_pos_ok == 0:
+            return
+
+        # Idea 2: no matter of the direction, to which the mouse is dragged, the circle will become bigger without changing the position of the center (for this solution is no if-else needed)
+        d_before = touch.ud['ellipse2'].size[0]
+        x_pos_before = touch.ud['ellipse2'].pos[0]
+        y_pos_before = touch.ud['ellipse2'].pos[1]
+        touch_x_before = x_pos_before + d_before / 2
+        touch_y_before = y_pos_before + d_before / 2
+        # start (0,0) is the bottom left window corner
+        if (touch.x-touch_x_before) > 0: # it doesn't matter if we take x or y, since we work with circles
+            # moved left
+            d_now = touch.x-touch_x_before
+            print("new radius: " + str(d_now))
+            touch.ud['ellipse2'].size = (d_now,d_now)
+            x_pos_now = touch_x_before - d_now / 2
+            y_pos_now = touch_y_before - d_now / 2
+            touch.ud['ellipse2'].pos = (x_pos_now, y_pos_now)
+        else:
+            # moved right
+            d_now = touch_x_before-touch.x
+            print("new radius: " + str(d_now))
+            touch.ud['ellipse2'].size = (d_now,d_now)
+            x_pos_now = touch_x_before - d_now / 2
+            y_pos_now = touch_y_before - d_now / 2
+            touch.ud['ellipse2'].pos = (x_pos_now, y_pos_now)
 
     def on_touch_up(self, touch):
         # form: height_top\nheight_bottom\nwidth_top\nwidth_bottom # internal.txt
@@ -240,21 +266,24 @@ class MyPaintWidgetCircleWatcher(Widget): # watcher (bigger then the obstacle)
             lines = file.readlines()
         
         # check if the positions are inside the 4 corners of the image
-        if (touch.y < float(lines[0]) and touch.y > float(lines[1]) and touch.x < float(lines[2]) and touch.x > float(lines[3])):
-            # save the watcher positions (x,y,radius) in a txt file
-            fob = open('output/internal/watcher.txt','a') # 'w'=write (overrides the content every time), better use 'a'=append but make sure the file is at first empty
-            d_last = touch.ud['ellipse2'].size[0]
-            x_pos_last = touch.ud['ellipse2'].pos[0]
-            y_pos_last = touch.ud['ellipse2'].pos[1]
-            fob.write('watcher (x,y,radius): ' + str(x_pos_last+d_last/2) + ',' + str(y_pos_last+d_last/2) + ',' + str(d_last/2) + "\n") # center and radius
+        global watcher_start_pos_ok
+        if not(touch.y < float(lines[0]) and touch.y > float(lines[1]) and touch.x < float(lines[2]) and touch.x > float(lines[3])) or watcher_start_pos_ok == 0:
+            return
+        
+        # save the watcher positions (x,y,radius) in a txt file
+        fob = open('output/internal/watcher.txt','a') # 'w'=write (overrides the content every time), better use 'a'=append but make sure the file is at first empty
+        d_last = touch.ud['ellipse2'].size[0]
+        x_pos_last = touch.ud['ellipse2'].pos[0]
+        y_pos_last = touch.ud['ellipse2'].pos[1]
+        fob.write('watcher (x,y,radius): ' + str(x_pos_last+d_last/2) + ',' + str(y_pos_last+d_last/2) + ',' + str(d_last/2) + "\n") # center and radius
 
-            # IDEA: give also the watchers an ID and then separately ask the user in a text field to connect the obstacles to the watchers
-            # TODO NEXT: might be a problem if the center of the watcher is placed under the obstacle, it will not be visible
-            count = self.file_len('output/internal/watcher.txt') # count the lines from watcher.txt
-            label_num = Label(text=str(count), pos=(x_pos_last, y_pos_last), size=(d_last, d_last), color=(0,0,1), disabled_color=(0,0,1)) # place the number in the middle of the circle
-            self.add_widget(label_num)
+        # IDEA: give also the watchers an ID and then separately ask the user in a text field to connect the obstacles to the watchers
+        # TODO NEXT: might be a problem if the center of the watcher is placed under the obstacle, it will not be visible
+        count = self.file_len('output/internal/watcher.txt') # count the lines from watcher.txt
+        label_num = Label(text=str(count), pos=(x_pos_last, y_pos_last), size=(d_last, d_last), color=(0,0,1), disabled_color=(0,0,1)) # place the number in the middle of the circle
+        self.add_widget(label_num)
 
-            fob.close()
+        fob.close()
 
 class MyPaintWidgetLine(Widget):
 
@@ -264,14 +293,19 @@ class MyPaintWidgetLine(Widget):
         with open('output/internal/internal.txt') as file:
             lines = file.readlines()
         
-        if (touch.y < float(lines[0]) and touch.y > float(lines[1]) and touch.x < float(lines[2]) and touch.x > float(lines[3])):
-            with self.canvas:
-                Color(1, 0, 0)
-                touch.ud['line'] = Line(points=(touch.x, touch.y)) # TODO: make the lines smooth!
-            # save the vector positions start(x,y), end(x,y) in a txt file
-            fob = open('output/internal/vector.txt','a') # 'w'=write (overrides the content every time), better use 'a'=append but make sure the file is at first empty
-            fob.write('vector start (x,y): ' + str(touch.x) + ',' + str(touch.y) + "\n")
-            fob.close()
+        global line_start_pos_ok
+        if not(touch.y < float(lines[0]) and touch.y > float(lines[1]) and touch.x < float(lines[2]) and touch.x > float(lines[3])):
+            line_start_pos_ok = 0
+        else:
+            line_start_pos_ok = 1
+
+        with self.canvas:
+            Color(1, 0, 0)
+            touch.ud['line'] = Line(points=(touch.x, touch.y)) # TODO: make the lines smooth!
+        # save the vector positions start(x,y), end(x,y) in a txt file
+        fob = open('output/internal/vector.txt','a') # 'w'=write (overrides the content every time), better use 'a'=append but make sure the file is at first empty
+        fob.write('vector start (x,y): ' + str(touch.x) + ',' + str(touch.y) + "\n")
+        fob.close()
     
     def on_touch_move(self, touch):
         # form: height_top\nheight_bottom\nwidth_top\nwidth_bottom # internal.txt
@@ -279,10 +313,13 @@ class MyPaintWidgetLine(Widget):
         with open('output/internal/internal.txt') as file:
             lines = file.readlines()
         
-        if (touch.y < float(lines[0]) and touch.y > float(lines[1]) and touch.x < float(lines[2]) and touch.x > float(lines[3])):
-            touch.ud['line'].points += [touch.x, touch.y]
-            #fob = open('output/internal/vector.txt','a') # TEST
-            #fob.write('vector test (x,y): ' + str(touch.x) + ',' + str(touch.y) + "\n") # TEST
+        global line_start_pos_ok
+        if not(touch.y < float(lines[0]) and touch.y > float(lines[1]) and touch.x < float(lines[2]) and touch.x > float(lines[3])) or line_start_pos_ok == 0:
+            return
+
+        touch.ud['line'].points += [touch.x, touch.y]
+        #fob = open('output/internal/vector.txt','a') # TEST
+        #fob.write('vector test (x,y): ' + str(touch.x) + ',' + str(touch.y) + "\n") # TEST
     
     def on_touch_up(self, touch):
         # form: height_top\nheight_bottom\nwidth_top\nwidth_bottom # internal.txt
@@ -290,11 +327,14 @@ class MyPaintWidgetLine(Widget):
         with open('output/internal/internal.txt') as file:
             lines = file.readlines()
         
-        if (touch.y < float(lines[0]) and touch.y > float(lines[1]) and touch.x < float(lines[2]) and touch.x > float(lines[3])):
-            # save the vector positions start(x,y), end(x,y) in a txt file
-            fob = open('output/internal/vector.txt','a') # 'w'=write (overrides the content every time), better use 'a'=append but make sure the file is at first empty
-            fob.write('vector end (x,y): ' + str(touch.x) + ',' + str(touch.y) + "\n")
-            fob.close()
+        global line_start_pos_ok
+        if not(touch.y < float(lines[0]) and touch.y > float(lines[1]) and touch.x < float(lines[2]) and touch.x > float(lines[3])) or line_start_pos_ok == 0:
+            return
+        
+        # save the vector positions start(x,y), end(x,y) in a txt file
+        fob = open('output/internal/vector.txt','a') # 'w'=write (overrides the content every time), better use 'a'=append but make sure the file is at first empty
+        fob.write('vector end (x,y): ' + str(touch.x) + ',' + str(touch.y) + "\n")
+        fob.close()
 
 class MyPaintWidgetRobot(Widget): # for drawing two circles with a constant small radius for the start and end position of the robot (so just take x and y for both positions)
     def file_len(self, fname):
@@ -311,21 +351,23 @@ class MyPaintWidgetRobot(Widget): # for drawing two circles with a constant smal
         with open('output/internal/internal.txt') as file:
             lines = file.readlines()
         
-        if (touch.y < float(lines[0]) and touch.y > float(lines[1]) and touch.x < float(lines[2]) and touch.x > float(lines[3])):
-            # try to contol the user to click only twice! -> nothing will happen after the second click!
-            fob = open('output/internal/robot.txt','a') # 'w'=write (overrides the content every time), better use 'a'=append but make sure the file is at first empty
-            if self.file_len('output/internal/robot.txt') < 2:
-                with self.canvas:
-                    Color(0, 1, 1)
-                    d = 20.
-                    Ellipse(pos=(touch.x - d / 2, touch.y - d / 2), size=(d, d)) # should be shiftet, because the position specifies the bottom left corner of the ellipse’s bounding box
-            
-            # save x and y positions of both start and end drawn circles in another txt file
-            if self.file_len('output/internal/robot.txt') == 0:
-                fob.write('robot start position (x,y): ' + str(touch.x) + ',' + str(touch.y) + "\n")
-            if self.file_len('output/internal/robot.txt') == 1:
-                fob.write('robot end position (x,y): ' + str(touch.x) + ',' + str(touch.y) + "\n")
-            fob.close()
+        if not(touch.y < float(lines[0]) and touch.y > float(lines[1]) and touch.x < float(lines[2]) and touch.x > float(lines[3])):
+            return
+
+        # try to contol the user to click only twice! -> nothing will happen after the second click!
+        fob = open('output/internal/robot.txt','a') # 'w'=write (overrides the content every time), better use 'a'=append but make sure the file is at first empty
+        if self.file_len('output/internal/robot.txt') < 2:
+            with self.canvas:
+                Color(0, 1, 1)
+                d = 20.
+                Ellipse(pos=(touch.x - d / 2, touch.y - d / 2), size=(d, d)) # should be shiftet, because the position specifies the bottom left corner of the ellipse’s bounding box
+        
+        # save x and y positions of both start and end drawn circles in another txt file
+        if self.file_len('output/internal/robot.txt') == 0:
+            fob.write('robot start position (x,y): ' + str(touch.x) + ',' + str(touch.y) + "\n")
+        if self.file_len('output/internal/robot.txt') == 1:
+            fob.write('robot end position (x,y): ' + str(touch.x) + ',' + str(touch.y) + "\n")
+        fob.close()
 
 class MyPaintApp(App):
 
@@ -512,11 +554,14 @@ class MyPaintApp(App):
         layout_origin.add_widget(label_origin)
         layout_origin.add_widget(textinput_origin)
 
-        # a dropdown button with all obstacle types (cleaner, random, turtlebot, walker)
+        # a dropdown button with all obstacle types (circle, cleaner, random, turtlebot, walker)
         # the different obstacle types should be not only visualized with different colors, but their value should be also saved in a file
         height_btn_obstacle_type = 30
         width_btn_obstacle_type = 140
         dropdown_obstacle_type = DropDown() # drop-down menu with different motions
+        btn_circle = Button(text='circle (red) - default', size_hint_y=None, height=height_btn_obstacle_type)
+        btn_circle.bind(on_release=lambda btn: dropdown_obstacle_type.select(btn_circle.text), on_press=lambda x: self.button_obstacle_type_circle_callback_down(mainbutton_obstacle_type, self.parent, wimg_input_map, parent_draw, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return))
+        dropdown_obstacle_type.add_widget(btn_circle)
         btn_cleaner = Button(text='cleaner (blue)', size_hint_y=None, height=height_btn_obstacle_type)
         btn_cleaner.bind(on_release=lambda btn: dropdown_obstacle_type.select(btn_cleaner.text), on_press=lambda x: self.button_obstacle_type_cleaner_callback_down(mainbutton_obstacle_type, self.parent, wimg_input_map, parent_draw, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return))
         dropdown_obstacle_type.add_widget(btn_cleaner)
@@ -538,9 +583,6 @@ class MyPaintApp(App):
         width_btn_return = 140
         button_return = Button(text='return', size_hint=(None, None), size=(width_btn_return,height_btn_return), pos=(border,height_layout_btn+height_btn_return))
         button_return.bind(on_press=lambda x: self.button_return_callback_down(self.parent, parent_draw, button, button2, button3, button4, self.painter_circle_obstacle, self.painter_circle_watcher, self.painter_line, self.painter_robot))
-
-        # TODO NEXT: Rules for the readme file
-        # 1) Once something is drawn it can not be moved or deleted; 2) To change the radius move still the clicked mouse to the right/left; ...
 
         # dynamically filled lists (needed for the txt files)
         textinput_velocity_list = []
@@ -570,7 +612,7 @@ class MyPaintApp(App):
         layout_btn.add_widget(button4)
 
         # add the neu widgets to the parent widgets
-        #parent_draw.add_widget(self.painter_circle_obstacle) # Important: add this widget if you want to have only one 'default' red obstacle type! If you are using the dropdown button for different obstacle types this widget do not have to be added!
+        parent_draw.add_widget(self.painter_circle_obstacle) # Important: add this widget if you want to have the default='circle' (red) obstacle type!
         self.parent.add_widget(wimg_input_map)
         self.parent.add_widget(parent_draw)
         self.parent.add_widget(layout_btn)
@@ -772,8 +814,28 @@ class MyPaintApp(App):
         # As a next step -> the python script parser.py should be run
 
     def button_obstacle_type(self, mainbutton_obstacle_type, parent, wimg_input_map, parent_draw, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return, color_r_temp, color_g_temp, color_b_temp):
+        global color_r # needed to be able to change a global variable!
+        global color_g
+        global color_b
         global counter
+        global type_change
+
+        # before updating the global colors, check if there was a change
+        if (color_r == color_r_temp) and (color_g == color_g_temp) and (color_b == color_b_temp):
+            type_change = 0 # no change
+        else:
+            type_change = 1 # change
+
+        color_r = color_r_temp
+        color_g = color_g_temp
+        color_b = color_b_temp
+        
         counter += 1
+
+        # Important: if it is selected the same type as the one currently used, nothing should be done, otherwise an unwanted behaviour will happen after the return button is selected
+        # (it will delete not all from the last type, but the ones after the last click in the dropdown button, no matter if the same type is choosen or not)
+        if type_change == 0:
+            return
         
         # IDEA: make the obstacle circles appear with a different color, save it first as an image, upload it again,
         # delete the obstacle widget and generate another with different color
@@ -794,21 +856,14 @@ class MyPaintApp(App):
             parent_draw.remove_widget(child)
         parent.remove_widget(parent_draw)
         
-        global color_r # needed to be able to change a global variable!
-        global color_g
-        global color_b
-        color_r = color_r_temp
-        color_g = color_g_temp
-        color_b = color_b_temp
-        painter_circle_obstacle_new = MyPaintWidgetCircleObstacle() # generate another widget with the same behaviour!
-        
         parent.add_widget(wimg_input_map) # !
 
         #wimg_obstacles_temp = Image(source='output/internal/obstacles_temp.png', size=(parent.width, parent.height))
-        # the problem with the line above if that the name of the image file is always the same !? (so it interprets it as the same widget? it didn't help to delete the image when done!?)
+        # the problem with the line above is that the name of the image file is always the same !? (so it interprets it as the same widget? it didn't help to delete the image when done!?)
         wimg_obstacles_temp = Image(source="output/internal/obstacles_temp__" + str(counter) + ".png", size=(parent.width, parent.height))
         parent.add_widget(wimg_obstacles_temp)
 
+        painter_circle_obstacle_new = MyPaintWidgetCircleObstacle() # generate another widget with the same behaviour!
         parent_draw.add_widget(painter_circle_obstacle_new)
         parent.add_widget(parent_draw)
         parent.add_widget(layout_btn)
@@ -819,6 +874,15 @@ class MyPaintApp(App):
         parent.add_widget(mainbutton_obstacle_type) # !
 
         # Important: because of multiple obstacle types, the return button should be updated!
+
+    def button_obstacle_type_circle_callback_down(self, mainbutton_obstacle_type, parent, wimg_input_map, parent_draw, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return):
+        print('Obstacle type was chosen - circle')
+        # red
+        color_r_temp = 1
+        color_g_temp = 0
+        color_b_temp = 0
+        self.button_obstacle_type(mainbutton_obstacle_type, parent, wimg_input_map, parent_draw, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return, color_r_temp, color_g_temp, color_b_temp)
+
 
     def button_obstacle_type_cleaner_callback_down(self, mainbutton_obstacle_type, parent, wimg_input_map, parent_draw, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return):
         print('Obstacle type was chosen - cleaner')
@@ -869,17 +933,18 @@ class MyPaintApp(App):
             # IDEA 2: multiple obstacle types -> delete only the last lines with the last obstacle type from the txt file
 
             # test if the chosen type in the dropdown button is the last saved type, if not, print "nothing to delete!"
-            last_type_chosed_dropdown = 'default'
+            last_type_chosed_dropdown = 'circle' # default type = 'circle'
             for obst_type in obstacle_type:
                 if (obst_type[1][0] == color_r) and (obst_type[1][1] == color_g) and (obst_type[1][2] == color_b):
                     last_type_chosed_dropdown = obst_type[0]
 
             lines_obstacles = []
-            last_type_clicked = 'default'
+            last_type_clicked = 'circle' # default type = 'circle'
             if os.path.exists("output/internal/obstacle.txt"):
                 with open('output/internal/obstacle.txt', "r") as file:
                     lines_obstacles = file.readlines()
-                last_type_clicked = lines_obstacles[len(lines_obstacles)-1].split('obstacle (x,y,radius,type): ')[1].split(',')[3].split('\n')[0]
+                if len(lines_obstacles) > 0:
+                    last_type_clicked = lines_obstacles[len(lines_obstacles)-1].split('obstacle (x,y,radius,type): ')[1].split(',')[3].split('\n')[0]
             lines_remove = []
             count = len(lines_obstacles)
             if last_type_chosed_dropdown == last_type_clicked: # only if the chosen type in the dropdown is the same as the last clicked obstacle type in the map
