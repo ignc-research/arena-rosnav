@@ -1,5 +1,6 @@
 import os
 from abc import ABC, abstractmethod
+from typing import List
 from threading import Condition, Lock
 from rl_agent.config.config import CfgNode, configurable
 
@@ -12,7 +13,7 @@ from nav_msgs.msg import OccupancyGrid
 from nav_msgs.srv import GetMap
 from geometry_msgs.msg import Pose2D
 from rospy.exceptions import ROSException
-
+from std_msgs.msg import Bool
 from .obstacles_manager import ObstaclesManager
 from .robot_manager import RobotManager
 from pathlib import Path
@@ -132,89 +133,76 @@ class ManualTask(ABCTask):
 @TASK_REGISTRY.register()
 class StagedRandomTask(RandomTask):
     @configurable
-    def __init__(self, obstacles_manager: ObstaclesManager, robot_manager: RobotManager, start_stage: int = 1, PATHS=None):
+    def __init__(self, ns: str, obstacles_manager: ObstaclesManager, robot_manager: RobotManager,stage_static:List[int], stage_dynamic:List[int],init_stage_idx:int=0):
         super().__init__(obstacles_manager, robot_manager)
-        self._curr_stage = start_stage
-        self._stages = dict()
-        self._PATHS = PATHS
-        self._read_stages_from_yaml()
+        self.ns = ns
+        self.ns_prefix = "/" if ns == '' else "/"+ns+"/"
+        import re
+        pattern = re.compile('\d+')
+        self.ns_idx = int(pattern.search(ns).group(0))
 
-        # check start stage format
-        if not isinstance(start_stage, int):
-            raise ValueError(
-                "Given start_stage not an Integer!")
-        if (self._curr_stage < 1 or 
-            self._curr_stage > len(self._stages)):
-            raise IndexError(
-                "Start stage given for training curriculum out of bounds! Has to be between {1 to %d}!" % len(self._stages))
-
-        # hyperparamters.json location
-        self.json_file = os.path.join(
-            self._PATHS.get('model'), "hyperparameters.json")
-        assert os.path.isfile(self.json_file), "Found no 'hyperparameters.json' at %s" % json_file
-
-        self._initiate_stage()
+        assert len(stage_static) == len(stage_dynamic) and init_stage_idx>=0 and init_stage_idx< len(stage_static)
+        self._stage_dynamic = stage_dynamic
+        self._stage_static = stage_static
+        self._curr_stage = init_stage_idx
+        self._set_stage()
+        # subs for triggers
+        self._sub_next = rospy.Subscriber(f"{self.ns_prefix}next_stage", Bool, self.next_stage)
+        self._sub_previous = rospy.Subscriber(f"{self.ns_prefix}previous_stage", Bool, self.previous_stage)
+       
+    
     @classmethod
-    def from_config(cls,cfg):
-        #TODO 
-        pass
+    def from_config(cls, cfg:CfgNode,ns):
+        # TODO in future use cfg to build obstacles and robot's manager
+        obstacles_manager, robot_manager = _get_obs_robot_manager(ns)
+        init_stage_idx = cfg.EVAL.CURRICULUM.INIT_STAGE_IDX
+        stage_static = cfg.EVAL.CURRICULUM.STAGE_STATIC_OBSTACLE
+        stage_dynamic =cfg.EVAL.CURRICULUM.STAGE_DYNAMIC_OBSTACLE
+        return {
+            'ns':ns,
+            'obstacles_manager':obstacles_manager,
+            'robot_manager': robot_manager,
+            'stage_static': stage_static,
+            'stage_dynamic': stage_dynamic,
+            'init_stage_idx': init_stage_idx
+        }
 
-    def next_stage(self):
-        if self._curr_stage < len(self._stages):
+    def next_stage(self, msg: Bool):
+        if self._curr_stage < len(self._stage_dynamic)-1:
             self._curr_stage = self._curr_stage + 1
-            self._update_curr_stage_json()
-            self._initiate_stage()
+            self._set_stage()
+        else:
+            rospy.loginfo(f"ENV {self.ns} tried to trigger next stage but already reached last one")
 
-    def previous_stage(self):
-        if self._curr_stage > 1:
+    def previous_stage(self, msg: Bool):
+        if self._curr_stage >0 : 
             self._curr_stage = self._curr_stage - 1
-            self._update_curr_stage_json()
-            self._initiate_stage()
+            self._set_stage()
+        else:
+            rospy.loginfo(f"ENV {self.ns} tried to trigger previous stage but already reached first one")
 
-    def _initiate_stage(self):
+    def _set_stage(self):
+        if self.ns_idx == 1:
+            rospy.set_param("/curr_stage",self._curr_stage)
+            if self._curr_stage == len(self._stage_dynamic)-1:
+                rospy.set_param("/last_stage_reached",True)
+            else:
+                rospy.set_param("/last_stage_reached",False)
+
         self._remove_obstacles()
-        
-        static_obstacles = self._stages[self._curr_stage]['static']
-        dynamic_obstacles = self._stages[self._curr_stage]['dynamic']
+        static_obstacles = self._stage_static[self._curr_stage]
+        dynamic_obstacles = self._stage_dynamic[self._curr_stage]
 
-        self.obstacles_manager.register_random_static_obstacles(
-            self._stages[self._curr_stage]['static'])
-        self.obstacles_manager.register_random_dynamic_obstacles(
-            self._stages[self._curr_stage]['dynamic'])
+        self.obstacles_manager.register_random_static_obstacles(static_obstacles)
+        self.obstacles_manager.register_random_dynamic_obstacles(dynamic_obstacles)
 
-        print("Spawning %d static and %d dynamic obstacles!" %
-              (static_obstacles, dynamic_obstacles))
-
-    def _read_stages_from_yaml(self):
-        file_location = self._PATHS.get('curriculum')
-        if os.path.isfile(file_location):
-            with open(file_location, "r") as file:
-                self._stages = yaml.load(file, Loader=yaml.FullLoader)
-            assert isinstance(
-                self._stages, dict), "'training_curriculum.yaml' has wrong fromat! Has to encode dictionary!"
-        else:
-            raise FileNotFoundError(
-                "Couldn't find 'training_curriculum.yaml' in %s " % self._PATHS.get('curriculum'))
-
-    def _update_curr_stage_json(self):
-        with open(self.json_file, "r") as file:
-            hyperparams = json.load(file)
-        try:
-            hyperparams['curr_stage'] = self._curr_stage
-        except Exception:
-            raise Warning(
-                "Parameter 'curr_stage' not found in 'hyperparameters.json'!")
-        else:
-            with open(self.json_file, "w", encoding='utf-8') as target:
-                json.dump(hyperparams, target,
-                        ensure_ascii=False, indent=4)
-
+        rospy.loginfo(f"ENV {self.ns} is set to stage {self._curr_stage}:\n\t \
+             Spawning {static_obstacles} static and {dynamic_obstacles} dynamic obstacles!")
     def _remove_obstacles(self):
         self.obstacles_manager.remove_obstacles()
 
-    def get_num_stages(self):
-        return len(self._stages)
-# @TASK_REGISTRY.register()
+
+# This task if only for evaluation
 class ScenerioTask(ABCTask):
     def __init__(self, obstacles_manager: ObstaclesManager, robot_manager: RobotManager, scenerios_json_path: str):
         """ The scenerio_json_path only has the "Scenerios" section, which contains a list of scenerios

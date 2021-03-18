@@ -1,19 +1,24 @@
+import os
+import copy
 import argparse
 from argparse import ArgumentParser
 from typing import List
-import os
-import copy
+import rospy
+
+from rl_agent.config import get_cfg
+from rl_agent.envs import build_env, build_env_wrapper  # SubprocVecEnv
+from rl_agent.model import build_model
+from rl_agent.utils.callbacks import TrainStageCallback,StopTrainingOnRewardThreshold
+from rl_agent.utils.debug import timeit
+
 from stable_baselines3.common.vec_env.dummy_vec_env import DummyVecEnv
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env.subproc_vec_env import SubprocVecEnv
-from rl_agent.envs import build_env, build_env_wrapper  # SubprocVecEnv
 from stable_baselines3.common.vec_env.vec_normalize import VecNormalize
-from stable_baselines3.common.callbacks import EvalCallback, StopTrainingOnRewardThreshold
-from rl_agent.model import build_model
-from rl_agent.config import get_cfg
-import rospy
+from stable_baselines3.common.callbacks import EvalCallback
+
 from task_generator import build_task_wrapper
-from rl_agent.utils.debug import timeit
+
 
 
 def get_default_arg_parser():
@@ -28,6 +33,7 @@ def get_default_arg_parser():
 
 
 def setup_config(args):
+    # get the global default config and merge it with the optional config file and arguments
     cfg = get_cfg()
     if args.conf_file is not None:
         cfg.merge_from_file(args.conf_file)
@@ -43,11 +49,16 @@ def setup_config(args):
     os.makedirs(output_dir)
     cfg.OUTPUT_DIR = output_dir
     print("Training logs will be written to the directory: ")
-    print(f"\t\t\t{cfg.OUTPUT_DIR}")
-    cfg.freeze()
+    print(f"\t{cfg.OUTPUT_DIR}")
 
+
+    # freeze the config and save it.
+    # TODO  we know there are some settings stored in some other places which is not trival for the training
+    # it would be a good idea to make a snapshot of them and store them in the output folder
+    cfg.freeze()
     with open(os.path.join(cfg.OUTPUT_DIR, "Hyperparams.yaml"), "w") as f:
         cfg.dump(stream=f)
+
     return cfg
 
 
@@ -83,28 +94,48 @@ def make_envs(cfg, args: argparse.Namespace, namespaces: List[str]):
 
     if cfg.INPUT.NORM:
         train_env = VecNormalize(
-            train_env, training=True, norm_obs=True, norm_reward=False, clip_reward=15)
+            train_env, training=True, norm_obs=True, norm_reward=True, clip_reward=15)
 
         eval_env = VecNormalize(eval_env, training=False,
-                                norm_obs=True, norm_reward=False, clip_reward=15)
+                                norm_obs=True, norm_reward=True, clip_reward=15)
     return train_env, eval_env
 
 
-def build_eval_callback(cfg, eval_env):
-    if cfg.EVAL.STOP_TRAINING_ON_REWARD is None:
+def build_eval_callback(cfg,namespaces:List[str],eval_env,train_env):
+    if not cfg.EVAL.STOP_TRAINING_ON_REWARD:
         stop_training_callback = None
     else:
         stop_training_callback = StopTrainingOnRewardThreshold(
-            cfg.EVAL.STOP_TRAINING_ON_REWARD, verbose=1)
+            cfg.EVAL.STOP_TRAINING_ON_REWARD_THRESHOLD, verbose=1)
+    
+    if cfg.TASK.NAME == "StagedRandomTask":
+        if cfg.EVAL.CURRICULUM.TRESHHOLD_TYPE == "rew":
+            thresholds = cfg.EVAL.CURRICULUM.REW_THRESHOLD_RANGE
+        elif cfg.EVAL.CURRICULUM.TRESHHOLD_TYPE == "succ": 
+            thresholds = cfg.EVAL.CURRICULUM.SUCC_THRESHOLD_RANGE
+        else:
+            raise ValueError("Currently Curriculum learning only supports 'rew' and 'succ'")
+
+        thresholds = thresholds[::-1]
+        trainstage_callback = TrainStageCallback(
+            namespaces,
+            cfg.EVAL.CURRICULUM.TRESHHOLD_TYPE,
+            *thresholds,
+            cfg.TASK.NAME, verbose=1)
+    else:
+        trainstage_callback = None
 
     eval_callback = EvalCallback(
         eval_env,
+        train_env,
         n_eval_episodes=cfg.EVAL.N_EVAL_EPISODES,
         eval_freq=cfg.EVAL.EVAL_FREQ,
         log_path=cfg.OUTPUT_DIR,
         best_model_save_path=cfg.OUTPUT_DIR,
         deterministic=True,
+        callback_on_eval_end=trainstage_callback,
         callback_on_new_best=stop_training_callback)
+
     return eval_callback
 
 
@@ -116,10 +147,9 @@ def main():
     training_env, eval_env = make_envs(cfg, args, namespaces)
     model = build_model(cfg, training_env,
                         tensorboard_log=cfg.OUTPUT_DIR, debug=args.debug)
-    eval_callback = build_eval_callback(cfg, eval_env=eval_env)
+    eval_callback = build_eval_callback(cfg,namespaces ,eval_env=eval_env,train_env=training_env)
     model.learn(
         total_timesteps=cfg.TRAINING.N_TIMESTEPS, callback=eval_callback, reset_num_timesteps=True)
-
 
 if __name__ == "__main__":
     main()
