@@ -76,8 +76,8 @@ class NN_tb3():
         # self.sub_clusters = rospy.Subscriber('~clusters',Clusters, self.cbClusters)
 
         # control timer
-        self.control_timer = rospy.Timer(rospy.Duration(0.01),self.cbControl)
-        self.nn_timer = rospy.Timer(rospy.Duration(0.3),self.cbComputeAction)
+        # self.control_timer = rospy.Timer(rospy.Duration(0.01),self.cbControl)
+        self.nn_timer = rospy.Timer(rospy.Duration(0.1),self.cbComputeAction)
 
     def cbGlobalGoal(self,msg):
         self.stop_moving_flag = True
@@ -279,8 +279,9 @@ class NN_tb3():
 
         _,scaled_action =generate_action_no_sampling(self.env, obs_state_list, self.policy, self.action_bound)
         action = scaled_action[0]
+        action[0] = 0.6*action[0]
         self.control_vel(action)
-        print('velocity : ', action[0], 'velocity_angular : ', action[1])
+        # print('velocity : ', action[0], 'velocity_angular : ', action[1])
 
 
         # env.control_vel(action)      #involke the ros system publisher to send velocity to ros system
