@@ -15,7 +15,7 @@ from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.tools.train_agent_utils import *
 
 ### HYPERPARAMETERS ###
-max_steps_per_episode = 100000000
+max_steps_per_episode = 1000
 
 if __name__ == "__main__":
     args, _ = parse_run_agent_args()
@@ -24,6 +24,7 @@ if __name__ == "__main__":
     dir = rospkg.RosPack().get_path('arena_local_planner_drl')
     PATHS={
         'model': os.path.join(dir, 'agents', args.load),
+        'vecnorm': os.path.join(dir, 'agents', args.load, 'vec_normalize.pkl'),
         'robot_setting' : os.path.join(rospkg.RosPack().get_path('simulator_setup'), 'robot', 'myrobot.model.yaml'),
         'robot_as' : os.path.join(rospkg.RosPack().get_path('arena_local_planner_drl'), 'configs', 'default_settings.yaml'),
         'scenerios_json_path' : os.path.join(rospkg.RosPack().get_path('simulator_setup'), 'scenerios', args.scenario+'.json'),
@@ -31,7 +32,7 @@ if __name__ == "__main__":
     }
 
     assert os.path.isfile(
-        os.path.join(PATHS['model'], 'best_model.zip')), "No model file found in %s" % PATHS['model']
+        os.path.join(PATHS['model'], "best_model.zip")), "No model file found in %s" % PATHS['model']
     assert os.path.isfile(
         PATHS['scenerios_json_path']), "No scenario file named %s" % PATHS['scenerios_json_path']
 
@@ -40,19 +41,17 @@ if __name__ == "__main__":
 
     print("START RUNNING AGENT:    %s" % params['agent_name'])
     print_hyperparameters(params)
-
-    # initialize task manager
-    task_manager = get_predefined_task(ns='sim_1', mode='staged', start_stage=4, PATHS=PATHS)
     
     # initialize gym env
     env = DummyVecEnv(
         [lambda: FlatlandEnv(
-            'sim_1', task_manager, PATHS.get('robot_setting'), PATHS.get('robot_as'), params['reward_fnc'], params['discrete_action_space'], 
-            goal_radius=0.50, max_steps_per_episode=max_steps_per_episode, train_mode=False)
+            'eval_sim', PATHS.get('robot_setting'), PATHS.get('robot_as'), params['reward_fnc'], params['discrete_action_space'], 
+            goal_radius=0.50, max_steps_per_episode=max_steps_per_episode, train_mode=False, task_mode='staged', PATHS=PATHS, curr_stage=4)
         ])
     if params['normalize']:
-        env = VecNormalize(
-            env, training=False, norm_obs=True, norm_reward=False, clip_reward=15)
+        assert os.path.isfile(PATHS['vecnorm']
+        ), "Couldn't find VecNormalize pickle, without it agent performance will be strongly altered"
+        env = VecNormalize.load(PATHS['vecnorm'], env)
 
     # load agent
     agent = PPO.load(os.path.join(PATHS['model'], "best_model.zip"), env)

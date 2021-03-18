@@ -22,7 +22,7 @@ class ActionPublisher():
         # apply rate in sim time
         rate = (1/self._action_publish_rate)/self._real_second_in_sim
 
-        ns_prefix = "/sim_1/"
+        ns_prefix = "/eval_sim/"
         self._pub_cmd_vel = rospy.Publisher(
             f"{ns_prefix}cmd_vel", Twist, queue_size=1)
         self._pub_cycle_trigger = rospy.Publisher(
