@@ -26,7 +26,9 @@
 7. The generated json file will be saved under the name `new_scenario.json` in the `output` folder.
 8. Copy and paste the json file in the folder `arena-rosnav/simulator_setup/scenerios/`.
 9. Modify the `arena-rosnav/arena_bringup/launch/sublaunch/task_generator.launch` file, changing the name of the expected json file to `new_scenario.json`.
-10. In `arena-rosnav` run for example `roslaunch arena_bringup start_arena_flatland.launch disable_scenario:="false" map_file:="map1" scenario_file:="new_scenario.json" local_planner:="teb" use_viz:=true rviz_file:=nav`. Please take a look at the section `Legend for the already tested maps` below.
+10. In `arena-rosnav` run for example <br />
+`$ roslaunch arena_bringup start_arena_flatland.launch local_planner:="teb" use_viz:="true" map_file:="map1" rviz_file:="nav2"`. <br />
+The file `nav2.rviz` is different from `nav.rviz` only by two things - the map is horizontal and the first couple of obstacles are visible with the start of rviz. The program still works will all available rviz files, just the visualization will be slightly defferent. Please take a look also at the section `Legend for the already tested maps` below.
 
 ### Folder structure
 1. The root folder consist of both executable files `paint.py` and `parser.py`, as well as the ReadMe file.

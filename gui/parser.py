@@ -425,5 +425,8 @@ im_scenario.show() # show the image
 
 # TODO TEST the code with different maps in rviz:
 # - tested with map_small.png and map.png and it works!
+# - launch it with a simple command
+# -> nav2.rviz (map horizontal and first couple of obstacles visible), still it works will all rviz files, just different visualized!
+# $ roslaunch arena_bringup start_arena_flatland.launch local_planner:="teb" use_viz:="true" map_file:="map1" rviz_file:="nav2"
 # ?- from the console ros topic list echo set goal; in rviz from the map check (x,y)
 
