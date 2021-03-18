@@ -1,6 +1,7 @@
 import os
 from abc import ABC, abstractmethod
 from threading import Condition, Lock
+from filelock import FileLock
 
 import rospy
 import rospkg
@@ -144,6 +145,7 @@ class StagedRandomTask(RandomTask):
         self.json_file = os.path.join(
             self._PATHS.get('model'), "hyperparameters.json")
         assert os.path.isfile(self.json_file), "Found no 'hyperparameters.json' at %s" % json_file
+        self._lock_json = FileLock(self.json_file + ".lock")
 
         # subs for triggers
         self._sub_next = rospy.Subscriber(f"{self.ns_prefix}next_stage", Bool, self.next_stage)
@@ -156,24 +158,29 @@ class StagedRandomTask(RandomTask):
             self._curr_stage = self._curr_stage + 1
             self._initiate_stage()
 
-            if self.ns == "sim_1":
-                self._update_curr_stage_json()
+            if self.ns == "eval_sim":
+                with self._lock_json:
+                    self._update_curr_stage_json()
+                    
                 if self._curr_stage == len(self._stages):
                     rospy.set_param("/last_stage_reached", True)
         else:
             print(
-                f"INFO: Tried to trigger next stage but already reached last one ({self.ns_prefix})")
+                f"({self.ns}) INFO: Tried to trigger next stage but already reached last one")
 
     def previous_stage(self, msg: Bool):
         if self._curr_stage > 1:
             rospy.set_param("/last_stage_reached", False)
 
             self._curr_stage = self._curr_stage - 1
-            self._update_curr_stage_json()
             self._initiate_stage()
+
+            if self.ns == "eval_sim":
+                with self._lock_json:
+                    self._update_curr_stage_json()
         else:
             print(
-                f"INFO: Tried to trigger previous stage but already reached first one ({self.ns_prefix})")
+                f"({self.ns}) INFO: Tried to trigger previous stage but already reached first one")
 
     def _initiate_stage(self):
         self._remove_obstacles()
@@ -187,7 +194,7 @@ class StagedRandomTask(RandomTask):
             self._stages[self._curr_stage]['dynamic'])
 
         print(
-            f"Stage {self._curr_stage}: Spawning {static_obstacles} static and {dynamic_obstacles} dynamic obstacles!")
+            f"({self.ns}) Stage {self._curr_stage}: Spawning {static_obstacles} static and {dynamic_obstacles} dynamic obstacles!")
 
     def _read_stages_from_yaml(self):
         file_location = self._PATHS.get('curriculum')

@@ -46,6 +46,14 @@ class InitiateNewTrainStage(BaseCallback):
             self.upper_threshold = upper_threshold
             self.lower_threshold = lower_threshold
 
+        assert (self.upper_threshold > self.lower_threshold
+        ), "upper threshold has to be bigger than lower threshold"
+        assert (self.upper_threshold >= 0 and self.lower_threshold >= 0
+        ), "upper/lower threshold have to be positive numbers"
+        if self.threshhold_type == "succ":
+            assert (self.upper_threshold <= 1 and self.lower_threshold >= 0
+            ), "succ thresholds have to be between [1.0, 0.0]"
+
         self.verbose = verbose
         self.activated = bool(task_mode == "staged")
 
@@ -59,6 +67,11 @@ class InitiateNewTrainStage(BaseCallback):
     def _instantiate_publishers(self):
         self._publishers_next = []
         self._publishers_previous = []
+
+        self._publishers_next.append(
+            rospy.Publisher(f"/eval_sim/next_stage", Bool, queue_size=1))
+        self._publishers_previous.append(
+            rospy.Publisher(f"/eval_sim/previous_stage", Bool, queue_size=1))
 
         for env_num in range(self.n_envs):
             self._publishers_next.append(

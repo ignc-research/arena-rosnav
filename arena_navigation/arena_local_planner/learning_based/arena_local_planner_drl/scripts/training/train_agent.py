@@ -135,7 +135,7 @@ def make_envs(rank: int,
             # eval env
             env = Monitor(
                 FlatlandEnv(
-                    f"sim_{rank+1}",
+                    f"eval_sim",
                     PATHS.get('robot_setting'), PATHS.get('robot_as'), 
                     params['reward_fnc'], params['discrete_action_space'], 
                     goal_radius=params['goal_radius'], 
@@ -229,6 +229,7 @@ if __name__ == "__main__":
                 load_path=load_path, venv=env)
             eval_env = VecNormalize.load(
                 load_path=load_path, venv=eval_env)
+            print("Succesfully loaded VecNormalize object from pickle file..")
         else:
             env = VecNormalize(
                 env, training=True, 
@@ -242,7 +243,7 @@ if __name__ == "__main__":
     # eval_freq: evaluate the agent every eval_freq train timesteps
     eval_cb = EvalCallback(
         eval_env=eval_env,          train_env=env,
-        n_eval_episodes=35,         eval_freq=25000, 
+        n_eval_episodes=40,         eval_freq=25000, 
         log_path=PATHS.get('eval'), best_model_save_path=PATHS.get('model'), 
         deterministic=True,         callback_on_eval_end=trainstage_cb,
         callback_on_new_best=stoptraining_cb)

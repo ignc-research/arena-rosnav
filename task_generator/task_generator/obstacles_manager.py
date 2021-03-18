@@ -118,14 +118,14 @@ class ObstaclesManager:
                 response = self._srv_spawn_model.call(spawn_request)
                 if not response.success:  # if service not succeeds, do something and redo service
                     rospy.logwarn(
-                        f"spawn object {spawn_request.name} failed! trying again... [{i_curr_try+1}/{max_num_try} tried]")
+                        f"({self.ns}) spawn object {spawn_request.name} failed! trying again... [{i_curr_try+1}/{max_num_try} tried]")
                     rospy.logwarn(response.message)
                     i_curr_try += 1
                 else:
                     self.obstacle_name_list.append(spawn_request.name)
                     break
             if i_curr_try == max_num_try:
-                raise rospy.ServiceException(f" failed to register obstacles")
+                raise rospy.ServiceException(f"({self.ns}) failed to register obstacles")
         return self
 
     def register_random_obstacles(self, num_obstacles: int, p_dynamic=0.5):

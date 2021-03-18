@@ -57,11 +57,11 @@ class FlatlandEnv(gym.Env):
         self.ns = ns
         try:
             # given every environment enough time to initialize, if we dont put sleep,
-            # the training script may crush.
+            # the training script may crash.
             ns_int = int(ns.split("_")[1])
             time.sleep(ns_int*2)
         except Exception:
-            rospy.logwarn(f"Can't not determinate the number of the environment, training script may crush!")
+            rospy.logwarn(f"Can't not determinate the number of the environment, training script may crash!")
             pass
 
 
