@@ -68,4 +68,11 @@
 `$ python paint.py` (move the black window a little bit to the bottom and back to make everything show) <br />
 `$ python parser.py` <br />
 
-4. Windows with WSL2 - not working, it can not deal with showing up a window (still not tested with WSL2 + GUI)
+4. Windows with WSL2 + Console - not working, it can not deal with showing up a window
+
+5. Windows with WSL2 + GUI
+`$ source kivy_venv/bin/activate` <br />
+`$ cd arena-rosnav/gui/` <br />
+`$ python paint.py` <br />
+`$ python parser.py` <br /><br />
+**Attention:** Depending on the Python version that you are using, you may have to run the operations above with `python3` insteed of `python`!
