@@ -521,3 +521,29 @@ Exemplary training curriculum:
 |```../arena_local_planner_drl/configs```| yaml files containing robots action spaces and the training curriculum
 |```../arena_local_planner_drl/training_logs```| tensorboard logs and evaluation logs
 |```../arena_local_planner_drl/scripts```| python file containing the predefined DNN architectures and the training script
+
+##### Imitation Learning
+Install rospy message converter:
+pip install git+https://github.com/uos/rospy_message_converter.git
+
+First, start simulation:
+example command:
+roslaunch arena_bringup start_arena_flatland.launch disable_scenario:="false" map_file:="map_empty" scenario_file:="eval/empty_map_obs5.json" local_planner:="teb" train_mode:=True
+
+Then start crowd-node:
+file location:
+/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/model_based/crowdnav_ros/scripts/crowd_test.py
+command:
+python crowd_test.py
+
+Then start observation collector:
+file location:
+/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/rl_agent/utils/observation_collector.py
+command:
+python observation_collector.py
+
+Planned changes:
+1) As the observation collector differs from the original in the local_planner branch only by a few
+functions, create a new file in /imitation_learning which inherits it and overrides the relevant
+functions
+2) Better way to manage the end of recording. Currently the observation_collector records for a set number of iterations (each iteration equals one set of synchronized observations)

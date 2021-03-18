@@ -104,7 +104,7 @@ class RosNav():
         self.distance_gg = np.linalg.norm(v_pg)
 
 
-        self.visualize_path()
+    #    self.visualize_path()
 
     def cbGlobalGoal(self,msg):
         self.global_goal.x = msg.pose.position.x

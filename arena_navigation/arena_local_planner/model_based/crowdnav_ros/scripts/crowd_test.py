@@ -5,6 +5,7 @@ import copy
 # crowdnav
 import numpy as np
 from geometry_msgs.msg import Twist
+from sensor_msgs.msg import LaserScan
 import math
 import configparser
 import torch
@@ -14,22 +15,39 @@ from crowd_nav.policy.policy_factory import policy_factory
 from crowd_nav.policy.cadrl import CADRL
 from crowd_nav.policy.lstm_rl import LstmRL
 from crowd_nav.policy.sarl import SARL
+from crowd_sim.envs.policy.orca import ORCA
 from crowd_sim.envs.utils.robot import Robot
 
+# for synchronization with simulation in train mode
+from flatland_msgs.srv import StepWorld,StepWorldRequest
 
 # prototype
 from visualization_msgs.msg import Marker, MarkerArray
 from ford_msgs.msg import Clusters
 from geometry_msgs.msg import Vector3,PoseStamped
 from std_msgs.msg import ColorRGBA
+from arena_plan_msgs.msg import RobotState,RobotStateStamped
 
 
 class TestNode():
     def __init__(self, env, env_config, policy):
-        self.tb3 = RosNav('/goal','/plan_manager/subgoal')
+        self.tb3 = RosNav('/goal','/subgoal')
         # self.tb3 = RosNav('/goal','/goal')
         self.desired_speed = 0.3
         self.angle2Action = 0.0
+
+        ## topics and services for recording rollouts (laser ranges, robot pose, current suboal)
+        ## laser scan
+        #self._ranges = LaserScan()
+        #self._sub_scan = rospy.Subscriber('scan', LaserScan, self.laser_callback)
+        ## current subgoal
+        #self._subgoal = PoseStamped()
+        #self.sub_subgoal = rospy.Subscriber('subgoal',PoseStamped, self.cbSubGoal)
+        ## current robot state (position)
+        #self._robot_state = RobotStateStamped()
+        #self._sub_robot_state = rospy.Subscriber('robot_state', RobotStateStamped, self.cbRobotState)
+        ## for synchronization with simulation in train mode
+        #_sim_step = rospy.ServiceProxy('step_world', StepWorld)
 
         # NN
         self.env = env
@@ -56,6 +74,41 @@ class TestNode():
         rospy.Timer(rospy.Duration(0.01),self.cbControl)
         rospy.Timer(rospy.Duration(0.1),self.cbComputeActionCrowdNav)
 
+    #def laser_callback(self, scan):
+    #    # scan contains:
+    #    # header:
+    #    #   seq: 2954
+    #    #  stamp:
+    #    #   secs: 149
+    #    #   nsecs: 700002994
+    #    # frame_id: "laser_link"
+    #    # angle_min: -1.5707963705062866
+    #    # angle_max: 4.6949357986450195
+    #    # angle_increment: 0.01745329238474369
+    #    # time_increment: 0.0
+    #    # scan_time: 0.0
+    #    # range_min: 0.0
+    #    # range_max: 3.5
+    #    # ranges: [nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, 3.4862523078918457, 3.4720942974090576, 3.4591033458709717, 3.447254180908203, 3.4365286827087402, 3.426910161972046, 3.418384313583374, 3.4109370708465576, 3.4045567512512207, 3.3992369174957275, 3.394960403442383, 3.391730546951294, 3.3895373344421387, 3.388381004333496, 3.388251781463623, 3.3891568183898926, 3.3910977840423584, 3.3940744400024414, 3.39809250831604, 3.4031553268432617, 3.4092745780944824, 3.4164609909057617, 3.424720287322998, 3.4340686798095703, 3.444521427154541, 3.4560940265655518, 3.4688050746917725, 3.482672691345215, 3.4977238178253174, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan]
+    #    # intensities: []
+    #
+    #    # ranges is a tuple of length 360
+    #    # save laser scan ranges into class variable
+    #    _ranges = scan.ranges
+    
+    #def cbSubGoal(self, subgoal):
+    #    # subgoal.pose.position consists of x, y, z (z always 0.0)
+    #    # subgoal.pose.orientation consists of x, y, z, w (#TODO all 0.0?)
+    #    _subgoal = subgoal
+    
+    #def cbRobotState(self, msg_robot_state_stamped):
+    #    state = msg_robot_state_stamped.state
+    #    # TODO observation collector contains functions to convert these into the 2D data needed
+    #    # state consists of pose (position, orientation) and twist (linear, angular)
+    #    pose3d = state.pose
+    #    twist = state.twist
+    #    _robot_state = state
+    
     def cbClusters(self,msg):
         # print(msg)
 
@@ -142,6 +195,8 @@ class TestNode():
         self.visualize_action()
 
     def cbComputeActionCrowdNav(self,event):
+        # print laser scan to console:
+
         robot_x = self.tb3.pose.pose.position.x
         robot_y = self.tb3.pose.pose.position.y
         # goal
@@ -157,11 +212,11 @@ class TestNode():
         # set robot info
         self.robot.set(robot_x, robot_y, goal_x, goal_y, robot_vx, robot_vy, theta, robot_radius)
 
-        obstacle_x = [-6.0,-6.0,-6.0,-6.0,-6.0]
-        obstacle_y = [-6.0,-6.0,-6.0,-6.0,-6.0]
+        obstacle_x = [-6.0,-6.0,-6.0,-6.0,-6.0,-6.0]
+        obstacle_y = [-6.0,-6.0,-6.0,-6.0,-6.0,-6.0]
         # velocity
-        obstacle_vx = [0.0,0.0,0.0,0.0,0.0]
-        obstacle_vy = [0.0,0.0,0.0,0.0,0.0]
+        obstacle_vx = [0.0,0.0,0.0,0.0,0.0,0.0]
+        obstacle_vy = [0.0,0.0,0.0,0.0,0.0,0.0]
         obstacle_radius = 0.3
         if True:
             for prop in self.other_agents_state:
@@ -252,23 +307,25 @@ def run():
     # rospy.sleep(0.1) # sometimes node isnt recognized
     print('==================================\ncrowd-node started\n==================================')
 
-    policy_name = "sarl"
+    #policy_name = "sarl"
+    policy_name = "orca"
 
     device = 'cpu'
     phase = 'test'
 
-    select_policy       = {"cadrl":CADRL(),"lstm":LstmRL(),"sarl":SARL()}
+    #select_policy       = {"cadrl":CADRL(),"lstm":LstmRL(),"sarl":SARL()}
+    select_policy       = {"cadrl":CADRL(),"lstm":LstmRL(),"sarl":SARL(),"orca":ORCA()}
     # the path of training result which contains configs and rl mode
     env_config_file     = 'crowd_nav/data/output/env.config'             #path beginging without slash
     policy_config_file  = 'crowd_nav/data/output/policy.config'
-    model_weights       = 'crowd_nav/data/output/rl_model_'+policy_name+'.pth'
+    #model_weights       = 'crowd_nav/data/output/rl_model_'+policy_name+'.pth'
     # print(model_weights)
     # select policy
     policy          = select_policy[policy_name]     #{SARL(),CADRL(),LstmRL()}
     policy_config   =  configparser.RawConfigParser()
     policy_config.read(policy_config_file)
     policy.configure(policy_config)
-    policy.get_model().load_state_dict(torch.load(model_weights))
+    #policy.get_model().load_state_dict(torch.load(model_weights))
     policy.set_device(device)
     policy.set_phase(phase)
 
@@ -277,6 +334,8 @@ def run():
     env_config.read(env_config_file)
     env = gym.make('CrowdSim-v0')   #env is inherited from CrowdSim class in crowd_sim.py
     env.configure(env_config)
+
+    print(policy)
 
 
     test = TestNode(env,env_config,policy)

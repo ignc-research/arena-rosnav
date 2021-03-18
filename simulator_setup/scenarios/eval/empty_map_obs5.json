@@ -110,6 +110,28 @@
                     "triggers": [
                         "watcher_4"
                     ]
+                },
+
+                "dynamic_obs_5": {
+                    "obstacle_radius": 0.3,
+                    "linear_velocity": 0.2,
+                    "start_pos": [
+                        10,
+                        4,
+                        0
+                    ],
+                    "waypoints": [
+                        [
+                            1,
+                            -5,
+                            0
+                        ]
+                    ],
+                    "is_waypoint_relative": true,
+                    "mode": "yoyo",
+                    "triggers": [
+                        "watcher_4"
+                    ]
                 }
 
 
