@@ -21,6 +21,7 @@ from stable_baselines3.common.policies import ActorCriticPolicy
 from stable_baselines3.common.type_aliases import GymEnv, MaybeCallback, Schedule
 from stable_baselines3.common.utils import explained_variance, get_schedule_fn
 from il_customer_policy import ILPolicy, ILPolicyContinuous
+from custom_policy import MLP_ARENA2D, MLP_ARENA2D_POLICY
 
 import h5py
 import glob
@@ -71,12 +72,11 @@ class pretrainPPO(PPO):
         # use customer defined policy
         if use_customer_policy:
             if env._is_action_space_discrete:
-                self.policy_class = ILPolicy
+                self.policy_class = MLP_ARENA2D_POLICY
                 self.policy = self.policy_class(self.observation_space,
                                                 self.action_space,
                                                 self.lr_schedule,
-                                                use_sde=self.use_sde,
-                                                batch_size=self.batch_size,
+                                                self.batch_size,
                                                 **self.policy_kwargs  # pytype:disable=not-instantiable
                                                 )
                 self.policy.to(self.device)

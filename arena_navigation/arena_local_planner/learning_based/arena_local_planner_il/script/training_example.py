@@ -35,7 +35,7 @@ def pretraining_train(dataset_length:int, pre_episodes:int, learn_step:int, poli
     model = pretrainPPO('MlpPolicy', env, learning_rate=2e-4, verbose=1, pretraining=pretraining, dataset_length=dataset_length)
     if pretraining:
         #run supervised learning
-        model.pretrain(5e-5, 64, policy_storage_addr, epi= pre_episodes) #first two varables:learning rate, batch_size
+        model.pretrain(5e-4, 64, policy_storage_addr, epi= pre_episodes) #first two varables:learning rate, batch_size
     else:
         # load the pretrained model weight
         model.policy = th.load(policy_storage_addr + '/20.pth')
@@ -89,7 +89,7 @@ def evaluate_policies():
 if __name__ == '__main__':
     addr = '/home/jiayun/git_ws/src/arena-rosnav/arena_navigation/arena_local_planner/learning_based/arena_local_planner_il/data/pretrained_policy'
     ##if using pretraining 30000 pairs need 14min to match data##
-    pretraining_train(30000, 2000000, 10000000, addr, pretraining=False)
+    pretraining_train(30000, 2000000, 10000000, addr, pretraining=True)
     #run_pretrained_model(addr+'/20.pth')
     
     # TODO find a way to evaluate policy by using drl reward functions.
