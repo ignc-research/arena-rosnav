@@ -32,10 +32,10 @@ class CfgNode(_CfgNode):
         # defaults.py needs to import CfgNode
         from .defaults import _C
 
-        latest_ver = _C.VERSION
-        assert (
-            latest_ver == self.VERSION
-        ), "CfgNode.merge_from_file is only allowed on a config object of latest version!"
+        # latest_ver = _C.VERSION
+        # assert (
+        #     latest_ver == self.VERSION
+        # ), "CfgNode.merge_from_file is only allowed on a config object of latest version!"
 
         logger = logging.getLogger(__name__)
         self.merge_from_other_cfg(loaded_cfg)

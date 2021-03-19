@@ -8,11 +8,6 @@ arena_local_planner_drl_root= rospkg.RosPack().get_path('arena_local_planner_drl
 _C = CN()
 
 _C.OUTPUT_DIR_ROOT = os.path.join(arena_local_planner_drl_root,'output')
-
-
-
-
-
 #Robot's setting
 _C.ROBOT = CN()
 # setting's file for flatland
@@ -52,8 +47,8 @@ _C.MODEL.GAMMA = 0.99
 _C.MODEL.GAE_LAMBDA = 0.95
 _C.MODEL.CLIP_RANGE = 0.2
 _C.MODEL.MAX_GRAD_NORM =  0.5
-_C.MODEL.ENT_COEF = 0.005
-_C.MODEL.VF_COEF = 0.2
+_C.MODEL.ENT_COEF = 0.002
+_C.MODEL.VF_COEF = 0.05
 
 _C.REWARD = CN()       
 _C.REWARD.RULE_NAME = "rule_01" 
