@@ -56,7 +56,7 @@ class RewardCalculator():
         self._reward_safe_dist(laser_scan)
         self._reward_collision(laser_scan)
         self._reward_goal_approached(goal_in_robot_frame)
-        self._reward_goal_approached3(goal_in_robot_frame)
+        #self._reward_goal_approached3(goal_in_robot_frame)
         self._reward_step_penalty()
         
 
@@ -66,7 +66,7 @@ class RewardCalculator():
         self._reward_safe_dist(laser_scan)
         self._reward_collision(laser_scan)
         self._reward_goal_approached2(goal_in_robot_frame)
-        self._reward_goal_approached3(goal_in_robot_frame)
+        #self._reward_goal_approached3(goal_in_robot_frame)
         self._reward_step_penalty()
         
 
