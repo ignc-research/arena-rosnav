@@ -17,16 +17,16 @@
 1. Upload an image of the map in the `input` folder inside of the root folder.
 2. Activate the kivy environment. <br />
 `$ source $HOME/kivy_venv/bin/activate`
-3. Navigate inside the project root folder.
+3. Navigate inside the project root folder. <br />
+`$ cd arena-rosnav/gui`
 4. Execute the `paint.py` file. <br />
 `$ python paint.py`
 5. Generate a new scenario in the paint app. Look at the rules!
 6. Execute the `parser.py` file. <br />
 `$ python parser.py`
-7. The generated json file will be saved under the name `new_scenario.json` in the `output` folder.
-8. Copy and paste the json file in the folder `arena-rosnav/simulator_setup/scenerios/`.
-9. Modify the `arena-rosnav/arena_bringup/launch/sublaunch/task_generator.launch` file, changing the name of the expected json file to `new_scenario.json`.
-10. In `arena-rosnav` run for example <br />
+7. The generated json file will be saved under the name `new_scenario.json` in the `output` folder as well as in the folder `arena-rosnav/simulator_setup/scenerios/`, where all scenarios are stored.
+8. Modify the `arena-rosnav/arena_bringup/launch/sublaunch/task_generator.launch` file, changing the name of the expected json file to `new_scenario.json`. <br />
+9. In `arena-rosnav` run for example <br />
 `$ roslaunch arena_bringup start_arena_flatland.launch local_planner:="teb" use_viz:="true" map_file:="map1" rviz_file:="nav2"`. <br />
 The file `nav2.rviz` is different from `nav.rviz` only by two things - the map is horizontal and the first couple of obstacles are visible with the start of rviz. The program still works will all available rviz files, just the visualization will be slightly defferent. Please take a look also at the section `Legend for the already tested maps` below.
 

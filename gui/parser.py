@@ -1,5 +1,6 @@
 import os
 from PIL import Image # if necessary run $ python3 -m pip install --upgrade Pillow
+from shutil import copyfile
 # it also may be necessary to install xclip if an error in the console is received -> do $ sudo apt-get install xclip
 
 # IDEA: from 6 txt files make 1 json file
@@ -373,10 +374,15 @@ with open('output/new_scenario.json') as file:
     file_contents = file.read()
     print(file_contents)
 
+# copy and paste the file to arena-rosnav/simulator-setup/scenerios, where all scenarious are stored
+copyfile('output/new_scenario.json', '../simulator_setup/scenerios/new_scenario.json')
+# to do it manuelly from the console, from arena-rosnav/gui run:
+# $ sudo cp output/new_scenario.json ../simulator_setup/scenerios/
+
 # when ready -> validate the json: https://jsonformatter.curiousconcept.com/
 
-print('/**************** user_data.json & scenario.png *****************/')
-### save only the relevant to the user data in a new txt file (user_data.json), from where the user could easily check his/hers inputs
+print('/**************** user_data.txt & scenario.png *****************/')
+### save only the relevant to the user data in a new txt file (user_data.txt), from where the user could easily check his/hers inputs
 # -> map resolution, obstacle velocities, obstacle-watchers connections from data.txt, the motions from motion.txt and obstacle types from obstacle.txt in a nicer form
 fob = open('output/user_data.txt','w')
 fob.write('Map resolution:\n' + str(map_res) + "\n")
@@ -417,6 +423,7 @@ im_scenario.show() # show the image
 # !1) different types of obstacles are allowed:
 # -> include "type" in the json file -> then modify task.py, obstacles_manager.py so that this info could be read
 # -> connect with another student -> include more obstacle types like human etc. (for human there should be also the parameter talking etc.)?
+# -> three more obstacles: "forklift", "person_single_circle", "person_two_legged"
 # 2) different motions per obstacle -> input field vs. dropdown box
 # 3) make the window not resizable or resizable (but everyhting should still work fine!) - for now the window is not resizable and it's fine
 # 4) animation of the obstacle how it moves from one point to another
@@ -428,5 +435,5 @@ im_scenario.show() # show the image
 # - launch it with a simple command
 # -> nav2.rviz (map horizontal and first couple of obstacles visible), still it works will all rviz files, just different visualized!
 # $ roslaunch arena_bringup start_arena_flatland.launch local_planner:="teb" use_viz:="true" map_file:="map1" rviz_file:="nav2"
-# ?- from the console ros topic list echo set goal; in rviz from the map check (x,y)
+# - DEBUG?: from the console ros topic list echo set goal; in rviz from the map check (x,y)
 
