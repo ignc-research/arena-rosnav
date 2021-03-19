@@ -140,6 +140,7 @@ class StagedRandomTask(RandomTask):
             self._curr_stage > len(self._stages)):
             raise IndexError(
                 "Start stage given for training curriculum out of bounds! Has to be between {1 to %d}!" % len(self._stages))
+        rospy.set_param("/curr_stage", self._curr_stage)
 
         # hyperparamters.json location
         self.json_file = os.path.join(
@@ -159,6 +160,7 @@ class StagedRandomTask(RandomTask):
             self._initiate_stage()
 
             if self.ns == "eval_sim":
+                rospy.set_param("/curr_stage", self._curr_stage)
                 with self._lock_json:
                     self._update_curr_stage_json()
                     
@@ -176,6 +178,7 @@ class StagedRandomTask(RandomTask):
             self._initiate_stage()
 
             if self.ns == "eval_sim":
+                rospy.set_param("/curr_stage", self._curr_stage)
                 with self._lock_json:
                     self._update_curr_stage_json()
         else:

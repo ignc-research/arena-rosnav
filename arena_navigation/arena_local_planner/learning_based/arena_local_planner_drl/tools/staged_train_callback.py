@@ -1,6 +1,7 @@
 import warnings
 import rospy
 import numpy as np
+import time
 
 from typing import List
 from std_msgs.msg import Bool
@@ -12,9 +13,7 @@ class InitiateNewTrainStage(BaseCallback):
     Introduces new training stage when threshhold reached.
     It must be used with "EvalCallback".
 
-    :param TaskManagers (list, StagedRandomTask): holds task managers with specific methods and stages
     :param treshhold_type (str): checks threshhold for either percentage of successful episodes (succ) or mean reward (rew)
-    :param StartAt (int): stage to start training with
     :param rew_threshold (int): mean reward threshold to trigger new stage
     :param succ_rate_threshold (float): threshold percentage of succesful episodes to trigger new stage
     :param task_mode (str): training task mode, if not 'staged' callback won't be called
@@ -89,15 +88,24 @@ class InitiateNewTrainStage(BaseCallback):
                     "results might not represent agent performance well" % EvalObject.n_eval_episodes)
             
             if ((self.threshhold_type == "rew" and EvalObject.best_mean_reward <= self.lower_threshold) or
-                (self.threshhold_type == "succ" and EvalObject.last_success_rate <= self.lower_threshold)):
-                for pub in self._publishers_previous:
+                (self.threshhold_type == "succ" and EvalObject.last_success_rate <= self.lower_threshold)):                
+                for i, pub in enumerate(self._publishers_previous):
                     pub.publish(self._trigger)
-
+                    if i == 0:
+                       self.log_curr_stage(EvalObject.logger)
+                    
             if ((self.threshhold_type == "rew" and EvalObject.best_mean_reward >= self.upper_threshold) or
                 (self.threshhold_type == "succ" and EvalObject.last_success_rate >= self.upper_threshold)):
-                for pub in self._publishers_next:
+                for i, pub in enumerate(self._publishers_next):
                     pub.publish(self._trigger)
+                    if i == 0:
+                        self.log_curr_stage(EvalObject.logger)
                 
                 if not rospy.get_param("/last_stage_reached"):
                     EvalObject.best_mean_reward = -np.inf
                     EvalObject.last_success_rate = -np.inf
+
+    def log_curr_stage(self, logger):
+        time.sleep(1)
+        curr_stage = rospy.get_param("/curr_stage", -1)
+        logger.record("train_stage/stage_idx", curr_stage)
