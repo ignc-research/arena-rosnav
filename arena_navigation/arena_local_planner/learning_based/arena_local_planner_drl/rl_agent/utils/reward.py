@@ -205,7 +205,7 @@ class RewardCalculator():
 
     def _reward_not_moving(self, 
                            action: np.ndarray = None, 
-                           punishment = 0.01):
+                           punishment: float=0.01):
         """
         Reward for not moving. Only applies half of the punishment amount
         when angular velocity is larger than zero.
@@ -221,19 +221,21 @@ class RewardCalculator():
 
     def _reward_distance_traveled(self, 
                                   action: np.array = None, 
-                                  punishment = 0.01):
+                                  punishment: float=0.01,
+                                  consumption_factor: float=0.005):
         """
         Reward for driving a certain distance. Supposed to represent "fuel consumption".
         
         :param action ((,2) np.ndarray): [0] = linear velocity, [1] = angular velocity 
         :param punishment (float, optional): punishment when action can't be retrieved. defaults to 0.01
+        :param consumption_factor (float, optional): weighted velocity punishment. defaults to 0.01
         """
         if action is None:
             self.curr_reward -= punishment
         else:
             lin_vel = action[0]
             ang_vel = action[1]
-            reward = ((lin_vel*0.98) + (ang_vel*0.02)) * 0.005
+            reward = ((lin_vel*0.98) + (ang_vel*0.02)) * consumption_factor
         self.curr_reward -= reward
         
     def _reward_distance_global_plan(self, 
