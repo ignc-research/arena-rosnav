@@ -41,7 +41,6 @@ def get_agent_name(args) -> str:
         return args.agent + "_" + START_TIME
     return args.load
 
-
 def get_paths(agent_name: str, args) -> dict:
     """ 
     Function to generate agent specific paths 
@@ -101,7 +100,6 @@ def get_paths(agent_name: str, args) -> dict:
         PATHS['tb'] = None
 
     return PATHS
-
 
 def make_envs(rank: int, 
               params: dict, 
@@ -318,4 +316,5 @@ if __name__ == "__main__":
     # update the timesteps the model has trained in total
     # update_total_timesteps_json(n_timesteps, PATHS)
     print("training done!")
+    sys.exit()
     
