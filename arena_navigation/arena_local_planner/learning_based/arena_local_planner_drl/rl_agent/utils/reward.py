@@ -151,8 +151,8 @@ class RewardCalculator():
 
     def _reward_goal_approached(self, 
                                 goal_in_robot_frame = Tuple[float,float],
-                                reward_factor: float = 0.3,
-                                penalty_factor: float = 0.5):
+                                reward_factor: float=0.3,
+                                penalty_factor: float=0.5):
         """
         Reward for approaching the goal.
         
@@ -204,13 +204,13 @@ class RewardCalculator():
             self.curr_reward -= punishment
 
     def _reward_not_moving(self, 
-                           action: np.ndarray = None, 
+                           action: np.ndarray=None, 
                            punishment: float=0.01):
         """
         Reward for not moving. Only applies half of the punishment amount
         when angular velocity is larger than zero.
         
-        :param action ((,2) np.ndarray): [0] = linear velocity, [1] = angular velocity 
+        :param action (np.ndarray (,2)): [0] - linear velocity, [1] - angular velocity 
         :param punishment (float, optional): punishment for not moving. defaults to 0.01
         """
         if action is not None and action[0] == 0.0:
@@ -226,7 +226,7 @@ class RewardCalculator():
         """
         Reward for driving a certain distance. Supposed to represent "fuel consumption".
         
-        :param action ((,2) np.ndarray): [0] = linear velocity, [1] = angular velocity 
+        :param action (np.ndarray (,2)): [0] - linear velocity, [1] - angular velocity 
         :param punishment (float, optional): punishment when action can't be retrieved. defaults to 0.01
         :param consumption_factor (float, optional): weighted velocity punishment. defaults to 0.01
         """
@@ -275,7 +275,7 @@ class RewardCalculator():
         
         :param global_plan: (np.ndarray): vector containing poses on global plan
         :param robot_pose (Pose2D): robot position
-        :param action ((,2) np.ndarray): [0] = linear velocity, [1] = angular velocity 
+        :param action (np.ndarray (,2)): [0] - linear velocity, [1] - angular velocity  
         :param dist_to_path (float, optional): applies reward within this distance
         """
         if global_plan is not None and len(global_plan) != 0 and action is not None:
