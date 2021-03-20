@@ -3,10 +3,12 @@ from PIL import Image # if necessary run $ python3 -m pip install --upgrade Pill
 from shutil import copyfile
 # it also may be necessary to install xclip if an error in the console is received -> do $ sudo apt-get install xclip
 
-# IDEA: from 6 txt files make 1 json file
+# IDEA: from txt files make 1 json file
 # parse a txt file: https://www.vipinajayakumar.com/parsing-text-with-python/; https://www.pythontutorial.net/python-basics/python-read-text-file/ (from here is the idea with the lines taken)
 
-# check if all 6 files exist and are not empty! (to not trow an error, but print a message if that is the case)
+print('\nSTART parser.py\n')
+
+# check if all txt files exist and are not empty! (to not trow an error, but print a message if that is the case)
 my_path = ['output/internal/data.txt', 'output/internal/obstacle.txt', 'output/internal/watcher.txt', 'output/internal/vector.txt', 'output/internal/robot.txt', 'output/internal/motion.txt']
 for my_file in my_path:
     if not (os.path.exists(my_file) and os.path.getsize(my_file) > 0):
@@ -74,7 +76,7 @@ for line in lines:
         for value in line.split(','):
             temp_array.append((int(value)))
         obstacle_watcher_connections_2.append(temp_array) # assume the ordering is right starting from 0
-        print('Single obstacle-watchers connections: ' + str(line))
+        print('Single obstacle-watchers connections: ' + str(line.split('\n')[0]))
 
 # check if the amount of obstacles given in the text area, is the same as the actually drawn, also as the same as the drawn lines etc.
 # obstacle.txt_lines == vector.txt_lines/2 == motion.txt_lines == data.txt_obstacle-vel.lines == data.txt_obst-watch-con.lines
@@ -280,7 +282,7 @@ new_start_point_y = image_corners[0][1]
 scale_x = pos_scale[0]*map_res
 scale_y = pos_scale[1]*map_res
 # check where is the (0,0) point in rviz; for the kivy app was in the bottom left corner!
-# TODO NEXT: flip_y_axis or flip_y_axis = -1 (if in rviz the start is in another corner)
+# Attention: flip_y_axis or flip_y_axis = -1 (if in rviz the start is in another corner)
 flip_x_axis = 1
 flip_y_axis = 1
 # check if the start point should be actually (0,0) or some other point -> shift all positions by that value (after all of the scaling has already been done!)
@@ -293,7 +295,7 @@ obstacles_json = ''
 i = 0
 for obstacle in obstacles:
     obstacle_num = str(i)
-    # TODO NEXT: should the radius be scaled by scale_x or scale_y -> it should be a circle after all !?
+    # TODO: should the radius be scaled by scale_x or scale_y -> it should be a circle after all !?
     obstacle_radius = str(obstacle[2]*scale_x) # good with obstacle[2]*scale_x (should be right!, since the radius is a distace and it was made according to the image size after, but taken as a image size before!)
     lin_velocity = str(obstacle_vel[i]) # before was obstacle_vel[i][1]
     start_pos_x = str((obstacle[0]-new_start_point_x)*scale_x*flip_x_axis+shift_x) # good with (obstacle[0]-new_start_point_x)*scale_x*flip_x_axis+shift_x
@@ -302,7 +304,7 @@ for obstacle in obstacles:
     waypoint_y = str((waypoints[i][1][1])*scale_y*flip_y_axis) # scale and flip? are only relevant!
     watcher_num = str(i)
     move = str(motion[i])
-    obstacle_type = str(obstacle[3]) # obstacle default type = "circle" # TODO NEXT
+    obstacle_type = str(obstacle[3]) # obstacle default type = "circle" # TODO: adjust the obstacle type
 
     # since the order of the obstacles is given in the window, it is here assumed that the obstacle velocities and the obstacle-watchers connections are written in the right order
     obstacles_json += '\n\t\t\t\t"dynamic_obs_' + obstacle_num + '": {\n\t\t\t\t\t'
@@ -418,22 +420,19 @@ im_scenario = im.crop((left, top, right, bottom))
 im_scenario.save("output/scenario.png")
 im_scenario.show() # show the image
 
-# TODO NEXT notes:
-# !0) comment the code, clear out the prints, make a video explaining each step; update the readme file
+# INFO:
+# The code is tested with different maps (map_small.png and map.png) in rviz and it works.
+# The scenario can be launched with following simple command:
+# $ roslaunch arena_bringup start_arena_flatland.launch local_planner:="teb" use_viz:="true" map_file:="map1" rviz_file:="nav2"
+# In nav2.rviz is the map horizontal and the first couple of obstacles are already with the start visible. It still works with all rviz files, just different visualized!
+
+# TODO:
+# !0) comment the code, clear out the prints, make a video explaining each step; update the readme file, make the window pretier
+# -> the program should be easy to extend -> include in the readme files tipps how to extend different things, how some things work etc.
 # !1) different types of obstacles are allowed:
 # -> include "type" in the json file -> then modify task.py, obstacles_manager.py so that this info could be read
 # -> connect with another student -> include more obstacle types like human etc. (for human there should be also the parameter talking etc.)?
-# -> three more obstacles: "forklift", "person_single_circle", "person_two_legged"
-# 2) different motions per obstacle -> input field vs. dropdown box
-# 3) make the window not resizable or resizable (but everyhting should still work fine!) - for now the window is not resizable and it's fine
-# 4) animation of the obstacle how it moves from one point to another
+# -> three more obstacles: "forklift", "person_single_circle", "person_two_legged" (even more from other branches) -> include them into the gui!?
+# 2) animation of the obstacle how it moves from one point to another
 # -> man kann am Rand eine hard coded Simulation in demselben map von einem obstacle mit Geschwindigkeit zB 0.3 visualizieren, damit der Nutzer Gefuehl bekommen kann, wie schnell das eigentlich ist
-# ?5) Rand von watcher zu rot machen, wenn es zu srash wird; die Robotergeschwindigkeit ist hard coded zu 0.3, man kann also berechnen, wann wird der ROboter der watcher aktivieren; also weiteres, letztes Button "simulate if colision"; man braucht dafuer aber noch global path -> nur mit box2d sim engine machbar
-
-# TODO TEST the code with different maps in rviz:
-# - tested with map_small.png and map.png and it works!
-# - launch it with a simple command
-# -> nav2.rviz (map horizontal and first couple of obstacles visible), still it works will all rviz files, just different visualized!
-# $ roslaunch arena_bringup start_arena_flatland.launch local_planner:="teb" use_viz:="true" map_file:="map1" rviz_file:="nav2"
-# - DEBUG?: from the console ros topic list echo set goal; in rviz from the map check (x,y)
-
+# ?3) Rand von watcher zu rot machen, wenn es zu srash wird; die Robotergeschwindigkeit ist hard coded zu 0.3, man kann also berechnen, wann wird der ROboter der watcher aktivieren; also weiteres, letztes Button "simulate if colision"; man braucht dafuer aber noch global path -> nur mit box2d sim engine machbar
