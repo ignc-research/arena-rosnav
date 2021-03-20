@@ -91,7 +91,7 @@ class RewardCalculator():
         self._reward_goal_reached(
             goal_in_robot_frame, reward=15)
         self._reward_safe_dist(
-            laser_scan, punishment=0.1)
+            laser_scan, punishment=0.2)
         self._reward_collision(
             laser_scan, punishment=15)
         self._reward_goal_approached(
@@ -110,7 +110,7 @@ class RewardCalculator():
         self._reward_collision(
             laser_scan, punishment=10)
         self._reward_goal_approached(
-            goal_in_robot_frame, reward_factor=0.3, penalty_factor=0.3)
+            goal_in_robot_frame, reward_factor=0.2, penalty_factor=0.4)
 
     def _cal_reward_rule_03(self, 
                             laser_scan: np.ndarray, 
@@ -126,9 +126,9 @@ class RewardCalculator():
         self._reward_goal_reached(
             goal_in_robot_frame, reward=15)
         self._reward_safe_dist(
-            laser_scan, punishment=0.25)
+            laser_scan, punishment=0.2)
         self._reward_collision(
-            laser_scan, punishment=15)
+            laser_scan, punishment=10)
         self._reward_goal_approached(
             goal_in_robot_frame, reward_factor=0.2, penalty_factor=0.2)
         
@@ -275,7 +275,7 @@ class RewardCalculator():
         
         :param global_plan: (np.ndarray): vector containing poses on global plan
         :param robot_pose (Pose2D): robot position
-        :param action (np.ndarray (,2)): [0] - linear velocity, [1] - angular velocity  
+        :param action (np.ndarray (,2)): [0] = linear velocity, [1] = angular velocity 
         :param dist_to_path (float, optional): applies reward within this distance
         """
         if global_plan is not None and len(global_plan) != 0 and action is not None:
