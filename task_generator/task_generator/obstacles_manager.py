@@ -77,9 +77,7 @@ class ObstaclesManager:
         self._obstacle_name_prefix = 'obstacle'
         # remove all existing obstacles generated before create an instance of this class
         self.remove_obstacles()
-        # print("start wait ")
-        # self.__remove_all_peds()
-        # print("start wait ")
+
     def setForbidden_zones(self, forbidden_zones: Union[list, None] = None):
         """ set the forbidden areas for spawning obstacles
         """
@@ -114,7 +112,6 @@ class ObstaclesManager:
         name_prefix = self._obstacle_name_prefix + '_' + model_name
 
         if type_obstacle == 'human':
-            # print("asad",num_obstacles)
             self.__remove_all_peds()
             self.spawn_random_peds_in_world(num_obstacles)
         else:
@@ -195,6 +192,7 @@ class ObstaclesManager:
         #     self.obstacle_name_str=self.obstacle_name_str+","+f'pedsim_agent_{i+1}/dynamic_human'
         model_path = os.path.join(rospkg.RosPack().get_path(
         'simulator_setup'), 'dynamic_obstacles/person_two_legged.model.yaml')
+        self.num_humans=num_obstacles
         self.register_obstacles(num_obstacles, model_path, type_obstacle='human')
             # os.remove(model_path)
 ##dynamic spawn in master branch
@@ -641,8 +639,8 @@ class ObstaclesManager:
         srv = SpawnPeds()
         srv.peds = []
         # print(peds)
-        self.agent_topic_str=''
-        for i, ped in enumerate(peds):
+        self.agent_topic_str=''        
+        for i, ped in enumerate(peds):            
             elements = [0, 1, 3]
             # probabilities = [0.4, 0.3, 0.3] np.random.choice(elements, 1, p=probabilities)[0]
             self.__ped_type=elements[i%3]
@@ -710,9 +708,9 @@ class ObstaclesManager:
             waypoints = np.vstack([waypoints, [x, y, 2]]) # the first waypoint
             # if random.uniform(0.0, 1.0) < 0.8:
             safe_distance=safe_distance-3 #the other waypoints don't need to avoid robot
-            for j in range(4):
+            for j in range(1000):
                 dist = 0
-                while dist < 4:
+                while dist < 8:
                     [x2, y2, theta2] = get_random_pos_on_map(self._free_space_indices, self.map, safe_distance, forbidden_zones)
                     dist = self.__mean_sqare_dist_((waypoints[-1,0] - x2), (waypoints[-1,1] - y2))
                 waypoints = np.vstack([waypoints, [x2, y2, 2]])

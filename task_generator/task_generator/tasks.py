@@ -378,7 +378,7 @@ def get_predefined_task(ns: str, mode="random", start_stage: int = 1, PATHS: dic
     # Tasks will be moved to other classes or functions.
     task = None
     if mode == "random":
-        obstacles_manager.register_random_obstacles(6, 1.0)
+        obstacles_manager.register_random_obstacles(9, 1.0)
         task = RandomTask(obstacles_manager, robot_manager)
         print("random tasks requested")
     if mode == "manual":

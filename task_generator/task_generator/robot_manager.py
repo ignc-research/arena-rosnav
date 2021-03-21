@@ -39,7 +39,7 @@ class RobotManager:
         self.ns_prefix = "/" if ns == "" else "/"+ns+"/"
         # print("ns",f'{self.ns_prefix}flatland_server/step_size')
 
-        self.safe_dist_adult=1.0
+        self.safe_dist_adult=0.8
         self.safe_dist_child=1.2
         self.safe_dist_elder=1.5
 
@@ -119,7 +119,7 @@ class RobotManager:
             pose (Pose2D): target postion
         """
         # call service move_model
-        print("use move robot func")
+        # print("use move robot func")
 
         srv_request = MoveModelRequest()
         srv_request.name = self.ROBOT_NAME
@@ -145,7 +145,7 @@ class RobotManager:
         self.move_robot(start_pos)
 
     def set_start_pos_goal_pos(self, start_pos: Union[Pose2D, None]
-                               = None, goal_pos: Union[Pose2D, None] = None, min_dist=1, min_dist_human=4, obs_dict=None):
+                               = None, goal_pos: Union[Pose2D, None] = None, min_dist=7, min_dist_human=4, obs_dict=None):
         """set up start position and the goal postion. Path validation checking will be conducted. If it failed, an
         exception will be raised.
 
@@ -164,40 +164,55 @@ class RobotManager:
 
         forbiddenZones=[]
         if obs_dict is not None:
-            print("calculate the forbidden zones")
-            coordinate_a=obs_dict['adult_coordinates_in_robot_frame'].T
-            for coordinate in coordinate_a:
-                forbiddenZones.append((coordinate[0],coordinate[1],self.safe_dist_adult*1.05))
-            coordinate_c=obs_dict['child_coordinates_in_robot_frame'].T
-            for coordinate in coordinate_c:
-                forbiddenZones.append((coordinate[0],coordinate[1],self.safe_dist_child*1.05))
-            coordinate_e=obs_dict['elder_coordinates_in_robot_frame'].T
-            for coordinate in coordinate_e:
-                forbiddenZones.append((coordinate[0],coordinate[1],self.safe_dist_elder*1.05))
+            # print("calculate the forbidden zones")
+            coordinates=obs_dict['human_coordinates_in_robot_frame'].T
+            tys=obs_dict['human_type']
+            for i, coordinate in enumerate(coordinates):
+                if tys[i]==0: #adult
+                    forbiddenZones.append((coordinate[0],coordinate[1],self.safe_dist_adult*1.05))
+                elif tys[i]==1: #child
+                    forbiddenZones.append((coordinate[0],coordinate[1],self.safe_dist_child*1.05))
+                elif tys[i]==3: #elder
+                    forbiddenZones.append((coordinate[0],coordinate[1],self.safe_dist_elder*1.05))
+
+
+            # coordinate_a=obs_dict['adult_coordinates_in_robot_frame'].T
+            # for coordinate in coordinate_a:
+            #     forbiddenZones.append((coordinate[0],coordinate[1],self.safe_dist_adult*1.05))
+            # coordinate_c=obs_dict['child_coordinates_in_robot_frame'].T
+            # for coordinate in coordinate_c:
+            #     forbiddenZones.append((coordinate[0],coordinate[1],self.safe_dist_child*1.05))
+            # coordinate_e=obs_dict['elder_coordinates_in_robot_frame'].T
+            # for coordinate in coordinate_e:
+            #     forbiddenZones.append((coordinate[0],coordinate[1],self.safe_dist_elder*1.05))
 
         # coordinates=np.hstack([obs_dict['adult_coordinates_in_robot_frame'] ,obs_dict['child_coordinates_in_robot_frame'] ]
         # coordinates=np.hstack([coordinates, obs_dict['elder_coordinates_in_robot_frame']])
 
         if start_pos is None or goal_pos is None:
             # if any of them need to be random generated, we set a higher threshold,otherwise only try once
-            max_try_times = 40
+            max_try_times = 100
         else:
             max_try_times = 1
 
         i_try = 0
         start_pos_ = None
         goal_pos_ = None
+        #print("free space",self._free_space_indices)
         while i_try < max_try_times:
             if start_pos is None:
                 start_pos_ = Pose2D()
                 start_pos_.x, start_pos_.y, start_pos_.theta = get_random_pos_on_map(
                     self._free_space_indices, self.map, self.ROBOT_RADIUS * 2,forbiddenZones)
+                #start_pos_.x, start_pos_.y, start_pos_.theta= -4.5, 3.5, 0
+
             else:
                 start_pos_ = start_pos
             if goal_pos is None:
                 goal_pos_ = Pose2D()
                 goal_pos_.x, goal_pos_.y, goal_pos_.theta = get_random_pos_on_map(
                     self._free_space_indices, self.map, self.ROBOT_RADIUS * 4)
+                #goal_pos_.x, goal_pos_.y, goal_pos_.theta= 9.5 , -4 , 0
             else:
                 goal_pos_ = goal_pos
 
