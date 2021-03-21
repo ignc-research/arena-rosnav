@@ -780,7 +780,8 @@ class MyPaintApp(App):
         label_done = Label(text='Done! The script parser.py is running. See the generated json file in the output folder!', pos=(Window.size[1]*1.7/3,Window.size[1]-60)) # write a label, that the image and the json are ready (generated in the root folder)
         parent.add_widget(label_done)
         
-        import parser # run parser.py
+        import parser # run parser.py # better way, but it trolls a warning on windows (another way is to just make the warning silent)
+        #os.system('python3 parser.py') # not the best way to run a script, but it works with all OS, be careful with python and python3
         os._exit(0) # terminate the window
 
     def button_obstacle_type(self, mainbutton_obstacle_type, parent, wimg_input_map, parent_draw, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return, color_r_temp, color_g_temp, color_b_temp):

@@ -267,12 +267,9 @@ for line in lines_motion:
     motion_given = line.split('\n')[0]
     valid = 0
     for motion_valid in motions_valid:
-        print(motion_valid)
-        print(motion_given)
         if motion_given == motion_valid:
             valid = 1
             break
-    print(valid)
     if valid == 1:
         motion.append(motion_given)
     else:
