@@ -13,6 +13,7 @@ import yaml
 from rl_agent.utils.observation_collector import ObservationCollector
 from rl_agent.utils.reward import RewardCalculator
 from rl_agent.utils.debug import timeit
+from rl_agent.utils.CSVWriter import CSVWriter
 from task_generator.tasks import ABSTask
 import numpy as np
 import rospy
@@ -20,6 +21,16 @@ from geometry_msgs.msg import Twist
 from flatland_msgs.srv import StepWorld, StepWorldRequest
 import time
 
+class Actions():
+    # Define 11 choices of actions to be:
+    # [v_pref,      [-pi/6, -pi/12, 0, pi/12, pi/6]]
+    # [0.5*v_pref,  [-pi/6, 0, pi/6]]
+    # [0,           [-pi/6, 0, pi/6]]
+    def __init__(self):
+        self.actions = np.mgrid[1.0:1.1:0.5, -np.pi/6:np.pi/6+0.01:np.pi/12].reshape(2, -1).T
+        self.actions = np.vstack([self.actions,np.mgrid[0.5:0.6:0.5, -np.pi/6:np.pi/6+0.01:np.pi/6].reshape(2, -1).T])
+        self.actions = np.vstack([self.actions,np.mgrid[0.0:0.1:0.5, -np.pi/6:np.pi/6+0.01:np.pi/6].reshape(2, -1).T])
+        self.num_actions = len(self.actions)
 
 class FlatlandEnv(gym.Env):
     """Custom Environment that follows gym interface"""
@@ -43,8 +54,8 @@ class FlatlandEnv(gym.Env):
         super(FlatlandEnv, self).__init__()
 
         self.ns = ns
+        self.task = task
         # process specific namespace in ros system
-        # print("namespace", self.ns)
         if ns is not None or ns !="":
             self.ns_prefix = '/'+ns + '/'
         else:
@@ -60,34 +71,32 @@ class FlatlandEnv(gym.Env):
         self._is_action_space_discrete = is_action_space_discrete
         self.setup_by_configuration(robot_yaml_path, settings_yaml_path)
         # observation collector
+        num_humans=self.task.obstacles_manager.num_humans
         self.observation_collector = ObservationCollector(
-            self.ns, self._laser_num_beams, self._laser_max_range)
+            self.ns, self._laser_num_beams, self._laser_max_range,num_humans)
         self.observation_space = self.observation_collector.get_observation_space()
+        #csv writer
+        self.csv_writer=CSVWriter()
+        # self.cum_reward=0
 
         # reward calculator
-        # if safe_dist is None:
-        #     safe_dist = 1.5*self._robot_radius
-        if safe_dist_h is None:
-            self.safe_dist_h = 1.0
-        # print("using reward system",reward_fnc)
-
         self.reward_calculator = RewardCalculator(
-            robot_radius=self._robot_radius, safe_dist=1.1*self._robot_radius, safe_dist_adult= self.safe_dist_h,goal_radius=goal_radius, rule=reward_fnc)
-        #     safe_dist = 1.5*self._robot_radius
-
-        # self.reward_calculator = RewardCalculator(
-        #     robot_radius=self._robot_radius, safe_dist=1.1*self._robot_radius, goal_radius=goal_radius, rule=reward_fnc)
+            robot_radius=self._robot_radius, safe_dist=1.5*self._robot_radius, goal_radius=goal_radius, rule=reward_fnc)
 
         # action agent publisher
-        self.agent_action_pub = rospy.Publisher(f'{self.ns_prefix}{self.ns}/cmd_vel', Twist, queue_size=1) 
+        self.agent_action_pub = rospy.Publisher(f'{self.ns_prefix}cmd_vel', Twist, queue_size=1)
+        # action space configuration
+        # self.robot_v_pref=0.7
+        # self.robot_w_pref=2.7
         # service clients
         self._is_train_mode = rospy.get_param("/train_mode")
         if self._is_train_mode:
             self._service_name_step = f'{self.ns_prefix}step_world' 
             self._sim_step_client = rospy.ServiceProxy(
             self._service_name_step, StepWorld)
-        self.task = task
+        
         self._steps_curr_episode = 0
+        self._episode = 0
         self._max_steps_per_episode = max_steps_per_episode
         # # get observation
         # obs=self.observation_collector.get_observations()
@@ -125,9 +134,10 @@ class FlatlandEnv(gym.Env):
             setting_data = yaml.safe_load(fd)
             if self._is_action_space_discrete:
                 # self._discrete_actions is a list, each element is a dict with the keys ["name", 'linear','angular']
-                self._discrete_acitons = setting_data['robot']['discrete_actions']
-                self.action_space = spaces.Discrete(
-                    len(self._discrete_acitons))
+                #self._discrete_acitons = setting_data['robot']['discrete_actions']
+                self._discrete_acitons=Actions().actions
+                self.action_space = spaces.Discrete(Actions().num_actions)
+                # print('action len', Actions().num_actions)
             else:
                 linear_range = setting_data['robot']['continuous_actions']['linear_range']
                 angular_range = setting_data['robot']['continuous_actions']['angular_range']
@@ -144,8 +154,10 @@ class FlatlandEnv(gym.Env):
 
     def _translate_disc_action(self, action):
         new_action = np.array([])
-        new_action = np.append(new_action, self._discrete_acitons[action]['linear'])
-        new_action = np.append(new_action, self._discrete_acitons[action]['angular'])    
+        new_action = np.append(new_action, self._discrete_acitons[action][0])
+        new_action = np.append(new_action, self._discrete_acitons[action][1])
+        # new_action = np.append(new_action, self._discrete_acitons[action]['linear'])
+        # new_action = np.append(new_action, self._discrete_acitons[action]['angular'])    
             
         return new_action
 
@@ -158,44 +170,56 @@ class FlatlandEnv(gym.Env):
         """
         if self._is_action_space_discrete:
             action = self._translate_disc_action(action)
+        # else:
+        #     action[0]=action[0]*self.robot_v_pref
+        #     action[1]=action[1]*self.robot_w_pref
         self._pub_action(action)
         self._steps_curr_episode += 1
         # wait for new observations
         s = time.time()
+        #tell the robot how long it has passed
+        self.observation_collector.set_timestep(self._steps_curr_episode/self._max_steps_per_episode)
         merged_obs, obs_dict = self.observation_collector.get_observations()
         # print("get observation: {}".format(time.time()-s))
 
         # calculate reward
         reward, reward_info = self.reward_calculator.get_reward(
             obs_dict['laser_scan'], obs_dict['goal_in_robot_frame'], obs_dict['adult_in_robot_frame'],
-            obs_dict['child_in_robot_frame'],obs_dict['elder_in_robot_frame'])
+            obs_dict['child_in_robot_frame'],obs_dict['elder_in_robot_frame'], self._steps_curr_episode/self._max_steps_per_episode)
         done = reward_info['is_done']
-
-        print("reward:  {}".format(reward))
+        # print("reward:  {}".format(reward))
         
         # info
         info = {}
         if done:
             info['done_reason'] = reward_info['done_reason']
             info['is_success'] = reward_info['is_success']
+            history_evaluation=self.reward_calculator.get_history_info()
+            history_evaluation=[self._episode]+history_evaluation+[info['done_reason']]
+            self.csv_writer.addData(np.array(history_evaluation))
         else:
             if self._steps_curr_episode == self._max_steps_per_episode:
                 done = True
                 info['done_reason'] = 0
                 info['is_success'] = 0
+                history_evaluation=self.reward_calculator.get_history_info()
+                history_evaluation=[self._episode]+history_evaluation+[info['done_reason']]
+                self.csv_writer.addData(np.array(history_evaluation))
         self.last_obs_dict=obs_dict
         return merged_obs, reward, done, info
 
     def reset(self):
 
         # set task
-        # regenerate start position end goal position of the robot and change the obstacles accordingly
+        # regenerate start position and goal position of the robot and change the obstacles accordingly
         self.agent_action_pub.publish(Twist())
         if self._is_train_mode:
             self._sim_step_client()
         self.task.reset(self.last_obs_dict)
-        self.reward_calculator.reset()
+        self.reward_calculator.reset()  
         self._steps_curr_episode = 0
+        self._episode += 1
+        self.observation_collector.set_timestep(0.0)
         obs, _ = self.observation_collector.get_observations()
         return obs  # reward, done, info can't be included
 
