@@ -38,7 +38,7 @@
   
   <?ignore
   <!-- spawn extra model -->
-  <node name="spawn_model2" pkg="rosservice" type="rosservice"
+  <node name="spawn_model_2" pkg="rosservice" type="rosservice"
     args="call --wait /spawn_model &quot;{
       yaml_path: '$(find simulator_setup)/obstacles/forklift.model.yaml',
       name: 'forklift',
@@ -54,7 +54,7 @@
 
   <!--  ************** rviz  ***************  -->
   <group if="$(arg use_rviz)">
-    <node name="flatland_rviz" pkg="rviz" type="rviz" output="screen" args="-d $(find arena_bringup)/rviz/$(arg rviz_file).rviz"/>
+    <node name="flatland_rviz" pkg="rviz" type="rviz" output="screen" args="-d $(find arena_bringup)/rviz/$(arg rviz_file).rviz" launch-prefix="bash -c 'sleep 1.0; $0 $@' "/>
   </group>    
 
 </launch>

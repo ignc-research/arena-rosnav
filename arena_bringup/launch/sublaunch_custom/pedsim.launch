@@ -1,5 +1,4 @@
 <launch>
-  <!-- <arg name="scene_file" default="$(find simulator_setup)/maps/social_contexts.xml"/> -->
   <arg name="scene_file" default="$(find simulator_setup)/pedsim_scenarios/empty.xml"/>
   <arg name="default_queue_size" default="10"/>
   <arg name="robot_mode" default="1"/>
@@ -7,18 +6,6 @@
   <arg name="simulation_factor" default="1"/>
   <arg name="update_rate" default="25.0"/>
   <arg name="spawn_period" default="5.0"/>
-
-  <!-- <arg name="kbd_teleop" default="false"/> -->
-  <!-- <arg name="rqt_teleop" default="false"/> -->
-  <!-- <arg name="visualize" default="true"/> -->
-  <!-- <arg name="max_robot_speed" default="1.5"/> -->
-  <!-- <arg name="with_robot" default="false"/> -->
-  <!-- <arg name="pose_initial_x" default="3.0"/> -->
-  <!-- <arg name="pose_initial_y" default="7.0"/> -->
-  <!-- <arg name="pose_initial_theta" default="0.0"/> -->
-
-   <!-- main simulator node -->
-  <!-- <node name="pedsim_simulator" pkg="pedsim_simulator" type="pedsim_simulator" output="screen" ns="$(arg ns)" launch-prefix="xterm -e gdb -ex run -args"> -->
 
   <node name="pedsim_simulator" pkg="pedsim_simulator" type="pedsim_simulator" output="screen">
     <param name="scene_file" value="$(arg scene_file)" type="string"/>

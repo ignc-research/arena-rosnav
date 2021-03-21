@@ -35,7 +35,7 @@
   <!-- <arg name="scan_topic" default="scan"/> default laser topic in flatland -->
   
  <!-- use simulator and rviz-->
-  <include file="$(find arena_bringup)/launch/sublaunch/flatland_simulator.launch">
+  <include file="$(find arena_bringup)/launch/sublaunch_custom/flatland_simulator.launch">
     <arg name="world_path"      value="$(arg world_path)"/>
     <arg name="update_rate"     default="50.0"/>
     <arg name="step_size"       default="0.05"/>
@@ -74,7 +74,10 @@
   </include>
 
   <!-- pedsim -->
-  <include file="$(find arena_bringup)/launch/sublaunch/pedsim.launch">
+  <include file="$(find arena_bringup)/launch/sublaunch_custom/pedsim.launch">
   </include>
+
+  <node name="spawn_ped" pkg="simulator_setup" type="spawn_ped.py" output="screen">
+  </node>
 
 </launch>
