@@ -255,8 +255,7 @@ policy_kwargs_navrep = dict(features_extractor_class=CNN_NAVREP,
 
 class MLP_LSTM(nn.Module):
     """
-    Custom Multilayer Perceptron for policy and value function.
-    Architecture was taken as reference from: https://github.com/ignc-research/arena2D/tree/master/arena2d-agents.
+    Net structure of CARDRL, using LSTM for dynamic infos, 
 
     :param feature_dim: dimension of the features extracted with the features_extractor (e.g. features from a CNN)
     :param last_layer_dim_pi: (int) number of units for the last layer of the policy network
@@ -358,9 +357,8 @@ class MLP_LSTM_POLICY(ActorCriticPolicy):
 
 class MLP_SARL(nn.Module):
     """
-    Custom Multilayer Perceptron for policy and value function.
-    Architecture was taken as reference from: https://github.com/ignc-research/arena2D/tree/master/arena2d-agents.
-
+    Policy SARL : the idea described in paper https://arxiv.org/abs/1809.08835
+    Crowd-robot interaction: Crowd-aware robot navigation with attention-based deep reinforcement learning
     :param feature_dim: dimension of the features extracted with the features_extractor (e.g. features from a CNN)
     :param last_layer_dim_pi: (int) number of units for the last layer of the policy network
     :param last_layer_dim_vf: (int) number of units for the last layer of the value network
