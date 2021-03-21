@@ -257,12 +257,27 @@ if len(lines_motion) != length_right or len(obstacle_vel) != length_right or len
 # data from robot.txt
 motion = [] # form: [motion_obstacle_0, motion-obstacle_1, ...]
 
+motions_valid = ["yoyo", "circle"] # TODO Important: extend the valid motion types if needed
+
 # parse the contents into a useful format
 count = 0
 for line in lines_motion:
     count += 1
-    #print(f'line {count}: {line}')
-    motion.append(line.split('\n')[0])
+    # check if the given motion type is valid, otherwise terminate and print an error!
+    motion_given = line.split('\n')[0]
+    valid = 0
+    for motion_valid in motions_valid:
+        print(motion_valid)
+        print(motion_given)
+        if motion_given == motion_valid:
+            valid = 1
+            break
+    print(valid)
+    if valid == 1:
+        motion.append(motion_given)
+    else:
+        print('ERROR: "' + motion_given + '" is an invalid motion type!')
+        os._exit(0)
 
 # DEBUGGING
 print('Motions:' + str(motion))
@@ -427,8 +442,7 @@ im_scenario.show() # show the image
 # In nav2.rviz is the map horizontal and the first couple of obstacles are already with the start visible. It still works with all rviz files, just different visualized!
 
 # TODO:
-# !0) comment the code, clear out the prints, make a video explaining each step; update the readme file, make the window pretier
-# -> the program should be easy to extend -> include in the readme files tipps how to extend different things, how some things work etc.
+# !0) comment the code, clear out the prints, make a video explaining each step, update the readme file, make the window pretier
 # !1) different types of obstacles are allowed:
 # -> include "type" in the json file -> then modify task.py, obstacles_manager.py so that this info could be read
 # -> connect with another student -> include more obstacle types like human etc. (for human there should be also the parameter talking etc.)?
