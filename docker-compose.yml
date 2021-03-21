@@ -2,7 +2,7 @@ version: '3'
 services:
   ros:
     image: llalal/arena-rosnav:rl-collision-avoidance
-    build: ./Docker
+    # build: ./Docker
     command: tail -f /dev/null
     volumes: 
       - .:/root/catkin_ws/src/arena-rosnav

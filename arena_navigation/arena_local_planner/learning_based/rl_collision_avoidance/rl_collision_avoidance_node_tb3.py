@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import rospy
-# import sys
 from std_msgs.msg import Float32, ColorRGBA, Int32, String
 from geometry_msgs.msg import PoseStamped, Twist, Vector3, Point
 from ford_msgs.msg import Clusters
@@ -28,14 +27,6 @@ from sensor_msgs.msg import LaserScan
 import tf
 import copy
 
-# PED_RADIUS = 0.3
-# # angle_1 - angle_2
-# # contains direction in range [-3.14, 3.14]
-# def find_angle_diff(angle_1, angle_2):
-#     angle_diff_raw = angle_1 - angle_2
-#     angle_diff = (angle_diff_raw + np.pi) % (2 * np.pi) - np.pi
-#     return angle_diff
-
 class NN_tb3():
     def __init__(self, env, policy, action_bound, OBS_SIZE, index, num_env):
         self.beam_mum = OBS_SIZE
@@ -46,34 +37,25 @@ class NN_tb3():
   
         self.policy = policy
         self.action_bound = action_bound
+
+
+        # for publishers
+        self.global_goal = PoseStamped()
+        self.goal = PoseStamped()
+        # subgoals
+        self.sub_goal = Vector3()
+        self.sub_goal.x = self.sub_goal.y = None
+
         # for subscribers
         self.pose = PoseStamped()
         self.vel = Vector3()
         self.psi = 0.0
 
-        # for publishers
-        self.global_goal = PoseStamped()
-        self.goal = PoseStamped()
-        # self.desired_position = PoseStamped() #used for update_action()
-        # self.desired_action = np.zeros((2,))
-
-        # # publishers
+        # publishers  
         self.pub_twist = rospy.Publisher('/cmd_vel',Twist,queue_size=1)
-        # self.pub_pose_marker = rospy.Publisher('',Marker,queue_size=1)  #used for visualize_pose()
-        # self.pub_agent_markers = rospy.Publisher('~agent_markers',MarkerArray,queue_size=1)
-        # self.pub_path_marker = rospy.Publisher('~path_marker',Marker,queue_size=1)
-        # self.pub_goal_path_marker = rospy.Publisher('~goal_path_marker',Marker,queue_size=1)
-        # # sub
         self.sub_pose = rospy.Subscriber('/odom',Odometry,self.cbPose)
-        # self.sub_global_goal = rospy.Subscriber('/goal',PoseStamped, self.cbGlobalGoal)
         self.sub_subgoal = rospy.Subscriber('/plan_manager/subgoal',PoseStamped, self.cbSubGoal)
         self.laser_sub = rospy.Subscriber('/scan', LaserScan, self.laser_scan_callback)
-        
-        # subgoals
-        self.sub_goal = Vector3()
-        self.sub_goal.x = self.sub_goal.y = None
-
-        # self.sub_clusters = rospy.Subscriber('~clusters',Clusters, self.cbClusters)
 
         # control timer
         # self.control_timer = rospy.Timer(rospy.Duration(0.01),self.cbControl)
@@ -105,102 +87,73 @@ class NN_tb3():
     def cbVel(self, msg):
         self.vel = msg.twist.twist.linear
         self.vel_angular = msg.twist.twist.angular.z
-    def cbClusters(self,msg):
-        other_agents = []
-
-        xs = []; ys = []; radii = []; labels = []
-        num_clusters = len(msg.labels)
-  
-        for i in range(num_clusters):
-            index = msg.labels[i]
-            x = msg.mean_points[i].x; y = msg.mean_points[i].y
-            v_x = msg.velocities[i].x; v_y = msg.velocities[i].y
-            radius = self.obst_rad
-
-
-            xs.append(x); ys.append(y); radii.append(radius); labels.append(index)
-            # self.visualize_other_agent(x,y,radius,msg.labels[i])
-            # helper fields
-            heading_angle = np.arctan2(v_y, v_x)
-            pref_speed = np.linalg.norm(np.array([v_x, v_y]))
-            goal_x = x + 5.0; goal_y = y + 5.0
-            
-
-            if pref_speed < 0.2:
-                pref_speed = 0; v_x = 0; v_y = 0
-            other_agents.append(agent.Agent(x, y, goal_x, goal_y, radius, pref_speed, heading_angle, index))
-        self.visualize_other_agents(xs, ys, radii, labels)
-        self.other_agents_state = other_agents
 
     def stop_moving(self):
         twist = Twist()
         self.pub_twist.publish(twist)
 
-    def update_action(self, action):
-        # print 'update action'
-        self.desired_action = action
-        self.desired_position.pose.position.x = self.pose.pose.position.x + 1*action[0]*np.cos(action[1])
-        self.desired_position.pose.position.y = self.pose.pose.position.y + 1*action[0]*np.sin(action[1])
+    # def update_action(self, action):
+    #     # print 'update action'
+    #     self.desired_action = action
+    #     self.desired_position.pose.position.x = self.pose.pose.position.x + 1*action[0]*np.cos(action[1])
+    #     self.desired_position.pose.position.y = self.pose.pose.position.y + 1*action[0]*np.sin(action[1])
 
-    def cbControl(self, event):
+    # def cbControl(self, event):
 
-        if self.goal.header.stamp == rospy.Time(0) or self.stop_moving_flag and not self.new_global_goal_received:
-            self.stop_moving()
-            return
-        elif self.operation_mode.mode==self.operation_mode.NN:
-            desired_yaw = self.desired_action[1]
-            yaw_error = desired_yaw - self.psi
-            if abs(yaw_error) > np.pi:
-                yaw_error -= np.sign(yaw_error)*2*np.pi
+    #     if self.goal.header.stamp == rospy.Time(0) or self.stop_moving_flag and not self.new_global_goal_received:
+    #         self.stop_moving()
+    #         return
+    #     elif self.operation_mode.mode==self.operation_mode.NN:
+    #         desired_yaw = self.desired_action[1]
+    #         yaw_error = desired_yaw - self.psi
+    #         if abs(yaw_error) > np.pi:
+    #             yaw_error -= np.sign(yaw_error)*2*np.pi
 
-            gain = 1.3 # canon: 2
-            vw = gain*yaw_error
+    #         gain = 1.3 # canon: 2
+    #         vw = gain*yaw_error
 
-            use_d_min = True
-            if False: # canon: True
-                # use_d_min = True
-                # print "vmax:", self.find_vmax(self.d_min,yaw_error)
-                vx = min(self.desired_action[0], self.find_vmax(self.d_min,yaw_error))
-            else:
-                vx = self.desired_action[0]
+    #         use_d_min = True
+    #         if False: # canon: True
+    #             # use_d_min = True
+    #             # print "vmax:", self.find_vmax(self.d_min,yaw_error)
+    #             vx = min(self.desired_action[0], self.find_vmax(self.d_min,yaw_error))
+    #         else:
+    #             vx = self.desired_action[0]
       
-            twist = Twist()
-            twist.angular.z = vw
-            twist.linear.x = vx
-            self.pub_twist.publish(twist)
-            self.visualize_action(use_d_min)
-            return
+    #         twist = Twist()
+    #         twist.angular.z = vw
+    #         twist.linear.x = vx
+    #         self.pub_twist.publish(twist)
+    #         self.visualize_action(use_d_min)
+    #         return
 
-        elif self.operation_mode.mode == self.operation_mode.SPIN_IN_PLACE:
-            print('Spinning in place.')
-            self.stop_moving_flag = False
-            angle_to_goal = np.arctan2(self.global_goal.pose.position.y - self.pose.pose.position.y, \
-                self.global_goal.pose.position.x - self.pose.pose.position.x) 
-            global_yaw_error = self.psi - angle_to_goal
-            if abs(global_yaw_error) > 0.5:
-                vx = 0.0
-                vw = 1.0
-                twist = Twist()
-                twist.angular.z = vw
-                twist.linear.x = vx
-                self.pub_twist.publish(twist)
-                # print twist
-            else:
-                print('Done spinning in place')
-                self.operation_mode.mode = self.operation_mode.NN
-                # self.new_global_goal_received = False
-            return
-        else:
-            self.stop_moving()
-            return
+    #     elif self.operation_mode.mode == self.operation_mode.SPIN_IN_PLACE:
+    #         print('Spinning in place.')
+    #         self.stop_moving_flag = False
+    #         angle_to_goal = np.arctan2(self.global_goal.pose.position.y - self.pose.pose.position.y, \
+    #             self.global_goal.pose.position.x - self.pose.pose.position.x) 
+    #         global_yaw_error = self.psi - angle_to_goal
+    #         if abs(global_yaw_error) > 0.5:
+    #             vx = 0.0
+    #             vw = 1.0
+    #             twist = Twist()
+    #             twist.angular.z = vw
+    #             twist.linear.x = vx
+    #             self.pub_twist.publish(twist)
+    #             # print twist
+    #         else:
+    #             print('Done spinning in place')
+    #             self.operation_mode.mode = self.operation_mode.NN
+    #             # self.new_global_goal_received = False
+    #         return
+    #     else:
+    #         self.stop_moving()
+    #         return
 
     def laser_scan_callback(self, scan):
         self.scan_param = [scan.angle_min, scan.angle_max, scan.angle_increment, scan.time_increment,
                             scan.scan_time, scan.range_min, scan.range_max]
-        # self.scan_param = [scan.angle_min, scan.angle_max, scan.angle_increment, scan.time_increment,
-        #                     scan.scan_time, scan.range_min, 6.0]
         self.scan = np.array(scan.ranges)
-        # self.scan = np.ones((512,)) * 6
         self.laser_cb_num += 1
 
     def get_laser_observation(self):
@@ -222,6 +175,7 @@ class NN_tb3():
             index -= step
         scan_sparse = np.concatenate((sparse_scan_left, sparse_scan_right[::-1]), axis=0)
         return scan_sparse / 6.0 - 0.5
+
     def control_vel(self, action):
         move_cmd = Twist()
         move_cmd.linear.x = action[0]
@@ -232,19 +186,19 @@ class NN_tb3():
         move_cmd.angular.z = action[1]
         self.pub_twist.publish(move_cmd)
 
-    def control_pose(self, pose):
-        pose_cmd = PoseStamped.Pose()
-        assert len(pose)==3
-        pose_cmd.position.x = pose[0]
-        pose_cmd.position.y = pose[1]
-        pose_cmd.position.z = 0
+    # def control_pose(self, pose):
+    #     pose_cmd = PoseStamped.Pose()
+    #     assert len(pose)==3
+    #     pose_cmd.position.x = pose[0]
+    #     pose_cmd.position.y = pose[1]
+    #     pose_cmd.position.z = 0
 
-        qtn = tf.transformations.quaternion_from_euler(0, 0, pose[2], 'rxyz')
-        pose_cmd.orientation.x = qtn[0]
-        pose_cmd.orientation.y = qtn[1]
-        pose_cmd.orientation.z = qtn[2]
-        pose_cmd.orientation.w = qtn[3]
-        self.cmd_pose.publish(pose_cmd)
+    #     qtn = tf.transformations.quaternion_from_euler(0, 0, pose[2], 'rxyz')
+    #     pose_cmd.orientation.x = qtn[0]
+    #     pose_cmd.orientation.y = qtn[1]
+    #     pose_cmd.orientation.z = qtn[2]
+    #     pose_cmd.orientation.w = qtn[3]
+    #     self.cmd_pose.publish(pose_cmd)
 
     def get_local_goal(self):
         [x, y, theta] = self.state  # self position based on map
@@ -256,47 +210,22 @@ class NN_tb3():
     def cbComputeAction(self, event):
         while self.scan is None or self.sub_goal.x is None:
             pass
+        # ************************************ Inpsut ************************************
         obs = self.get_laser_observation() 
         obs_stack = deque([obs, obs, obs])
-        # ************************************ Inpsut ************************************
-        # position
-        state = [self.pose.pose.position.x, self.pose.pose.position.y, self.psi]    # x, y, theta
-        self.state = state
-
-        # goal
-        goal = np.asarray(self.get_local_goal()) 
-        # Velocity
-        speed = np.asarray([self.vel.x, self.vel_angular],dtype='float64')
-        # self.speed_GT = np.asarray(speed) # linear v +angular
+        self.state = [self.pose.pose.position.x, self.pose.pose.position.y, self.psi]    # x, y, theta
+        self.goal = np.asarray(self.get_local_goal()) 
+        self.speed = np.asarray([self.vel.x, self.vel_angular],dtype='float64')
         
-        obs_state_list = [[obs_stack, goal, speed]]
-
+        obs_state_list = [[obs_stack, self.goal, self.speed]]
         # self.control_pose(state)
 
-
         # ************************************ Output ************************************
-        # agent: postion(x,y,theta),velocity(v,angular)
-
         _,scaled_action =generate_action_no_sampling(self.env, obs_state_list, self.policy, self.action_bound)
         action = scaled_action[0]
-        action[0] = 0.6*action[0]
-        self.control_vel(action)
-        # print('velocity : ', action[0], 'velocity_angular : ', action[1])
-
-
-        # env.control_vel(action)      #involke the ros system publisher to send velocity to ros system
-        # rospy.sleep(0.01)
-        # # the following output function is depending on callback function in ros.
-        # print('positon: x, y, theta', env.get_self_state())
-        # print('speed of agent: v, angular ', env.get_self_speed())
-                    
-
-
+        action[0] = 0.3*action[0]   # the maximum speed of cmd_vel 0.3
+        self.control_vel(action)               
         # self.update_action(action)
-
-    def update_subgoal(self,subgoal):
-        self.goal.pose.position.x = subgoal[0]
-        self.goal.pose.position.y = subgoal[1]
 
     def visualize_pose(self,pos,orientation):
         # Yellow Box for Vehicle
@@ -335,7 +264,6 @@ class NN_tb3():
         rospy.loginfo("Stopped %s's velocity.")
 
 def run():
-    
 
     # Set parameters of env
     LASER_HIST = 3
@@ -345,9 +273,7 @@ def run():
 
     # Set env and agent policy
     env = StageWorld(OBS_SIZE, index=0, num_env=NUM_ENV)    #index is useful for parallel programming, 0 is for the first agent
-
     trained_model_file = os.path.dirname(__file__) + '/policy/stage2.pth'
-    # trained_model_file = '/policy/stage2.pth'
     policy = CNNPolicy(frames=LASER_HIST, action_space=2) 
     policy.cpu()    # policy.cuda() for gpu
     state_dict = torch.load(trained_model_file,map_location=torch.device('cpu'))    #torch.load(trained_model_file) for gpu
