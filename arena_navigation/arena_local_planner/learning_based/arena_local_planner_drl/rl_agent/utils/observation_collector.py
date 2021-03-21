@@ -13,6 +13,7 @@ import threading
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Pose2D, PoseStamped, PoseWithCovarianceStamped
 from geometry_msgs.msg import Twist
+from pedsim_msgs.msg import AgentState
 from arena_plan_msgs.msg import RobotState,RobotStateStamped
 from std_msgs.msg import String
 from visualization_msgs.msg import Marker, MarkerArray
@@ -32,13 +33,12 @@ import numpy as np
 
 
 class ObservationCollector():
-    def __init__(self,ns: str, num_lidar_beams:int,lidar_range:float, num_humans:int=6): #
+    def __init__(self,ns: str, num_lidar_beams:int,lidar_range:float, num_humans:int): #
         """ a class to collect and merge observations
 
         Args:
             num_lidar_beams (int): [description]
             lidar_range (float): [description]
-            num_humans(int): max observation number of human, default 21
         """
         self.ns = ns
         if ns is None or ns == "":
@@ -46,12 +46,24 @@ class ObservationCollector():
         else:
             self.ns_prefix = "/"+ns+"/"
 
+        #safety settings for different humans TODO: should be global setting
+        self.safe_dist_adult=0.8 #in meter 1.0 1.5 2
+        self.safe_dist_child=1.2
+        self.safe_dist_elder=1.5
+        #settings for agents TODO: should be transferred from yaml files
+        self._radius_adult= 0.32
+        self._radius_child= 0.25
+        self._radius_elder= 0.3
+        self._radius_robot= 0.3
+
         # define observation_space
+        self.num_humans_observation_max=21
         self.observation_space = ObservationCollector._stack_spaces((
-            spaces.Box(low=0, high=lidar_range, shape=(num_lidar_beams,), dtype=np.float32),
-            spaces.Box(low=0, high=10, shape=(1,), dtype=np.float32) ,
-            spaces.Box(low=-np.pi, high=np.pi, shape=(1,), dtype=np.float32),
-            spaces.Box(low=0, high=np.PINF, shape=(num_humans*2,), dtype=np.float32)
+            spaces.Box(low=0.0, high=lidar_range, shape=(num_lidar_beams,),dtype=np.float64),
+            spaces.Box(low=0.0, high=10.0, shape=(1,),dtype=np.float64) ,
+            spaces.Box(low=-np.pi, high=np.pi, shape=(1,),dtype=np.float64),
+            spaces.Box(low=-np.PINF, high=np.PINF, shape=(7,),dtype=np.float64),
+            spaces.Box(low=-np.PINF, high=np.PINF, shape=(self.num_humans_observation_max*10,),dtype=np.float64)
         ))
 
         self._scan = LaserScan()
@@ -74,13 +86,13 @@ class ObservationCollector():
             except KeyError:
                 get_train_mode_try+=1
                 print(f'value not set retry {get_train_mode_try} times')
-        # self._is_train_mode=True
+
         if self._is_train_mode:
             self._service_name_step=f'{self.ns_prefix}step_world' 
             self._sim_step_client = rospy.ServiceProxy(self._service_name_step, StepWorld)
         
         # message_filter subscriber: laserscan, robot_pose
-        self._scan_sub = message_filters.Subscriber( f'{self.ns_prefix}{self.ns}/scan', LaserScan)
+        self._scan_sub = message_filters.Subscriber( f'{self.ns_prefix}scan', LaserScan)
         self._robot_state_sub = message_filters.Subscriber(f'{self.ns_prefix}robot_state', RobotStateStamped)
         get_agent_topic_try=0
         max_try=10
@@ -91,48 +103,26 @@ class ObservationCollector():
             except KeyError:
                 get_agent_topic_try+=1
                 print(f'value not set retry {get_agent_topic_try} times')
-        
-        # self.test_topic_get=rospy.get_published_topics()
-        # print(self.test_topic_get)
-        # for i in range(num_obstacles):
-        #     self.obstacle_name_str=self.obstacle_name_str+","+f'{self.ns_prefix}pedsim_agent_{i+1}/dynamic_human'
-        # print(self.human_name_str)
+
         self.human_name_list=self.human_name_str.split(',')[1:]
-        # print(self.human_name_list)
-
-        # topic subscriber: different kinds of humans
-        #adult
-        adult_topic_list=[i for i in self.human_name_list if i.find('human')!=-1]
-        # print(adult_topic_list)
-        self._adult = [None]*len(adult_topic_list)
-        self._adult_position, self._adult_vel= [None]*len(adult_topic_list),  [None]*len(adult_topic_list)
-        # print('dynamic',adult_topic_list)
-        for  i, _adult_name in enumerate(adult_topic_list):
-            # print(_adult_name)
-            self._adult[i] = message_filters.Subscriber(_adult_name, Odometry)
-        #child
-
-        child_topic_list=[i for i in self.human_name_list if i.find('child')!=-1]
-        # print(child_topic_list)
-        self._child= [None]*len(child_topic_list)
-        self._child_position, self._child_vel= [None]*len(child_topic_list),  [None]*len(child_topic_list)
-        for  i, _child_name in enumerate(child_topic_list):
-            self._child[i] = message_filters.Subscriber(_child_name, Odometry)
-        #elder
         
-        elder_topic_list=[i for i in self.human_name_list if i.find('elder')!=-1]
-        # print(elder_topic_list)
-        self._elder= [None]*len(elder_topic_list)
-        self._elder_position, self._elder_vel= [None]*len(elder_topic_list),  [None]*len(elder_topic_list)
-        for  i, _elder_name in enumerate(elder_topic_list):
-            self._elder[i] = message_filters.Subscriber(_elder_name, Odometry)
+        self.agent_state=[]
+        self.num_humans=num_humans
+        for i in range(num_humans):
+            self.agent_state.append(f'{self.ns_prefix}pedsim_agent_{i+1}/agent_state')
+        self._sub_agent_state=[None]*num_humans
+        self._human_type, self._human_position, self._human_vel= [None]*num_humans,[None]*num_humans,[None]*num_humans
+        self._human_type =np.array(self._human_type)
+        self._human_position=np.array(self._human_position)
+        self._human_vel=np.array(self._human_vel)
+        for i, topic in enumerate(self.agent_state):
+            self._sub_agent_state[i]=message_filters.Subscriber(topic, AgentState)
 
         # message_filters.TimeSynchronizer: call callback only when all sensor info are ready
-        self.sychronized_list=[self._scan_sub, self._robot_state_sub]+self._adult+self._child+self._elder
-        # print("reached here")
-        self.ts = message_filters.ApproximateTimeSynchronizer(self.sychronized_list,100,slop=0.05) #,allow_headerless=True)        
+        self.sychronized_list=[self._scan_sub, self._robot_state_sub]+self._sub_agent_state #[self._scan_sub, self._robot_state_sub]+self._adult+self._child+self._elder
+        self.ts = message_filters.ApproximateTimeSynchronizer(self.sychronized_list,10,slop=0.1) #,allow_headerless=True)        
         self.ts.registerCallback(self.callback_observation_received)
-        # print("reached end")
+
     
     def get_observation_space(self):
         return self.observation_space
@@ -152,9 +142,7 @@ class ObservationCollector():
         if self._is_train_mode: 
         # sim a step forward until all sensor msg uptodate
             i=0
-            # print(self._flag_all_received)
             while(self._flag_all_received==False):
-                # print(self._flag_all_received)
                 self.call_service_takeSimStep()
                 i+=1
         # with self._sub_flags_con:
@@ -164,46 +152,70 @@ class ObservationCollector():
         # rospy.logdebug(f"Current observation takes {i} steps for Synchronization")
         # print(f"Current observation takes {i} steps for Synchronization")
         scan = np.array(self._scan.ranges)
-        # print("scan shape",scan.shape)
+        # print("scan",scan)
         rho, theta = ObservationCollector._get_goal_pose_in_robot_frame(
-            self._subgoal, self._robot_pose)
-        merged_obs = np.hstack([scan, np.array([rho, theta])])
+            self._subgoal, self._robot_pose)        
+        # self.rot=np.arctan2(self._subgoal.y-self._robot_pose.y, self._subgoal.x-self._robot_pose.x)
+        self.robot_self_state=[self._robot_vel.linear.x, self._robot_vel.linear.y, self._robot_pose.x, self._robot_pose.y,
+                                                     self._robot_pose.theta, self._robot_vel.angular.z]
+        merged_obs = np.hstack([scan, np.array([rho, theta]+self.robot_self_state+[self.time_step])])
         obs_dict = {}
         obs_dict["laser_scan"] = scan
         obs_dict['goal_in_robot_frame'] = [rho,theta]
-        rho_a, theta_a = [None]*len(self._adult_position), [None]*len(self._adult_position)
-        coordinate_a= np.empty([2,len(self._adult_position)])
-        for  i, position in enumerate(self._adult_position):
-            #TODO temporarily use the same fnc of _get_goal_pose_in_robot_frame
-            # print("adult position",position)
-            coordinate_a[0][i]=position.x
-            coordinate_a[1][i]=position.y
-            rho_a[i], theta_a[i] = ObservationCollector._get_goal_pose_in_robot_frame(position,self._robot_pose)
-            merged_obs = np.hstack([merged_obs, np.array([rho_a[i],theta_a[i]])])
-        obs_dict['adult_in_robot_frame'] = np.vstack([np.array(rho_a),np.array(theta_a)])
-        obs_dict['adult_coordinates_in_robot_frame']=coordinate_a
 
-        rho_c, theta_c = [None]*len(self._child_position), [None]*len(self._child_position)
-        coordinate_c= np.empty([2,len(self._child_position)])
-        for  i, position in enumerate(self._child_position):
+        rho_humans,theta_humans=np.empty([self.num_humans,]),np.empty([self.num_humans,])
+        coordinate_humans= np.empty([2,self.num_humans])
+        for  i, position in enumerate(self._human_position):
             #TODO temporarily use the same fnc of _get_goal_pose_in_robot_frame
-            coordinate_c[0][i]=position.x
-            coordinate_c[1][i]=position.y
-            rho_c[i], theta_c[i] = ObservationCollector._get_goal_pose_in_robot_frame(position,self._robot_pose)
-            merged_obs = np.hstack([merged_obs, np.array([rho_c[i],theta_c[i]])])
-        obs_dict['child_in_robot_frame'] = np.vstack([np.array(rho_c),np.array(theta_c)])
-        obs_dict['child_coordinates_in_robot_frame']=coordinate_c
+            coordinate_humans[0][i]=position.x
+            coordinate_humans[1][i]=position.y
+            rho_humans[i], theta_humans[i] = ObservationCollector._get_goal_pose_in_robot_frame(position,self._robot_pose)
+        #sort the humans according to the relative position to robot
+        human_pos_index=np.argsort(rho_humans)        
+        rho_humans, theta_humans=rho_humans[human_pos_index], theta_humans[human_pos_index]
+        self._human_type=self._human_type[human_pos_index]
+        self._human_vel=self._human_vel[human_pos_index]
+        self._human_position=self._human_position[human_pos_index]
+        obs_dict['human_coordinates_in_robot_frame']=coordinate_humans
+        obs_dict['human_type']=self._human_type
 
-        rho_e, theta_e = [None]*len(self._elder_position), [None]*len(self._elder_position)
-        coordinate_e= np.empty([2,len(self._elder_position)])
-        for  i, position in enumerate(self._elder_position):
-            #TODO temporarily use the same fnc of _get_goal_pose_in_robot_frame
-            coordinate_e[0][i]=position.x
-            coordinate_e[1][i]=position.y
-            rho_e[i], theta_e[i] = ObservationCollector._get_goal_pose_in_robot_frame(position,self._robot_pose)
-            merged_obs = np.hstack([merged_obs, np.array([rho_e[i],theta_e[i]])])
-        obs_dict['elder_in_robot_frame'] = np.vstack([np.array(rho_e),np.array(theta_e)])
-        obs_dict['elder_coordinates_in_robot_frame']=coordinate_e
+        rho_adult=[]
+        rho_child=[]
+        rho_elder=[]
+
+        for i, ty in enumerate(self._human_type):            
+            if ty==0: # adult
+                rho_adult.append(rho_humans[i])
+                #robot centric 
+                # state=rotate(self.robot_self_state[:4]+[self._human_position[i].x, self._human_position[i].y, self._human_vel[i].linear.x,self._human_vel[i].linear.y])
+                obs=np.array([rho_humans[i], theta_humans[i], self._human_vel[i].linear.x,self._human_vel[i].linear.y, self._human_position[i].x, self._human_position[i].y,
+                                                self._radius_adult+self.safe_dist_adult+self._radius_robot, ty])
+                merged_obs = np.hstack([merged_obs,obs])
+            elif ty==1: # child
+                rho_child.append(rho_humans[i])
+                #10 states of other agents
+                obs=np.array([rho_humans[i], theta_humans[i], self._human_vel[i].linear.x,self._human_vel[i].linear.y, self._human_position[i].x, self._human_position[i].y,
+                                              self.safe_dist_child, self._radius_child,self._radius_child+self._radius_robot, ty])
+                merged_obs = np.hstack([merged_obs,obs])
+            elif ty==3: # elder
+                rho_elder.append(rho_humans[i])
+                # print('human elder',rho_humans[i])
+                #10 states of other agents
+                obs=np.array([rho_humans[i], theta_humans[i], self._human_vel[i].linear.x,self._human_vel[i].linear.y, self._human_position[i].x, self._human_position[i].y,
+                                              self.safe_dist_elder, self._radius_elder,self._radius_elder+self._radius_robot, ty])
+                merged_obs = np.hstack([merged_obs,obs])
+        # print(len(rho_adult))
+        obs_dict['adult_in_robot_frame'] = np.array(rho_adult)
+        obs_dict['child_in_robot_frame'] = np.array(rho_child)
+        obs_dict['elder_in_robot_frame'] = np.array(rho_elder)
+        #align the observation size
+        # print(self.observation_space.shape)
+        observation_blank=len(merged_obs) - self.observation_space.shape[0]
+        if observation_blank<0:
+            merged_obs=np.hstack([merged_obs,np.zeros([-observation_blank,])])
+        elif observation_blank>0:
+            merged_obs=merged_obs[:-observation_blank]
+
         return merged_obs, obs_dict
 
     @staticmethod
@@ -211,8 +223,7 @@ class ObservationCollector():
         y_relative = goal_pos.y - robot_pos.y
         x_relative = goal_pos.x - robot_pos.x
         rho = (x_relative**2+y_relative**2)**0.5
-        theta = (np.arctan2(y_relative, x_relative) -
-                 robot_pos.theta+4*np.pi) % (2*np.pi)-np.pi
+        theta = (np.arctan2(y_relative, x_relative) - robot_pos.theta+5*np.pi) % (2*np.pi)-np.pi
         return rho, theta
 
     def call_service_takeSimStep(self):
@@ -250,11 +261,21 @@ class ObservationCollector():
         # print("reached here callback")
         self._scan=self.process_scan_msg(msg[0])
         self._robot_pose,self._robot_vel=self.process_robot_state_msg(msg[1])
-        self.callback_dynamic_obstacles(msg[2:])
+        self.callback_agent_state(msg[2:])
+        #self.callback_dynamic_obstacles(msg[2:])
         # ask subgoal service
         #self._subgoal=self.call_service_askForSubgoal()
         self._flag_all_received=True
-        
+    def callback_agent_state(self, msg):
+            for i, m in enumerate(msg):
+                self._human_type[i],self._human_position[i],self._human_vel[i]=self.process_agent_state(m)
+    
+    def process_agent_state(self,msg):
+        human_type=msg.type
+        human_pose=self.pose3D_to_pose2D(msg.pose)
+        human_twist=msg.twist
+        return human_type,human_pose, human_twist
+
     def process_scan_msg(self, msg_LaserScan):
         # remove_nans_from_scan
         scan = np.array(msg_LaserScan.ranges)
@@ -284,6 +305,9 @@ class ObservationCollector():
         pose2d = self.pose3D_to_pose2D(msg_Subgoal.pose)
         return pose2d
 
+    def set_timestep(self, time_step):
+        self.time_step=time_step
+
     @staticmethod
     def pose3D_to_pose2D(pose3d):
         pose2d = Pose2D()
@@ -303,7 +327,8 @@ class ObservationCollector():
         for space in ss:
             low.extend(space.low.tolist())
             high.extend(space.high.tolist())
-        return spaces.Box(np.array(low).flatten(), np.array(high).flatten())
+        return spaces.Box(np.array(low).flatten(), np.array(high).flatten(), dtype=np.float64)
+
 
 
 if __name__ == '__main__':
