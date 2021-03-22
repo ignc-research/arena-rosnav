@@ -166,7 +166,9 @@ and value network.
 :constant policy_drl_local_planner: (dict)
 """
 policy_kwargs_drl_local_planner = dict(features_extractor_class=DRL_LOCAL_PLANNER,
-                                       features_extractor_kwargs=dict(features_dim=128))
+                                       features_extractor_kwargs=dict(features_dim=128),
+                                       net_arch=[dict(vf=[128], pi=[128])], 
+                                       activation_fn=th.nn.ReLU)
 
 
 class CNN_NAVREP(BaseFeaturesExtractor):
@@ -226,4 +228,5 @@ and value network.
 """
 policy_kwargs_navrep = dict(features_extractor_class=CNN_NAVREP,
                             features_extractor_kwargs=dict(features_dim=32),
-                            net_arch=[dict(vf=[64, 64], pi=[64, 64])], activation_fn=th.nn.ReLU)
+                            net_arch=[dict(vf=[64, 64], pi=[64, 64])], 
+                            activation_fn=th.nn.ReLU)
