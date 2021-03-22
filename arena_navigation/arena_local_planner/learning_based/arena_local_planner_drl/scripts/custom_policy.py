@@ -136,7 +136,7 @@ class DRL_LOCAL_PLANNER(BaseFeaturesExtractor):
             n_flatten = self.cnn(tensor_forward).shape[1]
 
         self.fc_1 = nn.Sequential(
-            nn.Linear(n_flatten, 256 - _RS),
+            nn.Linear(n_flatten, 256),
             nn.ReLU(),
         )
 
@@ -156,7 +156,8 @@ class DRL_LOCAL_PLANNER(BaseFeaturesExtractor):
         extracted_features = self.fc_1(self.cnn(laser_scan))
         features = th.cat((extracted_features, robot_state), 1)
 
-        return self.fc_2(features)
+        # return self.fc_2(features)
+        return features
 
 
 """
@@ -166,7 +167,7 @@ and value network.
 :constant policy_drl_local_planner: (dict)
 """
 policy_kwargs_drl_local_planner = dict(features_extractor_class=DRL_LOCAL_PLANNER,
-                                       features_extractor_kwargs=dict(features_dim=128),
+                                       features_extractor_kwargs=dict(features_dim=(256+_RS)),
                                        net_arch=[dict(vf=[128], pi=[128])], 
                                        activation_fn=th.nn.ReLU)
 

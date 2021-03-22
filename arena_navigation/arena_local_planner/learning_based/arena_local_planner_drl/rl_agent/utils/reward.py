@@ -122,7 +122,7 @@ class RewardCalculator():
             kwargs['global_plan'], kwargs['robot_pose'], kwargs['action'])
         if laser_scan.min() > self.safe_dist:
             self._reward_distance_global_plan(
-                kwargs['global_plan'], kwargs['robot_pose'], reward_factor=0.1, penalty_factor=0.2)
+                kwargs['global_plan'], kwargs['robot_pose'], reward_factor=0.15, penalty_factor=0.25)
         else:
             self.last_dist_to_path = None
         self._reward_goal_reached(
