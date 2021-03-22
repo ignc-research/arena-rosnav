@@ -72,7 +72,7 @@ def get_paths(agent_name: str, args) -> dict:
                 dir, 'configs', 'default_settings.yaml'),
         'curriculum': 
             os.path.join(
-                dir, 'configs', 'training_curriculum_map1small.yaml')
+                dir, 'configs', 'training_curriculum.yaml')
     }
     # check for mode
     if args.load is None:
@@ -241,7 +241,7 @@ if __name__ == "__main__":
     # eval_freq: evaluate the agent every eval_freq train timesteps
     eval_cb = EvalCallback(
         eval_env=eval_env,          train_env=env,
-        n_eval_episodes=30,         eval_freq=25000, 
+        n_eval_episodes=30,         eval_freq=20000, 
         log_path=PATHS.get('eval'), best_model_save_path=PATHS.get('model'), 
         deterministic=True,         callback_on_eval_end=trainstage_cb,
         callback_on_new_best=stoptraining_cb)
