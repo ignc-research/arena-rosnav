@@ -1,0 +1,109 @@
+{
+    "scenerios": [
+        {
+            "scene_name": "scene_1",
+            "repeats": 5,
+            "dynamic_obstacles": {
+                "dynamic_obs_0": {
+                    "obstacle_radius": 0.3,
+                    "linear_velocity": 0.2,
+                    "start_pos": [
+                        0,
+                        3,
+                        0
+                    ],
+                    "waypoints": [
+                        [
+                            0,
+                            7,
+                            0
+                        ]
+                    ],
+                    "is_waypoint_relative": true,
+                    "mode": "yoyo",
+                    "triggers": [
+                        "watcher_1"
+                    ]
+                },
+                "dynamic_obs_1": {
+                    "obstacle_radius": 0.3,
+                    "linear_velocity": 0.2,
+                    "start_pos": [
+                        0,
+                        4,
+                        0
+                    ],
+                    "waypoints": [
+                        [
+                            8,
+                            0,
+                            0
+                        ]
+                    ],
+                    "is_waypoint_relative": true,
+                    "mode": "yoyo",
+                    "triggers": [
+                        "watcher_2"
+                    ]
+                }
+            },
+            "static_obstacles": {
+                "static_obs_1": {
+                    "shape": "polygon",
+                    "vertices": [
+                        [
+                            2,
+                            0.4
+                        ],
+                        [
+                            2,
+                            0.5
+                        ],
+                        [
+                            5,
+                            0.5
+                        ],
+                        [
+                            5,
+                            0.4
+                        ]
+                    ]
+                },
+                "static_obs_2": {
+                    "shape": "circle",
+                    "x": 4,
+                    "y": 5,
+                    "radius": 0.2
+                }
+            },
+            "robot": {
+                "start_pos": [
+                    0.0,
+                    0.0,
+                    0.2
+                ],
+                "goal_pos": [
+                    4,
+                    8,
+                    0
+                ]
+            },
+            "watchers": {
+                "watcher_1": {
+                    "pos": [
+                        1,
+                        1
+                    ],
+                    "range": 5
+                },
+                "watcher_2": {
+                    "pos": [
+                        5,
+                        5
+                    ],
+                    "range": 2
+                }
+            }
+        }
+    ]
+}
