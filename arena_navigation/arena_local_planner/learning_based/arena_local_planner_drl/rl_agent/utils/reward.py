@@ -110,14 +110,14 @@ class RewardCalculator():
         self._reward_collision(
             laser_scan, punishment=10)
         self._reward_goal_approached(
-            goal_in_robot_frame, reward_factor=0.2, penalty_factor=0.4)
+            goal_in_robot_frame, reward_factor=0.3, penalty_factor=0.4)
 
     def _cal_reward_rule_03(self, 
                             laser_scan: np.ndarray, 
                             goal_in_robot_frame: Tuple[float,float],
                             *args,**kwargs):
         self._reward_not_moving(
-            kwargs['action'])
+            kwargs['action'], punishment=0.005)
         self._reward_following_global_plan(
             kwargs['global_plan'], kwargs['robot_pose'], kwargs['action'])
         if laser_scan.min() > self.safe_dist:
