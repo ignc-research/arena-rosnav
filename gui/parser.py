@@ -9,7 +9,8 @@ from shutil import copyfile
 print('\nSTART parser.py\n')
 
 # check if all txt files exist and are not empty! (to not trow an error, but print a message if that is the case)
-my_path = ['output/internal/data.txt', 'output/internal/obstacle.txt', 'output/internal/watcher.txt', 'output/internal/vector.txt', 'output/internal/robot.txt', 'output/internal/motion.txt']
+# 'output/internal/watcher.txt' could be empty if no wathers are used at all
+my_path = ['output/internal/data.txt', 'output/internal/obstacle.txt', 'output/internal/vector.txt', 'output/internal/robot.txt', 'output/internal/motion.txt']
 for my_file in my_path:
     if not (os.path.exists(my_file) and os.path.getsize(my_file) > 0):
         print('ERROR: File ' + my_file + ' does not exist or is empty!')
@@ -66,15 +67,25 @@ for line in lines:
 
 count = 0
 for line in lines:
+    print('LINE:' + str(line))
     count += 1
     if count > count_temp:
+        print('COUNT')
+        print(count)
+        print(count_temp)
         ## obstacle_watcher_connections.append((float(line.split(':')[0]), (float(line.split(':')[1].split(',')[0]), float(line.split(':')[1].split(',')[1]))))
         temp_array = []
         #for value in line.split(':')[1].split(','): # old version
         #    obstacle_watcher_connections.append((float(line.split(':')[0]), float(value)))
         #    temp_array.append((float(value)))
         for value in line.split(','):
-            temp_array.append((int(value)))
+            # It is not a must that an obstacle has a watcher -> append '_' when this is the case instead of a watcher index.
+            # Later on it don't have to be considered as a watcher and calculated to the watchers amount.
+            if value == '' or value == '\n': # it could be '\n' since in the txt file a line is saved for the watcher index
+                print('No watcher for obstacle ' + str(count-count_temp-1))
+                temp_array.append(('/'))
+            else:
+                temp_array.append((int(value)))
         obstacle_watcher_connections_2.append(temp_array) # assume the ordering is right starting from 0
         print('Single obstacle-watchers connections: ' + str(line.split('\n')[0]))
 
@@ -86,7 +97,8 @@ length_right = len(obstacle_vel) # == len(obstacle_watcher_connections_2)
 watchers_all_amount = 0
 for connection in obstacle_watcher_connections_2:
     for watcher in connection:
-        watchers_all_amount += 1
+        if watcher != '/': # this means no connection
+            watchers_all_amount += 1
 
 # DEBUGGING
 print('Image corners:' + str(image_corners))
@@ -100,7 +112,7 @@ print('Map origin:' + str(map_origin))
 print('Obstacle velocities:' + str(obstacle_vel))
 #print('First value:' + str(obstacle_vel[0]))
 #print('Second value:' + str(obstacle_vel[1]))
-print('Obstacle-watchers connections:' + str(obstacle_watcher_connections))
+#print('Obstacle-watchers connections:' + str(obstacle_watcher_connections))
 print('Obstacle-watchers connections:' + str(obstacle_watcher_connections_2))
 
 print('/**************** parsing obstacle.txt ***************/') # done!
@@ -130,28 +142,38 @@ for line in lines_obstacles:
 print('Obstacles:' + str(obstacles))
 
 print('/**************** parsing watcher.txt ****************/') # done!
-with open('output/internal/watcher.txt') as file:
-    file_contents = file.read()
-    print(file_contents)
-
 lines_watchers = []
-with open('output/internal/watcher.txt') as file:
-    lines_watchers = file.readlines()
-
-# check if the amount of watchers drawn on the map is the same as the amount of all watchers from the obstacle-watchers-connections given in the text fields
-if watchers_all_amount != len(lines_watchers):
-    print('ERROR: Unmatching amount of watchers given in the text fields and drawn on the map! The scenario is incorrect, make a new one!')
-    os._exit(0)
-
+drawn_watchers_amount = 0
 # data from watcher.txt
 watchers = [] # form: [(x_center, y_center, radius), ...]
 
-# parse the contents into a useful format
-count = 0
-for line in lines_watchers:
-    count += 1
-    #print(f'line {count}: {line}')
-    watchers.append((float(line.split('watcher (x,y,radius): ')[1].split(',')[0]), float(line.split('watcher (x,y,radius): ')[1].split(',')[1]), float(line.split('watcher (x,y,radius): ')[1].split(',')[2])))
+# since watcher.txt could be empty and this is valid, with it should dealed differently
+watcher_file = 'output/internal/watcher.txt'
+if not (os.path.exists(watcher_file) and os.path.getsize(watcher_file) > 0):
+    print('File ' + watcher_file + ' does not exist or is empty! No watchers at all are used.')
+else:
+    with open('output/internal/watcher.txt') as file:
+        file_contents = file.read()
+        print(file_contents)
+
+    with open('output/internal/watcher.txt') as file:
+        lines_watchers = file.readlines()
+
+    for line in lines_watchers:
+        if line != '' and line != '\n':
+            drawn_watchers_amount += 1
+
+    # check if the amount of watchers drawn on the map is the same as the amount of all watchers from the obstacle-watchers-connections given in the text fields
+    if watchers_all_amount != drawn_watchers_amount:
+        print('ERROR: Unmatching amount of watchers given in the text fields and drawn on the map! The scenario is incorrect, make a new one!')
+        os._exit(0)
+
+    # parse the contents into a useful format
+    count = 0
+    for line in lines_watchers:
+        count += 1
+        #print(f'line {count}: {line}')
+        watchers.append((float(line.split('watcher (x,y,radius): ')[1].split(',')[0]), float(line.split('watcher (x,y,radius): ')[1].split(',')[1]), float(line.split('watcher (x,y,radius): ')[1].split(',')[2])))
 
 # DEBUGGING
 print('Watchers:' + str(watchers))
@@ -250,14 +272,14 @@ lines_motion = []
 with open('output/internal/motion.txt') as file:
     lines_motion = file.readlines()
 
-if len(lines_motion) != length_right or len(obstacle_vel) != length_right or len(obstacle_watcher_connections_2) != length_right:
+if len(lines_motion) != length_right or len(obstacle_vel) != length_right: # or len(obstacle_watcher_connections_2) != length_right:
     print('ERROR: Unmatching amount of obstacles and motions! The scenario is incorrect, make a new one!')
     os._exit(0)
 
 # data from robot.txt
 motion = [] # form: [motion_obstacle_0, motion-obstacle_1, ...]
 
-motions_valid = ["yoyo", "circle"] # TODO Important: extend the valid motion types if needed
+motions_valid = ["yoyo", "circle", "once", "loop", "random"] # TODO Important: extend the valid motion types if needed
 
 # parse the contents into a useful format
 count = 0
@@ -316,7 +338,7 @@ for obstacle in obstacles:
     waypoint_y = str((waypoints[i][1][1])*scale_y*flip_y_axis) # scale and flip? are only relevant!
     watcher_num = str(i)
     move = str(motion[i])
-    obstacle_type = str(obstacle[3]) # obstacle default type = "circle" # TODO: adjust the obstacle type
+    obstacle_type = str(obstacle[3]) # obstacle default type = "circle"
 
     # since the order of the obstacles is given in the window, it is here assumed that the obstacle velocities and the obstacle-watchers connections are written in the right order
     obstacles_json += '\n\t\t\t\t"dynamic_obs_' + obstacle_num + '": {\n\t\t\t\t\t'
@@ -334,9 +356,10 @@ for obstacle in obstacles:
     #obstacles_json += '"watcher_' + watcher_num + '"'
     j = 0
     for watcher in obstacle_watcher_connections_2[i]:
-        obstacles_json += '"watcher_' + str(watcher) + '"'
-        if j < (len(obstacle_watcher_connections_2[i]) - 1):
-            obstacles_json += ', '
+        if watcher != '/':
+            obstacles_json += '"watcher_' + str(watcher) + '"'
+            if j < (len(obstacle_watcher_connections_2[i]) - 1):
+                obstacles_json += ', '
         j += 1
     
     obstacles_json += '\n\t\t\t\t\t]\n\t\t\t\t}'
@@ -352,11 +375,11 @@ for watcher in watchers:
     watcher_pos_y = str((watcher[1]-new_start_point_y)*scale_y*flip_y_axis+shift_y)
     watcher_radius = str(watcher[2]*scale_x)
 
-    watchers_json += '\n\t\t\t\t"watcher_' + watcher_num + '": {\n\t\t\t\t\t"pos": ['
+    watchers_json += '\t\t\t\t"watcher_' + watcher_num + '": {\n\t\t\t\t\t"pos": ['
     watchers_json += '\n\t\t\t\t\t\t' + watcher_pos_x + ',\n\t\t\t\t\t\t' + watcher_pos_y + '\n\t\t\t\t\t],'
     watchers_json += '\n\t\t\t\t\t"range": ' + watcher_radius + '\n\t\t\t\t}'
     if i != len(watchers) - 1:
-        watchers_json += ','
+        watchers_json += ',\n'
     i += 1
 
 robot_start_x = str((robot[0][0]-new_start_point_x)*scale_x*flip_x_axis+shift_x)
@@ -375,7 +398,7 @@ final_string += obstacles_json
 final_string += '\n\t\t\t},\n'
 final_string += '\t\t\t"static_obstacles": {\n\n\t\t\t},\n\t\t\t"robot": {'
 final_string += robot_json
-final_string += '\n\t\t\t},\n\t\t\t"watchers": {'
+final_string += '\n\t\t\t},\n\t\t\t"watchers": {\n'
 final_string += watchers_json
 final_string += '\n\t\t\t}\n\t\t}\n\t]\n}'
 
@@ -404,7 +427,7 @@ fob.write('Map origin:\n' + str(map_origin) + "\n")
 fob.write('ObstacleID - ObstacleType - Velocity - WatchersIDs - Motion:\n')
 i = 0
 for obstacle in obstacles:
-    fob.write(str(i) + ' - ' + str(obstacle[3]) + ' - ' + str(obstacle_vel[i]) + ' - ') # TODO: adjust the obstacle type
+    fob.write(str(i) + ' - ' + str(obstacle[3]) + ' - ' + str(obstacle_vel[i]) + ' - ')
     j = 0
     for watcher in obstacle_watcher_connections_2[i]:
         fob.write(str(watcher))
@@ -440,10 +463,10 @@ im_scenario.show() # show the image
 
 # TODO:
 # !0) comment the code, clear out the prints, make a video explaining each step, update the readme file, make the window pretier
-# !1) different types of obstacles are allowed:
-# -> include "type" in the json file -> then modify task.py, obstacles_manager.py so that this info could be read
-# -> connect with another student -> include more obstacle types like human etc. (for human there should be also the parameter talking etc.)?
-# -> three more obstacles: "forklift", "person_single_circle", "person_two_legged" (even more from other branches) -> include them into the gui!?
-# 2) animation of the obstacle how it moves from one point to another
+# !1) insert more parameters = text fields on the right per obstacle ("amount", "chatting_probability", "obstacle_force_factor", "desire_force_factor")
+# -> not all of them should always appear, this depends on the type of obstacle chosen
+# -> the window should be then bigger; update the readme file how to include more parameters
+# ?2) different types of obstacles -> include "type" in the json -> modify task.py, obstacles_manager.py so that this info could be read?
+# 3) animation of the obstacle how it moves from one point to another
 # -> man kann am Rand eine hard coded Simulation in demselben map von einem obstacle mit Geschwindigkeit zB 0.3 visualizieren, damit der Nutzer Gefuehl bekommen kann, wie schnell das eigentlich ist
-# ?3) Rand von watcher zu rot machen, wenn es zu srash wird; die Robotergeschwindigkeit ist hard coded zu 0.3, man kann also berechnen, wann wird der ROboter der watcher aktivieren; also weiteres, letztes Button "simulate if colision"; man braucht dafuer aber noch global path -> nur mit box2d sim engine machbar
+# ?4) Rand von watcher zu rot machen, wenn es zu srash wird; die Robotergeschwindigkeit ist hard coded zu 0.3, man kann also berechnen, wann wird der ROboter der watcher aktivieren; also weiteres, letztes Button "simulate if colision"; man braucht dafuer aber noch global path -> nur mit box2d sim engine machbar

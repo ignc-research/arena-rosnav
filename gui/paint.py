@@ -34,7 +34,7 @@ color_g = 0
 color_b = 0
 counter = 0
 type_change = 0
-obstacle_type = [('circle', (1, 0, 0)), ('cleaner', (0, 0, 1)), ('random', (1, 0.5, 0)), ('turtlebot', (1, 0, 0.5)), ('walker', (0.5, 0, 0.5))]
+obstacle_type = [('circle', (1, 0, 0)), ('cleaner', (0, 0, 1)), ('random', (1, 0.5, 0)), ('turtlebot', (1, 0, 0.5)), ('walker', (0.5, 0, 0.5)), ('adult', (0,1,0)), ('elder', (0.5,0.5,0.5)), ('child', (0,1,1)), ('forklift', (1,0,1)), ('robot', (1,0.5,0.75))]
 obstacle_start_pos_ok = 1
 watcher_start_pos_ok = 1
 line_start_pos_ok = 1
@@ -45,17 +45,19 @@ class MyPaintWidgetCircleObstacle(Widget): # obstacle widget
 
     def __init__(self, **kwargs):
         super(MyPaintWidgetCircleObstacle, self).__init__(**kwargs)
-        self._keyboard = Window.request_keyboard(
-            self._keyboard_closed, self, 'text')
+        self._keyboard = Window.request_keyboard(self._keyboard_closed, self, 'text')
         if self._keyboard.widget:
             # If it exists, this widget is a VKeyboard object which you can use to change the keyboard layout.
             pass
         self._keyboard.bind(on_key_down=self._on_keyboard_down)
 
     def _keyboard_closed(self):
-        print('My keyboard have been closed!')
-        self._keyboard.unbind(on_key_down=self._on_keyboard_down)
-        self._keyboard = None
+        print('The keyboard is still active!')
+        # The following lines are needed to be able to close the keyboard if necessary, for example by pressing 'Esc'.
+        # Because it disables the keyboard also when it is clicked on a text field, we keep the leyboard always active!
+        #print('The keyboard have been closed!')
+        #self._keyboard.unbind(on_key_down=self._on_keyboard_down)
+        #self._keyboard = None
 
     def _on_keyboard_down(self, keyboard, keycode, text, modifiers):
         #print('The key', keycode, 'have been pressed')
@@ -164,18 +166,24 @@ class MyPaintWidgetCircleObstacle(Widget): # obstacle widget
         global color_b
         #fob.write(', ' + str(color_r) + ', ' + str(color_g) + ', ' + str(color_b)) # write the color
         type_unknown = 1
+        cur_type = ''
         for obst_type in obstacle_type:
             if (obst_type[1][0] == color_r) and (obst_type[1][1] == color_g) and (obst_type[1][2] == color_b):
                 fob.write(',' + obst_type[0] + "\n") # write directly the obstacle type
+                cur_type = obst_type[0]
                 type_unknown = 0
         if type_unknown == 1:
             fob.write(',circle' + "\n") # the default type is 'circle'
 
         # put numbers in the middle of the circles and then separately ask the user for the velocity of every obstacle in a text field
         count = self.file_len('output/internal/obstacle.txt') # a counter for all on_touch_down events for this class MyPaintWidgetCircleObstacle -> idea: count the lines from obstacle.txt
-        label_num = Label(text=str(count), pos=(x_pos_last+d_last/2, y_pos_last+d_last/2), size=(1, 1), color=(0,1,0), disabled_color=(0,1,0)) # place the number in the middle of the circle # right
+        label_num = Label(text=str(count), pos=(x_pos_last+d_last/2, y_pos_last+d_last/2), size=(1, 1), color=(0,0,0), disabled_color=(0,0,0)) # place the number in the middle of the circle
         self.add_widget(label_num)
-    
+
+        # put the name of the type on top of the circle (decide betwenn keeping this behavior and (if you think the map will be too crawded) using it just for a test run, to make a legend with all obstacle types-colors pairs for the user)
+        label_type_name = Label(text=cur_type, pos=(x_pos_last+d_last/2, y_pos_last+d_last+10), size=(1, 1), color=(0,0,0), disabled_color=(0,0,0)) # place the name on top of the circle
+        self.add_widget(label_type_name)
+
         fob.close()
 
 class MyPaintWidgetCircleWatcher(Widget): # watcher widget (bigger then the obstacle)
@@ -552,6 +560,21 @@ class MyPaintApp(App):
         btn_walker = Button(text='walker (purple)', size_hint_y=None, height=height_btn_obstacle_type)
         btn_walker.bind(on_release=lambda btn: dropdown_obstacle_type.select(btn_walker.text), on_press=lambda x: self.button_obstacle_type_walker_callback_down(mainbutton_obstacle_type, self.parent, wimg_input_map, parent_draw, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return))
         dropdown_obstacle_type.add_widget(btn_walker)
+        btn_adult = Button(text='adult (green)', size_hint_y=None, height=height_btn_obstacle_type)
+        btn_adult.bind(on_release=lambda btn: dropdown_obstacle_type.select(btn_adult.text), on_press=lambda x: self.button_obstacle_type_adult_callback_down(mainbutton_obstacle_type, self.parent, wimg_input_map, parent_draw, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return))
+        dropdown_obstacle_type.add_widget(btn_adult)
+        btn_elder = Button(text='elder (grey)', size_hint_y=None, height=height_btn_obstacle_type)
+        btn_elder.bind(on_release=lambda btn: dropdown_obstacle_type.select(btn_elder.text), on_press=lambda x: self.button_obstacle_type_elder_callback_down(mainbutton_obstacle_type, self.parent, wimg_input_map, parent_draw, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return))
+        dropdown_obstacle_type.add_widget(btn_elder)
+        btn_child = Button(text='child (light blue)', size_hint_y=None, height=height_btn_obstacle_type)
+        btn_child.bind(on_release=lambda btn: dropdown_obstacle_type.select(btn_child.text), on_press=lambda x: self.button_obstacle_type_child_callback_down(mainbutton_obstacle_type, self.parent, wimg_input_map, parent_draw, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return))
+        dropdown_obstacle_type.add_widget(btn_child)
+        btn_forklift = Button(text='forklift (light purple)', size_hint_y=None, height=height_btn_obstacle_type)
+        btn_forklift.bind(on_release=lambda btn: dropdown_obstacle_type.select(btn_forklift.text), on_press=lambda x: self.button_obstacle_type_forklift_callback_down(mainbutton_obstacle_type, self.parent, wimg_input_map, parent_draw, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return))
+        dropdown_obstacle_type.add_widget(btn_forklift)
+        btn_robot = Button(text='robot (light pink)', size_hint_y=None, height=height_btn_obstacle_type)
+        btn_robot.bind(on_release=lambda btn: dropdown_obstacle_type.select(btn_robot.text), on_press=lambda x: self.button_obstacle_type_robot_callback_down(mainbutton_obstacle_type, self.parent, wimg_input_map, parent_draw, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return))
+        dropdown_obstacle_type.add_widget(btn_robot)
         mainbutton_obstacle_type = Button(text='obstacle type', size_hint=(None, None), size=(width_btn_obstacle_type,height_btn_obstacle_type), pos=(width_left_border, window_sizes[1]-height_up_border-height_layout_num_obstacles-height_layout_res-height_layout_origin-height_btn_obstacle_type/2)) #size_hint_y=None
         mainbutton_obstacle_type.bind(on_release=dropdown_obstacle_type.open)
         dropdown_obstacle_type.bind(on_select=lambda instance, x: setattr(mainbutton_obstacle_type, 'text', x))
@@ -675,9 +698,7 @@ class MyPaintApp(App):
                 fob.write('\n')
         fob.write('\nObstacle-watchers connections:\n')
         for i in range(int(textinput_num_obstacles.text)):
-            fob.write(str(textinput_obstacle_watchers_connection_list[i].text))
-            if i < int(textinput_num_obstacles.text) - 1:
-                fob.write('\n')
+            fob.write(str(textinput_obstacle_watchers_connection_list[i].text) + '\n')
         fob.close()
 
         # save the motion values in a file (again assume that the order is right and it starts with the motion for obstacle 0)
@@ -883,6 +904,46 @@ class MyPaintApp(App):
         color_r_temp = 0.5
         color_g_temp = 0
         color_b_temp = 0.5
+        self.button_obstacle_type(mainbutton_obstacle_type, parent, wimg_input_map, parent_draw, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return, color_r_temp, color_g_temp, color_b_temp)
+    
+    def button_obstacle_type_adult_callback_down(self, mainbutton_obstacle_type, parent, wimg_input_map, parent_draw, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return):
+        print('Obstacle type was chosen - adult')
+        # green
+        color_r_temp = 0
+        color_g_temp = 1
+        color_b_temp = 0
+        self.button_obstacle_type(mainbutton_obstacle_type, parent, wimg_input_map, parent_draw, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return, color_r_temp, color_g_temp, color_b_temp)
+
+    def button_obstacle_type_elder_callback_down(self, mainbutton_obstacle_type, parent, wimg_input_map, parent_draw, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return):
+        print('Obstacle type was chosen - elder')
+        # grey
+        color_r_temp = 0.5
+        color_g_temp = 0.5
+        color_b_temp = 0.5
+        self.button_obstacle_type(mainbutton_obstacle_type, parent, wimg_input_map, parent_draw, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return, color_r_temp, color_g_temp, color_b_temp)
+
+    def button_obstacle_type_child_callback_down(self, mainbutton_obstacle_type, parent, wimg_input_map, parent_draw, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return):
+        print('Obstacle type was chosen - child')
+        # light blue
+        color_r_temp = 0
+        color_g_temp = 1
+        color_b_temp = 1
+        self.button_obstacle_type(mainbutton_obstacle_type, parent, wimg_input_map, parent_draw, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return, color_r_temp, color_g_temp, color_b_temp)
+
+    def button_obstacle_type_forklift_callback_down(self, mainbutton_obstacle_type, parent, wimg_input_map, parent_draw, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return):
+        print('Obstacle type was chosen - forklift')
+        # light purple
+        color_r_temp = 1
+        color_g_temp = 0
+        color_b_temp = 1
+        self.button_obstacle_type(mainbutton_obstacle_type, parent, wimg_input_map, parent_draw, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return, color_r_temp, color_g_temp, color_b_temp)
+
+    def button_obstacle_type_robot_callback_down(self, mainbutton_obstacle_type, parent, wimg_input_map, parent_draw, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return):
+        print('Obstacle type was chosen - robot')
+        # light pink
+        color_r_temp = 1
+        color_g_temp = 0.5
+        color_b_temp = 0.75
         self.button_obstacle_type(mainbutton_obstacle_type, parent, wimg_input_map, parent_draw, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return, color_r_temp, color_g_temp, color_b_temp)
 
     # return button -> return one step (so if now drawing lines is turned on, after the button is clicked, start fresh with the lines, so delete all lines (and update/restart the coresponding txt file!))
