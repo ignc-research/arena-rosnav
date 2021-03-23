@@ -74,13 +74,13 @@ class RewardCalculator():
         self._reward_goal_reached(
             goal_in_robot_frame)
         self._reward_not_moving(
-            kwargs['action'])
+            kwargs['action'], punishment=0.005)
         self._reward_safe_dist(
             laser_scan)
         self._reward_collision(
             laser_scan)
         self._reward_goal_approached(
-            goal_in_robot_frame)
+            goal_in_robot_frame, reward_factor=0.3, penalty_factor=0.4)
 
     def _cal_reward_rule_01(self, 
                             laser_scan: np.ndarray, 

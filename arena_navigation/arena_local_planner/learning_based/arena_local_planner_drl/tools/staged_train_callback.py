@@ -96,14 +96,14 @@ class InitiateNewTrainStage(BaseCallback):
                     
             if ((self.threshhold_type == "rew" and EvalObject.best_mean_reward >= self.upper_threshold) or
                 (self.threshhold_type == "succ" and EvalObject.last_success_rate >= self.upper_threshold)):
+                if not rospy.get_param("/last_stage_reached"):
+                    EvalObject.best_mean_reward = -np.inf
+                    EvalObject.last_success_rate = -np.inf
+
                 for i, pub in enumerate(self._publishers_next):
                     pub.publish(self._trigger)
                     if i == 0:
                         self.log_curr_stage(EvalObject.logger)
-                
-                if not rospy.get_param("/last_stage_reached"):
-                    EvalObject.best_mean_reward = -np.inf
-                    EvalObject.last_success_rate = -np.inf
 
     def log_curr_stage(self, logger):
         time.sleep(1)
