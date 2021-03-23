@@ -65,14 +65,11 @@ for line in lines:
             # obstacle_vel.append((float(line.split(':')[0]), float(line.split(':')[1]))) # old version
             obstacle_vel.append(float(line))
 
+count_obstacles = count_temp - 12 - 1 # 12 not dynamic lines # 1 label 'Obstacle-watchers connections:'
 count = 0
 for line in lines:
-    print('LINE:' + str(line))
     count += 1
-    if count > count_temp:
-        print('COUNT')
-        print(count)
-        print(count_temp)
+    if count > count_temp and count <= count_temp+count_obstacles:
         ## obstacle_watcher_connections.append((float(line.split(':')[0]), (float(line.split(':')[1].split(',')[0]), float(line.split(':')[1].split(',')[1]))))
         temp_array = []
         #for value in line.split(':')[1].split(','): # old version
@@ -88,6 +85,14 @@ for line in lines:
                 temp_array.append((int(value)))
         obstacle_watcher_connections_2.append(temp_array) # assume the ordering is right starting from 0
         print('Single obstacle-watchers connections: ' + str(line.split('\n')[0]))
+    if count > count_temp+count_obstacles+1 and count <= count_temp+2*count_obstacles+1:
+        print('TODO: Amount of pedestrians in the group:')
+    if count > count_temp+2*count_obstacles+1 and count <= count_temp+3*count_obstacles+1:
+        print('TODO: Chatting probability:')
+    if count > count_temp+3*count_obstacles+1 and count <= count_temp+4*count_obstacles+1:
+        print('TODO: Obstacle force factor:')
+    if count > count_temp+4*count_obstacles+1 and count <= count_temp+5*count_obstacles+1:
+        print('TODO: Desire force factor:')
 
 # check if the amount of obstacles given in the text area, is the same as the actually drawn, also as the same as the drawn lines etc.
 # obstacle.txt_lines == vector.txt_lines/2 == motion.txt_lines == data.txt_obstacle-vel.lines == data.txt_obst-watch-con.lines
@@ -425,6 +430,7 @@ fob = open('output/user_data.txt','w')
 fob.write('Map resolution:\n' + str(map_res) + "\n")
 fob.write('Map origin:\n' + str(map_origin) + "\n")
 fob.write('ObstacleID - ObstacleType - Velocity - WatchersIDs - Motion:\n')
+# TODO: add the additional parameters
 i = 0
 for obstacle in obstacles:
     fob.write(str(i) + ' - ' + str(obstacle[3]) + ' - ' + str(obstacle_vel[i]) + ' - ')
@@ -465,7 +471,7 @@ im_scenario.show() # show the image
 # !0) comment the code, clear out the prints, make a video explaining each step, update the readme file, make the window pretier
 # !1) insert more parameters = text fields on the right per obstacle ("amount", "chatting_probability", "obstacle_force_factor", "desire_force_factor")
 # -> not all of them should always appear, this depends on the type of obstacle chosen
-# -> the window should be then bigger; update the readme file how to include more parameters
+# -> the window should be then bigger or area should be scrollable also to the left-right; update the readme file with explanation how to include more parameters (see set_obstacle_params() and the global arrays like textinput_desire_force_factor[])
 # ?2) different types of obstacles -> include "type" in the json -> modify task.py, obstacles_manager.py so that this info could be read?
 # 3) animation of the obstacle how it moves from one point to another
 # -> man kann am Rand eine hard coded Simulation in demselben map von einem obstacle mit Geschwindigkeit zB 0.3 visualizieren, damit der Nutzer Gefuehl bekommen kann, wie schnell das eigentlich ist

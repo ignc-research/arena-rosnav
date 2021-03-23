@@ -376,7 +376,7 @@ class MyPaintWidgetRobot(Widget): # for drawing two circles with a constant smal
             fob.write('robot end position (x,y): ' + str(touch.x) + ',' + str(touch.y) + "\n")
         fob.close()
 
-class MyPaintApp(App):
+class ScenarioGUIApp(App):
 
     def check_resize(self, instance, x, y):
         # Idea 1: make the window resizable -> resize all widgets and work only with relative positions etc. (pos_hint and size_hint) so that the scale calculation work no matter of the window size!
@@ -589,6 +589,10 @@ class MyPaintApp(App):
         textinput_velocity_list = []
         textinput_obstacle_watchers_connection_list = []
         mainbutton_motion_list = []
+        textinput_amount = []
+        textinput_chatting_probability = []
+        textinput_obstacle_force_factor = []
+        textinput_desire_force_factor = []
         
         # create buttons
         button = Button(text='Click when ready\nwith the obstacles\nnumber & position', font_size=14)
@@ -596,8 +600,8 @@ class MyPaintApp(App):
         button3 = Button(text='Click when ready\nwith the waypoints', font_size=14)
         button4 = Button(text='Click when ready\nwith robot start\nand end position\n-> Done!', font_size=14)
 
-        button.bind(on_press=lambda x: self.button_callback(self.parent, parent_draw, button, button2, mainbutton_obstacle_type, wimg_input_map, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return, textinput_res, textinput_origin, textinput_num_obstacles, image_corners, scale, scale2, scale_total, width_left_border, height_up_border, height_layout_btn, textinput_velocity_list, textinput_obstacle_watchers_connection_list, mainbutton_motion_list))
-        button2.bind(on_press=lambda x: self.button2_callback(self.parent, parent_draw, button2, button3, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return, mainbutton_obstacle_type, wimg_input_map, textinput_num_obstacles, textinput_velocity_list, textinput_obstacle_watchers_connection_list, mainbutton_motion_list))
+        button.bind(on_press=lambda x: self.button_callback(self.parent, parent_draw, button, button2, mainbutton_obstacle_type, wimg_input_map, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return, textinput_res, textinput_origin, textinput_num_obstacles, image_corners, scale, scale2, scale_total, width_left_border, height_up_border, height_layout_btn, textinput_velocity_list, textinput_obstacle_watchers_connection_list, mainbutton_motion_list, textinput_amount, textinput_chatting_probability, textinput_obstacle_force_factor, textinput_desire_force_factor))
+        button2.bind(on_press=lambda x: self.button2_callback(self.parent, parent_draw, button2, button3, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return, mainbutton_obstacle_type, wimg_input_map, textinput_num_obstacles, textinput_velocity_list, textinput_obstacle_watchers_connection_list, mainbutton_motion_list, textinput_amount, textinput_chatting_probability, textinput_obstacle_force_factor, textinput_desire_force_factor))
         button3.bind(on_press=lambda x: self.button3_callback(self.parent, parent_draw, button3, button4, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return, mainbutton_obstacle_type, wimg_input_map))
         button4.bind(on_press=lambda x: self.button4_callback(self.parent, parent_draw, button4, layout_btn, button_return, mainbutton_obstacle_type))
         
@@ -623,17 +627,13 @@ class MyPaintApp(App):
 
     # Idea: save as image -> load back -> then delete the first widget (that is how the drawings won't disappear) and enable the next widget
     # Idea: make a button (click when ready with the obstacles => save the positions and radius), then draw the watchers and again click and so on for the lines and robot positions
-    def button_callback(self, parent, parent_draw, button, button2, mainbutton_obstacle_type, wimg_input_map, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return, textinput_res, textinput_origin, textinput_num_obstacles, image_corners, scale, scale2, scale_total, width_left_border, height_up_border, height_layout_btn, textinput_velocity_list, textinput_obstacle_watchers_connection_list, mainbutton_motion_list):
+    def button_callback(self, parent, parent_draw, button, button2, mainbutton_obstacle_type, wimg_input_map, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return, textinput_res, textinput_origin, textinput_num_obstacles, image_corners, scale, scale2, scale_total, width_left_border, height_up_border, height_layout_btn, textinput_velocity_list, textinput_obstacle_watchers_connection_list, mainbutton_motion_list, textinput_amount, textinput_chatting_probability, textinput_obstacle_force_factor, textinput_desire_force_factor):
         print('The button <%s> is being pressed' % ' '.join(button.text.split('\n')))
         # the number of obstacles can not be changed once the button "done" has been clicked
         textinput_num_obstacles.disabled = True # disable the button, should be clicked only once!
         
-        # the user should first say how many obstacles he put -> after that can be created the same amount of text boxes and drop down boxes as the amount of obstacles -> so putting obstacle velocity, watchers and motion per obstacle can be done individually!
+        # the user should first say how many obstacles he put -> after that can be created the same amount of text boxes and drop down boxes as the amount of obstacles -> so putting obstacle velocity, watchers, motion etc. per obstacle can be done individually!
         print('Number of obstacles: ' + textinput_num_obstacles.text)
-        # on one row a text area for the obstacle velocity and for the obstacle-watcher connection and a button for the motion
-        height_layout_connect = (Window.size[1]-2*height_up_border-height_layout_btn)*2
-        width_layout_connect = 140
-        label_connect = Label(text='Obstacle - Velocity -\nWatchers - Motion', size=(width_layout_connect,60), size_hint=(None, None), pos=(Window.size[0]-width_left_border-140, Window.size[1]-height_up_border-30))
 
         # local variables, not needed to be global
         label_index_list = []
@@ -641,10 +641,12 @@ class MyPaintApp(App):
         btn_circle_list = []
         dropdown_motion_list = []
 
+        height_layout_connect = (Window.size[1]-height_up_border-height_layout_btn)*2
+        width_layout_connect = 140
         # Idea 1 - make everything with text inputs (no upper bound regarding the number of obstacles), scrollable after the fist 10 obstacles
-        scrollable_area = self.set_obstacle_params(textinput_num_obstacles, label_index_list, textinput_velocity_list, textinput_obstacle_watchers_connection_list, mainbutton_motion_list, height_layout_connect, width_layout_connect, width_left_border, height_up_border)
+        scrollable_area = self.set_obstacle_params(textinput_num_obstacles, label_index_list, textinput_velocity_list, textinput_obstacle_watchers_connection_list, mainbutton_motion_list, textinput_amount, textinput_chatting_probability, textinput_obstacle_force_factor, textinput_desire_force_factor, height_layout_connect, width_layout_connect, width_left_border, height_up_border)
         # Idea 2 - make text inputs only for the velocity and watchers -> for the motions make dropdown boxes (upper bound of max 10-20 obstacles), scrollable after the fist 10 obstacles
-        #scrollable_areas = self.set_obstacle_params_2(textinput_num_obstacles, label_index_list, textinput_velocity_list, textinput_obstacle_watchers_connection_list, mainbutton_motion_list, height_layout_connect, width_layout_connect, width_left_border, height_up_border)
+        #scrollable_areas = self.set_obstacle_params_2(textinput_num_obstacles, label_index_list, textinput_velocity_list, textinput_obstacle_watchers_connection_list, mainbutton_motion_list, textinput_amount, textinput_chatting_probability, textinput_obstacle_force_factor, textinput_desire_force_factor, height_layout_connect, width_layout_connect, width_left_border, height_up_border)
 
         # save the data from the text areas also to a txt file
         # at this place in the code are they for sure not empty and are their final version
@@ -674,7 +676,7 @@ class MyPaintApp(App):
         parent.add_widget(layout_btn)
         parent.add_widget(layout_origin)
         parent.add_widget(layout_res)
-        parent.add_widget(label_connect)
+        #parent.add_widget(label_connect)
         parent.add_widget(layout_num_obstacles)
         parent.add_widget(button_return)
         parent.add_widget(mainbutton_obstacle_type)
@@ -688,7 +690,7 @@ class MyPaintApp(App):
         button2.disabled = False # enable the next button
         mainbutton_obstacle_type.disabled = True # the dropdown button should not be changed anymore
 
-    def button2_callback(self, parent, parent_draw, button2, button3, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return, mainbutton_obstacle_type, wimg_input_map, textinput_num_obstacles, textinput_velocity_list, textinput_obstacle_watchers_connection_list, mainbutton_motion_list):
+    def button2_callback(self, parent, parent_draw, button2, button3, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return, mainbutton_obstacle_type, wimg_input_map, textinput_num_obstacles, textinput_velocity_list, textinput_obstacle_watchers_connection_list, mainbutton_motion_list, textinput_amount, textinput_chatting_probability, textinput_obstacle_force_factor, textinput_desire_force_factor):
         # should be done here and not in button_callback, because there the button values are still not visible!
         fob = open('output/internal/data.txt','a')
         fob.write('\nObstacle velocities:\n')
@@ -698,9 +700,34 @@ class MyPaintApp(App):
                 fob.write('\n')
         fob.write('\nObstacle-watchers connections:\n')
         for i in range(int(textinput_num_obstacles.text)):
-            fob.write(str(textinput_obstacle_watchers_connection_list[i].text) + '\n')
+            #fob.write(str(textinput_obstacle_watchers_connection_list[i].text) + '\n')
+            fob.write(str(textinput_obstacle_watchers_connection_list[i].text))
+            if i < int(textinput_num_obstacles.text) - 1:
+                fob.write('\n')
+        # TODO: write the additional parameters
+        fob.write('\nAmount of pedestrians in the group:\n')
+        for i in range(int(textinput_num_obstacles.text)):
+            fob.write(str(textinput_amount[i].text))
+            if i < int(textinput_num_obstacles.text) - 1:
+                fob.write('\n')
+        fob.write('\nChatting probability:\n')
+        for i in range(int(textinput_num_obstacles.text)):
+            fob.write(str(textinput_chatting_probability[i].text))
+            if i < int(textinput_num_obstacles.text) - 1:
+                fob.write('\n')
+        fob.write('\nObstacle force factor:\n')
+        for i in range(int(textinput_num_obstacles.text)):
+            fob.write(str(textinput_obstacle_force_factor[i].text))
+            if i < int(textinput_num_obstacles.text) - 1:
+                fob.write('\n')
+        fob.write('\nDesire force factor:\n')
+        for i in range(int(textinput_num_obstacles.text)):
+            fob.write(str(textinput_desire_force_factor[i].text) + '\n')
+            #fob.write(str(textinput_desire_force_factor[i].text))
+            #if i < int(textinput_num_obstacles.text) - 1:
+            #    fob.write('\n')
         fob.close()
-
+        
         # save the motion values in a file (again assume that the order is right and it starts with the motion for obstacle 0)
         fob = open('output/internal/motion.txt','w') # the button is clicked only once
         max_obstacles = 20
@@ -1034,24 +1061,51 @@ class MyPaintApp(App):
         else:
             print('All done, nothing to return!')
     
-    def set_obstacle_params(self, textinput_num_obstacles, label_index_list, textinput_velocity_list, textinput_obstacle_watchers_connection_list, mainbutton_motion_list, height_layout_connect, width_layout_connect, width_left_border, height_up_border): # IDEA 1 - make everything with text inputs (so save from here the information also about the motions)
-        # scrollable (make place for setting up 10 obstacles before the area gets scrollable)
-        layout_connect = GridLayout(cols=4, size_hint_y=None)
-        layout_connect.bind(minimum_height=layout_connect.setter('height'))
+    def set_obstacle_params(self, textinput_num_obstacles, label_index_list, textinput_velocity_list, textinput_obstacle_watchers_connection_list, mainbutton_motion_list, textinput_amount, textinput_chatting_probability, textinput_obstacle_force_factor, textinput_desire_force_factor, height_layout_connect, width_layout_connect, width_left_border, height_up_border): # IDEA 1 - make everything with text inputs (so save from here the information also about the motions)
+        # scrollable up-down (make place for setting up 10 obstacles before the area gets scrollable)
+        # scrollable left-right (no matter how much more parameters are added in the future, it will still work)
+        # TODO: keep the labels when scrolling up-down and keep the index when scrolling left-right
+        # TODO: when it is scrolled, sometimes the error with the ['ellipse2'] still occures?
+        layout_connect = GridLayout(cols=8, size_hint=(None,None))
+        layout_connect.bind(minimum_height=layout_connect.setter('height'), minimum_width=layout_connect.setter('width'))
+        label_connect_obstacle = Label(text='#', size_hint=(None,None), height=height_layout_connect/10, width=15) # 'Obstacle'
+        label_connect_velocity = Label(text='Velocity', size_hint=(None,None), height=height_layout_connect/10, width=60)
+        label_connect_watchers = Label(text='Watchers', size_hint=(None,None), height=height_layout_connect/10, width=65)
+        label_connect_motion = Label(text='Motion', size_hint=(None,None), height=height_layout_connect/10, width=60)
+        label_connect_amount = Label(text='Amount', size_hint=(None,None), height=height_layout_connect/10, width=60)
+        label_connect_chatting_probability = Label(text='Chatting\nprobability', size_hint=(None,None), height=height_layout_connect/10, width=85)
+        label_connect_obstacle_force_factor = Label(text='Obstacle\nforce factor', size_hint=(None,None), height=height_layout_connect/10, width=85)
+        label_connect_desire_force_factor = Label(text='Desire\nforce factor', size_hint=(None,None), height=height_layout_connect/10, width=85)
+        layout_connect.add_widget(label_connect_obstacle)
+        layout_connect.add_widget(label_connect_velocity)
+        layout_connect.add_widget(label_connect_watchers)
+        layout_connect.add_widget(label_connect_motion)
+        layout_connect.add_widget(label_connect_amount)
+        layout_connect.add_widget(label_connect_chatting_probability)
+        layout_connect.add_widget(label_connect_obstacle_force_factor)
+        layout_connect.add_widget(label_connect_desire_force_factor)
         for index in range(int(textinput_num_obstacles.text)): # index starts with 0
-            label_index_list.append(Label(text=str(index), size_hint_x=None, width=15, size_hint_y=None, height=height_layout_connect/2/10)) # height=28=height_layout_connect/2/10 to have place for 10 obstacle before it starts to scroll
-            textinput_velocity_list.append(TextInput(text='0.3', size_hint_y=None, height=height_layout_connect/2/10)) # editable; give an example value already written in the box
-            textinput_obstacle_watchers_connection_list.append(TextInput(text=str(index), size_hint_y=None, height=height_layout_connect/2/10))
-            mainbutton_motion_list.append(TextInput(text='yoyo', size_hint=(None,None), height=height_layout_connect/2/10, width=50))
+            label_index_list.append(Label(text=str(index), size_hint_x=None, size_hint=(None,None), height=height_layout_connect/2/10, width=15)) # height=28=height_layout_connect/2/10 to have place for 10 obstacle before it starts to scroll
+            textinput_velocity_list.append(TextInput(text='0.3', size_hint=(None,None), height=height_layout_connect/2/10, width=60)) # editable; give an example value already written in the box
+            textinput_obstacle_watchers_connection_list.append(TextInput(text=str(index), size_hint=(None,None), height=height_layout_connect/2/10, width=65))
+            mainbutton_motion_list.append(TextInput(text='yoyo', size_hint=(None,None), height=height_layout_connect/2/10, width=60))
+            textinput_amount.append(TextInput(text='1', size_hint=(None,None), height=height_layout_connect/2/10, width=60))
+            textinput_chatting_probability.append(TextInput(text='0.3', size_hint=(None,None), height=height_layout_connect/2/10, width=85))
+            textinput_obstacle_force_factor.append(TextInput(text='1.0', size_hint=(None,None), height=height_layout_connect/2/10, width=85))
+            textinput_desire_force_factor.append(TextInput(text='1.0', size_hint=(None,None), height=height_layout_connect/2/10, width=85))
             layout_connect.add_widget(label_index_list[index])
             layout_connect.add_widget(textinput_velocity_list[index])
             layout_connect.add_widget(textinput_obstacle_watchers_connection_list[index])
             layout_connect.add_widget(mainbutton_motion_list[index])
-        scrollable_area = ScrollView(size_hint=(1, None), size=(width_layout_connect,height_layout_connect/2), pos=(Window.size[0]-width_left_border-140, Window.size[1]-height_up_border-height_layout_connect/2-30))
+            layout_connect.add_widget(textinput_amount[index])
+            layout_connect.add_widget(textinput_chatting_probability[index])
+            layout_connect.add_widget(textinput_obstacle_force_factor[index])
+            layout_connect.add_widget(textinput_desire_force_factor[index])
+        scrollable_area = ScrollView(size_hint=(None, None), size=(width_layout_connect,height_layout_connect/2), pos=(Window.size[0]-width_left_border-140, Window.size[1]-height_up_border/2-height_layout_connect/2))
         scrollable_area.add_widget(layout_connect)
         return scrollable_area
 
-    def set_obstacle_params_2(self, textinput_num_obstacles, label_index_list, textinput_velocity_list, textinput_obstacle_watchers_connection_list, mainbutton_motion_list, height_layout_connect, width_layout_connect, width_left_border, height_up_border): # IDEA 2 - make text inputs only for the velocity and watchers -> for the motions make dropdown boxes
+    def set_obstacle_params_2(self, textinput_num_obstacles, label_index_list, textinput_velocity_list, textinput_obstacle_watchers_connection_list, mainbutton_motion_list, textinput_amount, textinput_chatting_probability, textinput_obstacle_force_factor, textinput_desire_force_factor, height_layout_connect, width_layout_connect, width_left_border, height_up_border): # IDEA 2 - make text inputs only for the velocity and watchers -> for the motions make dropdown boxes
         ## not scrollable (if more then 10 obstacles -> too small boxes -> can not be read anymore!)
         #layout_connect = GridLayout(cols=3, rows=int(textinput_num_obstacles.text), size=(width_layout_connect-50,height_layout_connect/2), size_hint=(None, None), pos=(Window.size[0]-width_left_border-140, Window.size[1]-height_up_border-height_layout_connect/2-30))
         ## scrollable (make place for setting up 10 obstacles before the area gets scrollable)
@@ -1061,9 +1115,17 @@ class MyPaintApp(App):
             label_index_list.append(Label(text=str(index), size_hint_x=None, width=15, size_hint_y=None, height=height_layout_connect/2/10)) # height=28=height_layout_connect/2/10 to have place for 10 obstacle before it starts to scroll
             textinput_velocity_list.append(TextInput(text='0.3', size_hint_y=None, height=height_layout_connect/2/10)) # editable; give an example value already written in the box
             textinput_obstacle_watchers_connection_list.append(TextInput(text=str(index), size_hint_y=None, height=height_layout_connect/2/10)) # editable; give an example value already written in the box
+            textinput_amount.append(TextInput(text='1', size_hint_y=None, height=height_layout_connect/2/10))
+            textinput_chatting_probability.append(TextInput(text='0.3', size_hint_y=None, height=height_layout_connect/2/10))
+            textinput_obstacle_force_factor.append(TextInput(text='1.0', size_hint_y=None, height=height_layout_connect/2/10))
+            textinput_desire_force_factor.append(TextInput(text='1.0', size_hint_y=None, height=height_layout_connect/2/10))
             layout_connect.add_widget(label_index_list[index])
             layout_connect.add_widget(textinput_velocity_list[index])
             layout_connect.add_widget(textinput_obstacle_watchers_connection_list[index])
+            #layout_connect.add_widget(textinput_amount[index])
+            #layout_connect.add_widget(textinput_chatting_probability[index])
+            #layout_connect.add_widget(textinput_obstacle_force_factor[index])
+            #layout_connect.add_widget(textinput_desire_force_factor[index])
         scrollable_area = ScrollView(size_hint=(1, None), size=(width_layout_connect-50,height_layout_connect/2), pos=(Window.size[0]-width_left_border-140, Window.size[1]-height_up_border-height_layout_connect/2-30))
         scrollable_area.add_widget(layout_connect)
 
@@ -1377,4 +1439,4 @@ class MyPaintApp(App):
         #return (mainbutton_motion_, mainbutton_motion_1, mainbutton_motion_2, mainbutton_motion_3, mainbutton_motion_4, mainbutton_motion_5, mainbutton_motion_6, mainbutton_motion_7, mainbutton_motion_8, mainbutton_motion_9)
 
 if __name__ == '__main__':
-    MyPaintApp().run()
+    ScenarioGUIApp().run()
