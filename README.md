@@ -1,5 +1,5 @@
 # IROS21 information
-To test the code and reproduce the experiments, switch to the branch local_planner. Follow the installation steps in [Installation.md](docs/Installation.md). Afterwards, follow the steps in [Evaluation.md](docs/Evaluation.md).
+To test the code and reproduce the experiments, switch to the branch local_planner. Follow the installation steps in [Installation.md](docs/Installation.md). Afterwards, follow the steps in [Evaluations.md](docs/Evaluations.md).
 # Arena-Rosnav
 
 A flexible, high-performance 2D simulator with configurable agents, multiple sensors, and benchmark scenarios for testing robotic navigation. 
