@@ -6,7 +6,7 @@
             "dynamic_obstacles": {
                 "dynamic_obs_0": {
                     "obstacle_radius": 0.3,
-                    "linear_velocity": 0.1,
+                    "linear_velocity": 0.6,
                     "start_pos": [
                         3,
                         9,
@@ -27,7 +27,7 @@
                 },
                 "dynamic_obs_1": {
                     "obstacle_radius": 0.3,
-                    "linear_velocity": 0.1,
+                    "linear_velocity": 0.6,
                     "start_pos": [
                         3.5,
                         -1.75,
@@ -48,7 +48,7 @@
                 },
                 "dynamic_obs_2": {
                     "obstacle_radius": 0.3,
-                    "linear_velocity": 0.1,
+                    "linear_velocity": 0.6,
                     "start_pos": [
                         7,
                         5.5,
@@ -70,7 +70,7 @@
 
                 "dynamic_obs_3": {
                     "obstacle_radius": 0.3,
-                    "linear_velocity": 0.1,
+                    "linear_velocity": 0.6,
                     "start_pos": [
                         11,
                         10,
@@ -92,7 +92,7 @@
 
                 "dynamic_obs_4": {
                     "obstacle_radius": 0.3,
-                    "linear_velocity": 0.1,
+                    "linear_velocity": 0.6,
                     "start_pos": [
                         10,
                         14.75,
@@ -113,7 +113,7 @@
                 },
                 "dynamic_obs_5": {
                     "obstacle_radius": 0.3,
-                    "linear_velocity": 0.1,
+                    "linear_velocity": 0.6,
                     "start_pos": [
                         12.5,
                         4.5,
@@ -134,7 +134,7 @@
                 },
                 "dynamic_obs_6": {
                     "obstacle_radius": 0.3,
-                    "linear_velocity": 0.1,
+                    "linear_velocity": 0.6,
                     "start_pos": [
                         12.5,
                         1,
@@ -155,7 +155,7 @@
                 },
                 "dynamic_obs_7": {
                     "obstacle_radius": 0.3,
-                    "linear_velocity": 0.1,
+                    "linear_velocity": 0.6,
                     "start_pos": [
                         15,
                         -1.75,
@@ -176,7 +176,7 @@
                 },
                 "dynamic_obs_8": {
                     "obstacle_radius": 0.3,
-                    "linear_velocity": 0.1,
+                    "linear_velocity": 0.6,
                     "start_pos": [
                         16.5,
                         6,
@@ -197,7 +197,7 @@
                 },
                 "dynamic_obs_9": {
                     "obstacle_radius": 0.3,
-                    "linear_velocity": 0.1,
+                    "linear_velocity": 0.6,
                     "start_pos": [
                         5,
                         10,
@@ -218,7 +218,7 @@
                 },
                 "dynamic_obs_10": {
                     "obstacle_radius": 0.3,
-                    "linear_velocity": 0.1,
+                    "linear_velocity": 0.6,
                     "start_pos": [
                         4.1,
                         1.5,
@@ -239,7 +239,7 @@
                 },
                 "dynamic_obs_11": {
                     "obstacle_radius": 0.3,
-                    "linear_velocity": 0.1,
+                    "linear_velocity": 0.6,
                     "start_pos": [
                         7,
                         6.5,
@@ -261,7 +261,7 @@
 
                 "dynamic_obs_12": {
                     "obstacle_radius": 0.3,
-                    "linear_velocity": 0.1,
+                    "linear_velocity": 0.6,
                     "start_pos": [
                         11.5,
                         11,
@@ -283,7 +283,7 @@
 
                 "dynamic_obs_13": {
                     "obstacle_radius": 0.3,
-                    "linear_velocity": 0.1,
+                    "linear_velocity": 0.6,
                     "start_pos": [
                         10.6,
                         13.75,
@@ -304,7 +304,7 @@
                 },
                 "dynamic_obs_14": {
                     "obstacle_radius": 0.3,
-                    "linear_velocity": 0.1,
+                    "linear_velocity": 0.6,
                     "start_pos": [
                         13.1,
                         4.9,
@@ -325,7 +325,7 @@
                 },
                 "dynamic_obs_15": {
                     "obstacle_radius": 0.3,
-                    "linear_velocity": 0.1,
+                    "linear_velocity": 0.6,
                     "start_pos": [
                         12.5,
                         4,
@@ -346,7 +346,7 @@
                 },
                 "dynamic_obs_16": {
                     "obstacle_radius": 0.3,
-                    "linear_velocity": 0.1,
+                    "linear_velocity": 0.6,
                     "start_pos": [
                         15,
                         2.75,
@@ -367,7 +367,7 @@
                 },
                 "dynamic_obs_17": {
                     "obstacle_radius": 0.3,
-                    "linear_velocity": 0.1,
+                    "linear_velocity": 0.6,
                     "start_pos": [
                         17.0,
                         4,
@@ -388,7 +388,7 @@
                 },
                 "dynamic_obs_18": {
                     "obstacle_radius": 0.3,
-                    "linear_velocity": 0.1,
+                    "linear_velocity": 0.6,
                     "start_pos": [
                         15,
                         4,
@@ -409,7 +409,7 @@
                 },
                 "dynamic_obs_19": {
                     "obstacle_radius": 0.3,
-                    "linear_velocity": 0.1,
+                    "linear_velocity": 0.6,
                     "start_pos": [
                         15.5,
                         8,

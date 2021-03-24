@@ -338,6 +338,7 @@ void DynamicReplanFSM::trackTrajCallback(const ros::TimerEvent &e){
         //ROS_INFO_STREAM("vel: "<<v);
         //ROS_INFO_STREAM("rot vel: "<<w);
     }
+    
     twist_cmd.angular.x=0.0;
     twist_cmd.angular.y=0.0;
     twist_cmd.angular.z=w;
