@@ -84,13 +84,13 @@ class FlatlandEnv(gym.Env):
         
         self.setup_by_configuration(robot_yaml_path, settings_yaml_path)
         
+        # set rosparam
+        rospy.set_param("/laser_num_beams", self._laser_num_beams)
+        
         # observation collector
         self.observation_collector = ObservationCollector(
             self.ns, self._laser_num_beams, self._laser_max_range)
         self.observation_space = self.observation_collector.get_observation_space()
-
-        # set rosparam
-        rospy.set_param("/laser_num_beams", self._laser_num_beams)
 
         # reward calculator
         if safe_dist is None:

@@ -128,7 +128,7 @@ class RewardCalculator():
         self._reward_goal_reached(
             goal_in_robot_frame, reward=15)
         self._reward_safe_dist(
-            laser_scan, punishment=0.15)
+            laser_scan, punishment=0.2)
         self._reward_collision(
             laser_scan, punishment=10)
         self._reward_goal_approached(
