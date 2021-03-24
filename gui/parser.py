@@ -373,11 +373,11 @@ for obstacle in obstacles:
     obstacles_json += '"linear_velocity": ' + lin_velocity + ',\n\t\t\t\t\t'
     obstacles_json += '"type": "' + obstacle_type + '",\n\t\t\t\t\t'
     if len(amount_pedestrians) > 0:
-        obstacles_json += '"amount": "' + amount + '",\n\t\t\t\t\t'
-        obstacles_json += '"chatting_probability": "' + chat_probability + '",\n\t\t\t\t\t'
+        obstacles_json += '"amount": ' + amount + ',\n\t\t\t\t\t'
+        obstacles_json += '"chatting_probability": ' + chat_probability + ',\n\t\t\t\t\t'
     if len(obstacle_force_factor) > 0:
-        obstacles_json += '"obstacle_force_factor": "' + obstactle_force_fact + '",\n\t\t\t\t\t'
-        obstacles_json += '"desire_force_factor": "' + desire_force_fact + '",\n\t\t\t\t\t'
+        obstacles_json += '"obstacle_force_factor": ' + obstactle_force_fact + ',\n\t\t\t\t\t'
+        obstacles_json += '"desire_force_factor": ' + desire_force_fact + ',\n\t\t\t\t\t'
     obstacles_json += '"start_pos": [\n\t\t\t\t\t\t' + start_pos_x + ',\n\t\t\t\t\t\t' + start_pos_y + ',\n\t\t\t\t\t\t0'
     obstacles_json += '\n\t\t\t\t\t],\n\t\t\t\t\t"waypoints": [\n\t\t\t\t\t\t[\n\t\t\t\t\t\t\t'
     obstacles_json += waypoint_x + ',\n\t\t\t\t\t\t\t' + waypoint_y + ',\n\t\t\t\t\t\t\t0' # Idea 1 for the waypoints (see above for the explanaition)
@@ -512,8 +512,8 @@ im_scenario.show() # show the image
 
 # TODO:
 # !0) comment the code, clear out the prints, make a video explaining each step, update the readme file, make the window pretier
-# !1) insert more parameters = text fields on the right per obstacle
-# -> keep the labels when scrolling up-down and keep the index when scrolling left-right; prevent the weird error by scrolling
+# !1) more parameters = text fields on the right per obstacle
+# -> keep the labels when scrolling up-down and keep the index when scrolling left-right
 # -> update the readme file with an explanation how to include more parameters (see set_obstacle_params() and the global arrays like textinput_desire_force_factor[])
 # ?2) different types of obstacles -> include "type" in the json -> modify task.py, obstacles_manager.py so that this info could be read?
 # 3) animation of the obstacle how it moves from one point to another

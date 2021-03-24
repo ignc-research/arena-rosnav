@@ -36,11 +36,12 @@ counter = 0
 type_change = 0
 obstacle_type = [('circle', (1, 0, 0)), ('cleaner', (0, 0, 1)), ('random', (1, 0.5, 0)), ('turtlebot', (1, 0, 0.5)), ('walker', (0.5, 0, 0.5)), ('adult', (0,1,0)), ('elder', (0.5,0.5,0.5)), ('child', (0,1,1)), ('forklift', (1,0,1)), ('robot', (1,0.5,0.75))]
 obstacle_type_used = [] # append here only the used obstacle types for the current scenario
-obstacle_start_pos_ok = 1
-watcher_start_pos_ok = 1
+obstacle_start_pos_ok = 0 # it is better, when the default value is false
+watcher_start_pos_ok = 0 # it is better, when the default value is false
 line_start_pos_ok = 1
 radius_current_global = 10. # init value of the radius
 radius_watcher_current_global = 25.  # init value of the watcher
+button2_activate = 0
 
 class MyPaintWidgetCircleObstacle(Widget): # obstacle widget
 
@@ -72,14 +73,21 @@ class MyPaintWidgetCircleObstacle(Widget): # obstacle widget
         # Attention: the changes of the radous will be visualized only after the clicked mouse is moved slightly again
         global radius_current_global
         global radius_watcher_current_global
+        global button2_activate # make a difference between the radius of the obstacle and the one of the watcher
         if keycode[1] == 'numpadadd': # '+' clicked
-            radius_current_global += 1 # make the radius of the obstacle bigger
-            radius_watcher_current_global += 1 # make the radius of the watcher bigger
-            print('Radius obstacle >>, now: ' + str(radius_current_global))
+            if button2_activate == 0:
+                radius_current_global += 1 # make the radius of the obstacle bigger
+                print('Radius obstacle >>, now: ' + str(radius_current_global))
+            else:
+                radius_watcher_current_global += 1 # make the radius of the watcher bigger
+                print('Radius watcher >>, now: ' + str(radius_watcher_current_global))
         if keycode[1] == 'numpadsubstract': # '-' clicked
-            radius_current_global -= 1 # make the radius of the obstacle smaller
-            radius_watcher_current_global -= 1 # make the radius of the watcher smaller
-            print ('Radius obstacle <<, now: ' + str(radius_current_global))
+            if button2_activate == 0:
+                radius_current_global -= 1 # make the radius of the obstacle smaller
+                print ('Radius obstacle <<, now: ' + str(radius_current_global))
+            else:
+                radius_watcher_current_global -= 1 # make the radius of the watcher smaller
+                print ('Radius watcher <<, now: ' + str(radius_watcher_current_global))
 
         # Return True to accept the key. Otherwise, it will be used by the system.
         return True
@@ -151,6 +159,11 @@ class MyPaintWidgetCircleObstacle(Widget): # obstacle widget
         # do not draw with scrolling the mouse up and down or with a right click
         if touch.is_mouse_scrolling or touch.button == 'right': # touch.button == 'scrolldown' (mouse scroll up), touch.button == 'scrollup' (mouse scroll down), touch.button == 'right' (mouse right click)
             return
+        
+        # reset to the initial value:
+        obstacle_start_pos_ok = 0
+        global radius_current_global
+        radius_current_global = 10
         
         # save the obstacle positions (x,y,radius) in a txt file
         fob = open('output/internal/obstacle.txt','a') # 'w'=write (overrides the content every time), better use 'a'=append but make sure the file is at first empty
@@ -282,6 +295,11 @@ class MyPaintWidgetCircleWatcher(Widget): # watcher widget (bigger then the obst
         if touch.is_mouse_scrolling or touch.button == 'right': # touch.button == 'scrolldown' (mouse scroll up), touch.button == 'scrollup' (mouse scroll down), touch.button == 'right' (mouse right click)
             return
         
+        # reset to the initial value:
+        watcher_start_pos_ok = 0 # important, otherwise it can come to an error, for example by using the scrolling area (when you hold outside and then go inside the map)
+        global radius_watcher_current_global
+        radius_watcher_current_global = 25
+
         # save the watcher positions (x,y,radius) in a txt file
         fob = open('output/internal/watcher.txt','a')
         d_last = touch.ud['ellipse2'].size[0]
@@ -693,6 +711,8 @@ class ScenarioGUIApp(App):
         button.disabled = True # disable the button, should be clicked only once!
         button2.disabled = False # enable the next button
         mainbutton_obstacle_type.disabled = True # the dropdown button should not be changed anymore
+        global button2_activate
+        button2_activate = 1
 
     def button2_callback(self, parent, parent_draw, button2, button3, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return, mainbutton_obstacle_type, wimg_input_map, textinput_num_obstacles, textinput_velocity_list, textinput_obstacle_watchers_connection_list, mainbutton_motion_list, textinput_amount, textinput_chatting_probability, textinput_obstacle_force_factor, textinput_desire_force_factor):
         # should be done here and not in button_callback, because there the button values are still not visible!
@@ -782,6 +802,8 @@ class ScenarioGUIApp(App):
         parent.add_widget(wimg_watchers_obstacles)
         button2.disabled = True # disable the button, should be clicked only once!
         button3.disabled = False # enable the next button
+        global button2_activate
+        button2_activate = 0
 
     def button3_callback(self, parent, parent_draw, button3, button4, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return, mainbutton_obstacle_type, wimg_input_map):
         print('The button <%s> is being pressed' % ' '.join(button3.text.split('\n')))
@@ -813,7 +835,6 @@ class ScenarioGUIApp(App):
         parent.add_widget(wimg_watchers_obstacles_waypoints)
         button3.disabled = True # disable the button, should be clicked only once!
         button4.disabled = False # enable the next button
-        
 
     def button4_callback(self, parent, parent_draw, button4, layout_btn, button_return, mainbutton_obstacle_type):
         print('The button <%s> is being pressed' % ' '.join(button4.text.split('\n')))
@@ -1074,7 +1095,6 @@ class ScenarioGUIApp(App):
         # scrollable up-down (make place for setting up 10 obstacles before the area gets scrollable)
         # scrollable left-right (no matter how much more parameters are added in the future, it will still work)
         # TODO: keep the labels when scrolling up-down and keep the index when scrolling left-right
-        # TODO: when it is scrolled, sometimes the error with the ['ellipse2'] still occures?
         global obstacle_type_used
         pedestrians_bool = 0
         vehicles_bool = 0
