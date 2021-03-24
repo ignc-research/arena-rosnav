@@ -15,6 +15,7 @@ max_jerk: &max_jerk 4.0                                 # m/s^3 robot max jerk
 robot_radius: &robot_radius 0.3                         # m
 obstacle_radius: &obstacle_radius 0.3                   # m
 obstacles_inflation: &obstacles_inflation 0.3           # m
+obstacle_name: &obstacle_name obstacle_dynamic_with_traj
 # ----------------------------------------------------------------------------------
 # 1. FSM parameters (fsm/)
 fsm/goal_tolerance: *goal_tolerance
@@ -34,6 +35,7 @@ plan_manager/feasibility_tolerance: 0.05
 plan_manager/control_points_distance: 0.4
 plan_manager/use_distinctive_trajs: true
 plan_manager/local_time_horizon: *planning_time_horizon
+plan_manager/dynamic_obstacle_name: *obstacle_name
 
 
 # ----------------------------------------------------------------------------------

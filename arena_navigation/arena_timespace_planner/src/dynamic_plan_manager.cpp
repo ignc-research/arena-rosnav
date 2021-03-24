@@ -15,6 +15,7 @@ void DynamicPlanManager::initPlanModules(ros::NodeHandle &nh)
   node_.param("plan_manager/control_points_distance", pp_.ctrl_pt_dist_, 0.4);
   node_.param("plan_manager/use_distinctive_trajs",   pp_.use_distinctive_trajs_, true);
   node_.param("plan_manager/local_time_horizon",   pp_.local_time_horizon_,    2.0);
+  
 
   
 
@@ -36,13 +37,15 @@ void DynamicPlanManager::initPlanModules(ros::NodeHandle &nh)
   // MovingObstacleInfo
   ros::master::V_TopicInfo topic_infos;
   ros::master::getTopics(topic_infos);
-  std::string str1="obs_dynamic";
+  std::string str_dynamic_obs;
+  node_.param<std::string>("plan_manager/dynamic_obstacle_name", str_dynamic_obs,"obs_dynamic");
+
 	obs_info_provider_.reserve(100);
   for (ros::master::V_TopicInfo::iterator it = topic_infos.begin() ; it != topic_infos.end(); it++)
   {
         const ros::master::TopicInfo& info = *it;
         
-        if (info.name.find(str1) != std::string::npos) 
+        if (info.name.find(str_dynamic_obs) != std::string::npos) 
         {
             std::cout << "topic_" << it - topic_infos.begin() << ": " << info.name << std::endl;
 			      obs_info_provider_.emplace_back(std::make_shared<DynamicObstacleInfo>(node_,info.name,grid_map_));
