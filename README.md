@@ -1,3 +1,5 @@
+# IROS21 information
+To test the code and reproduce the experiments, switch to the branch local_planner. Follow the installation steps in [Installation.md](docs/Installation.md). Afterwards, follow the steps in [Evaluations.md](docs/Evaluations.md).
 # Arena-Rosnav
 
 A flexible, high-performance 2D simulator with configurable agents, multiple sensors, and benchmark scenarios for testing robotic navigation. 
@@ -28,11 +30,6 @@ Train DRL agents on ROS compatible simulations for autonomous navigation in high
 * Modular structure for extension of new functionalities and approaches
 
 
-### Recent Updates
-- 04.02.2021: Added Multiprocessing for training speedup
-- 26.01.2021: Added Scenario Tasks: generate your own scenario by specifying a scenario.json 
-
-
 ### Documentation & References
 * How to use flatland: http://flatland-simulator.readthedocs.io
 * ros navigation stack: http://wiki.ros.org/navigation
@@ -48,7 +45,7 @@ Please refer to [Installation.md](docs/Installation.md) for detailed explanation
 ### DRL Training
 
 Please refer to [DRL-Training.md](docs/DRL-Training.md) for detailed explanations about agent, policy and training setups.
-
+For the IROS21 paper, please switch to the branch local_planner and follow the installation steps. Afterwards, 
 ### 2.1 Test the simulation environment and task generator
 
 * In one terminal, start simulation. You can specify the following parameters: 
