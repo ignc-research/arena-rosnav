@@ -130,7 +130,10 @@ class ObservationCollector():
         self.last = self._clock
         self.last_r = time.time()
 
-        scan = self._scan.ranges.astype(np.float32)
+        if len(self._scan.ranges) > 0:
+            scan = self._scan.ranges.astype(np.float32)
+        else:
+            scan = np.zeros(360, dtype=float)
         rho, theta = ObservationCollector._get_goal_pose_in_robot_frame(
             self._subgoal, self._robot_pose)
         merged_obs = np.hstack([scan, np.array([rho, theta])])

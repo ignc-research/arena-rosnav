@@ -418,8 +418,8 @@ def get_predefined_task(ns: str, mode="random", start_stage: int = 1, PATHS: dic
         rospy.set_param("/task_mode", "staged")
         task = StagedRandomTask(
             ns, obstacles_manager, robot_manager, start_stage, PATHS)
-    if mode == "ScenerioTask":
+    if mode == "scenario":
         rospy.set_param("/task_mode", "scenario")
         task = ScenerioTask(obstacles_manager, robot_manager,
-                            PATHS['scenerios_json_path'])
+                            PATHS['scenario'])
     return task
