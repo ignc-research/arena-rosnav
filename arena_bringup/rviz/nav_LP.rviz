@@ -835,7 +835,7 @@ Visualization Manager:
           Max Intensity: 4096
           Min Color: 0; 0; 0
           Min Intensity: 0
-          Name: occmap_local_fused
+          Name: occmap_local_only
           Position Transformer: XYZ
           Queue Size: 10
           Selectable: true
@@ -865,7 +865,7 @@ Visualization Manager:
           Max Intensity: 4096
           Min Color: 0; 0; 0
           Min Intensity: 0
-          Name: occmap_dynamic
+          Name: occmap_dynamic_only
           Position Transformer: XYZ
           Queue Size: 10
           Selectable: true
@@ -895,14 +895,14 @@ Visualization Manager:
           Max Intensity: 4096
           Min Color: 0; 0; 0
           Min Intensity: 0
-          Name: occmap_static
+          Name: occmap_static_only
           Position Transformer: XYZ
           Queue Size: 10
           Selectable: true
           Size (Pixels): 3
           Size (m): 0.009999999776482582
           Style: Points
-          Topic: /sdf_map/occupancy
+          Topic: /sdf_map/occupancy_static
           Unreliable: false
           Use Fixed Frame: true
           Use rainbow: true
@@ -922,7 +922,7 @@ Visualization Manager:
           Enabled: false
           Invert Rainbow: false
           Max Color: 255; 255; 255
-          Max Intensity: 1
+          Max Intensity: 0.7902179956436157
           Min Color: 0; 0; 0
           Min Intensity: 0
           Name: esdfmap_local_fused
@@ -955,14 +955,14 @@ Visualization Manager:
           Max Intensity: 1
           Min Color: 0; 0; 0
           Min Intensity: 0
-          Name: esdfmap_static
+          Name: esdfmap_static_only
           Position Transformer: XYZ
           Queue Size: 10
           Selectable: true
           Size (Pixels): 3
           Size (m): 0.009999999776482582
           Style: Points
-          Topic: /sdf_map/esdf
+          Topic: /sdf_map/esdf_static
           Unreliable: false
           Use Fixed Frame: true
           Use rainbow: true
@@ -996,7 +996,7 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Angle: -9.545001983642578
+      Angle: -6.324986457824707
       Class: rviz/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
@@ -1006,11 +1006,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 14.924482345581055
+      Scale: 26.929931640625
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
-      X: -3.2712862491607666
-      Y: 12.693242073059082
+      X: 14.416903495788574
+      Y: 2.165898084640503
     Saved: ~
 Window Geometry:
   Displays:
