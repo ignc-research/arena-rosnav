@@ -237,7 +237,7 @@ class RewardCalculator():
         else:
             lin_vel = action[0]
             ang_vel = action[1]
-            reward = ((lin_vel*0.98) + (ang_vel*0.02)) * consumption_factor
+            reward = ((lin_vel*0.99) + (ang_vel*0.01)) * consumption_factor
         self.curr_reward -= reward
         
     def _reward_distance_global_plan(self, 
