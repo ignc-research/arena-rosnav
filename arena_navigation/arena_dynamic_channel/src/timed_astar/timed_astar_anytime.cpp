@@ -256,10 +256,11 @@ bool TimedAstar::TimeAstarSearch(const std::vector<double>& coords,
     PathNodePtr start_node = std::make_shared<PathNode>(); //path_node_pool_[0];
     start_node->parent     = nullptr;
     start_node->pos        =start_pos_;
+    //start_node->vel        = Vec2d(speeds[INIT_INDEX*2],speeds[INIT_INDEX*2+1]);
     start_node->dir        =dir_start;
     start_node->setTimedTriangle(start_pos_,0.0,timed_graph_,time_resolution_,SLICE_NUM_);
     start_node->G          = 0.0;
-    start_node->H          =estimateHeuristic(start_pos_,goal_pos_,start_pos_);
+    start_node->H          =estimateHeuristic(start_node,goal_pos_,start_pos_);
     start_node->node_state = PathNode::OPENSET;
     
     
@@ -325,7 +326,7 @@ bool TimedAstar::TimeAstarSearch(const std::vector<double>& coords,
                 neigbor_node->parent=curr_node;
                 
                 neigbor_node->G=tmp_g_score;
-                neigbor_node->H=estimateHeuristic(neigbor_node->pos,goal_pos_,curr_node->pos);
+                neigbor_node->H=estimateHeuristic(neigbor_node, goal_pos_,start_pos_);
                 
                 neigbor_node->setTimedTriangle(neigbor_node->pos,neigbor_node->time_elapsed,timed_graph_,time_resolution_,SLICE_NUM_);
                 
@@ -360,7 +361,7 @@ bool TimedAstar::TimeAstarSearch(const std::vector<double>& coords,
                         pro_node->parent = curr_node;
                         
                         pro_node->G = tmp_g_score;
-                        pro_node->H = estimateHeuristic(neigbor_node->pos,goal_pos_,curr_node->pos);
+                        pro_node->H = estimateHeuristic(neigbor_node, goal_pos_,start_pos_);
                         pro_node->pos=neigbor_node->pos;
                         pro_node->dir=neigbor_node->dir;
                         pro_node->time_elapsed=neigbor_node->time_elapsed;
@@ -523,10 +524,11 @@ bool TimedAstar::getNeighborNodes(PathNodePtr &curr_node, std::vector<PathNodePt
     auto goal_eid = dl::locateCurrentFace(graph_t, goal_pos_.x, goal_pos_.y);
     double curr_goal_diff = (curr_node->pos - goal_pos_).length();
     
+    samples.push_back(goal_pos_);
     if(floor(curr_eid / 3.0)==floor(goal_eid / 3.0) || curr_goal_diff<SAFE_DIST_ )//
     {   // if in same triangle or near to the goal 
         
-        samples.push_back(goal_pos_);
+        
         std::cout<<"GOAL is in same triangle"<<std::endl;
         
 
@@ -579,25 +581,27 @@ bool TimedAstar::getNeighborNodes(PathNodePtr &curr_node, std::vector<PathNodePt
     
     for(size_t i=0;i<samples.size();i++)
     {   
-        for(size_t action_id=0; action_id<action_w_set_.size();++action_id)
+        for(size_t action_id=0; action_id<action_v_set_.size();++action_id)
         {   
             
             // init candidate neighbor
             PathNodePtr next_node=std::make_shared<PathNode>();
             next_node->pos=samples[i];
+            //next_node->vel=curr_node->v_in;
             next_node->w_in=action_w_set_[0];
             next_node->v_in=action_v_set_[action_id];
   
             double dist_to_potential_collid, time_to_potential_collid;
             bool no_collision=checkCollision(curr_node,next_node,graph_t,dist_to_potential_collid,time_to_potential_collid);
+            
             //no_collision=true;
             if(no_collision)
             {   
 
                 //calculate edge cost
                 double k;
-                k=2.0;
-                double edge_cost =next_node->dur_v + k*next_node->dur_w;
+                k=1.0;
+                double edge_cost =next_node->dur_v+ k*next_node->dur_w;
 
                 // pushback node & edge cost
                 neighbor_ptr_set.push_back(next_node);
@@ -612,15 +616,15 @@ bool TimedAstar::getNeighborNodes(PathNodePtr &curr_node, std::vector<PathNodePt
 
 }
 
-double TimedAstar::estimateHeuristic(Vec2d robot_pos,Vec2d goal_pos, Vec2d start_pos){
+double TimedAstar::estimateHeuristic(PathNodePtr &curr_node,Vec2d goal_pos, Vec2d start_pos){
     // arrving time with MAX_SPEED, so to make it admissable
-    double dir_start_robot=(robot_pos-start_pos).angle();
-    double dir_goal_robot=(goal_pos-robot_pos).angle();
-    double dir_diff = std::abs(dir_goal_robot-dir_start_robot);
+    double curr_dir         = curr_node->dir;
+    double dir_goal_robot   =(goal_pos-curr_node->pos).angle(); //double dir_start_robot  =(curr_node->pos-start_pos).angle();
+    double dir_diff = std::abs(dir_goal_robot-curr_dir);
     dir_diff=dir_diff>PI?2*PI-dir_diff:dir_diff;
     double dur_dir = dir_diff/MAX_ROT_SPEED_;
-	double dur_arrive = (robot_pos-goal_pos).length()/MIN_SPEED_;
-    return dur_arrive + 3.0*dur_dir;
+	double dur_arrive = (curr_node->pos-goal_pos).length()/MIN_SPEED_;
+    return dur_arrive + dur_dir;
 }
 
 void TimedAstar::retrievePath(PathNodePtr end_node)

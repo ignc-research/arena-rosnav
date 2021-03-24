@@ -98,7 +98,7 @@ private:
 
     bool getNeighborNodes(PathNodePtr &curr_node, std::vector<PathNodePtr> & neighbor_ptr_set,std::vector<double> & edge_cost_set);
 
-    double estimateHeuristic(Vec2d robot_pos,Vec2d goal_pos, Vec2d start_pos);
+    double estimateHeuristic(PathNodePtr &curr_node,Vec2d goal_pos, Vec2d start_pos);
 
     bool checkCollision(const PathNodePtr &curr_node, PathNodePtr &next_node,Graph *graph_t, double & dist_to_collid, double & time_to_collid);
 

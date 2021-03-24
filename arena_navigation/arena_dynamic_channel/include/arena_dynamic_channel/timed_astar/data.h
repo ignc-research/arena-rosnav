@@ -197,8 +197,9 @@ struct PathNode
 
     double time_elapsed;    // accumulated time
 
-    Vec2d pos;                // node placement position
+    Vec2d pos;                // current position,  node placement position
     //Vec2i pos_index;        // node placement position
+    Vec2d vel;                // current velocity
 
     double dir;             // [rad] current direction of the car
 
