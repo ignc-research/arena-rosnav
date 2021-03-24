@@ -1,4 +1,5 @@
-use_drl: &use_drl false
+use_drl: &use_drl false                                 # true:  cmd_vel is published by drl or others; 
+                                                        # false: cmd_vel is published by traj tracker in plan_fsm
 subgoal_mode: &subgoal_mode 0                           # 0: spacial horizon 1:timed_astar
 subgoal_pub_period: &subgoal_pub_period 0.5             # sec
 goal_tolerance: &goal_tolerance 0.5
