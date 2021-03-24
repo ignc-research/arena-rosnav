@@ -1094,7 +1094,6 @@ class ScenarioGUIApp(App):
     def set_obstacle_params(self, textinput_num_obstacles, label_index_list, textinput_velocity_list, textinput_obstacle_watchers_connection_list, mainbutton_motion_list, textinput_amount, textinput_chatting_probability, textinput_obstacle_force_factor, textinput_desire_force_factor, height_layout_connect, width_layout_connect, width_left_border, height_up_border): # IDEA 1 - make everything with text inputs (so save from here the information also about the motions)
         # scrollable up-down (make place for setting up 10 obstacles before the area gets scrollable)
         # scrollable left-right (no matter how much more parameters are added in the future, it will still work)
-        # TODO: keep the labels when scrolling up-down and keep the index when scrolling left-right
         global obstacle_type_used
         pedestrians_bool = 0
         vehicles_bool = 0

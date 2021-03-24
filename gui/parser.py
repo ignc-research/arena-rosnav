@@ -155,7 +155,6 @@ obstacles = [] # form: [(x_center, y_center, radius, type), ...]
 count = 0
 for line in lines_obstacles:
     count += 1
-    #print(f'line {count}: {line}')
     obstacles.append((float(line.split('obstacle (x,y,radius,type): ')[1].split(',')[0]), float(line.split('obstacle (x,y,radius,type): ')[1].split(',')[1]), float(line.split('obstacle (x,y,radius,type): ')[1].split(',')[2]), line.split('obstacle (x,y,radius,type): ')[1].split(',')[3].split('\n')[0]))
 
 # DEBUGGING
@@ -192,7 +191,6 @@ else:
     count = 0
     for line in lines_watchers:
         count += 1
-        #print(f'line {count}: {line}')
         watchers.append((float(line.split('watcher (x,y,radius): ')[1].split(',')[0]), float(line.split('watcher (x,y,radius): ')[1].split(',')[1]), float(line.split('watcher (x,y,radius): ')[1].split(',')[2])))
 
 # DEBUGGING
@@ -220,7 +218,6 @@ waypoints = [] # form: [(x, y), ...] # OR [((x_start, y_start),(x_end, y_end)), 
 count = 0
 for line in lines_vectors:
     count += 1
-    #print(f'line {count}: {line}')
     if count % 2 != 0:
         start_pos.append((float(line.split('vector start (x,y): ')[1].split(',')[0]), float(line.split('vector start (x,y): ')[1].split(',')[1])))
     else:
@@ -274,7 +271,6 @@ robot = [] # form: [(x_start, y_start),(x_end, y_end)]
 count = 0
 for line in lines_robot:
     count += 1
-    #print(f'line {count}: {line}')
     if count == 1:
         robot.append((float(line.split('robot start position (x,y): ')[1].split(',')[0]), float(line.split('robot start position (x,y): ')[1].split(',')[1])))
     if count == 2:
@@ -509,13 +505,3 @@ im_scenario.show() # show the image
 # The scenario can be launched with following simple command:
 # $ roslaunch arena_bringup start_arena_flatland.launch local_planner:="teb" use_viz:="true" map_file:="map1" rviz_file:="nav2"
 # In nav2.rviz is the map horizontal and the first couple of obstacles are already with the start visible. It still works with all rviz files, just different visualized!
-
-# TODO:
-# !0) comment the code, clear out the prints, make a video explaining each step, update the readme file, make the window pretier
-# !1) more parameters = text fields on the right per obstacle
-# -> keep the labels when scrolling up-down and keep the index when scrolling left-right
-# -> update the readme file with an explanation how to include more parameters (see set_obstacle_params() and the global arrays like textinput_desire_force_factor[])
-# ?2) different types of obstacles -> include "type" in the json -> modify task.py, obstacles_manager.py so that this info could be read?
-# 3) animation of the obstacle how it moves from one point to another
-# -> man kann am Rand eine hard coded Simulation in demselben map von einem obstacle mit Geschwindigkeit zB 0.3 visualizieren, damit der Nutzer Gefuehl bekommen kann, wie schnell das eigentlich ist
-# ?4) Rand von watcher zu rot machen, wenn es zu srash wird; die Robotergeschwindigkeit ist hard coded zu 0.3, man kann also berechnen, wann wird der ROboter der watcher aktivieren; also weiteres, letztes Button "simulate if colision"; man braucht dafuer aber noch global path -> nur mit box2d sim engine machbar
