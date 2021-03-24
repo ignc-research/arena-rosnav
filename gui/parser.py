@@ -35,6 +35,10 @@ map_origin = [0.0, 0.0, 0.0] # form: [x,y,z]
 obstacle_vel = [] # old form [(obstacle_num, obstacle_vel), ...] # new form [obstacle_0_vel, ...]
 obstacle_watcher_connections = [] # idea 1 - not used # form [(obstacle_num, (watcher_num_1, ...), ...)] # OR for example: [(obstacle_num_1, watcher_num_1), (obstacle_num_1, watcher_num_2), (obstacle_num_2, watcher_num_3) ...)]
 obstacle_watcher_connections_2 = [] # idea 2 - used # form [(obst0_watch_1, obst0_watch_2, ...),(obst1_watch_1, obst1_watch_2, ...), ...]
+amount_pedestrians = [] # form: [amount_group1, amount_group2, ...]
+chatting_probability = [] # form: see above
+obstacle_force_factor = [] # form: see above
+desire_force_factor = [] # form: see above
 
 # parse the contents into a useful format
 count = 0
@@ -67,6 +71,7 @@ for line in lines:
 
 count_obstacles = count_temp - 12 - 1 # 12 not dynamic lines # 1 label 'Obstacle-watchers connections:'
 count = 0
+no_pedestrians = 0
 for line in lines:
     count += 1
     if count > count_temp and count <= count_temp+count_obstacles:
@@ -85,14 +90,20 @@ for line in lines:
                 temp_array.append((int(value)))
         obstacle_watcher_connections_2.append(temp_array) # assume the ordering is right starting from 0
         print('Single obstacle-watchers connections: ' + str(line.split('\n')[0]))
-    if count > count_temp+count_obstacles+1 and count <= count_temp+2*count_obstacles+1:
-        print('TODO: Amount of pedestrians in the group:')
-    if count > count_temp+2*count_obstacles+1 and count <= count_temp+3*count_obstacles+1:
-        print('TODO: Chatting probability:')
-    if count > count_temp+3*count_obstacles+1 and count <= count_temp+4*count_obstacles+1:
-        print('TODO: Obstacle force factor:')
-    if count > count_temp+4*count_obstacles+1 and count <= count_temp+5*count_obstacles+1:
-        print('TODO: Desire force factor:')
+    if count > count_temp+count_obstacles and line.split('Obstacle force factor:')[0] == '':
+        no_pedestrians = 1
+    if count > count_temp+count_obstacles+1 and count <= count_temp+2*count_obstacles+1 and no_pedestrians == 0:
+        amount_pedestrians.append((int(line.split('\n')[0])))
+    if count > count_temp+count_obstacles+1 and count <= count_temp+2*count_obstacles+1 and no_pedestrians == 1:
+        obstacle_force_factor.append((float(line.split('\n')[0])))
+    if count > count_temp+2*(count_obstacles+1) and count <= count_temp+2*(count_obstacles+1)+count_obstacles and no_pedestrians == 0:
+        chatting_probability.append((float(line.split('\n')[0])))
+    if count > count_temp+2*(count_obstacles+1) and count <= count_temp+2*(count_obstacles+1)+count_obstacles and no_pedestrians == 1:
+        desire_force_factor.append((float(line.split('\n')[0])))
+    if count > count_temp+3*(count_obstacles+1) and count <= count_temp+3*(count_obstacles+1)+count_obstacles:
+        obstacle_force_factor.append((float(line.split('\n')[0])))
+    if count > count_temp+4*(count_obstacles+1) and count <= count_temp+4*(count_obstacles+1)+count_obstacles:
+        desire_force_factor.append((float(line.split('\n')[0])))
 
 # check if the amount of obstacles given in the text area, is the same as the actually drawn, also as the same as the drawn lines etc.
 # obstacle.txt_lines == vector.txt_lines/2 == motion.txt_lines == data.txt_obstacle-vel.lines == data.txt_obst-watch-con.lines
@@ -119,6 +130,10 @@ print('Obstacle velocities:' + str(obstacle_vel))
 #print('Second value:' + str(obstacle_vel[1]))
 #print('Obstacle-watchers connections:' + str(obstacle_watcher_connections))
 print('Obstacle-watchers connections:' + str(obstacle_watcher_connections_2))
+print('Amount of pedestrians:' + str(amount_pedestrians))
+print('Chatting probability:' + str(chatting_probability))
+print('Obstacle force factor:' + str(obstacle_force_factor))
+print('Desire force factor:' + str(desire_force_factor))
 
 print('/**************** parsing obstacle.txt ***************/') # done!
 with open('output/internal/obstacle.txt') as file:
@@ -284,7 +299,7 @@ if len(lines_motion) != length_right or len(obstacle_vel) != length_right: # or 
 # data from robot.txt
 motion = [] # form: [motion_obstacle_0, motion-obstacle_1, ...]
 
-motions_valid = ["yoyo", "circle", "once", "loop", "random"] # TODO Important: extend the valid motion types if needed
+motions_valid = ["yoyo", "circle", "once", "loop", "random"] # Important: extend the valid motion types if needed
 
 # parse the contents into a useful format
 count = 0
@@ -344,12 +359,25 @@ for obstacle in obstacles:
     watcher_num = str(i)
     move = str(motion[i])
     obstacle_type = str(obstacle[3]) # obstacle default type = "circle"
+    # take care of the additional parameters:
+    if len(amount_pedestrians) > 0:
+        amount = str(amount_pedestrians[i])
+        chat_probability = str(chatting_probability[i])
+    if len(obstacle_force_factor) > 0:
+        obstactle_force_fact = str(obstacle_force_factor[i])
+        desire_force_fact = str(desire_force_factor[i])
 
     # since the order of the obstacles is given in the window, it is here assumed that the obstacle velocities and the obstacle-watchers connections are written in the right order
     obstacles_json += '\n\t\t\t\t"dynamic_obs_' + obstacle_num + '": {\n\t\t\t\t\t'
     obstacles_json += '"obstacle_radius": ' + obstacle_radius + ',\n\t\t\t\t\t'
     obstacles_json += '"linear_velocity": ' + lin_velocity + ',\n\t\t\t\t\t'
     obstacles_json += '"type": "' + obstacle_type + '",\n\t\t\t\t\t'
+    if len(amount_pedestrians) > 0:
+        obstacles_json += '"amount": "' + amount + '",\n\t\t\t\t\t'
+        obstacles_json += '"chatting_probability": "' + chat_probability + '",\n\t\t\t\t\t'
+    if len(obstacle_force_factor) > 0:
+        obstacles_json += '"obstacle_force_factor": "' + obstactle_force_fact + '",\n\t\t\t\t\t'
+        obstacles_json += '"desire_force_factor": "' + desire_force_fact + '",\n\t\t\t\t\t'
     obstacles_json += '"start_pos": [\n\t\t\t\t\t\t' + start_pos_x + ',\n\t\t\t\t\t\t' + start_pos_y + ',\n\t\t\t\t\t\t0'
     obstacles_json += '\n\t\t\t\t\t],\n\t\t\t\t\t"waypoints": [\n\t\t\t\t\t\t[\n\t\t\t\t\t\t\t'
     obstacles_json += waypoint_x + ',\n\t\t\t\t\t\t\t' + waypoint_y + ',\n\t\t\t\t\t\t\t0' # Idea 1 for the waypoints (see above for the explanaition)
@@ -429,8 +457,12 @@ print('/**************** user_data.txt & scenario.png *****************/')
 fob = open('output/user_data.txt','w')
 fob.write('Map resolution:\n' + str(map_res) + "\n")
 fob.write('Map origin:\n' + str(map_origin) + "\n")
-fob.write('ObstacleID - ObstacleType - Velocity - WatchersIDs - Motion:\n')
-# TODO: add the additional parameters
+if len(amount_pedestrians) == 0 and len(obstacle_force_factor) == 0:
+    fob.write('ObstacleID - ObstacleType - Velocity - WatchersIDs - Motion:\n')
+if len(amount_pedestrians) == 0 and len(obstacle_force_factor) > 0:
+    fob.write('ObstacleID - ObstacleType - Velocity - WatchersIDs - Motion - Obstacle force factor - Desire force factor:\n')
+if len(amount_pedestrians) > 0 and len(obstacle_force_factor) > 0:
+    fob.write('ObstacleID - ObstacleType - Velocity - WatchersIDs - Motion - Pedestrians amount - Chatting probability - Obstacle force factor - Desire force factor:\n')
 i = 0
 for obstacle in obstacles:
     fob.write(str(i) + ' - ' + str(obstacle[3]) + ' - ' + str(obstacle_vel[i]) + ' - ')
@@ -440,7 +472,18 @@ for obstacle in obstacles:
         if j < (len(obstacle_watcher_connections_2[i]) - 1):
             fob.write(',')
         j += 1
-    fob.write(' - ' + motion[i] + '\n')
+    fob.write(' - ' + motion[i])
+    # take care of the additional parameters
+    if len(amount_pedestrians) == 0 and len(obstacle_force_factor) == 0:
+        fob.write('\n')
+    if len(amount_pedestrians) == 0 and len(obstacle_force_factor) > 0:
+        fob.write(' - ' + str(obstacle_force_factor[i]))
+        fob.write(' - ' + str(desire_force_factor[i]) + '\n')
+    if len(amount_pedestrians) > 0 and len(obstacle_force_factor) > 0:
+        fob.write(' - ' + str(amount_pedestrians[i]))
+        fob.write(' - ' + str(chatting_probability[i]))
+        fob.write(' - ' + str(obstacle_force_factor[i]))
+        fob.write(' - ' + str(desire_force_factor[i]) + '\n')
     i += 1
 fob.close()
 # print the content
@@ -469,9 +512,9 @@ im_scenario.show() # show the image
 
 # TODO:
 # !0) comment the code, clear out the prints, make a video explaining each step, update the readme file, make the window pretier
-# !1) insert more parameters = text fields on the right per obstacle ("amount", "chatting_probability", "obstacle_force_factor", "desire_force_factor")
-# -> not all of them should always appear, this depends on the type of obstacle chosen
-# -> the window should be then bigger or area should be scrollable also to the left-right; update the readme file with explanation how to include more parameters (see set_obstacle_params() and the global arrays like textinput_desire_force_factor[])
+# !1) insert more parameters = text fields on the right per obstacle
+# -> keep the labels when scrolling up-down and keep the index when scrolling left-right; prevent the weird error by scrolling
+# -> update the readme file with an explanation how to include more parameters (see set_obstacle_params() and the global arrays like textinput_desire_force_factor[])
 # ?2) different types of obstacles -> include "type" in the json -> modify task.py, obstacles_manager.py so that this info could be read?
 # 3) animation of the obstacle how it moves from one point to another
 # -> man kann am Rand eine hard coded Simulation in demselben map von einem obstacle mit Geschwindigkeit zB 0.3 visualizieren, damit der Nutzer Gefuehl bekommen kann, wie schnell das eigentlich ist

@@ -35,6 +35,7 @@ color_b = 0
 counter = 0
 type_change = 0
 obstacle_type = [('circle', (1, 0, 0)), ('cleaner', (0, 0, 1)), ('random', (1, 0.5, 0)), ('turtlebot', (1, 0, 0.5)), ('walker', (0.5, 0, 0.5)), ('adult', (0,1,0)), ('elder', (0.5,0.5,0.5)), ('child', (0,1,1)), ('forklift', (1,0,1)), ('robot', (1,0.5,0.75))]
+obstacle_type_used = [] # append here only the used obstacle types for the current scenario
 obstacle_start_pos_ok = 1
 watcher_start_pos_ok = 1
 line_start_pos_ok = 1
@@ -183,6 +184,9 @@ class MyPaintWidgetCircleObstacle(Widget): # obstacle widget
         # put the name of the type on top of the circle (decide betwenn keeping this behavior and (if you think the map will be too crawded) using it just for a test run, to make a legend with all obstacle types-colors pairs for the user)
         label_type_name = Label(text=cur_type, pos=(x_pos_last+d_last/2, y_pos_last+d_last+10), size=(1, 1), color=(0,0,0), disabled_color=(0,0,0)) # place the name on top of the circle
         self.add_widget(label_type_name)
+        # append the type to the global array
+        global obstacle_type_used
+        obstacle_type_used.append(cur_type)
 
         fob.close()
 
@@ -700,32 +704,37 @@ class ScenarioGUIApp(App):
                 fob.write('\n')
         fob.write('\nObstacle-watchers connections:\n')
         for i in range(int(textinput_num_obstacles.text)):
-            #fob.write(str(textinput_obstacle_watchers_connection_list[i].text) + '\n')
-            fob.write(str(textinput_obstacle_watchers_connection_list[i].text))
-            if i < int(textinput_num_obstacles.text) - 1:
-                fob.write('\n')
-        # TODO: write the additional parameters
-        fob.write('\nAmount of pedestrians in the group:\n')
-        for i in range(int(textinput_num_obstacles.text)):
-            fob.write(str(textinput_amount[i].text))
-            if i < int(textinput_num_obstacles.text) - 1:
-                fob.write('\n')
-        fob.write('\nChatting probability:\n')
-        for i in range(int(textinput_num_obstacles.text)):
-            fob.write(str(textinput_chatting_probability[i].text))
-            if i < int(textinput_num_obstacles.text) - 1:
-                fob.write('\n')
-        fob.write('\nObstacle force factor:\n')
-        for i in range(int(textinput_num_obstacles.text)):
-            fob.write(str(textinput_obstacle_force_factor[i].text))
-            if i < int(textinput_num_obstacles.text) - 1:
-                fob.write('\n')
-        fob.write('\nDesire force factor:\n')
-        for i in range(int(textinput_num_obstacles.text)):
-            fob.write(str(textinput_desire_force_factor[i].text) + '\n')
-            #fob.write(str(textinput_desire_force_factor[i].text))
-            #if i < int(textinput_num_obstacles.text) - 1:
-            #    fob.write('\n')
+            # it is important for the parsing afterwards that the data.txt file has '\n' at the end (this is important to count correctly when no watchers are used)
+            if len(textinput_amount) == 0 and len(textinput_obstacle_force_factor) == 0:
+                fob.write(str(textinput_obstacle_watchers_connection_list[i].text) + '\n')
+            else:
+                fob.write(str(textinput_obstacle_watchers_connection_list[i].text))
+                if i < int(textinput_num_obstacles.text) - 1:
+                    fob.write('\n')
+        # the above 4 parameters will be always there, but the following 4 parameters could be there or not, so this should be checked
+        if len(textinput_amount) > 0:
+            fob.write('\nAmount of pedestrians in the group:\n')
+            for i in range(int(textinput_num_obstacles.text)):
+                fob.write(str(textinput_amount[i].text))
+                if i < int(textinput_num_obstacles.text) - 1:
+                    fob.write('\n')
+            fob.write('\nChatting probability:\n')
+            for i in range(int(textinput_num_obstacles.text)):
+                if len(textinput_obstacle_force_factor) == 0:
+                    fob.write(str(textinput_chatting_probability[i].text) + '\n')
+                else:
+                    fob.write(str(textinput_chatting_probability[i].text))
+                    if i < int(textinput_num_obstacles.text) - 1:
+                        fob.write('\n')
+        if len(textinput_obstacle_force_factor) > 0:
+            fob.write('\nObstacle force factor:\n')
+            for i in range(int(textinput_num_obstacles.text)):
+                fob.write(str(textinput_obstacle_force_factor[i].text))
+                if i < int(textinput_num_obstacles.text) - 1:
+                    fob.write('\n')
+            fob.write('\nDesire force factor:\n')
+            for i in range(int(textinput_num_obstacles.text)):
+                fob.write(str(textinput_desire_force_factor[i].text) + '\n')
         fob.close()
         
         # save the motion values in a file (again assume that the order is right and it starts with the motion for obstacle 0)
@@ -1066,7 +1075,21 @@ class ScenarioGUIApp(App):
         # scrollable left-right (no matter how much more parameters are added in the future, it will still work)
         # TODO: keep the labels when scrolling up-down and keep the index when scrolling left-right
         # TODO: when it is scrolled, sometimes the error with the ['ellipse2'] still occures?
-        layout_connect = GridLayout(cols=8, size_hint=(None,None))
+        global obstacle_type_used
+        pedestrians_bool = 0
+        vehicles_bool = 0
+        for obstacle_type in obstacle_type_used:
+            if obstacle_type == "adult" or obstacle_type == "elder" or obstacle_type == "child":
+                pedestrians_bool = 1
+            if obstacle_type == "forklift" or obstacle_type == "robot":
+                vehicles_bool = 1
+        colums = 4 # min 4
+        if pedestrians_bool == 1: # add textinput_amount and textinput_chatting_probability
+            colums += 2
+        if pedestrians_bool == 1 or vehicles_bool == 1: # add textinput_obstacle_force_factor and textinput_desire_force_factor
+            colums += 2
+        
+        layout_connect = GridLayout(cols=colums, size_hint=(None,None))
         layout_connect.bind(minimum_height=layout_connect.setter('height'), minimum_width=layout_connect.setter('width'))
         label_connect_obstacle = Label(text='#', size_hint=(None,None), height=height_layout_connect/10, width=15) # 'Obstacle'
         label_connect_velocity = Label(text='Velocity', size_hint=(None,None), height=height_layout_connect/10, width=60)
@@ -1080,27 +1103,31 @@ class ScenarioGUIApp(App):
         layout_connect.add_widget(label_connect_velocity)
         layout_connect.add_widget(label_connect_watchers)
         layout_connect.add_widget(label_connect_motion)
-        layout_connect.add_widget(label_connect_amount)
-        layout_connect.add_widget(label_connect_chatting_probability)
-        layout_connect.add_widget(label_connect_obstacle_force_factor)
-        layout_connect.add_widget(label_connect_desire_force_factor)
+        if pedestrians_bool == 1: # add textinput_amount and textinput_chatting_probability
+            layout_connect.add_widget(label_connect_amount)
+            layout_connect.add_widget(label_connect_chatting_probability)
+        if pedestrians_bool == 1 or vehicles_bool == 1: # add textinput_obstacle_force_factor and textinput_desire_force_factor
+            layout_connect.add_widget(label_connect_obstacle_force_factor)
+            layout_connect.add_widget(label_connect_desire_force_factor)
         for index in range(int(textinput_num_obstacles.text)): # index starts with 0
             label_index_list.append(Label(text=str(index), size_hint_x=None, size_hint=(None,None), height=height_layout_connect/2/10, width=15)) # height=28=height_layout_connect/2/10 to have place for 10 obstacle before it starts to scroll
-            textinput_velocity_list.append(TextInput(text='0.3', size_hint=(None,None), height=height_layout_connect/2/10, width=60)) # editable; give an example value already written in the box
-            textinput_obstacle_watchers_connection_list.append(TextInput(text=str(index), size_hint=(None,None), height=height_layout_connect/2/10, width=65))
-            mainbutton_motion_list.append(TextInput(text='yoyo', size_hint=(None,None), height=height_layout_connect/2/10, width=60))
-            textinput_amount.append(TextInput(text='1', size_hint=(None,None), height=height_layout_connect/2/10, width=60))
-            textinput_chatting_probability.append(TextInput(text='0.3', size_hint=(None,None), height=height_layout_connect/2/10, width=85))
-            textinput_obstacle_force_factor.append(TextInput(text='1.0', size_hint=(None,None), height=height_layout_connect/2/10, width=85))
-            textinput_desire_force_factor.append(TextInput(text='1.0', size_hint=(None,None), height=height_layout_connect/2/10, width=85))
             layout_connect.add_widget(label_index_list[index])
+            textinput_velocity_list.append(TextInput(text='0.3', size_hint=(None,None), height=height_layout_connect/2/10, width=60)) # editable; give an example value already written in the box
             layout_connect.add_widget(textinput_velocity_list[index])
+            textinput_obstacle_watchers_connection_list.append(TextInput(text=str(index), size_hint=(None,None), height=height_layout_connect/2/10, width=65))
             layout_connect.add_widget(textinput_obstacle_watchers_connection_list[index])
+            mainbutton_motion_list.append(TextInput(text='yoyo', size_hint=(None,None), height=height_layout_connect/2/10, width=60))
             layout_connect.add_widget(mainbutton_motion_list[index])
-            layout_connect.add_widget(textinput_amount[index])
-            layout_connect.add_widget(textinput_chatting_probability[index])
-            layout_connect.add_widget(textinput_obstacle_force_factor[index])
-            layout_connect.add_widget(textinput_desire_force_factor[index])
+            if pedestrians_bool == 1: # add textinput_amount and textinput_chatting_probability
+                textinput_amount.append(TextInput(text='1', size_hint=(None,None), height=height_layout_connect/2/10, width=60))
+                layout_connect.add_widget(textinput_amount[index])
+                textinput_chatting_probability.append(TextInput(text='0.3', size_hint=(None,None), height=height_layout_connect/2/10, width=85))
+                layout_connect.add_widget(textinput_chatting_probability[index])
+            if pedestrians_bool == 1 or vehicles_bool == 1: # add textinput_obstacle_force_factor and textinput_desire_force_factor
+                textinput_obstacle_force_factor.append(TextInput(text='1.0', size_hint=(None,None), height=height_layout_connect/2/10, width=85))
+                layout_connect.add_widget(textinput_obstacle_force_factor[index])
+                textinput_desire_force_factor.append(TextInput(text='1.0', size_hint=(None,None), height=height_layout_connect/2/10, width=85))
+                layout_connect.add_widget(textinput_desire_force_factor[index])
         scrollable_area = ScrollView(size_hint=(None, None), size=(width_layout_connect,height_layout_connect/2), pos=(Window.size[0]-width_left_border-140, Window.size[1]-height_up_border/2-height_layout_connect/2))
         scrollable_area.add_widget(layout_connect)
         return scrollable_area
