@@ -13,7 +13,7 @@ void GridMap::initMap(ros::NodeHandle& nh){
     
     // check if use esdf
     node_.param("sdf_map/use_occ_esdf", mp_.use_occ_esdf_, true);
-
+    
     // local map size
     node_.param("sdf_map/local_update_range_x", mp_.local_update_range_(0), 5.5);
     node_.param("sdf_map/local_update_range_y", mp_.local_update_range_(1), 5.5);
@@ -53,11 +53,7 @@ void GridMap::initMap(ros::NodeHandle& nh){
     x_origin=static_map_.info.origin.position.x;                              // coordinate of left-bottom corner of the map, in meter
     y_origin=static_map_.info.origin.position.y;                              // coordinate of left-bottom corner of the map, in meter
     mp_.map_origin_ = Eigen::Vector2d(x_origin, y_origin);                    // left-bottom corner  w.r.t coordinate origin
-
-    std::cout << "x_size: " <<  x_size << std::endl;
-    std::cout << "y_size: " <<  y_size << std::endl;
-    std::cout << "x_origin: " << x_origin << std::endl;
-    std::cout << "y_origin: " << y_origin << std::endl;
+    
    
     // size in pixel of global map
     //for (int i = 0; i < 2; ++i) mp_.map_pixel_num_(i) = ceil(mp_.map_size_(i) / mp_.resolution_);
@@ -107,7 +103,8 @@ void GridMap::initMap(ros::NodeHandle& nh){
     md_.occupancy_buffer_ = std::vector<double>(md_.buffer_size_, mp_.clamp_min_log_ - mp_.unknown_flag_); // save state_occu probability [mp_.clamp_min_log_,mp_.clamp_max_log_]
     md_.occupancy_buffer_neg_ = std::vector<char>(md_.buffer_size_, 0);
     md_.occupancy_buffer_inflate_ = std::vector<char>(md_.buffer_size_, 0);                                // save is_occ {0,1}, 0 free, 1 occ 
-    md_.occupancy_buffer_static_inflate_=std::vector<char>(md_.buffer_size_, 0);                           // static map buffer
+    md_.occupancy_buffer_static_inflate_=std::vector<char>(md_.buffer_size_, 0); // static map buffer
+    md_.occupancy_buffer_dynamic_inflate_=std::vector<char>(md_.buffer_size_, 0);
     
 
     // global distance map buffer
@@ -135,6 +132,12 @@ void GridMap::initMap(ros::NodeHandle& nh){
 
     
     /* show map param */
+    std::cout << "use_occ_esdf: " << mp_.use_occ_esdf_<<std::endl; 
+    std::cout << "x_size: " <<  x_size << std::endl;
+    std::cout << "y_size: " <<  y_size << std::endl;
+    std::cout << "x_origin: " << x_origin << std::endl;
+    std::cout << "y_origin: " << y_origin << std::endl;
+    
     std::cout << "x_size_pix: " << mp_.map_pixel_num_(0) << std::endl;
     std::cout << "y_size_pix: " << mp_.map_pixel_num_(1) << std::endl;
     std::cout << "x_map_max_idx: " << mp_.map_max_idx_(0) << std::endl;
@@ -173,16 +176,17 @@ void GridMap::initMap(ros::NodeHandle& nh){
     vis_timer_ = public_nh.createTimer(ros::Duration(0.05), &GridMap::visCallback, this);
     
     // publishers 
-    map_pub_ = node_.advertise<sensor_msgs::PointCloud2>("sdf_map/occupancy", 10);
-    static_map_pub_= node_.advertise<sensor_msgs::PointCloud2>("sdf_map/occupancy_static", 10);
+    map_pub_ = public_nh.advertise<sensor_msgs::PointCloud2>("sdf_map/occupancy", 10);
+    static_map_pub_= public_nh.advertise<sensor_msgs::PointCloud2>("sdf_map/occupancy_static", 10);
+    dynamic_map_pub_= public_nh.advertise<sensor_msgs::PointCloud2>("sdf_map/occupancy_dynamic", 10);
     
     //map_inf_pub_ = node_.advertise<sensor_msgs::PointCloud2>("/sdf_map/occupancy_inflate", 10);
     
-    esdf_pub_ = node_.advertise<sensor_msgs::PointCloud2>("sdf_map/esdf", 10);
-    esdf_static_pub_ = node_.advertise<sensor_msgs::PointCloud2>("sdf_map/esdf_static", 10);
-    update_range_pub_ = node_.advertise<visualization_msgs::Marker>("sdf_map/update_range", 10);
-    unknown_pub_ = node_.advertise<sensor_msgs::PointCloud2>("sdf_map/unknown", 10);
-    depth_pub_ = node_.advertise<sensor_msgs::PointCloud2>("sdf_map/depth_cloud", 10);
+    esdf_pub_ = public_nh.advertise<sensor_msgs::PointCloud2>("sdf_map/esdf", 10);
+    esdf_static_pub_ = public_nh.advertise<sensor_msgs::PointCloud2>("sdf_map/esdf_static", 10);
+    update_range_pub_ = public_nh.advertise<visualization_msgs::Marker>("sdf_map/update_range", 10);
+    unknown_pub_ = public_nh.advertise<sensor_msgs::PointCloud2>("sdf_map/unknown", 10);
+    depth_pub_ = public_nh.advertise<sensor_msgs::PointCloud2>("sdf_map/depth_cloud", 10);
 
 }
 
@@ -280,6 +284,20 @@ void GridMap::get_static_buffer(std::vector<char> & static_buffer_inflate){
       }   
 
      
+}
+
+void GridMap::updateDynamicOccupancyMap(const std::vector<Eigen::Vector2d> &pos_set){
+  // reset dynamic buffer
+  for (int id_x = 0; id_x < mp_.map_pixel_num_(0); id_x++)
+      for (int id_y = 0; id_y < mp_.map_pixel_num_(1); id_y++)
+      {
+        md_.occupancy_buffer_dynamic_inflate_[toAddress(id_x, id_y)] = 0;
+      }
+  // set occupancy
+  for(size_t i=0;i<pos_set.size();i++)
+  {
+    setDynamicOccupancy(pos_set[i],0);
+  }
 }
 
 void GridMap::updateESDF2d_static(std::vector<char> & occ_buffer_inflate, std::vector<double> &dist_buffer_all ) {
@@ -948,7 +966,8 @@ void GridMap::fuseOccupancyBuffer(){
 
 /*Time event callback: ESDF update*/
 void GridMap::updateESDFCallback(const ros::TimerEvent& /*event*/) {
-  //if (!md_.esdf_need_update_) return;  // because of dynamic env, we need to update more often
+  // this is important otherwise will be neicun error
+  if (!md_.esdf_need_update_) return;  // because of dynamic env, we need to update more often
 
   /* esdf */
   ros::WallTime t1, t2;
@@ -1229,6 +1248,36 @@ void GridMap::publishStaticMap(){
   static_map_pub_.publish(cloud_msg);
 }
 
+void GridMap::publishDynamicMap(){
+    pcl::PointXYZ pt;
+    pcl::PointCloud<pcl::PointXYZ> cloud;
+
+    for (int x = 0; x <= mp_.map_pixel_num_(0); ++x)
+      for (int y = 0; y <= mp_.map_pixel_num_(1); ++y){ 
+        //if (md_.occupancy_buffer_[toAddress(x, y)] == 0) continue;
+        int idx_inf=toAddress(x,y);
+        if (md_.occupancy_buffer_dynamic_inflate_[idx_inf] == 0) continue;
+
+        Eigen::Vector2d pos;
+        indexToPos(Eigen::Vector2i(x, y), pos);
+        
+        pt.x = pos(0);
+        pt.y = pos(1);
+        pt.z = 1; // z=0
+        cloud.push_back(pt);
+      }
+
+    cloud.width = cloud.points.size();
+    cloud.height = 1;
+
+    cloud.is_dense = true;
+    cloud.header.frame_id = mp_.frame_id_;
+    sensor_msgs::PointCloud2 cloud_msg;
+
+    pcl::toROSMsg(cloud, cloud_msg);
+    dynamic_map_pub_.publish(cloud_msg);
+}
+
 void GridMap::publishESDF() {
   double dist;
   pcl::PointCloud<pcl::PointXYZI> cloud;
@@ -1411,14 +1460,15 @@ void GridMap::publishUnknown() {
 void GridMap::visCallback(const ros::TimerEvent& /*event*/) {
   publishMap();
   publishStaticMap();
+  publishDynamicMap();
   //publishMapInflate(false);
   if(mp_.use_occ_esdf_){
     publishESDF();
     publishStaticESDF();
   }
-  publishDepth();
-  publishUnknown();
-  publishUpdateRange();
+  //publishDepth();
+  //publishUnknown();
+  //publishUpdateRange();
   //std::cout<<"VisualCallback:"<<std::endl;
 }
 

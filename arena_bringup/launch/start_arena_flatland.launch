@@ -72,19 +72,9 @@
    <include file="$(find arena_bringup)/launch/sublaunch/sensor_sim.launch" unless="$(arg disable_scenario)">
   </include>
 
-  <!-- start plan manager-->
-  <include file="$(find arena_bringup)/launch/sublaunch/plan_manager.launch">
-    <arg name="train_mode"        value="$(arg train_mode)"/>
-    <arg name="global_frame_id"   value="$(arg global_frame_id)"/>
-    <arg name="odom_frame_id"     value="$(arg odom_frame_id)"/>
-    <arg name="base_frame_id"     value="$(arg base_frame_id)"/>
-    <arg name="local_planner"     value="$(arg local_planner)"/>
-
-    <arg name="dist_lookahead"          default="3.0" /><!-- meter, double-->
-    <arg name="dist_tolerance"          default="1.0" /><!-- meter, double-->
-    <arg name="timeout_goal"            default="300.0" />  <!-- Timeout for plan manager fsm             sec, double-->
-  </include>
-
+  <!-- move_base plan manager: which provide basic global planner and cost map -->
+  <include file="$(find arena_bringup)/launch/sublaunch/move_base/move_base_$(arg local_planner).launch"/>
   
-    
+  <!-- start time_space plan manager FSM-->
+  <include file="$(find arena_bringup)/launch/sublaunch/timed_space_planner_fsm.launch"/>
 </launch>

@@ -632,7 +632,7 @@ bool BsplineOptimizerAstar::rebound_optimize()
 
         if (!flag_occ)
         {
-          //printf("\033[32miter(+1)=%d,time(ms)=%5.3f,total_t(ms)=%5.3f,cost=%5.3f\n\033[0m", iter_num_, time_ms, total_time_ms, final_cost);
+          printf("\033[32miter(+1)=%d,time(ms)=%5.3f,total_t(ms)=%5.3f,cost=%5.3f\n\033[0m", iter_num_, time_ms, total_time_ms, final_cost);
           success = true;
         }
         else // restart
@@ -651,7 +651,7 @@ bool BsplineOptimizerAstar::rebound_optimize()
       {
         flag_force_return = true;
         rebound_times++;
-        //cout <<"Optimization process canceled once" <<"iter=" << iter_num_ << ",time(ms)=" << time_ms << ",rebound." << endl;
+        cout <<"Optimization process canceled once" <<"iter=" << iter_num_ << ",time(ms)=" << time_ms << ",rebound." << endl;
         if(rebound_times>max_rebound_times_){
           ROS_WARN_STREAM("[Optimization] canceled too many and called too many rebound "<<rebound_times);
         }
@@ -665,11 +665,11 @@ bool BsplineOptimizerAstar::rebound_optimize()
 
     } while ((flag_occ && restart_nums < MAX_RESART_NUMS_SET) ||
              (flag_force_return && force_stop_type_ == STOP_FOR_REBOUND && rebound_times <= max_rebound_times_));
-      //std::cout<<"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"<<std::endl;
-      //std::cout<<"flag_force_return="<<flag_force_return<<std::endl;
-      //std::cout<<"force_stop_type_="<<force_stop_type_<<std::endl;
-      //std::cout<<"restart_nums="<<restart_nums<<std::endl;
-      //std::cout<<"rebound_times="<<rebound_times<<std::endl;
+      std::cout<<"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"<<std::endl;
+      std::cout<<"flag_force_return="<<flag_force_return<<std::endl;
+      std::cout<<"force_stop_type_="<<force_stop_type_<<std::endl;
+      std::cout<<"restart_nums="<<restart_nums<<std::endl;
+      std::cout<<"rebound_times="<<rebound_times<<std::endl;
     return success;
 }
 

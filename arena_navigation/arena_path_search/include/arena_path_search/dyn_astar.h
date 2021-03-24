@@ -107,7 +107,7 @@ inline bool AStar::Coord2Index(const Eigen::Vector2d &pt, Eigen::Vector2i &idx) 
 
 	if (idx(0) < 0 || idx(0) >= POOL_SIZE_(0) || idx(1) < 0 || idx(1) >= POOL_SIZE_(1))
 	{
-		ROS_ERROR("Ran out of pool, index=%d  %d", idx(0), idx(1));
+		ROS_ERROR("Ran out of pool, index=%d %d %d", idx(0), idx(1));
 		return false;
 	}
 

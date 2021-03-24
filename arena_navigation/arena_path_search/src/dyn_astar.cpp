@@ -37,16 +37,7 @@ double AStar::getDiagHeu(GridNodePtr node1, GridNodePtr node2)
     int diag = min(dx, dy);
     dx -= diag;
     dy -= diag;
-
-    // if (dx == 0)
-    // {
-    //     h = 1.0 * sqrt(3.0) * diag + sqrt(2.0) * min(dy, dz) + 1.0 * abs(dy - dz);
-    // }
-    // if (dy == 0)
-    // {
-    //     h = 1.0 * sqrt(3.0) * diag + sqrt(2.0) * min(dx, dz) + 1.0 * abs(dx - dz);
-    // }
-
+    
     h = 1.0 * sqrt(3.0) * diag + sqrt(2.0) * min(dx, dy) + 1.0 * abs(dx - dy);
 
     return h;

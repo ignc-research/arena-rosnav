@@ -87,6 +87,7 @@ struct MappingData {
   std::vector<double> occupancy_buffer_;
   std::vector<char>   occupancy_buffer_inflate_;
   std::vector<char>   occupancy_buffer_static_inflate_;
+  std::vector<char>   occupancy_buffer_dynamic_inflate_;
 
   std::vector<char>   occupancy_buffer_neg_;             // for esdf
   std::vector<double> distance_buffer_;
@@ -170,7 +171,12 @@ class GridMap{
         inline int getOccupancy(Eigen::Vector2d pos);
         inline int getOccupancy(Eigen::Vector2i id);
         inline int getInflateOccupancy(Eigen::Vector2d pos);
-        inline int getFusedInflateOccupancy(Eigen::Vector2d pos);  // fuse local and static map 
+        inline int getFusedInflateOccupancy(Eigen::Vector2d pos);         // fuse local and static map 
+        
+        inline int getFusedDynamicInflateOccupancy(Eigen::Vector2d pos);  // fuse local and static map and dynamic obs
+        inline void setDynamicOccupancy(Eigen::Vector2d pos, int occ);
+        void updateDynamicOccupancyMap(const std::vector<Eigen::Vector2d> &pos_set);
+
 
         // utils: bound index, known, unknown, free, occupied
         inline void boundIndex(Eigen::Vector2i& id);
@@ -201,11 +207,13 @@ class GridMap{
         /* visualization publish */
         void publishMap();
         void publishStaticMap();
+        void publishDynamicMap();
         void publishESDF();
         void publishStaticESDF();
         void publishDepth();
         void publishUpdateRange();
         void publishUnknown();
+
 
     private:
         ros::NodeHandle node_;
@@ -232,11 +240,12 @@ class GridMap{
         nav_msgs::OccupancyGrid static_map_;
 
         // publiser
-        ros::Publisher map_pub_,static_map_pub_;
+        ros::Publisher map_pub_,static_map_pub_,dynamic_map_pub_;
         ros::Publisher esdf_pub_,esdf_static_pub_;
         ros::Publisher depth_pub_; //laser pointcloud2
         ros::Publisher update_range_pub_;
         ros::Publisher unknown_pub_;
+
 
         // timer
         ros::Timer occ_timer_;
@@ -343,6 +352,20 @@ inline void GridMap::setOccupancy(Eigen::Vector2d pos, double occ) {
   md_.occupancy_buffer_[toAddress(id)] = occ;
 }
 
+inline void GridMap::setDynamicOccupancy(Eigen::Vector2d pos,int occ){
+  if (occ != 1 && occ != 0) {
+    std::cout << "occ value error!" << std::endl;
+    return;
+  }
+  
+  if (!isInMap(pos)) return;
+
+  Eigen::Vector2i id;
+  posToIndex(pos, id);
+
+  md_.occupancy_buffer_dynamic_inflate_[toAddress(id)] = occ;
+}
+
 inline int GridMap::getOccupancy(Eigen::Vector2d pos) {
   if (!isInMap(pos)) return -1;
 
@@ -380,6 +403,25 @@ inline int GridMap::getFusedInflateOccupancy(Eigen::Vector2d pos){
   return int(md_.occupancy_buffer_inflate_[toAddress(id)]);
 
 }
+
+inline int GridMap::getFusedDynamicInflateOccupancy(Eigen::Vector2d pos){
+    if (!isInMap(pos)) return -1;
+    Eigen::Vector2i id;
+    posToIndex(pos, id);
+
+    if(md_.has_static_map_ && md_.occupancy_buffer_static_inflate_[toAddress(id)]==1){
+      return 1;
+    }
+
+    if(md_.occupancy_buffer_dynamic_inflate_[toAddress(id)]==1){
+      return 1;
+    }
+
+    return int(md_.occupancy_buffer_inflate_[toAddress(id)]);
+}
+
+
+
 
 inline void GridMap::boundIndex(Eigen::Vector2i& id) {
   Eigen::Vector2i id1;

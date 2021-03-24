@@ -120,7 +120,7 @@ set(Eigen3_INCLUDE_DIRS ${EIGEN3_INCLUDE_DIR})
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES arena_traj_planner
-  CATKIN_DEPENDS geometry_msgs nav_msgs roscpp rospy std_msgs arena_mapping arena_path_search
+  CATKIN_DEPENDS geometry_msgs nav_msgs roscpp rospy std_msgs arena_mapping arena_path_search 
 #  DEPENDS system_lib
 )
 
@@ -132,6 +132,9 @@ catkin_package(
 ## Your package locations should be listed before other locations
 include_directories(
   include
+  #include/arena_traj_planner/bspline
+  #include/arena_traj_planner/bspline_opt
+  #include/arena_traj_planner/polynomial
   ${catkin_INCLUDE_DIRS}
   ${Eigen3_INCLUDE_DIRS} 
   ${PCL_INCLUDE_DIRS} 
@@ -139,11 +142,14 @@ include_directories(
 
 ## Declare a C++ library
 add_library(arena_traj_planner
-  src/bspline_optimizer_esdf.cpp
+  
   src/bspline_optimizer_astar.cpp
   
-  src/uniform_bspline.cpp
-  src/polynomial_traj.cpp
+  src/bspline_opt/dyn_a_star.cpp
+  src/bspline_opt/bspline_optimizer.cpp
+  src/bspline_opt/bspline_optimizer_esdf.cpp
+  src/bspline/uniform_bspline.cpp
+  src/polynomial/polynomial_traj.cpp
 )
 
 ## Add cmake target dependencies of the library
