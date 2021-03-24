@@ -89,6 +89,9 @@ class FlatlandEnv(gym.Env):
             self.ns, self._laser_num_beams, self._laser_max_range)
         self.observation_space = self.observation_collector.get_observation_space()
 
+        # set rosparam
+        rospy.set_param("/laser_num_beams", self._laser_num_beams)
+
         # reward calculator
         if safe_dist is None:
             safe_dist = 1.6*self._robot_radius

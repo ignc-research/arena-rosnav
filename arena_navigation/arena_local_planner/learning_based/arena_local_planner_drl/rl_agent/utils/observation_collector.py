@@ -56,6 +56,7 @@ class ObservationCollector():
             spaces.Box(low=-np.pi, high=np.pi, shape=(1,), dtype=np.float32)
         ))
 
+        self._laser_num_beams = rospy.get_param("/laser_num_beams")
         # for frequency controlling
         self._action_frequency = 1/rospy.get_param("/robot_action_rate")
 
@@ -126,14 +127,12 @@ class ObservationCollector():
             self._robot_pose = robot_pose
         # else:
         #     print("Not synced")
-        
-        self.last = self._clock
-        self.last_r = time.time()
 
         if len(self._scan.ranges) > 0:
             scan = self._scan.ranges.astype(np.float32)
         else:
-            scan = np.zeros(360, dtype=float)
+            scan = np.zeros(self._laser_num_beams, dtype=float)
+            
         rho, theta = ObservationCollector._get_goal_pose_in_robot_frame(
             self._subgoal, self._robot_pose)
         merged_obs = np.hstack([scan, np.array([rho, theta])])
