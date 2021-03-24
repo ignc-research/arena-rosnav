@@ -29,7 +29,7 @@ Train DRL agents on ROS compatible simulations for autonomous navigation in high
 
 
 ### Recent Updates
-
+- 04.02.2021: Added Multiprocessing for training speedup
 - 26.01.2021: Added Scenario Tasks: generate your own scenario by specifying a scenario.json 
 
 
@@ -40,7 +40,8 @@ Train DRL agents on ROS compatible simulations for autonomous navigation in high
 * Full documentation and system design is released this week
 
 ## 1. Installation
-Please refer to [Installation.md](docs/Installation.md) for detailed explanations about the installation process.
+Please refer to [Installation.md](docs/Installation.md) for detailed explanations about the installation process.  
+  If you want to use Docker, please refer to our [Dockerfile](Docker) 
 
 ## 2. Usage
 
@@ -92,7 +93,7 @@ Export turtlebot model for simulation
 
 ```bash
 
-roslaunch arena_bringup start_arena_flatland.launch  train_mode:=true 	use_viz:=true  task_mode=random
+roslaunch arena_bringup start_arena_flatland.launch  train_mode:=true 	use_viz:=true  task_mode:=random
 
 ```
 * In another terminal
@@ -100,7 +101,7 @@ roslaunch arena_bringup start_arena_flatland.launch  train_mode:=true 	use_viz:=
 ```
 workon rosnav
 roscd arena_local_planner_drl
-python scripts/training/training_example.py
+python scripts/training/train_example.py
 ```
 first **activate your python3 env**, which contains libaraies stable_baseline3, geometry2
 then python run the script.
@@ -321,7 +322,7 @@ As a fundament for our Deep Reinforcement Learning approaches [StableBaselines3]
 * In one terminnal, start simulation
 
 ```bash
-roslaunch arena_bringup start_arena_flatland.launch  train_mode:=true 	use_viz:=true  task_mode=random
+roslaunch arena_bringup start_arena_flatland.launch train_mode:=true use_viz:=true task_mode:=random
 ```
 * In another terminal
 
