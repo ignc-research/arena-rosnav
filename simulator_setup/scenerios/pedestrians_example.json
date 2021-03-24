@@ -1,0 +1,73 @@
+{
+    "scenerios": [
+        {
+            "scene_name": "scenario_1",
+            "repeats": 5,
+            "dynamic_obstacles": {
+                "dynamic_obs_0": {
+                    "type": "adult",
+                    "obstacle_force_factor": 2.0,
+                    "desire_force_factor": 10.0,
+                    "amount": 5,
+                    "chatting_probability": 0.001,
+                    "obstacle_radius": 0.3,
+                    "linear_velocity": 2.0,
+                    "start_pos": [
+                        2,
+                        -1.5,
+                        0
+                    ],
+                    "waypoints": [
+                        [1, 1, 0],
+                        [9, 1, 0],
+                        [9, 9, 0],
+                        [1, 9, 0]
+                    ],
+                    "is_waypoint_relative": true,
+                    "mode": "random",
+                    "triggers": [
+                        "watcher_0"
+                    ]
+                },
+                "dynamic_obs_1": {
+                    "type": "elder",
+                    "obstacle_force_factor": 2.0,
+                    "desire_force_factor": 1.0,
+                    "amount": 1,
+                    "chatting_probability": 0.3,
+                    "obstacle_radius": 0.3,
+                    "linear_velocity": 0.2,
+                    "start_pos": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "waypoints": [
+                        [-1, -1, 0]
+                    ],
+                    "is_waypoint_relative": true,
+                    "mode": "loop",
+                    "triggers": [
+                        "watcher_0"
+                    ]
+                }
+            },
+            "static_obstacles": {
+            },
+            "robot": {
+                "start_pos": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "goal_pos": [
+                    -3.5,
+                    -3.7,
+                    0
+                ]
+            },
+            "watchers": {
+            }
+        }
+    ]
+}

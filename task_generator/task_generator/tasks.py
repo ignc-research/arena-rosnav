@@ -11,6 +11,9 @@ from nav_msgs.msg import OccupancyGrid
 from nav_msgs.srv import GetMap
 from geometry_msgs.msg import Pose2D
 from rospy.exceptions import ROSException
+from pedsim_srvs.srv import SpawnPeds
+from pedsim_msgs.msg import Ped
+from geometry_msgs.msg import Point
 
 from .obstacles_manager import ObstaclesManager
 from .robot_manager import RobotManager
@@ -201,6 +204,18 @@ class ScenerioTask(ABSTask):
         self._num_repeats_curr_scene = -1
         # The times of current scenerio need to be repeated
         self._max_repeats_curr_scene = 0
+        # types available in pedsim
+        self.pedsim_types = ["adult", "elder", "child", "forklift"]
+        # waypoint modes available in pedsim
+        self.waypoint_modes = ["loop", "random"]
+        # model.yaml paths for pedsim types
+        rospack = rospkg.RosPack()
+        self.pedsim_types_model_paths = {
+            "adult": os.path.join(rospack.get_path("simulator_setup"), "obstacles", "person_two_legged.model.yaml"),
+            "elder": os.path.join(rospack.get_path("simulator_setup"), "obstacles", "person_two_legged.model.yaml"),
+            "child": os.path.join(rospack.get_path("simulator_setup"), "obstacles", "person_two_legged.model.yaml"),
+            "forklift": os.path.join(rospack.get_path("simulator_setup"), "obstacles", "forklift.model.yaml"),
+        }
 
     def reset(self):
         info = {}
@@ -210,7 +225,8 @@ class ScenerioTask(ABSTask):
                 info["new_scenerio_loaded"] = True
             else:
                 info["new_scenerio_loaded"] = False
-                self.obstacles_manager.move_all_obstacles_to_start_pos_tween2()
+                self.obstacles_manager.reset_obstacles()
+
             # reset robot
             robot_data = self._scenerios_data[self._idx_curr_scene]['robot']
             robot_start_pos = robot_data["start_pos"]
@@ -228,12 +244,14 @@ class ScenerioTask(ABSTask):
             while True:
                 self._idx_curr_scene += 1
                 scenerio_data = self._scenerios_data[self._idx_curr_scene]
-                scenerio_name = scenerio_data['scene_name']
                 # use can set "repeats" to a non-positive value to disable the scenerio
                 if scenerio_data["repeats"] > 0:
                     # set obstacles
+
+                    # remove obstacles
                     self.obstacles_manager.remove_obstacles()
-                    watchers_dict = scenerio_data.setdefault('watchers', [])
+
+                    # handle static obstacles
                     for obstacle_name, obstacle_data in scenerio_data["static_obstacles"].items():
                         if obstacle_data['shape'] == 'circle':
                             self.obstacles_manager.register_static_obstacle_circle(obstacle_data['x'],obstacle_data['y'],obstacle_data['radius'])
@@ -246,26 +264,14 @@ class ScenerioTask(ABSTask):
                         else:
                             raise ValueError(f"Shape {obstacle_data['shape']} is not supported, supported shape 'circle' OR 'polygon'")
 
+                    # handle dynamic obstacles
                     for obstacle_name, obstacle_data in scenerio_data["dynamic_obstacles"].items():
-                        # currently dynamic obstacle only has circle shape
-                        obstacle_radius = obstacle_data["obstacle_radius"]
-                        linear_velocity = obstacle_data['linear_velocity']
-                        # 3-elementary list
-                        start_pos = obstacle_data["start_pos"]
-                        waypoints = obstacle_data["waypoints"]
-                        is_waypoint_relative = obstacle_data["is_waypoint_relative"]
-                        mode = obstacle_data["mode"]
-                        trigger_zones = []
-                        if 'triggers' in obstacle_data:
-                            for trigger in obstacle_data['triggers']:
-                                if trigger not in watchers_dict:
-                                    raise ValueError(
-                                        f"For dynamic obstacle [{obstacle_name}] the trigger: {trigger} not found in the corresponding 'watchers' dict for scene {scenerio_name} ")
-                                trigger_zones.append(
-                                    watchers_dict[trigger]['pos']+[watchers_dict[trigger]['range']])
-                        self.obstacles_manager.register_dynamic_obstacle_circle_tween2(
-                            obstacle_name, obstacle_radius, linear_velocity, start_pos, waypoints, is_waypoint_relative, mode, trigger_zones)
-                    # self.robot_
+                        if obstacle_data["type"] == "walker":
+                            self.add_walker(scenerio_data, obstacle_name, obstacle_data)
+                        elif obstacle_data["type"] in self.pedsim_types:
+                            self.add_pedsim_object(obstacle_data)
+
+                    # handle robot
                     robot_data = scenerio_data["robot"]
                     robot_start_pos = robot_data["start_pos"]
                     robot_goal_pos = robot_data["goal_pos"]
@@ -278,6 +284,63 @@ class ScenerioTask(ABSTask):
 
         except IndexError as e:
             raise StopReset("All scenerios have been evaluated!") from e
+
+    
+    def add_pedsim_object(self, obstacle_data):
+        # set up service client
+        spawn_peds_service_name = "pedsim_simulator/spawn_peds"
+        rospy.wait_for_service(spawn_peds_service_name, 6.0)
+        spawn_peds_srv = rospy.ServiceProxy(spawn_peds_service_name, SpawnPeds)
+        peds = []
+
+        ped = Ped()
+        ped.pos = Point(*obstacle_data["start_pos"])
+        ped.type = self.pedsim_types.index(obstacle_data["type"])
+        ped.number_of_peds = obstacle_data["amount"]
+        ped.vmax = obstacle_data["linear_velocity"] + np.random.uniform(-0.2, 0.2)
+        ped.chatting_probability = obstacle_data["chatting_probability"]
+
+        mode = obstacle_data["mode"]
+        if mode in self.waypoint_modes:
+            ped.waypoint_mode = self.waypoint_modes.index(obstacle_data["mode"])
+        else:
+            ped.waypoint_mode = 0
+
+        ped.force_factor_desired = obstacle_data["desire_force_factor"]
+        ped.force_factor_obstacle = obstacle_data["obstacle_force_factor"]
+        ped.force_factor_social = obstacle_data["social_force_factor"] if "social_force_factor" in obstacle_data else 2.0
+        ped.waypoints = [Point(waypoint[0], waypoint[1], 0.3) for waypoint in obstacle_data["waypoints"]]
+        ped.yaml_file = self.pedsim_types_model_paths[obstacle_data["type"]]
+        peds.append(ped)
+
+        # call service
+        response = spawn_peds_srv.call(peds)
+        if not response.success:
+            rospy.log_warn("failed to spawn peds")
+
+
+    def add_walker(self, scenerio_data, obstacle_name, obstacle_data):
+        scenerio_name = scenerio_data['scene_name']
+        watchers_dict = scenerio_data.setdefault('watchers', [])
+        # currently dynamic obstacle only has circle shape
+        obstacle_radius = obstacle_data["obstacle_radius"]
+        linear_velocity = obstacle_data['linear_velocity']
+        # 3-elementary list
+        start_pos = obstacle_data["start_pos"]
+        waypoints = obstacle_data["waypoints"]
+        is_waypoint_relative = obstacle_data["is_waypoint_relative"]
+        mode = obstacle_data["mode"]
+        trigger_zones = []
+        if 'triggers' in obstacle_data:
+            for trigger in obstacle_data['triggers']:
+                if trigger not in watchers_dict:
+                    raise ValueError(
+                        f"For dynamic obstacle [{obstacle_name}] the trigger: {trigger} not found in the corresponding 'watchers' dict for scene {scenerio_name} ")
+                trigger_zones.append(
+                    watchers_dict[trigger]['pos']+[watchers_dict[trigger]['range']])
+        self.obstacles_manager.register_dynamic_obstacle_circle_tween2(
+            obstacle_name, obstacle_radius, linear_velocity, start_pos, waypoints, is_waypoint_relative, mode, trigger_zones)
+
 
     @staticmethod
     def generate_scenerios_json_example(dst_json_path: str):

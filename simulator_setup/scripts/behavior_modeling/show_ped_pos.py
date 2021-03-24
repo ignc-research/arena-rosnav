@@ -28,7 +28,17 @@ class Listener:
             social_force_magnitude = np.linalg.norm(social_force)
             combined_forces = desired_force + social_force
             combined_forces_magnitude = np.linalg.norm(combined_forces)
-            self.stdscr.addstr(i, 0, "id: {} state: {:20} x: {:2.2f} y: {:2.2f} desired: {:2.2f} social: {:2.2f} combined: {:2.2f}".format(id, social_state, x, y, desired_force_magnitude, social_force_magnitude, combined_forces_magnitude))
+            talking_to_id = agent_state.talking_to_id
+            self.stdscr.addstr(i, 0, "id: {} state: {:20} talking_to: {:2} x: {:2.2f} y: {:2.2f} desired: {:2.2f} social: {:2.2f} combined: {:2.2f}".format(
+                id,
+                social_state,
+                talking_to_id,
+                x,
+                y,
+                desired_force_magnitude,
+                social_force_magnitude,
+                combined_forces_magnitude)
+            )
         self.stdscr.refresh()
         
     def listen(self):

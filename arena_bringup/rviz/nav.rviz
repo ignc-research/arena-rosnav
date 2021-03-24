@@ -10,6 +10,7 @@ Panels:
         - /MarkerArray2
         - /MarkerArray3
         - /MarkerArray4
+        - /MarkerArray5
         - /MarkerArray5/Namespaces1
         - /MarkerArray18
         - /MarkerArray19
@@ -24,6 +25,8 @@ Panels:
         - /MarkerArray23
         - /MarkerArray24
         - /MarkerArray25
+        - /MarkerArray26
+        - /MarkerArray28
       Splitter Ratio: 0.6526610255241394
     Tree Height: 611
   - Class: rviz/Selection
@@ -403,7 +406,7 @@ Visualization Manager:
       Marker Topic: /flatland_server/debug/model/obstacles_static_random_00
       Name: MarkerArray
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -411,7 +414,7 @@ Visualization Manager:
       Marker Topic: /flatland_server/debug/model/obstacles_static_random_01
       Name: MarkerArray
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -419,7 +422,7 @@ Visualization Manager:
       Marker Topic: /flatland_server/debug/model/obstacles_static_random_02
       Name: MarkerArray
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -539,7 +542,7 @@ Visualization Manager:
       Marker Topic: /flatland_server/debug/model/obstacles_static_random_01
       Name: MarkerArray
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -547,7 +550,7 @@ Visualization Manager:
       Marker Topic: /flatland_server/debug/model/obstacles_static_random_00
       Name: MarkerArray
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -555,7 +558,7 @@ Visualization Manager:
       Marker Topic: /flatland_server/debug/model/obstacles_dynamic_random_02
       Name: MarkerArray
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -563,7 +566,7 @@ Visualization Manager:
       Marker Topic: /flatland_server/debug/model/obstacles_dynamic_random_01
       Name: MarkerArray
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -571,7 +574,7 @@ Visualization Manager:
       Marker Topic: /flatland_server/debug/model/obstacles_dynamic_random_00
       Name: MarkerArray
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Alpha: 1
@@ -618,7 +621,7 @@ Visualization Manager:
       Marker Topic: /planning_vis/goal
       Name: Marker
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
       Value: true
     - Class: rviz/Marker
@@ -674,12 +677,12 @@ Visualization Manager:
       Marker Topic: /flatland_server/debug/model/person_1_2
       Name: MarkerArray
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
       Enabled: true
-      Marker Topic: /flatland_server/debug/model/person_1_3
+      Marker Topic: /flatland_server/debug/model/person_2_0
       Name: MarkerArray
       Namespaces:
         "": true
@@ -690,7 +693,7 @@ Visualization Manager:
       Marker Topic: /flatland_server/debug/model/person_1_4
       Name: MarkerArray
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -698,7 +701,7 @@ Visualization Manager:
       Marker Topic: /flatland_server/debug/model/person_1_5
       Name: MarkerArray
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -706,7 +709,7 @@ Visualization Manager:
       Marker Topic: /flatland_server/debug/model/person_1_6
       Name: MarkerArray
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -714,7 +717,7 @@ Visualization Manager:
       Marker Topic: /flatland_server/debug/model/person_1_7
       Name: MarkerArray
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -722,7 +725,7 @@ Visualization Manager:
       Marker Topic: /flatland_server/debug/model/person_1_8
       Name: MarkerArray
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -772,8 +775,8 @@ Visualization Manager:
       Scale: 37.92409133911133
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
-      X: 2.7693135738372803
-      Y: 3.1327428817749023
+      X: 4.802515506744385
+      Y: 5.899354457855225
     Saved: ~
 Window Geometry:
   Displays:

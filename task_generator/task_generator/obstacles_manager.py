@@ -10,6 +10,7 @@ from flatland_msgs.srv import MoveModel, MoveModelRequest
 from flatland_msgs.srv import StepWorld
 from nav_msgs.msg import OccupancyGrid
 from geometry_msgs.msg import Pose2D
+from std_srvs.srv import SetBool
 import numpy as np
 from std_msgs.msg import Empty
 import rospy
@@ -218,6 +219,20 @@ class ObstaclesManager:
         for move_obstacle_start_pos_pub in self._move_all_obstacles_start_pos_pubs:
             move_obstacle_start_pos_pub.publish(Empty())
             print("moved ")
+
+    def reset_pedsim_obstacles(self):
+        # call reset_all_peds service
+        reset_peds_service_name = "pedsim_simulator/reset_all_peds"
+        try:
+            rospy.wait_for_service(reset_peds_service_name, 1.0)
+            reset_peds_srv = rospy.ServiceProxy(reset_peds_service_name, SetBool)
+            reset_peds_srv.call(True)
+        except Exception as e:
+            rospy.log_warn(e)
+
+    def reset_obstacles(self):
+        self.move_all_obstacles_to_start_pos_tween2()
+        self.reset_pedsim_obstacles()
 
     def move_obstacle(self, obstacle_name: str, x: float, y: float, theta: float):
         """move the obstacle to a given position

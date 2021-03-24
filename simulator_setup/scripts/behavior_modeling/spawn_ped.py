@@ -8,10 +8,11 @@ from pedsim_srvs.srv import SpawnPeds
 from pedsim_msgs.msg import Ped
 from geometry_msgs.msg import Point
 
-time.sleep(4)
 
 rospack = rospkg.RosPack()
-spawn_ped_srv = rospy.ServiceProxy('pedsim_simulator/spawn_peds', SpawnPeds)
+spawn_peds_service_name = "pedsim_simulator/spawn_peds"
+rospy.wait_for_service(spawn_peds_service_name, 6.0)
+spawn_ped_srv = rospy.ServiceProxy(spawn_peds_service_name, SpawnPeds)
 
 peds = []
 
