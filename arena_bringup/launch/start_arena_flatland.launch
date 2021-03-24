@@ -76,5 +76,5 @@
   <include file="$(find arena_bringup)/launch/sublaunch/move_base/move_base_$(arg local_planner).launch"/>
   
   <!-- start time_space plan manager FSM-->
-  <include file="$(find arena_bringup)/launch/sublaunch/timed_space_planner_fsm.launch"/>
+  <!-- <include file="$(find arena_bringup)/launch/sublaunch/timed_space_planner_fsm.launch"/> -->
 </launch>

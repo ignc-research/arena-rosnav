@@ -38,13 +38,15 @@ void DynamicPlanManager::initPlanModules(ros::NodeHandle &nh)
   ros::master::V_TopicInfo topic_infos;
   ros::master::getTopics(topic_infos);
   std::string str_dynamic_obs;
-  node_.param<std::string>("plan_manager/dynamic_obstacle_name", str_dynamic_obs,"obs_dynamic");
+  node_.param<std::string>("plan_manager/dynamic_obstacle_name",   str_dynamic_obs,    "obs");
+  std::cout << "parameter name="<< str_dynamic_obs<<std::endl;
 
 	obs_info_provider_.reserve(100);
   for (ros::master::V_TopicInfo::iterator it = topic_infos.begin() ; it != topic_infos.end(); it++)
   {
         const ros::master::TopicInfo& info = *it;
-        
+        //std::cout << "topic_name" << it - topic_infos.begin() << ": " << info.name << std::endl;
+
         if (info.name.find(str_dynamic_obs) != std::string::npos) 
         {
             std::cout << "topic_" << it - topic_infos.begin() << ": " << info.name << std::endl;

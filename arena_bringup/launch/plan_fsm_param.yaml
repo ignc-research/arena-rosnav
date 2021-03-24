@@ -35,7 +35,7 @@ plan_manager/feasibility_tolerance: 0.05
 plan_manager/control_points_distance: 0.4
 plan_manager/use_distinctive_trajs: true
 plan_manager/local_time_horizon: *planning_time_horizon
-plan_manager/dynamic_obstacle_name: *obstacle_name
+plan_manager/dynamic_obstacle_name: obstacle_dynamic_with_traj
 
 
 # ----------------------------------------------------------------------------------
