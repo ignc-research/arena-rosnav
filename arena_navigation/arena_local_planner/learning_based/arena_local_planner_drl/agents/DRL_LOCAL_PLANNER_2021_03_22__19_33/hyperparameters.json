@@ -3,7 +3,7 @@
     "robot": "myrobot",
     "batch_size": 21000,
     "gamma": 0.99,
-    "n_steps": 2625,
+    "n_steps": 1750,
     "ent_coef": 0.005,
     "learning_rate": 0.0002,
     "vf_coef": 0.22,
@@ -19,5 +19,5 @@
     "discrete_action_space": false,
     "normalize": true,
     "task_mode": "staged",
-    "curr_stage": 3
+    "curr_stage": 5
 }
