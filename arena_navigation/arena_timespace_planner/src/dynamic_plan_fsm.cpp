@@ -335,6 +335,7 @@ void DynamicReplanFSM::trackTrajCallback(const ros::TimerEvent &e){
         v=0.0;
         w=0.0;
         target_traj_data_.getControlInput(t_cur,v,w);
+        
         //ROS_INFO_STREAM("vel: "<<v);
         //ROS_INFO_STREAM("rot vel: "<<w);
     }
@@ -383,6 +384,8 @@ void DynamicReplanFSM::updateSubgoalDRLCallback(const ros::TimerEvent &e){
         std::vector<Eigen::Vector2d> point_set;
         point_set.push_back(subgoal);
         visualizePoints(point_set,0.8,Eigen::Vector4d(1, 0, 1, 1.0),vis_subgoal_drl_pub_);
+    }else{
+        changeFSMExecState(GEN_NEW_GLOBAL, "SUBGOAL");
     }
         
 }

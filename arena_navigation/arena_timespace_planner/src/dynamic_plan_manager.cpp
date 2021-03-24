@@ -119,6 +119,9 @@ bool DynamicPlanManager::planGlobalTraj( Eigen::Vector2d &start_pos,  Eigen::Vec
     }
     
     global_data_.resetData(global_traj);
+    // in case start_pos trapped 
+    local_traj_data_.resetData(global_traj);
+
     return true;
 
 }

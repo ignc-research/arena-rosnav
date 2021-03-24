@@ -206,7 +206,6 @@ public:
         }
         return landmark_pts;
     }
-
 };
 
 class MidData{
@@ -303,6 +302,11 @@ public:
             w=30*3.14/180;
         }
     }
+
+    // Eigen::Vector2d getPositionAtTime(double t_curr){
+    //     return pos_traj_.evaluateDeBoorT(t_curr);
+    // }
+
 };
 
 
