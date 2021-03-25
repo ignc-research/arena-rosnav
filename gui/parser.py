@@ -35,6 +35,7 @@ map_origin = [0.0, 0.0, 0.0] # form: [x,y,z]
 obstacle_vel = [] # old form [(obstacle_num, obstacle_vel), ...] # new form [obstacle_0_vel, ...]
 obstacle_watcher_connections = [] # idea 1 - not used # form [(obstacle_num, (watcher_num_1, ...), ...)] # OR for example: [(obstacle_num_1, watcher_num_1), (obstacle_num_1, watcher_num_2), (obstacle_num_2, watcher_num_3) ...)]
 obstacle_watcher_connections_2 = [] # idea 2 - used # form [(obst0_watch_1, obst0_watch_2, ...),(obst1_watch_1, obst1_watch_2, ...), ...]
+obstacle_waypoint_connections = [] # see obstacle_watcher_connections_2
 amount_pedestrians = [] # form: [amount_group1, amount_group2, ...]
 chatting_probability = [] # form: see above
 obstacle_force_factor = [] # form: see above
@@ -81,28 +82,39 @@ for line in lines:
         #    obstacle_watcher_connections.append((float(line.split(':')[0]), float(value)))
         #    temp_array.append((float(value)))
         for value in line.split(','):
-            # It is not a must that an obstacle has a watcher -> append '_' when this is the case instead of a watcher index.
+            # It is not a must that an obstacle has a watcher -> append '/' when this is the case instead of a watcher index.
             # Later on it don't have to be considered as a watcher and calculated to the watchers amount.
-            if value == '' or value == '\n': # it could be '\n' since in the txt file a line is saved for the watcher index
+            if value == '' or value == '\n': # it could be '\n' since in the txt file a line is reserved for the watcher index
                 print('No watcher for obstacle ' + str(count-count_temp-1))
                 temp_array.append(('/'))
             else:
                 temp_array.append((int(value)))
         obstacle_watcher_connections_2.append(temp_array) # assume the ordering is right starting from 0
         print('Single obstacle-watchers connections: ' + str(line.split('\n')[0]))
-    if count > count_temp+count_obstacles and line.split('Obstacle force factor:')[0] == '':
+    if count > count_temp+count_obstacles+1 and count <= count_temp+2*count_obstacles+1:
+        temp_array = []
+        for value in line.split(','):
+            # The GUI implements dynamic obstacles => minimum one waypoint per obstacle should be always given
+            if value == '' or value == '\n': # it could be '\n' since in the txt file a line is reserved for the waypoint index
+                print('ERROR: All obstacles schould be dynamic, so a minimum of one waypoint per obstacle is required!')
+                os._exit(0)
+            else:
+                temp_array.append((int(value)))
+        obstacle_waypoint_connections.append(temp_array) # assume the ordering is right starting from 0
+        print('Single obstacle-waypoints connections: ' + str(line.split('\n')[0]))
+    if count > count_temp+2*(count_obstacles+1) and line.split('Obstacle force factor:')[0] == '':
         no_pedestrians = 1
-    if count > count_temp+count_obstacles+1 and count <= count_temp+2*count_obstacles+1 and no_pedestrians == 0:
-        amount_pedestrians.append((int(line.split('\n')[0])))
-    if count > count_temp+count_obstacles+1 and count <= count_temp+2*count_obstacles+1 and no_pedestrians == 1:
-        obstacle_force_factor.append((float(line.split('\n')[0])))
     if count > count_temp+2*(count_obstacles+1) and count <= count_temp+2*(count_obstacles+1)+count_obstacles and no_pedestrians == 0:
-        chatting_probability.append((float(line.split('\n')[0])))
+        amount_pedestrians.append((int(line.split('\n')[0])))
     if count > count_temp+2*(count_obstacles+1) and count <= count_temp+2*(count_obstacles+1)+count_obstacles and no_pedestrians == 1:
-        desire_force_factor.append((float(line.split('\n')[0])))
-    if count > count_temp+3*(count_obstacles+1) and count <= count_temp+3*(count_obstacles+1)+count_obstacles:
         obstacle_force_factor.append((float(line.split('\n')[0])))
+    if count > count_temp+3*(count_obstacles+1) and count <= count_temp+3*(count_obstacles+1)+count_obstacles and no_pedestrians == 0:
+        chatting_probability.append((float(line.split('\n')[0])))
+    if count > count_temp+3*(count_obstacles+1) and count <= count_temp+3*(count_obstacles+1)+count_obstacles and no_pedestrians == 1:
+        desire_force_factor.append((float(line.split('\n')[0])))
     if count > count_temp+4*(count_obstacles+1) and count <= count_temp+4*(count_obstacles+1)+count_obstacles:
+        obstacle_force_factor.append((float(line.split('\n')[0])))
+    if count > count_temp+5*(count_obstacles+1) and count <= count_temp+5*(count_obstacles+1)+count_obstacles:
         desire_force_factor.append((float(line.split('\n')[0])))
 
 # check if the amount of obstacles given in the text area, is the same as the actually drawn, also as the same as the drawn lines etc.
@@ -115,6 +127,12 @@ for connection in obstacle_watcher_connections_2:
     for watcher in connection:
         if watcher != '/': # this means no connection
             watchers_all_amount += 1
+
+# calculate the amount of all waypoints given in the text fileds
+waypoints_all_amount = 0
+for connection in obstacle_waypoint_connections:
+    for waypoint in connection:
+        waypoints_all_amount += 1
 
 # DEBUGGING
 print('Image corners:' + str(image_corners))
@@ -130,6 +148,7 @@ print('Obstacle velocities:' + str(obstacle_vel))
 #print('Second value:' + str(obstacle_vel[1]))
 #print('Obstacle-watchers connections:' + str(obstacle_watcher_connections))
 print('Obstacle-watchers connections:' + str(obstacle_watcher_connections_2))
+print('Obstacle-waypoints connections:' + str(obstacle_waypoint_connections))
 print('Amount of pedestrians:' + str(amount_pedestrians))
 print('Chatting probability:' + str(chatting_probability))
 print('Obstacle force factor:' + str(obstacle_force_factor))
@@ -205,8 +224,14 @@ lines_vectors = []
 with open('output/internal/vector.txt') as file:
     lines_vectors = file.readlines()
 
-if int(len(lines_vectors)/2) != length_right:
-    print('ERROR: Unmatching amount of obstacles and waypoints! The scenario is incorrect, make a new one!')
+## for when it is allowed only one waypoint per obstacle:
+#if int(len(lines_vectors)/2) != length_right:
+#    print('ERROR: Unmatching amount of obstacles and waypoints! The scenario is incorrect, make a new one!')
+#    os._exit(0)
+
+# check if the amount of waypoints drawn on the map is the same as the amount of all waypoints from the obstacle-waypoints-connections given in the text fields
+if waypoints_all_amount != int(len(lines_vectors)/2):
+    print('ERROR: Unmatching amount of waypoints given in the text fields and drawn on the map! The scenario is incorrect, make a new one!')
     os._exit(0)
 
 # data from vector.txt
@@ -224,15 +249,18 @@ for line in lines_vectors:
         end_pos.append((float(line.split('vector end (x,y): ')[1].split(',')[0]), float(line.split('vector end (x,y): ')[1].split(',')[1])))
 
 # make each element from start_pos[] and end_pos[] relative to the corresponding element of obstacles[]
+# all three arrays (obstacles[], start_pos[] and end_pos[]) should have the same length (and be in the right order)!
+# Important: pair the waypoint to the obstacle, so that the right relative distance can be calculated, use the data from data.txt (obstacle_waypoint_connections[])
 i = 0
-for obstacle in obstacles: # all three arrays (obstacles[], start_pos[] and end_pos[]) should have the same length (and be in the right order)!
-    start_rel_x = start_pos[i][0] - obstacle[0]
-    start_rel_y = start_pos[i][1] - obstacle[1]
-
-    end_rel_x = end_pos[i][0] - obstacle[0]
-    end_rel_y = end_pos[i][1] - obstacle[1]
-
-    waypoints.append(((start_rel_x, start_rel_y), (end_rel_x, end_rel_y)))
+for obstacle in obstacles: # len(obstacles)=len(obstacle_waypoint_connections)
+    for waypoint_index in obstacle_waypoint_connections[i]:
+        start_rel_x = start_pos[waypoint_index][0] - obstacle[0]
+        start_rel_y = start_pos[waypoint_index][1] - obstacle[1]
+    
+        end_rel_x = end_pos[waypoint_index][0] - obstacle[0]
+        end_rel_y = end_pos[waypoint_index][1] - obstacle[1]
+    
+        waypoints.append(((start_rel_x, start_rel_y), (end_rel_x, end_rel_y)))
     i += 1
 
 # Transform start and end position to start and waypoints (use relative distances!) -> two ideas! In the json file as start position is meant the obstacle position at the beginning and not the start of the drawn line
@@ -342,6 +370,7 @@ shift_y = map_origin[1]
 # Info: the center of the obstacle reaches the goal position (the waypoint), not the nearest part of the obstacle!
 
 obstacles_json = ''
+k = 0
 i = 0
 for obstacle in obstacles:
     obstacle_num = str(i)
@@ -350,8 +379,6 @@ for obstacle in obstacles:
     lin_velocity = str(obstacle_vel[i]) # before was obstacle_vel[i][1]
     start_pos_x = str((obstacle[0]-new_start_point_x)*scale_x*flip_x_axis+shift_x) # good with (obstacle[0]-new_start_point_x)*scale_x*flip_x_axis+shift_x
     start_pos_y = str((obstacle[1]-new_start_point_y)*scale_y*flip_y_axis+shift_y)
-    waypoint_x = str((waypoints[i][1][0])*scale_x*flip_x_axis) # the waypoints are relative to the obstacle position! -> new_start_point and shift should be irrelevant!
-    waypoint_y = str((waypoints[i][1][1])*scale_y*flip_y_axis) # scale and flip? are only relevant!
     watcher_num = str(i)
     move = str(motion[i])
     obstacle_type = str(obstacle[3]) # obstacle default type = "circle"
@@ -375,13 +402,24 @@ for obstacle in obstacles:
         obstacles_json += '"obstacle_force_factor": ' + obstactle_force_fact + ',\n\t\t\t\t\t'
         obstacles_json += '"desire_force_factor": ' + desire_force_fact + ',\n\t\t\t\t\t'
     obstacles_json += '"start_pos": [\n\t\t\t\t\t\t' + start_pos_x + ',\n\t\t\t\t\t\t' + start_pos_y + ',\n\t\t\t\t\t\t0'
-    obstacles_json += '\n\t\t\t\t\t],\n\t\t\t\t\t"waypoints": [\n\t\t\t\t\t\t[\n\t\t\t\t\t\t\t'
-    obstacles_json += waypoint_x + ',\n\t\t\t\t\t\t\t' + waypoint_y + ',\n\t\t\t\t\t\t\t0' # Idea 1 for the waypoints (see above for the explanaition)
-    obstacles_json += '\n\t\t\t\t\t\t]\n\t\t\t\t\t],\n\t\t\t\t\t"is_waypoint_relative": true,\n\t\t\t\t\t'
+    obstacles_json += '\n\t\t\t\t\t],\n\t\t\t\t\t"waypoints": [\n\t\t\t\t\t\t'
+
+    # since now we have obstacle-waypoints connections -> we do not have to take waypoints just line by line, but the coresponding lines! -> use the info from obstacle_waypoint_connections
+    # Idea 1 for the waypoints (see above for the explanation)
+    for waypoint in obstacle_waypoint_connections[i]: # use it just as counter = waypoints per obstacle, since in "waypoints[]" the waypoints are already sorted by obstacles
+        waypoint_x = str((waypoints[k][1][0])*scale_x*flip_x_axis) # the waypoints are relative to the obstacle position! -> new_start_point and shift should be irrelevant!
+        waypoint_y = str((waypoints[k][1][1])*scale_y*flip_y_axis) # scale and flip? are only relevant!
+        obstacles_json += '[\n\t\t\t\t\t\t\t' + waypoint_x + ',\n\t\t\t\t\t\t\t' + waypoint_y + ',\n\t\t\t\t\t\t\t0' + '\n\t\t\t\t\t\t]'
+        if k < (len(obstacle_waypoint_connections[i]) - 1):
+            obstacles_json += ','
+        obstacles_json +='\n'
+        k += 1
+    
+    obstacles_json += '\t\t\t\t\t],\n\t\t\t\t\t"is_waypoint_relative": true,\n\t\t\t\t\t'
     obstacles_json += '"mode": "' + move + '"'
     obstacles_json += ',\n\t\t\t\t\t"triggers": [\n\t\t\t\t\t\t'
 
-    # since now we have obstacle-watchers connections -> we do not have to take the obstacles and watchers just line by line, but the coresponding lines! -> use the info from obstacle_watcher_connections or obstacle_watcher_connections_2
+    # since now we have obstacle-watchers connections -> we do not have to take the watchers just line by line, but the coresponding lines! -> use the info from obstacle_watcher_connections or obstacle_watcher_connections_2
     #obstacles_json += '"watcher_' + watcher_num + '"'
     j = 0
     for watcher in obstacle_watcher_connections_2[i]:
@@ -394,6 +432,7 @@ for obstacle in obstacles:
     obstacles_json += '\n\t\t\t\t\t]\n\t\t\t\t}'
     if i != len(obstacles) - 1:
         obstacles_json += ','
+    
     i += 1
 
 watchers_json = ''
@@ -454,11 +493,11 @@ fob = open('output/user_data.txt','w')
 fob.write('Map resolution:\n' + str(map_res) + "\n")
 fob.write('Map origin:\n' + str(map_origin) + "\n")
 if len(amount_pedestrians) == 0 and len(obstacle_force_factor) == 0:
-    fob.write('ObstacleID - ObstacleType - Velocity - WatchersIDs - Motion:\n')
+    fob.write('ObstacleID - ObstacleType - Velocity - WatchersIDs - WaypointsIDs - Motion:\n')
 if len(amount_pedestrians) == 0 and len(obstacle_force_factor) > 0:
-    fob.write('ObstacleID - ObstacleType - Velocity - WatchersIDs - Motion - Obstacle force factor - Desire force factor:\n')
+    fob.write('ObstacleID - ObstacleType - Velocity - WatchersIDs - WaypointsIDs - Motion - Obstacle force factor - Desire force factor:\n')
 if len(amount_pedestrians) > 0 and len(obstacle_force_factor) > 0:
-    fob.write('ObstacleID - ObstacleType - Velocity - WatchersIDs - Motion - Pedestrians amount - Chatting probability - Obstacle force factor - Desire force factor:\n')
+    fob.write('ObstacleID - ObstacleType - Velocity - WatchersIDs - WaypointsIDs - Motion - Pedestrians amount - Chatting probability - Obstacle force factor - Desire force factor:\n')
 i = 0
 for obstacle in obstacles:
     fob.write(str(i) + ' - ' + str(obstacle[3]) + ' - ' + str(obstacle_vel[i]) + ' - ')
@@ -468,6 +507,13 @@ for obstacle in obstacles:
         if j < (len(obstacle_watcher_connections_2[i]) - 1):
             fob.write(',')
         j += 1
+    fob.write(' - ')
+    k = 0
+    for waypoint in obstacle_waypoint_connections[i]:
+        fob.write(str(waypoint))
+        if k < (len(obstacle_waypoint_connections[i]) - 1):
+            fob.write(',')
+        k += 1
     fob.write(' - ' + motion[i])
     # take care of the additional parameters
     if len(amount_pedestrians) == 0 and len(obstacle_force_factor) == 0:
