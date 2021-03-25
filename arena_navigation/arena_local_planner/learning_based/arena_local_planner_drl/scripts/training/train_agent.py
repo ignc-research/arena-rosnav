@@ -212,7 +212,7 @@ if __name__ == "__main__":
     
     # stop training on reward threshold callback
     stoptraining_cb = StopTrainingOnRewardThreshold(
-        reward_threshold=14.5, verbose=1)
+        reward_threshold=15, verbose=1)
 
     # instantiate eval environment
     # take task_manager from first sim (currently evaluation only provided for single process)
@@ -241,7 +241,7 @@ if __name__ == "__main__":
     # eval_freq: evaluate the agent every eval_freq train timesteps
     eval_cb = EvalCallback(
         eval_env=eval_env,          train_env=env,
-        n_eval_episodes=30,         eval_freq=20000, 
+        n_eval_episodes=30,         eval_freq=15000, 
         log_path=PATHS.get('eval'), best_model_save_path=PATHS.get('model'), 
         deterministic=True,         callback_on_eval_end=trainstage_cb,
         callback_on_new_best=stoptraining_cb)
