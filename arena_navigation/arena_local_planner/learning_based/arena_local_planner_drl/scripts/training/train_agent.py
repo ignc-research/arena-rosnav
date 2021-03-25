@@ -76,26 +76,26 @@ def get_paths(agent_name: str, args) -> dict:
     }
     # check for mode
     if args.load is None:
-        os.makedirs(PATHS.get('model'))
+        os.makedirs(PATHS['model'])
     else:
         if (not os.path.isfile(
-                os.path.join(PATHS.get('model'), AGENT_NAME + ".zip")) 
+                os.path.join(PATHS['model'], AGENT_NAME + ".zip")) 
             and not os.path.isfile(
-                os.path.join(PATHS.get('model'), "best_model.zip"))
+                os.path.join(PATHS['model'], "best_model.zip"))
             ):
             raise FileNotFoundError(
                 "Couldn't find model named %s.zip' or 'best_model.zip' in '%s'" 
-                % (AGENT_NAME, PATHS.get('model')))
+                % (AGENT_NAME, PATHS['model']))
     # evaluation log enabled
     if args.eval_log:
-        if not os.path.exists(PATHS.get('eval')):
-            os.makedirs(PATHS.get('eval'))
+        if not os.path.exists(PATHS['eval']):
+            os.makedirs(PATHS['eval'])
     else:
         PATHS['eval'] = None
     # tensorboard log enabled
     if args.tb:
-        if not os.path.exists(PATHS.get('tb')):
-            os.makedirs(PATHS.get('tb'))
+        if not os.path.exists(PATHS['tb']):
+            os.makedirs(PATHS['tb'])
     else:
         PATHS['tb'] = None
 
@@ -122,7 +122,7 @@ def make_envs(rank: int,
             # train env
             env = FlatlandEnv(
                 f"sim_{rank+1}", 
-                PATHS.get('robot_setting'), PATHS.get('robot_as'), 
+                PATHS['robot_setting'], PATHS['robot_as'], 
                 params['reward_fnc'], params['discrete_action_space'], 
                 goal_radius=params['goal_radius'], 
                 max_steps_per_episode=params['train_max_steps_per_episode'],
@@ -134,7 +134,7 @@ def make_envs(rank: int,
             env = Monitor(
                 FlatlandEnv(
                     f"eval_sim",
-                    PATHS.get('robot_setting'), PATHS.get('robot_as'), 
+                    PATHS['robot_setting'], PATHS['robot_as'], 
                     params['reward_fnc'], params['discrete_action_space'], 
                     goal_radius=params['goal_radius'], 
                     max_steps_per_episode=params['eval_max_steps_per_episode'], 
@@ -212,7 +212,7 @@ if __name__ == "__main__":
     
     # stop training on reward threshold callback
     stoptraining_cb = StopTrainingOnRewardThreshold(
-        reward_threshold=15, verbose=1)
+        reward_threshold=14.5, verbose=1)
 
     # instantiate eval environment
     # take task_manager from first sim (currently evaluation only provided for single process)
@@ -241,8 +241,8 @@ if __name__ == "__main__":
     # eval_freq: evaluate the agent every eval_freq train timesteps
     eval_cb = EvalCallback(
         eval_env=eval_env,          train_env=env,
-        n_eval_episodes=30,         eval_freq=15000, 
-        log_path=PATHS.get('eval'), best_model_save_path=PATHS.get('model'), 
+        n_eval_episodes=40,         eval_freq=20000, 
+        log_path=PATHS['eval'],     best_model_save_path=PATHS['model'], 
         deterministic=True,         callback_on_eval_end=trainstage_cb,
         callback_on_new_best=stoptraining_cb)
    
@@ -258,7 +258,7 @@ if __name__ == "__main__":
             vf_coef = params['vf_coef'],        max_grad_norm = params['max_grad_norm'], 
             gae_lambda = params['gae_lambda'],  batch_size = params['m_batch_size'], 
             n_epochs = params['n_epochs'],      clip_range = params['clip_range'], 
-            tensorboard_log = PATHS.get('tb'),  verbose = 1
+            tensorboard_log = PATHS['tb'],  verbose = 1
         )
     elif args.agent is not None:
         # predefined agent flag
@@ -270,7 +270,7 @@ if __name__ == "__main__":
                     vf_coef = params['vf_coef'],        max_grad_norm = params['max_grad_norm'], 
                     gae_lambda = params['gae_lambda'],  batch_size = params['m_batch_size'], 
                     n_epochs = params['n_epochs'],      clip_range = params['clip_range'], 
-                    tensorboard_log = PATHS.get('tb'),  verbose = 1
+                    tensorboard_log = PATHS['tb'],  verbose = 1
                 )
 
         elif args.agent == "DRL_LOCAL_PLANNER" or args.agent == "CNN_NAVREP":
@@ -292,13 +292,13 @@ if __name__ == "__main__":
     else:
         # load flag
         if os.path.isfile(
-                os.path.join(PATHS.get('model'), AGENT_NAME + ".zip")):
+                os.path.join(PATHS['model'], AGENT_NAME + ".zip")):
             model = PPO.load(
-                os.path.join(PATHS.get('model'), AGENT_NAME), env)
+                os.path.join(PATHS['model'], AGENT_NAME), env)
         elif os.path.isfile(
-                os.path.join(PATHS.get('model'), "best_model.zip")):
+                os.path.join(PATHS['model'], "best_model.zip")):
             model = PPO.load(
-                os.path.join(PATHS.get('model'), "best_model"), env)
+                os.path.join(PATHS['model'], "best_model"), env)
         update_hyperparam_model(model, PATHS, params, args.n_envs)
 
     # set num of timesteps to be generated
