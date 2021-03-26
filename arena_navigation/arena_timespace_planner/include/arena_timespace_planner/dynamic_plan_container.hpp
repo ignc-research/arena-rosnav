@@ -298,6 +298,7 @@ public:
 
         if(v!=0.0){
             w=(vel(0)*acc(1) - vel(1)*acc(0))/vel.squaredNorm();
+            //w=std::max(w,180*3.14/180);
         }else{
             w=30*3.14/180;
         }
