@@ -33,6 +33,8 @@ The file `nav2.rviz` is different from `nav.rviz` only by two things - the map i
 2. The folder `input` inside of the root folder should be filled by the user before starting the program with the image of the map, for which scenarios have to be designed. <br />
 **Attention:** Do not forget to adjust the name of the new map in the `paint.py` file!
 3. The folder `output` inside of the root folder will be empty at first, but after the file `paint.py` has been run, it will fill with data and images from the painting program, as well as with the subfolder `internal`. As the name says, the data and images from the subfolder will be used for internal use from the files `paint.py` and `parser.py`. The output will be stored in the folder `output` itself. It will contain the generated json file `(new_scenario.json)`, the relevant to the user data such as map resolution etc. `(user_data.txt)` and a screenshot from the generated scenario `(scenario.png)`.
+4. The folder `examples` consists of the saved data after creating different scenarios with the gui. It consists of the `internal` folder, it the parser should be run again and of the json file as well as other usefull data for the user to directly use the scenario as it is.
+5. The folder `media` consists of screenshots and videos for different test rounds to give the user the feeling how a scenario should look like and to prove that the program works correctly.
 
 ### Rules for using the paint program
 1. The first thing to do is to set the number of obstacles, the resolution and the origin of the uploaded map.
