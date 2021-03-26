@@ -60,6 +60,8 @@ python3-setuptools \
 ros-melodic-navigation \
 ros-melodic-teb-local-planner \
 ros-melodic-mpc-local-planner \
+libarmadillo-dev \
+ros-melodic-nlopt \
 ```
 
 #### 1.2. Prepare virtual environment & install python packages
