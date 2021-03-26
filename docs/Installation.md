@@ -105,7 +105,7 @@ pip install pyyaml catkin_pkg netifaces pathlib
 ```
 pip install stable-baselines3
 ```
-* (optional) Install CADRL dependencies (venv always activated!) 
+* Install CADRL dependencies (venv always activated!) 
 ```
 cd $HOME/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/model_based/cadrl_ros
 pip install -r requirements_cadrl.txt
