@@ -1,25 +1,25 @@
 
 ## Try in empty map
-#### 1) Start Simulation
+#### 1) Start Simulation in one terminal
 ```
 workon rosnav
 roslaunch arena_bringup start_arena_flatland.launch
 ```
-#### 2) Start time_space plan manager(fsm:Finite state machine) 
+#### 2) Start time_space plan manager(fsm:Finite state machine) in another terminal
 ```
 workon rosnav
 roslaunch arena_bringup timed_space_planner_fsm.launch
 ```
 
 ## Test in automatic test mode 
-#### 1) Start Simulation
+#### 1) Start Simulation in one terminal
 ```
 workon rosnav
 roslaunch arena_bringup start_arena_flatland.launch map_file:="map1" scenario_file:="eval/obstacle_map1_obs20.json" local_planner:="mpc" disable_scenario:="false"
 ```
 #### 2) just wait 
 (wait all the obstacles are loaded by task generator, in order to wait all topics in ros master are ready)
-#### 3) Start time_space plan manager 
+#### 3) Start time_space plan manager in another terminal
 ```
 workon rosnav
 roslaunch arena_bringup timed_space_planner_fsm.launch
