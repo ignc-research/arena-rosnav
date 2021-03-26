@@ -45,8 +45,8 @@ src/arena-rosnav/arena_bringup/launch/start_arena_flatland.launch
 
 The important parameter that need to set:
 
-* <arg name="update_rate"     default="1000.0"/>
-* <arg name="step_size"       default="0.005"/>
+* "update_rate"     default="1000.0"
+* "step_size"       default="0.005"
 
 ```
 Remark 1: step_size should smaller than 0.01, e.g. 0.005
