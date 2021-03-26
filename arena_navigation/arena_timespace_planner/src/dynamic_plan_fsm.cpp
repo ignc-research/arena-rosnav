@@ -41,7 +41,7 @@ void DynamicReplanFSM::init(ros::NodeHandle &nh)
   	odom_sub_ = public_nh.subscribe("odom", 1, &DynamicReplanFSM::odomCallback, this);
 
     cmd_vel_pub_ =public_nh.advertise<geometry_msgs::Twist>("cmd_vel",1000);
-    subgoal_DRL_pub_  = nh.advertise<geometry_msgs::PoseStamped>("subgoal",10);
+    subgoal_DRL_pub_  = public_nh.advertise<geometry_msgs::PoseStamped>("subgoal",10);
 
     /* visualization */
     vis_goal_pub_ =	        public_nh.advertise<visualization_msgs::Marker>("vis_goal", 20);
