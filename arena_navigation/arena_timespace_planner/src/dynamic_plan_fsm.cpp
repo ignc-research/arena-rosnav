@@ -155,6 +155,10 @@ void DynamicReplanFSM::execFSMCallback(const ros::TimerEvent& e){
                     landmark_wps_= planner_manager_->global_data_.getLandmarks();
                     mid_target_=getNextWaypoint();
 
+                    // reset simple samples and curr index
+                    sample_wps_ = planner_manager_->global_data_.getSamples();
+                    curr_wp_index_=0;
+
                     // visualize global path & landmark
                     cout<<"[Plan Manager]GLOBAL_PLAN Success"<<endl;
                     visualizePath(planner_manager_->global_data_.getGlobalPath(),vis_global_path_pub_);
@@ -372,6 +376,10 @@ void DynamicReplanFSM::updateSubgoalDRLCallback(const ros::TimerEvent &e){
             subgoal_success=getSubgoalTimedAstar(subgoal);
             break;
         }
+        case 2:{
+            subgoal_success=getSubgoalSimpleSample(subgoal);
+            break;
+        }
         /* --------------Others ---------------*/
         default: {
             ROS_ERROR_STREAM("Not valid subgoal mode"<<subgoal_drl_mode_);
@@ -455,14 +463,38 @@ bool DynamicReplanFSM::getSubgoalTimedAstar(Eigen::Vector2d &subgoal){
             }
         }
     }
-    cout<<"global_path.size()"<<global_path.size()<<endl;
-    cout<<"subgoal_id"<<subgoal_id<<endl;
+    //cout<<"global_path.size()"<<global_path.size()<<endl;
+    //cout<<"subgoal_id"<<subgoal_id<<endl;
     if(subgoal_id>0){
         subgoal=global_path[subgoal_id];
         return true;
     }else{
         return false;
     }
+}
+
+bool DynamicReplanFSM::getSubgoalSimpleSample(Eigen::Vector2d &subgoal){
+    // if near goal
+    double dist_to_goal=(odom_pos_-end_pos_).norm();
+    if(dist_to_goal<planning_horizen_){
+        subgoal = end_pos_;
+        return true;
+    }
+    // check if sample_wps is empty
+    if(sample_wps_.empty()){
+        return false;
+    }
+
+    curr_wp_index_=std::min(curr_wp_index_,sample_wps_.size()-1);
+    Eigen::Vector2d wp_pt=sample_wps_[curr_wp_index_];
+    subgoal=wp_pt;
+
+    double dist_to_robot=(odom_pos_-wp_pt).norm();
+    if(dist_to_robot<subgoal_tolerance_){
+        curr_wp_index_++;
+    }
+
+    return true;
 }
 
 

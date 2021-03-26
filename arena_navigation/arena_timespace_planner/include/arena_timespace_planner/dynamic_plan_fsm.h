@@ -40,6 +40,9 @@ private:
     Eigen::Vector2d end_pos_, end_vel_;
 
     std::vector<Eigen::Vector2d> landmark_wps_;
+    std::vector<Eigen::Vector2d> sample_wps_;
+    size_t curr_wp_index_;
+
     Eigen::Vector2d mid_target_;
     //Eigen::Vector2d local_target_;
     TargetTrajData target_traj_data_;
@@ -94,6 +97,7 @@ private:
     Eigen::Vector2d getNextWaypoint();
     bool getSubgoalSpacialHorizon(Eigen::Vector2d &subgoal);
     bool getSubgoalTimedAstar(Eigen::Vector2d &subgoal);
+    bool getSubgoalSimpleSample(Eigen::Vector2d &subgoal);
 
 
     /* helper functions */

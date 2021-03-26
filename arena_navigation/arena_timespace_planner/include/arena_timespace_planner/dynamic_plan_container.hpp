@@ -29,6 +29,8 @@ private:
     double angle_thresh_=20*PI/180;        // [rad]
     double min_angle_vel_=5*PI/180;        // [rad]
     double max_angle_vel_=360*PI/180;      // [rad]
+    
+    double dist_wp_ = 3.0;                 // [meter] // for simple wp sampler
 
     size_t visited_landmark_cnt_;
     double subgoal_tolerance_;
@@ -59,6 +61,7 @@ private:
     void resetLandmarks()
     {
         global_path_.clear();
+        wp_samples_.clear(); 
         landmark_points_.clear();
 
         double angle_sum=0;
@@ -69,6 +72,7 @@ private:
 
         // init last_landmark pos
         Eigen::Vector2d last_landmark=start_pos_;
+        Eigen::Vector2d last_wp=start_pos_;
         
         // init id
         int id=0;
@@ -81,6 +85,11 @@ private:
             // add to global path
             Eigen::Vector2d pos_t = getPosition(t);
             global_path_.push_back(pos_t);
+            //for simple wp sampler
+            if((pos_t-last_wp).norm()>dist_wp_){
+                wp_samples_.push_back(pos_t);
+                last_wp=pos_t;
+            }    
 
             // get angular vel
             angle_vel=calculateRotationVelocity(getVelocity(t),getAcceleration(t));
@@ -147,6 +156,7 @@ private:
         landmark_points_.push_back(LandmarkPoint(end_pos_,id));
 
         global_path_.push_back(end_pos_);
+        wp_samples_.push_back(end_pos_);
         // reset landmark counter
         visited_landmark_cnt_=0;
     }
@@ -162,6 +172,9 @@ public:
 
     std::vector<Eigen::Vector2d> global_path_;
     std::vector<LandmarkPoint> landmark_points_;
+
+    std::vector<Eigen::Vector2d> wp_samples_;
+    
 
     GlobalData(){};
     ~GlobalData(){};
@@ -206,6 +219,11 @@ public:
         }
         return landmark_pts;
     }
+
+    std::vector<Eigen::Vector2d> getSamples(){
+        return wp_samples_;
+    }
+
 };
 
 class MidData{
@@ -257,6 +275,8 @@ public:
     Eigen::Vector2d start_pos_;
     UniformBspline pos_traj_, vel_traj_, acc_traj_, jerk_traj_;
     std::vector<Eigen::Vector2d> local_path_;
+    
+    
 
     TargetTrajData(){flag_is_empty=true;}
     ~TargetTrajData(){}
@@ -274,11 +294,14 @@ public:
         duration_ = pos_traj_.getTimeSum();
 
         local_path_.clear();
+        
         double tm_start,tm_end;
         pos_traj_.getTimeSpan(tm_start, tm_end);
         for(double t = tm_start; t < tm_end; t += 0.1){
-            local_path_.push_back(pos_traj_.evaluateDeBoor(t));            
+            Eigen::Vector2d pt=pos_traj_.evaluateDeBoor(t);
+            local_path_.push_back(pt); 
         }
+
     }
 
     std::vector<Eigen::Vector2d> getLocalPath()
