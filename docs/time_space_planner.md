@@ -27,7 +27,7 @@ The paramater yaml file is located at:
 src/arena-rosnav/arena_bringup/launch/plan_fsm_param.yaml
 ```
 
-the only parameter that are relavant to DRL:
+The only parameter that are relavant to DRL:
 * use_drl:
   *  true:  cmd_vel is published by drl or by mpc planners
   *  false: cmd_vel is published by traj tracker in plan_fsm
@@ -36,3 +36,20 @@ the only parameter that are relavant to DRL:
   * 1:  timed_space
   * 2:  simple_sample
 
+
+## start flatland launch file simulator parameter
+The start_arena_flatland  file is located at:
+```
+src/arena-rosnav/arena_bringup/launch/start_arena_flatland.launch
+```
+
+The important parameter that need to set:
+
+* <arg name="update_rate"     default="1000.0"/>
+* <arg name="step_size"       default="0.005"/>
+
+```
+Remark 1: step_size should smaller than 0.01, e.g. 0.005
+Remark 2: update_rate should be compatible with step_size and your computer performance
+
+```
