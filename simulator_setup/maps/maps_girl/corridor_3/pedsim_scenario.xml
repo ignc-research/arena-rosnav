@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scenario>
+
+    <waypoint id="robot_goal" x="22" y="27" r="2"/> -->
+    <waypoint id="robot_start" x="4" y="4" r="2"/>
+
+
+    <!--Robot Agents-->
+    <agent x="8" y="8" n="1" dx="0" dy="0" type="2">
+        <addwaypoint id="robot_start"/>
+        <!-- <addwaypoint id="robot_goal"/> -->
+    </agent>
+</scenario>
