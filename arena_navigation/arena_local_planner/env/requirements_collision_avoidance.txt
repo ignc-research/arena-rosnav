@@ -14,8 +14,8 @@ catkin-pkg==0.4.23
 certifi==2020.12.5
 chardet==4.0.0
 cloudpickle==1.6.0
-controller-manager==0.18.3
-controller-manager-msgs==0.18.3
+controller-manager
+controller-manager-msgs
 cv-bridge==1.13.0
 cycler==0.10.0
 dataclasses==0.8
@@ -166,7 +166,7 @@ tf2-ros==0.6.5
 topic-tools==1.14.10
 torch==1.7.1
 typing-extensions==3.7.4.3
-urdfdom-py==0.4.5
+urdfdom-py
 urllib3==1.26.2
 Werkzeug==1.0.1
 wrapt==1.12.1
