@@ -40,7 +40,7 @@
     <!-- <arg name="update_rate"     default="1000.0"/>
     <arg name="step_size"       default="0.005"/> -->
 
-    <arg name="update_rate"     default="1000.0"/>
+    <arg name="update_rate"     default="2000.0"/>
     <arg name="step_size"       default="0.005"/>
 
     <arg name="show_viz"        default="true"/>
