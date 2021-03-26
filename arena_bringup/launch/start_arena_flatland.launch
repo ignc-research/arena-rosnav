@@ -11,11 +11,15 @@
   <arg name="reset"   default="true"/>
 
   <!-- Simulation update -->
-  <arg name="step_size" default="0.025"/>
-  <arg name="update_rate" default="100"/>
+  <arg name="step_size" default="0.01"/>
+  <arg name="update_rate" default="300"/>
   <param name="step_size" value="$(arg step_size)"/>
   <param name="update_rate" value="$(arg update_rate)"/>
-  
+
+  <!-- DRL action frequency -->
+  <arg name="action_frequency" default="10"/>
+  <param name="action_frequency" value="$(arg action_frequency)"/>
+
   <!-- Map parameters -->
   <arg name="map_file"        default="map_empty"/>
   <arg name="map_path"        default="$(find simulator_setup)/maps/$(arg map_file)/map.yaml"/>

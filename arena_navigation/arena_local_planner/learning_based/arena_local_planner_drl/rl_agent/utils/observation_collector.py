@@ -14,6 +14,7 @@ from geometry_msgs.msg import Pose2D,PoseStamped, PoseWithCovarianceStamped
 from geometry_msgs.msg import Twist
 from arena_plan_msgs.msg import RobotState, RobotStateStamped
 from std_msgs.msg import Bool
+from nav_msgs.msg import Odometry
 
 # services
 from flatland_msgs.srv import StepWorld,StepWorldRequest
@@ -67,7 +68,7 @@ class ObservationCollector():
             'scan', LaserScan, self.callback_scan, tcp_nodelay=True)
 
         self._robot_state_sub = rospy.Subscriber(
-            'plan_manager/robot_state', RobotStateStamped, self.callback_robot_state, tcp_nodelay=True)
+            'odom', Odometry, self.callback_robot_state, tcp_nodelay=True)
         
         # topic subscriber: subgoal
         self._subgoal_sub = rospy.Subscriber(
@@ -195,10 +196,9 @@ class ObservationCollector():
         msg_LaserScan.ranges = scan
         return msg_LaserScan
     
-    def process_robot_state_msg(self,msg_RobotStateStamped):
-        state=msg_RobotStateStamped.state
-        pose3d=state.pose
-        twist=state.twist
+    def process_robot_state_msg(self, msg_Odometry):
+        pose3d = msg_Odometry.pose.pose
+        twist = msg_Odometry.twist.twist
         return self.pose3D_to_pose2D(pose3d), twist
         
     def process_pose_msg(self,msg_PoseWithCovarianceStamped):

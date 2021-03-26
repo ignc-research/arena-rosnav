@@ -17,7 +17,7 @@ class ActionPublisher():
         self._update_rate = rospy.get_param("/update_rate")
         # real time second in sim time
         self._real_second_in_sim = self._step_size * self._update_rate
-        self._action_publish_rate = 10
+        self._action_publish_rate = rospy.get_param("/action_frequency")
 
         # apply rate in sim time
         rate = (1/self._action_publish_rate)/self._real_second_in_sim
