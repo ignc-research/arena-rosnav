@@ -301,7 +301,7 @@ void DynamicReplanFSM::checkCollisionCallback(const ros::TimerEvent& e) {
     Eigen::Vector2d p_curr = target_traj_data_.pos_traj_.evaluateDeBoorT(t_curr);
     //const double CLEARANCE = 0.5;
     constexpr double time_step = 0.01;
-    double t_2_3 = target_traj_data_.duration_ * 2 / 3;
+    double t_2_3 = 2.0;//target_traj_data_.duration_ * 2 / 3;
 
     bool occ = false;
     for (double t = t_curr; t < target_traj_data_.duration_; t += time_step){
@@ -309,7 +309,7 @@ void DynamicReplanFSM::checkCollisionCallback(const ros::TimerEvent& e) {
         if (t_curr < t_2_3 && t >= t_2_3) // If t_cur < t_2_3, only the first 2/3 partition of the trajectory is considered valid and will get checked.
             break;
 
-        occ = map->getFusedInflateOccupancy(target_traj_data_.pos_traj_.evaluateDeBoorT(t));
+        occ = map->getFusedDynamicInflateOccupancy(target_traj_data_.pos_traj_.evaluateDeBoorT(t));
         
         if(occ==true){
             if(planFromCurrentTraj()){
@@ -351,7 +351,10 @@ void DynamicReplanFSM::trackTrajCallback(const ros::TimerEvent &e){
 }
 
 void DynamicReplanFSM::updateSubgoalDRLCallback(const ros::TimerEvent &e){
+    // if there's no target_traj_data_, subgoal cannot be calculated
+    if(target_traj_data_.flag_is_empty){return;}
     
+    // get subgoal
     bool subgoal_success=false;
     Eigen::Vector2d subgoal;
     switch (subgoal_drl_mode_) {
@@ -446,7 +449,8 @@ bool DynamicReplanFSM::getSubgoalTimedAstar(Eigen::Vector2d &subgoal){
             }
         }
     }
-    
+    cout<<"global_path.size()"<<global_path.size()<<endl;
+    cout<<"subgoal_id"<<subgoal_id<<endl;
     if(subgoal_id>0){
         subgoal=global_path[subgoal_id];
         return true;
