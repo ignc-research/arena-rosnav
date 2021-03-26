@@ -123,7 +123,7 @@ git clone https://github.com/ignc-research/arena-rosnav
 cd arena-rosnav && rosws update
 source $HOME/.zshrc
 cd ../.. 
-catkin_make -DPYTHON_EXECUTABLE=/usr/bin/python3
+catkin_make -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=/usr/bin/python3
 source devel/setup.zsh
 ````
 Note: if you use bash replace zsh with bash in the commands
