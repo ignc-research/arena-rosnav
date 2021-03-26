@@ -15,6 +15,7 @@ from std_msgs.msg import Empty
 import rospy
 import rospkg
 import shutil
+import warnings
 from .utils import generate_freespace_indices, get_random_pos_on_map
 
 
@@ -509,8 +510,8 @@ class ObstaclesManager:
         response = self._srv_delete_model(srv_request)
 
         if not response.success:
-            raise rospy.ServiceException(
-                f"failed to remove the object with the name: {name}! ")
+            warnings.warn(
+                f"failed to remove the object with the name: {name}!")
         else:
             rospy.logdebug(f"Removed the obstacle with the name {name}")
 

@@ -10,10 +10,13 @@
   <arg name="scenario_file"   default="empty_map.json"/>
   <arg name="reset"   default="true"/>
 
-
-
+  <!-- Simulation update -->
+  <arg name="step_size" default="0.025"/>
+  <arg name="update_rate" default="100"/>
+  <param name="step_size" value="$(arg step_size)"/>
+  <param name="update_rate" value="$(arg update_rate)"/>
+  
   <!-- Map parameters -->
-
   <arg name="map_file"        default="map_empty"/>
   <arg name="map_path"        default="$(find simulator_setup)/maps/$(arg map_file)/map.yaml"/>
   <arg name="world_path"      default="$(find simulator_setup)/maps/$(arg map_file)/map.world.yaml"/>
@@ -40,8 +43,8 @@
     <!-- <arg name="update_rate"     default="1000.0"/>
     <arg name="step_size"       default="0.005"/> -->
 
-    <arg name="update_rate"     default="1000.0"/>
-    <arg name="step_size"       default="0.005"/>
+    <arg name="update_rate"     default="250.0"/>
+    <arg name="step_size"       default="0.01"/>
 
     <arg name="show_viz"        default="true"/>
 

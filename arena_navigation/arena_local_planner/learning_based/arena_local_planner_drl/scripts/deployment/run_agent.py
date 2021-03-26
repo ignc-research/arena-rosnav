@@ -22,29 +22,40 @@ if __name__ == "__main__":
     # get paths
     dir = rospkg.RosPack().get_path('arena_local_planner_drl')
     PATHS={
-        'model': os.path.join(dir, 'agents', args.load),
-        'robot_setting' : os.path.join(rospkg.RosPack().get_path('simulator_setup'), 'robot', 'myrobot.model.yaml'),
-        'robot_as' : os.path.join(rospkg.RosPack().get_path('arena_local_planner_drl'), 'configs', 'default_settings.yaml'),
-        'scenarios_json_path' : os.path.join(rospkg.RosPack().get_path('simulator_setup'), 'scenarios', 'eval', args.scenario+'.json')
+        'model': 
+        os.path.join(dir, 'agents', args.load),
+        'vec_norm': 
+        os.path.join(dir, 'agents', args.load, 'vec_normalize.pkl'),
+        'robot_setting': 
+        os.path.join(rospkg.RosPack().get_path('simulator_setup'), 'robot', 'myrobot.model.yaml'),
+        'robot_as': 
+        os.path.join(rospkg.RosPack().get_path('arena_local_planner_drl'), 'configs', 'default_settings.yaml'),
+        'scenarios_json_path': 
+        os.path.join(rospkg.RosPack().get_path('simulator_setup'), 'scenarios', 'eval', args.scenario+'.json')
     }
-    assert os.path.isfile(
-        os.path.join(PATHS['model'], 'best_model.zip')), "No model file found in %s" % PATHS['model']
-    assert os.path.isfile(
-        PATHS['scenarios_json_path']), "No scenario file named %s" % PATHS['scenarios_json_path']
+    assert os.path.isfile(os.path.join(PATHS['model'], 'best_model.zip')
+    ), "No model file found in %s" % PATHS['model']
+    assert os.path.isfile(PATHS['scenarios_json_path']
+    ), "No scenario file named %s" % PATHS['scenarios_json_path']
 
     # initialize hyperparams
-    params = load_hyperparameters_json(agent_hyperparams, PATHS)
+    params = load_hyperparameters_json(
+        agent_hyperparams, PATHS)
 
     print("START RUNNING AGENT:    %s" % params['agent_name'])
     print_hyperparameters(params)
 
     # initialize task manager
-    task_manager = get_predefined_task(mode='ScenarioTask', PATHS=PATHS)
+    task_manager = get_predefined_task(
+        mode='ScenarioTask', PATHS=PATHS)
+
     # initialize gym env
     env = DummyVecEnv([lambda: FlatlandEnv(
-        task_manager, PATHS.get('robot_setting'), PATHS.get('robot_as'), params['reward_fnc'], params['discrete_action_space'], goal_radius=0.50, max_steps_per_episode=100000)])
+        task_manager, PATHS.get('robot_setting'), PATHS.get('robot_as'), params['reward_fnc'], params['discrete_action_space'], goal_radius=0.25, max_steps_per_episode=100000)])
     if params['normalize']:
-        env = VecNormalize(env, training=False, norm_obs=True, norm_reward=False, clip_reward=15)
+        assert os.path.isfile(PATHS['vec_norm']
+        ), "Couldn't find VecNormalize pickle, without it agent performance will be strongly altered"
+        env = VecNormalize.load(PATHS['vec_norm'], env)
 
     # load agent
     agent = PPO.load(os.path.join(PATHS['model'], "best_model.zip"), env)
@@ -66,7 +77,8 @@ if __name__ == "__main__":
 
         # clip action
         if not params['discrete_action_space']:
-            action = np.maximum(np.minimum(agent.action_space.high, action), agent.action_space.low)
+            action = np.maximum(
+                np.minimum(agent.action_space.high, action), agent.action_space.low)
         
         # apply action
         obs, rewards, done, info = env.step(action)
@@ -86,7 +98,6 @@ if __name__ == "__main__":
             env.reset()
             first_obs = True
 
-        time.sleep(0.0001)
         if rospy.is_shutdown():
             print('shutdown')
             break
