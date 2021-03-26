@@ -2,32 +2,36 @@
 ## Try in empty map
 #### 1) Start Simulation
 ```
+workon rosnav
 roslaunch arena_bringup start_arena_flatland.launch
 ```
 #### 2) Start time_space plan manager(fsm:Finite state machine) 
 ```
+workon rosnav
 roslaunch arena_bringup timed_space_planner_fsm.launch
 ```
 
 ## Test in automatic test mode 
 #### 1) Start Simulation
 ```
+workon rosnav
 roslaunch arena_bringup start_arena_flatland.launch map_file:="map1" scenario_file:="eval/obstacle_map1_obs20.json" local_planner:="mpc" disable_scenario:="false"
 ```
 #### 2) just wait 
 (wait all the obstacles are loaded by task generator, in order to wait all topics in ros master are ready)
 #### 3) Start time_space plan manager 
 ```
+workon rosnav
 roslaunch arena_bringup timed_space_planner_fsm.launch
 ```
 
-## Parameter.yaml for plan manager(fsm:Finite state machine) 
-The paramater yaml file is located at:
+## Setting parameter for plan manager(fsm:Finite state machine) 
+Open the parameter yaml file with the following code:
 ```
-src/arena-rosnav/arena_bringup/launch/plan_fsm_param.yaml
+code -r $HOME/catkin_ws/src/arena-rosnav/arena_bringup/launch/plan_fsm_param.yaml
 ```
 
-The only parameter that are relavant to DRL:
+The only parameter that are relevant to DRL: (line 1-3)
 * use_drl:
   *  true:  cmd_vel is published by drl or by mpc planners
   *  false: cmd_vel is published by traj tracker in plan_fsm
@@ -37,13 +41,13 @@ The only parameter that are relavant to DRL:
   * 2:  simple_sample
 
 
-## start flatland launch file simulator parameter
-The start_arena_flatland  file is located at:
+## Setting parameter for start flatland launch file simulator
+Open the start_arena_flatland file with the following code:
 ```
-src/arena-rosnav/arena_bringup/launch/start_arena_flatland.launch
+code -r $HOME/catkin_ws/src/arena-rosnav/arena_bringup/launch/start_arena_flatland.launch
 ```
 
-The important parameter that need to set:
+The important parameter that need to be set: (line 43-44)
 
 * "update_rate"     default="1000.0"
 * "step_size"       default="0.005"
