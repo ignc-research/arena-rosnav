@@ -26,7 +26,7 @@ roslaunch arena_bringup timed_space_planner_fsm.launch
 ```
 
 ## Setting parameter for plan manager(fsm:Finite state machine) 
-Open the parameter yaml file with the following code:
+Open the parameter yaml file with the following code in VSC:
 ```
 code -r $HOME/catkin_ws/src/arena-rosnav/arena_bringup/launch/plan_fsm_param.yaml
 ```
@@ -42,7 +42,7 @@ The only parameter that are relevant to DRL: (line 1-3)
 
 
 ## Setting parameter for start flatland launch file simulator
-Open the start_arena_flatland file with the following code:
+Open the start_arena_flatland file with the following code in VSC:
 ```
 code -r $HOME/catkin_ws/src/arena-rosnav/arena_bringup/launch/start_arena_flatland.launch
 ```
