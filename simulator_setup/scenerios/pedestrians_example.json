@@ -2,15 +2,14 @@
     "scenerios": [
         {
             "scene_name": "scenario_1",
-            "repeats": 5,
+            "repeats": 10,
             "dynamic_obstacles": {
                 "dynamic_obs_0": {
                     "type": "adult",
                     "obstacle_force_factor": 2.0,
-                    "desire_force_factor": 10.0,
+                    "desire_force_factor": 5.0,
                     "amount": 5,
                     "chatting_probability": 0.001,
-                    "obstacle_radius": 0.3,
                     "linear_velocity": 2.0,
                     "start_pos": [
                         2,
@@ -24,31 +23,30 @@
                         [1, 9, 0]
                     ],
                     "is_waypoint_relative": true,
-                    "mode": "random",
+                    "mode": "loop",
                     "triggers": [
-                        "watcher_0"
                     ]
                 },
                 "dynamic_obs_1": {
-                    "type": "elder",
+                    "type": "adult",
                     "obstacle_force_factor": 2.0,
-                    "desire_force_factor": 1.0,
+                    "desire_force_factor": 3.0,
                     "amount": 1,
                     "chatting_probability": 0.3,
                     "obstacle_radius": 0.3,
-                    "linear_velocity": 0.2,
+                    "linear_velocity": 1.0,
                     "start_pos": [
                         0,
                         0,
                         0
                     ],
                     "waypoints": [
-                        [-1, -1, 0]
+                        [10, 10, 0],
+                        [0, 0, 0]
                     ],
                     "is_waypoint_relative": true,
                     "mode": "loop",
                     "triggers": [
-                        "watcher_0"
                     ]
                 }
             },
