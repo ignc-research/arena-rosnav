@@ -351,9 +351,13 @@ void DynamicReplanFSM::trackTrajCallback(const ros::TimerEvent &e){
 }
 
 void DynamicReplanFSM::updateSubgoalDRLCallback(const ros::TimerEvent &e){
+    //if there's no goal
+    if(!have_goal_) return;
+
     // if there's no target_traj_data_, subgoal cannot be calculated
     if(target_traj_data_.flag_is_empty){return;}
     
+    //if (exec_state_ == WAIT_GOAL || exec_state_ == INIT)
     // get subgoal
     bool subgoal_success=false;
     Eigen::Vector2d subgoal;
@@ -388,7 +392,7 @@ void DynamicReplanFSM::updateSubgoalDRLCallback(const ros::TimerEvent &e){
         point_set.push_back(subgoal);
         visualizePoints(point_set,0.8,Eigen::Vector4d(1, 0, 1, 1.0),vis_subgoal_drl_pub_);
     }else{
-        changeFSMExecState(GEN_NEW_GLOBAL, "SUBGOAL");
+        //changeFSMExecState(GEN_NEW_GLOBAL, "SUBGOAL");
     }
         
 }
@@ -421,6 +425,8 @@ bool DynamicReplanFSM::getSubgoalSpacialHorizon(Eigen::Vector2d &subgoal){
         subgoal=global_path[subgoal_id];
         return true;
     }else{
+        // because spacial horizon based on global path, so it needs global replan; for timed_astar it doesn't need
+        changeFSMExecState(GEN_NEW_GLOBAL, "SUBGOAL");
         return false;
     }
 
