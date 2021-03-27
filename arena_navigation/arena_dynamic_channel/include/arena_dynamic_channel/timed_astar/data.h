@@ -59,7 +59,10 @@ struct TimedAstarParam{
     
     // time 
     double TIME_HORIZON;
-    size_t TIME_SLICE_NUM; 
+    size_t TIME_SLICE_NUM;
+
+    // sensor range
+    double SENSOR_RANGE; 
 };
 
 /* build in hyperpara */

@@ -26,8 +26,8 @@ bool solveRoot(double a0, double a1, double a2, double &x1, double &x2){
 			x1 = std::max(T_vals(1).real(),0.0);   // x_min
 			x2 = std::max(T_vals(0).real(),0.0);   // x_max
             is_valid=true; 
-            std::cout<<"x_min:"<<x1<<std::endl;
-            std::cout<<"x_max:"<<x2<<std::endl;
+            //std::cout<<"x_min:"<<x1<<std::endl;
+            //std::cout<<"x_max:"<<x2<<std::endl;
 		}else{
 			// if t1<0,t2<0 or t1=t2=nan
 			x1=x2=-1.0;
@@ -240,6 +240,7 @@ bool TimedAstar::TimeAstarSearch(const std::vector<double>& coords,
     start_pos_  = robot;
     goal_pos_   = goal;
     time_origin_= time_start;
+    reached_goal_=false;
     
 
     // init time_graphs
@@ -270,7 +271,7 @@ bool TimedAstar::TimeAstarSearch(const std::vector<double>& coords,
     path_node_pool_[0]=start_node;
     use_node_num_ += 1;
 
-    
+    ros::Time t_start=ros::Time::now();
 
     // begin astar searching
     //std::cout<<"[time astar search]: begin while loop search---------------"<<std::endl;
@@ -286,6 +287,7 @@ bool TimedAstar::TimeAstarSearch(const std::vector<double>& coords,
         if (dist_to_goal < GOAL_RADIUS_) 
         {
             goal_reached_node = curr_node;
+            reached_goal_=true;
             break;
         }
         
@@ -294,7 +296,15 @@ bool TimedAstar::TimeAstarSearch(const std::vector<double>& coords,
             nearest_dist = dist_to_goal;
             goal_nearest_node = curr_node;
         }
-         
+
+        // // computation time limit reached
+        // if((ros::Time::now()-t_start).toSec()<0.5){
+        //     ROS_WARN("[Timed_astar] time limited reached, use goal nearest node ");
+        //     break;
+        // }
+
+        
+
         // put it into closed set
         open_list_.pop();
         curr_node->node_state = PathNode::CLOSEDSET;
@@ -401,7 +411,6 @@ bool TimedAstar::TimeAstarSearch(const std::vector<double>& coords,
     return true;
 }
 
-
 double TimedAstar::computeCollisionTime(const Vec2d &p_ir, const Vec2d &v_ir, const double &duration){
     double a2,a1,a0;
     a2   = dot(v_ir,v_ir);
@@ -431,23 +440,25 @@ double TimedAstar::computeCollisionTime(const Vec2d &p_ir, const Vec2d &v_ir, co
     return time_to_collide;
 }
 
-bool TimedAstar::checkCollision(const PathNodePtr &curr_node, PathNodePtr &next_node, Graph *graph_t, double & dist_to_collid, double & time_to_collid)
-{   
-    // new direction 
+void TimedAstar::setNeighborNodeActionDuration(const PathNodePtr &curr_node, PathNodePtr &next_node){
+    // compute heading for next_node 
     next_node->dir   =  (next_node->pos-curr_node->pos).angle();
-    
-    // check rotation velocity direction
-    double delta_dir = next_node->dir - curr_node->dir;
-    if(delta_dir>PI || (delta_dir<0 && delta_dir>- PI)){
+
+    // compute difference of heading & w direction
+    double diff_dir = next_node->dir - curr_node->dir;
+    if(diff_dir>PI || (diff_dir<0 && diff_dir>- PI)){
         next_node->w_in= -next_node->w_in;
     }
 
-    // calculate durations
+    // compute duration
     next_node->dur_w = std::abs((next_node->dir - curr_node->dir)/next_node->w_in);
     next_node->dur_v = std::abs((next_node->pos - curr_node->pos).length()/next_node->v_in);
+    
+}
 
-    
-    
+bool TimedAstar::checkCollisionFree(const PathNodePtr &curr_node, PathNodePtr &next_node, Graph *graph_t, double & dist_to_collid, double & time_to_collid)
+{   
+
     // test collision constraints
     Vec2d p_r =curr_node->pos;
     Vec2d v_r =Vec2d(next_node->v_in *cos(next_node->dir),curr_node->v_in*sin(next_node->dir));
@@ -466,11 +477,13 @@ bool TimedAstar::checkCollision(const PathNodePtr &curr_node, PathNodePtr &next_
         
         double time_to_collide_w,time_to_collide_v;
         Vec2d p_ir, v_ir;
+        
         //check collision in w state
         p_ir = p_i - p_r;
         v_ir = v_i ;
         time_to_collide_w=computeCollisionTime(p_ir,v_ir,next_node->dur_w);
         if(time_to_collide_w < next_node->dur_w){
+            // collide could happen
             time_to_collid=0;
             dist_to_collid=0;
             return false;
@@ -488,6 +501,7 @@ bool TimedAstar::checkCollision(const PathNodePtr &curr_node, PathNodePtr &next_
         time_to_collide_v=computeCollisionTime(p_ir,v_ir,next_node->dur_v);
         if(time_to_collide_v < next_node->dur_v){
             if(time_to_collide_v<2.0){
+                // collide could happen
                 time_to_collid=0;
                 dist_to_collid=0;
                 return false;
@@ -504,6 +518,7 @@ bool TimedAstar::checkCollision(const PathNodePtr &curr_node, PathNodePtr &next_
             min_dist_to_collide = time_to_collide_v*v_ir.length();
         }
     }
+
     time_to_collid=min_time_to_collide;
     dist_to_collid=min_dist_to_collide;
     return true;
@@ -513,25 +528,30 @@ bool TimedAstar::getNeighborNodes(PathNodePtr &curr_node, std::vector<PathNodePt
     // init neighbor_ptr_set & edge_cost_set
     neighbor_ptr_set.clear();
     edge_cost_set.clear();
-    std::vector<Vec2d> samples;
+    std::vector<Vec2d> sample_set;
       
+    // check if reached time horizon
+    bool reached_time_horizon=false;
+    if(curr_node->sid >= SLICE_NUM_-1){
+        reached_time_horizon=true;
+    }
+
     // get time_graph at time sid+1
-    size_t slice_id_plan=std::min(curr_node->sid+1,SLICE_NUM_-1);
-    auto graph_t = timed_graph_[slice_id_plan].get();
+    size_t curr_slice_id=std::min(curr_node->sid+1,SLICE_NUM_-1);
+    auto graph_t = timed_graph_[curr_slice_id].get();
 
     // find triangle id on time_graph[t], where current node is in
     auto curr_eid = dl::locateCurrentFace(graph_t, curr_node->pos.x, curr_node->pos.y);
     auto goal_eid = dl::locateCurrentFace(graph_t, goal_pos_.x, goal_pos_.y);
     double curr_goal_diff = (curr_node->pos - goal_pos_).length();
     
-    samples.push_back(goal_pos_);
+    // add goal into sample_set
+    sample_set.push_back(goal_pos_);
+
+    // search for other samples on timed_graph
     if(floor(curr_eid / 3.0)==floor(goal_eid / 3.0) || curr_goal_diff<SAFE_DIST_ )//
     {   // if in same triangle or near to the goal 
-        
-        
         std::cout<<"GOAL is in same triangle"<<std::endl;
-        
-
     }else{
         // find 3 vertice of current triangle
         std::vector<NodePtr> vertices;
@@ -546,7 +566,7 @@ bool TimedAstar::getNeighborNodes(PathNodePtr &curr_node, std::vector<PathNodePt
         // sample points on triangle edge
         size_t k_sample=NUM_SAMPLE_EDGE_;;
         if(iter_num_==1){
-            // first step need more samples to guarantee the solution
+            // first step need more sample_set to guarantee the solution
             k_sample=3*NUM_SAMPLE_EDGE_;
         }
         for(size_t i=0;i<vertices.size();++i){
@@ -554,53 +574,50 @@ bool TimedAstar::getNeighborNodes(PathNodePtr &curr_node, std::vector<PathNodePt
             //double height=getDistPointToLine(curr_node->pos,vertices[i]->position,vertices[j]->position);
             double length= (vertices[i]->position-vertices[j]->position).length();
             
+            // if the edge(gate) not big enough to go through, pass it
             if(length< SAFE_DIST_) continue;
             
             //add goal directed point
             Vec2d inter_pt;
             bool have_inter_pt=getTwoLineIntersection(vertices[i]->position,vertices[j]->position,curr_node->pos,goal_pos_,inter_pt);
             if(have_inter_pt){
-                samples.push_back(inter_pt);
+                sample_set.push_back(inter_pt);
             }
+
             // add uniform sampled points
             for(size_t k=1;k<=k_sample;k++)
             {
                 Vec2d sample;
                 double a =double(k)/double(k_sample+1);
                 sample=vertices[i]->position * (1-a)+ vertices[j]->position * a;
-                samples.push_back(sample);
+                sample_set.push_back(sample);
             }
         }
-
-        // check safety for the samples
-        if(samples.empty()){
-            return false;
-        }
-    
     }
     
-    for(size_t i=0;i<samples.size();i++)
+    // check safety for the sample_set
+    for(size_t i=0;i<sample_set.size();i++)
     {   
         for(size_t action_id=0; action_id<action_v_set_.size();++action_id)
         {   
             
             // init candidate neighbor
             PathNodePtr next_node=std::make_shared<PathNode>();
-            next_node->pos=samples[i];
-            //next_node->vel=curr_node->v_in;
+            next_node->pos=sample_set[i];
             next_node->w_in=action_w_set_[0];
             next_node->v_in=action_v_set_[action_id];
-  
+            // set action duration
+            setNeighborNodeActionDuration(curr_node,next_node );
+            
+            // check if collision free within action trajectory duration
             double dist_to_potential_collid, time_to_potential_collid;
-            bool no_collision=checkCollision(curr_node,next_node,graph_t,dist_to_potential_collid,time_to_potential_collid);
+            bool no_collision=checkCollisionFree(curr_node,next_node,graph_t,dist_to_potential_collid,time_to_potential_collid);
             
             //no_collision=true;
-            if(no_collision)
+            if(no_collision || reached_time_horizon)
             {   
-
                 //calculate edge cost
-                double k;
-                k=1.0;
+                double k =1.0;
                 double edge_cost =next_node->dur_v+ k*next_node->dur_w;
 
                 // pushback node & edge cost
@@ -652,14 +669,18 @@ std::vector<Eigen::Vector2d> TimedAstar::getPath(){
 std::vector<Eigen::Vector2d> TimedAstar::getTrajectory(double ts, double local_time_horizon){
     std::vector<Eigen::Vector2d> point_set;
     double total_time=0.0;
+
+    // add reachable part of the trajecotry
     for(size_t i=0;i<final_path_nodes_.size()-1;++i){
         PathNodePtr curr_node=final_path_nodes_[i];
         PathNodePtr next_node=final_path_nodes_[i+1];
         
         double t_curr=0;
+        // get avg velocity of the robot (accounting for rotation & linear time )
         Vec2d v_robot =Vec2d(next_node->v_in *cos(next_node->dir),next_node->v_in*sin(next_node->dir));
-        v_robot=v_robot*next_node->dur_v/(next_node->dur_v+next_node->dur_w);
-        // first
+        v_robot = v_robot * next_node->dur_v/(next_node->dur_v+next_node->dur_w);
+        
+        // add first pos of the state trajectory from curr_node to next_node
         Vec2d pos_curr  =curr_node->pos;
         point_set.push_back(Eigen::Vector2d(pos_curr.x,pos_curr.y));
         //still & rotate
@@ -673,11 +694,13 @@ std::vector<Eigen::Vector2d> TimedAstar::getTrajectory(double ts, double local_t
         //     if(total_time>local_time_horizon) return point_set;
         // }
         // run straight
+        
+        // add poses along the straight segement of the state trajectory from curr_node to next_node
         t_curr=0.0;
         while(t_curr < next_node->dur_v-0.00001*next_node->dur_w){
             pos_curr = pos_curr + v_robot * ts;
-            std::cout<<" ******curr time:"<<total_time<<std::endl;
-            std::cout<<" ******node posv:"<<pos_curr.x <<"   "<<pos_curr.y<<std::endl;
+            //std::cout<<" ******curr time:"<<total_time<<std::endl;
+            //std::cout<<" ******node posv:"<<pos_curr.x <<"   "<<pos_curr.y<<std::endl;
             point_set.push_back(Eigen::Vector2d(pos_curr.x,pos_curr.y));
             t_curr=t_curr + ts;
             total_time=total_time+ts;
@@ -685,7 +708,12 @@ std::vector<Eigen::Vector2d> TimedAstar::getTrajectory(double ts, double local_t
         }
     }
     
-    // final part of trajectory
+    if(!reached_goal_){
+        // if the path to the goal is blocked, because of obstacle or run out of time
+        return point_set;
+    }
+
+    // add final part of trajectory
     PathNodePtr last_node=final_path_nodes_[final_path_nodes_.size()-1];
     double dist_to_goal=(last_node->pos - goal_pos_).length();
     if(dist_to_goal > GOAL_RADIUS_){
@@ -695,8 +723,8 @@ std::vector<Eigen::Vector2d> TimedAstar::getTrajectory(double ts, double local_t
         Vec2d pos_curr=last_node->pos;
         while(t>0){
             pos_curr = pos_curr + v_robot* ts;
-            std::cout<<" ******curr time:"<<total_time<<std::endl;
-            std::cout<<" ******node pos last:"<<pos_curr.x <<"   "<<pos_curr.y<<std::endl;
+            //std::cout<<" ******curr time:"<<total_time<<std::endl;
+            //std::cout<<" ******node pos last:"<<pos_curr.x <<"   "<<pos_curr.y<<std::endl;
             point_set.push_back(Eigen::Vector2d(pos_curr.x,pos_curr.y));
             t=t-ts;
             total_time=total_time+ts;
@@ -706,7 +734,6 @@ std::vector<Eigen::Vector2d> TimedAstar::getTrajectory(double ts, double local_t
 
     return point_set;
 }
-
 
 Vec2i TimedAstar::posToIndex(Vec2d pos){
     Vec2d temp=(pos-occ_map_origin_)*inv_resolution_;

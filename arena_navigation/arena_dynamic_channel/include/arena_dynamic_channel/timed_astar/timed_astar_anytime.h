@@ -88,6 +88,9 @@ private:
 
     // counter
     int  iter_num_;
+
+    // reach_goal
+    bool reached_goal_;
     
     Vec2i posToIndex(Vec2d pos);
 
@@ -100,7 +103,9 @@ private:
 
     double estimateHeuristic(PathNodePtr &curr_node,Vec2d goal_pos, Vec2d start_pos);
 
-    bool checkCollision(const PathNodePtr &curr_node, PathNodePtr &next_node,Graph *graph_t, double & dist_to_collid, double & time_to_collid);
+    void setNeighborNodeActionDuration(const PathNodePtr &curr_node, PathNodePtr &next_node);
+
+    bool checkCollisionFree(const PathNodePtr &curr_node, PathNodePtr &next_node,Graph *graph_t, double & dist_to_collid, double & time_to_collid);
 
     double computeCollisionTime(const Vec2d &p_ir, const Vec2d &v_ir, const double &duration);
 
