@@ -50,21 +50,21 @@ class MLP_ARENA2D(nn.Module):
 
         # Body network
         self.body_net = nn.Sequential(
-            nn.Linear(feature_dim, 64),
+            nn.Linear(_L+_RS, 64),
             nn.ReLU(),
-            nn.Linear(64, 64),
+            nn.Linear(64, feature_dim),
             nn.ReLU()
         )
 
         # Policy network
         self.policy_net = nn.Sequential(
-            nn.Linear(64, last_layer_dim_pi),
+            nn.Linear(feature_dim, last_layer_dim_pi),
             nn.ReLU()
         )
 
         # Value network
         self.value_net = nn.Sequential(
-            nn.Linear(64, last_layer_dim_vf),
+            nn.Linear(feature_dim, last_layer_dim_vf),
             nn.ReLU()
         )
 
@@ -105,7 +105,7 @@ class MLP_ARENA2D_POLICY(ActorCriticPolicy):
         self.ortho_init = True
 
     def _build_mlp_extractor(self) -> None:
-        self.mlp_extractor = MLP_ARENA2D(self.features_dim)
+        self.mlp_extractor = MLP_ARENA2D(64)
 
 
 class DRL_LOCAL_PLANNER(BaseFeaturesExtractor):
@@ -136,7 +136,7 @@ class DRL_LOCAL_PLANNER(BaseFeaturesExtractor):
             n_flatten = self.cnn(tensor_forward).shape[1]
 
         self.fc_1 = nn.Sequential(
-            nn.Linear(n_flatten, 256 - _RS),
+            nn.Linear(n_flatten, 256),
             nn.ReLU(),
         )
 
@@ -156,7 +156,8 @@ class DRL_LOCAL_PLANNER(BaseFeaturesExtractor):
         extracted_features = self.fc_1(self.cnn(laser_scan))
         features = th.cat((extracted_features, robot_state), 1)
 
-        return self.fc_2(features)
+        # return self.fc_2(features)
+        return features
 
 
 """
@@ -166,7 +167,9 @@ and value network.
 :constant policy_drl_local_planner: (dict)
 """
 policy_kwargs_drl_local_planner = dict(features_extractor_class=DRL_LOCAL_PLANNER,
-                                       features_extractor_kwargs=dict(features_dim=128))
+                                       features_extractor_kwargs=dict(features_dim=(256+_RS)),
+                                       net_arch=[dict(vf=[128], pi=[128])], 
+                                       activation_fn=th.nn.ReLU)
 
 
 class CNN_NAVREP(BaseFeaturesExtractor):
@@ -226,4 +229,5 @@ and value network.
 """
 policy_kwargs_navrep = dict(features_extractor_class=CNN_NAVREP,
                             features_extractor_kwargs=dict(features_dim=32),
-                            net_arch=[dict(vf=[64, 64], pi=[64, 64])], activation_fn=th.nn.ReLU)
+                            net_arch=[dict(vf=[64, 64], pi=[64, 64])], 
+                            activation_fn=th.nn.ReLU)

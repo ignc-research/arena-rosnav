@@ -56,9 +56,13 @@ class FlatlandEnv(gym.Env):
             robot_radius=self._robot_radius, safe_dist=1.1*self._robot_radius, goal_radius=goal_radius, rule=reward_fnc)
 
         # action agent publisher
-        self.agent_action_pub = rospy.Publisher('cmd_vel', Twist, queue_size=1)
-        # service clients
         self._is_train_mode = rospy.get_param("train_mode")
+        if self._is_train_mode:
+            self.agent_action_pub = rospy.Publisher('cmd_vel', Twist, queue_size=1)
+        else:
+            self.agent_action_pub = rospy.Publisher('cmd_vel_pub', Twist, queue_size=1)
+        
+        # service clients
         if self._is_train_mode:
             self._service_name_step = '/step_world'
             self._sim_step_client = rospy.ServiceProxy(
@@ -129,8 +133,8 @@ class FlatlandEnv(gym.Env):
         """
         self._pub_action(action)
         self._steps_curr_episode += 1
+
         # wait for new observations
-        s = time.time()
         merged_obs, obs_dict = self.observation_collector.get_observations()
         # print("get observation: {}".format(time.time()-s))
 
@@ -139,7 +143,7 @@ class FlatlandEnv(gym.Env):
             obs_dict['laser_scan'], obs_dict['goal_in_robot_frame'])
         done = reward_info['is_done']
 
-        print("reward:  {}".format(reward))
+        # print("reward:  {}".format(reward))
         
         # info
         info = {}

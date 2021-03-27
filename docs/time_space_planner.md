@@ -1,3 +1,11 @@
+## Preparations
+```
+git checkout local_planner_subgoalmode
+git pull
+
+cd $HOME/catkin_ws
+catkin_make -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=/usr/bin/python3
+```
 
 ## Try in empty map
 #### 1) Start Simulation in one terminal
@@ -10,6 +18,7 @@ roslaunch arena_bringup start_arena_flatland.launch
 workon rosnav
 roslaunch arena_bringup timed_space_planner_fsm.launch
 ```
+Note: for this simple test use_drl must be set to true (look below in section: Setting parameter for plan manager)
 
 ## Test in automatic test mode 
 #### 1) Start Simulation in one terminal
@@ -18,7 +27,7 @@ workon rosnav
 roslaunch arena_bringup start_arena_flatland.launch map_file:="map1" scenario_file:="eval/obstacle_map1_obs20.json" local_planner:="mpc" disable_scenario:="false"
 ```
 #### 2) just wait 
-(wait all the obstacles are loaded by task generator, in order to wait all topics in ros master are ready)
+(wait until all the obstacles are loaded by task generator, meanwhile all topics in ros master are ready)
 #### 3) Start time_space plan manager in another terminal
 ```
 workon rosnav
