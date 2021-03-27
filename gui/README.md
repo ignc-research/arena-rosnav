@@ -9,10 +9,11 @@
 `$ python -m pip install kivy[base] kivy_examples`
 3. Clone the whole project.
 4. (if needed) install/update Pillow <br />
-`$ python3 -m pip install --upgrade Pillow`
+`$ python -m pip install --upgrade Pillow`
 5. (if needed) install xclip <br />
 `$ sudo apt-get install xclip`
-6. (optional) if you want to support the `SHIFT+TAB` behaviour to jump backwards from text field to another, change in the file `$HOME/kivy_venv/lib/python3.6/site-packages/kivy/uix/behaviors/focus.py` in function `keyboard_on_key_down()` `['shift']` to `{'shift'}`
+6. (optional) if you want to support the `SHIFT+TAB` behaviour to jump backwards from text field to another, change in the file `$HOME/kivy_venv/lib/python-{version}/site-packages/kivy/uix/behaviors/focus.py` in function `keyboard_on_key_down()` `['shift']` to `{'shift'}`<br /><br />
+**Attention:** Depending on the Python version that you are using, you may have to run the operations above with for example `python3` insteed of `python`!
 
 ### How to run
 1. Upload an image of the map in the `input` folder inside of the root folder.
@@ -25,6 +26,9 @@
 5. Generate a new scenario in the paint app. Look at the rules! When ready, the next script `parser.py` will automatically start. <br />
 6. The generated json file will be saved under the name `new_scenario.json` in the `output` folder as well as in the folder `arena-rosnav/simulator_setup/scenerios/`, where all scenarios are stored.
 7. Modify the `arena-rosnav/arena_bringup/launch/sublaunch/task_generator.launch` file, changing the name of the expected json file to `new_scenario.json`. <br />
+8. Activate rosnav. <br />
+`$ workon rosnav` <br />
+**Attention:** Rosnav and kivy_env might not be able to stay active at the same time, so activate kivy_env for the gui and rosnav for launching.
 8. In `arena-rosnav` run for example <br />
 `$ roslaunch arena_bringup start_arena_flatland.launch local_planner:="teb" use_viz:="true" map_file:="map1" rviz_file:="nav2"`. <br />
 The file `nav2.rviz` is different from `nav.rviz` only by two things - the map is horizontal and the first couple of obstacles are visible with the start of rviz. The program still works will all available rviz files, just the visualization will be slightly defferent. Please take a look also at the section `Legend for the already tested maps` below.
@@ -63,7 +67,7 @@ The file `nav2.rviz` is different from `nav.rviz` only by two things - the map i
 ### Overview for working on different operation systems
 #### (only for running this scenario gui, not the whole project!)
 
-1. Ubuntu <br />
+1. Ubuntu OR Windows with WSL2 + GUI support <br />
 `$ source kivy_venv/bin/activate` <br />
 `$ cd arena-rosnav/gui/` <br />
 `$ python paint.py` <br />
@@ -71,25 +75,16 @@ The file `nav2.rviz` is different from `nav.rviz` only by two things - the map i
 
 2. Windows from git bash <br />
 `$ source kivy_venv/Scripts/activate` <br />
-`$ cd Desktop/VIS_Windows/arena-rosnav/gui` <br />
+`$ cd arena-rosnav/gui` <br />
 `$ python paint.py` (move the black window a little bit to the bottom and back to make everything show) <br />
 `$ python parser.py` (if everything is correct, the data will corectly show up, but if something is wrong, the program will terminate as it should do, but without showing the corresponding messages) <br />
 
 3. Windows from cmd <br />
 `$ kivy_venv\Scripts\activate` <br />
-`$ cd Desktop\VIS_Windows\arena-rosnav\gui` <br />
+`$ cd arena-rosnav\gui` <br />
 `$ python paint.py` (move the black window a little bit to the bottom and back to make everything show) <br />
-`$ python parser.py` <br />
-
-4. Windows with WSL2 + Console <br />
-It is not working. It can not deal with showing up a window.
-
-5. Windows with WSL2 + GUI <br />
-`$ source kivy_venv/bin/activate` <br />
-`$ cd arena-rosnav/gui/` <br />
-`$ python paint.py` <br />
 `$ python parser.py` <br /><br />
-**Attention:** Depending on the Python version that you are using, you may have to run the operations above with `python3` insteed of `python`!
+**Attention:** Depending on the Python version that you are using, you may have to run the operations above with for example `python3` insteed of `python`!
 
 ### Tips and brief explanations for future developers how to modify/extend the program
 
