@@ -125,8 +125,8 @@ class RewardCalculator():
     def _reward_collision(self,laser_scan, punishment = 10):
         if laser_scan.min() <= self.robot_radius:
             self.curr_reward -= punishment
-            self.info['is_done'] = True
-            self.info['done_reason'] = 1
+            #self.info['is_done'] = True
+            #self.info['done_reason'] = 1
 
     
     def _reward_safe_dist(self, laser_scan, punishment = 0.15):
