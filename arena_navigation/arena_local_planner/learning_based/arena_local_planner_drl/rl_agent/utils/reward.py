@@ -2,6 +2,7 @@ import numpy as np
 from numpy.lib.utils import safe_eval
 import rospy
 from typing import Tuple
+from std_msgs.msg import Int16
 
 class RewardCalculator():
     def __init__(self, robot_radius: float, safe_dist:float, goal_radius:float, rule:str = 'rule_00' ):
@@ -75,6 +76,7 @@ class RewardCalculator():
             self.curr_reward = reward
             self.info['is_done'] = True
             self.info['done_reason'] = 2
+            self.sr = rospy.Publisher('/scenario_reset', Int16, queue_size=1)
         else:
             self.info['is_done'] = False
 
@@ -125,8 +127,8 @@ class RewardCalculator():
     def _reward_collision(self,laser_scan, punishment = 10):
         if laser_scan.min() <= self.robot_radius:
             self.curr_reward -= punishment
-            self.info['is_done'] = True
-            self.info['done_reason'] = 1
+            #self.info['is_done'] = True
+            #self.info['done_reason'] = 1
 
     
     def _reward_safe_dist(self, laser_scan, punishment = 0.15):

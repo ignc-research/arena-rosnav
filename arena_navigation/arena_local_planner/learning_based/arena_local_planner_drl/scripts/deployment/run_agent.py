@@ -98,6 +98,8 @@ if __name__ == "__main__":
             env.reset()
             first_obs = True
 
+
+
         if rospy.is_shutdown():
             print('shutdown')
             break
