@@ -1,7 +1,9 @@
+
 # subgoal mode selection
 subgoal_mode: &subgoal_mode 0                           # 0: spacial_horizon 1:timed_astar 2: simple sample
 
-# other main parameters (not relevant for this evaluation )------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------
+# other main parameters (not relevant for this evaluation)
 subgoal_pub_period: &subgoal_pub_period 0.5             # sec
 goal_tolerance: &goal_tolerance 0.5
 subgoal_tolerance: &subgoal_tolerance 2.0
