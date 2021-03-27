@@ -11,6 +11,7 @@ void DynamicPlanManager::initPlanModules(ros::NodeHandle &nh)
   node_.param("plan_manager/max_vel",   pp_.max_vel_, 2.0);
   node_.param("plan_manager/max_acc",   pp_.max_acc_, 3.0);
   node_.param("plan_manager/max_jerk",  pp_.max_jerk_, 4.0);
+  //node_.param("plan_manager/time_resolution",  pp_.time_resolution_, 1.0);
   node_.param("plan_manager/feasibility_tolerance",   pp_.feasibility_tolerance_, 0.05);
   node_.param("plan_manager/control_points_distance", pp_.ctrl_pt_dist_, 0.4);
   node_.param("plan_manager/use_distinctive_trajs",   pp_.use_distinctive_trajs_, true);
@@ -166,17 +167,24 @@ bool DynamicPlanManager::planMidTraj(Eigen::Vector2d & start_pos, Eigen::Vector2
   
   std::vector<Eigen::Vector2d> point_set,start_end_derivatives;
   
-  double ts=0.1;
+  double ts=pp_.ctrl_pt_dist_ / pp_.max_vel_;
   double local_time_horizon=pp_.local_time_horizon_;
   bool success;
 
   success=mid_planner_timed_astar_->stateTimeAstarSearch(start_pos,start_vel,start_dir,end_pos,ts,local_time_horizon, point_set,start_end_derivatives,line_sets);
   
+  // special case when poinst set too small even success
+  if(success && point_set.size()<5){
+    success=false;
+    end_pos=point_set.back();
+  }
+  std::cout<<"[planMidTraj]timed astar search finish 1"<<std::endl;
   UniformBspline mid_traj;
   // if no timed_astar solution available
   if(!success){
     Eigen::Vector2d end_vel =Eigen::Vector2d::Zero();
     bool oneshot_success=genOneshotTraj(start_pos, start_vel,start_dir,end_pos,end_vel, mid_traj);
+    std::cout<<"[planMidTraj]timed astar search finish 2"<<std::endl;
     if(oneshot_success){
       local_traj_data_.resetData(mid_traj);
     }
@@ -225,6 +233,10 @@ bool DynamicPlanManager::genOneshotTraj(Eigen::Vector2d & start_pos, Eigen::Vect
   bool flag_too_far;
   ts *= 1.5; // ts will be divided by 1.5 in the next
   do{
+    if(ts<0.001){
+      // ts is too small, not reasonable
+      return false;
+    }
     ts /= 1.5;
     point_set.clear();
     flag_too_far = false;

@@ -15,7 +15,7 @@
 //#include <geometry_msgs/PoseStamped.h>
 
 #include <visualization_msgs/MarkerArray.h>
-#include <std_msgs/Float32.h>
+#include <std_msgs/Float64.h>
 
 #include <vector>
 #include <arena_mapping/mapping.h>

@@ -469,6 +469,10 @@ bool DynamicReplanFSM::getSubgoalTimedAstar(Eigen::Vector2d &subgoal){
         subgoal=global_path[subgoal_id];
         return true;
     }else{
+        if(global_path.size()>2){
+            subgoal=global_path.back();
+            return true;
+        }
         return false;
     }
 }

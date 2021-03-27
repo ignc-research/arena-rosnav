@@ -17,10 +17,12 @@ void TimedAstarSearch::init(ros::NodeHandle & nh,GridMap::Ptr grid_map, std::vec
     node_.param("timed_astar/min_vel",              tap_.MIN_SPEED,         0.5);
     node_.param("timed_astar/max_rot_vel",          tap_.MAX_ROT_SPEED,     0.52);
 
+    node_.param("timed_astar/sensor_range",         tap_.SENSOR_RANGE,      5.0);
     node_.param("timed_astar/time_horizon",         tap_.TIME_HORIZON,      5.0);
     node_.param("timed_astar/time_resolution",      tap_.TIME_RESOLUTION,   1.2);
     node_.param("timed_astar/resolution",           tap_.RESOLUTION,        0.1);
     node_.param("timed_astar/num_sample_edge",      tap_.NUM_SAMPLE_EDGE,   5);
+    
     tap_.TIME_SLICE_NUM=static_cast<size_t>(round(tap_.TIME_HORIZON / tap_.TIME_RESOLUTION));
     tap_.SAFE_DIST =(tap_.ROBOT_RADIUS + tap_.OBSTACLE_RADIUS)*2;
     // init map
@@ -55,8 +57,8 @@ bool TimedAstarSearch::stateTimeAstarSearch(const Eigen::Vector2d & start_pos,
     speeds.reserve(100*2);
     angles.reserve(100*2);
 
-    Eigen::Vector2d corner_min = start_pos - Eigen::Vector2d(1.0,1.0) * tap_.AVG_SPEED * tap_.TIME_HORIZON;
-    Eigen::Vector2d corner_max = start_pos + Eigen::Vector2d(1.0,1.0) * tap_.AVG_SPEED * tap_.TIME_HORIZON;
+    Eigen::Vector2d corner_min = start_pos - Eigen::Vector2d(1.0,1.0) *tap_.SENSOR_RANGE;//Eigen::Vector2d(1.0,1.0) * tap_.AVG_SPEED * tap_.TIME_HORIZON;
+    Eigen::Vector2d corner_max = start_pos + Eigen::Vector2d(1.0,1.0) *tap_.SENSOR_RANGE;//Eigen::Vector2d(1.0,1.0) * tap_.AVG_SPEED * tap_.TIME_HORIZON;
 
     boundPosition(corner_min);
 	boundPosition(corner_max);
