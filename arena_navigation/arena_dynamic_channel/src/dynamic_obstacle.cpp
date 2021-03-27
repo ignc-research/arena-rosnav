@@ -17,8 +17,8 @@ DynamicObstacleInfo::DynamicObstacleInfo(ros::NodeHandle &nh, std::string topic_
     // init subscriber for obstacles state
     ros::NodeHandle public_nh_;
     obs_odom_sub_=public_nh_.subscribe(topic_name_, 1, &DynamicObstacleInfo::updateOdomCallback,this);
-    std::string vel_topic_name=topic_name_+"_vel";
-    obs_vel_pub_ =public_nh_.advertise<std_msgs::Float32>(vel_topic_name,1);
+    //std::string vel_topic_name=topic_name_+"_vel";
+    //obs_vel_pub_ =public_nh_.advertise<std_msgs::Float64>(vel_topic_name,1);
 
     // init subscriber for robot state
     robot_odom_sub_ = public_nh_.subscribe("odom", 1, &DynamicObstacleInfo::updateRobotOdomCallback,this);
@@ -55,9 +55,9 @@ void DynamicObstacleInfo::updateOdomCallback(visualization_msgs::MarkerArray::Co
     if(!is_init_){
         updateDynamicOcc();
     }
-    std_msgs::Float32 velocity;
-    velocity.data=vel_.norm();
-    obs_vel_pub_.publish(velocity);
+    //std_msgs::Float64 velocity;
+    //velocity.data= (double)vel_.norm();
+    //obs_vel_pub_.publish(velocity);
 
 }
 
