@@ -349,7 +349,7 @@ struct PlanParameters{
     
     double max_vel_, max_acc_, max_jerk_;   // physical limits
     double ctrl_pt_dist_;                  // distance between adjacient B-spline control points
-    
+    //double time_resolution_;                // for select smaple from timed_astar path
     
     double feasibility_tolerance_;        // permitted ratio of vel/acc exceeding limits
     
