@@ -214,7 +214,7 @@ Now that you've trained your agent you surely want to deploy and evaluate it. Fo
 
 - Firstly, you need to start the *simulation environment*:
 ```
-roslaunch arena_bringup start_arena_flatland.launch map_file:="map1"  disable_scenario:="false"
+roslaunch arena_bringup start_arena_flatland.launch map_file:="map1"  disable_scenario:="false" scenario_file:="eval/obstacle_map1_obs20.json"
 ```
 
 - Then, start the *time-space plan manager*:
@@ -228,7 +228,8 @@ roscd arena_local_planner_drl/scripts/deployment/
 python action_publisher.py
 ```
 
-- Then run the ```run_agent.py``` script
+- Then run the ```run_agent.py``` script.
+```python run_agent.py --load DRL_LOCAL_PLANNER_2021_03_22__19_33 --scenario obstacle_map1_obs20```
 
 **Generic program call**:
 ```
