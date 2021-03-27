@@ -27,6 +27,7 @@ from kivy.core.window import Window
 from kivy.uix.label import Label
 from kivy.uix.textinput import TextInput
 from kivy.uix.scrollview import ScrollView
+from kivy.uix.behaviors.focus import FocusBehavior
 
 # global variables
 color_r = 1
@@ -554,7 +555,8 @@ class ScenarioGUIApp(App):
         width_layout_num_obstacles = 140
         layout_num_obstacles = GridLayout(cols=1, rows=2, size=(width_layout_num_obstacles,height_layout_num_obstacles), size_hint=(None, None), pos=(width_left_border, window_sizes[1]-height_up_border-height_layout_num_obstacles/2))
         label_num_obstacles = Label(text='#obstacles:')
-        textinput_num_obstacles = TextInput(text='3')
+        textinput_num_obstacles = TextInput(text='3', multiline=False, write_tab=False) # with write_tab=False you can jump to the next TextInput using tab!
+        # Important: if you want to be able to use 'tab'+'shift' for going backwards, you need to change the file '$HOME/kivy_venv/lib/python3.6/site-packages/kivy/uix/behaviors/focus.py' in function keyboard_on_key_down() from ['shift'] to {'shift'}
         layout_num_obstacles.add_widget(label_num_obstacles)
         layout_num_obstacles.add_widget(textinput_num_obstacles)
 
@@ -563,7 +565,7 @@ class ScenarioGUIApp(App):
         width_layout_res = 140
         layout_res = GridLayout(cols=1, rows=2, size=(width_layout_res,height_layout_res), size_hint=(None, None), pos=(width_left_border, window_sizes[1]-height_up_border-height_layout_num_obstacles-height_layout_res/2))
         label_res = Label(text='Map resolution:')
-        textinput_res = TextInput(text='0.05') # editable; give an example value already written in the box
+        textinput_res = TextInput(text='0.05', multiline=False, write_tab=False) # editable; give an example value already written in the box
         layout_res.add_widget(label_res)
         layout_res.add_widget(textinput_res)
 
@@ -573,7 +575,7 @@ class ScenarioGUIApp(App):
         width_layout_origin = 140
         layout_origin = GridLayout(cols=1, rows=2, size=(width_layout_origin,height_layout_origin), size_hint=(None, None), pos=(width_left_border, window_sizes[1]-height_up_border-height_layout_num_obstacles-height_layout_res-height_layout_origin/2))
         label_origin = Label(text='Map origin:') # the form should be "x_pos, y_pos, z_pos"
-        textinput_origin = TextInput(text='-6.0, -6.0, 0.0') # editable; give an example value already written in the box
+        textinput_origin = TextInput(text='-6.0, -6.0, 0.0', multiline=False, write_tab=False) # editable; give an example value already written in the box
         layout_origin.add_widget(label_origin)
         layout_origin.add_widget(textinput_origin)
 
@@ -659,8 +661,8 @@ class ScenarioGUIApp(App):
         self.parent.add_widget(parent_draw)
         self.parent.add_widget(layout_btn)
         self.parent.add_widget(layout_num_obstacles)
-        self.parent.add_widget(layout_origin)
         self.parent.add_widget(layout_res)
+        self.parent.add_widget(layout_origin)
         self.parent.add_widget(button_return)
         self.parent.add_widget(mainbutton_obstacle_type)
 
@@ -693,9 +695,9 @@ class ScenarioGUIApp(App):
         # it is necessary to make the widgets inactive (remove them) and after png download and upload active (add them) again, otherwise they are just considered as nothing more then an image
         # the info from these text boxes should be written to the data.txt file at the beginning of the second button (because there will the final version be visible!)
         parent.remove_widget(layout_btn)
-        parent.remove_widget(layout_origin)
-        parent.remove_widget(layout_res)
         parent.remove_widget(layout_num_obstacles)
+        parent.remove_widget(layout_res)
+        parent.remove_widget(layout_origin)
         parent.remove_widget(button_return)
         parent.remove_widget(mainbutton_obstacle_type)
 
@@ -708,10 +710,10 @@ class ScenarioGUIApp(App):
         parent_draw.add_widget(self.painter_circle_watcher)
         parent.add_widget(parent_draw)
         parent.add_widget(layout_btn)
-        parent.add_widget(layout_origin)
-        parent.add_widget(layout_res)
-        #parent.add_widget(label_connect)
         parent.add_widget(layout_num_obstacles)
+        parent.add_widget(layout_res)
+        parent.add_widget(layout_origin)
+        #parent.add_widget(label_connect)
         parent.add_widget(button_return)
         parent.add_widget(mainbutton_obstacle_type)
         parent.add_widget(scrollable_area_global) # for Idea 1
@@ -731,9 +733,9 @@ class ScenarioGUIApp(App):
 
         parent.remove_widget(wimg_input_map) # !
         parent.remove_widget(layout_btn)
-        parent.remove_widget(layout_origin)
-        parent.remove_widget(layout_res)
         parent.remove_widget(layout_num_obstacles)
+        parent.remove_widget(layout_res)
+        parent.remove_widget(layout_origin)
         parent.remove_widget(button_return)
         parent.remove_widget(mainbutton_obstacle_type)
         parent.remove_widget(scrollable_area_global)
@@ -747,9 +749,9 @@ class ScenarioGUIApp(App):
         parent_draw.add_widget(self.painter_line)
         parent.add_widget(parent_draw)
         parent.add_widget(layout_btn)
-        parent.add_widget(layout_origin)
-        parent.add_widget(layout_res)
         parent.add_widget(layout_num_obstacles)
+        parent.add_widget(layout_res)
+        parent.add_widget(layout_origin)
         parent.add_widget(button_return)
         parent.add_widget(mainbutton_obstacle_type)
         parent.add_widget(scrollable_area_global)
@@ -766,9 +768,9 @@ class ScenarioGUIApp(App):
 
         parent.remove_widget(wimg_input_map) # !
         parent.remove_widget(layout_btn)
-        parent.remove_widget(layout_origin)
-        parent.remove_widget(layout_res)
         parent.remove_widget(layout_num_obstacles)
+        parent.remove_widget(layout_res)
+        parent.remove_widget(layout_origin)
         parent.remove_widget(button_return)
         parent.remove_widget(mainbutton_obstacle_type)
         parent.remove_widget(scrollable_area_global)
@@ -782,9 +784,9 @@ class ScenarioGUIApp(App):
         parent_draw.add_widget(self.painter_robot)
         parent.add_widget(parent_draw)
         parent.add_widget(layout_btn)
-        parent.add_widget(layout_origin)
-        parent.add_widget(layout_res)
         parent.add_widget(layout_num_obstacles)
+        parent.add_widget(layout_res)
+        parent.add_widget(layout_origin)
         parent.add_widget(button_return)
         parent.add_widget(mainbutton_obstacle_type)
         parent.add_widget(scrollable_area_global)
@@ -910,9 +912,9 @@ class ScenarioGUIApp(App):
         # delete the obstacle widget and generate another with different color
         parent.remove_widget(wimg_input_map) # !
         parent.remove_widget(layout_btn)
-        parent.remove_widget(layout_origin)
-        parent.remove_widget(layout_res)
         parent.remove_widget(layout_num_obstacles)
+        parent.remove_widget(layout_res)
+        parent.remove_widget(layout_origin)
         parent.remove_widget(button_return)
         parent.remove_widget(mainbutton_obstacle_type) # important so that the chosen type could be refreshed into the dropdown button !
 
@@ -936,9 +938,9 @@ class ScenarioGUIApp(App):
         parent_draw.add_widget(painter_circle_obstacle_new)
         parent.add_widget(parent_draw)
         parent.add_widget(layout_btn)
-        parent.add_widget(layout_origin)
-        parent.add_widget(layout_res)
         parent.add_widget(layout_num_obstacles)
+        parent.add_widget(layout_res)
+        parent.add_widget(layout_origin)
         parent.add_widget(button_return)
         parent.add_widget(mainbutton_obstacle_type) # !
 
@@ -1111,6 +1113,14 @@ class ScenarioGUIApp(App):
         else:
             print('All done, nothing to return!')
     
+    # Important: when the focused text field changes, the area will automatically scroll so that the text field is visible
+    def on_focus(self, instance, value):
+        if value:
+        #    print('User focused', instance)
+            scrollable_area_global.scroll_to(instance, padding=10, animate=True)
+        #else:
+        #    print('User defocused', instance)
+
     def set_obstacle_params(self, textinput_num_obstacles, label_index_list, textinput_velocity_list, textinput_obstacle_watchers_connection_list, textinput_obstacle_waypoints_connection_list, mainbutton_motion_list, textinput_amount, textinput_chatting_probability, textinput_obstacle_force_factor, textinput_desire_force_factor, height_layout_connect, width_layout_connect, width_left_border, height_up_border): # IDEA 1 - make everything with text inputs (so save from here the information also about the motions)
         # scrollable up-down (make place for setting up 10 obstacles before the area gets scrollable)
         # scrollable left-right (no matter how much more parameters are added in the future, it will still work)
@@ -1153,25 +1163,33 @@ class ScenarioGUIApp(App):
         for index in range(int(textinput_num_obstacles.text)): # index starts with 0
             label_index_list.append(Label(text=str(index), size_hint_x=None, size_hint=(None,None), height=height_layout_connect/2/10, width=15)) # height=28=height_layout_connect/2/10 to have place for 10 obstacle before it starts to scroll
             layout_connect.add_widget(label_index_list[index])
-            textinput_velocity_list.append(TextInput(text='0.3', size_hint=(None,None), height=height_layout_connect/2/10, width=60)) # editable; give an example value already written in the box
+            textinput_velocity_list.append(TextInput(text='0.3', multiline=False, write_tab=False, size_hint=(None,None), height=height_layout_connect/2/10, width=60)) # editable; give an example value already written in the box
+            textinput_velocity_list[index].bind(focus=self.on_focus)
             layout_connect.add_widget(textinput_velocity_list[index])
-            textinput_obstacle_watchers_connection_list.append(TextInput(text=str(index), size_hint=(None,None), height=height_layout_connect/2/10, width=65))
+            textinput_obstacle_watchers_connection_list.append(TextInput(text=str(index), multiline=False, write_tab=False, size_hint=(None,None), height=height_layout_connect/2/10, width=65))
+            textinput_obstacle_watchers_connection_list[index].bind(focus=self.on_focus)
             layout_connect.add_widget(textinput_obstacle_watchers_connection_list[index])
-            textinput_obstacle_waypoints_connection_list.append(TextInput(text=str(index), size_hint=(None,None), height=height_layout_connect/2/10, width=70))
+            textinput_obstacle_waypoints_connection_list.append(TextInput(text=str(index), multiline=False, write_tab=False, size_hint=(None,None), height=height_layout_connect/2/10, width=70))
+            textinput_obstacle_waypoints_connection_list[index].bind(focus=self.on_focus)
             layout_connect.add_widget(textinput_obstacle_waypoints_connection_list[index])
-            mainbutton_motion_list.append(TextInput(text='yoyo', size_hint=(None,None), height=height_layout_connect/2/10, width=60))
+            mainbutton_motion_list.append(TextInput(text='yoyo', multiline=False, write_tab=False, size_hint=(None,None), height=height_layout_connect/2/10, width=60))
+            mainbutton_motion_list[index].bind(focus=self.on_focus)
             layout_connect.add_widget(mainbutton_motion_list[index])
             if pedestrians_bool == 1: # add textinput_amount and textinput_chatting_probability
-                textinput_amount.append(TextInput(text='1', size_hint=(None,None), height=height_layout_connect/2/10, width=60))
+                textinput_amount.append(TextInput(text='1', multiline=False, write_tab=False, size_hint=(None,None), height=height_layout_connect/2/10, width=60))
+                textinput_amount[index].bind(focus=self.on_focus)
                 layout_connect.add_widget(textinput_amount[index])
-                textinput_chatting_probability.append(TextInput(text='0.3', size_hint=(None,None), height=height_layout_connect/2/10, width=85))
+                textinput_chatting_probability.append(TextInput(text='0.3', multiline=False, write_tab=False, size_hint=(None,None), height=height_layout_connect/2/10, width=85))
+                textinput_chatting_probability[index].bind(focus=self.on_focus)
                 layout_connect.add_widget(textinput_chatting_probability[index])
             if pedestrians_bool == 1 or vehicles_bool == 1: # add textinput_obstacle_force_factor and textinput_desire_force_factor
-                textinput_obstacle_force_factor.append(TextInput(text='1.0', size_hint=(None,None), height=height_layout_connect/2/10, width=85))
+                textinput_obstacle_force_factor.append(TextInput(text='1.0', multiline=False, write_tab=False, size_hint=(None,None), height=height_layout_connect/2/10, width=85))
+                textinput_obstacle_force_factor[index].bind(focus=self.on_focus)
                 layout_connect.add_widget(textinput_obstacle_force_factor[index])
-                textinput_desire_force_factor.append(TextInput(text='1.0', size_hint=(None,None), height=height_layout_connect/2/10, width=85))
+                textinput_desire_force_factor.append(TextInput(text='1.0', multiline=False, write_tab=False, size_hint=(None,None), height=height_layout_connect/2/10, width=85))
+                textinput_desire_force_factor[index].bind(focus=self.on_focus)
                 layout_connect.add_widget(textinput_desire_force_factor[index])
-        scrollable_area = ScrollView(size_hint=(None, None), size=(width_layout_connect,height_layout_connect/2), pos=(Window.size[0]-width_left_border-140, Window.size[1]-height_up_border/2-height_layout_connect/2))
+        scrollable_area = ScrollView(scroll_type=['bars', 'content'] ,size_hint=(None, None), size=(width_layout_connect,height_layout_connect/2), pos=(Window.size[0]-width_left_border-140, Window.size[1]-height_up_border/2-height_layout_connect/2))
         scrollable_area.add_widget(layout_connect)
         return scrollable_area
 
@@ -1186,13 +1204,13 @@ class ScenarioGUIApp(App):
         layout_connect.bind(minimum_height=layout_connect.setter('height'))
         for index in range(int(textinput_num_obstacles.text)): # index starts with 0
             label_index_list.append(Label(text=str(index), size_hint_x=None, width=15, size_hint_y=None, height=height_layout_connect/2/10)) # height=28=height_layout_connect/2/10 to have place for 10 obstacle before it starts to scroll
-            textinput_velocity_list.append(TextInput(text='0.3', size_hint_y=None, height=height_layout_connect/2/10)) # editable; give an example value already written in the box
-            textinput_obstacle_watchers_connection_list.append(TextInput(text=str(index), size_hint_y=None, height=height_layout_connect/2/10)) # editable; give an example value already written in the box
-            textinput_obstacle_waypoints_connection_list.append(TextInput(text=str(index), size_hint=(None,None), height=height_layout_connect/2/10, width=70))
-            textinput_amount.append(TextInput(text='1', size_hint_y=None, height=height_layout_connect/2/10))
-            textinput_chatting_probability.append(TextInput(text='0.3', size_hint_y=None, height=height_layout_connect/2/10))
-            textinput_obstacle_force_factor.append(TextInput(text='1.0', size_hint_y=None, height=height_layout_connect/2/10))
-            textinput_desire_force_factor.append(TextInput(text='1.0', size_hint_y=None, height=height_layout_connect/2/10))
+            textinput_velocity_list.append(TextInput(text='0.3', multiline=False, write_tab=False, size_hint_y=None, height=height_layout_connect/2/10)) # editable; give an example value already written in the box
+            textinput_obstacle_watchers_connection_list.append(TextInput(text=str(index), multiline=False, write_tab=False, size_hint_y=None, height=height_layout_connect/2/10)) # editable; give an example value already written in the box
+            textinput_obstacle_waypoints_connection_list.append(TextInput(text=str(index), multiline=False, write_tab=False, size_hint=(None,None), height=height_layout_connect/2/10, width=70))
+            textinput_amount.append(TextInput(text='1', multiline=False, write_tab=False, size_hint_y=None, height=height_layout_connect/2/10))
+            textinput_chatting_probability.append(TextInput(text='0.3', multiline=False, write_tab=False, size_hint_y=None, height=height_layout_connect/2/10))
+            textinput_obstacle_force_factor.append(TextInput(text='1.0', multiline=False, write_tab=False, size_hint_y=None, height=height_layout_connect/2/10))
+            textinput_desire_force_factor.append(TextInput(text='1.0', multiline=False, write_tab=False, size_hint_y=None, height=height_layout_connect/2/10))
             layout_connect.add_widget(label_index_list[index])
             layout_connect.add_widget(textinput_velocity_list[index])
             layout_connect.add_widget(textinput_obstacle_watchers_connection_list[index])
