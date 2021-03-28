@@ -27,6 +27,7 @@ class police():
         self.sg_wpg_received = False
 
         self.update_cluster = True
+        self.gp_published = False
 
  
         # sub
@@ -113,9 +114,10 @@ class police():
             self.pub_subg_wpg.publish(self.subgoal_wgp)
             self.sg_wpg_received = False
 
-        if self.gp_received:
+        if self.gp_received and not self.gp_published:
             self.pub_subgp.publish(self.global_path)
             self.gp_received = False
+            self.gp_published = True
 
         # print(self.subgoal)
 
