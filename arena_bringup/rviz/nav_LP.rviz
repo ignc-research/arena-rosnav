@@ -766,7 +766,7 @@ Visualization Manager:
           Buffer Length: 1
           Class: rviz/Path
           Color: 85; 170; 255
-          Enabled: true
+          Enabled: false
           Head Diameter: 0.30000001192092896
           Head Length: 0.20000000298023224
           Length: 0.30000001192092896
@@ -784,7 +784,7 @@ Visualization Manager:
           Shaft Length: 0.10000000149011612
           Topic: /vis_path_timed_astar
           Unreliable: false
-          Value: true
+          Value: false
         - Class: rviz/Marker
           Enabled: true
           Marker Topic: /vis_goal
@@ -810,13 +810,13 @@ Visualization Manager:
           Queue Size: 100
           Value: true
         - Class: rviz/Marker
-          Enabled: true
+          Enabled: false
           Marker Topic: /vis_triangle
           Name: triangulation_map
           Namespaces:
-            lines: true
+            {}
           Queue Size: 100
-          Value: true
+          Value: false
         - Alpha: 1
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
@@ -859,7 +859,7 @@ Visualization Manager:
           Color: 255; 255; 255
           Color Transformer: Intensity
           Decay Time: 0
-          Enabled: true
+          Enabled: false
           Invert Rainbow: false
           Max Color: 255; 255; 255
           Max Intensity: 4096
@@ -876,7 +876,7 @@ Visualization Manager:
           Unreliable: false
           Use Fixed Frame: true
           Use rainbow: true
-          Value: true
+          Value: false
         - Alpha: 1
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
@@ -1009,8 +1009,8 @@ Visualization Manager:
       Scale: 26.929931640625
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
-      X: 14.416903495788574
-      Y: 2.165898084640503
+      X: 17.68983268737793
+      Y: 3.9987971782684326
     Saved: ~
 Window Geometry:
   Displays:
@@ -1028,5 +1028,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1920
-  X: 0
+  X: 8
   Y: 31

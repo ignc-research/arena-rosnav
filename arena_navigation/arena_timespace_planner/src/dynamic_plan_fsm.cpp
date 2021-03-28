@@ -494,7 +494,7 @@ bool DynamicReplanFSM::getSubgoalSimpleSample(Eigen::Vector2d &subgoal){
     subgoal=wp_pt;
 
     double dist_to_robot=(odom_pos_-wp_pt).norm();
-    if(dist_to_robot< 0.5){//subgoal_tolerance_
+    if(dist_to_robot< 1.2){//subgoal_tolerance_
         curr_wp_index_++;
     }
 

@@ -35,6 +35,8 @@ class NN_tb3():
         # pubs
         self.pub_twist = rospy.Publisher('/cmd_vel',Twist,queue_size=1) 
 
+        rospy.sleep(5)
+
         self.nn_timer = rospy.Timer(rospy.Duration(0.01),self.cbComputeActionArena)
         self.control_timer = rospy.Timer(rospy.Duration(0.1),self.cbControl)
 
@@ -161,7 +163,6 @@ class NN_tb3():
 def run():
 
     rospy.init_node('arena_tb3',anonymous=False)
-
     print('==================================\narena node started\n==================================')
 
     nn_tb3 = NN_tb3()
