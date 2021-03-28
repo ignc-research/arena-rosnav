@@ -76,7 +76,6 @@ class RewardCalculator():
             self.curr_reward = reward
             self.info['is_done'] = True
             self.info['done_reason'] = 2
-            self.sr = rospy.Publisher('/scenario_reset', Int16, queue_size=1)
         else:
             self.info['is_done'] = False
 
