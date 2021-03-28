@@ -88,7 +88,7 @@ def evaluate_policies():
 
 if __name__ == '__main__':
     addr = '/home/jiayun/git_ws/src/arena-rosnav/arena_navigation/arena_local_planner/learning_based/arena_local_planner_il/data/pretrained_policy'
-    ##if using pretraining 30000 pairs need 14min to match data##
+    ##if using pretraining 30000 pairs need 5 sec to match data##
     pretraining_train(30000, 2000000, 10000000, addr, pretraining=True)
     #run_pretrained_model(addr+'/20.pth')
     

@@ -26,7 +26,7 @@ from custom_policy import MLP_ARENA2D, MLP_ARENA2D_POLICY
 import h5py
 import glob
 import time
-
+from collections import OrderedDict
 import rospkg
 
 class pretrainPPO(PPO):
@@ -99,7 +99,7 @@ class pretrainPPO(PPO):
         if not h5_path:
             raise FileNotFoundError
         
-        actions, states = {},{}
+        actions, states = OrderedDict(), OrderedDict()
         for addr in h5_path:
             if addr.endswith('state.hdf5'):
                 with h5py.File(addr, "r") as state_f:
@@ -122,12 +122,14 @@ class pretrainPPO(PPO):
         counter = 0
         print('start matching dataset...')
         start = time.time()
-        for _, time_slot in enumerate(self._actions_data):
+        actions_timepoints = sorted(self._actions_data, key=lambda x: x[0])
+        states_timepoints = sorted(self._states_data, key=lambda x: x[0])
+        for index, time_slot in enumerate(actions_timepoints):
             if counter >= dataset_length:
                 break
             action_key = time_slot
             # matching according to the mindest time gap principle
-            state_key = min(self._states_data.keys(), key=lambda x: abs(float(action_key)-float(x)))
+            state_key = min(states_timepoints[index:index+100], key=lambda x: abs(float(action_key)-float(x)))
             self._dataset.append((self._actions_data[action_key], self._states_data[state_key]))
             counter += 1
             if counter % 1000 == 0:
