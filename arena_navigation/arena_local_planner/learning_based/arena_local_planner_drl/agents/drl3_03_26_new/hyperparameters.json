@@ -1,0 +1,23 @@
+{
+    "agent_name": "DRL_LOCAL_PLANNER_2021_03_26__00_11",
+    "robot": "myrobot",
+    "batch_size": 22080,
+    "gamma": 0.99,
+    "n_steps": 1840,
+    "ent_coef": 0.005,
+    "learning_rate": 0.0003,
+    "vf_coef": 0.22,
+    "max_grad_norm": 0.5,
+    "gae_lambda": 0.95,
+    "m_batch_size": 15,
+    "n_epochs": 3,
+    "clip_range": 0.22,
+    "train_max_steps_per_episode": 650,
+    "eval_max_steps_per_episode": 650,
+    "goal_radius": 0.25,
+    "reward_fnc": "rule_02",
+    "discrete_action_space": false,
+    "normalize": true,
+    "task_mode": "staged",
+    "curr_stage": 6
+}
