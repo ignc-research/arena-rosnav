@@ -1,0 +1,13 @@
+# Person
+
+bodies:
+  - name: body
+    pose: [0, 0, 0]
+    type: dynamic
+    color: [0, 0.75, 0.75, 0.25]
+    footprints:
+      - type: circle
+        center: [0, 0]
+        radius: 0.4
+        sensor: true
+        density: 0

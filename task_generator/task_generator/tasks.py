@@ -32,6 +32,7 @@ class ABSTask(ABC):
     def __init__(self, obstacles_manager: ObstaclesManager, robot_manager: RobotManager):
         self.obstacles_manager = obstacles_manager
         self.robot_manager = robot_manager
+        rospy.wait_for_service("/static_map")
         self._service_client_get_map = rospy.ServiceProxy('/static_map', GetMap)
         self._map_lock = Lock()
         rospy.Subscriber('/map', OccupancyGrid, self._update_map)
@@ -385,6 +386,7 @@ def get_predefined_task(ns: str, mode="random", start_stage: int = 1, PATHS: dic
     # either e.g. ns = 'sim1/' or ns = ''
 
     # get the map
+    rospy.wait_for_service("/static_map")
     service_client_get_map = rospy.ServiceProxy('/static_map', GetMap)
     map_response = service_client_get_map()
 

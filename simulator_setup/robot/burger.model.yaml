@@ -1,0 +1,84 @@
+#Burger
+bodies:
+  - name: base
+    type: dynamic  
+    color: [0.2, 0.1, 0.8, 1.0]
+    footprints:
+      - type: polygon
+        density: 100
+        points: [ [-0.20, 0.325], 
+                          [-0.325, 0.2], 
+                          [-0.325, -0.2], 
+                          [-0.20, -0.325], 
+                          [0.20, -0.325], 
+                          [0.325, -0.2], 
+                          [0.325, 0.2], 
+                          [0.20, 0.325] ]
+        layers: ["all"]
+        sensor: true
+  - name: left_wheel
+    enabled: true
+    pose: [0,0,0]
+    color: [0.2, 0.1, 0.8, 1.0]
+    footprints:
+        - type: polygon
+          points: [ [0.33, 0.415],
+                            [0.01, 0.415],
+                            [0.01, 0.325],
+                            [0.33, 0.325] ]
+          density: 1
+          sensor: true
+
+  - name: right_wheel
+    enabled: true
+    pose: [0,0,0]
+    color: [0.2, 0.1, 0.8, 1.0]
+    footprints:
+        - type: polygon
+          points: [ [0.33, -0.325],
+                            [0.01, -0.325],
+                            [0.01, -0.415],
+                            [0.33, -0.415] ]
+          density: 1
+          sensor: true
+
+plugins:
+  - type: DiffDrive 
+    name: turtlebot_drive 
+    body: base
+    odom_frame_id: map
+    pub_rate: 10
+    # odom_pose_noise: [0.1, 0.1, 0.1]
+    # odom_twist_noise: [0.1, 0.1, 0.1]
+    # odom_pose_covariance: [0.00, 0.01, 0.02, 0.03, 0.04, 0.05, 
+    #                         0.06, 0.07, 0.08, 0.09, 0.10, 0.11, 
+    #                         0.12, 0.13, 0.14, 0.15, 0.16, 0.17, 
+    #                         0.18, 0.19, 0.20, 0.21, 0.22, 0.23, 
+    #                         0.24, 0.25, 0.26, 0.27, 0.28, 0.29, 
+    #                         0.30, 0.31, 0.32, 0.33, 0.34, 0.35]
+  - type: Laser
+    name: static_laser
+    frame: laser_link
+    topic: scan
+    body: base
+    broadcast_tf: false
+    origin: [0.0, 0.0, 0.0]
+    # range: 3
+    #arena
+    range: 20
+    # angle: {min: -3.12413936, max: 3.14159265359, increment: 0.01745}
+    # shifted for arena
+    #for fc or trans 360
+    angle: {min: -1.5707963267948966, max: 4.694936014, increment:  0.017453292}
+    #for gru 64
+    # angle: {min: -1.570796327, max: 4.694935688, increment:  0.0877}
+
+    # noise_std_dev: 0.015
+    # arena
+    noise_std_dev: 0.0
+    update_rate: 10    
+
+
+  - type: ModelTfPublisher
+    name: tf_publisher
+    publish_tf_world: true

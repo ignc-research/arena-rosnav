@@ -1,7 +1,7 @@
 - git:
     local-name: ../forks/flatland
     uri: https://github.com/tuananhroman/flatland
-    version: dev_multi_tuan_anh
+    version: arena_human
 
 #- git:
 #    local-name: ../forks/navigation
@@ -35,3 +35,8 @@
     local-name: ../forks/stable-baselines3
     uri: https://github.com/tuananhroman/stable-baselines3
     version: master
+
+- git:
+    local-name: ../forks/pedsim_ros
+    uri: https://github.com/Sirupli/pedsim_ros
+    version: human_ros
