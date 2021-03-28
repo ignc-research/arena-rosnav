@@ -37,7 +37,7 @@ class police():
         rospy.Subscriber('/odom',Odometry, self.cb_odom)
         rospy.Subscriber('/subgoal',PoseStamped, self.cb_subgoal)
         rospy.Subscriber('/subgoal_wpg',PoseStamped, self.cb_subgoal_wpg)
-        rospy.Subscriber('/globalPlan',Path, self.cb_global_path)
+        rospy.Subscriber('/vis_global_path',Path, self.cb_global_path)
         # rospy.Subscriber('/obst_odom',Clusters, self.cb_cluster)
 
 
