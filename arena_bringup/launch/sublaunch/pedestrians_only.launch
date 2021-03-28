@@ -1,0 +1,38 @@
+<launch>
+  <arg name="map_path"/> 
+	<arg name="ns" default="sim_1"/> 
+  <arg name="kbd_teleop" default="false"/>
+  <arg name="rqt_teleop" default="false"/>
+  <arg name="visualize" default="true"/>
+  <arg name="scene_file" default="$(find simulator_setup)/maps/pedsim_scenario.xml"/>
+  <arg name="default_queue_size" default="10"/>
+  <arg name="max_robot_speed" default="1.5"/>
+  <arg name="robot_mode" default="1"/>
+  <arg name="enable_groups" default="false"/>
+  <arg name="with_robot" default="false"/>
+  <arg name="pose_initial_x" default="3.0"/>
+  <arg name="pose_initial_y" default="7.0"/>
+  <arg name="pose_initial_theta" default="0.0"/>
+  <arg name="simulation_factor" default="1"/>
+  <arg name="update_rate" default="25.0"/>
+  <arg name="spawn_period" default="5.0"/>
+
+   <!-- main simulator node -->
+  <node name="pedsim_simulator" pkg="pedsim_simulator" type="pedsim_simulator" output="screen" ns="$(arg ns)" launch-prefix="xterm -e gdb -ex run --args">
+    <param name="scene_file" value="$(arg scene_file)" type="string"/>
+    <param name="default_queue_size" value="$(arg default_queue_size)" type="int"/>
+    <param name="robot_mode" value="$(arg robot_mode)" type="int"/>
+    <param name="enable_groups" value="$(arg enable_groups)" type="bool"/>
+    <param name="simulation_factor" value="$(arg simulation_factor)" type="double"/>
+    <param name="update_rate" value="$(arg update_rate)" type="double"/>
+    <param name="spawn_period" value="$(arg spawn_period)" type="double"/>
+    <remap from="/tf" to="/$(arg ns)/tf"/>
+		<remap from="/clock" to="/$(arg ns)/clock"/>
+  </node>
+
+
+  <!-- Visualizer -->
+  <!-- <include file="$(find arena_bringup)/launch/sublaunch/pedsim_visualizer.launch">
+      <arg name="ns" value="$(arg ns)" />
+  </include> -->
+</launch>
