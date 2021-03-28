@@ -52,7 +52,7 @@ if __name__ == "__main__":
 
     # initialize gym env
     env = DummyVecEnv([lambda: FlatlandEnv(
-        task_manager, PATHS.get('robot_setting'), PATHS.get('robot_as'), params['reward_fnc'], params['discrete_action_space'], goal_radius=1.25, max_steps_per_episode=100000)])
+        task_manager, PATHS.get('robot_setting'), PATHS.get('robot_as'), params['reward_fnc'], params['discrete_action_space'], goal_radius=1.0, max_steps_per_episode=100000)])
     if params['normalize']:
         assert os.path.isfile(PATHS['vec_norm']
         ), "Couldn't find VecNormalize pickle, without it agent performance will be strongly altered"
@@ -104,7 +104,7 @@ if __name__ == "__main__":
             msg = Int16()
             msg.data = episodes
             sr.publish(msg)
-            
+
             env.reset()
             first_obs = True
 
