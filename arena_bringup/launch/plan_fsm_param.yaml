@@ -5,7 +5,7 @@ subgoal_mode: &subgoal_mode 0                           # 0: spacial_horizon 1:t
 # ------------------------------------------------------------------------------------------------------
 # other main parameters (not relevant for this evaluation)
 subgoal_pub_period: &subgoal_pub_period 0.5             # sec
-goal_tolerance: &goal_tolerance 0.5
+goal_tolerance: &goal_tolerance 0.2
 subgoal_tolerance: &subgoal_tolerance 2.0
 
 planning_time_horizon: &planning_time_horizon 3.0       # sec look ahead time
