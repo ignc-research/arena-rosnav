@@ -10,7 +10,7 @@ import yaml
 from rl_agent.utils.observation_collector import ObservationCollector
 from rl_agent.utils.reward import RewardCalculator
 from rl_agent.utils.debug import timeit
-from task_generator.tasks import ABSTask
+from task_generator.tasks import *
 import numpy as np
 import rospy
 from geometry_msgs.msg import Twist
@@ -18,8 +18,16 @@ from flatland_msgs.srv import StepWorld, StepWorldRequest
 from std_msgs.msg import Bool
 import time
 
-from rl_agent.utils.debug import timeit
-from task_generator.task_generator.tasks import *
+class Actions():
+    # Define 11 choices of actions to be:
+    # [v_pref,      [-pi/6, -pi/12, 0, pi/12, pi/6]]
+    # [0.5*v_pref,  [-pi/6, 0, pi/6]]
+    # [0,           [-pi/6, 0, pi/6]]
+    def __init__(self):
+        self.actions = np.mgrid[1.0:1.1:0.5, -np.pi/6:np.pi/6+0.01:np.pi/12].reshape(2, -1).T
+        self.actions = np.vstack([self.actions,np.mgrid[0.5:0.6:0.5, -np.pi/6:np.pi/6+0.01:np.pi/6].reshape(2, -1).T])
+        self.actions = np.vstack([self.actions,np.mgrid[0.0:0.1:0.5, -np.pi/6:np.pi/6+0.01:np.pi/6].reshape(2, -1).T])
+        self.num_actions = len(self.actions)
 
 class FlatlandEnv(gym.Env):
     """Custom Environment that follows gym interface"""
@@ -88,16 +96,19 @@ class FlatlandEnv(gym.Env):
         rospy.set_param("/laser_num_beams", self._laser_num_beams)
         
         # observation collector
+        num_humans=self.task.obstacles_manager.num_humans
         self.observation_collector = ObservationCollector(
-            self.ns, self._laser_num_beams, self._laser_max_range)
+            self.ns, self._laser_num_beams, self._laser_max_range,num_humans)
         self.observation_space = self.observation_collector.get_observation_space()
+        #csv writer
+        self.csv_writer=CSVWriter()
 
         # reward calculator
         if safe_dist is None:
             safe_dist = 1.6*self._robot_radius
 
         self.reward_calculator = RewardCalculator(
-            robot_radius=self._robot_radius, safe_dist=1.2*self._robot_radius, goal_radius=goal_radius, rule=reward_fnc)
+            robot_radius=self._robot_radius, safe_dist=1.5*self._robot_radius, goal_radius=goal_radius, rule=reward_fnc)
 
         # action agent publisher
         if self._is_train_mode:
@@ -116,7 +127,10 @@ class FlatlandEnv(gym.Env):
             ns, mode=task_mode, start_stage=kwargs['curr_stage'], PATHS=PATHS)
 
         self._steps_curr_episode = 0
+        self._episode = 0
         self._max_steps_per_episode = max_steps_per_episode
+        #store the obeservations from the last step for spawning the robot
+        self.last_obs_dict=None
  
     def setup_by_configuration(self, robot_yaml_path: str, settings_yaml_path: str):
         """get the configuration from the yaml file, including robot radius, discrete action space and continuous action space.
@@ -152,6 +166,8 @@ class FlatlandEnv(gym.Env):
                 self._discrete_acitons = setting_data['robot']['discrete_actions']
                 self.action_space = spaces.Discrete(
                     len(self._discrete_acitons))
+                # self._discrete_acitons=Actions().actions
+                # self.action_space = spaces.Discrete(Actions().num_actions)
             else:
                 linear_range = setting_data['robot']['continuous_actions']['linear_range']
                 angular_range = setting_data['robot']['continuous_actions']['angular_range']
@@ -168,6 +184,8 @@ class FlatlandEnv(gym.Env):
 
     def _translate_disc_action(self, action):
         new_action = np.array([])
+        # new_action = np.append(new_action, self._discrete_acitons[action][0])
+        # new_action = np.append(new_action, self._discrete_acitons[action][1])
         new_action = np.append(new_action, self._discrete_acitons[action]['linear'])
         new_action = np.append(new_action, self._discrete_acitons[action]['angular'])    
             
@@ -178,6 +196,7 @@ class FlatlandEnv(gym.Env):
         done_reasons:   0   -   exceeded max steps
                         1   -   collision with obstacle
                         2   -   goal reached
+                        >3   -   too close to human
         """
         if self._is_action_space_discrete:
             action = self._translate_disc_action(action)
@@ -190,10 +209,10 @@ class FlatlandEnv(gym.Env):
 
         # calculate reward
         reward, reward_info = self.reward_calculator.get_reward(
-            obs_dict['laser_scan'], obs_dict['goal_in_robot_frame'], 
-            action=action, global_plan=obs_dict['global_plan'], robot_pose=obs_dict['robot_pose'])
-        # print(f"cum_reward: {reward}")
+            obs_dict['laser_scan'], obs_dict['goal_in_robot_frame'], obs_dict['adult_in_robot_frame'],
+            obs_dict['child_in_robot_frame'],obs_dict['elder_in_robot_frame'], self._steps_curr_episode/self._max_steps_per_episode)
         done = reward_info['is_done']
+        # print("cum_reward:  {}".format(reward))
         
         # info
         info = {}
@@ -201,12 +220,20 @@ class FlatlandEnv(gym.Env):
             info['done_reason'] = reward_info['done_reason']
             info['is_success'] = reward_info['is_success']
             self.reward_calculator.kdtree = None
+            history_evaluation=self.reward_calculator.get_history_info()
+            history_evaluation=[self._episode]+history_evaluation+[info['done_reason']]
+            self.csv_writer.addData(np.array(history_evaluation))
 
         if self._steps_curr_episode > self._max_steps_per_episode:
             done = True
             info['done_reason'] = 0
             info['is_success'] = 0
             self.reward_calculator.kdtree = None
+            history_evaluation=self.reward_calculator.get_history_info()
+            history_evaluation=[self._episode]+history_evaluation+[info['done_reason']]
+            self.csv_writer.addData(np.array(history_evaluation))
+
+        self.last_obs_dict=obs_dict
 
         return merged_obs, reward, done, info
 
@@ -217,9 +244,11 @@ class FlatlandEnv(gym.Env):
         self.agent_action_pub.publish(Twist())
         if self._is_train_mode:
             self._sim_step_client()
-        self.task.reset()
+        self.task.reset(self.last_obs_dict)
         self.reward_calculator.reset()
         self._steps_curr_episode = 0
+        self._episode += 1
+        self.observation_collector.set_timestep(0.0)
         obs, _ = self.observation_collector.get_observations()
         return obs  # reward, done, info can't be included
 
