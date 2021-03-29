@@ -9,8 +9,15 @@ import yaml
 from torch import nn
 from stable_baselines3.common.policies import ActorCriticPolicy
 from stable_baselines3.common.torch_layers import BaseFeaturesExtractor
+from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.tools.policy_sarl_utils import SARL
 
-_RS = 2  # robot state size
+# _RS = 2+2*6  # robot state size+ human state size
+_RS = 9  # robot state size 3
+self_state_dim = 9
+num_humans =  6  #
+human_state_size= 18 #size of human info 17
+_HS= 18*21  # human state size
+HIDDEN_SHAPE_LSTM=32 # hidden size of lstm
 
 ROBOT_SETTING_PATH = rospkg.RosPack().get_path('simulator_setup')
 yaml_ROBOT_SETTING_PATH = os.path.join(ROBOT_SETTING_PATH, 'robot', 'myrobot.model.yaml')
@@ -107,6 +114,111 @@ class MLP_ARENA2D_POLICY(ActorCriticPolicy):
     def _build_mlp_extractor(self) -> None:
         self.mlp_extractor = MLP_ARENA2D(64)
 
+class MLP_HUMAN(nn.Module):
+    """
+    Custom Multilayer Perceptron for policy and value function.
+    Architecture was taken as reference from: https://github.com/ignc-research/arena2D/tree/master/arena2d-agents.
+
+    :param feature_dim: dimension of the features extracted with the features_extractor (e.g. features from a CNN)
+    :param last_layer_dim_pi: (int) number of units for the last layer of the policy network
+    :param last_layer_dim_vf: (int) number of units for the last layer of the value network
+    """
+
+    def __init__(
+            self,
+            feature_dim: int,
+            last_layer_dim_pi: int = 32,
+            last_layer_dim_vf: int = 32,
+    ):
+        super(MLP_HUMAN, self).__init__()
+        # Save output dimensions, used to create the distributions
+        self.latent_dim_pi = last_layer_dim_pi
+        self.latent_dim_vf = last_layer_dim_vf
+
+        # Body networks
+        self.body_net_laser = nn.Sequential(
+            nn.Linear(_L, 256),
+            nn.ReLU(),
+            nn.Linear(256, 128),
+            nn.ReLU(),
+            nn.Linear(128, feature_dim),
+            nn.ReLU()
+        ).to('cuda')
+        self.body_net_human = nn.Sequential(
+            nn.Linear(108, 128),
+            nn.ReLU(),
+            nn.Linear(128, 96),
+            nn.ReLU(),
+            nn.Linear(96, 32),
+            nn.ReLU()
+        ).to('cuda')
+
+        # Policy network
+        self.policy_net = nn.Sequential(
+            nn.Linear(feature_dim+_RS+33, 128),
+            nn.ReLU(),
+            nn.Linear(128, 64),
+            nn.ReLU(),
+            nn.Linear(64, last_layer_dim_pi),
+            nn.ReLU(),
+        ).to('cuda')
+
+        # Value network
+        self.value_net = nn.Sequential(
+            nn.Linear(feature_dim+_RS+33, 64),
+            nn.ReLU(),
+            nn.Linear(64, 32),
+            nn.ReLU(),
+            nn.Linear(32, last_layer_dim_vf),
+            nn.ReLU()
+        ).to('cuda')
+
+    def forward(self, features: th.Tensor) -> Tuple[th.Tensor, th.Tensor]:
+        """
+        :return: (th.Tensor, th.Tensor) latent_policy, latent_value of the specified network.
+            If all layers are shared, then ``latent_policy == latent_value``
+        """
+        size=features.shape
+        time=features[:, 0].reshape(size[0], -1)
+        body_x = self.body_net_laser(features[:, 1:_L+1])
+        robot_state=features[:, _L+1:_L+1+_RS]
+        humans_state=features[:, _L+1:_L+1+num_humans*human_state_size]
+        human_hidden=self.body_net_human(humans_state)
+        features_1 = th.cat((time, body_x), 1)
+        features_2=th.cat((features_1, human_hidden), 1)
+        features=th.cat((features_2, robot_state), 1)
+        return self.policy_net(features), self.value_net(features)
+
+class MLP_HUMAN_POLICY(ActorCriticPolicy):
+    """
+    Policy using the custom Multilayer Perceptron.
+    """
+
+    def __init__(
+            self,
+            observation_space: gym.spaces.Space,
+            action_space: gym.spaces.Space,
+            lr_schedule: Callable[[float], float],
+            net_arch: Optional[List[Union[int, Dict[str, List[int]]]]] = None,
+            activation_fn: Type[nn.Module] = nn.ReLU,
+            *args,
+            **kwargs,
+    ):
+        super(MLP_HUMAN_POLICY, self).__init__(
+            observation_space,
+            action_space,
+            lr_schedule,
+            net_arch,
+            activation_fn,
+            *args,
+            **kwargs,
+        )
+        # Enable orthogonal initialization
+        self.ortho_init = True
+
+    def _build_mlp_extractor(self) -> None:
+        self.features_dim=64
+        self.mlp_extractor = MLP_HUMAN(self.features_dim)
 
 class DRL_LOCAL_PLANNER(BaseFeaturesExtractor):
     """
@@ -231,3 +343,207 @@ policy_kwargs_navrep = dict(features_extractor_class=CNN_NAVREP,
                             features_extractor_kwargs=dict(features_dim=32),
                             net_arch=[dict(vf=[64, 64], pi=[64, 64])], 
                             activation_fn=th.nn.ReLU)
+
+
+class MLP_LSTM(nn.Module):
+    """
+    Net structure of CARDRL, using LSTM for dynamic infos, 
+
+    :param feature_dim: dimension of the features extracted with the features_extractor (e.g. features from a CNN)
+    :param last_layer_dim_pi: (int) number of units for the last layer of the policy network
+    :param last_layer_dim_vf: (int) number of units for the last layer of the value network
+    """
+
+    def __init__(
+            self,
+            feature_dim: int,
+            last_layer_dim_pi: int = 64,
+            last_layer_dim_vf: int = 64,
+    ):
+        super(MLP_LSTM, self).__init__()
+
+        # Save output dimensions, used to create the distributions
+        self.latent_dim_pi = last_layer_dim_pi
+        self.latent_dim_vf = last_layer_dim_vf
+
+        # Body networks
+        self.body_net_fc = nn.Sequential(
+            nn.Linear(_L, 256),
+            nn.ReLU(),
+            nn.Linear(256, feature_dim),
+            nn.ReLU()
+        ).to('cuda')
+
+        self.body_net_lstm = nn.LSTM(input_size=human_state_size, hidden_size=HIDDEN_SHAPE_LSTM).to('cuda')
+
+        # Policy network
+        self.policy_net = nn.Sequential(
+            nn.Linear(feature_dim +1+ _RS + HIDDEN_SHAPE_LSTM, 96),
+            nn.ReLU(),
+            nn.Linear(96, 64),
+            nn.ReLU(),
+            nn.Linear(64, last_layer_dim_pi),
+            nn.ReLU()
+        ).to('cuda')
+
+        # Value network
+        self.value_net = nn.Sequential(
+            nn.Linear(feature_dim + 1+_RS + HIDDEN_SHAPE_LSTM, 96),
+            nn.ReLU(),
+            nn.Linear(96, 64),
+            nn.ReLU(),
+            nn.Linear(64, last_layer_dim_vf),
+            nn.ReLU()
+        ).to('cuda')
+
+    def forward(self, features: th.Tensor) -> Tuple[th.Tensor, th.Tensor]:
+        """
+        :return: (th.Tensor, th.Tensor) latent_policy, latent_value of the specified network.
+            If all layers are shared, then ``latent_policy == latent_value``
+        """
+        size=features.shape
+        time=features[:, 0].reshape(size[0], -1)
+        body_x = self.body_net_fc(features[:, 1:_L+1])
+        robot_state=features[:, _L+1:_L+1+_RS]
+        humans_state=features[:, _L+1:_L+1+num_humans*human_state_size]
+        humans_state=humans_state.reshape((humans_state.shape[0],-1,human_state_size)).flip([0,1]).permute(1,0,2)
+        _, (h_n, _)=self.body_net_lstm(humans_state) # feed through lstm with initial hidden state = zeros
+        human_features = h_n.view(h_n.shape[1],-1)
+        features_1 = th.cat((body_x, robot_state), 1)
+        features_2 = th.cat((time, features_1), 1)
+        features=th.cat((features_2, human_features), 1)
+        return self.policy_net(features), self.value_net(features)
+
+
+class MLP_LSTM_POLICY(ActorCriticPolicy):
+    """
+    Policy using the custom Multilayer Perceptron.
+    """
+
+    def __init__(
+            self,
+            observation_space: gym.spaces.Space,
+            action_space: gym.spaces.Space,
+            lr_schedule: Callable[[float], float],
+            net_arch: Optional[List[Union[int, Dict[str, List[int]]]]] = None,
+            activation_fn: Type[nn.Module] = nn.ReLU,
+            *args,
+            **kwargs,
+    ):
+        super(MLP_LSTM_POLICY, self).__init__(
+            observation_space,
+            action_space,
+            lr_schedule,
+            net_arch,
+            activation_fn,
+            *args,
+            **kwargs,
+        )
+        # Enable orthogonal initialization
+        self.ortho_init = True
+
+    def _build_mlp_extractor(self) -> None:
+        self.features_dim=64
+        self.mlp_extractor = MLP_LSTM(self.features_dim)
+
+class MLP_SARL(nn.Module):
+    """
+    Policy SARL : the idea described in paper https://arxiv.org/abs/1809.08835
+    Crowd-robot interaction: Crowd-aware robot navigation with attention-based deep reinforcement learning
+    :param feature_dim: dimension of the features extracted with the features_extractor (e.g. features from a CNN)
+    :param last_layer_dim_pi: (int) number of units for the last layer of the policy network
+    :param last_layer_dim_vf: (int) number of units for the last layer of the value network
+    """
+
+    def __init__(
+            self,
+            feature_dim: int,
+            last_layer_dim_pi: int = 64,
+            last_layer_dim_vf: int = 64,
+    ):
+        super(MLP_SARL, self).__init__()
+
+        # Save output dimensions, used to create the distributions
+        self.latent_dim_pi = last_layer_dim_pi
+        self.latent_dim_vf = last_layer_dim_vf
+
+        # Body networks
+        self.body_net_fc = nn.Sequential(
+            nn.Linear(_L, 256),
+            nn.ReLU(),
+            nn.Linear(256, feature_dim),
+            nn.ReLU()
+        ).to('cuda')
+
+        sarl=SARL()
+        sarl.build_net()
+        sarl.set_device('cuda')
+        self.body_net_human=sarl.model
+        # # Policy network
+        self.policy_net = nn.Sequential(
+            nn.Linear(feature_dim+sarl.model.mlp3_input_dim+1,128),
+            nn.ReLU(),
+            nn.Linear(128, 64),
+            nn.ReLU(),
+            nn.Linear(64, last_layer_dim_pi),
+            nn.ReLU()
+        ).to('cuda')
+
+        # #Value network
+        self.value_net = nn.Sequential(
+            nn.Linear(feature_dim+sarl.model.mlp3_input_dim+1,128),
+            nn.ReLU(),
+            nn.Linear(128, 64),
+            nn.ReLU(),
+            nn.Linear(64, last_layer_dim_pi),
+            nn.ReLU()
+        ).to('cuda')
+
+    def forward(self, features: th.Tensor)-> Tuple[th.Tensor, th.Tensor]:
+        """
+        :return: (th.Tensor, th.Tensor) latent_policy, latent_value of the specified network.
+            If all layers are shared, then ``latent_policy == latent_value``
+        """
+        size=features.shape
+        time=features[:, 0].reshape(size[0], -1)
+        body_x = self.body_net_fc(features[:, 1:_L+1])
+        # robot_state=features[:, _L+1:_L+1+_RS]
+        humans_state=features[:, _L+1:_L+1+num_humans*human_state_size]
+        humans_state=humans_state.reshape((humans_state.shape[0],-1,human_state_size)).flip([0,1])
+        joint_state=self.body_net_human(humans_state) # feed through SARL
+        features_1 = th.cat((time, body_x), 1)
+        features=th.cat((features_1,joint_state), 1)
+        return self.policy_net(features), self.value_net(features)
+
+
+
+class MLP_SARL_POLICY(ActorCriticPolicy):
+    """
+    Policy using the custom Multilayer Perceptron.
+    """
+
+    def __init__(
+            self,
+            observation_space: gym.spaces.Space,
+            action_space: gym.spaces.Space,
+            lr_schedule: Callable[[float], float],
+            net_arch: Optional[List[Union[int, Dict[str, List[int]]]]] = None,
+            activation_fn: Type[nn.Module] = nn.ReLU,
+            *args,
+            **kwargs,
+    ):
+        super(MLP_SARL_POLICY, self).__init__(
+            observation_space,
+            action_space,
+            lr_schedule,
+            net_arch,
+            activation_fn,
+            *args,
+            **kwargs,
+        )
+        # Enable orthogonal initialization
+        self.ortho_init = True
+
+    def _build_mlp_extractor(self) -> None:
+        self.features_dim=128
+        self.mlp_extractor = MLP_SARL(self.features_dim)
