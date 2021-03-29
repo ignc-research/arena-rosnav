@@ -57,23 +57,25 @@ class RandomTask(ABSTask):
     def __init__(self, obstacles_manager: ObstaclesManager, robot_manager: RobotManager):
         super().__init__(obstacles_manager, robot_manager)
 
-    def reset(self):
+    def reset(self,obs_dict=None):
         """[summary]
         """
+        self.last_obs_dict=obs_dict
         with self._map_lock:
             max_fail_times = 3
             fail_times = 0
             while fail_times < max_fail_times:
                 try:
-                    start_pos, goal_pos = self.robot_manager.set_start_pos_goal_pos()
-                    self.obstacles_manager.reset_pos_obstacles_random(
-                        forbidden_zones=[
+                    start_pos, goal_pos = self.robot_manager.set_start_pos_goal_pos(obs_dict=self.last_obs_dict)
+                    forbiddenZones=[
                             (start_pos.x,
                                 start_pos.y,
                                 self.robot_manager.ROBOT_RADIUS),
                             (goal_pos.x,
                                 goal_pos.y,
-                                self.robot_manager.ROBOT_RADIUS)])
+                                self.robot_manager.ROBOT_RADIUS)]
+                    self.obstacles_manager.setForbidden_zones(forbiddenZones)
+                    self.obstacles_manager.reset_pos_obstacles_random(forbidden_zones=forbiddenZones)
                     break
                 except rospy.ServiceException as e:
                     rospy.logwarn(repr(e))

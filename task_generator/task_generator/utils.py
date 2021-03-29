@@ -82,3 +82,45 @@ def get_random_pos_on_map(free_space_indices, map_: OccupancyGrid, safe_dist: fl
     theta = random.uniform(-math.pi, math.pi)
 
     return x_in_meters, y_in_meters, theta
+
+
+def update_freespace_indices(free_space_indices, map_: OccupancyGrid, vertexArray) -> tuple:
+    """update the indices(represented in a tuple) of the freespace based on the map and the static polygons
+    ostacles manuelly added 
+    param map_ : original occupacy grid
+    param vertlist: vertex of the polygons
+
+    Returns:
+        indices_y_x(tuple): indices of the non-occupied cells, the first element is the y-axis indices,
+        the second element is the x-axis indices.
+    """
+    # free_space_indices=generate_freespace_indices(map_)
+    print(vertexArray)
+    n_freespace_cells = len(free_space_indices[0])    
+    mask=[]
+    for idx in range(n_freespace_cells):
+        # in cells
+        y_in_cells, x_in_cells = free_space_indices[0][idx], free_space_indices[1][idx]
+        # convert x, y in meters
+        y_in_meters = y_in_cells * map_.info.resolution + map_.info.origin.position.y
+        x_in_meters = x_in_cells * map_.info.resolution + map_.info.origin.position.x
+        p=np.array([x_in_meters,y_in_meters])
+        size=vertexArray.shape[0]
+        #check if the point is in the polygon or not
+        for i in range(size):
+            v1=vertexArray[i]-p
+            v1=v1/np.linalg.norm(v1)
+            v2=vertexArray[(i+1)%size]-p
+            v2=v2/np.linalg.norm(v2)
+            c1=np.cross(v1,v2)
+            v3=vertexArray[(i+2)%size]-p
+            v3=v3/np.linalg.norm(v3)
+            c2=np.cross(v2,v3)
+            if c1*c2 <0:                
+                mask.append(True)
+                break
+        else:
+            print(p)
+            mask.append(False)
+    free_space_indices_new=(free_space_indices[0][mask],free_space_indices[0][mask])
+    return free_space_indices_new
