@@ -6,7 +6,7 @@
             "dynamic_obstacles": {
                 "dynamic_obs_0": {
                     "obstacle_radius": 0.3,
-                    "linear_velocity": 0.2,
+                     "linear_velocity": 0.2,
                     "start_pos": [
                         3,
                         9,
@@ -27,7 +27,7 @@
                 },
                 "dynamic_obs_1": {
                     "obstacle_radius": 0.3,
-                    "linear_velocity": 0.1,
+                     "linear_velocity": 0.2,
                     "start_pos": [
                         3.5,
                         -1.75,
@@ -48,7 +48,7 @@
                 },
                 "dynamic_obs_2": {
                     "obstacle_radius": 0.3,
-                    "linear_velocity": 0.1,
+                     "linear_velocity": 0.2,
                     "start_pos": [
                         7,
                         5.5,
@@ -70,7 +70,7 @@
 
                 "dynamic_obs_3": {
                     "obstacle_radius": 0.3,
-                    "linear_velocity": 0.1,
+                     "linear_velocity": 0.2,
                     "start_pos": [
                         11,
                         10,
@@ -92,7 +92,7 @@
 
                 "dynamic_obs_4": {
                     "obstacle_radius": 0.3,
-                    "linear_velocity": 0.1,
+                     "linear_velocity": 0.2,
                     "start_pos": [
                         10,
                         14.75,
@@ -113,7 +113,7 @@
                 },
                 "dynamic_obs_5": {
                     "obstacle_radius": 0.3,
-                    "linear_velocity": 0.1,
+                     "linear_velocity": 0.2,
                     "start_pos": [
                         12.5,
                         4.5,
@@ -134,7 +134,7 @@
                 },
                 "dynamic_obs_6": {
                     "obstacle_radius": 0.3,
-                    "linear_velocity": 0.1,
+                     "linear_velocity": 0.2,
                     "start_pos": [
                         12.5,
                         1,
@@ -155,7 +155,7 @@
                 },
                 "dynamic_obs_7": {
                     "obstacle_radius": 0.3,
-                    "linear_velocity": 0.1,
+                     "linear_velocity": 0.2,
                     "start_pos": [
                         15,
                         -1.75,
@@ -176,7 +176,7 @@
                 },
                 "dynamic_obs_8": {
                     "obstacle_radius": 0.3,
-                    "linear_velocity": 0.1,
+                     "linear_velocity": 0.2,
                     "start_pos": [
                         16.5,
                         6,

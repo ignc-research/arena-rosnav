@@ -1,6 +1,6 @@
 
 # subgoal mode selection
-subgoal_mode: &subgoal_mode 2                        # 0: spacial_horizon 1:timed_astar 2: simple sample
+subgoal_mode: &subgoal_mode 1                        # 0: spacial_horizon 1:timed_astar 2: simple sample
 
 
 # ------------------------------------------------------------------------------------------------------
