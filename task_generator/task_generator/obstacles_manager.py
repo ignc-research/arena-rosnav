@@ -10,14 +10,17 @@ from flatland_msgs.srv import SpawnModel, SpawnModelRequest
 from flatland_msgs.srv import MoveModel, MoveModelRequest
 from flatland_msgs.srv import StepWorld
 from nav_msgs.msg import OccupancyGrid
-from geometry_msgs.msg import Pose2D
-import numpy as np
-from rospy.rostime import Time
-from std_msgs.msg import Empty
+from geometry_msgs.msg import Pose2D, Twist, Point
+from pedsim_srvs.srv import SpawnPeds
+from pedsim_srvs.srv import SpawnObstacle,SpawnObstacleRequest
+from pedsim_msgs.msg import Ped
+from pedsim_msgs.msg import LineObstacle
+from pedsim_msgs.msg import LineObstacles
+from std_srvs.srv import SetBool, Empty
 import rospy
 import rospkg
 import shutil
-from .utils import generate_freespace_indices, get_random_pos_on_map
+from .utils import generate_freespace_indices, get_random_pos_on_map,update_freespace_indices
 
 
 class ObstaclesManager:
@@ -53,6 +56,7 @@ class ObstaclesManager:
         self.update_map(map_)
         self.obstacle_name_list = []
         self._obstacle_name_prefix = 'obstacle'
+        self.__peds=[]
         # remove all existing obstacles generated before create an instance of this class
         self.remove_obstacles()
 
@@ -86,46 +90,59 @@ class ObstaclesManager:
         # But we don't want to keep it in the name of the topic otherwise it won't be easy to visualize them in riviz
         model_name = model_name.replace(self.ns,'')
         name_prefix = self._obstacle_name_prefix + '_' + model_name
-        count_same_type = sum(
-            1 if obstacle_name.startswith(name_prefix) else 0
-            for obstacle_name in self.obstacle_name_list)
+        if type_obstacle == 'human':
+            self.__remove_all_peds()
+            self.spawn_random_peds_in_world(num_obstacles)
+        else:
+            count_same_type = sum(
+                1 if obstacle_name.startswith(name_prefix) else 0
+                for obstacle_name in self.obstacle_name_list)
 
-        for instance_idx in range(count_same_type, count_same_type + num_obstacles):
-            max_num_try = 2
-            i_curr_try = 0
-            while i_curr_try < max_num_try:
-                spawn_request = SpawnModelRequest()
-                spawn_request.yaml_path = model_yaml_file_path
-                spawn_request.name = f'{name_prefix}_{instance_idx:02d}'
-                spawn_request.ns = rospy.get_namespace()
-                # x, y, theta = get_random_pos_on_map(self._free_space_indices, self.map,)
-                # set the postion of the obstacle out of the map to hidden them
-                if len(start_pos) == 0:
-                    x = self.map.info.origin.position.x - 3 * \
-                        self.map.info.resolution * self.map.info.height
-                    y = self.map.info.origin.position.y - 3 * \
-                        self.map.info.resolution * self.map.info.width
-                    theta = theta = random.uniform(-math.pi, math.pi)
-                else:
-                    assert len(start_pos) == 3
-                    x = start_pos[0]
-                    y = start_pos[1]
-                    theta = start_pos[2]
-                spawn_request.pose.x = x
-                spawn_request.pose.y = y
-                spawn_request.pose.theta = theta
-                # try to call service
-                response = self._srv_spawn_model.call(spawn_request)
-                if not response.success:  # if service not succeeds, do something and redo service
-                    rospy.logwarn(
-                        f"({self.ns}) spawn object {spawn_request.name} failed! trying again... [{i_curr_try+1}/{max_num_try} tried]")
-                    rospy.logwarn(response.message)
-                    i_curr_try += 1
-                else:
-                    self.obstacle_name_list.append(spawn_request.name)
-                    break
-            if i_curr_try == max_num_try:
-                raise rospy.ServiceException(f"({self.ns}) failed to register obstacles")
+            for instance_idx in range(count_same_type, count_same_type + num_obstacles):
+                max_num_try = 2
+                i_curr_try = 0
+                while i_curr_try < max_num_try:
+                    spawn_request = SpawnModelRequest()
+                    spawn_request.yaml_path = model_yaml_file_path
+                    spawn_request.name = f'{name_prefix}_{instance_idx:02d}'
+                    spawn_request.ns = rospy.get_namespace()
+                    # x, y, theta = get_random_pos_on_map(self._free_space_indices, self.map,)
+                    # set the postion of the obstacle out of the map to hidden them
+                    if len(start_pos) == 0:
+                        x = self.map.info.origin.position.x - 3 * \
+                            self.map.info.resolution * self.map.info.height
+                        y = self.map.info.origin.position.y - 3 * \
+                            self.map.info.resolution * self.map.info.width
+                        theta = theta = random.uniform(-math.pi, math.pi)
+                    else:
+                        assert len(start_pos) == 3
+                        x = start_pos[0]
+                        y = start_pos[1]
+                        theta = start_pos[2]
+                    spawn_request.pose.x = x
+                    spawn_request.pose.y = y
+                    spawn_request.pose.theta = theta
+                    # try to call service
+                    response = self._srv_spawn_model.call(spawn_request)
+                    if not response.success:  # if service not succeeds, do something and redo service
+                        rospy.logwarn(
+                            f"({self.ns}) spawn object {spawn_request.name} failed! trying again... [{i_curr_try+1}/{max_num_try} tried]")
+                        rospy.logwarn(response.message)
+                        i_curr_try += 1
+                    else:
+                        self.obstacle_name_list.append(spawn_request.name)
+                        #tell the info of polygon obstacles to pedsim
+                        add_pedsim_srv=SpawnObstacleRequest()
+                        size=vertices.shape[0]
+                        for i in range(size):
+                            lineObstacle=LineObstacle()
+                            lineObstacle.start.x,lineObstacle.start.y=vertices[i,0],vertices[i,1]
+                            lineObstacle.end.x,lineObstacle.end.y=vertices[(i+1)%size,0],vertices[(i+1)%size,0]
+                            add_pedsim_srv.staticObstacles.obstacles.append(lineObstacle)
+                        self.__add_obstacle_srv.call(add_pedsim_srv)
+                        break
+                if i_curr_try == max_num_try:
+                    raise rospy.ServiceException(f"({self.ns}) failed to register obstacles")
         return self
 
     def register_random_obstacles(self, num_obstacles: int, p_dynamic=0.5):
@@ -138,7 +155,9 @@ class ObstaclesManager:
         """
         num_dynamic_obstalces = int(num_obstacles*p_dynamic)
         max_linear_velocity = rospy.get_param("/obs_vel")
-        self.register_random_dynamic_obstacles(
+        # self.register_random_dynamic_obstacles(
+        #     num_dynamic_obstalces, max_linear_velocity)
+        self.register_human(
             num_dynamic_obstalces, max_linear_velocity)
         self.register_random_static_obstacles(
             num_obstacles-num_dynamic_obstalces)
@@ -164,6 +183,23 @@ class ObstaclesManager:
             self.register_obstacles(1, model_path)
             os.remove(model_path)
 
+    def register_human(self, num_obstacles: int, linear_velocity=0.3, angular_velocity_max=math.pi/6, min_obstacle_radius=0.5, max_obstacle_radius=0.5):
+        """register dynamic obstacles human.
+
+        Args:
+            num_obstacles (int): number of the obstacles.
+            linear_velocity (float, optional):  the constant linear velocity of the dynamic obstacle.
+            angular_velocity_max (float, optional): the maximum angular verlocity of the dynamic obstacle.
+                When the obstacle's linear velocity is too low(because of the collision),we will apply an
+                angular verlocity which is sampled from [-angular_velocity_max,angular_velocity_max] to the it to help it better escape from the "freezing" satuation.
+            min_obstacle_radius (float, optional): the minimum radius of the obstacle. Defaults to 0.5.
+            max_obstacle_radius (float, optional): the maximum radius of the obstacle. Defaults to 0.5.
+        """
+        model_path = os.path.join(rospkg.RosPack().get_path(
+        'simulator_setup'), 'dynamic_obstacles/person_two_legged.model.yaml')
+        self.num_humans=num_obstacles
+        self.register_obstacles(num_obstacles, model_path, type_obstacle='human')
+
     def register_random_static_obstacles(self, num_obstacles: int, num_vertices_min=3, num_vertices_max=5, min_obstacle_radius=0.5, max_obstacle_radius=2):
         """register static obstacles with polygon shape.
 
@@ -179,6 +215,27 @@ class ObstaclesManager:
             model_path = self._generate_random_obstacle_yaml(
                 False, num_vertices=num_vertices, min_obstacle_radius=min_obstacle_radius, max_obstacle_radius=max_obstacle_radius)
             self.register_obstacles(1, model_path)
+            os.remove(model_path)
+
+    def register_walls(self, num_obstacles: int, num_vertices_min=3, num_vertices_max=6, min_obstacle_radius=0.5, max_obstacle_radius=2):
+        """register static obstacles with polygon shape.
+
+        Args:
+            num_obstacles (int): number of the obstacles.
+            num_vertices_min (int, optional): the minimum number of the vertices . Defaults to 3.
+            num_vertices_max (int, optional): the maximum number of the vertices. Defaults to 6.
+            min_obstacle_radius (float, optional): the minimum radius of the obstacle. Defaults to 0.5.
+            max_obstacle_radius (float, optional): the maximum radius of the obstacle. Defaults to 2.
+        """
+        for _ in range(num_obstacles):
+            num_vertices = random.randint(num_vertices_min, num_vertices_max)
+            vertexArray=self._generate_vertices_for_polygon_obstacle(num_vertices)
+            # model_path = self._generate_random_obstacle_yaml(
+            #     False, num_vertices=num_vertices, min_obstacle_radius=min_obstacle_radius, max_obstacle_radius=max_obstacle_radius)
+            model_path, start_pos=self._generate_static_obstacle_polygon_yaml(vertexArray)
+            print('start_pos yaml',start_pos)
+            self._free_space_indices=update_freespace_indices(self._free_space_indices, self.map, vertexArray)
+            self.register_obstacles(1,model_path, start_pos, vertexArray, type_obstacle='static')
             os.remove(model_path)
 
     def register_static_obstacle_polygon(self, vertices: np.ndarray):
@@ -582,3 +639,123 @@ class ObstaclesManager:
                 rospy.logwarn(
                     "Can not get publised topics with 'rospy.get_published_topics'")
             # pass
+    def __respawn_peds(self, peds):
+        """
+        Spawning one pedestrian in the simulation. The type of pedestrian is randomly decided here.
+        TODO: the task generator later can decide the number of the agents
+        ADULT = 0, CHILD = 1, ROBOT = 2, ELDER = 3,
+        ADULT_AVOID_ROBOT = 10, ADULT_AVOID_ROBOT_REACTION_TIME = 11
+        :param  start_pos start position of the pedestrian.
+        :param  wps waypoints the pedestrian is supposed to walk to.
+        :param  id id of the pedestrian.
+        """
+        srv = SpawnPeds()
+        srv.peds = []
+        # print(peds)
+        self.agent_topic_str=''        
+        for ped in peds:            
+            elements = [0, 1, 3]
+            # probabilities = [0.4, 0.3, 0.3] np.random.choice(elements, 1, p=probabilities)[0]
+            self.__ped_type=elements[(ped[0]-1)%3]
+            if  self.__ped_type==0:
+                self.agent_topic_str+=f',{self.ns_prefix}pedsim_agent_{ped[0]}/dynamic_human'
+                self.__ped_file=os.path.join(rospkg.RosPack().get_path(
+                'simulator_setup'), 'dynamic_obstacles/person_two_legged.model.yaml')
+            elif self.__ped_type==1:
+                self.agent_topic_str+=f',{self.ns_prefix}pedsim_agent_{ped[0]}/dynamic_child'
+                self.__ped_file=os.path.join(rospkg.RosPack().get_path(
+                'simulator_setup'), 'dynamic_obstacles/person_two_legged_child.model.yaml')
+            else:
+                self.agent_topic_str+=f',{self.ns_prefix}pedsim_agent_{ped[0]}/dynamic_elder'
+                self.__ped_file=os.path.join(rospkg.RosPack().get_path(
+                'simulator_setup'), 'dynamic_obstacles/person_single_circle_elder.model.yaml')
+            msg = Ped()
+            msg.id = ped[0]
+            msg.pos = Point()
+            msg.pos.x = ped[1][0]
+            msg.pos.y = ped[1][1]
+            msg.pos.z = ped[1][2]
+            msg.type = self.__ped_type
+            msg.number_of_peds = 1
+            msg.yaml_file = self.__ped_file
+            msg.waypoints = []
+            for pos in ped[2]:
+                p = Point()
+                p.x = pos[0]
+                p.y = pos[1]
+                p.z = pos[2]
+                msg.waypoints.append(p)
+            srv.peds.append(msg)
+
+        max_num_try = 2
+        i_curr_try = 0
+        while i_curr_try < max_num_try:
+            # try to call service
+            response=self.__respawn_peds_srv.call(srv.peds)
+            # response=self.__spawn_ped_srv.call(srv.peds)
+            if not response.finished:  # if service not succeeds, do something and redo service
+                rospy.logwarn(
+                    f"spawn human failed! trying again... [{i_curr_try+1}/{max_num_try} tried]")
+                # rospy.logwarn(response.message)
+                i_curr_try += 1
+            else:
+                break
+        self.__peds = peds        
+        rospy.set_param(f'{self.ns_prefix}agent_topic_string', self.agent_topic_str)
+        return
+
+    def spawn_random_peds_in_world(self, n:int, safe_distance:float=3.5, forbidden_zones: Union[list, None] = None):
+        """
+        Spawning n random pedestrians in the whole world.
+        :param n number of pedestrians that will be spawned.
+        :param map the occupancy grid of the current map (TODO: the map should be updated every spawn)
+        :safe_distance [meter] for sake of not exceeding the safety distance at the beginning phase
+        """
+        ped_array =np.array([],dtype=object).reshape(0,3)
+        # self.human_id+=1
+        for i in range(n):
+            [x, y, theta] = get_random_pos_on_map(self._free_space_indices, self.map, safe_distance, forbidden_zones)
+            waypoints = np.array( [x, y, 2]).reshape(1,3) # the first waypoint
+            # if random.uniform(0.0, 1.0) < 0.8:
+            safe_distance=safe_distance-3 #the other waypoints don't need to avoid robot
+            for j in range(1000):
+                dist = 0
+                while dist < 8:                    
+                    [x2, y2, theta2] = get_random_pos_on_map(self._free_space_indices, self.map, safe_distance, forbidden_zones)
+                    dist = np.linalg.norm([waypoints[-1,0] - x2,waypoints[-1,1] - y2])
+                    # if dist>=8: print(dist)
+                waypoints = np.vstack([waypoints, [x2, y2, 2]])
+            ped=np.array([i+1, [x, y, 0.0], waypoints],dtype=object)
+            ped_array=np.vstack([ped_array,ped])
+        self.__respawn_peds(ped_array)
+
+    def __remove_all_peds(self):
+        """
+        Removes all pedestrians, that has been spawned so far
+        """
+        srv = SetBool()
+        srv.data = True
+        self.__remove_all_peds_srv.call(srv.data)
+        self.__peds = []
+        return
+
+    def _generate_vertices_for_polygon_obstacle(self,num_vertices:int): 
+        [x1, y1, theta1] = get_random_pos_on_map(self._free_space_indices, self.map, 0.3)        
+        angle = 2*np.pi*np.random.random(1)
+        radius = 1.5
+        point = np.array([x1+np.cos(angle)*radius, y1+np.sin(angle)*radius])
+        vertex=point.reshape(1,2)
+        # print('register static task stage')
+        for i in range(num_vertices-1):
+            dist = 0
+            # x2, y2=0.0, 0.0
+            while dist <1.0 or dist > 1.3:
+                angle = 2*np.pi*np.random.random(1)
+                # radius = 0.1
+                x2, y2= x1+np.cos(angle)*radius, y1+np.sin(angle)*radius
+                dist = np.linalg.norm([vertex[-1,0] - x2,vertex[-1,1] - y2])
+                # print('d',dist)
+            vertex=np.vstack([vertex,[x2[0],y2[0]]])
+        # print(num_vertices)
+        # print('start_pos',[x1, y1, theta1])
+        return vertex
