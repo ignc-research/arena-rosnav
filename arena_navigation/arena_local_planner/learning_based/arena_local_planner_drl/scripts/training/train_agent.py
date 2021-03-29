@@ -12,6 +12,7 @@ from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.callbacks import EvalCallback, StopTrainingOnRewardThreshold
 from stable_baselines3.common.utils import set_random_seed
 
+from task_generator.task_generator.tasks import *
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.scripts.custom_policy import *
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.rl_agent.envs.flatland_gym_env import FlatlandEnv
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.tools.argsparser import parse_training_args
@@ -207,12 +208,12 @@ if __name__ == "__main__":
     trainstage_cb = InitiateNewTrainStage(
         n_envs=args.n_envs,
         treshhold_type="succ", 
-        upper_threshold=0.9, lower_threshold=0.6, 
+        upper_threshold=0.99, lower_threshold=0.3, 
         task_mode=params['task_mode'], verbose=1)
     
     # stop training on reward threshold callback
     stoptraining_cb = StopTrainingOnRewardThreshold(
-        reward_threshold=14.5, verbose=1)
+        reward_threshold=35, verbose=1)
 
     # instantiate eval environment
     # take task_manager from first sim (currently evaluation only provided for single process)
@@ -231,17 +232,17 @@ if __name__ == "__main__":
         else:
             env = VecNormalize(
                 env, training=True, 
-                norm_obs=True, norm_reward=False, clip_reward=15)
+                norm_obs=True, norm_reward=False, clip_reward=35)
             eval_env = VecNormalize(
                 eval_env, training=True, 
-                norm_obs=True, norm_reward=False, clip_reward=15)
+                norm_obs=True, norm_reward=False, clip_reward=35)
     
     # evaluation settings
     # n_eval_episodes: number of episodes to evaluate agent on
     # eval_freq: evaluate the agent every eval_freq train timesteps
     eval_cb = EvalCallback(
         eval_env=eval_env,          train_env=env,
-        n_eval_episodes=40,         eval_freq=20000, 
+        n_eval_episodes=50,         eval_freq=2**15, 
         log_path=PATHS['eval'],     best_model_save_path=PATHS['model'], 
         deterministic=True,         callback_on_eval_end=trainstage_cb,
         callback_on_new_best=stoptraining_cb)
@@ -271,6 +272,29 @@ if __name__ == "__main__":
                     gae_lambda = params['gae_lambda'],  batch_size = params['m_batch_size'], 
                     n_epochs = params['n_epochs'],      clip_range = params['clip_range'], 
                     tensorboard_log = PATHS['tb'],  verbose = 1
+                )
+                
+        elif args.agent == "MLP_LSTM":
+                model = PPO(
+                    MLP_LSTM_POLICY, env,
+                    gamma = gamma,                     n_steps = n_steps, 
+                    ent_coef = ent_coef,               learning_rate = learning_rate, 
+                    vf_coef = vf_coef,                 max_grad_norm = max_grad_norm, 
+                    gae_lambda = gae_lambda,           batch_size = batch_size, 
+                    n_epochs = n_epochs,               clip_range = clip_range, 
+                    tensorboard_log = PATHS.get('tb'), verbose = 1,
+                    use_sde=use_sde
+                )
+        elif args.agent == "MLP_SARL":
+                model = PPO(
+                    MLP_SARL_POLICY, env,
+                    gamma = gamma,                     n_steps = n_steps, 
+                    ent_coef = ent_coef,               learning_rate = learning_rate, 
+                    vf_coef = vf_coef,                 max_grad_norm = max_grad_norm, 
+                    gae_lambda = gae_lambda,           batch_size = batch_size, 
+                    n_epochs = n_epochs,               clip_range = clip_range, 
+                    tensorboard_log = PATHS.get('tb'), verbose = 1,
+                    use_sde=use_sde
                 )
 
         elif args.agent == "DRL_LOCAL_PLANNER" or args.agent == "CNN_NAVREP":
