@@ -46,7 +46,7 @@ if __name__ == "__main__":
     env = DummyVecEnv(
         [lambda: FlatlandEnv(
             'eval_sim', PATHS.get('robot_setting'), PATHS.get('robot_as'), params['reward_fnc'], params['discrete_action_space'], 
-            goal_radius=0.50, max_steps_per_episode=max_steps_per_episode, train_mode=False, task_mode='scenario', PATHS=PATHS, curr_stage=4)
+            goal_radius=0.25, max_steps_per_episode=max_steps_per_episode, train_mode=False, task_mode='scenario', PATHS=PATHS, curr_stage=4)
         ])
     if params['normalize']:
         assert os.path.isfile(PATHS['vecnorm']
@@ -97,6 +97,8 @@ if __name__ == "__main__":
                     done_reason = "exceeded max steps"
                 elif info[0]['done_reason'] == 1:
                     done_reason = "collision"
+                elif info[0]['done_reason'] >= 3:
+                    done_reason = "exceeded safety distance"
                 else:
                     done_reason = "goal reached"
                 
