@@ -1,5 +1,4 @@
 # for data
-import rosbag
 import bagpy
 from bagpy import bagreader
 import pandas as pd
@@ -348,6 +347,7 @@ class newBag():
                 # for av
                 trajs.append(path_length)
                 if path_length > 0 and plot_trj:
+                    print(lgnd)
                     ax.plot(y, x, lgnd[planner], alpha=0.2)
                     ax.set_xlabel("x in [m]")
                     ax.set_ylabel("y in [m]")
@@ -682,6 +682,7 @@ def read_scn_file(map, ob):
     json_path = rospack.get_path('simulator_setup')+'/scenarios/eval/'
 
     for file in os.listdir(json_path):
+        print(map, ob)
         if file.endswith(".json") and map in file and ob in file:
             jf = file
     # read file
@@ -717,80 +718,114 @@ def read_scn_file(map, ob):
     start = data["robot"]["start_pos"]
     goal  = data["robot"]["goal_pos"]
 
-def eval_all(a, map, ob, vel, wpg, run, saved_name=""):
-    global ax, sm, lgnd, start, goal, axlim, plot_sm
-    fig, ax = plt.subplots(figsize=(6, 7))
+# def eval_all(a, map, ob, vel, wpg, run, saved_name=""):
+#     global ax, sm, lgnd, start, goal, axlim, plot_sm
+#     fig, ax = plt.subplots(figsize=(6, 7))
     
-    read_scn_file(map, ob) 
+#     read_scn_file(map, ob) 
 
-    mode =  map + "_" + ob + "_" + vel 
-    # fig.suptitle(mode, fontsize=16)
-    # plot static map
-    if not "empty" in map and plot_sm:
-        # img = plt.imread("map_small.png")
-        # ax.imshow(img, extent=[-20, 6, -6, 27.3])
-        plt.scatter(sm[1], sm[0],s = 0.2 , c = "grey")
-        # plt.plot(sm[1], sm[0],"--")
+#     mode =  map + "_" + ob + "_" + vel 
+#     # fig.suptitle(mode, fontsize=16)
+#     # plot static map
+#     if not "empty" in map and plot_sm:
+#         # img = plt.imread("map_small.png")
+#         # ax.imshow(img, extent=[-20, 6, -6, 27.3])
+#         plt.scatter(sm[1], sm[0],s = 0.2 , c = "grey")
+#         # plt.plot(sm[1], sm[0],"--")
         
-    # return
+#     # return
+#     cur_path    = str(pathlib.Path().absolute()) 
+#     parent_path = str(os.path.abspath(os.path.join(cur_path, os.pardir)))
+#     bag_path    = parent_path + "/bags/scenarios/" + run
+
+def eval_cfg():
+    global ax, sm, lgnd, start, goal, axlim, plot_sm
+
     cur_path    = str(pathlib.Path().absolute()) 
     parent_path = str(os.path.abspath(os.path.join(cur_path, os.pardir)))
-    bag_path    = parent_path + "/bags/scenarios/" + run
-
-
-    for planner in a:
-        curr_bag = bag_path + planner
-        for file in os.listdir(curr_bag):
-            if file.endswith(".bag") and map in file and ob in file and vel in file:
-                fn = planner + "_" + mode
-                # if "subsample" not in fn or "esdf" not in fn:
-                #     fn.replace("02","03")
-                print(file, fn)
-                
-                newBag(planner, fn, curr_bag + "/" + file)
-
-
-                # print(fn)
     
-    # dhow legend labels once per planner
+
+    with open("eval.yml", "r") as ymlfile:
+        cfg = yaml.safe_load(ymlfile)
+    for f in cfg:
+        fig, ax  = plt.subplots(figsize=(6, 7))
+        ca = f.split("_")
+        map  = ca[0]
+        ob   = ca[1]
+        vel  = ca[2]
+        read_scn_file(map, ob) 
+        mode =  map + "_" + ob + "_" + vel 
+        
+        planner  = cfg[f]
+        for ids in planner:
+            if planner[ids] != None:
+                dir  = planner[ids][0]
+                # lgnd = planner[ids][1]
+                wpg  = planner[ids][2]
+
+
+                bag_path = parent_path + "/bags/scenarios/" + dir
+                curr_bag = bag_path + ids
+                for file in os.listdir(curr_bag):
+                    if file.endswith(".bag") and map in file and ob in file and vel in file and wpg in file:
+                        fn = ids + "_" + mode
+                        # if "subsample" not in fn or "esdf" not in fn:
+                        #     fn.replace("02","03")
+                        print(file, fn)
+                        
+                        newBag(ids, fn, curr_bag + "/" + file)
+
+
+
+
+
+
+
+    # # fig.suptitle(mode, fontsize=16)
+    # # plot static map
+    # if not "empty" in map and plot_sm:
+    #     # img = plt.imread("map_small.png")
+    #     # ax.imshow(img, extent=[-20, 6, -6, 27.3])
+    #     plt.scatter(sm[1], sm[0],s = 0.2 , c = "grey")
+    #     # plt.plot(sm[1], sm[0],"--")
+        
+    # # return
+    # cur_path    = str(pathlib.Path().absolute()) 
+    # parent_path = str(os.path.abspath(os.path.join(cur_path, os.pardir)))
+    # bag_path    = parent_path + "/bags/scenarios/" + run
+
+
+
+
+    #             # print(fn)
     
-    legend_elements = []
-    # el = Line2D([0], [0], color="tab:cyan", lw=4, label="Global Plan")
-    # legend_elements.append(el)
-    for l in lgnd:
-            clr = lgnd[l]
-            mrk = ""
-            # if l == "cadrl":
-            #     l = "STH-WP"
-            # if l == "esdf":
-            #     l = "LM-WP"
-            # if l == "subsample":
-            #     l = "SUB-WP"
-            if "_" in clr:
-                clr = lgnd[l].split("_")[1]
-                mrk = lgnd[l].split("_")[0]
-                el = Line2D([0], [0], color=clr, lw=4, label=l, marker = mrk, linestyle='None')
-            else:
-                el = Line2D([0], [0], color=clr, lw=4, label=l, marker = mrk)
-            legend_elements.append(el)
-    ax.legend(handles=legend_elements, loc=0)
+    # # dhow legend labels once per planner
     
-    # ax.set_ylim([start[0]-1, goal[0]+1])
+    # legend_elements = []
+    # # el = Line2D([0], [0], color="tab:cyan", lw=4, label="Global Plan")
+    # # legend_elements.append(el)
+    # for l in lgnd:
+    #         clr = lgnd[l]
+    #         mrk = ""
+    #         # if l == "cadrl":
+    #         #     l = "STH-WP"
+    #         # if l == "esdf":
+    #         #     l = "LM-WP"
+    #         # if l == "subsample":
+    #         #     l = "SUB-WP"
+    #         if "_" in clr:
+    #             clr = lgnd[l].split("_")[1]
+    #             mrk = lgnd[l].split("_")[0]
+    #             el = Line2D([0], [0], color=clr, lw=4, label=l, marker = mrk, linestyle='None')
+    #         else:
+    #             el = Line2D([0], [0], color=clr, lw=4, label=l, marker = mrk)
+    #         legend_elements.append(el)
+    # ax.legend(handles=legend_elements, loc=0)
+    plt.show()
 
-    # ax.set_xlim([-16, 3])
-    # ax.set_ylim([-4, 24])
+    
 
 
-    # legend = plt.imread("legend/legend1_4.png")
-    # imbox = OffsetImage(legend,zoom="0.5")
-    # xy = [100,200]
-    # ab = AnnotationBox(imbox,xy,xybox=(0,0),boxcoords="op")
-
-    plt.subplots_adjust(top = 1, bottom = 0, right = 1, left = 0, hspace = 0, wspace = 0)
-    plt.savefig('../plots/' + saved_name + mode + '.pdf', bbox_inches = 'tight', pad_inches = 0)
-
-
-    # plt.savefig('../plots/' + saved_name + mode + '.png')
 
 def getMap(msg):
     global ax, sm
@@ -814,15 +849,15 @@ def run():
     # plots
     grid_step       = 2
     plot_sm         = False
-    plot_obst       = False
+    plot_obst       = True
     plot_trj        = True
     plot_zones      = True
     plot_collisions = True
     plot_grid       = False
     plot_gp         = False
     # static map
-    rospy.init_node("eval", anonymous=False)
-    rospy.Subscriber('/flatland_server/debug/layer/static',MarkerArray, getMap)
+    # rospy.init_node("eval", anonymous=False)
+    # rospy.Subscriber('/flatland_server/debug/layer/static',MarkerArray, getMap)
     
 
     # 13 - 18
@@ -845,20 +880,12 @@ def run():
     planner = ["cadrl"]
 
     # map 1 
-    eval_all(planner, "map1", "obs20", "vel02", "timespace", "run_3/")
+    # eval_all(planner, "map1", "obs20", "vel02", "timespace", "run_3/")
+    eval_cfg()
 
-    plt.show()
-    rospy.spin()
+
+
+    # rospy.spin()
 
 if __name__=="__main__":
-    # run()
-    with open("eval.yml", "r") as ymlfile:
-        cfg = yaml.safe_load(ymlfile)
-
-    for section in cfg:
-        # print(section)
-        fig = cfg[section]
-        for key in fig:
-            print(key, fig[key], type(fig[key]))
-       
-        # print(type(x), "\n", x)
+    run()

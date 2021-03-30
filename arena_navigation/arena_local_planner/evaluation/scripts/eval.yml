@@ -1,5 +1,13 @@
-fig1:
-    file_id: cadrl
+map1_obs20_vel02:
+    teb: 
+        - run_3/
+        - clr_tab:orange,ls:-
+        - ""
 
-fig2:
-    file_id: teb
+    mpc:
+        - run_3/
+        - clr_tab:orange,ls:-
+        - ""
+# fig2:
+#     - teb
+#     - mpc
