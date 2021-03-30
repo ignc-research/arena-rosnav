@@ -47,14 +47,14 @@ joint-state-publisher==1.12.15
 kdl-parser-py==1.13.1
 Keras-Preprocessing==1.1.2
 kiwisolver==1.3.1
-laser-geometry==1.6.5
+laser-geometry
 Markdown==3.3.3
 matplotlib==3.3.3
 message-filters==1.14.10
 numpy==1.19.5
 oauthlib==3.1.0
 opt-einsum==3.3.0
-Pillow==8.1.0
+Pillow==7.2.0
 protobuf==3.14.0
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
@@ -91,8 +91,8 @@ rostopic==1.14.10
 rosunit==1.14.9
 roswtf==1.14.10
 rqt-action==0.4.9
-rqt-bag==0.5.0
-rqt-bag-plugins==0.5.0
+rqt-bag
+rqt-bag-plugins
 rqt-console==0.4.9
 rqt-dep==0.4.9
 rqt-graph==0.4.11
@@ -124,7 +124,7 @@ rqt-topic==0.4.11
 rqt-web==0.4.8
 rsa==4.7
 rviz==1.13.15
-sensor-msgs==1.12.7
+sensor-msgs
 six==1.15.0
 smach==2.0.1
 smach-ros==2.0.1
