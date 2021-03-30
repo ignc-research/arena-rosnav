@@ -739,7 +739,7 @@ def read_scn_file(map, ob):
 #     bag_path    = parent_path + "/bags/scenarios/" + run
 
 def eval_cfg():
-    global ax, sm, lgnd, start, goal, axlim, plot_sm
+    global ax, sm, lgnd, start, goal, axlim, plot_sm, plt_cfg
 
     cur_path    = str(pathlib.Path().absolute()) 
     parent_path = str(os.path.abspath(os.path.join(cur_path, os.pardir)))
@@ -747,33 +747,39 @@ def eval_cfg():
 
     with open("eval.yml", "r") as ymlfile:
         cfg = yaml.safe_load(ymlfile)
-    for f in cfg:
-        fig, ax  = plt.subplots(figsize=(6, 7))
-        ca = f.split("_")
-        map  = ca[0]
-        ob   = ca[1]
-        vel  = ca[2]
-        read_scn_file(map, ob) 
-        mode =  map + "_" + ob + "_" + vel 
+    plt_cfg = cfg["plt_default"]
+    print(plt_cfg)
+    # print(cfg["map1_obs20_vel02"]["plt_selector"])
+
+    # for f in cfg:
+    #     fig, ax  = plt.subplots(figsize=(6, 7))
+    #     ca = f.split("_")
+    #     map  = ca[0]
+    #     ob   = ca[1]
+    #     vel  = ca[2]
+    #     read_scn_file(map, ob) 
+    #     mode =  map + "_" + ob + "_" + vel 
+    #     fig.canvas.set_window_title(mode)
+
         
-        planner  = cfg[f]
-        for ids in planner:
-            if planner[ids] != None:
-                dir  = planner[ids][0]
-                # lgnd = planner[ids][1]
-                wpg  = planner[ids][2]
+    #     planner  = cfg[f]
+    #     for ids in planner:
+    #         if planner[ids] != None:
+    #             dir  = planner[ids][0]
+    #             # lgnd = planner[ids][1]
+    #             wpg  = planner[ids][2]
 
 
-                bag_path = parent_path + "/bags/scenarios/" + dir
-                curr_bag = bag_path + ids
-                for file in os.listdir(curr_bag):
-                    if file.endswith(".bag") and map in file and ob in file and vel in file and wpg in file:
-                        fn = ids + "_" + mode
-                        # if "subsample" not in fn or "esdf" not in fn:
-                        #     fn.replace("02","03")
-                        print(file, fn)
+    #             bag_path = parent_path + "/bags/scenarios/" + dir
+    #             curr_bag = bag_path + ids
+    #             for file in os.listdir(curr_bag):
+    #                 if file.endswith(".bag") and map in file and ob in file and vel in file and wpg in file:
+    #                     fn = ids + "_" + mode
+    #                     # if "subsample" not in fn or "esdf" not in fn:
+    #                     #     fn.replace("02","03")
+    #                     print(file, fn)
                         
-                        newBag(ids, fn, curr_bag + "/" + file)
+    #                     newBag(ids, fn, curr_bag + "/" + file)
 
 
 
@@ -821,10 +827,8 @@ def eval_cfg():
     #             el = Line2D([0], [0], color=clr, lw=4, label=l, marker = mrk)
     #         legend_elements.append(el)
     # ax.legend(handles=legend_elements, loc=0)
+
     plt.show()
-
-    
-
 
 
 def getMap(msg):
@@ -841,7 +845,9 @@ def getMap(msg):
 
 def run():
     global ax, sm, lgnd, grid_step, select_run
-    global plot_trj, plot_zones, plot_obst, plot_collisions, plot_grid, plot_sm, plot_gp, plot_subgoals
+    global plt_cfg, plot_trj, plot_zones, plot_obst, plot_collisions, plot_grid, plot_sm, plot_gp, plot_subgoals
+    plt_cfg = {}
+
     select_run = []
     # ToDo: merge nearby zones 
     # legend

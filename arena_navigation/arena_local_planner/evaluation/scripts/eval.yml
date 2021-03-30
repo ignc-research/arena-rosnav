@@ -1,13 +1,41 @@
-map1_obs20_vel02:
-    teb: 
-        - run_3/
-        - clr_tab:orange,ls:-
-        - ""
+plt_default: 
+    {
+        plot_trj: 1, 
+        plot_zones: 1, 
+        plot_obst: 1, 
+        plot_collisions: 1, 
+        plot_grid: 0, 
+        plot_sm: 1, 
+        plot_gp: 0, 
+        plot_subgoals: 0 
+    }
 
-    mpc:
-        - run_3/
-        - clr_tab:orange,ls:-
-        - ""
-# fig2:
-#     - teb
-#     - mpc
+map1_obs20_vel02:
+    plt_selector:
+        {
+            plot_obst: 0,  
+        }
+    planner:
+        {
+
+            teb: 
+                - run_3/
+                - clr_tab:orange,ls:-
+                - ""
+
+            mpc:
+                - run_3/
+                - clr_tab:green,ls:-
+                - ""
+        }
+    
+# map1_obs20_vel03:
+#     teb: 
+#         - run_3/
+#         - clr_tab:orange,ls:-
+#         - ""
+
+#     mpc:
+#         - run_3/
+#         - clr_tab:green,ls:-
+#         - ""
