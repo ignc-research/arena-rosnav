@@ -246,9 +246,10 @@ class newBag():
              return 0
 
     def plot_global_plan(self,run_n,pwp):
-        global plot_gp
+        global plt_cfg
 
-        if plot_gp and self.plot_gp:
+        print("gp", plt_cfg["plot_gp"])
+        if plt_cfg["plot_gp"] and self.plot_gp:
             csv_dir = self.csv_dir 
             # print(csv_dir+"/scenario_reset.csv")
             if os.path.isfile(csv_dir+"/sensorsim-police-gplan.csv") and os.path.isfile(csv_dir+"/scenario_reset.csv"): 
@@ -266,7 +267,7 @@ class newBag():
                 self.plot_gp = False
 
     def plot_collisions(self, xya, clr):
-        global ax, plot_collisions, lgnd
+        global ax, plt_cfg, lgnd
         all_cols_x = []
         all_cols_y = []
         col_exists = False
@@ -276,7 +277,7 @@ class newBag():
                 all_cols_x.append(-col_xy[1])
                 all_cols_y.append(col_xy[0])
 
-                if plot_collisions:
+                if plt_cfg["plot_collisions"]:
                     circle = plt.Circle((-col_xy[1], col_xy[0]), 0.3, color=clr, fill = True, alpha = 0.3)
                     ax.add_patch(circle)
                     
@@ -288,7 +289,7 @@ class newBag():
 
     def evalPath(self, planner, file_name, bags):
         col_xy = []
-        global ax, lgnd, axlim, plot_trj, plot_subgoals, plot_gp, plot_collisions
+        global ax, lgnd, axlim, plt_cfg
 
         durations = [] 
         trajs = []
@@ -346,14 +347,15 @@ class newBag():
                 path_length = np.sum(np.sqrt(dist_array)) 
                 # for av
                 trajs.append(path_length)
-                if path_length > 0 and plot_trj:
+                print("plot_trj", plt_cfg["plot_trj"])
+                if path_length > 0 and plt_cfg["plot_trj"]:
                     print(lgnd)
                     ax.plot(y, x, lgnd[planner], alpha=0.2)
                     ax.set_xlabel("x in [m]")
                     ax.set_ylabel("y in [m]")
 
                 pwp = True
-                if plot_subgoals:
+                if plt_cfg["plot_subgoals"]:
                     if len(wp_y) > 0 and len(wp_x) > 0:
                         pwp = False
                         ax.plot(wp_y, wp_x, "s", color='g', alpha=0.1)
@@ -379,7 +381,7 @@ class newBag():
                 # plot global plan
                 n_run = run.replace("run_","")
                 n_run = int(n_run)
-                if plot_gp:
+                if plt_cfg["plot_gp"]:
                     self.plot_global_plan(n_run,pwp)
 
                 # append current run to txt
@@ -417,7 +419,7 @@ class newBag():
         # self.make_txt(file_name,msg_col)
 
         # self.make_json(json_data)
-        if plot_collisions:
+        if plt_cfg["plot_collisions"]:
             self.plot_collisions(col_xy,lgnd[planner])
 
     def fit_cluster(self,ca):
@@ -440,7 +442,7 @@ class newBag():
         plt.ylim(-4,24)
 
     def make_grid(self, acxy, clr):
-        global ax, plot_grid, grid_step
+        global ax, plt_cfg, grid_step
 
         # max grid size
         cx_min = min(acxy[0]) 
@@ -503,7 +505,7 @@ class newBag():
             cells[i][j] = [n_cell ,x1, y1, x2, y2, x3, y3, x4, y4]
 
 
-            if plot_grid:
+            if plt_cfg["plot_grid"]:
                 # plot coordinates 
                 circle = plt.Circle((x1, y1), 0.1, color=clr, fill = True, alpha = 1)
                 ax.add_patch(circle)
@@ -530,7 +532,7 @@ class newBag():
         self.find_zones(cells,acxy,clr)
 
     def find_zones(self, cells, acxy, clr):
-        global ax, plot_zones, grid_step
+        global ax, plt_cfg, grid_step
         zones = {}
 
         for i in range(len(acxy[0])):
@@ -591,7 +593,7 @@ class newBag():
         col_tol = 5
         filtered_zones = {}
 
-        if plot_zones:
+        if plt_cfg["plot_zones"]:
             for i in zones:
                 nof_cols = len(zones[i])
                 
@@ -651,7 +653,7 @@ class newBag():
 
             break
 
-        # if plot_zones:
+        # if plt_cfg[plot_zones]:
         #     for i in merged:
         #         radius = 1
         #         circle = plt.Circle((i[0], i[1]), radius, color=clr, fill = False, alpha = 1, lw = 2)
@@ -676,13 +678,12 @@ def plot_dyn_obst(ob_xy):
 
 def read_scn_file(map, ob):
     # gets start / goal of each scenario as global param
-    global start, goal, plot_obst
+    global start, goal, plt_cfg
     # find json path
     rospack = rospkg.RosPack()
     json_path = rospack.get_path('simulator_setup')+'/scenarios/eval/'
 
     for file in os.listdir(json_path):
-        print(map, ob)
         if file.endswith(".json") and map in file and ob in file:
             jf = file
     # read file
@@ -709,7 +710,7 @@ def read_scn_file(map, ob):
         ep_y = sp_y + wp_y
         ep   = [ep_x, ep_y]
 
-        if plot_obst:
+        if plt_cfg["plot_obst"]:
             plot_dyn_obst(sp)
             plot_dyn_obst(ep)
             plot_arrow(sp,wp)
@@ -727,7 +728,7 @@ def read_scn_file(map, ob):
 #     mode =  map + "_" + ob + "_" + vel 
 #     # fig.suptitle(mode, fontsize=16)
 #     # plot static map
-#     if not "empty" in map and plot_sm:
+#     if not "empty" in map and plt_cfg["plot_sm"]:
 #         # img = plt.imread("map_small.png")
 #         # ax.imshow(img, extent=[-20, 6, -6, 27.3])
 #         plt.scatter(sm[1], sm[0],s = 0.2 , c = "grey")
@@ -739,7 +740,7 @@ def read_scn_file(map, ob):
 #     bag_path    = parent_path + "/bags/scenarios/" + run
 
 def eval_cfg():
-    global ax, sm, lgnd, start, goal, axlim, plot_sm, plt_cfg
+    global ax, sm, lgnd, start, goal, axlim, plt_cfg
 
     cur_path    = str(pathlib.Path().absolute()) 
     parent_path = str(os.path.abspath(os.path.join(cur_path, os.pardir)))
@@ -748,38 +749,42 @@ def eval_cfg():
     with open("eval.yml", "r") as ymlfile:
         cfg = yaml.safe_load(ymlfile)
     plt_cfg = cfg["plt_default"]
-    print(plt_cfg)
+    # print(plt_cfg)
     # print(cfg["map1_obs20_vel02"]["plt_selector"])
 
-    # for f in cfg:
-    #     fig, ax  = plt.subplots(figsize=(6, 7))
-    #     ca = f.split("_")
-    #     map  = ca[0]
-    #     ob   = ca[1]
-    #     vel  = ca[2]
-    #     read_scn_file(map, ob) 
-    #     mode =  map + "_" + ob + "_" + vel 
-    #     fig.canvas.set_window_title(mode)
+    for f in cfg:
+        if f != "plt_default":
+            fig, ax  = plt.subplots(figsize=(6, 7))
+            ca = f.split("_")
+            map  = ca[0]
+            ob   = ca[1]
+            vel  = ca[2]
+            read_scn_file(map, ob) 
+            mode =  map + "_" + ob + "_" + vel 
+            fig.canvas.set_window_title(mode)
 
-        
-    #     planner  = cfg[f]
-    #     for ids in planner:
-    #         if planner[ids] != None:
-    #             dir  = planner[ids][0]
-    #             # lgnd = planner[ids][1]
-    #             wpg  = planner[ids][2]
+            for key in cfg[f]["plt_selector"]:
+                plt_cfg[key] = cfg[f]["plt_selector"][key]
+            
+            print(mode)
+            print(plt_cfg)
 
+            for planner in cfg[f]["planner"]:
+                arr  = cfg[f]["planner"][planner]
+                dir  = arr[0]
+                # lgnd = arr[1]
+                wpg  = arr[2]
 
-    #             bag_path = parent_path + "/bags/scenarios/" + dir
-    #             curr_bag = bag_path + ids
-    #             for file in os.listdir(curr_bag):
-    #                 if file.endswith(".bag") and map in file and ob in file and vel in file and wpg in file:
-    #                     fn = ids + "_" + mode
-    #                     # if "subsample" not in fn or "esdf" not in fn:
-    #                     #     fn.replace("02","03")
-    #                     print(file, fn)
+                bag_path = parent_path + "/bags/scenarios/" + dir
+                curr_bag = bag_path + planner
+                for file in os.listdir(curr_bag):
+                    if file.endswith(".bag") and map in file and ob in file and vel in file and wpg in file:
+                        fn = planner + "_" + mode
+                        # if "subsample" not in fn or "esdf" not in fn:
+                        #     fn.replace("02","03")
+                        print(file, fn)
                         
-    #                     newBag(ids, fn, curr_bag + "/" + file)
+                        newBag(planner, fn, curr_bag + "/" + file)
 
 
 
@@ -789,7 +794,7 @@ def eval_cfg():
 
     # # fig.suptitle(mode, fontsize=16)
     # # plot static map
-    # if not "empty" in map and plot_sm:
+    # if not "empty" in map and plt_cfg[plot_sm]:
     #     # img = plt.imread("map_small.png")
     #     # ax.imshow(img, extent=[-20, 6, -6, 27.3])
     #     plt.scatter(sm[1], sm[0],s = 0.2 , c = "grey")
@@ -845,7 +850,7 @@ def getMap(msg):
 
 def run():
     global ax, sm, lgnd, grid_step, select_run
-    global plt_cfg, plot_trj, plot_zones, plot_obst, plot_collisions, plot_grid, plot_sm, plot_gp, plot_subgoals
+    global plt_cfg
     plt_cfg = {}
 
     select_run = []
@@ -854,13 +859,15 @@ def run():
 
     # plots
     grid_step       = 2
-    plot_sm         = False
-    plot_obst       = True
-    plot_trj        = True
-    plot_zones      = True
-    plot_collisions = True
-    plot_grid       = False
-    plot_gp         = False
+
+    # plot_sm         = False
+    # plot_obst       = True
+    # plot_trj        = True
+    # plot_zones      = True
+    # plot_collisions = True
+    # plot_grid       = False
+    # plot_gp         = False
+
     # static map
     # rospy.init_node("eval", anonymous=False)
     # rospy.Subscriber('/flatland_server/debug/layer/static',MarkerArray, getMap)

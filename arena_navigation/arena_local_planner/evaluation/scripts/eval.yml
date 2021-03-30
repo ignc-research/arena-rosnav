@@ -1,41 +1,45 @@
 plt_default: 
-    {
-        plot_trj: 1, 
-        plot_zones: 1, 
-        plot_obst: 1, 
-        plot_collisions: 1, 
-        plot_grid: 0, 
-        plot_sm: 1, 
-        plot_gp: 0, 
-        plot_subgoals: 0 
-    }
+    plot_trj: 1, 
+    plot_zones: 1, 
+    plot_obst: 1, 
+    plot_collisions: 1, 
+    plot_grid: 0, 
+    plot_sm: 1, 
+    plot_gp: 0, 
+    plot_subgoals: 0 
 
+
+# fig1
 map1_obs20_vel02:
-    plt_selector:
-        {
-            plot_obst: 0,  
-        }
-    planner:
-        {
-
-            teb: 
-                - run_3/
-                - clr_tab:orange,ls:-
-                - ""
-
-            mpc:
-                - run_3/
-                - clr_tab:green,ls:-
-                - ""
-        }
     
-# map1_obs20_vel03:
-#     teb: 
-#         - run_3/
-#         - clr_tab:orange,ls:-
-#         - ""
-
-#     mpc:
-#         - run_3/
-#         - clr_tab:green,ls:-
-#         - ""
+    plt_selector:
+            plot_sm: 0
+            plot_trj: 1
+        
+    planner:
+        teb: 
+            - run_3/
+            - clr_tab:orange,ls:-
+            - ""
+        
+        mpc:
+            - run_3/
+            - clr_tab:green,ls:-
+            - ""
+# fig2
+map1_obs20_vel03:
+    
+    plt_selector:
+            plot_sm: 0
+            plot_trj: 1
+        
+    planner:
+        teb: 
+            - run_3/
+            - clr_tab:orange,ls:-
+            - ""
+        
+        mpc:
+            - run_3/
+            - clr_tab:green,ls:-
+            - ""    
