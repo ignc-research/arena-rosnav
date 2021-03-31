@@ -8,6 +8,7 @@ from typing import Union
 from stable_baselines3.common.env_checker import check_env
 import yaml
 from rl_agent.utils.observation_collector import ObservationCollector
+from rl_agent.utils.CSVWriter import CSVWriter
 from rl_agent.utils.reward import RewardCalculator
 from rl_agent.utils.debug import timeit
 from task_generator.tasks import *
@@ -66,12 +67,12 @@ class FlatlandEnv(gym.Env):
         try:
             # given every environment enough time to initialize, if we dont put sleep,
             # the training script may crash.
-            ns_int = int(ns.split("_")[1])
-            time.sleep(ns_int*2)
+            if ns.split("_")[1]!='sim':
+                ns_int = int(ns.split("_")[1])
+                time.sleep(ns_int*2)
         except Exception:
             rospy.logwarn(f"Can't not determinate the number of the environment, training script may crash!")
             pass
-
 
         # process specific namespace in ros system
         if ns is not None or ns !="":
@@ -94,11 +95,15 @@ class FlatlandEnv(gym.Env):
         
         # set rosparam
         rospy.set_param("/laser_num_beams", self._laser_num_beams)
+
+        # instantiate task manager
+        self.task = get_predefined_task(
+            ns, mode=task_mode, start_stage=kwargs['curr_stage'], PATHS=PATHS)
         
         # observation collector
         num_humans=self.task.obstacles_manager.num_humans
         self.observation_collector = ObservationCollector(
-            self.ns, self._laser_num_beams, self._laser_max_range,num_humans)
+            self.ns, self._laser_num_beams, self._laser_max_range, num_humans)
         self.observation_space = self.observation_collector.get_observation_space()
         #csv writer
         self.csv_writer=CSVWriter()
@@ -122,9 +127,7 @@ class FlatlandEnv(gym.Env):
             self._sim_step_client = rospy.ServiceProxy(
             self._service_name_step, StepWorld)
         
-        # instantiate task manager
-        self.task = get_predefined_task(
-            ns, mode=task_mode, start_stage=kwargs['curr_stage'], PATHS=PATHS)
+
 
         self._steps_curr_episode = 0
         self._episode = 0
@@ -203,14 +206,17 @@ class FlatlandEnv(gym.Env):
         self._pub_action(action)
         #print(f"Linear: {action[0]}, Angular: {action[1]}")
         self._steps_curr_episode += 1
-
+        s = time.time()
+        #tell the robot how long it has passed
+        self.observation_collector.set_timestep(self._steps_curr_episode/self._max_steps_per_episode)
         # wait for new observations
         merged_obs, obs_dict = self.observation_collector.get_observations()
 
         # calculate reward
         reward, reward_info = self.reward_calculator.get_reward(
             obs_dict['laser_scan'], obs_dict['goal_in_robot_frame'], obs_dict['adult_in_robot_frame'],
-            obs_dict['child_in_robot_frame'],obs_dict['elder_in_robot_frame'], self._steps_curr_episode/self._max_steps_per_episode)
+            obs_dict['child_in_robot_frame'],obs_dict['elder_in_robot_frame'], self._steps_curr_episode/self._max_steps_per_episode
+        )
         done = reward_info['is_done']
         # print("cum_reward:  {}".format(reward))
         
