@@ -59,7 +59,7 @@ class newBag():
         #     fa[2] = "0" + fa[2]
         # fn = fa[0] + "_" + fa[1] + "_" + "obs" + fa[2] + "_" + fa[3].replace("_","") + fa[4]
 
-        with open("quantitative/" + fn + ".json", 'w') as outfile:
+        with open("quantitative/" + self.planner + "_" + fn + ".json", 'w') as outfile:
             json.dump(data, outfile, indent=2)
 
     def make_txt(self,file,msg,ron="a"):
@@ -854,7 +854,8 @@ def run():
 
     select_run = []
 
-    eval_cfg("eval_run3.yml")
+    eval_cfg("eval_run3_empty.yml")
+    eval_cfg("eval_run3_map1.yml")
 
 
 
