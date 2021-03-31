@@ -46,21 +46,32 @@ class newBag():
         # eval bags
         self.bag = bagreader(bag_name)
         eps = self.split_runs()
-        self.evalPath(planner,file_name,eps)
+        if len(eps) != 0:
+            self.evalPath(planner,file_name,eps)
+        else:
+            print("no resets for: " + bag_name)
 
 
     def make_json(self, data):
         fn = self.file_name
-        # fa = fn.split("_")
-        # print(fa)
+        fa = fn.split("_")
+        le = fa[len(fa)-1]
 
-        # # adjust file name
-        # if "0" not in fa[2]:
-        #     fa[2] = "0" + fa[2]
-        # fn = fa[0] + "_" + fa[1] + "_" + "obs" + fa[2] + "_" + fa[3].replace("_","") + fa[4]
-
-        with open("quantitative/" + self.planner + "_" + fn + ".json", 'w') as outfile:
-            json.dump(data, outfile, indent=2)
+        # check which wpg was used
+        relevant = False
+        if le != "DRL":
+            fn = fa[0] + fa[1] + fa[2] + le
+            relevant = True
+        # no wpg for classic planner
+        elif "ego" in self.planner or "mpc" in self.planner or "teb" in self.planner:
+            fn = fa[0] +"_"+ fa[1] + "_" + fa[2]
+            relevant = True
+        
+        if relevant:
+            jfile = "quantitative/" + self.planner + "_" + fn + ".json"
+            if not os.path.isfile(jfile): 
+                with open(jfile, 'w') as outfile:
+                    json.dump(data, outfile, indent=2)
 
     def make_txt(self,file,msg,ron="a"):
         file = file.replace("/","_") + ".txt"
@@ -117,126 +128,130 @@ class newBag():
 
         t_col = []
    
+        try:
+            for i in range(len(df_collision)): 
+                t_col.append(df_collision.loc[i, "Time"])   
+                
+            self.nc_total = len(t_col)
+            # get reset time
+            reset_csv   = self.bag.message_by_topic("/scenario_reset")
+            df_reset    = pd.read_csv(reset_csv, error_bad_lines=False)
+            t_reset     = []
+            for i in range(len(df_reset)): 
+                t_reset.append(df_reset.loc[i, "Time"])
 
-        for i in range(len(df_collision)): 
-            t_col.append(df_collision.loc[i, "Time"])   
-            
-        self.nc_total = len(t_col)
-        # get reset time
-        reset_csv   = self.bag.message_by_topic("/scenario_reset")
-        df_reset    = pd.read_csv(reset_csv, error_bad_lines=False)
-        t_reset     = []
-        for i in range(len(df_reset)): 
-            t_reset.append(df_reset.loc[i, "Time"])
+            # subgoals
+            sg_n = 0
+            subgoal_x = []
+            subgoal_y = []
 
-        # subgoals
-        sg_n = 0
-        subgoal_x = []
-        subgoal_y = []
+            # wpg
+            wpg_n = 0
+            wpg_x = []
+            wpg_y = []
 
-        # wpg
-        wpg_n = 0
-        wpg_x = []
-        wpg_y = []
+            pose_x = []
+            pose_y = []
+            t = []
 
-        pose_x = []
-        pose_y = []
-        t = []
+            bags = {}
+            # run idx
+            n = 0
+            # collsion pos
+            col_xy = []
+            nc = 0
 
-        bags = {}
-        # run idx
-        n = 0
-        # collsion pos
-        col_xy = []
-        nc = 0
+            global start, select_run
 
-        global start, select_run
+            for i in range(len(df_odom)): 
+                current_time = df_odom.loc[i, "Time"]
+                x = df_odom.loc[i, "pose.pose.position.x"]
+                x = round(x,2)
+                y = df_odom.loc[i, "pose.pose.position.y"]
+                y = round(y,2)
+                reset = t_reset[n]
 
-        for i in range(len(df_odom)): 
-            current_time = df_odom.loc[i, "Time"]
-            x = df_odom.loc[i, "pose.pose.position.x"]
-            x = round(x,2)
-            y = df_odom.loc[i, "pose.pose.position.y"]
-            y = round(y,2)
-            reset = t_reset[n]
+                # print(reset)
 
-            # print(reset)
+                # check if respawned
+                
+                start_x = start[0] + 0.5
 
-            # check if respawned
-            
-            start_x = start[0] + 0.5
+                if current_time > reset-6 and n < len(t_reset)-1 and x < start_x:
+                    n += 1
+                    # store the run
+                    if n in select_run or len(select_run) == 0:
+                        bags["run_"+str(n)] = [pose_x, pose_y, t, col_xy, subgoal_x, subgoal_y, wpg_x, wpg_y]
 
-            if current_time > reset-6 and n < len(t_reset)-1 and x < start_x:
-                n += 1
-                # store the run
-                if n in select_run or len(select_run) == 0:
-                    bags["run_"+str(n)] = [pose_x, pose_y, t, col_xy, subgoal_x, subgoal_y, wpg_x, wpg_y]
+                    # reset 
+                    wpg_x     = []
+                    wpg_y     = []
 
-                # reset 
-                wpg_x     = []
-                wpg_y     = []
+                    subgoal_x = []
+                    subgoal_y = []
 
-                subgoal_x = []
-                subgoal_y = []
+                    pose_x    = []
+                    pose_y    = []
+                    t         = []
 
-                pose_x    = []
-                pose_y    = []
-                t         = []
+                    col_xy    = []
+    
+                if n+1 in select_run or len(select_run) == 0:
 
-                col_xy    = []
-   
-            if n+1 in select_run or len(select_run) == 0:
+                    if  len(pose_x) > 0:
+                        pose_x.append(x)
+                        pose_y.append(y)
+                    elif x < start_x:
+                        pose_x.append(x)
+                        pose_y.append(y)
 
-                if  len(pose_x) > 0:
-                    pose_x.append(x)
-                    pose_y.append(y)
-                elif x < start_x:
-                    pose_x.append(x)
-                    pose_y.append(y)
+                    t.append(current_time)
+                    # get trajectory
 
-                t.append(current_time)
-                # get trajectory
+                    # check for col
+                    if len(t_col) > nc:
+                        if current_time >= t_col[nc]:
+                            col_xy.append([x,y])
+                            nc += 1
 
-                # check for col
-                if len(t_col) > nc:
-                    if current_time >= t_col[nc]:
-                        col_xy.append([x,y])
-                        nc += 1
+                    # check for goals
+                    if len(df_subg) > 0:
+                        sg_t = round(df_subg.loc[sg_n, "Time"],3)
+                        sg_x = round(df_subg.loc[sg_n, "pose.position.x"],3)
+                        sg_y = round(df_subg.loc[sg_n, "pose.position.y"],3)
 
-                # check for goals
-                if len(df_subg) > 0:
-                    sg_t = round(df_subg.loc[sg_n, "Time"],3)
-                    sg_x = round(df_subg.loc[sg_n, "pose.position.x"],3)
-                    sg_y = round(df_subg.loc[sg_n, "pose.position.y"],3)
+                        if current_time > sg_t and sg_n < len(df_subg) - 1:
 
-                    if current_time > sg_t and sg_n < len(df_subg) - 1:
+                            subgoal_x.append(sg_x)
+                            subgoal_y.append(sg_y)
 
-                        subgoal_x.append(sg_x)
-                        subgoal_y.append(sg_y)
+                            sg_n += 1
 
-                        sg_n += 1
+                    if len(df_wpg) > 0:
+                        wp_t = round(df_wpg.loc[wpg_n, "Time"],3)
+                        wp_x = round(df_wpg.loc[wpg_n, "pose.position.x"],3)
+                        wp_y = round(df_wpg.loc[wpg_n, "pose.position.y"],3)
 
-                if len(df_wpg) > 0:
-                    wp_t = round(df_wpg.loc[wpg_n, "Time"],3)
-                    wp_x = round(df_wpg.loc[wpg_n, "pose.position.x"],3)
-                    wp_y = round(df_wpg.loc[wpg_n, "pose.position.y"],3)
+                        if current_time > wp_t and wpg_n < len(df_wpg) - 1:
 
-                    if current_time > wp_t and wpg_n < len(df_wpg) - 1:
+                            wpg_x.append(wp_x)
+                            wpg_y.append(wp_y)
 
-                        wpg_x.append(wp_x)
-                        wpg_y.append(wp_y)
-
-                        wpg_n += 1
+                            wpg_n += 1
 
 
-        # remove first 
-        if "run_1" in bags:    
-            bags.pop("run_1")
+            # remove first 
+            if "run_1" in bags:    
+                bags.pop("run_1")
 
-        df = pd.DataFrame(data=bags)
-        run_csv = self.csv_dir + "/" + self.csv_dir.rsplit('/', 1)[-1] + ".csv"
-        df.to_csv(run_csv,index=False)   
-        print("csv created in: " + self.csv_dir)    
+            df = pd.DataFrame(data=bags)
+            run_csv = self.csv_dir + "/" + self.csv_dir.rsplit('/', 1)[-1] + ".csv"
+            df.to_csv(run_csv,index=False)   
+            print("csv created in: " + self.csv_dir)  
+        except Exception as e:
+            # otherwise run had zero collisions
+            print(e)
+            bags = {}
         return bags
     
     def average(self,lst): 
@@ -288,7 +303,7 @@ class newBag():
 
     def evalPath(self, planner, file_name, bags):
         col_xy = []
-        global ax, lgnd, axlim, plt_cfg, line_clr
+        global ax, axlim, plt_cfg, line_clr
 
         durations = [] 
         trajs = []
@@ -723,15 +738,13 @@ def eval_cfg(file):
     cur_path    = str(pathlib.Path().absolute()) 
     parent_path = str(os.path.abspath(os.path.join(cur_path, os.pardir)))
     
-
+    # load default config
     with open(file, "r") as ymlfile:
         cfg = yaml.safe_load(ymlfile)
-    plt_cfg = cfg["plt_default"]
-    # print(plt_cfg)
-    # print(cfg["map1_obs20_vel02"]["plt_selector"])
+    plt_cfg = cfg["default"]
 
     for f in cfg:
-        if f != "plt_default":
+        if f != "default":
             fig, ax  = plt.subplots(figsize=(6, 7))
 
             ca = f.split("_")
@@ -834,7 +847,7 @@ def getMap(msg):
     sm = [points_x, points_y]
 
 def run():
-    global ax, sm, lgnd, grid_step, select_run
+    global ax, sm, grid_step, select_run
     global plt_cfg
     plt_cfg = {}
 
@@ -850,12 +863,11 @@ def run():
     rospy.Subscriber('/flatland_server/debug/layer/static',MarkerArray, getMap)
     
 
-    # 13 - 18
 
-    select_run = []
 
     eval_cfg("eval_run3_empty.yml")
     eval_cfg("eval_run3_map1.yml")
+    # eval_cfg("eval_test.yml")
 
 
 

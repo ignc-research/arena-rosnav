@@ -1,0 +1,43 @@
+default: 
+    plot_trj: 1
+    plot_zones: 1
+    plot_obst: 1
+    plot_collisions: 1
+    plot_grid: 0
+    plot_sm: 1
+    plot_gp: 0 
+    plot_subgoals: 0
+    folder: "run_3/" 
+
+# all wpg       --------------
+
+# fig 1
+map1_obs20_vel02_DRL:
+    
+    plt_selector:
+            plot_sm:  1
+            plot_trj: 1
+        
+    planner:
+        cadrl:
+            - run_3/
+            - tab:red,-
+            - "spatialhorizon"
+        drl1:
+            - run_3/
+            - tab:blue,-
+            - "spatialhorizon"
+        drl2:
+            - run_3/
+            - tab:purple,-
+            - "spatialhorizon"
+        drl3:
+            - run_3/
+            - tab:gray,-
+            - "spatialhorizon"
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "spatialhorizon"
+
+

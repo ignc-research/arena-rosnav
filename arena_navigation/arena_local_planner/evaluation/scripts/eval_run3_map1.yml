@@ -1,4 +1,4 @@
-plt_default: 
+default: 
     plot_trj: 1
     plot_zones: 1
     plot_obst: 1
@@ -7,6 +7,7 @@ plt_default:
     plot_sm: 1
     plot_gp: 0 
     plot_subgoals: 0
+    folder: "run_3/" 
 
 # all wpg       --------------
 
@@ -34,7 +35,10 @@ map1_obs20_vel02_DRL:
             - run_3/
             - tab:gray,-
             - ""
-
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - ""
 # fig 2
 map1_obs20_vel02_classic_DRL:
     
@@ -71,7 +75,10 @@ map1_obs20_vel02_classic_DRL:
             - run_3/
             - tab:gray,-
             - ""
-
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - ""
 # fig 1a
 map1_obs20_vel03_DRL:
     
@@ -96,7 +103,10 @@ map1_obs20_vel03_DRL:
             - run_3/
             - tab:gray,-
             - ""
-
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - ""
 # fig 2a
 map1_obs20_vel03_classic_DRL:
     
@@ -133,7 +143,10 @@ map1_obs20_vel03_classic_DRL:
             - run_3/
             - tab:gray,-
             - ""
-
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - ""
 # fig 1b
 map1_obs10_vel02_DRL:
     
@@ -158,7 +171,10 @@ map1_obs10_vel02_DRL:
             - run_3/
             - tab:gray,-
             - ""
-
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - ""
 # fig 2b
 map1_obs10_vel02_classic_DRL:
     
@@ -195,7 +211,10 @@ map1_obs10_vel02_classic_DRL:
             - run_3/
             - tab:gray,-
             - ""
-
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - ""
 # fig 1c
 map1_obs10_vel03_DRL:
     
@@ -220,7 +239,10 @@ map1_obs10_vel03_DRL:
             - run_3/
             - tab:gray,-
             - ""
-
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - ""
 # fig 2c
 map1_obs10_vel03_classic_DRL:
     
@@ -257,7 +279,10 @@ map1_obs10_vel03_classic_DRL:
             - run_3/
             - tab:gray,-
             - ""
-
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - ""
 # fig 1d
 map1_obs05_vel02_DRL:
     
@@ -281,6 +306,10 @@ map1_obs05_vel02_DRL:
         drl3:
             - run_3/
             - tab:gray,-
+            - ""
+        rlca:
+            - run_3/
+            - tab:cyan,-
             - ""
 
 # fig 2d
@@ -319,7 +348,10 @@ map1_obs05_vel02_classic_DRL:
             - run_3/
             - tab:gray,-
             - ""
-
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - ""
 # fig 1e
 map1_obs05_vel03_DRL:
     
@@ -344,7 +376,10 @@ map1_obs05_vel03_DRL:
             - run_3/
             - tab:gray,-
             - ""
-
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - ""
 # fig 2e
 map1_obs05_vel03_classic_DRL:
     
@@ -381,6 +416,10 @@ map1_obs05_vel03_classic_DRL:
             - run_3/
             - tab:gray,-
             - ""
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - ""
 # wpg spatialhorizon --------------
 # fig 3
 map1_obs20_vel02_DRL_spatialhorizon:
@@ -406,7 +445,10 @@ map1_obs20_vel02_DRL_spatialhorizon:
             - run_3/
             - tab:gray,-
             - "spatialhorizon"
-
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "spatialhorizon"
 # fig 4
 map1_obs20_vel02_classic_DRL_spatialhorizon:
     
@@ -443,7 +485,10 @@ map1_obs20_vel02_classic_DRL_spatialhorizon:
             - run_3/
             - tab:gray,-
             - "spatialhorizon"
-
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "spatialhorizon"
 # fig 3a
 map1_obs20_vel03_DRL_spatialhorizon:
     
@@ -468,7 +513,10 @@ map1_obs20_vel03_DRL_spatialhorizon:
             - run_3/
             - tab:gray,-
             - "spatialhorizon"
-
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "spatialhorizon"
 # fig 4a
 map1_obs20_vel03_classic_DRL_spatialhorizon:
     
@@ -505,7 +553,10 @@ map1_obs20_vel03_classic_DRL_spatialhorizon:
             - run_3/
             - tab:gray,-
             - "spatialhorizon"
-
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "spatialhorizon"
 # fig 3b
 map1_obs10_vel02_DRL_spatialhorizon:
     
@@ -530,7 +581,10 @@ map1_obs10_vel02_DRL_spatialhorizon:
             - run_3/
             - tab:gray,-
             - "spatialhorizon"
-
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "spatialhorizon"
 # fig 4b
 map1_obs10_vel02_classic_DRL_spatialhorizon:
     
@@ -567,7 +621,10 @@ map1_obs10_vel02_classic_DRL_spatialhorizon:
             - run_3/
             - tab:gray,-
             - "spatialhorizon"
-
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "spatialhorizon"
 # fig 3c
 map1_obs10_vel03_DRL_spatialhorizon:
     
@@ -592,7 +649,10 @@ map1_obs10_vel03_DRL_spatialhorizon:
             - run_3/
             - tab:gray,-
             - "spatialhorizon"
-
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "spatialhorizon"
 # fig 4c
 map1_obs10_vel03_classic_DRL_spatialhorizon:
     
@@ -629,7 +689,10 @@ map1_obs10_vel03_classic_DRL_spatialhorizon:
             - run_3/
             - tab:gray,-
             - "spatialhorizon"
-
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "spatialhorizon"
 # fig 3d
 map1_obs05_vel02_DRL_spatialhorizon:
     
@@ -654,7 +717,10 @@ map1_obs05_vel02_DRL_spatialhorizon:
             - run_3/
             - tab:gray,-
             - "spatialhorizon"
-
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "spatialhorizon"
 # fig 4d
 map1_obs05_vel02_classic_DRL_spatialhorizon:
     plt_selector:
@@ -690,6 +756,11 @@ map1_obs05_vel02_classic_DRL_spatialhorizon:
             - run_3/
             - tab:gray,-
             - "spatialhorizon"
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "spatialhorizon"
+
 # fig 3e
 map1_obs05_vel03_DRL_spatialhorizon:
     
@@ -713,6 +784,10 @@ map1_obs05_vel03_DRL_spatialhorizon:
         drl3:
             - run_3/
             - tab:gray,-
+            - "spatialhorizon"
+        rlca:
+            - run_3/
+            - tab:cyan,-
             - "spatialhorizon"
 
 # fig 4e
@@ -751,6 +826,10 @@ map1_obs05_vel03_classic_DRL_spatialhorizon:
             - run_3/
             - tab:gray,-
             - "spatialhorizon"
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "spatialhorizon"
 # wpg timespace      --------------
 # fig 5
 map1_obs20_vel02_DRL_timespace:
@@ -775,6 +854,10 @@ map1_obs20_vel02_DRL_timespace:
         drl3:
             - run_3/
             - tab:gray,-
+            - "timespace"
+        rlca:
+            - run_3/
+            - tab:cyan,-
             - "timespace"
 
 # fig 6
@@ -813,6 +896,10 @@ map1_obs20_vel02_classic_DRL_timespace:
             - run_3/
             - tab:gray,-
             - "timespace"
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "timespace"
 
 # fig 5a
 map1_obs20_vel03_DRL_timespace:
@@ -837,6 +924,10 @@ map1_obs20_vel03_DRL_timespace:
         drl3:
             - run_3/
             - tab:gray,-
+            - "timespace"
+        rlca:
+            - run_3/
+            - tab:cyan,-
             - "timespace"
 
 # fig 6a
@@ -875,6 +966,10 @@ map1_obs20_vel03_classic_DRL_timespace:
             - run_3/
             - tab:gray,-
             - "timespace"
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "timespace"
 
 # fig 5b
 map1_obs10_vel02_DRL_timespace:
@@ -900,7 +995,10 @@ map1_obs10_vel02_DRL_timespace:
             - run_3/
             - tab:gray,-
             - "timespace"
-
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "timespace"
 # fig 6b
 map1_obs10_vel02_classic_DRL_timespace:
     
@@ -937,7 +1035,10 @@ map1_obs10_vel02_classic_DRL_timespace:
             - run_3/
             - tab:gray,-
             - "timespace"
-
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "timespace"
 # fig 5c
 map1_obs10_vel03_DRL_timespace:
     
@@ -962,7 +1063,10 @@ map1_obs10_vel03_DRL_timespace:
             - run_3/
             - tab:gray,-
             - "timespace"
-
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "timespace"
 # fig 6c
 map1_obs10_vel03_classic_DRL_timespace:
     
@@ -999,7 +1103,10 @@ map1_obs10_vel03_classic_DRL_timespace:
             - run_3/
             - tab:gray,-
             - "timespace"
-
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "timespace"
 # fig 5d
 map1_obs05_vel02_DRL_timespace:
     
@@ -1024,7 +1131,10 @@ map1_obs05_vel02_DRL_timespace:
             - run_3/
             - tab:gray,-
             - "timespace"
-
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "timespace"
 # fig 6d
 map1_obs05_vel02_classic_DRL_timespace:
     
@@ -1061,7 +1171,10 @@ map1_obs05_vel02_classic_DRL_timespace:
             - run_3/
             - tab:gray,-
             - "timespace"
-
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "timespace"
 # fig 5e
 map1_obs05_vel03_DRL_timespace:
     
@@ -1086,7 +1199,10 @@ map1_obs05_vel03_DRL_timespace:
             - run_3/
             - tab:gray,-
             - "timespace"
-
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "timespace"
 # fig 6e
 map1_obs05_vel03_classic_DRL_timespace:
     
@@ -1123,6 +1239,10 @@ map1_obs05_vel03_classic_DRL_timespace:
             - run_3/
             - tab:gray,-
             - "timespace"
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "timespace"
 
 # wpg subsampling    --------------
 # fig 7 
@@ -1149,7 +1269,10 @@ map1_obs20_vel02_DRL_subsampling:
             - run_3/
             - tab:gray,-
             - "subsampling"
-
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "subsampling"
 # fig 8
 map1_obs20_vel02_classic_DRL_subsampling:
     
@@ -1186,6 +1309,10 @@ map1_obs20_vel02_classic_DRL_subsampling:
             - run_3/
             - tab:gray,-
             - "subsampling"
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "subsampling"
 
 # fig 7a 
 map1_obs20_vel03_DRL_subsampling:
@@ -1211,7 +1338,10 @@ map1_obs20_vel03_DRL_subsampling:
             - run_3/
             - tab:gray,-
             - "subsampling"
-
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "subsampling"
 # fig 8a
 map1_obs20_vel03_classic_DRL_subsampling:
     
@@ -1248,6 +1378,10 @@ map1_obs20_vel03_classic_DRL_subsampling:
             - run_3/
             - tab:gray,-
             - "subsampling"
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "subsampling"
 
 # fig 7b 
 map1_obs10_vel02_DRL_subsampling:
@@ -1273,7 +1407,10 @@ map1_obs10_vel02_DRL_subsampling:
             - run_3/
             - tab:gray,-
             - "subsampling"
-
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "subsampling"
 # fig 8b
 map1_obs10_vel02_classic_DRL_subsampling:
     
@@ -1310,6 +1447,10 @@ map1_obs10_vel02_classic_DRL_subsampling:
             - run_3/
             - tab:gray,-
             - "subsampling"
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "subsampling"
 
 # fig 7c 
 map1_obs10_vel03_DRL_subsampling:
@@ -1335,7 +1476,10 @@ map1_obs10_vel03_DRL_subsampling:
             - run_3/
             - tab:gray,-
             - "subsampling"
-
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "subsampling"
 # fig 8c
 map1_obs10_vel03_classic_DRL_subsampling:
     
@@ -1372,6 +1516,10 @@ map1_obs10_vel03_classic_DRL_subsampling:
             - run_3/
             - tab:gray,-
             - "subsampling"
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "subsampling"
 
 # fig 7d 
 map1_obs05_vel02_DRL_subsampling:
@@ -1397,7 +1545,10 @@ map1_obs05_vel02_DRL_subsampling:
             - run_3/
             - tab:gray,-
             - "subsampling"
-
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "subsampling"
 # fig 8d
 map1_obs05_vel02_classic_DRL_subsampling:
     
@@ -1434,6 +1585,10 @@ map1_obs05_vel02_classic_DRL_subsampling:
             - run_3/
             - tab:gray,-
             - "subsampling"
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "subsampling"
 
 # fig 7e 
 map1_obs05_vel03_DRL_subsampling:
@@ -1459,7 +1614,10 @@ map1_obs05_vel03_DRL_subsampling:
             - run_3/
             - tab:gray,-
             - "subsampling"
-
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "subsampling"
 # fig 8e
 map1_obs05_vel03_classic_DRL_subsampling:
     
@@ -1495,5 +1653,9 @@ map1_obs05_vel03_classic_DRL_subsampling:
         drl3:
             - run_3/
             - tab:gray,-
+            - "subsampling"
+        rlca:
+            - run_3/
+            - tab:cyan,-
             - "subsampling"
 
