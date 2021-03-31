@@ -63,7 +63,6 @@ class wp3Env(gym.Env):
         self._robot_state_sub = rospy.Subscriber('/odom', Odometry, self.cbRobotPosition)            # for robot orientation
         self._ref_wp_sub = rospy.Subscriber('/plan_manager/subgoal', PoseStamped, self.cbRefWp)                   # for subgoal position (reference point for circle)
         self._globalGoal = rospy.Subscriber('/goal', PoseStamped, self.cbGlobalGoal)                 # to set wp on global goal if circle touces it
-        #TODO: check if global plan is still needed or can be deleted
         self._globalPlan_sub = rospy.Subscriber('/plan_manager/globalPlan', Path, self.cbglobalPlan)
         self._twist_sub = rospy.Subscriber('/cmd_vel', Twist, self.cbTwist)                          # to calculate distance traveled 
         self._wp4train_reached =False
@@ -86,7 +85,6 @@ class wp3Env(gym.Env):
         self.range_circle = 1.5
         self._steps_curr_episode = 0
         self._robot_pose = PoseStamped()
-        #TODO: check if global plan still need it and delete if not
         self._globalPlan = Path()
         self._subgoal = Pose2D()
         self._globalGoal = Pose2D()
@@ -183,7 +181,6 @@ class wp3Env(gym.Env):
 
         _, obs_dict = self.observation_collector.get_observations()
         dist_robot_goal = obs_dict['goal_in_robot_frame']
-        #TODO: check if still needed and delete if not
         dist_global_sub = obs_dict['global_in_subgoal_frame']
         #transform action which is a waypoint to 2d to calculate distance robot-wp
         wp2d = Pose2D()
@@ -251,7 +248,6 @@ class wp3Env(gym.Env):
             _, obs_dict = self.observation_collector.get_observations()
             dist_robot_goal = obs_dict['goal_in_robot_frame']
             
-            #TODO check if still needed and delete if not
             #dist_robot_goal = np.array([self._robot_pose.x - self._subgoal.x, self._robot_pose.y - self._subgoal.y])
             dist_rg = np.linalg.norm(dist_robot_goal)            
             #todo consider the distance to global path when choosing next optimal waypoint
@@ -328,7 +324,6 @@ class wp3Env(gym.Env):
         return merged_obs, reward, done, info
 
     def reset(self):
-        #TODO check if still needed and comment if not
         self.clear_costmaps()
 
         # set task

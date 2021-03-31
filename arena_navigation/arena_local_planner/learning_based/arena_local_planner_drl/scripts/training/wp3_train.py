@@ -140,6 +140,8 @@ def get_paths(agent_name: str, args):
 if __name__ == "__main__":
     args, _ = parse_training_args()
 
+    rospy.init_node("test", disable_signals=True)
+
     # generate agent name and model specific paths
     AGENT_NAME = get_agent_name(args)
     print("________ STARTING TRAINING WITH:  %s ________\n" % AGENT_NAME)
