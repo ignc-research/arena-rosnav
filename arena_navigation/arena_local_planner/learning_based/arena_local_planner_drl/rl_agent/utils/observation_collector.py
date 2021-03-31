@@ -36,7 +36,7 @@ from std_msgs.msg import Bool
 from rl_agent.utils.debug import timeit 
 
 class ObservationCollector():
-    def __init__(self, ns: str, num_lidar_beams: int, lidar_range: float):
+    def __init__(self, ns: str, num_lidar_beams: int, lidar_range: float, num_humans:int):
         """ a class to collect and merge observations
 
         Args:
@@ -65,7 +65,7 @@ class ObservationCollector():
             spaces.Box(low=-np.PINF, high=np.PINF, shape=(1,),dtype=np.float64), #time
             spaces.Box(low=0.0, high=lidar_range, shape=(num_lidar_beams,),dtype=np.float64), #lidar
             # spaces.Box(low=0.0, high=10.0, shape=(1,),dtype=np.float64) ,
-            # spaces.Box(low=-np.pi, high=np.pi, shape=(1,),dtype=np.float64),            
+            # spaces.Box(low=-np.pi, high=np.pi, shape=(1,),dtype=np.float64) ,
             spaces.Box(low=-np.PINF, high=np.PINF, shape=(self.num_humans_observation_max*18,),dtype=np.float64)
         ))
 
@@ -92,11 +92,13 @@ class ObservationCollector():
         self._rs_deque = deque()
 
         # subscriptions
-        self._scan_sub = rospy.Subscriber(
-            f'{self.ns_prefix}scan', LaserScan, self.callback_scan, tcp_nodelay=True)
+        # self._scan_sub = rospy.Subscriber(
+        #     f'{self.ns_prefix}scan', LaserScan, self.callback_scan, tcp_nodelay=True)
 
-        self._robot_state_sub = rospy.Subscriber(
-            f'{self.ns_prefix}robot_state', RobotStateStamped, self.callback_robot_state, tcp_nodelay=True)
+        # self._robot_state_sub = rospy.Subscriber(
+        #     f'{self.ns_prefix}robot_state', RobotStateStamped, self.callback_robot_state, tcp_nodelay=True)
+        self._scan_sub = message_filters.Subscriber( f'{self.ns_prefix}scan', LaserScan)
+        self._robot_state_sub = message_filters.Subscriber(f'{self.ns_prefix}robot_state', RobotStateStamped)
         
         # self._clock_sub = rospy.Subscriber(
         #     f'{self.ns_prefix}clock', Clock, self.callback_clock, tcp_nodelay=True)
@@ -131,7 +133,7 @@ class ObservationCollector():
 
         # message_filters.TimeSynchronizer: call callback only when all sensor info are ready
         self.sychronized_list=[self._scan_sub, self._robot_state_sub]+self._sub_agent_state #[self._scan_sub, self._robot_state_sub]+self._adult+self._child+self._elder
-        self.ts = message_filters.ApproximateTimeSynchronizer(self.sychronized_list,10,slop=0.05) #,allow_headerless=True)        
+        self.ts = message_filters.ApproximateTimeSynchronizer(self.sychronized_list, 10, slop=0.01) #,allow_headerless=True)
         self.ts.registerCallback(self.callback_observation_received)
 
     def get_observation_space(self):
@@ -139,9 +141,17 @@ class ObservationCollector():
 
     def get_observations(self):
         # apply action time horizon
-        timer = self._clock
-        if self._is_train_mode:
-            self.call_service_takeSimStep(self._action_frequency)
+        # print('get_observation')
+        self._flag_all_received=False
+        if self._is_train_mode: 
+        # sim a step forward until all sensor msg uptodate
+            i=0
+            while(self._flag_all_received==False):
+                # print('1111') self._action_frequency
+                self.call_service_takeSimStep(0.1)
+                i+=1
+                time.sleep(0.01)
+            # print(f"Current observation takes {i} steps for Synchronization")
         else:
             try:
                 rospy.wait_for_message(
@@ -149,27 +159,18 @@ class ObservationCollector():
             except Exception:
                 pass
 
-        # try to retrieve sync'ed obs
-        laser_scan, robot_pose = self.get_sync_obs()
-        if laser_scan is not None and robot_pose is not None:
-            # print("Synced successfully")
-            self._scan = laser_scan
-            self._robot_pose = robot_pose
-        # else:
-        #     print("Not synced")
-
         if len(self._scan.ranges) > 0:
             scan = self._scan.ranges.astype(np.float32)
         else:
-            scan = np.zeros(self._laser_num_beams, dtype=float)
+            scan = np.ones(self._laser_num_beams, dtype=float)*100
             
         rho, theta = ObservationCollector._get_goal_pose_in_robot_frame(
-            self._subgoal, self._robot_pose)        
-        self.rot=np.arctan2(self._subgoal.y-self._robot_pose.y, self._subgoal.x-self._robot_pose.x)
+            self._subgoal, self._robot_pose)
+        self.rot=np.arctan2(self._subgoal.y - self._robot_pose.y, self._subgoal.x - self._robot_pose.x)
         self.robot_vx = self._robot_vel.linear.x * np.cos(self.rot) + self._robot_vel.linear.y * np.sin(self.rot)
         self.robot_vy=self._robot_vel.linear.y* np.cos(self.rot) - self._robot_vel.linear.x * np.sin(self.rot)
         self.robot_self_state=[self._robot_pose.x, self._robot_pose.y, self.robot_vx, self.robot_vy,
-                                                     self._robot_pose.theta, self._robot_vel.angular.z, self._radius_robot,rho, theta]
+                                                     self._robot_pose.theta, self._robot_vel.angular.z, self._radius_robot, rho, theta]
         merged_obs = np.hstack([np.array([self.time_step]), scan])
         obs_dict = {}
         obs_dict["laser_scan"] = scan
@@ -181,7 +182,7 @@ class ObservationCollector():
             #TODO temporarily use the same fnc of _get_goal_pose_in_robot_frame
             coordinate_humans[0][i]=position.x
             coordinate_humans[1][i]=position.y
-            rho_humans[i], theta_humans[i] = ObservationCollector._get_goal_pose_in_robot_frame(position,self._robot_pose)
+            rho_humans[i], theta_humans[i] = ObservationCollector._get_goal_pose_in_robot_frame(position, self._robot_pose)
 
         #sort the humans according to the relative position to robot
         human_pos_index=np.argsort(rho_humans)        
@@ -229,6 +230,7 @@ class ObservationCollector():
             merged_obs=np.hstack([merged_obs,np.zeros([-observation_blank,])])
         elif observation_blank>0:
             merged_obs=merged_obs[:-observation_blank]
+        
         return merged_obs, obs_dict
 
     @staticmethod
@@ -275,8 +277,7 @@ class ObservationCollector():
             robot_pose, _ = self.process_robot_state_msg(robot_pose_msg)
 
             if self._first_sync_obs:
-                break
-        
+                break        
         #print(f"Laser_stamp: {laser_stamp}, Robot_stamp: {robot_stamp}")
         return laser_scan, robot_pose
 
@@ -285,21 +286,12 @@ class ObservationCollector():
             request = StepWorldRequest()
         else:
             request = StepWorldRequest(t)
-        timeout = 12
         try:
-            for i in range(timeout):
-                response = self._sim_step_client(request)
-                rospy.logdebug("step service=", response)
-
-                if response.success:
-                    break
-                if i == timeout-1:
-                    raise TimeoutError(
-                        f"Timeout while trying to call '{self.ns_prefix}step_world'")
-                time.sleep(0.33)
-
+            response = self._sim_step_client(request)
+            rospy.logdebug("step service=", response)
         except rospy.ServiceException as e:
             rospy.logdebug("step Service call failed: %s" % e)
+
 
     def callback_clock(self, msg_Clock):
         self._clock = msg_Clock.clock.to_sec()
@@ -307,23 +299,6 @@ class ObservationCollector():
 
     def callback_subgoal(self, msg_Subgoal):
         self._subgoal = self.process_subgoal_msg(msg_Subgoal)
-        return
-        
-    def callback_dynamic_obstacles(self,msg_human):
-        # print("reached here callback human")
-        num_adult = len(self._adult)
-        num_child = len(self._child)
-        num_elder = len(self._elder)
-        msg_adult=msg_human[:num_adult]
-        msg_child=msg_human[num_adult:num_adult+num_child]
-        msg_elder=msg_human[num_adult+num_child:]
-        for i,msg in enumerate(msg_adult):
-            # print("x",msg.pose.pose.position.x)
-            self._adult_position[i],self._adult_vel[i]=self.process_human_state_msg(msg_adult[i])
-        for i,msg in enumerate(msg_child):
-            self._child_position[i],self._child_vel[i]=self.process_human_state_msg(msg_child[i])
-        for i,msg in enumerate(msg_elder):
-            self._elder_position[i],self._elder_vel[i]=self.process_human_state_msg(msg_elder[i])
         return
 
     def callback_global_plan(self, msg_global_plan):
@@ -340,22 +315,12 @@ class ObservationCollector():
             self._rs_deque.popleft()
         self._rs_deque.append(msg_robotstate)
 
-    # def callback_observation_received(self, msg_LaserScan, msg_RobotStateStamped):
-    #     # process sensor msg
-    #     self._scan = self.process_scan_msg(msg_LaserScan)
-    #     self._robot_pose, self._robot_vel = self.process_robot_state_msg(msg_RobotStateStamped)
-    #     self.obs_received = True
-    #     return
     def callback_observation_received(self, *msg):
-        # process sensor msg
-        # print("reached here callback")
         self._scan=self.process_scan_msg(msg[0])
         self._robot_pose,self._robot_vel=self.process_robot_state_msg(msg[1])
         self.callback_agent_state(msg[2:])
-        #self.callback_dynamic_obstacles(msg[2:])
-        # ask subgoal service
-        #self._subgoal=self.call_service_askForSubgoal()
         self._flag_all_received=True
+
     def callback_agent_state(self, msg):
             for i, m in enumerate(msg):
                 self._human_type[i],self._human_position[i],self._human_vel[i]=self.process_agent_state(m)
