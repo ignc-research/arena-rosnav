@@ -32,7 +32,6 @@ class newBag():
         self.planner = planner
         self.file_name = file_name
         # csv dir
-        self.bag_name = bag_name
         self.csv_dir = bag_name.replace(".bag","")
         # bag topics
         self.odom_topic      = "/sensorsim/police/odom"
@@ -52,12 +51,13 @@ class newBag():
 
     def make_json(self, data):
         fn = self.file_name
-        fa = fn.split("_")
+        # fa = fn.split("_")
+        # print(fa)
 
-        # adjust file name
-        if "0" not in fa[2]:
-            fa[2] = "0" + fa[2]
-        fn = fa[0] + "_" + fa[1] + "_" + "obs" + fa[2] + "_" + fa[3].replace("_","") + fa[4]
+        # # adjust file name
+        # if "0" not in fa[2]:
+        #     fa[2] = "0" + fa[2]
+        # fn = fa[0] + "_" + fa[1] + "_" + "obs" + fa[2] + "_" + fa[3].replace("_","") + fa[4]
 
         with open("quantitative/" + fn + ".json", 'w') as outfile:
             json.dump(data, outfile, indent=2)
@@ -102,7 +102,7 @@ class newBag():
             df_subg  = pd.read_csv(subg_csv, error_bad_lines=False)
 
             gp       = self.bag.message_by_topic(self.gp_topic)
-            df_gp    = pd.read_csv(gp, error_bad_lines=False)
+            # df_gp    = pd.read_csv(gp, error_bad_lines=False)
 
             wpg      = self.bag.message_by_topic(self.wpg_topic)
             df_wpg   = pd.read_csv(wpg, error_bad_lines=False)
@@ -248,7 +248,6 @@ class newBag():
     def plot_global_plan(self,run_n,pwp):
         global plt_cfg
 
-        print("gp", plt_cfg["plot_gp"])
         if plt_cfg["plot_gp"] and self.plot_gp:
             csv_dir = self.csv_dir 
             # print(csv_dir+"/scenario_reset.csv")
@@ -289,7 +288,7 @@ class newBag():
 
     def evalPath(self, planner, file_name, bags):
         col_xy = []
-        global ax, lgnd, axlim, plt_cfg
+        global ax, lgnd, axlim, plt_cfg, line_clr
 
         durations = [] 
         trajs = []
@@ -347,10 +346,9 @@ class newBag():
                 path_length = np.sum(np.sqrt(dist_array)) 
                 # for av
                 trajs.append(path_length)
-                print("plot_trj", plt_cfg["plot_trj"])
                 if path_length > 0 and plt_cfg["plot_trj"]:
-                    print(lgnd)
-                    ax.plot(y, x, lgnd[planner], alpha=0.2)
+                    # print(lgnd)
+                    ax.plot(y, x, line_clr, alpha=0.2)
                     ax.set_xlabel("x in [m]")
                     ax.set_ylabel("y in [m]")
 
@@ -418,9 +416,9 @@ class newBag():
         # self.make_txt(file_name,msg_av)
         # self.make_txt(file_name,msg_col)
 
-        # self.make_json(json_data)
+        self.make_json(json_data)
         if plt_cfg["plot_collisions"]:
-            self.plot_collisions(col_xy,lgnd[planner])
+            self.plot_collisions(col_xy,line_clr)
 
     def fit_cluster(self,ca):
 
@@ -719,34 +717,14 @@ def read_scn_file(map, ob):
     start = data["robot"]["start_pos"]
     goal  = data["robot"]["goal_pos"]
 
-# def eval_all(a, map, ob, vel, wpg, run, saved_name=""):
-#     global ax, sm, lgnd, start, goal, axlim, plot_sm
-#     fig, ax = plt.subplots(figsize=(6, 7))
-    
-#     read_scn_file(map, ob) 
-
-#     mode =  map + "_" + ob + "_" + vel 
-#     # fig.suptitle(mode, fontsize=16)
-#     # plot static map
-#     if not "empty" in map and plt_cfg["plot_sm"]:
-#         # img = plt.imread("map_small.png")
-#         # ax.imshow(img, extent=[-20, 6, -6, 27.3])
-#         plt.scatter(sm[1], sm[0],s = 0.2 , c = "grey")
-#         # plt.plot(sm[1], sm[0],"--")
-        
-#     # return
-#     cur_path    = str(pathlib.Path().absolute()) 
-#     parent_path = str(os.path.abspath(os.path.join(cur_path, os.pardir)))
-#     bag_path    = parent_path + "/bags/scenarios/" + run
-
-def eval_cfg():
-    global ax, sm, lgnd, start, goal, axlim, plt_cfg
+def eval_cfg(file):
+    global ax, sm, start, goal, axlim, plt_cfg, line_clr
 
     cur_path    = str(pathlib.Path().absolute()) 
     parent_path = str(os.path.abspath(os.path.join(cur_path, os.pardir)))
     
 
-    with open("eval.yml", "r") as ymlfile:
+    with open(file, "r") as ymlfile:
         cfg = yaml.safe_load(ymlfile)
     plt_cfg = cfg["plt_default"]
     # print(plt_cfg)
@@ -755,59 +733,67 @@ def eval_cfg():
     for f in cfg:
         if f != "plt_default":
             fig, ax  = plt.subplots(figsize=(6, 7))
+
             ca = f.split("_")
             map  = ca[0]
             ob   = ca[1]
             vel  = ca[2]
             read_scn_file(map, ob) 
             mode =  map + "_" + ob + "_" + vel 
-            fig.canvas.set_window_title(mode)
+            fig.canvas.set_window_title(f)
 
+            # load config settings
             for key in cfg[f]["plt_selector"]:
                 plt_cfg[key] = cfg[f]["plt_selector"][key]
             
-            print(mode)
-            print(plt_cfg)
+            
+            legend_elements = []
+            if plt_cfg["plot_gp"]:
+                gp_el = Line2D([0], [0], color="tab:cyan", lw=4, label="Global Plan")
+                legend_elements.append(gp_el)
+
+
+            if not "empty" in map and plt_cfg["plot_sm"]:
+                # img = plt.imread("map_small.png")
+                # ax.imshow(img, extent=[-20, 6, -6, 27.3])
+                plt.scatter(sm[1], sm[0],s = 0.2 , c = "grey")
+                # plt.plot(sm[1], sm[0],"--")
 
             for planner in cfg[f]["planner"]:
-                arr  = cfg[f]["planner"][planner]
-                dir  = arr[0]
-                # lgnd = arr[1]
-                wpg  = arr[2]
+                arr   = cfg[f]["planner"][planner]
+                dir   = arr[0]
+                style = arr[1]
+                wpg   = arr[2]
 
                 bag_path = parent_path + "/bags/scenarios/" + dir
                 curr_bag = bag_path + planner
+
+                style_arr = style.split(",")
+                line_clr  = style_arr[0]
+                ls        = style_arr[1]
+                el        = Line2D([0], [0], color=line_clr, lw=4, label=planner, marker = "", linestyle=ls)
+                legend_elements.append(el)
+
                 for file in os.listdir(curr_bag):
-                    if file.endswith(".bag") and map in file and ob in file and vel in file and wpg in file:
+
+                    # check if file matches ids
+
+                    file_match = map in file and \
+                                 ob  in file and \
+                                 vel in file and \
+                                 wpg in file
+
+                    if file.endswith(".bag") and file_match:
                         fn = planner + "_" + mode
                         # if "subsample" not in fn or "esdf" not in fn:
                         #     fn.replace("02","03")
-                        print(file, fn)
+                        # print(file, fn)
                         
-                        newBag(planner, fn, curr_bag + "/" + file)
-
-
-
-
-
-
-
-    # # fig.suptitle(mode, fontsize=16)
-    # # plot static map
-    # if not "empty" in map and plt_cfg[plot_sm]:
-    #     # img = plt.imread("map_small.png")
-    #     # ax.imshow(img, extent=[-20, 6, -6, 27.3])
-    #     plt.scatter(sm[1], sm[0],s = 0.2 , c = "grey")
-    #     # plt.plot(sm[1], sm[0],"--")
-        
-    # # return
-    # cur_path    = str(pathlib.Path().absolute()) 
-    # parent_path = str(os.path.abspath(os.path.join(cur_path, os.pardir)))
-    # bag_path    = parent_path + "/bags/scenarios/" + run
-
-
-
-
+                        newBag(planner, f, curr_bag + "/" + file)
+                 
+            ax.legend(handles=legend_elements, loc=0)
+            plt.subplots_adjust(top = 1, bottom = 0, right = 1, left = 0, hspace = 0, wspace = 0)
+            plt.savefig('../plots/' + f + '.pdf', bbox_inches = 'tight', pad_inches = 0)
     #             # print(fn)
     
     # # dhow legend labels once per planner
@@ -831,10 +817,9 @@ def eval_cfg():
     #         else:
     #             el = Line2D([0], [0], color=clr, lw=4, label=l, marker = mrk)
     #         legend_elements.append(el)
-    # ax.legend(handles=legend_elements, loc=0)
+    
 
     plt.show()
-
 
 def getMap(msg):
     global ax, sm
@@ -858,47 +843,22 @@ def run():
     # legend
 
     # plots
-    grid_step       = 2
-
-    # plot_sm         = False
-    # plot_obst       = True
-    # plot_trj        = True
-    # plot_zones      = True
-    # plot_collisions = True
-    # plot_grid       = False
-    # plot_gp         = False
+    grid_step = 2
 
     # static map
-    # rospy.init_node("eval", anonymous=False)
-    # rospy.Subscriber('/flatland_server/debug/layer/static',MarkerArray, getMap)
+    rospy.init_node("eval", anonymous=False)
+    rospy.Subscriber('/flatland_server/debug/layer/static',MarkerArray, getMap)
     
 
     # 13 - 18
 
     select_run = []
-    plot_zones    = True
-    plot_subgoals = False
 
-    lgnd          = {}
-    lgnd["cadrl"] = "tab:red"
-    lgnd["teb"]   = "tab:orange"
-    lgnd["mpc"]   = "tab:green"
-
-    # lgnd["esdf"] = "tab:blue"
-    # lgnd["subsample"] = "tab:purple"
-
-
-    # all runs ------------------------------
-    # print(lgnd)
-    planner = ["cadrl"]
-
-    # map 1 
-    # eval_all(planner, "map1", "obs20", "vel02", "timespace", "run_3/")
-    eval_cfg()
+    eval_cfg("eval_run3.yml")
 
 
 
-    # rospy.spin()
+    rospy.spin()
 
 if __name__=="__main__":
     run()
