@@ -34,7 +34,7 @@ class RobotManager:
         self.ns = ns
         self.ns_prefix = "/" if ns == "" else "/"+ns+"/"
 
-        self.safe_dist_adult=0.8
+        self.safe_dist_adult=1.0
         self.safe_dist_child=1.2
         self.safe_dist_elder=1.5
 
