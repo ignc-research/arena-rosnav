@@ -5,6 +5,7 @@ import re
 import yaml
 import os
 import warnings
+import numpy as np
 from flatland_msgs.srv import DeleteModel, DeleteModelRequest
 from flatland_msgs.srv import SpawnModel, SpawnModelRequest
 from flatland_msgs.srv import MoveModel, MoveModelRequest
@@ -20,8 +21,7 @@ from std_srvs.srv import SetBool, Empty
 import rospy
 import rospkg
 import shutil
-from .utils import generate_freespace_indices, get_random_pos_on_map,update_freespace_indices
-
+from .utils import *
 
 class ObstaclesManager:
     """
@@ -45,6 +45,10 @@ class ObstaclesManager:
         rospy.wait_for_service(f'{self.ns_prefix}move_model', timeout=20)
         rospy.wait_for_service(f'{self.ns_prefix}delete_model', timeout=20)
         rospy.wait_for_service(f'{self.ns_prefix}spawn_model', timeout=20)
+        rospy.wait_for_service(f'{self.ns_prefix}pedsim_simulator/remove_all_peds', timeout=20)
+        rospy.wait_for_service(f'{self.ns_prefix}pedsim_simulator/add_obstacle', timeout=20)
+        rospy.wait_for_service(f'{self.ns_prefix}pedsim_simulator/respawn_peds' , timeout=20)
+        rospy.wait_for_service(f'{self.ns_prefix}pedsim_simulator/spawn_ped' , timeout=20)
         # allow for persistent connections to services
         self._srv_move_model = rospy.ServiceProxy(
             f'{self.ns_prefix}move_model', MoveModel, persistent=True)
@@ -53,10 +57,23 @@ class ObstaclesManager:
         self._srv_spawn_model = rospy.ServiceProxy(
             f'{self.ns_prefix}spawn_model', SpawnModel, persistent=True)
 
+        self.__spawn_ped_srv = rospy.ServiceProxy(
+            f'{self.ns_prefix}pedsim_simulator/spawn_ped', SpawnPeds, persistent=True)
+        self.__respawn_peds_srv = rospy.ServiceProxy(
+            f'{self.ns_prefix}pedsim_simulator/respawn_peds' , SpawnPeds, persistent=True)
+        self.__remove_all_peds_srv = rospy.ServiceProxy(
+            f'{self.ns_prefix}pedsim_simulator/remove_all_peds' , SetBool, persistent=True)
+        self.__add_obstacle_srv = rospy.ServiceProxy(
+            f'{self.ns_prefix}pedsim_simulator/add_obstacle' ,SpawnObstacle, persistent=True)
+
         self.update_map(map_)
         self.obstacle_name_list = []
         self._obstacle_name_prefix = 'obstacle'
         self.__peds=[]
+
+        #tell the pedsim the map border
+        self._add_map_border_in_pedsim()
+
         # remove all existing obstacles generated before create an instance of this class
         self.remove_obstacles()
 
@@ -65,7 +82,12 @@ class ObstaclesManager:
         # a tuple stores the indices of the non-occupied spaces. format ((y,....),(x,...)
         self._free_space_indices = generate_freespace_indices(self.map)
 
-    def register_obstacles(self, num_obstacles: int, model_yaml_file_path: str, start_pos: list = []):
+    def register_obstacles(self, 
+    num_obstacles: int, 
+    model_yaml_file_path: str, 
+    start_pos: list=[] , 
+    vertices:np.ndarray=np.array([]), 
+    type_obstacle:str='dynamic'):
         """register the obstacles defined by a yaml file and request flatland to respawn the them.
 
         Args:
@@ -88,7 +110,8 @@ class ObstaclesManager:
         # we added environments's namespace as the prefix in the model_name to make sure the every environment has it's own temporary model file
         model_name = os.path.basename(model_yaml_file_path).split('.')[0]
         # But we don't want to keep it in the name of the topic otherwise it won't be easy to visualize them in riviz
-        model_name = model_name.replace(self.ns,'')
+        # print(model_name)
+        model_name = model_name.replace(self.ns,'')        
         name_prefix = self._obstacle_name_prefix + '_' + model_name
         if type_obstacle == 'human':
             self.__remove_all_peds()
@@ -137,7 +160,7 @@ class ObstaclesManager:
                         for i in range(size):
                             lineObstacle=LineObstacle()
                             lineObstacle.start.x,lineObstacle.start.y=vertices[i,0],vertices[i,1]
-                            lineObstacle.end.x,lineObstacle.end.y=vertices[(i+1)%size,0],vertices[(i+1)%size,0]
+                            lineObstacle.end.x,lineObstacle.end.y=vertices[(i+1)%size,0],vertices[(i+1)%size,1]
                             add_pedsim_srv.staticObstacles.obstacles.append(lineObstacle)
                         self.__add_obstacle_srv.call(add_pedsim_srv)
                         break
@@ -145,7 +168,7 @@ class ObstaclesManager:
                     raise rospy.ServiceException(f"({self.ns}) failed to register obstacles")
         return self
 
-    def register_random_obstacles(self, num_obstacles: int, p_dynamic=0.5):
+    def register_random_obstacles(self, num_obstacles: int, p_dynamic=1):
         """register static or dynamic obstacles.
 
         Args:
@@ -157,8 +180,7 @@ class ObstaclesManager:
         max_linear_velocity = rospy.get_param("/obs_vel")
         # self.register_random_dynamic_obstacles(
         #     num_dynamic_obstalces, max_linear_velocity)
-        self.register_human(
-            num_dynamic_obstalces, max_linear_velocity)
+        self.register_human(num_dynamic_obstalces)
         self.register_random_static_obstacles(
             num_obstacles-num_dynamic_obstalces)
         rospy.loginfo(
@@ -183,17 +205,11 @@ class ObstaclesManager:
             self.register_obstacles(1, model_path)
             os.remove(model_path)
 
-    def register_human(self, num_obstacles: int, linear_velocity=0.3, angular_velocity_max=math.pi/6, min_obstacle_radius=0.5, max_obstacle_radius=0.5):
+    def register_human(self, num_obstacles: int):
         """register dynamic obstacles human.
 
         Args:
             num_obstacles (int): number of the obstacles.
-            linear_velocity (float, optional):  the constant linear velocity of the dynamic obstacle.
-            angular_velocity_max (float, optional): the maximum angular verlocity of the dynamic obstacle.
-                When the obstacle's linear velocity is too low(because of the collision),we will apply an
-                angular verlocity which is sampled from [-angular_velocity_max,angular_velocity_max] to the it to help it better escape from the "freezing" satuation.
-            min_obstacle_radius (float, optional): the minimum radius of the obstacle. Defaults to 0.5.
-            max_obstacle_radius (float, optional): the maximum radius of the obstacle. Defaults to 0.5.
         """
         model_path = os.path.join(rospkg.RosPack().get_path(
         'simulator_setup'), 'dynamic_obstacles/person_two_legged.model.yaml')
@@ -217,17 +233,12 @@ class ObstaclesManager:
             self.register_obstacles(1, model_path)
             os.remove(model_path)
 
-    def register_walls(self, num_obstacles: int, num_vertices_min=3, num_vertices_max=6, min_obstacle_radius=0.5, max_obstacle_radius=2):
-        """register static obstacles with polygon shape.
-
+    def register_walls(self, num_walls: int):
+        """register walls with polygon shape.
         Args:
-            num_obstacles (int): number of the obstacles.
-            num_vertices_min (int, optional): the minimum number of the vertices . Defaults to 3.
-            num_vertices_max (int, optional): the maximum number of the vertices. Defaults to 6.
-            min_obstacle_radius (float, optional): the minimum radius of the obstacle. Defaults to 0.5.
-            max_obstacle_radius (float, optional): the maximum radius of the obstacle. Defaults to 2.
+            num_walls (int): number of the obstacles.
         """
-        for _ in range(num_obstacles):
+        for _ in range(num_walls):
             num_vertices = random.randint(num_vertices_min, num_vertices_max)
             vertexArray=self._generate_vertices_for_polygon_obstacle(num_vertices)
             # model_path = self._generate_random_obstacle_yaml(
@@ -237,6 +248,7 @@ class ObstaclesManager:
             self._free_space_indices=update_freespace_indices(self._free_space_indices, self.map, vertexArray)
             self.register_obstacles(1,model_path, start_pos, vertexArray, type_obstacle='static')
             os.remove(model_path)
+
 
     def register_static_obstacle_polygon(self, vertices: np.ndarray):
         """register static obstacle with polygon shape
@@ -475,6 +487,11 @@ class ObstaclesManager:
             yaml.dump(dict_file, fd)
         return yaml_path
 
+    def setForbidden_zones(self, forbidden_zones: Union[list, None] = None):
+        """ set the forbidden areas for spawning obstacles
+        """
+        self.forbidden_zones=forbidden_zones 
+
     def _generate_random_obstacle_yaml(self,
                                        is_dynamic=False,
                                        linear_velocity=0.3,
@@ -614,7 +631,6 @@ class ObstaclesManager:
             # # this class.
             max_tries = 5
             while max_tries > 0:
-                
                 # some time the returned topices is not iterable
                 try:
                     topics = rospy.get_published_topics()
@@ -700,7 +716,7 @@ class ObstaclesManager:
                 i_curr_try += 1
             else:
                 break
-        self.__peds = peds        
+        self.__peds = peds
         rospy.set_param(f'{self.ns_prefix}agent_topic_string', self.agent_topic_str)
         return
 
@@ -715,12 +731,12 @@ class ObstaclesManager:
         # self.human_id+=1
         for i in range(n):
             [x, y, theta] = get_random_pos_on_map(self._free_space_indices, self.map, safe_distance, forbidden_zones)
-            waypoints = np.array( [x, y, 2]).reshape(1,3) # the first waypoint
+            waypoints = np.array( [x, y, 2]).reshape(1, 3) # the first waypoint
             # if random.uniform(0.0, 1.0) < 0.8:
-            safe_distance=safe_distance-3 #the other waypoints don't need to avoid robot
+            safe_distance = safe_distance - 3 #the other waypoints don't need to avoid robot
             for j in range(1000):
                 dist = 0
-                while dist < 8:                    
+                while dist < 8:
                     [x2, y2, theta2] = get_random_pos_on_map(self._free_space_indices, self.map, safe_distance, forbidden_zones)
                     dist = np.linalg.norm([waypoints[-1,0] - x2,waypoints[-1,1] - y2])
                     # if dist>=8: print(dist)
@@ -756,6 +772,19 @@ class ObstaclesManager:
                 dist = np.linalg.norm([vertex[-1,0] - x2,vertex[-1,1] - y2])
                 # print('d',dist)
             vertex=np.vstack([vertex,[x2[0],y2[0]]])
-        # print(num_vertices)
+        # print(num_border_vertex)
         # print('start_pos',[x1, y1, theta1])
         return vertex
+
+    def _add_map_border_in_pedsim(self):
+        border_vertex=generate_map_inner_border(self._free_space_indices,self.map)
+        self.map_border_vertices=border_vertex
+        add_pedsim_srv=SpawnObstacleRequest()
+        size=border_vertex.shape[0]
+        for i in range(size):
+            lineObstacle=LineObstacle()
+            lineObstacle.start.x,lineObstacle.start.y=border_vertex[i,0],border_vertex[i,1]
+            lineObstacle.end.x,lineObstacle.end.y=border_vertex[(i+1)%size,0],border_vertex[(i+1)%size,1]
+            add_pedsim_srv.staticObstacles.obstacles.append(lineObstacle)
+        self.__add_obstacle_srv.call(add_pedsim_srv)
+
