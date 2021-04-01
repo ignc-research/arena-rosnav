@@ -96,7 +96,7 @@ def update_freespace_indices(free_space_indices, map_: OccupancyGrid, vertexArra
     """
     # free_space_indices=generate_freespace_indices(map_)
     print(vertexArray)
-    n_freespace_cells = len(free_space_indices[0])    
+    n_freespace_cells = len(free_space_indices[0])
     mask=[]
     for idx in range(n_freespace_cells):
         # in cells
@@ -124,3 +124,24 @@ def update_freespace_indices(free_space_indices, map_: OccupancyGrid, vertexArra
             mask.append(False)
     free_space_indices_new=(free_space_indices[0][mask],free_space_indices[0][mask])
     return free_space_indices_new
+
+
+def generate_map_inner_border(free_space_indices, map_: OccupancyGrid):
+    """generate map border (four vertices of the map)
+
+    Returns:
+        vertex_coordinate_x_y(np.ndarray with shape 4 x 2):
+    """
+    n_freespace_cells = len(free_space_indices[0])
+    border_vertex=np.array([]).reshape(0,2)
+    border_vertices=np.array([]).reshape(0,2)
+    for idx in [0,n_freespace_cells-1]:
+        y_in_cells, x_in_cells = free_space_indices[0][idx], free_space_indices[1][idx]
+        y_in_meters = y_in_cells * map_.info.resolution + map_.info.origin.position.y
+        x_in_meters = x_in_cells * map_.info.resolution + map_.info.origin.position.x
+        border_vertex=np.vstack([border_vertex, [x_in_meters, y_in_meters]])
+    border_vertices=np.vstack([border_vertices, [border_vertex[0,0],border_vertex[0,1]]])
+    border_vertices=np.vstack([border_vertices, [border_vertex[0,0],border_vertex[1,1]]])
+    border_vertices=np.vstack([border_vertices, [border_vertex[1,0],border_vertex[0,1]]])
+    border_vertices=np.vstack([border_vertices, [border_vertex[1,0],border_vertex[1,1]]])
+    return border_vertices
