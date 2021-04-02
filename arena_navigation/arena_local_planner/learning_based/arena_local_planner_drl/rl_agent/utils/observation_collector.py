@@ -50,7 +50,7 @@ class ObservationCollector():
             self.ns_prefix = "/"+ns+"/"
 
         #safety settings for different humans TODO: should be global setting
-        self.safe_dist_adult=0.8 #in meter 1.0 1.5 2
+        self.safe_dist_adult=1.0 #in meter 1.0 1.5 2
         self.safe_dist_child=1.2
         self.safe_dist_elder=1.5
         #settings for agents TODO: should be transferred from yaml files
@@ -125,9 +125,11 @@ class ObservationCollector():
             self.agent_state.append(f'{self.ns_prefix}pedsim_agent_{i+1}/agent_state')
         self._sub_agent_state=[None]*num_humans
         self._human_type, self._human_position, self._human_vel= [None]*num_humans,[None]*num_humans,[None]*num_humans
+        self._human_behavior=[None]*num_humans
         self._human_type =np.array(self._human_type)
         self._human_position=np.array(self._human_position)
         self._human_vel=np.array(self._human_vel)
+        self._human_behavior=np.array(self._human_behavior)
         for i, topic in enumerate(self.agent_state):
             self._sub_agent_state[i]=message_filters.Subscriber(topic, AgentState)
 
@@ -141,13 +143,12 @@ class ObservationCollector():
 
     def get_observations(self):
         # apply action time horizon
-        # print('get_observation')
         self._flag_all_received=False
         if self._is_train_mode: 
         # sim a step forward until all sensor msg uptodate
             i=0
             while(self._flag_all_received==False):
-                # print('1111') self._action_frequency
+                # self._action_frequency
                 self.call_service_takeSimStep(0.1)
                 i+=1
                 time.sleep(0.01)
@@ -164,7 +165,7 @@ class ObservationCollector():
         else:
             scan = np.ones(self._laser_num_beams, dtype=float)*100
             
-        rho, theta = ObservationCollector._get_goal_pose_in_robot_frame(
+        rho, theta = ObservationCollector._get_pose_in_robot_frame(
             self._subgoal, self._robot_pose)
         self.rot=np.arctan2(self._subgoal.y - self._robot_pose.y, self._subgoal.x - self._robot_pose.x)
         self.robot_vx = self._robot_vel.linear.x * np.cos(self.rot) + self._robot_vel.linear.y * np.sin(self.rot)
@@ -179,10 +180,10 @@ class ObservationCollector():
         rho_humans, theta_humans=np.empty([self.num_humans,]), np.empty([self.num_humans,])
         coordinate_humans= np.empty([2,self.num_humans])
         for  i, position in enumerate(self._human_position):
-            #TODO temporarily use the same fnc of _get_goal_pose_in_robot_frame
+            #TODO temporarily use the same fnc of _get_pose_in_robot_frame (finished)
             coordinate_humans[0][i]=position.x
             coordinate_humans[1][i]=position.y
-            rho_humans[i], theta_humans[i] = ObservationCollector._get_goal_pose_in_robot_frame(position, self._robot_pose)
+            rho_humans[i], theta_humans[i] = ObservationCollector._get_pose_in_robot_frame(position, self._robot_pose)
 
         #sort the humans according to the relative position to robot
         human_pos_index=np.argsort(rho_humans)        
@@ -190,8 +191,10 @@ class ObservationCollector():
         self._human_type=self._human_type[human_pos_index]
         self._human_vel=self._human_vel[human_pos_index]
         self._human_position=self._human_position[human_pos_index]
+        self._human_behavior=self._human_behavior[human_pos_index]
         obs_dict['human_coordinates_in_robot_frame']=coordinate_humans
         obs_dict['human_type']=self._human_type
+        obs_dict['human_behavior']=self._human_behavior
 
         rho_adult=[]
         rho_child=[]
@@ -234,9 +237,9 @@ class ObservationCollector():
         return merged_obs, obs_dict
 
     @staticmethod
-    def _get_goal_pose_in_robot_frame(goal_pos: Pose2D, robot_pos: Pose2D):
-        y_relative = goal_pos.y - robot_pos.y
-        x_relative = goal_pos.x - robot_pos.x
+    def _get_pose_in_robot_frame(agent_pos: Pose2D, robot_pos: Pose2D):
+        y_relative = agent_pos.y - robot_pos.y
+        x_relative = agent_pos.x - robot_pos.x
         rho = (x_relative**2+y_relative**2)**0.5
         theta = (np.arctan2(y_relative, x_relative) -
                  robot_pos.theta+5*np.pi) % (2*np.pi)-np.pi
@@ -252,7 +255,6 @@ class ObservationCollector():
     def get_sync_obs(self):
         laser_scan = None
         robot_pose = None
-
         #print(f"laser deque: {len(self._laser_deque)}, robot state deque: {len(self._rs_deque)}")
         while len(self._rs_deque) > 0 and len(self._laser_deque) > 0:
             laser_scan_msg = self._laser_deque.popleft()
@@ -323,13 +325,14 @@ class ObservationCollector():
 
     def callback_agent_state(self, msg):
             for i, m in enumerate(msg):
-                self._human_type[i],self._human_position[i],self._human_vel[i]=self.process_agent_state(m)
+                self._human_type[i],self._human_position[i],self._human_vel[i], self._human_behavior[i]=self.process_agent_state(m)
 
     def process_agent_state(self,msg):
         human_type=msg.type
         human_pose=self.pose3D_to_pose2D(msg.pose)
         human_twist=msg.twist
-        return human_type,human_pose, human_twist
+        human_behavior=msg.social_state
+        return human_type,human_pose, human_twist, human_behavior
 
     def process_scan_msg(self, msg_LaserScan: LaserScan):
         # remove_nans_from_scan
