@@ -1,4 +1,6 @@
 # for data
+import copy
+import pprint as pp
 import bagpy
 from bagpy import bagreader
 import pandas as pd
@@ -29,10 +31,11 @@ matplotlib.rcParams.update({'font.size': 18})
 class newBag():
     def __init__(self, planner, file_name, bag_name):
         # planner
-        self.planner = planner
-        self.file_name = file_name
+        self.planner         = planner.split("wpg")[0]
+        self.wpg             = planner.split("wpg")[1]
+        self.file_name       = file_name
         # csv dir
-        self.csv_dir = bag_name.replace(".bag","")
+        self.csv_dir         = bag_name.replace(".bag","")
         # bag topics
         self.odom_topic      = "/sensorsim/police/odom"
         self.collision_topic = "/sensorsim/police/collision"
@@ -47,7 +50,7 @@ class newBag():
         self.bag = bagreader(bag_name)
         eps = self.split_runs()
         if len(eps) != 0:
-            self.evalPath(planner,file_name,eps)
+            self.evalPath(self.planner, file_name, eps)
         else:
             print("no resets for: " + bag_name)
 
@@ -55,23 +58,12 @@ class newBag():
     def make_json(self, data):
         fn = self.file_name
         fa = fn.split("_")
-        le = fa[len(fa)-1]
+        fn = fa[0] +"_"+ fa[1] + "_" + fa[2] + "_" + self.wpg
 
-        # check which wpg was used
-        relevant = False
-        if le != "DRL":
-            fn = fa[0] + fa[1] + fa[2] + le
-            relevant = True
-        # no wpg for classic planner
-        elif "ego" in self.planner or "mpc" in self.planner or "teb" in self.planner:
-            fn = fa[0] +"_"+ fa[1] + "_" + fa[2]
-            relevant = True
-        
-        if relevant:
-            jfile = "quantitative/" + self.planner + "_" + fn + ".json"
-            if not os.path.isfile(jfile): 
-                with open(jfile, 'w') as outfile:
-                    json.dump(data, outfile, indent=2)
+        jfile = "quantitative/" + self.planner + "_" + fn + ".json"
+        if not os.path.isfile(jfile): 
+            with open(jfile, 'w') as outfile:
+                json.dump(data, outfile, indent=2)
 
     def make_txt(self,file,msg,ron="a"):
         file = file.replace("/","_") + ".txt"
@@ -303,7 +295,7 @@ class newBag():
 
     def evalPath(self, planner, file_name, bags):
         col_xy = []
-        global ax, axlim, plt_cfg, line_clr
+        global ax, axlim, plt_cfg, line_clr, line_stl
 
         durations = [] 
         trajs = []
@@ -363,7 +355,7 @@ class newBag():
                 trajs.append(path_length)
                 if path_length > 0 and plt_cfg["plot_trj"]:
                     # print(lgnd)
-                    ax.plot(y, x, line_clr, alpha=0.2)
+                    ax.plot(y, x, line_clr, linestyle = line_stl, alpha=0.2)
                     ax.set_xlabel("x in [m]")
                     ax.set_ylabel("y in [m]")
 
@@ -733,7 +725,7 @@ def read_scn_file(map, ob):
     goal  = data["robot"]["goal_pos"]
 
 def eval_cfg(file):
-    global ax, sm, start, goal, axlim, plt_cfg, line_clr
+    global ax, sm, start, goal, axlim, plt_cfg, line_clr, line_stl
 
     cur_path    = str(pathlib.Path().absolute()) 
     parent_path = str(os.path.abspath(os.path.join(cur_path, os.pardir)))
@@ -741,25 +733,30 @@ def eval_cfg(file):
     # load default config
     with open(file, "r") as ymlfile:
         cfg = yaml.safe_load(ymlfile)
-    plt_cfg = cfg["default"]
+    default_cfg = cfg["default_cfg"]
+    plt_cfg  = copy.deepcopy(default_cfg)
 
-    for f in cfg:
-        if f != "default":
+    for curr_figure in cfg:
+        # plot file name
+        plot_file = '../plots/' + curr_figure + '.pdf'
+        if "custom_cfg" in curr_figure:
+            plt_cfg = copy.deepcopy(default_cfg)
+            for param in cfg[curr_figure]:
+                plt_cfg[param] = cfg[curr_figure][param]
+        
+            # print("----------------")
+            # pp.pprint(plt_cfg)
+        elif "default" not in curr_figure and not os.path.isfile(plot_file):
             fig, ax  = plt.subplots(figsize=(6, 7))
 
-            ca = f.split("_")
+            ca = curr_figure.split("_")
             map  = ca[0]
             ob   = ca[1]
             vel  = ca[2]
             read_scn_file(map, ob) 
             mode =  map + "_" + ob + "_" + vel 
-            fig.canvas.set_window_title(f)
+            fig.canvas.set_window_title(curr_figure)
 
-            # load config settings
-            for key in cfg[f]["plt_selector"]:
-                plt_cfg[key] = cfg[f]["plt_selector"][key]
-            
-            
             legend_elements = []
             if plt_cfg["plot_gp"]:
                 gp_el = Line2D([0], [0], color="tab:cyan", lw=4, label="Global Plan")
@@ -767,24 +764,37 @@ def eval_cfg(file):
 
 
             if not "empty" in map and plt_cfg["plot_sm"]:
-                # img = plt.imread("map_small.png")
-                # ax.imshow(img, extent=[-20, 6, -6, 27.3])
+    #             # img = plt.imread("map_small.png")
+    #             # ax.imshow(img, extent=[-20, 6, -6, 27.3])
                 plt.scatter(sm[1], sm[0],s = 0.2 , c = "grey")
-                # plt.plot(sm[1], sm[0],"--")
+    #             # plt.plot(sm[1], sm[0],"--")
 
-            for planner in cfg[f]["planner"]:
-                arr   = cfg[f]["planner"][planner]
-                dir   = arr[0]
-                style = arr[1]
-                wpg   = arr[2]
+            for planner in cfg[curr_figure]["planner"]:
+                # config plot param for planner
+                plot_param  = cfg[curr_figure]["planner"][planner]
+                if "folder" in plot_param:
+                    dir = plot_param["folder"]
+                else:
+                    dir = plt_cfg["folder"]
+                if "wpg" in plot_param:
+                    wpg     = plot_param["wpg"]
+                else:
+                    wpg = ""
+
+                model   = plot_param["model"]
+                style   = plot_param["linestyle"]
+    
+
+                # print(planner, dir, model, style, wpg)
 
                 bag_path = parent_path + "/bags/scenarios/" + dir
-                curr_bag = bag_path + planner
+                curr_bag = bag_path + model
+
 
                 style_arr = style.split(",")
                 line_clr  = style_arr[0]
-                ls        = style_arr[1]
-                el        = Line2D([0], [0], color=line_clr, lw=4, label=planner, marker = "", linestyle=ls)
+                line_stl  = style_arr[1]
+                el        = Line2D([0], [0], color=line_clr, lw=4, label=planner, marker = "", linestyle=line_stl)
                 legend_elements.append(el)
 
                 for file in os.listdir(curr_bag):
@@ -798,39 +808,17 @@ def eval_cfg(file):
 
                     if file.endswith(".bag") and file_match:
                         fn = planner + "_" + mode
-                        # if "subsample" not in fn or "esdf" not in fn:
-                        #     fn.replace("02","03")
-                        # print(file, fn)
+                        # print(fn)
+    #                     # if "subsample" not in fn or "esdf" not in fn:
+    #                     #     fn.replace("02","03")
+    #                     # print(file, fn)
                         
-                        newBag(planner, f, curr_bag + "/" + file)
+                        planner_wpg = planner.split("_")[0] + "wpg" + wpg 
+                        newBag(planner_wpg, curr_figure, curr_bag + "/" + file)
                  
             ax.legend(handles=legend_elements, loc=0)
             plt.subplots_adjust(top = 1, bottom = 0, right = 1, left = 0, hspace = 0, wspace = 0)
-            plt.savefig('../plots/' + f + '.pdf', bbox_inches = 'tight', pad_inches = 0)
-    #             # print(fn)
-    
-    # # dhow legend labels once per planner
-    
-    # legend_elements = []
-    # # el = Line2D([0], [0], color="tab:cyan", lw=4, label="Global Plan")
-    # # legend_elements.append(el)
-    # for l in lgnd:
-    #         clr = lgnd[l]
-    #         mrk = ""
-    #         # if l == "cadrl":
-    #         #     l = "STH-WP"
-    #         # if l == "esdf":
-    #         #     l = "LM-WP"
-    #         # if l == "subsample":
-    #         #     l = "SUB-WP"
-    #         if "_" in clr:
-    #             clr = lgnd[l].split("_")[1]
-    #             mrk = lgnd[l].split("_")[0]
-    #             el = Line2D([0], [0], color=clr, lw=4, label=l, marker = mrk, linestyle='None')
-    #         else:
-    #             el = Line2D([0], [0], color=clr, lw=4, label=l, marker = mrk)
-    #         legend_elements.append(el)
-    
+            plt.savefig(plot_file, bbox_inches = 'tight', pad_inches = 0)
 
     plt.show()
 
@@ -865,9 +853,9 @@ def run():
 
 
 
-    eval_cfg("eval_run3_empty.yml")
-    eval_cfg("eval_run3_map1.yml")
-    # eval_cfg("eval_test.yml")
+    # eval_cfg("eval_run3_empty.yml")
+    # eval_cfg("eval_run3_map1.yml")
+    eval_cfg("eval_test.yml")
 
 
 
