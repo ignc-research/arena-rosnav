@@ -739,13 +739,12 @@ def eval_cfg(file):
     for curr_figure in cfg:
         # plot file name
         plot_file = '../plots/' + curr_figure + '.pdf'
-        plt_cfg = copy.deepcopy(default_cfg)
+        # print(curr_figure)
         if "custom_cfg" in curr_figure:
             for param in cfg[curr_figure]:
                 plt_cfg[param] = cfg[curr_figure][param]
-        
             # print("----------------")
-            pp.pprint(plt_cfg)
+            # pp.pprint(plt_cfg)
         elif "default" not in curr_figure and not os.path.isfile(plot_file):
             fig, ax  = plt.subplots(figsize=(6, 7))
 
@@ -819,6 +818,9 @@ def eval_cfg(file):
             ax.legend(handles=legend_elements, loc=0)
             plt.subplots_adjust(top = 1, bottom = 0, right = 1, left = 0, hspace = 0, wspace = 0)
             plt.savefig(plot_file, bbox_inches = 'tight', pad_inches = 0)
+            # reset plot cfg to default
+            plt_cfg = copy.deepcopy(default_cfg)
+
 
     plt.show()
 

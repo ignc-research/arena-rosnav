@@ -81,7 +81,7 @@ map1_obs20_vel02_testplot2:
 # We could also ovverride the default folder param with a "custom_cfg_3", but this would apply to all planners !
 map1_obs20_vel02_testplot3:
     planner:
-        cadrl:
+        cadrl (from run 1):
             folder:    "run_2/" # model from folder "run_2/"  
             model:     "esdf"
             linestyle: "tab:red,-"
@@ -96,7 +96,7 @@ map1_obs20_vel02_testplot3:
             linestyle: "tab:grey,-."
         teb:
             model:     "mpc"
-            linestyle: "tab:grey,-."
+            linestyle: "tab:green,-."
 
 
 # We can easily customize the output of the eval script by creating a similar yml config. 
