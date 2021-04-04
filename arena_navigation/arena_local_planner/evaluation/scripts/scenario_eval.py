@@ -739,13 +739,13 @@ def eval_cfg(file):
     for curr_figure in cfg:
         # plot file name
         plot_file = '../plots/' + curr_figure + '.pdf'
+        plt_cfg = copy.deepcopy(default_cfg)
         if "custom_cfg" in curr_figure:
-            plt_cfg = copy.deepcopy(default_cfg)
             for param in cfg[curr_figure]:
                 plt_cfg[param] = cfg[curr_figure][param]
         
             # print("----------------")
-            # pp.pprint(plt_cfg)
+            pp.pprint(plt_cfg)
         elif "default" not in curr_figure and not os.path.isfile(plot_file):
             fig, ax  = plt.subplots(figsize=(6, 7))
 
@@ -807,7 +807,7 @@ def eval_cfg(file):
                                  wpg in file
 
                     if file.endswith(".bag") and file_match:
-                        fn = planner + "_" + mode
+                        # fn = planner + "_" + mode
                         # print(fn)
     #                     # if "subsample" not in fn or "esdf" not in fn:
     #                     #     fn.replace("02","03")
@@ -855,7 +855,8 @@ def run():
 
     # eval_cfg("eval_run3_empty.yml")
     # eval_cfg("eval_run3_map1.yml")
-    eval_cfg("eval_test.yml")
+    # eval_cfg("eval_test.yml")
+    eval_cfg("test.yml")
 
 
 

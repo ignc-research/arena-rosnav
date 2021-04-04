@@ -1,18 +1,3 @@
-# Evaluation
-
-The evaluation script will compare different planners provided as rosbags. The bags need to be recorded while running a scenario (see here), since some topics are needed by the script. The script file is located in script/scenario_eval.py
-
-Once the config id ready, one can easily start the evaluation by ```python scenario_eval.py``` 
-
-
-## yml config
-
-The config file needs to be placed in the script folder. Suppose there is a config file called "test.yml"
-In this file the user can define how many figures will be created, which plots each figure will contain, which color and style each planners will have ...etc.
-
-## example cfg: test.yml
-
-```yml
 # Each yml file should start with the default cfg block, these parameters will apply to all
 # figures below in order to prevent redundant parameter definitions:
 
@@ -117,5 +102,3 @@ map1_obs20_vel02_testplot3:
 # We can easily customize the output of the eval script by creating a similar yml config. 
 # The user can combine any planner with anny figure even comparing planners from different runs.
 # If the corresponding bag exists, any combination will work.
-```
-<img width="400" height="400" src="/plots/test_plots/map1_obs20_vel02_testplot1.pdf">
