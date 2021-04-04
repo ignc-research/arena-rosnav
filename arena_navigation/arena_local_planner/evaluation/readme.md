@@ -123,7 +123,7 @@ map1_obs20_vel02_testplot3:
 <img width="400" height="400" src="/arena_navigation/arena_local_planner/evaluation/plots/test_plots/map1_obs20_vel02_testplot3.png"> -->
 
 <p float="left">
-  <img src="/arena_navigation/arena_local_planner/evaluation/plots/test_plots/map1_obs20_vel02_testplot1.png" width="100" />
-  <img src="/arena_navigation/arena_local_planner/evaluation/plots/test_plots/map1_obs20_vel02_testplot1.png" width="100" /> 
-  <img src="/arena_navigation/arena_local_planner/evaluation/plots/test_plots/map1_obs20_vel02_testplot1.png" width="100" />
+  <img src="/arena_navigation/arena_local_planner/evaluation/plots/test_plots/map1_obs20_vel02_testplot1.png" width="400" />
+  <img src="/arena_navigation/arena_local_planner/evaluation/plots/test_plots/map1_obs20_vel02_testplot1.png" width="400" /> 
+  <img src="/arena_navigation/arena_local_planner/evaluation/plots/test_plots/map1_obs20_vel02_testplot1.png" width="400" />
 </p>
