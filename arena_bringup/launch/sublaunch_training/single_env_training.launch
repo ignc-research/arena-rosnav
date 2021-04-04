@@ -35,7 +35,12 @@
       <arg name="timeout_goal"            default="330."/>  <!-- sec, double-->
       <arg name="timeout_subgoal"         default="30."/>   <!-- sec, double-->
     </include>
-    
+
+    <!-- Launch light pedsim -->
+    <include file="$(find arena_bringup)/launch/sublaunch_training/pedestrians_only.launch">
+        <arg name="ns" value="$(arg ns)" />
+    </include>
+
     <!-- use simulator and rviz-->
     <include file="$(find arena_bringup)/launch/sublaunch_training/flatland_simulator.launch">
         <arg name="ns" value="$(arg ns)"/>

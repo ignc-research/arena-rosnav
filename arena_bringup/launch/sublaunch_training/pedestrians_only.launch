@@ -30,8 +30,7 @@
     <remap from="/tf" to="/$(arg ns)/tf"/>
 		<remap from="/clock" to="/$(arg ns)/clock"/>
   </node>
-
-
+  
   <!-- Visualizer -->
   <!-- <include file="$(find arena_bringup)/launch/sublaunch/pedsim_visualizer.launch">
       <arg name="ns" value="$(arg ns)" />

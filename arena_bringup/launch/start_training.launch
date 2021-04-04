@@ -4,7 +4,7 @@
   <arg name="ns_prefix" default="sim" />
   <arg name="num_envs" default="1" />
   <!-- To make the training more efficient make sure this step_size*laser_update_rate == 1  -->
-  <arg name="step_size" default="0.025"/>
+  <arg name="step_size" default="0.1"/>
   <arg name="update_rate" default="100"/>
   <!-- train mode  -->
   <arg name="train_mode"       default="true"/>
