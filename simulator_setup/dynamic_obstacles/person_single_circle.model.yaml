@@ -21,7 +21,6 @@ bodies:  # List of named bodies
         radius: 0.1
         center: [0.0, 0]
         density: 1
-        # layers: ["2d", "ped"]
         layers: ["ped"]
         collision: false
 
@@ -34,7 +33,6 @@ bodies:  # List of named bodies
         radius: 0.1
         center: [-0.0, 0]
         density: 1
-        # layers: ["2d", "ped"]
         layers: ["ped"]
         collision: false
 

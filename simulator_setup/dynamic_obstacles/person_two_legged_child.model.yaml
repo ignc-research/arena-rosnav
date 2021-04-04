@@ -21,7 +21,6 @@ bodies:  # List of named bodies
         radius: 0.1
         center: [0.0, 0]
         density: 1
-        # layers: ["2d", "ped"]
         layers: ["static"]
         collision: false
 
@@ -34,10 +33,20 @@ bodies:  # List of named bodies
         radius: 0.1
         center: [-0.0, 0]
         density: 1
-        # layers: ["2d", "ped"]
         layers: ["static"]
         collision: false
 
+  - name: safety_dist_circle
+    pose: [0, 0, 0]
+    type: dynamic
+    color: [0.26, 0.3, 0, 0.3]
+    footprints:
+      - type: circle
+        radius: 0.9
+        center: [0.0, 0.0]
+        density: 1
+        layers: ["static"]
+        collision: false
 
 # joints:
 #   - type: weld
@@ -64,6 +73,7 @@ plugins:
     base_body: base_ped
     left_leg_body: left_leg
     right_leg_body: right_leg
+    safety_dist_body: safety_dist_circle
     update_rate: 10
     toggle_leg_movement: true 
     leg_offset: 0.3 
@@ -72,6 +82,7 @@ plugins:
     var_step_time: 0.00
     leg_radius: 0.10 
     var_leg_radius: 0.0
+    safety_dist: 1.0
 
   - type: PosePub
     name: publish_human_pose
