@@ -118,4 +118,4 @@ map1_obs20_vel02_testplot3:
 # The user can combine any planner with anny figure even comparing planners from different runs.
 # If the corresponding bag exists, any combination will work.
 ```
-<img width="400" height="400" src="/plots/test_plots/map1_obs20_vel02_testplot1.pdf">
+<img width="400" height="400" src="/plots/test_plots/map1_obs20_vel02_testplot1.png">

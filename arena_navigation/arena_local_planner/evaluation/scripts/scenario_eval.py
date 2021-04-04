@@ -1,4 +1,5 @@
 # for data
+import sys
 import copy
 import pprint as pp
 import bagpy
@@ -86,8 +87,7 @@ class newBag():
         # get odometry
         
         odom_csv = self.bag.message_by_topic(self.odom_topic)
-        df_odom = pd.read_csv(odom_csv, error_bad_lines=False)
-
+        df_odom  = pd.read_csv(odom_csv, error_bad_lines=False)
 
         df_collision = []
         df_subg      = []
@@ -724,21 +724,21 @@ def read_scn_file(map, ob):
     start = data["robot"]["start_pos"]
     goal  = data["robot"]["goal_pos"]
 
-def eval_cfg(file):
+def eval_cfg(cfg_file, filetype):
     global ax, sm, start, goal, axlim, plt_cfg, line_clr, line_stl
 
     cur_path    = str(pathlib.Path().absolute()) 
     parent_path = str(os.path.abspath(os.path.join(cur_path, os.pardir)))
     
     # load default config
-    with open(file, "r") as ymlfile:
+    with open(cfg_file, "r") as ymlfile:
         cfg = yaml.safe_load(ymlfile)
     default_cfg = cfg["default_cfg"]
     plt_cfg  = copy.deepcopy(default_cfg)
 
     for curr_figure in cfg:
         # plot file name
-        plot_file = '../plots/' + curr_figure + '.pdf'
+        plot_file = '../plots/' + curr_figure + "." + filetype 
         # print(curr_figure)
         if "custom_cfg" in curr_figure:
             for param in cfg[curr_figure]:
@@ -836,33 +836,42 @@ def getMap(msg):
     # plt.scatter(points_y, points_x)
     sm = [points_x, points_y]
 
-def run():
+def run(cfg_file, filetype):
     global ax, sm, grid_step, select_run
     global plt_cfg
     plt_cfg = {}
 
     select_run = []
-    # ToDo: merge nearby zones 
-    # legend
 
-    # plots
-    grid_step = 2
-
+    grid_step            = 2
+        
     # static map
     rospy.init_node("eval", anonymous=False)
     rospy.Subscriber('/flatland_server/debug/layer/static',MarkerArray, getMap)
     
 
-
-
     # eval_cfg("eval_run3_empty.yml")
     # eval_cfg("eval_run3_map1.yml")
     # eval_cfg("eval_test.yml")
-    eval_cfg("test.yml")
+    eval_cfg(cfg_file, filetype)
 
 
 
     rospy.spin()
 
 if __name__=="__main__":
-    run()
+
+    try:
+        yml_file = sys.argv[1]
+        if len(sys.argv) > 2:
+            filetype = sys.argv[2]
+        else:
+            filetype = "png"
+    except Exception as e:
+        print(e)
+        print("\nCall this script like this: python scenario_eval.py '$config.yml' '$format'")
+        print("Example:  python scenario_eval.py 'test.yml' 'pdf'")
+        print("This will generate figures defined in test.yml as pdf files.")
+        print("If $format is left empty, output files will default to png.")
+        
+    run(yml_file, filetype)

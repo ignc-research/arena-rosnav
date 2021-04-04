@@ -6,9 +6,9 @@
 default_cfg:
     plot_trj:        1        # plot agent trajectory
     plot_zones:      0        # plot collision zones
+    plot_grid:       0        # zone grid
     plot_obst:       1        # plot obstacles (start, end, direction)
     plot_collisions: 1        # plot a circle where agent collided
-    plot_grid:       0        # plot collision grid  (eval)
     plot_sm:         0        # plot static map
     plot_gp:         0        # plot global plan
     plot_subgoals:   0        # plot subgoals
