@@ -41,7 +41,7 @@ default_cfg:
 
 # fig 1
 # in figure 1 we want to have the empty map with 20 obstacles and vel of 0.2
-# The script will generate a "map1_obs20_vel02_testplot1.pdf" file inside plots/
+# The script will generate a "map1_obs20_vel02_testplot1.png" file inside plots/
 # We can include any amount of plots to this figure by adding them to "planner"
 # In figure 1 we want to compare three wpg's for the cadrl model
 map1_obs20_vel02_testplot1:            
@@ -123,9 +123,9 @@ map1_obs20_vel02_testplot3:
 <img width="400" height="400" src="/arena_navigation/arena_local_planner/evaluation/plots/test_plots/map1_obs20_vel02_testplot3.png"> -->
 
 <p float="left">
-  <img src="/arena_navigation/arena_local_planner/evaluation/plots/test_plots/map1_obs20_vel02_testplot1.png" width="350" />
-  <img src="/arena_navigation/arena_local_planner/evaluation/plots/test_plots/map1_obs20_vel02_testplot2.png" width="350" /> 
-  <img src="/arena_navigation/arena_local_planner/evaluation/plots/test_plots/map1_obs20_vel02_testplot3.png" width="350" />
+  <img src="/arena_navigation/arena_local_planner/evaluation/plots/test_plots/map1_obs20_vel02_testplot1.png" width="320" />
+  <img src="/arena_navigation/arena_local_planner/evaluation/plots/test_plots/map1_obs20_vel02_testplot2.png" width="320" /> 
+  <img src="/arena_navigation/arena_local_planner/evaluation/plots/test_plots/map1_obs20_vel02_testplot3.png" width="320" />
 </p>
 
 Here, you can see the three figures generated using the test cfg. First figure uses the default cfg, 2nd figure uses a custom cfg including collision zones and the static map. Figure three uses the default cfg again and uses the cadrl model from run 2. 
