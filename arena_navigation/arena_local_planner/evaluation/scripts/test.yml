@@ -81,7 +81,7 @@ map1_obs20_vel02_testplot2:
 # We could also ovverride the default folder param with a "custom_cfg_3", but this would apply to all planners !
 map1_obs20_vel02_testplot3:
     planner:
-        cadrl (from run 1):
+        cadrl (from run 2):
             folder:    "run_2/" # model from folder "run_2/"  
             model:     "esdf"
             linestyle: "tab:red,-"

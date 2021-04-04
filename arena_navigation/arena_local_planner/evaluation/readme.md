@@ -96,7 +96,7 @@ map1_obs20_vel02_testplot2:
 # We could also ovverride the default folder param with a "custom_cfg_3", but this would apply to all planners !
 map1_obs20_vel02_testplot3:
     planner:
-        cadrl:
+        cadrl (from run 2):
             folder:    "run_2/" # model from folder "run_2/"  
             model:     "esdf"
             linestyle: "tab:red,-"
@@ -123,7 +123,9 @@ map1_obs20_vel02_testplot3:
 <img width="400" height="400" src="/arena_navigation/arena_local_planner/evaluation/plots/test_plots/map1_obs20_vel02_testplot3.png"> -->
 
 <p float="left">
-  <img src="/arena_navigation/arena_local_planner/evaluation/plots/test_plots/map1_obs20_vel02_testplot1.png" width="300" />
-  <img src="/arena_navigation/arena_local_planner/evaluation/plots/test_plots/map1_obs20_vel02_testplot2.png" width="300" /> 
-  <img src="/arena_navigation/arena_local_planner/evaluation/plots/test_plots/map1_obs20_vel02_testplot3.png" width="300" />
+  <img src="/arena_navigation/arena_local_planner/evaluation/plots/test_plots/map1_obs20_vel02_testplot1.png" width="350" />
+  <img src="/arena_navigation/arena_local_planner/evaluation/plots/test_plots/map1_obs20_vel02_testplot2.png" width="350" /> 
+  <img src="/arena_navigation/arena_local_planner/evaluation/plots/test_plots/map1_obs20_vel02_testplot3.png" width="350" />
 </p>
+
+Here, you can see the three figures generated using the test cfg. First figure uses the default cfg, 2nd figure uses a custom cfg including collision zones and the static map. Figure three uses the default cfg again and uses the cadrl model from run 2. 
