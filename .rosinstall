@@ -1,6 +1,6 @@
 - git:
     local-name: ../forks/flatland
-    uri: https://github.com/tuananhroman/flatland
+    uri: https://github.com/ignc-research/flatland
     version: arena_human
 
 #- git:
