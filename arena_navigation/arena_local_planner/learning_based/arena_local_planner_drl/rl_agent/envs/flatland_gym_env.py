@@ -70,6 +70,8 @@ class FlatlandEnv(gym.Env):
             if ns.split("_")[1]!='sim':
                 ns_int = int(ns.split("_")[1])
                 time.sleep(ns_int*2)
+            # else:
+            #     time.sleep(3)
         except Exception:
             rospy.logwarn(f"Can't not determinate the number of the environment, training script may crash!")
             pass
@@ -246,14 +248,17 @@ class FlatlandEnv(gym.Env):
     def reset(self):
 
         # set task
-        # regenerate start position end goal position of the robot and change the obstacles accordingly
+        # regenerate start position end goal position of the robot and change the obstacles and ped accordingly
+        self._episode += 1
         self.agent_action_pub.publish(Twist())
         if self._is_train_mode:
             self._sim_step_client()
-        self.task.reset(self.last_obs_dict)
+        #reset start position end goal position  ped positions TODO : modify the reset mechnism
+        self.task.reset(self.last_obs_dict, self._episode)
+        #reset 
+        # self.task.obstacles_manager.__move_all_peds(self._episode)
         self.reward_calculator.reset()
-        self._steps_curr_episode = 0
-        self._episode += 1
+        self._steps_curr_episode = 0        
         self.observation_collector.set_timestep(0.0)
         obs, _ = self.observation_collector.get_observations()
         return obs  # reward, done, info can't be included
