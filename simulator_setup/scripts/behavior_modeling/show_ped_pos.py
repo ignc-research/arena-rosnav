@@ -26,10 +26,13 @@ class Listener:
             social_force = agent_state.forces.social_force
             social_force = np.array([social_force.x, social_force.y])
             social_force_magnitude = np.linalg.norm(social_force)
-            combined_forces = desired_force + social_force
+            obstacle_force = agent_state.forces.obstacle_force
+            obstacle_force = np.array([obstacle_force.x, obstacle_force.y])
+            obstacle_force_magnitude = np.linalg.norm(obstacle_force)
+            combined_forces = desired_force + social_force + obstacle_force
             combined_forces_magnitude = np.linalg.norm(combined_forces)
             talking_to_id = agent_state.talking_to_id
-            self.stdscr.addstr(i, 0, "id: {} state: {:20} talking_to: {:2} x: {:2.2f} y: {:2.2f} desired: {:2.2f} social: {:2.2f} combined: {:2.2f}".format(
+            self.stdscr.addstr(i, 0, "id: {} state: {:20} talking_to: {:2} x: {:4.1f} y: {:4.1f} desired: {:2.2f} social: {:2.2f} obstacle: {:2.2f} combined: {:2.2f}".format(
                 id,
                 social_state,
                 talking_to_id,
@@ -37,6 +40,7 @@ class Listener:
                 y,
                 desired_force_magnitude,
                 social_force_magnitude,
+                obstacle_force_magnitude,
                 combined_forces_magnitude)
             )
         self.stdscr.refresh()
