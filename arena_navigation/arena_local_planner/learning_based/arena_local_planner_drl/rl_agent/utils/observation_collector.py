@@ -66,7 +66,7 @@ class ObservationCollector():
             spaces.Box(low=0.0, high=lidar_range, shape=(num_lidar_beams,),dtype=np.float64), #lidar
             # spaces.Box(low=0.0, high=10.0, shape=(1,),dtype=np.float64) ,
             # spaces.Box(low=-np.pi, high=np.pi, shape=(1,),dtype=np.float64) ,
-            spaces.Box(low=-np.PINF, high=np.PINF, shape=(self.num_humans_observation_max*18,),dtype=np.float64)
+            spaces.Box(low=-np.PINF, high=np.PINF, shape=(self.num_humans_observation_max*19,),dtype=np.float64) # human states
         ))
 
         self._laser_num_beams = rospy.get_param("/laser_num_beams")
@@ -192,42 +192,48 @@ class ObservationCollector():
         self._human_vel=self._human_vel[human_pos_index]
         self._human_position=self._human_position[human_pos_index]
         self._human_behavior=self._human_behavior[human_pos_index]
+
         obs_dict['human_coordinates_in_robot_frame']=coordinate_humans
         obs_dict['human_type']=self._human_type
         obs_dict['human_behavior']=self._human_behavior
 
-        rho_adult=[]
-        rho_child=[]
-        rho_elder=[]
+        # semantic tokens
+        self._human_behavior_token=(self._human_behavior=='talking').astype(np.int)
+        # print(self._human_behavior)
+
+        rho_behavior_adult = np.array([],dtype=object).reshape(0,2)
+        rho_behavior_child = np.array([],dtype=object).reshape(0,2)
+        rho_behavior_elder = np.array([],dtype=object).reshape(0,2)
 
         for i, ty in enumerate(self._human_type):            
             if ty==0: # adult
-                rho_adult.append(rho_humans[i])
+                rho_behavior=np.array([rho_humans[i],self._human_behavior[i]],dtype=object)
+                rho_behavior_adult=np.vstack([rho_behavior_adult, rho_behavior])
                 #robot centric 
                 state=ObservationCollector.rotate(self.robot_self_state[:2]+[self._human_position[i].x, self._human_position[i].y, self._human_vel[i].linear.x,self._human_vel[i].linear.y], self.rot)
                 obs=np.array(self.robot_self_state+[rho_humans[i], theta_humans[i]]+state+[self.safe_dist_adult ,self._radius_adult,
-                                                self._radius_adult+self.safe_dist_adult+self._radius_robot])
+                                                self._radius_adult+self.safe_dist_adult+self._radius_robot,self._human_behavior_token[i]])
                 merged_obs = np.hstack([merged_obs,obs])
             elif ty==1: # child
-                rho_child.append(rho_humans[i])
+                rho_behavior=np.array([rho_humans[i],self._human_behavior[i]],dtype=object)
+                rho_behavior_child=np.vstack([rho_behavior_child, rho_behavior])
                 #robot centric 
                 state=ObservationCollector.rotate(self.robot_self_state[:2]+[self._human_position[i].x, self._human_position[i].y, self._human_vel[i].linear.x,self._human_vel[i].linear.y],self.rot)
                 obs=np.array(self.robot_self_state+[rho_humans[i], theta_humans[i]]+state+[self.safe_dist_child,self._radius_child,
-                                                self._radius_child+self.safe_dist_child+self._radius_robot])
+                                                self._radius_child+self.safe_dist_child+self._radius_robot,self._human_behavior_token[i]])
                 merged_obs = np.hstack([merged_obs,obs])
             elif ty==3: # elder
-                rho_elder.append(rho_humans[i])
+                rho_behavior=np.array([rho_humans[i],self._human_behavior[i]],dtype=object)
+                rho_behavior_elder=np.vstack([rho_behavior_elder, rho_behavior])
                 #robot centric 
                 state=ObservationCollector.rotate(self.robot_self_state[:2]+[self._human_position[i].x, self._human_position[i].y, self._human_vel[i].linear.x,self._human_vel[i].linear.y], self.rot)
                 obs=np.array(self.robot_self_state+[rho_humans[i], theta_humans[i]]+state+[self.safe_dist_elder,self._radius_elder,
-                                                self._radius_elder+self.safe_dist_elder+self._radius_robot])
+                                                self._radius_elder+self.safe_dist_elder+self._radius_robot, self._human_behavior_token[i]])
                 merged_obs = np.hstack([merged_obs,obs])
-        # print(len(rho_adult))
-        obs_dict['adult_in_robot_frame'] = np.array(rho_adult)
-        obs_dict['child_in_robot_frame'] = np.array(rho_child)
-        obs_dict['elder_in_robot_frame'] = np.array(rho_elder)
+        obs_dict['adult_in_robot_frame'] = rho_behavior_adult
+        obs_dict['child_in_robot_frame'] = rho_behavior_child
+        obs_dict['elder_in_robot_frame'] = rho_behavior_elder
         #align the observation size
-        # print(self.observation_space.shape)
         observation_blank=len(merged_obs) - self.observation_space.shape[0]
         if observation_blank<0:
             merged_obs=np.hstack([merged_obs,np.zeros([-observation_blank,])])
@@ -331,7 +337,7 @@ class ObservationCollector():
         human_type=msg.type
         human_pose=self.pose3D_to_pose2D(msg.pose)
         human_twist=msg.twist
-        human_behavior=msg.social_state
+        human_behavior=msg.social_state.strip("\"")
         return human_type,human_pose, human_twist, human_behavior
 
     def process_scan_msg(self, msg_LaserScan: LaserScan):
