@@ -14,6 +14,7 @@ from nav_msgs.msg import OccupancyGrid
 from geometry_msgs.msg import Pose2D, Twist, Point
 from pedsim_srvs.srv import SpawnPeds
 from pedsim_srvs.srv import SpawnObstacle,SpawnObstacleRequest
+from pedsim_srvs.srv import MovePeds,MovePedsRequest
 from pedsim_msgs.msg import Ped
 from pedsim_msgs.msg import LineObstacle
 from pedsim_msgs.msg import LineObstacles
@@ -49,6 +50,7 @@ class ObstaclesManager:
         rospy.wait_for_service(f'{self.ns_prefix}pedsim_simulator/add_obstacle', timeout=20)
         rospy.wait_for_service(f'{self.ns_prefix}pedsim_simulator/respawn_peds' , timeout=20)
         rospy.wait_for_service(f'{self.ns_prefix}pedsim_simulator/spawn_ped' , timeout=20)
+        rospy.wait_for_service(f'{self.ns_prefix}pedsim_simulator/move_peds' , timeout=20)
         # allow for persistent connections to services
         self._srv_move_model = rospy.ServiceProxy(
             f'{self.ns_prefix}move_model', MoveModel, persistent=True)
@@ -65,6 +67,8 @@ class ObstaclesManager:
             f'{self.ns_prefix}pedsim_simulator/remove_all_peds' , SetBool, persistent=True)
         self.__add_obstacle_srv = rospy.ServiceProxy(
             f'{self.ns_prefix}pedsim_simulator/add_obstacle' ,SpawnObstacle, persistent=True)
+        self.__move_peds_srv = rospy.ServiceProxy(
+            f'{self.ns_prefix}pedsim_simulator/move_peds' ,MovePeds, persistent=True)
 
         self.update_map(map_)
         self.obstacle_name_list = []
@@ -761,16 +765,12 @@ class ObstaclesManager:
         radius = 1.5
         point = np.array([x1+np.cos(angle)*radius, y1+np.sin(angle)*radius])
         vertex=point.reshape(1,2)
-        # print('register static task stage')
         for i in range(num_vertices-1):
             dist = 0
-            # x2, y2=0.0, 0.0
             while dist <1.0 or dist > 1.3:
                 angle = 2*np.pi*np.random.random(1)
-                # radius = 0.1
                 x2, y2= x1+np.cos(angle)*radius, y1+np.sin(angle)*radius
                 dist = np.linalg.norm([vertex[-1,0] - x2,vertex[-1,1] - y2])
-                # print('d',dist)
             vertex=np.vstack([vertex,[x2[0],y2[0]]])
         # print(num_border_vertex)
         # print('start_pos',[x1, y1, theta1])
@@ -787,4 +787,12 @@ class ObstaclesManager:
             lineObstacle.end.x,lineObstacle.end.y=border_vertex[(i+1)%size,0],border_vertex[(i+1)%size,1]
             add_pedsim_srv.staticObstacles.obstacles.append(lineObstacle)
         self.__add_obstacle_srv.call(add_pedsim_srv)
+
+    def move_all_peds(self, episode:int):
+        """
+        Move all pedestrians to a new initial place after every episode
+        """
+        srv = MovePedsRequest()
+        srv.episode = episode
+        self.__move_peds_srv.call(srv)
 
