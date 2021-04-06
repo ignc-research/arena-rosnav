@@ -60,9 +60,27 @@ The file `nav2.rviz` is different from `nav.rviz` only by two things - the map i
 
 9. From one text field to another can be jumped forwards pressing `TAB` and backwards pressing `SHIFT+TAB`. The scrollable area will also automatically scroll, so that the currently focused text field is visible. This makes the setup of parameters easier and faster.
 
-### Legend for the already tested maps
-1. map_small.png in paint.py -> resolution: 0.05; origin:(-6.0, -6.0) in the paint program -> ros launch with map_file:="map1"
-2. map.png in paint.py -> resolution: 0.050000; origin: (-16.600000, -6.650000) in the paint program -> ros launch with map_file:="map0"
+### Legend for the already used maps
+
+Ros launch with the flag `map_file:="<map_name>"`. For example for `map1` run `map_file:="map1"`.
+
+| Map                   | Resolution  | Origin (x,y)   |
+| --------------------- | ----------- | -------------- |
+| map_empty             | 0.05        | (-6.0, -6.0)   |
+| map1                  | 0.05        | (-6.0, -6.0)   |
+| map0                  | 0.05        | (-16.6, -6.65) |
+| map_small             | 0.027       | (-6.0, -6.0)   |
+| map_middle_complexity | 0.05        | (0.0, 0.0)     |
+| complex_map_1         | 0.05        | (0.0, 0.0)     |
+| complex_map_2         | 0.05        | (0.0, 0.0)     |
+| complex_map_3         | 0.05        | (0.0, 0.0)     |
+| corridor_1            | 0.05        | (0.0, 0.0)     |
+| corridor_2            | 0.05        | (0.0, 0.0)     |
+| corridor_3            | 0.05        | (0.0, 0.0)     |
+| open_field_1          | 0.05        | (0.0, 0.0)     |
+| open_field_2          | 0.05        | (0.0, 0.0)     |
+| open_field_3          | 0.05        | (0.0, 0.0)     |
+|                       |             |                |
 
 ### Overview for working on different operation systems
 #### (only for running this scenario gui, not the whole project!)

@@ -44,6 +44,9 @@ radius_current_global = 10. # init value of the radius
 radius_watcher_current_global = 25.  # init value of the watcher
 button2_activate = 0
 scrollable_area_global = ScrollView()
+# Important: set the image of the map, always place the map in the input folder for better structure (for now tested with map_small.png and map.png)
+# The tested maps up until now can be found under 'input/all_maps'.
+scenario_map = 'input/all_maps/map_small.png'
 
 class MyPaintWidgetCircleObstacle(Widget): # obstacle widget
 
@@ -474,12 +477,12 @@ class ScenarioGUIApp(App):
         layout_btn = GridLayout(cols=4, size=(window_sizes[0],height_layout_btn), size_hint=(None, None))
         
         # load the user map as a background image for the drawings
-        # Important: it should work with every map (for now tested with map_small.png and map.png)
+        # Important: it should work with every map
         width_layout_map = 140 + 2*border
         size_given_width = window_sizes[0] - 2*width_layout_map
         size_given_height = window_sizes[1] - height_layout_btn
         # pos gives the start, so the bottom left corner of the image, and from there the size will be kept or resized!
-        wimg_input_map = Image(source='input/map_small.png', size=(size_given_width, size_given_height), pos=(width_layout_map, height_layout_btn)) # push the image up with the heght of the buttons
+        wimg_input_map = Image(source=scenario_map, size=(size_given_width, size_given_height), pos=(width_layout_map, height_layout_btn)) # push the image up with the heght of the buttons
         # find the real size of the uploaded image
         image_size_before = (wimg_input_map.texture_size[0], wimg_input_map.texture_size[1])
         print('size image before:' + str(image_size_before)) # (666, 521) for map_small
