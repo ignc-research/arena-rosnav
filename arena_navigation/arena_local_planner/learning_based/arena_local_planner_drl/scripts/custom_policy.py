@@ -15,8 +15,8 @@ from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl
 _RS = 9  # robot state size 3
 self_state_dim = 9
 num_humans =  6  #
-human_state_size= 18 #size of human info 17
-_HS= 18*21  # human state size
+human_state_size= 19 #size of human info 17
+_HS= 19*21  # human state size
 HIDDEN_SHAPE_LSTM=32 # hidden size of lstm
 
 ROBOT_SETTING_PATH = rospkg.RosPack().get_path('simulator_setup')
@@ -145,7 +145,7 @@ class MLP_HUMAN(nn.Module):
             nn.ReLU()
         ).to('cuda')
         self.body_net_human = nn.Sequential(
-            nn.Linear(108, 128),
+            nn.Linear(114, 128),
             nn.ReLU(),
             nn.Linear(128, 96),
             nn.ReLU(),
