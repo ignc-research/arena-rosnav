@@ -63,6 +63,8 @@ struct TimedAstarParam{
 
     // sensor range
     double SENSOR_RANGE; 
+
+    double SAFE_TIME;
 };
 
 /* build in hyperpara */
@@ -193,7 +195,7 @@ struct PathNode
     
 	enum state node_state{UNDEFINED};
 
-    //current
+    //  current
     Index eid;              // the halfedge index = next
     Index tid;              // the triangle index = floor(eid / 3.0)
     Index sid;              // the slice index of timed graph
@@ -206,16 +208,21 @@ struct PathNode
 
     double dir;             // [rad] current direction of the car
 
-    //input
+    //  input
     double v_in;
     double w_in;
 
-    //duration
+    //  duration
     double dur_v;
     double dur_w;
 
-    //cost
+    //  cost
     double G, H;             // accumulated cost-to-go and heuristic
+
+    // collide check
+    double time_to_collide;
+    double dist_to_collide;
+    bool is_unsafe=false;
 
     // parent node
     std::shared_ptr<PathNode> parent;   // the parent node pointer
@@ -237,8 +244,6 @@ struct PathNode
         
         this->tid = static_cast<Index>(floor(eid / 3.0));
     }
-
-    
 
 };
 

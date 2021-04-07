@@ -137,6 +137,7 @@ void TimedAstar::init(GridMap::Ptr grid_map,TimedAstarParam param){
     SLICE_NUM_      = param.TIME_SLICE_NUM;
     GOAL_RADIUS_    = param.GOAL_RADIUS;
     NUM_SAMPLE_EDGE_= param.NUM_SAMPLE_EDGE;
+    SAFE_TIME_      = param.SAFE_TIME;//   2.0;
 
 }
 
@@ -177,11 +178,25 @@ void TimedAstar::getTimedGraph(const std::vector<double>& coords,
     timed_graph.clear();
 
     // decode the boundaries
-    auto x_min = coords[PHASE3_INDEX*2];
-    auto y_min = coords[PHASE3_INDEX*2+1];
-    auto x_max = coords[PHASE1_INDEX*2];
-    auto y_max = coords[PHASE1_INDEX*2+1];
+    // auto x_min = coords[PHASE3_INDEX*2];
+    // auto y_min = coords[PHASE3_INDEX*2+1];
+    // auto x_max = coords[PHASE1_INDEX*2];
+    // auto y_max = coords[PHASE1_INDEX*2+1];
 
+    // auto x_min = coords[PHASE4_INDEX*2];
+    // auto y_min = coords[PHASE3_INDEX*2+1];
+    // auto x_max = coords[PHASE2_INDEX*2];
+    // auto y_max = coords[PHASE1_INDEX*2+1];
+
+    auto x_min = std::min(std::min(coords[PHASE1_INDEX*2],coords[PHASE2_INDEX*2]),std::min(coords[PHASE3_INDEX*2],coords[PHASE4_INDEX*2]));
+    auto y_min = std::min(std::min(coords[PHASE1_INDEX*2+1],coords[PHASE2_INDEX*2+1]),std::min(coords[PHASE3_INDEX*2+1],coords[PHASE4_INDEX*2+1]));
+    auto x_max = std::max(std::max(coords[PHASE1_INDEX*2],coords[PHASE2_INDEX*2]),std::max(coords[PHASE3_INDEX*2],coords[PHASE4_INDEX*2]));
+    auto y_max = std::max(std::max(coords[PHASE1_INDEX*2+1],coords[PHASE2_INDEX*2+1]),std::max(coords[PHASE3_INDEX*2+1],coords[PHASE4_INDEX*2+1]));
+    
+    x_min=x_min-0.5;
+    y_min=y_min-0.5;
+    x_max=x_max+0.5;
+    y_max=y_max+0.5;
     // decode the init and goal
     //auto x_init = coords[INIT_INDEX*2];
     //auto y_init = coords[INIT_INDEX*2+1];
@@ -257,12 +272,15 @@ bool TimedAstar::TimeAstarSearch(const std::vector<double>& coords,
     PathNodePtr start_node = std::make_shared<PathNode>(); //path_node_pool_[0];
     start_node->parent     = nullptr;
     start_node->pos        =start_pos_;
-    //start_node->vel        = Vec2d(speeds[INIT_INDEX*2],speeds[INIT_INDEX*2+1]);
+    start_node->vel        = Vec2d(speeds[INIT_INDEX*2],speeds[INIT_INDEX*2+1]);
     start_node->dir        =dir_start;
     start_node->setTimedTriangle(start_pos_,0.0,timed_graph_,time_resolution_,SLICE_NUM_);
     start_node->G          = 0.0;
+    checkStartNodeSafety(start_node,timed_graph_[0].get());
     start_node->H          =estimateHeuristic(start_node,goal_pos_,start_pos_);
     start_node->node_state = PathNode::OPENSET;
+
+    
     
     
     // push_into openlist
@@ -411,7 +429,7 @@ bool TimedAstar::TimeAstarSearch(const std::vector<double>& coords,
     return true;
 }
 
-double TimedAstar::computeCollisionTime(const Vec2d &p_ir, const Vec2d &v_ir, const double &duration){
+double TimedAstar::computeCollisionTime(const Vec2d &p_ir, const Vec2d &v_ir){
     double a2,a1,a0;
     a2   = dot(v_ir,v_ir);
 	a1   = 2*dot(p_ir,v_ir);
@@ -420,24 +438,58 @@ double TimedAstar::computeCollisionTime(const Vec2d &p_ir, const Vec2d &v_ir, co
     bool is_valid_solution=solveRoot(a0,a1,a2,t_min,t_max);
 
     double time_to_collide;
+    double safe_time =SAFE_TIME_;                      // safe time sec parameter= 2.0 or TIME_HORIZON_
+    
     if(!is_valid_solution){
         time_to_collide=DBL_MAX;                //  will never collide
     }else
     {   
-        if(t_min>TIME_HORIZON_){
+        if(t_min > TIME_HORIZON_){
             time_to_collide=DBL_MAX;            // will not collide in TIME_HORIZON_
         }else{
-            if(duration<t_min)
-            {
-                time_to_collide = t_min;        // will not collide, before arrived
-            }else{
-                // duration>t_min 
-                time_to_collide = t_min;        // will collide
-            }
+            time_to_collide = t_min;
+            // if(duration<t_min)
+            // {
+            //     time_to_collide = t_min;        // will not collide, before arrived
+            // }else{
+            //     // duration>t_min 
+            //     time_to_collide = t_min;        // will collide
+            // }
         }
     }
   
     return time_to_collide;
+}
+
+void TimedAstar::checkStartNodeSafety(const PathNodePtr &start_node, Graph *graph_t){
+    Vec2d p_r =start_node->pos;
+    Vec2d v_r =start_node->vel;
+    
+    double min_time_to_collide=DBL_MAX, min_dist_to_collide=DBL_MAX;
+    for (size_t i = 0; i < graph_t->triangles.size(); ++i){
+        size_t id = graph_t->triangles[i];
+        Vec2d p_i = Vec2d(graph_t->coords[2*id], graph_t->coords[2*id+1]);
+        Vec2d v_i = Vec2d(graph_t->speeds[2*id], graph_t->speeds[2*id+1]);
+        
+        if(v_i.x==0 && v_i.y==0){
+            continue;           // if not an obstacle but start, goal, boundary
+        }
+
+        double time_to_collide;
+        Vec2d p_ir, v_ir;
+        p_ir = p_i - p_r;
+        v_ir = v_i - v_r;
+        time_to_collide=computeCollisionTime(p_ir,v_ir);
+        if(time_to_collide<min_time_to_collide){
+            min_time_to_collide=time_to_collide;
+        }
+    }
+    if(min_time_to_collide<SAFE_TIME_){
+        start_node->is_unsafe=true;
+    }else{
+         start_node->is_unsafe=false;
+    }
+    
 }
 
 void TimedAstar::setNeighborNodeActionDuration(const PathNodePtr &curr_node, PathNodePtr &next_node){
@@ -464,6 +516,7 @@ bool TimedAstar::checkCollisionFree(const PathNodePtr &curr_node, PathNodePtr &n
     Vec2d v_r =Vec2d(next_node->v_in *cos(next_node->dir),curr_node->v_in*sin(next_node->dir));
     double min_time_to_collide=DBL_MAX, min_dist_to_collide=DBL_MAX;
     
+    double safe_time=SAFE_TIME_;
     
     for (size_t i = 0; i < graph_t->triangles.size(); ++i) {
         size_t id = graph_t->triangles[i];
@@ -481,40 +534,34 @@ bool TimedAstar::checkCollisionFree(const PathNodePtr &curr_node, PathNodePtr &n
         //check collision in w state
         p_ir = p_i - p_r;
         v_ir = v_i ;
-        time_to_collide_w=computeCollisionTime(p_ir,v_ir,next_node->dur_w);
+        time_to_collide_w=computeCollisionTime(p_ir,v_ir);
         if(time_to_collide_w < next_node->dur_w){
-            // collide could happen
+            // if this direction meet collision, then the whole node is deleted
             time_to_collid=0;
             dist_to_collid=0;
             return false;
         }
 
-        if(time_to_collide_w<min_time_to_collide){
-            min_time_to_collide = time_to_collide_w;
-            min_dist_to_collide = time_to_collide_w*v_ir.length();
-        }
-       
-        
 	    // check collision in v state
         p_ir = (p_i + v_i *next_node->dur_w)- p_r;
         v_ir = v_i - v_r;
-        time_to_collide_v=computeCollisionTime(p_ir,v_ir,next_node->dur_v);
+        time_to_collide_v=computeCollisionTime(p_ir,v_ir);
         if(time_to_collide_v < next_node->dur_v){
-            if(time_to_collide_v<2.0){
+            if(time_to_collide_v<safe_time){
                 // collide could happen
                 time_to_collid=0;
                 dist_to_collid=0;
                 return false;
             }else{
                 std::cout<<"*********lucky residual sample"<<std::endl;
-                double new_dur_v = std::min(1.0,time_to_collide_v-1.0);
+                double new_dur_v = time_to_collide_v-safe_time;
                 next_node->pos = curr_node->pos + (next_node->pos-curr_node->pos)*new_dur_v/next_node->dur_v;
                 next_node->dur_v=new_dur_v;
             }
         }
 
-        if(time_to_collide_v<min_time_to_collide){
-            min_time_to_collide = time_to_collide_v;
+        if(time_to_collide_v+time_to_collide_w<min_time_to_collide){
+            min_time_to_collide = time_to_collide_v+time_to_collide_w;
             min_dist_to_collide = time_to_collide_v*v_ir.length();
         }
     }
@@ -640,8 +687,15 @@ double TimedAstar::estimateHeuristic(PathNodePtr &curr_node,Vec2d goal_pos, Vec2
     double dir_diff = std::abs(dir_goal_robot-curr_dir);
     dir_diff=dir_diff>PI?2*PI-dir_diff:dir_diff;
     double dur_dir = dir_diff/MAX_ROT_SPEED_;
-	double dur_arrive = (curr_node->pos-goal_pos).length()/MIN_SPEED_;
-    return dur_arrive + dur_dir;
+	double dur_arrive = (curr_node->pos-goal_pos).length()/MIN_SPEED_;//curr_node->v_in;//MIN_SPEED_;
+    double dur_to_avoid;
+    if(curr_node->is_unsafe){
+        dur_to_avoid = PI/MAX_ROT_SPEED_ + 2.0/MIN_SPEED_;//10*SAFE_TIME_;
+    }else{
+        dur_to_avoid =0.0;
+    }
+    
+    return dur_arrive + dur_dir + dur_to_avoid;
 }
 
 void TimedAstar::retrievePath(PathNodePtr end_node)

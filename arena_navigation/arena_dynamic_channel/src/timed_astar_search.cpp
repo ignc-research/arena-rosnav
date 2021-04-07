@@ -22,6 +22,7 @@ void TimedAstarSearch::init(ros::NodeHandle & nh,GridMap::Ptr grid_map, std::vec
     node_.param("timed_astar/time_resolution",      tap_.TIME_RESOLUTION,   1.2);
     node_.param("timed_astar/resolution",           tap_.RESOLUTION,        0.1);
     node_.param("timed_astar/num_sample_edge",      tap_.NUM_SAMPLE_EDGE,   5);
+    node_.param("timed_astar/safe_time",            tap_.SAFE_TIME,         1.5);
     
     tap_.TIME_SLICE_NUM=static_cast<size_t>(round(tap_.TIME_HORIZON / tap_.TIME_RESOLUTION));
     tap_.SAFE_DIST =(tap_.ROBOT_RADIUS + tap_.OBSTACLE_RADIUS)*2;
@@ -62,11 +63,13 @@ bool TimedAstarSearch::stateTimeAstarSearch(const Eigen::Vector2d & start_pos,
 
     Eigen::Vector2d vec_start2end=end_pos-start_pos;
     double dist_start2end=vec_start2end.norm();
-    double dist_range=dist_start2end > tap_.SENSOR_RANGE?tap_.SENSOR_RANGE:dist_start2end;
+    double dist_range=tap_.SENSOR_RANGE/1.8;//dist_start2end > tap_.SENSOR_RANGE?tap_.SENSOR_RANGE:dist_start2end;
     Eigen::Vector2d vec_norm=Eigen::Vector2d(vec_start2end(1),-vec_start2end(0))/dist_start2end;
     Eigen::Vector2d M = start_pos + dist_range/dist_start2end*(end_pos-start_pos);
+    boundPosition(M);
     Eigen::Vector2d N1= M + vec_norm * tap_.SENSOR_RANGE;
     Eigen::Vector2d N2= M - vec_norm * tap_.SENSOR_RANGE;
+    Eigen::Vector2d M0= start_pos - vec_start2end/dist_start2end *1.0;
     boundPosition(N1);
     boundPosition(N2);
     boundPosition(corner_min);
@@ -85,26 +88,26 @@ bool TimedAstarSearch::stateTimeAstarSearch(const Eigen::Vector2d & start_pos,
     speeds.push_back(0.0);
 
     // PHASE1_INDEX
-    coords.push_back(start_pos(0)); //corner_max
-    coords.push_back(corner_max(1));
+    coords.push_back(N1(0)); //corner_max
+    coords.push_back(N1(1));
     speeds.push_back(0.0);
     speeds.push_back(0.0);
 
     // PHASE4_INDEX
-    coords.push_back(corner_min(0));
-    coords.push_back(start_pos(1));//corner_max
+    coords.push_back(N2(0));
+    coords.push_back(N2(1));//corner_max
     speeds.push_back(0.0);
     speeds.push_back(0.0);
 
     // PHASE3_INDEX
-    coords.push_back(start_pos(0));//corner_min
-    coords.push_back(start_pos(1)); //corner_min(1)
+    coords.push_back(M0(0));//corner_min
+    coords.push_back(M0(1)); //corner_min(1)
     speeds.push_back(0.0);
     speeds.push_back(0.0);
 
     // PHASE2_INDEX
-    coords.push_back(corner_max(0));
-    coords.push_back(start_pos(1));//corner_min
+    coords.push_back(M(0));//M
+    coords.push_back(M(1));//M//corner_min
     speeds.push_back(0.0);
     speeds.push_back(0.0);
     

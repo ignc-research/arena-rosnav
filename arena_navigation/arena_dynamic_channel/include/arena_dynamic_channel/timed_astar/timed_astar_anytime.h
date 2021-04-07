@@ -52,7 +52,7 @@ private:
     TimedAstarParam param_;
     std::vector<double> action_v_set_;
     std::vector<double> action_w_set_;
-    double SAFE_DIST_;
+    double SAFE_DIST_,SAFE_TIME_;
     double ROBOT_RADIUS_;
     double OBSTACLE_RADIUS_; 
     double TIME_HORIZON_;
@@ -107,7 +107,11 @@ private:
 
     bool checkCollisionFree(const PathNodePtr &curr_node, PathNodePtr &next_node,Graph *graph_t, double & dist_to_collid, double & time_to_collid);
 
-    double computeCollisionTime(const Vec2d &p_ir, const Vec2d &v_ir, const double &duration);
+    double computeCollisionTime(const Vec2d &p_ir, const Vec2d &v_ir);
+
+    //double computeCollisionTimeAll(const Vec2d &p_r, const Vec2d &v_r, Graph *graph_t);
+
+    void checkStartNodeSafety(const PathNodePtr &start_node, Graph *graph_t);
 
     void retrievePath(PathNodePtr end_node);
 
