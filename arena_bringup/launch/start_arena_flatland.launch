@@ -12,7 +12,7 @@
 
   <!-- Simulation update -->
   <arg name="step_size" default="0.01"/>
-  <arg name="update_rate" default="100"/>
+  <arg name="update_rate" default="1000"/>
   <param name="step_size" value="$(arg step_size)"/>
   <param name="update_rate" value="$(arg update_rate)"/>
 

@@ -22,7 +22,7 @@ plugins:
     body: base_footprint
     odom_frame_id: odom
     odom_pub: odom  # topic odom is published on
-    pub_rate: 10
+    pub_rate: 100
   
   - type: Laser
     name: static_laser
@@ -42,7 +42,7 @@ plugins:
     # noise_std_dev: 0.015
     # arena
     noise_std_dev: 0.0
-    update_rate: 10
+    update_rate: 50
 
 
   - type: ModelTfPublisher
