@@ -60,6 +60,15 @@ bool TimedAstarSearch::stateTimeAstarSearch(const Eigen::Vector2d & start_pos,
     Eigen::Vector2d corner_min = start_pos - Eigen::Vector2d(1.0,1.0) *tap_.SENSOR_RANGE;//Eigen::Vector2d(1.0,1.0) * tap_.AVG_SPEED * tap_.TIME_HORIZON;
     Eigen::Vector2d corner_max = start_pos + Eigen::Vector2d(1.0,1.0) *tap_.SENSOR_RANGE;//Eigen::Vector2d(1.0,1.0) * tap_.AVG_SPEED * tap_.TIME_HORIZON;
 
+    Eigen::Vector2d vec_start2end=end_pos-start_pos;
+    double dist_start2end=vec_start2end.norm();
+    double dist_range=dist_start2end > tap_.SENSOR_RANGE?tap_.SENSOR_RANGE:dist_start2end;
+    Eigen::Vector2d vec_norm=Eigen::Vector2d(vec_start2end(1),-vec_start2end(0))/dist_start2end;
+    Eigen::Vector2d M = start_pos + dist_range/dist_start2end*(end_pos-start_pos);
+    Eigen::Vector2d N1= M + vec_norm * tap_.SENSOR_RANGE;
+    Eigen::Vector2d N2= M - vec_norm * tap_.SENSOR_RANGE;
+    boundPosition(N1);
+    boundPosition(N2);
     boundPosition(corner_min);
 	boundPosition(corner_max);
 
@@ -76,29 +85,29 @@ bool TimedAstarSearch::stateTimeAstarSearch(const Eigen::Vector2d & start_pos,
     speeds.push_back(0.0);
 
     // PHASE1_INDEX
-    coords.push_back(corner_max(0));
+    coords.push_back(start_pos(0)); //corner_max
     coords.push_back(corner_max(1));
     speeds.push_back(0.0);
     speeds.push_back(0.0);
 
     // PHASE4_INDEX
     coords.push_back(corner_min(0));
-    coords.push_back(corner_max(1));
+    coords.push_back(start_pos(1));//corner_max
     speeds.push_back(0.0);
     speeds.push_back(0.0);
 
     // PHASE3_INDEX
-    coords.push_back(corner_min(0));
-    coords.push_back(corner_min(1));
+    coords.push_back(start_pos(0));//corner_min
+    coords.push_back(start_pos(1)); //corner_min(1)
     speeds.push_back(0.0);
     speeds.push_back(0.0);
 
     // PHASE2_INDEX
     coords.push_back(corner_max(0));
-    coords.push_back(corner_min(1));
+    coords.push_back(start_pos(1));//corner_min
     speeds.push_back(0.0);
     speeds.push_back(0.0);
-
+    
     // obstacles
 	for (std::vector<DynamicObstacleInfo::Ptr>::iterator it = obs_info_provider_.begin() ; it != obs_info_provider_.end(); it++)
     {   
