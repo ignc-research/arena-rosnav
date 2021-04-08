@@ -23,9 +23,9 @@ typedef std::shared_ptr<Graph> GraphPtr;
 constexpr size_t INIT_INDEX = 0;
 constexpr size_t GOAL_INDEX = 1;
 constexpr size_t PHASE1_INDEX = 2;
-constexpr size_t PHASE2_INDEX = 5;
+constexpr size_t PHASE2_INDEX = 3;
 constexpr size_t PHASE3_INDEX = 4;
-constexpr size_t PHASE4_INDEX = 3;
+constexpr size_t PHASE4_INDEX = 5;
 constexpr size_t PEDS_START = 6;
 #define PI 3.14159265
 

@@ -31,6 +31,10 @@ private:
     // gridmap
     GridMap::Ptr grid_map_;
     Eigen::Vector2d occ_map_origin_,occ_map_size_2d_;
+
+    // visual
+    ros::Publisher visited_points_pub_;
+    visualization_msgs::MarkerArray target_marker_list_;
     
     // helper
     inline void boundPosition(Eigen::Vector2d & pos);
@@ -49,6 +53,8 @@ public:
     void getTriangleEdges(std::vector<std::pair<Eigen::Vector2d,Eigen::Vector2d>> &line_sets);
 
     std::vector<Eigen::Vector2d> getWaypoints();
+
+    void visualizePoints(const std::vector<Eigen::Vector2d>& point_set, double pt_size, const Eigen::Vector4d& color, const ros::Publisher & pub);
     
 };
 

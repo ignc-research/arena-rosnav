@@ -61,6 +61,7 @@ private:
     size_t SLICE_NUM_;
     double GOAL_RADIUS_;
     size_t NUM_SAMPLE_EDGE_;
+    double SENSOR_RANGE_;
     
 
     // map
@@ -88,6 +89,7 @@ private:
 
     // counter
     int  iter_num_;
+    int  sample_num_;
 
     // reach_goal
     bool reached_goal_;
@@ -129,7 +131,7 @@ public:
                     const std::vector<double>& angles,const Vec2d& robot,const Vec2d& goal,
                     const double & dir_start,const double & time_start);
 
-
+    std::vector<Eigen::Vector2d> getVistedNodes();
     std::vector<Eigen::Vector2d> getPath();
 
     std::vector<Eigen::Vector2d> getTrajectory(double ts,double local_time_horizon);

@@ -138,6 +138,7 @@ void TimedAstar::init(GridMap::Ptr grid_map,TimedAstarParam param){
     GOAL_RADIUS_    = param.GOAL_RADIUS;
     NUM_SAMPLE_EDGE_= param.NUM_SAMPLE_EDGE;
     SAFE_TIME_      = param.SAFE_TIME;//   2.0;
+    SENSOR_RANGE_   = param.SENSOR_RANGE;
 
 }
 
@@ -176,32 +177,32 @@ void TimedAstar::getTimedGraph(const std::vector<double>& coords,
 
     // clear data
     timed_graph.clear();
-
-    // decode the boundaries
-    // auto x_min = coords[PHASE3_INDEX*2];
-    // auto y_min = coords[PHASE3_INDEX*2+1];
-    // auto x_max = coords[PHASE1_INDEX*2];
-    // auto y_max = coords[PHASE1_INDEX*2+1];
-
-    // auto x_min = coords[PHASE4_INDEX*2];
-    // auto y_min = coords[PHASE3_INDEX*2+1];
-    // auto x_max = coords[PHASE2_INDEX*2];
-    // auto y_max = coords[PHASE1_INDEX*2+1];
-
-    auto x_min = std::min(std::min(coords[PHASE1_INDEX*2],coords[PHASE2_INDEX*2]),std::min(coords[PHASE3_INDEX*2],coords[PHASE4_INDEX*2]));
-    auto y_min = std::min(std::min(coords[PHASE1_INDEX*2+1],coords[PHASE2_INDEX*2+1]),std::min(coords[PHASE3_INDEX*2+1],coords[PHASE4_INDEX*2+1]));
-    auto x_max = std::max(std::max(coords[PHASE1_INDEX*2],coords[PHASE2_INDEX*2]),std::max(coords[PHASE3_INDEX*2],coords[PHASE4_INDEX*2]));
-    auto y_max = std::max(std::max(coords[PHASE1_INDEX*2+1],coords[PHASE2_INDEX*2+1]),std::max(coords[PHASE3_INDEX*2+1],coords[PHASE4_INDEX*2+1]));
     
-    x_min=x_min-0.5;
-    y_min=y_min-0.5;
-    x_max=x_max+0.5;
-    y_max=y_max+0.5;
+    
     // decode the init and goal
-    //auto x_init = coords[INIT_INDEX*2];
-    //auto y_init = coords[INIT_INDEX*2+1];
+    auto x_init = coords[INIT_INDEX*2];
+    auto y_init = coords[INIT_INDEX*2+1];
     auto x_goal = coords[GOAL_INDEX*2];
     auto y_goal = coords[GOAL_INDEX*2+1];
+    // decode the boundaries
+    auto x_min = x_init -   SENSOR_RANGE_;
+    auto y_min = y_init -   SENSOR_RANGE_;
+    auto x_max = x_init +   SENSOR_RANGE_;
+    auto y_max = y_init +   SENSOR_RANGE_;
+
+    // decode initial boundray triangle
+    auto x_b1 = coords[PHASE1_INDEX*2];
+    auto y_b1 = coords[PHASE1_INDEX*2+1];
+    auto x_b2 = coords[PHASE2_INDEX*2];
+    auto y_b2 = coords[PHASE2_INDEX*2+1];
+    auto x_b3 = coords[PHASE3_INDEX*2];
+    auto y_b3 = coords[PHASE3_INDEX*2+1];
+    auto x_b4 = coords[PHASE4_INDEX*2];
+    auto y_b4 = coords[PHASE4_INDEX*2+1];
+    // auto x_min = std::min(std::min(coords[PHASE1_INDEX*2],coords[PHASE2_INDEX*2]),std::min(coords[PHASE3_INDEX*2],coords[PHASE4_INDEX*2]));
+    // auto y_min = std::min(std::min(coords[PHASE1_INDEX*2+1],coords[PHASE2_INDEX*2+1]),std::min(coords[PHASE3_INDEX*2+1],coords[PHASE4_INDEX*2+1]));
+    // auto x_max = std::max(std::max(coords[PHASE1_INDEX*2],coords[PHASE2_INDEX*2]),std::max(coords[PHASE3_INDEX*2],coords[PHASE4_INDEX*2]));
+    // auto y_max = std::max(std::max(coords[PHASE1_INDEX*2+1],coords[PHASE2_INDEX*2+1]),std::max(coords[PHASE3_INDEX*2+1],coords[PHASE4_INDEX*2+1]));
     
     // discretize the time space
     for (size_t t = 0; t < SLICE_NUM_; ++t) {
@@ -212,14 +213,26 @@ void TimedAstar::getTimedGraph(const std::vector<double>& coords,
         //coord_t.push_back(y_init);
         coord_t.push_back(x_goal);
         coord_t.push_back(y_goal);
-        for (size_t i = 0; i < 2; ++i) {
+
+        coord_t.push_back(x_b1);
+        coord_t.push_back(y_b1);
+
+        coord_t.push_back(x_b2);
+        coord_t.push_back(y_b2);
+
+        coord_t.push_back(x_b3);
+        coord_t.push_back(y_b3);
+
+        //coord_t.push_back(x_b4);
+        //coord_t.push_back(y_b4);
+        for (size_t i = 0; i < coord_t.size(); ++i) {
             speed_t.push_back(0.0);
             angle_t.push_back(0.0);
         }
 
         // time evolution
         // std::cout << "new node:" << std::endl;
-        for (size_t i = 4; i < coords.size(); i += 2) {
+        for (size_t i = 12; i < coords.size(); i += 2) {
             auto xi = coords[i] + speeds[i] * time_resolution_ * t;
             auto yi = coords[i+1] + speeds[i+1] * time_resolution_ * t;
             if (xi < x_min || xi > x_max || yi < y_min || yi > y_max){
@@ -252,6 +265,7 @@ bool TimedAstar::TimeAstarSearch(const std::vector<double>& coords,
              
     // reset
     reset();
+    sample_num_=0;
     start_pos_  = robot;
     goal_pos_   = goal;
     time_origin_= time_start;
@@ -418,11 +432,14 @@ bool TimedAstar::TimeAstarSearch(const std::vector<double>& coords,
     if (ancestor == nullptr) {
         ancestor = goal_nearest_node;
         std::cout << "not reach goal" << std::endl;
+    }else{
+        std::cout << " goal reached " << std::endl;
     }
     // retrieve path
     retrievePath(ancestor);
-    std::cout << " goal reached " << std::endl;
+    
     std::cout << "path size" << final_path_nodes_.size()<<std::endl;
+    std::cout << "tried sample num: " << sample_num_ << std::endl;
     std::cout << "use node num: " << use_node_num_ << std::endl;
     std::cout << "iter num: " << iter_num_ << std::endl;
     
@@ -448,13 +465,7 @@ double TimedAstar::computeCollisionTime(const Vec2d &p_ir, const Vec2d &v_ir){
             time_to_collide=DBL_MAX;            // will not collide in TIME_HORIZON_
         }else{
             time_to_collide = t_min;
-            // if(duration<t_min)
-            // {
-            //     time_to_collide = t_min;        // will not collide, before arrived
-            // }else{
-            //     // duration>t_min 
-            //     time_to_collide = t_min;        // will collide
-            // }
+            
         }
     }
   
@@ -516,7 +527,7 @@ bool TimedAstar::checkCollisionFree(const PathNodePtr &curr_node, PathNodePtr &n
     Vec2d v_r =Vec2d(next_node->v_in *cos(next_node->dir),curr_node->v_in*sin(next_node->dir));
     double min_time_to_collide=DBL_MAX, min_dist_to_collide=DBL_MAX;
     
-    double safe_time=SAFE_TIME_;
+    double dur_safe=SAFE_TIME_;
     
     for (size_t i = 0; i < graph_t->triangles.size(); ++i) {
         size_t id = graph_t->triangles[i];
@@ -546,24 +557,64 @@ bool TimedAstar::checkCollisionFree(const PathNodePtr &curr_node, PathNodePtr &n
         p_ir = (p_i + v_i *next_node->dur_w)- p_r;
         v_ir = v_i - v_r;
         time_to_collide_v=computeCollisionTime(p_ir,v_ir);
-        if(time_to_collide_v < next_node->dur_v){
-            if(time_to_collide_v<safe_time){
-                // collide could happen
+
+        if(time_to_collide_v <= next_node->dur_v){
+            // if collision happens within action time
+            if(time_to_collide_v - dur_safe<0){
                 time_to_collid=0;
                 dist_to_collid=0;
                 return false;
             }else{
-                std::cout<<"*********lucky residual sample"<<std::endl;
-                double new_dur_v = time_to_collide_v-safe_time;
-                next_node->pos = curr_node->pos + (next_node->pos-curr_node->pos)*new_dur_v/next_node->dur_v;
-                next_node->dur_v=new_dur_v;
+                
+                //check safe distance at time (time_to_collide_v-dur_safe)
+                double new_dur_1 = time_to_collide_v-dur_safe;
+                double new_dur_2 = dur_safe;
+                if(new_dur_1<0){
+                    time_to_collid=0;
+                    dist_to_collid=0;
+                    return false;
+                }
+                double dist_1 =sqrt(dot((p_ir + (v_ir * new_dur_1)),(p_ir + (v_ir * new_dur_1))));
+                double dist_2 =sqrt(dot((p_ir + (v_ir * new_dur_2)),(p_ir + (v_ir * new_dur_2))));
+                if(dist_1>SAFE_DIST_ && next_node->v_in*new_dur_1>1.0){
+                    next_node->pos = curr_node->pos + (next_node->pos-curr_node->pos)*new_dur_1/next_node->dur_v;
+                    next_node->dur_v=new_dur_1;
+
+                    if(dur_safe+time_to_collide_w<min_time_to_collide){
+                        min_time_to_collide = dur_safe+time_to_collide_w;
+                    }
+                    continue;
+                }
+                
+                if(new_dur_2>new_dur_1){
+                    time_to_collid=0;
+                    dist_to_collid=0;
+                    return false;
+                }
+
+                if(dist_2>SAFE_DIST_ && next_node->v_in*new_dur_2>1.0){
+                    next_node->pos = curr_node->pos + (next_node->pos-curr_node->pos)*new_dur_2/next_node->dur_v;
+                    next_node->dur_v=new_dur_2;
+                    if(time_to_collide_v-dur_safe+time_to_collide_w<min_time_to_collide){
+                        min_time_to_collide = time_to_collide_v-dur_safe+time_to_collide_w;
+                    }
+                    continue;
+                }else{
+                    time_to_collid=0;
+                    dist_to_collid=0;
+                    return false;
+                }
+               
+            }
+        }else{
+            // collision won't happen within action time, and safe distance is keeped
+            if(time_to_collide_v+time_to_collide_w<min_time_to_collide){
+                min_time_to_collide = time_to_collide_v+time_to_collide_w;
+                min_dist_to_collide = time_to_collide_v*v_ir.length();
             }
         }
-
-        if(time_to_collide_v+time_to_collide_w<min_time_to_collide){
-            min_time_to_collide = time_to_collide_v+time_to_collide_w;
-            min_dist_to_collide = time_to_collide_v*v_ir.length();
-        }
+        
+        
     }
 
     time_to_collid=min_time_to_collide;
@@ -593,12 +644,14 @@ bool TimedAstar::getNeighborNodes(PathNodePtr &curr_node, std::vector<PathNodePt
     double curr_goal_diff = (curr_node->pos - goal_pos_).length();
     
     // add goal into sample_set
-    sample_set.push_back(goal_pos_);
+    //sample_set.push_back(goal_pos_);
+    bool flag_goal_added=false;
 
     // search for other samples on timed_graph
     if(floor(curr_eid / 3.0)==floor(goal_eid / 3.0) || curr_goal_diff<SAFE_DIST_ )//
     {   // if in same triangle or near to the goal 
         std::cout<<"GOAL is in same triangle"<<std::endl;
+        sample_set.push_back(goal_pos_);
     }else{
         // find 3 vertice of current triangle
         std::vector<NodePtr> vertices;
@@ -629,6 +682,14 @@ bool TimedAstar::getNeighborNodes(PathNodePtr &curr_node, std::vector<PathNodePt
             bool have_inter_pt=getTwoLineIntersection(vertices[i]->position,vertices[j]->position,curr_node->pos,goal_pos_,inter_pt);
             if(have_inter_pt){
                 sample_set.push_back(inter_pt);
+                if(!flag_goal_added){
+                    // add goal into sample_set
+                    if(curr_slice_id==SLICE_NUM_-1){
+                        sample_set.push_back(goal_pos_);
+                        flag_goal_added=true;
+                    }
+                }
+                
             }
 
             // add uniform sampled points
@@ -644,7 +705,7 @@ bool TimedAstar::getNeighborNodes(PathNodePtr &curr_node, std::vector<PathNodePt
     
     // check safety for the sample_set
     for(size_t i=0;i<sample_set.size();i++)
-    {   
+    {   sample_num_++;
         for(size_t action_id=0; action_id<action_v_set_.size();++action_id)
         {   
             
@@ -653,6 +714,7 @@ bool TimedAstar::getNeighborNodes(PathNodePtr &curr_node, std::vector<PathNodePt
             next_node->pos=sample_set[i];
             next_node->w_in=action_w_set_[0];
             next_node->v_in=action_v_set_[action_id];
+            
             // set action duration
             setNeighborNodeActionDuration(curr_node,next_node );
             
@@ -665,7 +727,20 @@ bool TimedAstar::getNeighborNodes(PathNodePtr &curr_node, std::vector<PathNodePt
             {   
                 //calculate edge cost
                 double k =1.0;
-                double edge_cost =next_node->dur_v+ k*next_node->dur_w;
+                double weight= time_to_potential_collid > 2*SAFE_TIME_?1: 2*SAFE_TIME_/(time_to_potential_collid+0.0001);
+                
+                double edge_cost =next_node->dur_v+ next_node->dur_w;
+
+             
+                // double dir_goal_start   =(goal_pos_-start_pos_).angle(); //double dir_start_robot  =(curr_node->pos-start_pos).angle();
+                // double dir_diff = std::abs(dir_goal_start-next_node->dir);
+                // dir_diff=dir_diff>PI?2*PI-dir_diff:dir_diff;
+                // double dur_dir = dir_diff/MAX_ROT_SPEED_;
+
+                // edge_cost=edge_cost+dur_dir;
+                //edge_cost=weight*edge_cost;
+
+                
 
                 // pushback node & edge cost
                 neighbor_ptr_set.push_back(next_node);
@@ -710,6 +785,14 @@ void TimedAstar::retrievePath(PathNodePtr end_node)
   }
 
   std::reverse(final_path_nodes_.begin(), final_path_nodes_.end());
+}
+
+std::vector<Eigen::Vector2d> TimedAstar::getVistedNodes(){
+    std::vector<Eigen::Vector2d> visted_points;
+    for(size_t i=0;i<path_node_pool_.size();++i){
+        visted_points.push_back(Eigen::Vector2d(path_node_pool_[i]->pos.x,path_node_pool_[i]->pos.y));
+    }
+    return visted_points;
 }
 
 std::vector<Eigen::Vector2d> TimedAstar::getPath(){
@@ -806,6 +889,7 @@ void TimedAstar::getGraph(GraphPtr &graph_t, const double time=0.0){
     t= std::min(t,SLICE_NUM_);
     graph_t=timed_graph_[t];
 }
+
 
 
 }
