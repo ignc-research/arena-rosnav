@@ -64,7 +64,7 @@ void DynamicPlanManager::initPlanModules(ros::NodeHandle &nh)
   bspline_optimizer_->setParam(node_);
   bspline_optimizer_->setEnvironment(grid_map_);
   bspline_optimizer_->a_star_.reset(new AStar);
-  bspline_optimizer_->a_star_->initGridMap(grid_map_, Eigen::Vector2i(100, 100));
+  bspline_optimizer_->a_star_->initGridMap(grid_map_, Eigen::Vector2i(200, 200));
 
 }
 
@@ -121,7 +121,7 @@ bool DynamicPlanManager::planGlobalTraj( Eigen::Vector2d &start_pos,  Eigen::Vec
     
     global_data_.resetData(global_traj);
     // in case start_pos trapped 
-    local_traj_data_.resetData(global_traj);
+    //local_traj_data_.resetData(global_traj);
 
     return true;
 
@@ -164,7 +164,7 @@ bool DynamicPlanManager::optimizeGlobalTraj(double ts,std::vector<Eigen::Vector2
 }
 
 bool DynamicPlanManager::planMidTraj(Eigen::Vector2d & start_pos, Eigen::Vector2d & start_vel,  double & start_dir,  Eigen::Vector2d & end_pos,std::vector<std::pair<Eigen::Vector2d,Eigen::Vector2d>> &line_sets){
-  
+  std::cout<<"[planMidTraj]timed astar search start 1"<<std::endl;
   std::vector<Eigen::Vector2d> point_set,start_end_derivatives;
   
   double ts=pp_.ctrl_pt_dist_ / pp_.max_vel_;
@@ -187,11 +187,15 @@ bool DynamicPlanManager::planMidTraj(Eigen::Vector2d & start_pos, Eigen::Vector2
     std::cout<<"[planMidTraj]timed astar search finish 2"<<std::endl;
     if(oneshot_success){
       local_traj_data_.resetData(mid_traj);
+      return true;
+    }else{
+      return false;
     }
-    return false;
   }else{
     // optimze traj
     bool optimize_success=optimizeBsplineTraj(ts,point_set,start_end_derivatives,mid_traj);
+    local_traj_data_.resetData(mid_traj);
+    
     if(!optimize_success){
       Eigen::Vector2d end_vel =Eigen::Vector2d::Zero();
       bool oneshot_success=genOneshotTraj(start_pos, start_vel,start_dir,end_pos,end_vel, mid_traj);
@@ -199,7 +203,7 @@ bool DynamicPlanManager::planMidTraj(Eigen::Vector2d & start_pos, Eigen::Vector2
       {
         local_traj_data_.resetData(mid_traj);
       }else{
-        return false;
+        //return true; //false
       }
     }else{
       ROS_WARN_STREAM("end mid optimize");
