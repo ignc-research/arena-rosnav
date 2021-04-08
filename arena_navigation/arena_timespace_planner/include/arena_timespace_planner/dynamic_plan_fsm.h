@@ -55,6 +55,7 @@ private:
     double t_replan_thresh_;        // sec
     int subgoal_drl_mode_;       // 0: spacial horizon, 1:time_astar
     double subgoal_pub_period_;
+    int mid_replan_count_= 0;
 
 
     /* ROS utils */

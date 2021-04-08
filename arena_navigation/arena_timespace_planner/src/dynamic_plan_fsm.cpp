@@ -28,7 +28,7 @@ void DynamicReplanFSM::init(ros::NodeHandle &nh)
 
     /* callback */
     exec_timer_ = node_.createTimer(ros::Duration(0.01), &DynamicReplanFSM::execFSMCallback, this);
-    safety_timer_ = node_.createTimer(ros::Duration(0.05), &DynamicReplanFSM::checkCollisionCallback, this);
+    //safety_timer_ = node_.createTimer(ros::Duration(0.05), &DynamicReplanFSM::checkCollisionCallback, this);
     if(!use_drl){
         traj_tracker_timer_ = node_.createTimer(ros::Duration(0.01), &DynamicReplanFSM::trackTrajCallback, this);
     }
@@ -205,19 +205,27 @@ void DynamicReplanFSM::execFSMCallback(const ros::TimerEvent& e){
             //bool success =planner_manager_->planLocalTraj(curr_pos,curr_vel,curr_dir,mid_target_,target_vel);
 
             if(success){
+                mid_replan_count_=0;
                 target_traj_data_ = planner_manager_->local_traj_data_;
                 visualizePath(target_traj_data_.getLocalPath(),vis_timed_astar_path_pub_);
 
                 cout<<"[Plan FSM]MID_REPLAN Success"<<endl;
                 changeFSMExecState(EXEC_LOCAL, "FSM");
             }else{
+                mid_replan_count_++;
                 // for debug
                 target_traj_data_ = planner_manager_->local_traj_data_;
                 visualizePath(target_traj_data_.getLocalPath(),vis_timed_astar_path_pub_);
                 
                 //target_traj_data_ = TargetTrajData();
                 ROS_ERROR("[Plan FSM]Failed to generate the mid trajectory!!!");
-                changeFSMExecState(GEN_NEW_GLOBAL, "FSM");
+
+                if(mid_replan_count_>10){
+                    changeFSMExecState(GEN_NEW_GLOBAL, "FSM");
+                }else{
+                    changeFSMExecState(REPLAN_MID, "TRY one more");
+                }
+                
             }
             break;
 
