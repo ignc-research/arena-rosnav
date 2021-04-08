@@ -2,7 +2,7 @@
     
   <param name="use_sim_time" value="true"/>
 
-  <arg name="local_planner"   default="teb"/>
+  <arg name="local_planner"   default="teb"/> 
   <arg name="rviz_file"       default="nav_LP"/>
 
   <arg name="train_mode"      default="false"/>
@@ -12,7 +12,7 @@
 
   <!-- Simulation update -->
   <arg name="step_size" default="0.01"/>
-  <arg name="update_rate" default="1000"/>
+  <arg name="update_rate" default="200"/>
   <param name="step_size" value="$(arg step_size)"/>
   <param name="update_rate" value="$(arg update_rate)"/>
 
@@ -47,8 +47,8 @@
     <!-- <arg name="update_rate"     default="1000.0"/>
     <arg name="step_size"       default="0.005"/> -->
 
-    <arg name="update_rate"     default="50.0"/>
-    <arg name="step_size"       default="0.01"/>
+    <arg name="update_rate"     default="$(arg update_rate)"/>
+    <arg name="step_size"       default="$(arg step_size)"/>
 
     <arg name="show_viz"        default="true"/>
 
