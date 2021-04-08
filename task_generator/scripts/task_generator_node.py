@@ -2,6 +2,7 @@
 
 from logging import setLogRecordFactory
 import rospy
+import time
 from std_srvs.srv import Empty, EmptyResponse
 from nav_msgs.msg import Odometry
 from task_generator.tasks import get_predefined_task
@@ -23,6 +24,9 @@ class TaskGenerator:
         # this can be activated only when the mode set to 'ScenarioTask'
         auto_reset = rospy.get_param("~auto_reset")
         # if the distance between the robot and goal_pos is smaller than this value, task will be reset
+        self.timeout_= rospy.get_param("~timeout")
+        self.timeout_= self.timeout_*60             # sec
+        self.start_time_=time.time()                # sec
         self.delta_ = rospy.get_param("~delta")
         robot_odom_topic_name = rospy.get_param(
             "robot_odom_topic_name", "odom")
@@ -52,6 +56,10 @@ class TaskGenerator:
         if self.err_g < self.delta_:
             print(self.err_g)
             self.reset_task()
+        if(time.time()-self.start_time_>self.timeout_):
+            print("timeout")
+            self.reset_task()
+
 
     # def clear_costmaps(self):
     #     bashCommand = "rosservice call /move_base/clear_costmaps"
@@ -66,6 +74,7 @@ class TaskGenerator:
 
 
     def reset_task(self):
+        self.start_time_=time.time()
         info = self.task.reset()
         # clear_costmaps()
         if info is not None:
