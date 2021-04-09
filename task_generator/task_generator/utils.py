@@ -95,7 +95,7 @@ def update_freespace_indices(free_space_indices, map_: OccupancyGrid, vertexArra
         the second element is the x-axis indices.
     """
     # free_space_indices=generate_freespace_indices(map_)
-    print(vertexArray)
+    # print(vertexArray)
     n_freespace_cells = len(free_space_indices[0])
     mask=[]
     for idx in range(n_freespace_cells):
@@ -120,7 +120,7 @@ def update_freespace_indices(free_space_indices, map_: OccupancyGrid, vertexArra
                 mask.append(True)
                 break
         else:
-            print(p)
+            # print(p)
             mask.append(False)
     free_space_indices_new=(free_space_indices[0][mask],free_space_indices[0][mask])
     return free_space_indices_new
@@ -133,15 +133,193 @@ def generate_map_inner_border(free_space_indices, map_: OccupancyGrid):
         vertex_coordinate_x_y(np.ndarray with shape 4 x 2):
     """
     n_freespace_cells = len(free_space_indices[0])
-    border_vertex=np.array([]).reshape(0,2)
-    border_vertices=np.array([]).reshape(0,2)
-    for idx in [0,n_freespace_cells-1]:
+    border_vertex=np.array([]).reshape(0, 2)
+    border_vertices=np.array([]).reshape(0, 2)
+    for idx in [0, n_freespace_cells-4]:
         y_in_cells, x_in_cells = free_space_indices[0][idx], free_space_indices[1][idx]
         y_in_meters = y_in_cells * map_.info.resolution + map_.info.origin.position.y
         x_in_meters = x_in_cells * map_.info.resolution + map_.info.origin.position.x
         border_vertex=np.vstack([border_vertex, [x_in_meters, y_in_meters]])
     border_vertices=np.vstack([border_vertices, [border_vertex[0,0],border_vertex[0,1]]])
     border_vertices=np.vstack([border_vertices, [border_vertex[0,0],border_vertex[1,1]]])
-    border_vertices=np.vstack([border_vertices, [border_vertex[1,0],border_vertex[0,1]]])
     border_vertices=np.vstack([border_vertices, [border_vertex[1,0],border_vertex[1,1]]])
+    border_vertices=np.vstack([border_vertices, [border_vertex[1,0],border_vertex[0,1]]])
+    # print('border',border_vertices)
     return border_vertices
+
+class Maze(object):
+    def __init__(self):
+        self.self.mapInnerBorderlength=None
+        self.wallWidth=0.2
+
+    def build_maze(self, free_space_indices, map_: OccupancyGrid):
+        """generate maze stripes on the map
+
+        Returns:
+            vertex_coordinates_x_y(np.ndarray with shape #(one long wall + one short wall)x 4)
+            short_wall_centers_coordinates_x_y(np.ndarray with shape #number of walls x 4)
+            long_wall_centers_coordinates_x_y(np.ndarray with shape #number of walls x 4)
+            new_free_space_indices
+        """
+        n_freespace_cells = len(free_space_indices[0])
+
+        border_vertex=np.array([]).reshape(0, 2)
+        border_vertices=np.array([]).reshape(0, 2)
+
+        #calculate map border
+        for idx in [0, n_freespace_cells-4]:
+            y_in_cells, x_in_cells = free_space_indices[0][idx], free_space_indices[1][idx]
+            y_in_meters = y_in_cells * map_.info.resolution + map_.info.origin.position.y
+            x_in_meters = x_in_cells * map_.info.resolution + map_.info.origin.position.x
+            border_vertex=np.vstack([border_vertex, [x_in_meters, y_in_meters]])
+
+        self.mapInnerBorderlength=np.abs(border_vertex[0,1]-border_vertex[1,1]) - 0.1
+
+        self.wallLengthShort=self.mapInnerBorderlength/4
+        self.wallLengthLong=2*self.wallLengthShort
+        
+        self.map_center=np.array([[(border_vertex[0,0]+border_vertex[1,0])/2, (border_vertex[0,1]+border_vertex[1,1])/2]])
+        short_wall_centers=np.array([[map_center[0,0]+self.mapInnerBorderlength/4, map_center[0,1]+self.mapInnerBorderlength/4],
+                                                                    [map_center[0,0]-self.mapInnerBorderlength/4, map_center[0,1]+self.mapInnerBorderlength/4], 
+                                                                    [map_center[0,0]-self.mapInnerBorderlength/4, map_center[0,1]-self.mapInnerBorderlength/4], 
+                                                                    [map_center[0,0]+self.mapInnerBorderlength/4, map_center[0,1]-self.mapInnerBorderlength/4]])
+
+        long_wall_centers=self.map_center
+        free_space_indices_new = update_freespace_indices_maze(map_, long_wall_centers, short_wall_centers)
+        # four short walls which have the same shape (choose the first wall with theta 0 as the shape of all short walls )
+        wall_shape_short=np.array([[short_wall_centers[0,0]-self.wallWidth/2, short_wall_centers[0,1]-self.wallLengthShort/2], 
+                                                                    [short_wall_centers[0,0]+self.wallWidth/2, short_wall_centers[0,1]-self.wallLengthShort/2], 
+                                                                    [short_wall_centers[0,0]+self.wallWidth/2, short_wall_centers[0,1]+self.wallLengthShort/2], 
+                                                                    [short_wall_centers[0,0]-self.wallWidth/2, short_wall_centers[0,1]+self.wallLengthShort/2]])
+
+        wall_shape_long=np.array([[long_wall_centers[0,0]-self.wallWidth/2,long_wall_centers[0,1]-self.wallLengthShort], 
+                                                                    [long_wall_centers[0,0]+self.wallWidth/2,long_wall_centers[0,1]-self.wallLengthShort], 
+                                                                    [long_wall_centers[0,0]+self.wallWidth/2,long_wall_centers[0,1]+self.wallLengthShort], 
+                                                                    [long_wall_centers[0,0]-self.wallWidth/2,long_wall_centers[0,1]+self.wallLengthShort]])
+
+        return long_wall_centers, short_wall_centers, wall_shape_long, wall_shape_short, free_space_indices_new
+
+    def update_freespace_indices_maze(self, map_: OccupancyGrid, long_wall_centers, short_wall_centers):
+        """update the indices(represented in a tuple) of the freespace based on the map and the static polygons
+        ostacles manuelly added 
+        param map_ : original occupacy grid
+        param vertlist: vertex of the polygons
+
+        Returns:
+            indices_y_x(tuple): indices of the non-occupied cells, the first element is the y-axis indices,
+            the second element is the x-axis indices.
+        """
+        width_in_cell, height_in_cell = map_.info.width, map_.info.height
+        map_2d = np.reshape(map_.data, (height_in_cell, width_in_cell))
+        #height range and width range
+        wall_occupancy=np.array([[1.25, 12.65, 10.6, 10.8],
+                                                            [-4.45,18.35,16.3,16.5],
+                                                            [-4.45, 18.35, 4.9, 5.1], 
+                                                            [12.55, 12.75, -0.7, 22.1],
+                                                            [1.15, 1.35, -0.7, 22.1],
+                                                            [6.85, 7.05, 5.0, 16.4]])
+        size=wall_occupancy.shape[0]
+        for ranges in wall_occupancy:
+            height_low = int(ranges[0]/map_.info.resolution)
+            height_high = int(ranges[1]/map_.info.resolution)
+            width_low = int(ranges[2]/map_.info.resolution)
+            width_high = int(ranges[3]/map_.info.resolution)
+            height_grid=height_high-height_low
+            width_grid=width_high-width_low
+            for i in range(height_grid):
+                y =  height_low+ i
+                for j in range(width_grid):
+                    x= width_low + j
+                    map_2d[y, x]=100
+        free_space_indices_new = np.where(map_2d == 0)    
+        return free_space_indices_new
+
+    def update_maze(self, long_wall_centers, short_wall_centers):
+        """
+        spawn the walls of maze every episode
+        return:
+                pose of the walls
+        """
+        shortWallVertices=np.array([]).reshape(0, 4)
+        longWallVertices=np.array([]).reshape(0, 4)
+        theta_long_list=[]
+        theta_short_list=[]
+        # short_wall_centers
+        for i, center in enumerate(long_wall_centers):
+            theta=0
+            delta=np.random.choice([0, np.pi/2], 1, p=[0.5, 0.5])
+            theta+=delta
+            theta=theta%(2*np.pi)
+            theta_long_list.append(theta[0])
+            if delta==0:
+                vertices=np.array([[long_wall_centers[i,0] - self.wallWidth/2,long_wall_centers[i,1] - self.wallLengthShort], 
+                                                                    [long_wall_centers[i,0] + self.wallWidth/2,long_wall_centers[i,1] - self.wallLengthShort], 
+                                                                    [long_wall_centers[i,0] + self.wallWidth/2,long_wall_centers[i,1] + self.wallLengthShort], 
+                                                                    [long_wall_centers[i,0] - self.wallWidth/2,long_wall_centers[i,1] + self.wallLengthShort]])
+                long_wall_centers[i, 1] = 0.0
+                long_wall_centers[i, 0] = 0.0
+                longWallVertices=np.vstack([longWallVertices, vertices])
+            else:
+                vertices=np.array([[long_wall_centers[i,0] - self.wallLengthShort, long_wall_centers[i,1] - self.wallWidth/2], 
+                                                                    [long_wall_centers[i,0] - self.wallLengthShort, long_wall_centers[i,1] + self.wallWidth/2], 
+                                                                    [long_wall_centers[i,0] + self.wallLengthShort,long_wall_centers[i,1] + self.wallWidth/2], 
+                                                                    [long_wall_centers[i,0] + self.wallLengthShort,long_wall_centers[i,1] - self.wallWidth/2]])
+                long_wall_centers[i, 1] = -3.75
+                long_wall_centers[i, 0] = 17.65
+                longWallVertices=np.vstack([longWallVertices, vertices])
+
+        for i, center in enumerate(short_wall_centers):
+            theta=0 
+            delta=np.random.choice([0, np.pi/2], 1, p=[1, 0])
+            theta+=delta
+            theta=theta%(2*np.pi)
+            theta_short_list.append(theta[0])
+            sign=np.random.choice([-1, 1], 1, p=[0.5, 0.5])
+            # vertices of the walls
+            if delta==0:
+                short_wall_centers[i, 1]  =short_wall_centers[i, 1]+ sign*self.self.mapInnerBorderlength/8
+                vertices= np.array([[short_wall_centers[i,0]-self.wallWidth/2, short_wall_centers[i,1]-self.wallLengthShort/2], 
+                                                        [short_wall_centers[i,0]+self.wallWidth/2, short_wall_centers[i,1]-self.wallLengthShort/2], 
+                                                        [short_wall_centers[i,0]+self.wallWidth/2, short_wall_centers[i,1]+self.wallLengthShort/2], 
+                                                        [short_wall_centers[i,0]-self.wallWidth/2, short_wall_centers[i,1]+self.wallLengthShort/2]])
+                shortWallVertices= np.vstack([shortWallVertices,vertices])
+            else:
+                short_wall_centers[i, 0]   = short_wall_centers[i, 1] + sign*self.self.mapInnerBorderlength/8
+                vertices= np.array([[short_wall_centers[i,0]-self.wallLengthShort/2, short_wall_centers[i,1]-self.wallWidth/2], 
+                                                        [short_wall_centers[i,0]-self.wallLengthShort/2, short_wall_centers[i,1]+self.wallWidth/2], 
+                                                        [short_wall_centers[i,0]+self.wallLengthShort/2, short_wall_centers[i,1]+self.wallWidth/2], 
+                                                        [short_wall_centers[i,0]+self.wallLengthShort/2, short_wall_centers[i,1]-self.wallWidth/2]])
+                shortWallVertices= np.vstack([shortWallVertices,vertices])
+            # translations and rotations of the walls
+            if i==0:
+                if delta==0:
+                    short_wall_centers[i, 1] = sign*self.self.mapInnerBorderlength/8
+                    short_wall_centers[i, 0] = 0.0
+                else:
+                    short_wall_centers[i, 1] = -3.75
+                    short_wall_centers[i, 0]  = 29.05 + sign*self.self.mapInnerBorderlength/8
+            elif i==1:
+                if delta==0:
+                    short_wall_centers[i, 1] = sign*self.self.mapInnerBorderlength/8
+                    short_wall_centers[i, 0] = -11.4
+                else:
+                    short_wall_centers[i, 1] = -3.75
+                    short_wall_centers[i, 0]  = -11.4+29.05 + sign*self.self.mapInnerBorderlength/8
+            elif i==2:
+                if delta==0:
+                    short_wall_centers[i, 1] = -11.4+sign*self.self.mapInnerBorderlength/8
+                    short_wall_centers[i, 0] = -11.4
+                else:
+                    short_wall_centers[i, 1] = -11.4 - 3.75
+                    short_wall_centers[i, 0]  = -11.4+29.05 + sign*self.self.mapInnerBorderlength/8
+            elif i==3:
+                if delta==0:
+                    short_wall_centers[i, 1] = -11.4 + sign*self.self.mapInnerBorderlength/8
+                    short_wall_centers[i, 0] = 0.0
+                else:
+                    short_wall_centers[i, 1] = - 11.4 - 3.75
+                    short_wall_centers[i, 0]  = 29.05 + sign*self.self.mapInnerBorderlength/8
+
+        return short_wall_centers, long_wall_centers, theta_short_list, theta_long_list, shortWallVertices, longWallVertices
+
+
