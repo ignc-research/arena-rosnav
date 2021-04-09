@@ -10,6 +10,9 @@ import numpy as np
 from flatland_msgs.srv import MoveModel, MoveModelRequest, SpawnModelRequest, SpawnModel
 from flatland_msgs.srv import StepWorld
 from geometry_msgs.msg import Pose2D, PoseWithCovarianceStamped, PoseStamped
+from pedsim_srvs.srv import SpawnObstacle, SpawnObstacleRequest
+from pedsim_msgs.msg import LineObstacle
+from pedsim_msgs.msg import LineObstacles
 
 from nav_msgs.msg import OccupancyGrid, Path
 
@@ -44,6 +47,7 @@ class RobotManager:
         # setup proxy to handle  services provided by flatland
         rospy.wait_for_service(f'{self.ns_prefix}move_model', timeout=timeout)
         rospy.wait_for_service(f'{self.ns_prefix}spawn_model', timeout=timeout)
+        rospy.wait_for_service(f'{self.ns_prefix}pedsim_simulator/add_obstacle', timeout=timeout)
         #rospy.wait_for_service('step_world', timeout=20)
         self._srv_move_model = rospy.ServiceProxy(
             f'{self.ns_prefix}move_model', MoveModel)
@@ -52,6 +56,8 @@ class RobotManager:
         # it's only needed in training mode to send the clock signal.
         self._step_world = rospy.ServiceProxy(
             f'{self.ns_prefix}step_world', StepWorld)
+        self.__add_obstacle_srv = rospy.ServiceProxy(
+            f'{self.ns_prefix}pedsim_simulator/add_obstacle' ,SpawnObstacle, persistent=True)
 
         # publisher
         # publish the start position of the robot
@@ -259,5 +265,21 @@ class RobotManager:
                 self._new_global_path_generated = True
             self._global_path_con.notify()
 
-    def __mean_square_dist_(self, x, y):
-        return math.sqrt(math.pow(x, 2) + math.pow(y, 2))
+    def setGoalRadius(self, goal_radius):
+        self.goalRadius=goal_radius
+
+    def setGoalInfoToPedsim(self, goal_pos):
+        #partition of the goal area as a polygon
+        vertices=np.array([[goal_pos.x, goal_pos.y+1.1*self.goalRadius],
+                                                [goal_pos.x, goal_pos.y-1.1*self.goalRadius],
+                                                [goal_pos.x+1.1*self.goalRadius, goal_pos.y],
+                                                [goal_pos.x-1.1*self.goalRadius, goal_pos.y]])
+        add_pedsim_srv=SpawnObstacleRequest()
+        size=vertices.shape[0]
+        for i in range(size):
+            lineObstacle=LineObstacle()
+            lineObstacle.start.x,lineObstacle.start.y=vertices[i,0], vertices[i,1]
+            lineObstacle.end.x,lineObstacle.end.y=vertices[(i+1)%size,0], vertices[(i+1)%size,1]
+            add_pedsim_srv.staticObstacles.obstacles.append(lineObstacle)
+        # tell the pedsim the position of goal
+        self.__add_obstacle_srv.call(add_pedsim_srv)
