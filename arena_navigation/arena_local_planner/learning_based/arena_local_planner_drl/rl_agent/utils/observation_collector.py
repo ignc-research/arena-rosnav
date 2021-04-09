@@ -50,9 +50,10 @@ class ObservationCollector():
             self.ns_prefix = "/"+ns+"/"
 
         #safety settings for different humans TODO: should be global setting
-        self.safe_dist_adult=1.0 #in meter 1.0 1.5 2
-        self.safe_dist_child=1.2
-        self.safe_dist_elder=1.5
+        self.safe_dist_adult = 1.0 #in meter 1.0 1.5 2
+        self.safe_dist_child = 1.2
+        self.safe_dist_elder = 1.5
+        self.safe_dist_talking = 0.8
         #settings for agents TODO: should be transferred from yaml files
         self._radius_adult= 0.32
         self._radius_child= 0.25
@@ -186,7 +187,7 @@ class ObservationCollector():
             rho_humans[i], theta_humans[i] = ObservationCollector._get_pose_in_robot_frame(position, self._robot_pose)
 
         #sort the humans according to the relative position to robot
-        human_pos_index=np.argsort(rho_humans)        
+        human_pos_index=np.argsort(rho_humans)
         rho_humans, theta_humans=rho_humans[human_pos_index], theta_humans[human_pos_index]
         self._human_type=self._human_type[human_pos_index]
         self._human_vel=self._human_vel[human_pos_index]
@@ -205,30 +206,48 @@ class ObservationCollector():
         rho_behavior_child = np.array([],dtype=object).reshape(0,2)
         rho_behavior_elder = np.array([],dtype=object).reshape(0,2)
 
-        for i, ty in enumerate(self._human_type):            
+        for i, ty in enumerate(self._human_type):
+            # filter the obstacles which are not in the visible range of the robot
+            if not self.IsInViewRange(6, [-2.618,2.618], rho_humans[i], theta_humans[i]):
+                continue
             if ty==0: # adult
                 rho_behavior=np.array([rho_humans[i],self._human_behavior[i]],dtype=object)
                 rho_behavior_adult=np.vstack([rho_behavior_adult, rho_behavior])
+                #determine the safe_dist for every human
+                if self._human_behavior[i] =='talking':
+                    safe_dist_=self.safe_dist_talking
+                else:
+                    safe_dist_=self.safe_dist_adult
                 #robot centric 
                 state=ObservationCollector.rotate(self.robot_self_state[:2]+[self._human_position[i].x, self._human_position[i].y, self._human_vel[i].linear.x,self._human_vel[i].linear.y], self.rot)
-                obs=np.array(self.robot_self_state+[rho_humans[i], theta_humans[i]]+state+[self.safe_dist_adult ,self._radius_adult,
-                                                self._radius_adult+self.safe_dist_adult+self._radius_robot,self._human_behavior_token[i]])
+                obs=np.array(self.robot_self_state+[rho_humans[i], theta_humans[i]]+state+[safe_dist_ ,self._radius_adult,
+                                                self._radius_adult+safe_dist_+self._radius_robot,self._human_behavior_token[i]])
                 merged_obs = np.hstack([merged_obs,obs])
             elif ty==1: # child
                 rho_behavior=np.array([rho_humans[i],self._human_behavior[i]],dtype=object)
                 rho_behavior_child=np.vstack([rho_behavior_child, rho_behavior])
+                #determine the safe_dist for every human
+                if self._human_behavior[i] =='talking':
+                    safe_dist_=self.safe_dist_talking
+                else:
+                    safe_dist_=self.safe_dist_child
                 #robot centric 
                 state=ObservationCollector.rotate(self.robot_self_state[:2]+[self._human_position[i].x, self._human_position[i].y, self._human_vel[i].linear.x,self._human_vel[i].linear.y],self.rot)
-                obs=np.array(self.robot_self_state+[rho_humans[i], theta_humans[i]]+state+[self.safe_dist_child,self._radius_child,
-                                                self._radius_child+self.safe_dist_child+self._radius_robot,self._human_behavior_token[i]])
+                obs=np.array(self.robot_self_state+[rho_humans[i], theta_humans[i]]+state+[safe_dist_,self._radius_child,
+                                                self._radius_child+safe_dist_+self._radius_robot,self._human_behavior_token[i]])
                 merged_obs = np.hstack([merged_obs,obs])
             elif ty==3: # elder
                 rho_behavior=np.array([rho_humans[i],self._human_behavior[i]],dtype=object)
                 rho_behavior_elder=np.vstack([rho_behavior_elder, rho_behavior])
+                #determine the safe_dist for every human
+                if self._human_behavior[i] =='talking':
+                    safe_dist_=self.safe_dist_talking
+                else:
+                    safe_dist_=self.safe_dist_elder
                 #robot centric 
                 state=ObservationCollector.rotate(self.robot_self_state[:2]+[self._human_position[i].x, self._human_position[i].y, self._human_vel[i].linear.x,self._human_vel[i].linear.y], self.rot)
-                obs=np.array(self.robot_self_state+[rho_humans[i], theta_humans[i]]+state+[self.safe_dist_elder,self._radius_elder,
-                                                self._radius_elder+self.safe_dist_elder+self._radius_robot, self._human_behavior_token[i]])
+                obs=np.array(self.robot_self_state+[rho_humans[i], theta_humans[i]]+state+[safe_dist_,self._radius_elder,
+                                                self._radius_elder+safe_dist_+self._radius_robot, self._human_behavior_token[i]])
                 merged_obs = np.hstack([merged_obs,obs])
         obs_dict['adult_in_robot_frame'] = rho_behavior_adult
         obs_dict['child_in_robot_frame'] = rho_behavior_child
@@ -236,7 +255,8 @@ class ObservationCollector():
         #align the observation size
         observation_blank=len(merged_obs) - self.observation_space.shape[0]
         if observation_blank<0:
-            merged_obs=np.hstack([merged_obs,np.zeros([-observation_blank,])])
+            #add invalid value -1000 if the merged_obs are not full
+            merged_obs=np.hstack([merged_obs,-np.ones([-observation_blank,])*1000])
         elif observation_blank>0:
             merged_obs=merged_obs[:-observation_blank]
         
@@ -373,6 +393,12 @@ class ObservationCollector():
 
     def set_timestep(self, time_step):
         self.time_step=time_step
+
+    def IsInViewRange(self, distance, angleRange, rho_human, theta_human):
+        if rho_human<=distance and theta_human<=angleRange[1] and theta_human>=angleRange[0]:
+            return True
+        else:
+            return False
 
     @staticmethod
     def process_global_plan_msg(globalplan):
