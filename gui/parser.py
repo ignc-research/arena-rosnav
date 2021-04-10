@@ -215,6 +215,19 @@ else:
 # DEBUGGING
 print('Watchers:' + str(watchers))
 
+print('/**************** parsing triggered_watchers.txt *****************/') # done!
+lines_triggered_watchers = []
+triggered_watchers = []
+if os.path.exists("output/internal/triggered_watchers.txt") and os.path.getsize("output/internal/triggered_watchers.txt") > 0: # only if exists and not empty
+    with open('output/internal/triggered_watchers.txt') as file:
+        lines_triggered_watchers = file.readlines()
+
+for line in lines_triggered_watchers:
+    triggered_watchers.append(int(line))
+
+# DEBUGGING
+print('Triggered watchers:' + str(triggered_watchers))
+
 print('/**************** parsing vector.txt *****************/') # done!
 with open('output/internal/vector.txt') as file:
     file_contents = file.read()
@@ -374,7 +387,8 @@ k = 0
 i = 0
 for obstacle in obstacles:
     obstacle_num = str(i)
-    # TODO: should the radius be scaled by scale_x or scale_y -> it should be a circle after all !?
+    # Important: because of how the gui works, scale_x and scale_y will always be the same, which is really good, because we need for example to scale the obstacle_radius, so that at the end the obstacle stays a circle and not an ellipse!
+    # -> that is why it does not matter if we use for the obstacle_radius scale_x or scale_y
     obstacle_radius = str(obstacle[2]*scale_x) # good with obstacle[2]*scale_x (should be right!, since the radius is a distace and it was made according to the image size after, but taken as a image size before!)
     lin_velocity = str(obstacle_vel[i]) # before was obstacle_vel[i][1]
     start_pos_x = str((obstacle[0]-new_start_point_x)*scale_x*flip_x_axis+shift_x) # good with (obstacle[0]-new_start_point_x)*scale_x*flip_x_axis+shift_x
@@ -441,7 +455,7 @@ for watcher in watchers:
     watcher_num = str(i)
     watcher_pos_x = str((watcher[0]-new_start_point_x)*scale_x*flip_x_axis+shift_x)
     watcher_pos_y = str((watcher[1]-new_start_point_y)*scale_y*flip_y_axis+shift_y)
-    watcher_radius = str(watcher[2]*scale_x)
+    watcher_radius = str(watcher[2]*scale_x) # again here it does not matter if we use scale_x or scale_y, since both are the same!
 
     watchers_json += '\t\t\t\t"watcher_' + watcher_num + '": {\n\t\t\t\t\t"pos": ['
     watchers_json += '\n\t\t\t\t\t\t' + watcher_pos_x + ',\n\t\t\t\t\t\t' + watcher_pos_y + '\n\t\t\t\t\t],'
@@ -488,22 +502,35 @@ copyfile('output/new_scenario.json', '../simulator_setup/scenerios/new_scenario.
 
 print('/**************** user_data.txt & scenario.png *****************/')
 ### save only the relevant to the user data in a new txt file (user_data.txt), from where the user could easily check his/hers inputs
-# -> map resolution, obstacle velocities, obstacle-watchers connections from data.txt, the motions from motion.txt and obstacle types from obstacle.txt in a nicer form
+# -> map resolution, obstacle velocities, obstacle-watchers connections from data.txt, the motions from motion.txt, obstacle types from obstacle.txt and if a watcher is triggered or not from triggered_watchers.txt in a nicer form
 fob = open('output/user_data.txt','w')
 fob.write('Map resolution:\n' + str(map_res) + "\n")
 fob.write('Map origin:\n' + str(map_origin) + "\n")
 if len(amount_pedestrians) == 0 and len(obstacle_force_factor) == 0:
-    fob.write('ObstacleID - ObstacleType - Velocity - WatchersIDs - WaypointsIDs - Motion:\n')
+    fob.write('ObstacleID - ObstacleType - Velocity - WatchersIDs(triggered-/+/?) - WaypointsIDs - Motion:\n')
 if len(amount_pedestrians) == 0 and len(obstacle_force_factor) > 0:
-    fob.write('ObstacleID - ObstacleType - Velocity - WatchersIDs - WaypointsIDs - Motion - Obstacle force factor - Desire force factor:\n')
+    fob.write('ObstacleID - ObstacleType - Velocity - WatchersIDs(triggered-/+/?) - WaypointsIDs - Motion - Obstacle force factor - Desire force factor:\n')
 if len(amount_pedestrians) > 0 and len(obstacle_force_factor) > 0:
-    fob.write('ObstacleID - ObstacleType - Velocity - WatchersIDs - WaypointsIDs - Motion - Pedestrians amount - Chatting probability - Obstacle force factor - Desire force factor:\n')
+    fob.write('ObstacleID - ObstacleType - Velocity - WatchersIDs(triggered-/+/?) - WaypointsIDs - Motion - Pedestrians amount - Chatting probability - Obstacle force factor - Desire force factor:\n')
 i = 0
 for obstacle in obstacles:
     fob.write(str(i) + ' - ' + str(obstacle[3]) + ' - ' + str(obstacle_vel[i]) + ' - ')
     j = 0
     for watcher in obstacle_watcher_connections_2[i]:
         fob.write(str(watcher))
+        triggered_bool = False
+        for triggered in triggered_watchers:
+            if watcher == triggered:
+                triggered_bool = True
+        # '+' if the watcher has been triggered, otherwise '-'
+        # '?' if the array is empty, so the simulation did not run and it can not be known if a watcher was triggered or not
+        if len(triggered_watchers) > 0:
+            if triggered_bool:
+                fob.write('(' + '+' + ')')
+            else:
+                fob.write('(' + '-' + ')')
+        else:
+            fob.write('(' + '?' + ')')
         if j < (len(obstacle_watcher_connections_2[i]) - 1):
             fob.write(',')
         j += 1
@@ -535,7 +562,7 @@ with open('output/user_data.txt') as file:
 
 ### save further more the resulted scenario as an image (so only the map with everything on it), to be able later to compare the resulted map with the ones in rviz
 # ready.png image should be cut/cropped according to the relative map position and size
-im = Image.open(r"output/internal/ready.png") 
+im = Image.open(r"output/internal/ready.png")
 width, height = im.size # size of orginal image: (800,600)=the size of the kivy window
 # cropped image of the following dimension
 left = image_corners[0][0]
@@ -545,6 +572,12 @@ bottom = height - image_corners[0][1]
 im_scenario = im.crop((left, top, right, bottom))
 im_scenario.save("output/scenario.png")
 im_scenario.show() # show the image
+
+### save also the cutted image from sim.png with the dark red marked triggered watchers
+im_sim = Image.open(r"output/internal/sim.png")
+im_scenario_sim = im_sim.crop((left, top, right, bottom))
+im_scenario_sim.save("output/scenario_sim.png")
+im_scenario_sim.show() # show the image
 
 # INFO:
 # The code is tested with different maps (map_small.png and map.png) in rviz and it works.

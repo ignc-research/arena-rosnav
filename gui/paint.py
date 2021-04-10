@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import io, os, shutil
+import io, os, shutil, time, math
 from kivy.config import Config
 
 # Idea: make the window not resizable, to not mess up with the scale etc.
@@ -28,6 +28,9 @@ from kivy.uix.label import Label
 from kivy.uix.textinput import TextInput
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.behaviors.focus import FocusBehavior
+from kivy.animation import Animation
+from kivy.clock import Clock
+from functools import partial
 
 # global variables
 color_r = 1
@@ -40,13 +43,28 @@ obstacle_type_used = [] # append here only the used obstacle types for the curre
 obstacle_start_pos_ok = 0 # it is better, when the default value is false
 watcher_start_pos_ok = 0 # it is better, when the default value is false
 line_start_pos_ok = 1
+only_one_path = 0
 radius_current_global = 10. # init value of the radius
 radius_watcher_current_global = 25.  # init value of the watcher
 button2_activate = 0
 scrollable_area_global = ScrollView()
+index_sim = 0
+sim_array = []
+triggered_watchers = []
+no_watchers_used_no_triggered = 0
+pos_scales = [] # consists of all three calculated scales
+map_res = 0.0
+robot_radius = 0.0
+M = 0 # max distance of the robot movement
 # Important: set the image of the map, always place the map in the input folder for better structure (for now tested with map_small.png and map.png)
 # The tested maps up until now can be found under 'input/all_maps'.
-scenario_map = 'input/all_maps/map_small.png'
+scenario_map = 'input/all_maps/map1.png'
+robot_vel_rviz = 0.3 # hard coded robot velocity in rviz
+
+def my_callback(dt): # the event needs to be global, so that it can be stopped from a different button callback function
+    pass
+clock_delay = 0.3 # a default value, will be changed later after some calculations
+event = Clock.schedule_interval(my_callback, clock_delay) # here it does not matter what the clock_delay ist, will be changed later
 
 class MyPaintWidgetCircleObstacle(Widget): # obstacle widget
 
@@ -338,6 +356,7 @@ class MyPaintWidgetLine(Widget):
         global line_start_pos_ok
         if not(touch.y < float(lines[0]) and touch.y > float(lines[1]) and touch.x < float(lines[2]) and touch.x > float(lines[3])):
             line_start_pos_ok = 0
+            return
         else:
             line_start_pos_ok = 1
 
@@ -392,6 +411,21 @@ class MyPaintWidgetRobot(Widget): # for drawing two circles with a constant smal
         if 'i' in locals(): return i + 1
         else: return 0
     
+    def calculate_radius_robot(self):
+        # the radius of the robot in the gui should be calculated and known
+        # hard coded robot radius of 0.2m in rviz -> so it should be first scaled to become the radius in the gui
+        x_scale = pos_scales[0][0]*map_res
+        y_scale = pos_scales[0][1]*map_res
+        x_scale_reverse = 1/x_scale
+        y_scale_reverse = 1/y_scale
+        # Important: because of how the gui works, scale[0] and scale[1] will always be the same, which is really good!
+        # -> that is why it does not matter if we scale the following parameter wit x_scale_reverse or with y_scale_reverse!
+        robot_radius_rviz = 0.2 # hard coded 0.2m
+        global robot_radius
+        robot_radius = robot_radius_rviz*x_scale_reverse
+        #print('Robot radius in rviz: ' + str(robot_radius_rviz)) # 0.2
+        #print('Robot radius in the gui: ' + str(robot_radius)) # 3.003 (checked with rviz, seems right, compared with a default obstacle with radius 10)
+
     # the first circle that is done should be the start and the second should be the end position
     def on_touch_down(self, touch):
         # form of internal.txt: height_top\nheight_bottom\nwidth_top\nwidth_bottom
@@ -407,15 +441,112 @@ class MyPaintWidgetRobot(Widget): # for drawing two circles with a constant smal
         if self.file_len('output/internal/robot.txt') < 2:
             with self.canvas:
                 Color(0, 1, 1)
-                d = 20.
+                self.calculate_radius_robot() # it is enough to be run once, after that the radius is saved in a global variable
+                d = 2*robot_radius # before was used the default value 20, to be better seen
                 Ellipse(pos=(touch.x - d / 2, touch.y - d / 2), size=(d, d)) # should be shiftet, because the position specifies the bottom left corner of the ellipse’s bounding box
         
         # save x and y positions of both start and end drawn circles in another txt file
+        # write labels "start" and "end" above the robot positions -> those labels are too big -> better draw a small dot or line in the center of the end position
         if self.file_len('output/internal/robot.txt') == 0:
             fob.write('robot start position (x,y): ' + str(touch.x) + ',' + str(touch.y) + "\n")
+            label_start = Label(text="", pos=(touch.x, touch.y), size=(1, 1), color=(0,0,0), disabled_color=(0,0,0)) # place the number at the end of the line
+            self.add_widget(label_start)
         if self.file_len('output/internal/robot.txt') == 1:
             fob.write('robot end position (x,y): ' + str(touch.x) + ',' + str(touch.y) + "\n")
+            label_end = Label(text="-", font_size='15sp', pos=(touch.x, touch.y), size=(1, 1), color=(0,0,0), disabled_color=(0,0,0)) # place the number at the end of the line
+            self.add_widget(label_end)
         fob.close()
+
+class MyPaintWidgetPath(Widget): # a robot path
+    def file_len(self, fname):
+        with open(fname) as f:
+            for i, l in enumerate(f):
+                pass
+        if 'i' in locals(): return i + 1
+        else: return 0
+
+    def on_touch_down(self, touch): # line = path from start to end position
+        # form of internal.txt: height_top\nheight_bottom\nwidth_top\nwidth_bottom
+        lines = []
+        with open('output/internal/internal.txt') as file:
+            lines = file.readlines()
+        
+        global line_start_pos_ok
+        if not(touch.y < float(lines[0]) and touch.y > float(lines[1]) and touch.x < float(lines[2]) and touch.x > float(lines[3])):
+            line_start_pos_ok = 0
+            return
+        else:
+            line_start_pos_ok = 1
+        
+        # do not allow the user to draw more then one path, so to click more then once -> nothing will happen after the first click
+        global only_one_path
+        fob = open('output/internal/sim.txt','a')
+        if self.file_len('output/internal/sim.txt') > 0:
+            only_one_path = 1
+
+        if only_one_path == 1:
+            return
+
+        with self.canvas:
+            Color(0, 1, 1)
+            touch.ud['line'] = Line(points=(touch.x, touch.y))
+        
+        # save all path positions (x,y) in a txt file
+        fob = open('output/internal/sim.txt','a')
+        fob.write('vector start (x,y): ' + str(touch.x) + ',' + str(touch.y) + "\n")
+        sim_array.append((touch.x, touch.y))
+        fob.close()
+    
+    def on_touch_move(self, touch):
+        lines = []
+        with open('output/internal/internal.txt') as file:
+            lines = file.readlines()
+        
+        global line_start_pos_ok
+        if not(touch.y < float(lines[0]) and touch.y > float(lines[1]) and touch.x < float(lines[2]) and touch.x > float(lines[3])) or line_start_pos_ok == 0:
+            return
+        global only_one_path
+        if only_one_path == 1:
+            return
+
+        touch.ud['line'].points += [touch.x, touch.y]
+        fob = open('output/internal/sim.txt','a')
+        fob.write('vector during (x,y): ' + str(touch.x) + ',' + str(touch.y) + "\n") # save all position during the mause movement
+        sim_array.append((touch.x, touch.y))
+    
+    def on_touch_up(self, touch):
+        lines = []
+        with open('output/internal/internal.txt') as file:
+            lines = file.readlines()
+        
+        global line_start_pos_ok
+        if not(touch.y < float(lines[0]) and touch.y > float(lines[1]) and touch.x < float(lines[2]) and touch.x > float(lines[3])) or line_start_pos_ok == 0:
+            return
+        global only_one_path
+        if only_one_path == 1:
+            return
+        
+        # save the vector positions in a txt file
+        fob = open('output/internal/sim.txt','a')
+        fob.write('vector end (x,y): ' + str(touch.x) + ',' + str(touch.y) + "\n")
+        sim_array.append((touch.x, touch.y))
+        fob.close()
+
+class MyPaintWidgetSimRobot(Widget): # a circle representing the robot (used for simulating the robot movement on a drawn path)
+
+    def init(self, x, y):
+        with self.canvas:
+            Color(0, 1, 1)
+            d = 2*robot_radius
+            Ellipse(pos=(x - d / 2, y - d / 2), size=(d, d))
+
+class MyPaintWidgetTriggeredWatcher(Widget): # a triggered watcher
+
+    def init(self, x, y, r):
+        with self.canvas:
+            Color(0.75, 0, 0) # dark red
+            d = 2*r # diameter = 2*radius
+            Ellipse(pos=(x - d / 2, y - d / 2), size=(d, d))
 
 class ScenarioGUIApp(App):
 
@@ -467,6 +598,7 @@ class ScenarioGUIApp(App):
         self.painter_circle_obstacle = MyPaintWidgetCircleObstacle()
         self.painter_line = MyPaintWidgetLine()
         self.painter_robot = MyPaintWidgetRobot()
+        self.painter_sim = MyPaintWidgetPath()
         
         window_sizes=Window.size # (800, 600) per default
 
@@ -474,7 +606,7 @@ class ScenarioGUIApp(App):
         height_layout_btn = window_sizes[1]/3
         width_layout_btn = 0
         border = 5
-        layout_btn = GridLayout(cols=4, size=(window_sizes[0],height_layout_btn), size_hint=(None, None))
+        layout_btn = GridLayout(cols=3, size=(window_sizes[0],height_layout_btn), size_hint=(None, None))
         
         # load the user map as a background image for the drawings
         # Important: it should work with every map
@@ -529,12 +661,16 @@ class ScenarioGUIApp(App):
         
         # scale the image: from the uploaded image -> to the drawing area -> to the whole window -> in parser.py (using "resolution" and "origin" from the yaml file) to the real world area
         scale = (image_size_before[0]/image_size_after[0], image_size_before[1]/image_size_after[1])
+        pos_scales.append(scale)
+        # Important: because of how the gui works, scale[0] and scale[1] will always be the same, which is really good!
         print('scale = image_size_before/image_size_after:' + str(scale)) # image_size_after * scale = image_size_before
         # the image range should be scaled up to the window-size range
         print('size image window:' + str(window_sizes)) # [800, 600]
         scale2 = (image_size_after[0]/window_sizes[0], image_size_after[1]/window_sizes[1])
+        pos_scales.append(scale2)
         print('scale 2 = image_size_after/window_size:' + str(scale2)) # window_size * scale2 = image_size_after
         scale_total = (image_size_before[0]/window_sizes[0], image_size_before[1]/window_sizes[1])
+        pos_scales.append(scale_total)
         print('scale total = image_size_before/window_size:' + str(scale_total)) # window_size * scale_total = image_size_before
         # Important: all positions(x,y) and radiuses should be multiplied with the scale(x,y) value to be right (done in parser.py)
         # in parser.py will for now only scale be used, but nevertheless all there parameters (scale, scale2 and scale_total are passed), since it is better that parser.py has more information then less informtation
@@ -625,7 +761,7 @@ class ScenarioGUIApp(App):
         height_btn_return = 30
         width_btn_return = 140
         button_return = Button(text='return', size_hint=(None, None), size=(width_btn_return,height_btn_return), pos=(border,height_layout_btn+height_btn_return))
-        button_return.bind(on_press=lambda x: self.button_return_callback_down(self.parent, parent_draw, button, button2, button3, button4, self.painter_circle_obstacle, self.painter_circle_watcher, self.painter_line, self.painter_robot))
+        button_return.bind(on_press=lambda x: self.button_return_callback_down(self.parent, parent_draw, button, button2, button3, button4, button5, self.painter_circle_obstacle, self.painter_circle_watcher, self.painter_line, self.painter_robot, self.painter_sim))
 
         # dynamically filled lists (needed for the txt files)
         label_index_list = []
@@ -639,24 +775,32 @@ class ScenarioGUIApp(App):
         textinput_desire_force_factor = []
         
         # create buttons
-        button = Button(text='Click when ready\nwith the obstacles\nnumber & position', font_size=14)
-        button2 = Button(text='Click when ready\nwith the watchers', font_size=14)
-        button3 = Button(text='Click when ready\nwith the waypoints', font_size=14)
-        button4 = Button(text='Click when ready\nwith robot start\nand end position &\nsetting all parameters\n-> Done!', font_size=14)
+        button = Button(text='Click when ready with\nthe obstacle positions\n& setting the parameters\non the left', font_size=14)
+        button2 = Button(text='Click when ready with\nthe watchers', font_size=14)
+        button3 = Button(text='Click when ready with\nthe waypoints', font_size=14)
+        button4 = Button(text='Click when ready with\nrobot start and end\nposition & setting the\nparameters on the right', font_size=14)
+        button5 = Button(text='Click when ready with\ndrawing a single path\nfrom start to end position\nto start the simulation (optional)\nor just click to continue', font_size=14)
+        button6 = Button(text='Click to stop\nthe simulation to see\nthe triggered watchers\nor just click to FINISH', font_size=14)
 
-        button.bind(on_press=lambda x: self.button_callback(self.parent, parent_draw, button, button2, mainbutton_obstacle_type, wimg_input_map, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return, textinput_num_obstacles, image_corners, scale, scale2, scale_total, width_left_border, height_up_border, height_layout_btn, label_index_list, textinput_velocity_list, textinput_obstacle_watchers_connection_list, textinput_obstacle_waypoints_connection_list, mainbutton_motion_list, textinput_amount, textinput_chatting_probability, textinput_obstacle_force_factor, textinput_desire_force_factor))
+        button.bind(on_press=lambda x: self.button_callback(self.parent, parent_draw, button, button2, mainbutton_obstacle_type, wimg_input_map, layout_btn, layout_origin, layout_res, layout_num_obstacles, textinput_res, textinput_origin, button_return, textinput_num_obstacles, image_corners, scale, scale2, scale_total, width_left_border, height_up_border, height_layout_btn, label_index_list, textinput_velocity_list, textinput_obstacle_watchers_connection_list, textinput_obstacle_waypoints_connection_list, mainbutton_motion_list, textinput_amount, textinput_chatting_probability, textinput_obstacle_force_factor, textinput_desire_force_factor))
         button2.bind(on_press=lambda x: self.button2_callback(self.parent, parent_draw, button2, button3, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return, mainbutton_obstacle_type, wimg_input_map))
         button3.bind(on_press=lambda x: self.button3_callback(self.parent, parent_draw, button3, button4, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return, mainbutton_obstacle_type, wimg_input_map))
-        button4.bind(on_press=lambda x: self.button4_callback(self.parent, parent_draw, button4, layout_btn, button_return, mainbutton_obstacle_type, textinput_res, textinput_origin, textinput_num_obstacles, label_index_list, textinput_velocity_list, textinput_obstacle_watchers_connection_list, textinput_obstacle_waypoints_connection_list, mainbutton_motion_list, textinput_amount, textinput_chatting_probability, textinput_obstacle_force_factor, textinput_desire_force_factor))
-        
+        button4.bind(on_press=lambda x: self.button4_callback(self.parent, parent_draw, button4, button5, wimg_input_map, layout_btn, button_return, mainbutton_obstacle_type, textinput_num_obstacles, label_index_list, textinput_velocity_list, textinput_obstacle_watchers_connection_list, textinput_obstacle_waypoints_connection_list, mainbutton_motion_list, textinput_amount, textinput_chatting_probability, textinput_obstacle_force_factor, textinput_desire_force_factor))
+        button5.bind(on_press=lambda x: self.button5_callback(self.parent, parent_draw, button5, button6))
+        button6.bind(on_press=lambda x: self.button6_callback(self.parent, parent_draw, button6))
+
         button2.disabled = True # at first should be disabled
         button3.disabled = True # at first should be disabled
         button4.disabled = True # at first should be disabled
+        button5.disabled = True # at first should be disabled
+        button6.disabled = True # at first should be disabled
 
         layout_btn.add_widget(button)
         layout_btn.add_widget(button2)
         layout_btn.add_widget(button3)
         layout_btn.add_widget(button4)
+        layout_btn.add_widget(button5)
+        layout_btn.add_widget(button6)
 
         # add the neu widgets to the parent widgets
         parent_draw.add_widget(self.painter_circle_obstacle) # Important: add this widget if you want to have the default='circle' (red) obstacle type!
@@ -671,10 +815,12 @@ class ScenarioGUIApp(App):
 
     # Idea: save as image -> load back -> then delete the first widget (that is how the drawings won't disappear) and enable the next widget
     # Idea: make a button (click when ready with the obstacles => save the positions and radius), then draw the watchers and again click and so on for the lines and robot positions
-    def button_callback(self, parent, parent_draw, button, button2, mainbutton_obstacle_type, wimg_input_map, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return, textinput_num_obstacles, image_corners, scale, scale2, scale_total, width_left_border, height_up_border, height_layout_btn, label_index_list, textinput_velocity_list, textinput_obstacle_watchers_connection_list, textinput_obstacle_waypoints_connection_list, mainbutton_motion_list, textinput_amount, textinput_chatting_probability, textinput_obstacle_force_factor, textinput_desire_force_factor):
+    def button_callback(self, parent, parent_draw, button, button2, mainbutton_obstacle_type, wimg_input_map, layout_btn, layout_origin, layout_res, layout_num_obstacles, textinput_res, textinput_origin, button_return, textinput_num_obstacles, image_corners, scale, scale2, scale_total, width_left_border, height_up_border, height_layout_btn, label_index_list, textinput_velocity_list, textinput_obstacle_watchers_connection_list, textinput_obstacle_waypoints_connection_list, mainbutton_motion_list, textinput_amount, textinput_chatting_probability, textinput_obstacle_force_factor, textinput_desire_force_factor):
         print('The button <%s> is being pressed' % ' '.join(button.text.split('\n')))
         # the number of obstacles can not be changed once the first button has been clicked
         textinput_num_obstacles.disabled = True # disable the area, the input can not be changed later on
+        textinput_res.disabled = True # disable the area, the input can not be changed later on
+        textinput_origin.disabled = True # disable the area, the input can not be changed later on
         
         # the user should first say how many obstacles he put -> after that can be created the same amount of text boxes and drop down boxes as the amount of obstacles -> so putting obstacle velocity, watchers, motion etc. per obstacle can be done individually!
         print('Number of obstacles: ' + textinput_num_obstacles.text)
@@ -691,6 +837,10 @@ class ScenarioGUIApp(App):
         # at this place in the code are they for sure not empty and are their final version
         fob = open('output/internal/data.txt','w') # 'w'=write (overrides the content every time)
         fob.write('Image corners:\n' + str(image_corners[0][0]) + ',' + str(image_corners[0][1]) + '\n' + str(image_corners[1][0]) + ',' + str(image_corners[1][1]) + '\n' + str(image_corners[2][0]) + ',' + str(image_corners[2][1]) + '\n' + str(image_corners[3][0]) + ',' + str(image_corners[3][1]) + '\nPositions scale:\n' + str(scale[0]) + ',' + str(scale[1]) + ',' + str(scale2[0]) + ',' + str(scale2[1]) + ',' + str(scale_total[0]) + ',' + str(scale_total[1]))
+        # saving the map resolution and origin
+        fob.write('\nMap resolution:\n' + str(textinput_res.text) + '\nMap origin:\n' +  str(textinput_origin.text))
+        global map_res
+        map_res = float(textinput_res.text)
 
         parent.remove_widget(wimg_input_map) # !
         # the text boxes about the obstacle velocities and obstacle-watchers connections schould be editable also after the first button click!
@@ -799,13 +949,10 @@ class ScenarioGUIApp(App):
         button3.disabled = True # disable the button, should be clicked only once!
         button4.disabled = False # enable the next button
 
-    def button4_callback(self, parent, parent_draw, button4, layout_btn, button_return, mainbutton_obstacle_type, textinput_res, textinput_origin, textinput_num_obstacles, label_index_list, textinput_velocity_list, textinput_obstacle_watchers_connection_list, textinput_obstacle_waypoints_connection_list, mainbutton_motion_list, textinput_amount, textinput_chatting_probability, textinput_obstacle_force_factor, textinput_desire_force_factor):
+    def button4_callback(self, parent, parent_draw, button4, button5, wimg_input_map, layout_btn, button_return, mainbutton_obstacle_type, textinput_num_obstacles, label_index_list, textinput_velocity_list, textinput_obstacle_watchers_connection_list, textinput_obstacle_waypoints_connection_list, mainbutton_motion_list, textinput_amount, textinput_chatting_probability, textinput_obstacle_force_factor, textinput_desire_force_factor):
         print('The button <%s> is being pressed' % ' '.join(button4.text.split('\n')))
 
         fob = open('output/internal/data.txt','a')
-        # saving the map resolution and origin
-        fob.write('\nMap resolution:\n' + str(textinput_res.text) + '\nMap origin:\n' +  str(textinput_origin.text))
-
         # saving data in files should be done here and not in button_callback, because there the button values are still not visible!
         fob.write('\nObstacle velocities:\n')
         for i in range(int(textinput_num_obstacles.text)):
@@ -863,26 +1010,346 @@ class ScenarioGUIApp(App):
             #mainbutton_motion_list[i].disabled = True # if buttons, they should be disabled
         fob.close()
 
+        parent.remove_widget(wimg_input_map) # !
         parent.remove_widget(layout_btn)
         parent.remove_widget(button_return)
         parent.remove_widget(mainbutton_obstacle_type)
         scrollable_area_global.disabled = True # disable the scrolling behavior! (otherwise it will still be scrollable under the area saved as image) # still part of the last internal image
 
-        parent.export_to_png("output/internal/ready.png")
+        parent.export_to_png("output/internal/watchers_obstacles_waypoints_robot_positions.png")
         for child in parent_draw.children:
             parent_draw.remove_widget(child)
         parent.remove_widget(parent_draw)
 
+        parent.add_widget(wimg_input_map) # !
         parent.add_widget(layout_btn)
         parent.add_widget(button_return)
         parent.add_widget(mainbutton_obstacle_type)
-
-        wimg_ready = Image(source='output/internal/ready.png', size=(parent.width, parent.height))
+        wimg_ready = Image(source='output/internal/watchers_obstacles_waypoints_robot_positions.png', size=(parent.width, parent.height))
         parent.add_widget(wimg_ready)
+        parent_draw.add_widget(self.painter_sim) # ! add the new widget after the map and after the image, so that it is above all
+        parent.add_widget(parent_draw)
+        parent.export_to_png("output/internal/ready.png")
+        
         button4.disabled = True # disable the button, should be clicked only once!
+        button5.disabled = False # enable the next button
+    
+    def watcher_parsing(self):
+        lines_watchers = []
+        watchers_parsed = [] # form: [(x_center, y_center, radius), ...]
+        if not (not (os.path.exists('output/internal/watcher.txt') and os.path.getsize('output/internal/watcher.txt') > 0)):
+            with open('output/internal/watcher.txt') as file:
+                lines_watchers = file.readlines()
+
+            # parse the contents into a useful format
+            count = 0
+            for line in lines_watchers:
+                count += 1
+                watchers_parsed.append((float(line.split('watcher (x,y,radius): ')[1].split(',')[0]), float(line.split('watcher (x,y,radius): ')[1].split(',')[1]), float(line.split('watcher (x,y,radius): ')[1].split(',')[2])))
+        return watchers_parsed
+
+    def check_watcher_triggered(self, parent, parent_draw, watchers_parsed):
+        # The position and radius of every watcher is taken and every watcher is checked by every simulated movement
+        if (len(watchers_parsed) == 0):
+            global no_watchers_used_no_triggered
+            if no_watchers_used_no_triggered == 0:
+                print('No watchers used -> no watchers could be triggered!') # print it only once
+                no_watchers_used_no_triggered = 1
+            return
+        watcher_id = 0
+        for watcher in watchers_parsed:
+            x_watcher_center = watcher[0]
+            y_watcher_center = watcher[1]
+            radius_watcher = watcher[2]
+            # Important: check if the point is inside of the watcher circlular area
+            # for explanation see watcher_area_calculation.png in math folder
+            x_point = sim_array[index_sim][0]
+            y_point = sim_array[index_sim][1]
+            x_distance = x_watcher_center - x_point # it does not matter if it is positive or negative, since we need its square
+            y_distance = y_watcher_center - y_point
+            center_point_distance = math.sqrt(x_distance**2 + y_distance**2)
+            # Important: if it is checked "center_point_distance <= radius_watcher", a watcher will be triggered when the center of the robot overlapps with it -> but a robot has a radius > 0
+            # => the watcher should be triggered, already when its edge overlapps with a watcher => check instead if "center_point_distance - robot_radius <= radius_watcher"!
+            if center_point_distance - robot_radius <= radius_watcher:
+                print('Watcher with ID=' + str(watcher_id) + ' has been triggered!')
+                global triggered_watchers
+                id_existing = 0
+                for watcher in triggered_watchers:
+                    if watcher == watcher_id:
+                        id_existing = 1
+                if id_existing == 0: # only if not already there, append the id of the triggered watcher to the global array
+                    triggered_watchers.append(watcher_id)
+                # visualize the triggered watcher direct on the map -> color the watcher from yellow to dark red
+                triggered_watcher_temp = MyPaintWidgetTriggeredWatcher()
+                parent_draw.add_widget(triggered_watcher_temp)
+                triggered_watcher_temp.init(x_watcher_center, y_watcher_center, radius_watcher)
+                # load above the triggered watcher the image, where just the obstacles are saved (obstacles.png), so that the obstacles are still above the watchers as it should be
+                wimg_ready = Image(source='output/internal/obstacles.png', size=(parent.width, parent.height))
+                parent.add_widget(wimg_ready)
+                # nummerate the triggered watchers again, so that their ids are above and visible (still use their already given id "watcher_id" and not new ones)
+                label_triggered_watcher_num = Label(text=str(watcher_id), pos=(x_watcher_center-radius_watcher, y_watcher_center-radius_watcher), size=(radius_watcher*2, radius_watcher*2), color=(0,0,1), disabled_color=(0,0,1)) # place the number in the middle of the circle
+                parent.add_widget(label_triggered_watcher_num)
+                # only the path and the labels for robot start and end position will stay under the triggered watchers
+            watcher_id += 1
+
+    #def clock_callback(self, dt): # works, but can not take other arguments
+    def clock_callback(self, parent, parent_draw, temp_array_sim_robot, watchers_parsed, *largs):
+        #print("after 0.5 sec")
+        global index_sim
+        parent_draw.remove_widget(temp_array_sim_robot[index_sim])
+        index_sim = index_sim + 1
+        if index_sim == len(sim_array):
+            print("The simulation restarts")
+            index_sim = 0
+        temp_array_sim_robot[index_sim].init(sim_array[index_sim][0], sim_array[index_sim][1])
+        self.check_watcher_triggered(parent, parent_draw, watchers_parsed) # check if a watcher has been triggered
+        parent_draw.add_widget(temp_array_sim_robot[index_sim]) # ! add it at last, so that the moving robot is above the trigerred watchers
+
+    def sim_array_fill_gaps(self):
+        global sim_array
+        sim_array_filled = []
+        fob = open('output/internal/sim_advanced.txt','w') # directly also write to a file
+        count = 0
+        for pos in sim_array:
+            sim_array_filled.append(pos)
+            fob.write("vector saved (x,y): " + str(pos[0]) + ',' + str(pos[1]))
+            if count == len(sim_array) - 1:
+                break
+            fob.write('\n')
+            # append also the new calculated positions in the gap between pos (point A) and pos_next (point B):
+
+            pos_next = sim_array[count+1]
+            x_A = pos[0] # x coordinate of point A
+            y_A = pos[1] # y coordinate of point A
+            x_B = pos_next[0] # x coordinate of point B
+            y_B = pos_next[1] # y coordinate of point B
+
+            # Important: set up the max movement/distance M on the line, with which each new point in between will be searched
+            global M
+            M = 1 # not allowed to be 0! # with M=5 moves every ~ 1s, with M=1 moves every ~ 20ms
+
+            # the following two values should be added to point A again and again until point B is reached
+            x_step = 0 # step in x direction to reach a position in between
+            y_step = 0 # step in y direction to reach a position in between
+
+            case = 0.0
+            # case distinction (1):
+            if x_A == x_B and y_A > y_B:
+                x_step = 0
+                y_step = -M
+                case = 1.1
+                #print("case 1.1")
+            elif x_A == x_B and y_A < y_B:
+                x_step = 0
+                y_step = M
+                case = 1.2
+                #print("case 1.2")
+            elif y_A == y_B and x_A > x_B:
+                x_step = -M
+                y_step = 0
+                case = 1.3
+                #print("case 1.3")
+            elif y_A == y_B and x_A < x_B:
+                x_step = M
+                y_step = 0
+                case = 1.4
+                #print("case 1.4")
+            elif x_A == x_B and y_A == y_B:
+                x_step = 0
+                y_step = 0
+                case = 1.5
+                break # nothing to be done
+                #print("case 1.5")
+            else:
+                # case distinction (2):
+
+                # additional calculations (for more explanation see the extended_positions_on_the_path_calculation.png in the math folder):
+                S = abs(x_A - x_B) # distance (>0) between the x coordinates of point A and B
+                T = abs(y_A - y_B) # distance (>0) between the y coordinates of point A and B
+                L = math.sqrt((y_A - y_B)**2 + (x_A - x_B)**2) # length of the line
+                # the distance between the points on the line should be MAX ='M' => the distance between the last two points should be <='M' (so make only the last distance smaller and not each distance, when possible the distance should be = 'M')
+                rest = L % M
+                if rest == 0: # another bottom border then 0 could be set here
+                    N = L/M
+                else:
+                    N = int(L/M) + 1
+                #the line should be separated into N parts => N-1 points should be placed on the line in between point A and point B
+                #if N == 0 or N == 1 => no points in between are needed -> done for this pair A and B
+                # we have S, T, M -> we search for x_step_diagonal and y_step_diagonal for the cases in case distinction (2)
+                x_step_diagonal = abs(math.sqrt((M**2)/(1+((T**2)/(S**2))))) # here should be no division of 0, since S can not be 0 in these cases
+                y_step_diagonal = x_step_diagonal*T/S # here should be no division of 0, since S can not be 0 in these cases
+                
+                if y_A > y_B and x_A > x_B:
+                    x_step = -x_step_diagonal
+                    y_step = -y_step_diagonal
+                    case = 2.1
+                    #print("case 2.1")
+                elif y_A > y_B and x_A < x_B:
+                    x_step = x_step_diagonal
+                    y_step = -y_step_diagonal
+                    #print("case 2.2")
+                    case = 2.2
+                elif y_A < y_B and x_A > x_B:
+                    x_step = -x_step_diagonal
+                    y_step = y_step_diagonal
+                    #print("case 2.3")
+                    case = 2.3
+                elif y_A < y_B and x_A < x_B:
+                    x_step = x_step_diagonal
+                    y_step = y_step_diagonal
+                    #print("case 2.4")
+                    case = 2.4
+
+            # in a loop (until the next would reach point B or even go further) add the points in between: new point(x_A+x_step, y_A+y_step), another new point (x_A+2*x_step, y_A+2*y_step) etc.
+            # here the condition of reaching point B is again different for each case
+            pos_new_x = x_A
+            pos_new_y = y_A
+            if case == 1.1:
+                while pos_new_y + y_step > y_B:
+                    pos_new_x += x_step # x_step = 0
+                    pos_new_y += y_step
+                    pos_new = [pos_new_x, pos_new_y]
+                    sim_array_filled.append(pos_new) # append the new position in between
+                    fob.write("vector additional (x,y): " + str(pos_new[0]) + ',' + str(pos_new[1]) + '\n')
+            if case == 1.2:
+                while pos_new_y + y_step < y_B:
+                    pos_new_x += x_step # x_step = 0
+                    pos_new_y += y_step
+                    pos_new = [pos_new_x, pos_new_y]
+                    sim_array_filled.append(pos_new) # append the new position in between
+                    fob.write("vector additional (x,y): " + str(pos_new[0]) + ',' + str(pos_new[1]) + '\n')
+            if case == 1.3:
+                while pos_new_x + x_step > x_B:
+                    pos_new_x += x_step
+                    pos_new_y += y_step # y_step = 0
+                    pos_new = [pos_new_x, pos_new_y]
+                    sim_array_filled.append(pos_new) # append the new position in between
+                    fob.write("vector additional (x,y): " + str(pos_new[0]) + ',' + str(pos_new[1]) + '\n')
+            if case == 1.4:
+                while pos_new_x + x_step < x_B:
+                    pos_new_x += x_step
+                    pos_new_y += y_step # y_step = 0
+                    pos_new = [pos_new_x, pos_new_y]
+                    sim_array_filled.append(pos_new) # append the new position in between
+                    fob.write("vector additional (x,y): " + str(pos_new[0]) + ',' + str(pos_new[1]) + '\n')
+            if case == 2.1:
+                while pos_new_x + x_step > x_B and pos_new_y + y_step > y_B:
+                    pos_new_x += x_step
+                    pos_new_y += y_step
+                    pos_new = [pos_new_x, pos_new_y]
+                    sim_array_filled.append(pos_new) # append the new position in between
+                    fob.write("vector additional (x,y): " + str(pos_new[0]) + ',' + str(pos_new[1]) + '\n')
+            if case == 2.2:
+                while pos_new_x + x_step < x_B and pos_new_y + y_step > y_B:
+                    pos_new_x += x_step
+                    pos_new_y += y_step
+                    pos_new = [pos_new_x, pos_new_y]
+                    sim_array_filled.append(pos_new) # append the new position in between
+                    fob.write("vector additional (x,y): " + str(pos_new[0]) + ',' + str(pos_new[1]) + '\n')
+            if case == 2.3:
+                while pos_new_x + x_step > x_B and pos_new_y + y_step < y_B:
+                    pos_new_x += x_step
+                    pos_new_y += y_step
+                    pos_new = [pos_new_x, pos_new_y]
+                    sim_array_filled.append(pos_new) # append the new position in between
+                    fob.write("vector additional (x,y): " + str(pos_new[0]) + ',' + str(pos_new[1]) + '\n')
+            if case == 2.4:
+                while pos_new_x + x_step < x_B and pos_new_y + y_step < y_B:
+                    pos_new_x += x_step
+                    pos_new_y += y_step
+                    pos_new = [pos_new_x, pos_new_y]
+                    sim_array_filled.append(pos_new) # append the new position in between
+                    fob.write("vector additional (x,y): " + str(pos_new[0]) + ',' + str(pos_new[1]) + '\n')
+
+            count += 1
+        
+        fob.close()
+        sim_array = []
+        sim_array = sim_array_filled # update sim_array with the additional positions -> make sim_array = sim_array_filled
+        # DEBUGGING: test all cases! (for now they all seem to work)
+
+    def button5_callback(self, parent, parent_draw, button5, button6):
+        print('The button <%s> is being pressed' % ' '.join(button5.text.split('\n')))
+        
+        # In sim_array a position is only saved, when there is a mouse movement.
+        # So between each two positions in this array a straight line equation should be solved to fill the gaps.
+        # This is done in function sim_array_fill_gaps(). If it is not called here, only the saved positions by kivi will be simulated
+        self.sim_array_fill_gaps() # Important: updates sim_array with the additional positions in between the mouse movements
+
+        # the global array "sim_array" consists of the robot positions
+        if len(sim_array) != 0: # start the simulation only if a line on the map has been drawn
+            print("The simulation starts")
+            temp_array_sim_robot = []
+            for pos in sim_array:
+                temp_array_sim_robot.append(MyPaintWidgetSimRobot())
+            temp_array_sim_robot[index_sim].init(sim_array[index_sim][0], sim_array[index_sim][1])
+
+            # Important: if the robot goes over a yellow area (activates a watcher), sth should be triggered
+            watchers_parsed = self.watcher_parsing() # parse watcher.txt
+            self.check_watcher_triggered(parent, parent_draw, watchers_parsed) # check if a watcher has been triggered
+            parent_draw.add_widget(temp_array_sim_robot[index_sim]) # ! add it at last, so that the moving robot is above the trigerred watchers
+
+            # Important: make the calculations (from distance and velocity of the robot) about the time (here reffered also as delay)
+            x_scale = pos_scales[0][0]*map_res
+            y_scale = pos_scales[0][1]*map_res
+            # Important: because of how the gui works, scale[0] and scale[1] will always be the same, which is really good!
+            # -> that is why it does not matter if we scale the following parameters with x_scale or with y_scale!
+            # scale the distance M to the distance in the simulation rviz
+            M_rviz = M*x_scale
+            # hard-coded robot velocity of 0.3 in m/sec in the simulation environment rviz
+            global robot_vel_rviz
+            v_rviz = robot_vel_rviz
+            # formel: distance M = velocity v * time t -> t = distance M / velocity v
+            t_rviz = M_rviz/v_rviz
+            # the difference between rviz and the gui is the map, so the distance, that is why also the velocity of the robot should be different, but the time the robot moves from A to B should be the same in the gui and in rviz!
+            # => t != t_rviz
+            t = t_rviz
+            # not needed, but calculate also the robot velocity in the gui
+            v = M/t
+            print('Robot velocity in rviz: ' + str(v_rviz) + 'm/s')
+            print('Robot velocity on the gui: ' + str(v) + 'px/s')
+            print('Time to pass a distance of ' + str(M_rviz) + 'm in rviz: ' + str(t_rviz) + 's')
+            print('Time to pass a distance of ' + str(M) + 'px in the gui: ' + str(t) + 's')
+            # set clock_delay to the calculated time
+            global clock_delay
+            clock_delay = t # DEBUGGING: further test, also in rviz! (it seems to work correctly)
+            
+            # delay every next step with the calculated time clock_delay
+            global event
+            #event = Clock.schedule_once(self.clock_callback, clock_delay) # works, but can not take other arguments
+            #event = Clock.schedule_once(partial(self.clock_callback, parent, parent_draw, temp_array_sim_robot)), clock_delay) # works, but it does it only once
+            event = Clock.schedule_interval(partial(self.clock_callback, parent, parent_draw, temp_array_sim_robot, watchers_parsed), clock_delay) # !
+        else:
+            print("Nothing to simulate")
+
+        button5.disabled = True # disable the button, should be clicked only once!
+        button6.disabled = False # enable the next button
+        
+    def button6_callback(self, parent, parent_draw, button6):
         label_done = Label(text='Done! The script parser.py is running. See the generated json file in the output folder!', pos=(Window.size[1]*1.7/3,Window.size[1]-60)) # write a label, that the image and the json are ready (generated in the root folder)
         parent.add_widget(label_done)
+        button6.disabled = True # disable the button, should be clicked only once!
+
+        # Important: stop the simulation
+        event.cancel()
+
+        # print at the end which watchers have been triggered
+        print('The IDs of all triggered watchers:')
+        print(triggered_watchers)
+        # save also to a file (watcher id per line)
+        fob = open('output/internal/triggered_watchers.txt','w')
+        count = 0
+        for watcher in triggered_watchers:
+            fob.write(str(watcher))
+            if count != len(triggered_watchers) - 1:
+                fob.write('\n')
+            count += 1
+        fob.close()
         
+        # save as an image (the triggered watchers are marked dark red and the path as well as the robot somewhere on it are visible)
+        parent.export_to_png("output/internal/sim.png")
+
+        # DEBUGGING: uncomment the next line when ready with debugging
         import parser # run parser.py # better way, but it trolls a warning on windows (another way is to just make the warning silent)
         #os.system('python3 parser.py') # not the best way to run a script, but it works with all OS, be careful with python and python3
         #os._exit(0) # terminate the window
@@ -1029,7 +1496,7 @@ class ScenarioGUIApp(App):
         self.button_obstacle_type(mainbutton_obstacle_type, parent, wimg_input_map, parent_draw, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return, color_r_temp, color_g_temp, color_b_temp)
 
     # return button -> return one step (so if now drawing lines is turned on, after the button is clicked, start fresh with the lines, so delete all lines (and update/restart the coresponding txt file!))
-    def button_return_callback_down(self, parent, parent_draw, button, button2, button3, button4, painter_circle_obstacle, painter_circle_watcher, painter_line, painter_robot):
+    def button_return_callback_down(self, parent, parent_draw, button, button2, button3, button4, button5, painter_circle_obstacle, painter_circle_watcher, painter_line, painter_robot, painter_sim):
         if button.disabled == False:
             print('Drawing obstacles is enabled -> return to the beginning of this stage!')
             parent.remove_widget(painter_circle_obstacle)
@@ -1113,6 +1580,18 @@ class ScenarioGUIApp(App):
             parent_draw.add_widget(painter_robot_new)
             if os.path.exists("output/internal/robot.txt"):
                 os.remove("output/internal/robot.txt") # reset the txt-file
+        elif button5.disabled == False:
+            print('Drawing a path is enabled -> return to the beginning of this stage!')
+            parent.remove_widget(painter_sim)
+            for child in parent_draw.children:
+                parent_draw.remove_widget(child)
+            painter_sim_new = MyPaintWidgetPath() # generate another widget with the same behaviour!
+            parent_draw.add_widget(painter_sim_new)
+            if os.path.exists("output/internal/sim.txt"):
+                os.remove("output/internal/sim.txt") # reset the txt-file
+            # update also the global array sim_array[]
+            global sim_array
+            sim_array = []
         else:
             print('All done, nothing to return!')
     

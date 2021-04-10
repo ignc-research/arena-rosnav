@@ -14,4 +14,4 @@ Obstacle velocities:
 Obstacle-watchers connections:
 0
 Obstacle-waypoints connections:
-0,1
+0
