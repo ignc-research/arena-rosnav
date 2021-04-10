@@ -32,6 +32,7 @@ class RewardCalculator():
         self.safe_dist_adult= 1.0
         self.safe_dist_child= 1.2
         self.safe_dist_elder= 1.5
+        self.safe_dist_talking= 0.8
 
         self.kdtree = None
 
@@ -139,7 +140,7 @@ class RewardCalculator():
         self._reward_goal_reached(goal_in_robot_frame, reward=2)
         self._reward_safe_dist(laser_scan)
         self._reward_collision(laser_scan, punishment=4)
-        self._reward_goal_approached3(goal_in_robot_frame,current_time_step)
+        self._reward_goal_approached3(goal_in_robot_frame, current_time_step)
         self._reward_adult_safety_dist3(adult_in_robot_frame, punishment=0.08) #0.05 0.07
         self._reward_child_safety_dist3(child_in_robot_frame, punishment=0.08)
         self._reward_elder_safety_dist3(elder_in_robot_frame, punishment=0.08)
@@ -290,6 +291,11 @@ class RewardCalculator():
                 self.info['is_done'] = True
                 self.info['done_reason'] = 3 #hit adult
                 self.info['is_success'] = 0
+            if min_adult_dist<self.safe_dist_talking and min_adult_behavior =='talking':
+                self.curr_reward -= punishment
+                self.info['is_done'] = True
+                self.info['done_reason'] = 3 #hit adult
+                self.info['is_success'] = 0
 
     def _reward_child_safety_dist1(self, child_in_robot_frame, punishment = 90):
         if child_in_robot_frame.shape[0]!=0:
@@ -300,7 +306,12 @@ class RewardCalculator():
             else:
                 if self.last_child_min>min_child_dist:
                     self.last_child_min=min_child_dist
-            if min_child_dist<self.safe_dist_child and min_child_behavior !='talking' :
+            if min_child_dist<self.safe_dist_child and min_child_behavior != 'talking' :
+                self.curr_reward -= punishment
+                self.info['is_done'] = True
+                self.info['done_reason'] = 4 #hit child
+                self.info['is_success'] = 0
+            if min_child_dist<self.safe_dist_talking and min_child_behavior == 'talking' :
                 self.curr_reward -= punishment
                 self.info['is_done'] = True
                 self.info['done_reason'] = 4 #hit child
@@ -316,6 +327,11 @@ class RewardCalculator():
                 if self.last_elder_min>min_elder_dist:
                     self.last_elder_min=min_elder_dist
             if min_elder_dist<self.safe_dist_elder and min_elder_behavior !='talking':
+                self.curr_reward -= punishment
+                self.info['is_done'] = True
+                self.info['done_reason'] = 5 # hit elder
+                self.info['is_success'] = 0
+            if min_elder_dist<self.safe_dist_talking and min_elder_behavior == 'talking':
                 self.curr_reward -= punishment
                 self.info['is_done'] = True
                 self.info['done_reason'] = 5 # hit elder
