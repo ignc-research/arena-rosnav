@@ -547,3 +547,104 @@ class MLP_SARL_POLICY(ActorCriticPolicy):
     def _build_mlp_extractor(self) -> None:
         self.features_dim=128
         self.mlp_extractor = MLP_SARL(self.features_dim)
+
+class MLP_GRU(nn.Module):
+    """
+    Structure idea of CARDRL, using GRU for dynamic infos, 
+
+    :param feature_dim: dimension of the features extracted with the features_extractor (e.g. features from a CNN)
+    :param last_layer_dim_pi: (int) number of units for the last layer of the policy network
+    :param last_layer_dim_vf: (int) number of units for the last layer of the value network
+    """
+
+    def __init__(
+            self,
+            feature_dim: int,
+            last_layer_dim_pi: int = 64,
+            last_layer_dim_vf: int = 64,
+    ):
+        super(MLP_GRU, self).__init__()
+
+        # Save output dimensions, used to create the distributions
+        self.latent_dim_pi = last_layer_dim_pi
+        self.latent_dim_vf = last_layer_dim_vf
+
+        # Body networks
+        self.body_net_fc = nn.Sequential(
+            nn.Linear(_L, 256),
+            nn.ReLU(),
+            nn.Linear(256, feature_dim),
+            nn.ReLU()
+        ).to('cuda')
+
+        self.body_net_lstm = nn.GRU(input_size=human_state_size, hidden_size=HIDDEN_SHAPE_LSTM).to('cuda')
+
+        # Policy network
+        self.policy_net = nn.Sequential(
+            nn.Linear(feature_dim +1+ _RS + HIDDEN_SHAPE_LSTM, 96),
+            nn.ReLU(),
+            nn.Linear(96, 64),
+            nn.ReLU(),
+            nn.Linear(64, last_layer_dim_pi),
+            nn.ReLU()
+        ).to('cuda')
+
+        # Value network
+        self.value_net = nn.Sequential(
+            nn.Linear(feature_dim + 1+_RS + HIDDEN_SHAPE_LSTM, 96),
+            nn.ReLU(),
+            nn.Linear(96, 64),
+            nn.ReLU(),
+            nn.Linear(64, last_layer_dim_vf),
+            nn.ReLU()
+        ).to('cuda')
+
+    def forward(self, features: th.Tensor) -> Tuple[th.Tensor, th.Tensor]:
+        """
+        :return: (th.Tensor, th.Tensor) latent_policy, latent_value of the specified network.
+            If all layers are shared, then ``latent_policy == latent_value``
+        """
+        size=features.shape
+        time=features[:, 0].reshape(size[0], -1)
+        body_x = self.body_net_fc(features[:, 1:_L+1])
+        robot_state=features[:, _L+1:_L+1+_RS]
+        humans_state=features[:, _L+1:_L+1+num_humans*human_state_size]
+        humans_state=humans_state.reshape((humans_state.shape[0],-1,human_state_size)).flip([0,1]).permute(1,0,2)
+        _, (h_n, _)=self.body_net_lstm(humans_state) # feed through lstm with initial hidden state = zeros
+        human_features = h_n.view(h_n.shape[1],-1)
+        features_1 = th.cat((body_x, robot_state), 1)
+        features_2 = th.cat((time, features_1), 1)
+        features=th.cat((features_2, human_features), 1)
+        return self.policy_net(features), self.value_net(features)
+
+
+class MLP_LSTM_POLICY(ActorCriticPolicy):
+    """
+    Policy using the custom Multilayer Perceptron.
+    """
+
+    def __init__(
+            self,
+            observation_space: gym.spaces.Space,
+            action_space: gym.spaces.Space,
+            lr_schedule: Callable[[float], float],
+            net_arch: Optional[List[Union[int, Dict[str, List[int]]]]] = None,
+            activation_fn: Type[nn.Module] = nn.ReLU,
+            *args,
+            **kwargs,
+    ):
+        super(MLP_LSTM_POLICY, self).__init__(
+            observation_space,
+            action_space,
+            lr_schedule,
+            net_arch,
+            activation_fn,
+            *args,
+            **kwargs,
+        )
+        # Enable orthogonal initialization
+        self.ortho_init = True
+
+    def _build_mlp_extractor(self) -> None:
+        self.features_dim=64
+        self.mlp_extractor = MLP_GRU(self.features_dim)
