@@ -38,9 +38,10 @@ The file `nav2.rviz` is different from `nav.rviz` only by two things - the map i
 2. The folder `input` inside of the root folder should be filled by the user before starting the program with the image of the map, for which scenarios have to be designed. <br />
 **Attention:** Do not forget to adjust the name of the new map in the `paint.py` file!
 3. The folder `output` inside of the root folder will be empty at first, but after the file `paint.py` has been run, it will fill with data and images from the painting program, as well as with the subfolder `internal`. As the name says, the data and images from the subfolder will be used for internal use from the files `paint.py` and `parser.py`. The output will be stored in the folder `output` itself. It will contain the generated json file `(new_scenario.json)`, the relevant to the user data such as map resolution etc. `(user_data.txt)` and a screenshot from the generated scenario without `(scenario.png)` and with the simulation `(scenario_sim.png)`.
-4. The folder `examples` consists of the saved data after creating different scenarios with the gui. It consists of the `internal` folder, it the parser should be run again and of the json file as well as other usefull data for the user to directly use the scenario as it is.
-5. The folder `media` consists of screenshots and videos for different test rounds to give the user the feeling how a scenario should look like and to prove that the program works correctly.
-6. The folder `math` consists of diagrams explaining the solution of different math problems.
+4. The folder `math` consists of diagrams explaining the solution of different math problems.
+5. The folder `media` consists of screenshots and videos for different test rounds to give the user the feeling how a scenario should look like and to prove that the program works correctly. Most important it also consists of tutorial videos about how to use the gui.
+6. The folder `examples` consists of the saved data after creating different scenarios with the gui. It consists of the `internal` folder, if the parser should be run again and of the json file as well as other usefull data for the user to directly use the scenario as it is.
+7. The folder `eval_scenarios` consists of example scenarios with difficult maps and a lot of obstacles for evaluation runs.
 
 ### Rules for using the paint program
 1. The first thing to do is to set the number of obstacles, the resolution and the origin of the uploaded map.
@@ -69,22 +70,22 @@ The file `nav2.rviz` is different from `nav.rviz` only by two things - the map i
 
 Ros launch with the flag `map_file:="<map_name>"`. For example for `map1` use `map_file:="map1"`.
 
-| Map                   | Resolution  | Origin (x,y)   |
-| --------------------- | ----------- | -------------- |
-| map_empty             | 0.05        | (-6.0, -6.0)   |
-| map1                  | 0.05        | (-6.0, -6.0)   |
-| map0                  | 0.05        | (-16.6, -6.65) |
-| map_small             | 0.027       | (-6.0, -6.0)   |
-| map_middle_complexity | 0.05        | (0.0, 0.0)     |
-| complex_map_1         | 0.05        | (0.0, 0.0)     |
-| complex_map_2         | 0.05        | (0.0, 0.0)     |
-| complex_map_3         | 0.05        | (0.0, 0.0)     |
-| corridor_1            | 0.05        | (0.0, 0.0)     |
-| corridor_2            | 0.05        | (0.0, 0.0)     |
-| corridor_3            | 0.05        | (0.0, 0.0)     |
-| open_field_1          | 0.05        | (0.0, 0.0)     |
-| open_field_2          | 0.05        | (0.0, 0.0)     |
-| open_field_3          | 0.05        | (0.0, 0.0)     |
+| Map                      | Resolution  | Origin (x,y)   |
+| ------------------------ | ----------- | -------------- |
+| map_empty *              | 0.05        | (-6.0, -6.0)   |
+| map1 **                  | 0.05        | (-6.0, -6.0)   |
+| map0                     | 0.05        | (-16.6, -6.65) |
+| map_small *              | 0.027       | (-6.0, -6.0)   |
+| map_middle_complexity ** | 0.05        | (0.0, 0.0)     |
+| complex_map_1            | 0.05        | (0.0, 0.0)     |
+| complex_map_2            | 0.05        | (0.0, 0.0)     |
+| complex_map_3            | 0.05        | (0.0, 0.0)     |
+| corridor_1               | 0.05        | (0.0, 0.0)     |
+| corridor_2               | 0.05        | (0.0, 0.0)     |
+| corridor_3               | 0.05        | (0.0, 0.0)     |
+| open_field_1             | 0.05        | (0.0, 0.0)     |
+| open_field_2             | 0.05        | (0.0, 0.0)     |
+| open_field_3             | 0.05        | (0.0, 0.0)     |
 
 ### Overview for working on different operation systems
 #### (only for running this scenario gui, not the whole project!)
@@ -110,8 +111,8 @@ Ros launch with the flag `map_file:="<map_name>"`. For example for `map1` use `m
 
 ### Tips and brief explanations for future developers how to modify/extend the program
 
-1. For now there is no automation available for the steps that need to be done in the gui to create a scenario. For every single parameter is already given a default value so that the creation could be made faster. Still, to become the json file at the end all steps and no mistakes should be done. If you want to create a huge amount of scenarios with small differences, there is still something you can do to 'cheat' a little bit and be a lot faster. </br>
-Let's say the only 'difference' that you have for a couple of scenarios is the robot start and end position. You do not need to create every single scenario separately. You can create one and for the next few you will only need the different robot positions. For that you can fast create a simple scenario using all default values and changing only the robot positions so that you can become the json file at the end, from where you can copy the positions and paste them to the bigger scenario. Please be careful with the data in  the `output/internal` subfolder. As you know the txt files there consits of the data from the gui. You may say that you can just create invalid, almost empty scenario with just the robot positions and then look inside the robot.txt file and get the positions from there. Pay attention that those positions are not yet scaled and will not be right. Of course you can scale the positions by yourself, if you know how and you are sure that the scale is correct. After you have created a couple of scenarios, you will get a better understanding of how it works and how to create scenarios even faster.
+1. For now there is no automation available for the steps that need to be done in the gui to create a scenario. Still, for every single parameter is already given a default value so that the creation could be made faster. For some of the default values are used global variables, so that they can be easily changed for for example big evaluation runs. The variables like `scenario_map`, `number_obstacles_default`, `map_resolution_default`, `map_origin_default` and `obstacle_vel_default` are easy to find, declared on top of the `paint.py` script. </br>
+Still, to become the json file at the end all steps and no mistakes should be done on the gui. If you want to create a huge amount of scenarios with small differences (excluding parameter values), there is one more thing you can do to 'cheat' a little bit and be a lot faster. Let's say the only 'difference' that you have for a couple of scenarios is the robot start and end position. You do not need to create every single scenario separately. You can create one and for the next few you will only need the different robot positions. For that you can fast create a simple scenario using all default values and changing only the robot positions so that you can become the json file at the end, from where you can copy the positions and paste them to the bigger scenario. Please be careful with the data in  the `output/internal` subfolder. As you know the txt files there consits of the data from the gui. You may say that you can just create invalid, almost empty scenario with just the robot positions and then look inside the robot.txt file and get the positions from there. Pay attention that those positions are not yet scaled and will not be right. Of course you can scale the positions by yourself, if you know how and you are sure that the scale is correct. After you have created a couple of scenarios, you will get a better understanding of how it works and how to create scenarios even faster.
 
 2. To scale the map as you see it in the gui to the map in rviz is one of the most important things. The folling steps were maid:
     * The map on the gui is uploaded from a .png file. First the size of this original image should be known.

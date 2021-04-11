@@ -56,10 +56,18 @@ pos_scales = [] # consists of all three calculated scales
 map_res = 0.0
 robot_radius = 0.0
 M = 0 # max distance of the robot movement
+
+robot_vel_rviz = 0.3 # hard coded robot velocity in rviz in m/s
+robot_radius_rviz = 0.2 # hard coded robot radius in rviz in m
+
+# All parameters that are likely to be changed by a big evaluation run as global variables for faster value changing!
 # Important: set the image of the map, always place the map in the input folder for better structure (for now tested with map_small.png and map.png)
 # The tested maps up until now can be found under 'input/all_maps'.
-scenario_map = 'input/all_maps/map1.png'
-robot_vel_rviz = 0.3 # hard coded robot velocity in rviz
+scenario_map = 'input/all_maps/map1.png' # default: 'input/all_maps/map1.png'
+number_obstacles_default = '3' # default: '3'
+map_resolution_default = '0.05' # default: '0.05'
+map_origin_default = '-6.0, -6.0, 0.0' # default: '-6.0, -6.0, 0.0'
+obstacle_vel_default = '0.3' # default: '0.3'
 
 def my_callback(dt): # the event needs to be global, so that it can be stopped from a different button callback function
     pass
@@ -420,8 +428,7 @@ class MyPaintWidgetRobot(Widget): # for drawing two circles with a constant smal
         y_scale_reverse = 1/y_scale
         # Important: because of how the gui works, scale[0] and scale[1] will always be the same, which is really good!
         # -> that is why it does not matter if we scale the following parameter wit x_scale_reverse or with y_scale_reverse!
-        robot_radius_rviz = 0.2 # hard coded 0.2m
-        global robot_radius
+        global robot_radius, robot_radius_rviz
         robot_radius = robot_radius_rviz*x_scale_reverse
         #print('Robot radius in rviz: ' + str(robot_radius_rviz)) # 0.2
         #print('Robot radius in the gui: ' + str(robot_radius)) # 3.003 (checked with rviz, seems right, compared with a default obstacle with radius 10)
@@ -694,7 +701,7 @@ class ScenarioGUIApp(App):
         width_layout_num_obstacles = 140
         layout_num_obstacles = GridLayout(cols=1, rows=2, size=(width_layout_num_obstacles,height_layout_num_obstacles), size_hint=(None, None), pos=(width_left_border, window_sizes[1]-height_up_border-height_layout_num_obstacles/2))
         label_num_obstacles = Label(text='#obstacles:')
-        textinput_num_obstacles = TextInput(text='3', multiline=False, write_tab=False) # with write_tab=False you can jump to the next TextInput using tab!
+        textinput_num_obstacles = TextInput(text=number_obstacles_default, multiline=False, write_tab=False) # with write_tab=False you can jump to the next TextInput using tab!
         # Important: if you want to be able to use 'tab'+'shift' for going backwards, you need to change the file '$HOME/kivy_venv/lib/python3.6/site-packages/kivy/uix/behaviors/focus.py' in function keyboard_on_key_down() from ['shift'] to {'shift'}
         layout_num_obstacles.add_widget(label_num_obstacles)
         layout_num_obstacles.add_widget(textinput_num_obstacles)
@@ -704,7 +711,7 @@ class ScenarioGUIApp(App):
         width_layout_res = 140
         layout_res = GridLayout(cols=1, rows=2, size=(width_layout_res,height_layout_res), size_hint=(None, None), pos=(width_left_border, window_sizes[1]-height_up_border-height_layout_num_obstacles-height_layout_res/2))
         label_res = Label(text='Map resolution:')
-        textinput_res = TextInput(text='0.05', multiline=False, write_tab=False) # editable; give an example value already written in the box
+        textinput_res = TextInput(text=map_resolution_default, multiline=False, write_tab=False) # editable; give an example value already written in the box
         layout_res.add_widget(label_res)
         layout_res.add_widget(textinput_res)
 
@@ -714,7 +721,7 @@ class ScenarioGUIApp(App):
         width_layout_origin = 140
         layout_origin = GridLayout(cols=1, rows=2, size=(width_layout_origin,height_layout_origin), size_hint=(None, None), pos=(width_left_border, window_sizes[1]-height_up_border-height_layout_num_obstacles-height_layout_res-height_layout_origin/2))
         label_origin = Label(text='Map origin:') # the form should be "x_pos, y_pos, z_pos"
-        textinput_origin = TextInput(text='-6.0, -6.0, 0.0', multiline=False, write_tab=False) # editable; give an example value already written in the box
+        textinput_origin = TextInput(text=map_origin_default, multiline=False, write_tab=False) # editable; give an example value already written in the box
         layout_origin.add_widget(label_origin)
         layout_origin.add_widget(textinput_origin)
 
@@ -1645,7 +1652,7 @@ class ScenarioGUIApp(App):
         for index in range(int(textinput_num_obstacles.text)): # index starts with 0
             label_index_list.append(Label(text=str(index), size_hint_x=None, size_hint=(None,None), height=height_layout_connect/2/10, width=15)) # height=28=height_layout_connect/2/10 to have place for 10 obstacle before it starts to scroll
             layout_connect.add_widget(label_index_list[index])
-            textinput_velocity_list.append(TextInput(text='0.3', multiline=False, write_tab=False, size_hint=(None,None), height=height_layout_connect/2/10, width=60)) # editable; give an example value already written in the box
+            textinput_velocity_list.append(TextInput(text=obstacle_vel_default, multiline=False, write_tab=False, size_hint=(None,None), height=height_layout_connect/2/10, width=60)) # editable; give an example value already written in the box
             textinput_velocity_list[index].bind(focus=self.on_focus)
             layout_connect.add_widget(textinput_velocity_list[index])
             textinput_obstacle_watchers_connection_list.append(TextInput(text=str(index), multiline=False, write_tab=False, size_hint=(None,None), height=height_layout_connect/2/10, width=65))
@@ -1686,7 +1693,7 @@ class ScenarioGUIApp(App):
         layout_connect.bind(minimum_height=layout_connect.setter('height'))
         for index in range(int(textinput_num_obstacles.text)): # index starts with 0
             label_index_list.append(Label(text=str(index), size_hint_x=None, width=15, size_hint_y=None, height=height_layout_connect/2/10)) # height=28=height_layout_connect/2/10 to have place for 10 obstacle before it starts to scroll
-            textinput_velocity_list.append(TextInput(text='0.3', multiline=False, write_tab=False, size_hint_y=None, height=height_layout_connect/2/10)) # editable; give an example value already written in the box
+            textinput_velocity_list.append(TextInput(text=obstacle_vel_default, multiline=False, write_tab=False, size_hint_y=None, height=height_layout_connect/2/10)) # editable; give an example value already written in the box
             textinput_obstacle_watchers_connection_list.append(TextInput(text=str(index), multiline=False, write_tab=False, size_hint_y=None, height=height_layout_connect/2/10)) # editable; give an example value already written in the box
             textinput_obstacle_waypoints_connection_list.append(TextInput(text=str(index), multiline=False, write_tab=False, size_hint=(None,None), height=height_layout_connect/2/10, width=70))
             textinput_amount.append(TextInput(text='1', multiline=False, write_tab=False, size_hint_y=None, height=height_layout_connect/2/10))
