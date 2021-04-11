@@ -114,6 +114,8 @@ class FlatlandEnv(gym.Env):
         if safe_dist is None:
             safe_dist = 1.6*self._robot_radius
 
+        self.goal_radius=goal_radius
+
         self.reward_calculator = RewardCalculator(
             robot_radius=self._robot_radius, safe_dist=1.5*self._robot_radius, goal_radius=goal_radius, rule=reward_fnc)
 
@@ -254,7 +256,7 @@ class FlatlandEnv(gym.Env):
         if self._is_train_mode:
             self._sim_step_client()
         #reset start position end goal position  ped positions TODO : modify the reset mechnism
-        self.task.reset(self.last_obs_dict, self._episode)
+        self.task.reset(self.last_obs_dict, self._episode, self.goal_radius)
         #reset 
         # self.task.obstacles_manager.__move_all_peds(self._episode)
         self.reward_calculator.reset()
