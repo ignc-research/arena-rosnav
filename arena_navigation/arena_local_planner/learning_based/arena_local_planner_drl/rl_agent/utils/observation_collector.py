@@ -128,6 +128,8 @@ class ObservationCollector():
             rospy.logdebug("step Service call failed: %s"%e)
 
     def callback_subgoal(self,msg_Subgoal):
+        print('-----------callback_subgoal()-----------')
+        print(f"msg_Subgoal: {msg_Subgoal}")
         self._subgoal=self.process_subgoal_msg(msg_Subgoal)
         return
         
@@ -139,8 +141,6 @@ class ObservationCollector():
         self._robot_pose,self._robot_vel=self.process_robot_state_msg(msg_RobotStateStamped)
 
         # ask subgoal service
-        #TODO create and call subgoal service to ensure the observation collector has the latest subgoal
-        # reason: subgoal is published rarely, may default to (0,0,0)
         #self._subgoal=self.call_service_askForSubgoal()
         self._flag_all_received=True
         
@@ -164,6 +164,8 @@ class ObservationCollector():
         return self.pose3D_to_pose2D(pose)
     
     def process_subgoal_msg(self,msg_Subgoal):
+        print('-----------process_subgoal_msg()-----------')
+        print(f"msg_Subgoal.pose: {msg_Subgoal.pose}")
         pose2d=self.pose3D_to_pose2D(msg_Subgoal.pose)
         return pose2d
 
@@ -186,12 +188,12 @@ class ObservationCollector():
             high.extend(space.high.tolist())
         return spaces.Box(np.array(low).flatten(),np.array(high).flatten())
     
-    def _save_rollouts_as_json(self, cmd_vels, subgoals, robot_poses, laser_scans):
+    def _save_rollouts_as_json(self, cmd_vels, goals_in_robot_frame, robot_poses, laser_scans):
         timesteps = len(cmd_vels)
         data_object = {}
         # iterate over all timesteps in the arrays, convert ROS messages to JSON formatted strings, and add to a dictionary
         for i in range(timesteps):
-            data_object[i] = {'cmd_vel': message_converter.convert_ros_message_to_dictionary(cmd_vels[i], True), 'subgoal': subgoals[i], 'robot_pose': message_converter.convert_ros_message_to_dictionary(robot_poses[i], True), 'laser_scan': laser_scans[i].tolist()}
+            data_object[str(i)] = {'cmd_vel': message_converter.convert_ros_message_to_dictionary(cmd_vels[i], True), 'goal_in_robot_frame': goals_in_robot_frame[i], 'robot_pose': message_converter.convert_ros_message_to_dictionary(robot_poses[i], True), 'laser_scan': laser_scans[i].tolist()}
         
         date_str = datetime.now().strftime('%Y%m%d_%H-%M')
         path = f'/home/michael/rollout_{date_str}.json'
@@ -210,19 +212,19 @@ if __name__ == '__main__':
     r=rospy.Rate(100)
 
     cmd_vels = []
-    subgoals = []
+    goals_in_robot_frame = []
     robot_poses = []
     laser_scans = []
 
-    while(i<=20):
+    while(i<=1200):
         i = i + 1
         # obs contains (merged_obs, obs_dict) each consisting of laser scan ranges and goal in robot frame (rho, theta), (dict also has robot_pose, cmd_vel)
         obs = state_collector.get_observations()
         cmd_vels.append(obs[1]['cmd_vel'])
-        subgoals.append(obs[1]['goal_in_robot_frame'])
+        goals_in_robot_frame.append(obs[1]['goal_in_robot_frame'])
         robot_poses.append(obs[1]['robot_pose'])
         laser_scans.append(obs[1]['laser_scan'])
         
         time.sleep(0.001)
     
-    state_collector._save_rollouts_as_json(cmd_vels, subgoals, robot_poses, laser_scans)
+    state_collector._save_rollouts_as_json(cmd_vels, goals_in_robot_frame, robot_poses, laser_scans)
