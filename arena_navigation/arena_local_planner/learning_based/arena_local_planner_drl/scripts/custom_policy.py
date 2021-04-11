@@ -378,7 +378,7 @@ class MLP_LSTM(nn.Module):
 
         # Policy network
         self.policy_net = nn.Sequential(
-            nn.Linear(feature_dim +1+ _RS + HIDDEN_SHAPE_LSTM, 96),
+            nn.Linear(feature_dim +1+ _RS+ HIDDEN_SHAPE_LSTM , 96), 
             nn.ReLU(),
             nn.Linear(96, 64),
             nn.ReLU(),
@@ -388,7 +388,7 @@ class MLP_LSTM(nn.Module):
 
         # Value network
         self.value_net = nn.Sequential(
-            nn.Linear(feature_dim + 1+_RS + HIDDEN_SHAPE_LSTM, 96),
+            nn.Linear(feature_dim + 1+_RS+ HIDDEN_SHAPE_LSTM , 96), 
             nn.ReLU(),
             nn.Linear(96, 64),
             nn.ReLU(),
@@ -407,7 +407,7 @@ class MLP_LSTM(nn.Module):
         robot_state=features[:, _L+1:_L+1+_RS]
         humans_state=features[:, _L+1:_L+1+num_humans*human_state_size]
         humans_state=humans_state.reshape((humans_state.shape[0],-1,human_state_size)).flip([0,1]).permute(1,0,2)
-        _, (h_n, _)=self.body_net_lstm(humans_state) # feed through lstm with initial hidden state = zeros
+        _, (h_n, _) = self.body_net_lstm(humans_state) # feed through lstm with initial hidden state = zeros
         human_features = h_n.view(h_n.shape[1],-1)
         features_1 = th.cat((body_x, robot_state), 1)
         features_2 = th.cat((time, features_1), 1)
@@ -577,7 +577,7 @@ class MLP_GRU(nn.Module):
             nn.ReLU()
         ).to('cuda')
 
-        self.body_net_lstm = nn.GRU(input_size=human_state_size, hidden_size=HIDDEN_SHAPE_LSTM).to('cuda')
+        self.body_net_gru = nn.GRU(input_size=human_state_size, hidden_size=HIDDEN_SHAPE_LSTM).to('cuda')
 
         # Policy network
         self.policy_net = nn.Sequential(
@@ -610,7 +610,7 @@ class MLP_GRU(nn.Module):
         robot_state=features[:, _L+1:_L+1+_RS]
         humans_state=features[:, _L+1:_L+1+num_humans*human_state_size]
         humans_state=humans_state.reshape((humans_state.shape[0],-1,human_state_size)).flip([0,1]).permute(1,0,2)
-        _, (h_n, _)=self.body_net_lstm(humans_state) # feed through lstm with initial hidden state = zeros
+        _, (h_n, _)=self.body_net_gru(humans_state) # feed through gru with initial hidden state = zeros
         human_features = h_n.view(h_n.shape[1],-1)
         features_1 = th.cat((body_x, robot_state), 1)
         features_2 = th.cat((time, features_1), 1)
@@ -618,7 +618,7 @@ class MLP_GRU(nn.Module):
         return self.policy_net(features), self.value_net(features)
 
 
-class MLP_LSTM_POLICY(ActorCriticPolicy):
+class MLP_GRU_POLICY(ActorCriticPolicy):
     """
     Policy using the custom Multilayer Perceptron.
     """
@@ -633,7 +633,7 @@ class MLP_LSTM_POLICY(ActorCriticPolicy):
             *args,
             **kwargs,
     ):
-        super(MLP_LSTM_POLICY, self).__init__(
+        super(MLP_GRU_POLICY, self).__init__(
             observation_space,
             action_space,
             lr_schedule,
