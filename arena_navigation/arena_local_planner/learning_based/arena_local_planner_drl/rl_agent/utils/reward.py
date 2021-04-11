@@ -35,6 +35,13 @@ class RewardCalculator():
         self.safe_dist_talking= 0.8
 
         self.kdtree = None
+        
+        self.last_goal_dist = None
+        self.last_dist_to_path = None
+        self.last_adult_min= None
+        self.last_child_min= None
+        self.last_elder_min= None
+        self.cum_reward=0
 
         self._cal_funcs = {
             'rule_00': RewardCalculator._cal_reward_rule_00,
