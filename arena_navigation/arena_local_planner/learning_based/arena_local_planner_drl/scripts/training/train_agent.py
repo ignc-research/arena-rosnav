@@ -30,7 +30,7 @@ def get_agent_name(args) -> str:
 
     :param args (argparse.Namespace): Object containing the program arguments
     """
-    START_TIME = dt.now().strftime("%Y_%m_%d__%H_%M")
+    START_TIME = dt.now().strftime("%Y_%m_%d__%H_%M_%S")
 
     if args.custom_mlp:
         return (
@@ -246,6 +246,12 @@ if __name__ == "__main__":
         log_path=PATHS['eval'],     best_model_save_path=PATHS['model'], 
         deterministic=True,         callback_on_eval_end=trainstage_cb,
         callback_on_new_best=stoptraining_cb)
+    # eval_cb = EvalCallback(
+    #     eval_env, 
+    #     n_eval_episodes=50,         eval_freq=2**16, 
+    #     log_path=PATHS.get('eval'), best_model_save_path=PATHS.get('model'), 
+    #     deterministic=True,         callback_on_eval_end=trainstage_cb,
+    #     callback_on_new_best=stoptraining_cb)
    
     # determine mode
     if args.custom_mlp:
@@ -299,6 +305,17 @@ if __name__ == "__main__":
         elif args.agent == "MLP_SARL":
                 model = PPO(
                     MLP_SARL_POLICY, env, 
+                    gamma = params['gamma'],            n_steps = params['n_steps'], 
+                    ent_coef = params['ent_coef'],      learning_rate = params['learning_rate'], 
+                    vf_coef = params['vf_coef'],        max_grad_norm = params['max_grad_norm'], 
+                    gae_lambda = params['gae_lambda'],  batch_size = params['m_batch_size'], 
+                    n_epochs = params['n_epochs'],      clip_range = params['clip_range'], 
+                    tensorboard_log = PATHS['tb'],  verbose = 1
+                )
+
+        elif args.agent == "MLP_GRU":
+                model = PPO(
+                    MLP_GRU_POLICY, env, 
                     gamma = params['gamma'],            n_steps = params['n_steps'], 
                     ent_coef = params['ent_coef'],      learning_rate = params['learning_rate'], 
                     vf_coef = params['vf_coef'],        max_grad_norm = params['max_grad_norm'], 
