@@ -15,6 +15,20 @@ class Listener:
 
 
     def simulated_agents_callback(self, agent_states_msg):
+        self.stdscr.addstr(0, 0, "{} {:20} {:13} {:13} {:5} {:5} {:8} {:8} {:8} {:8} {:8} {:8}".format(
+            "id",
+            "state",
+            "talking_to",
+            "listening_to",
+            "(x,",
+            "y)",
+            "desired",
+            "social",
+            "obstacle",
+            "combined",
+            "vel",
+            "acc",
+        ))
         for i, agent_state in enumerate(agent_states_msg.agent_states):
             id = agent_state.id
             social_state = agent_state.social_state
@@ -32,16 +46,24 @@ class Listener:
             combined_forces = desired_force + social_force + obstacle_force
             combined_forces_magnitude = np.linalg.norm(combined_forces)
             talking_to_id = agent_state.talking_to_id
-            self.stdscr.addstr(i, 0, "id: {} state: {:20} talking_to: {:2} x: {:4.1f} y: {:4.1f} desired: {:2.2f} social: {:2.2f} obstacle: {:2.2f} combined: {:2.2f}".format(
+            listening_to_id = agent_state.listening_to_id
+            vel = np.array([agent_state.velocity.x, agent_state.velocity.y])
+            vel_magnitude = np.linalg.norm(vel)
+            acc = np.array([agent_state.acceleration.x, agent_state.acceleration.y])
+            acc_magnitude = np.linalg.norm(acc)
+            self.stdscr.addstr(i+1, 0, "{} {:20} {:13} {:13} {:5.1f} {:5.1f} {:8.2f} {:8.2f} {:8.2f} {:8.2f} {:8.2f} {:8.2f}".format(
                 id,
                 social_state,
                 talking_to_id,
+                listening_to_id,
                 x,
                 y,
                 desired_force_magnitude,
                 social_force_magnitude,
                 obstacle_force_magnitude,
-                combined_forces_magnitude)
+                combined_forces_magnitude,
+                vel_magnitude,
+                acc_magnitude)
             )
         self.stdscr.refresh()
         

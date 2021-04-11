@@ -14,7 +14,7 @@ from std_msgs.msg import Header
 class Listener:
     def __init__(self):
         rospy.init_node('listener', anonymous=True)
-        self.force_max_distance = 1
+        self.force_max_distance = 0.5
         self.map_array = None
         self.agent_positions = None
         self.marker_publishers = []
@@ -30,6 +30,8 @@ class Listener:
             self.agent_pos_publishers.append(publisher_agent_pos)
             publisher_considered_pos = [rospy.Publisher('considered_pos_' + str(i) + "_" + str(j), PointStamped, queue_size=10) for j in range(10)]
             self.considered_pos_publishers.append(publisher_considered_pos)
+        self.direction_publisher = rospy.Publisher("direction", Marker, queue_size=10)
+        self.agent_states = None
         
         self.once = False
 
@@ -47,6 +49,8 @@ class Listener:
 
 
     def simulated_agents_callback(self, agent_states_msg):
+        self.agent_states = agent_states_msg
+
         # init agent_positions matrix or resize if number of agents changed
         if self.agent_positions is None or len(agent_states_msg.agent_states) != len(self.agent_positions):
             # shape: N_agents x 2
@@ -93,6 +97,11 @@ class Listener:
     #         marker = self.create_custom_marker(force, 1, 239, 41, 41)
     #         publisher.publish(marker)
 
+
+    def vis_direction(self, direction, origin):
+        marker = self.create_custom_marker(origin, origin + direction, 1, 239, 41, 41)
+        self.direction_publisher.publish(marker)
+            
 
     def vis_force(self, id, force, origin):
         if id < len(self.marker_publishers):
@@ -192,8 +201,9 @@ class Listener:
                             considered_positions.append(np.array([j, k]))
                     closest_obstacle_pos, distance = self.get_closest_obstacle_pos(considered_positions, self.agent_positions[i])
 
-                    self.vis_agent_pos(i, self.agent_positions[i])
-                    self.vis_considered_pos(i, considered_positions)
+
+                    # self.vis_agent_pos(i, self.agent_positions[i])
+                    # self.vis_considered_pos(i, considered_positions)
 
                     force = np.zeros(2)
                     if not closest_obstacle_pos is None:
@@ -201,11 +211,19 @@ class Listener:
                         force_direction = self.agent_positions[i] - closest_obstacle_pos
                         force = (force_direction / np.linalg.norm(force_direction)) * force_magnitude
 
-                    if i == 0:
-                        self.vis_force(i, force, self.agent_positions[i])
-                        self.vis_obstacle_pos(i, closest_obstacle_pos)
+                    # if i == 0:
+                    #     self.vis_force(i, force, self.agent_positions[i])
+                    #     self.vis_obstacle_pos(i, closest_obstacle_pos)
                         # print("agent: ", self.agent_positions[0])
                         # print("obstacle: ", closest_obstacle_pos)
+
+
+                # show direction
+                direction_vec = self.agent_states.agent_states[0].direction
+                direction = np.array([direction_vec.x, direction_vec.y])
+                pos_vec = self.agent_states.agent_states[0].pose.position
+                pos0 = np.array([pos_vec.x, pos_vec.y])
+                self.vis_direction(direction, pos0)
 
             rate.sleep()
 

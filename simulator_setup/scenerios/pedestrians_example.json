@@ -6,10 +6,10 @@
             "dynamic_obstacles": {
                 "dynamic_obs_0": {
                     "type": "adult",
-                    "obstacle_force_factor": 2.0,
+                    "obstacle_force_factor": 1.0,
                     "desire_force_factor": 5.0,
-                    "amount": 4,
-                    "chatting_probability": 0.01,
+                    "amount": 8,
+                    "chatting_probability": 0.0001,
                     "linear_velocity": 1.0,
                     "start_pos": [
                         2,
@@ -18,7 +18,7 @@
                     ],
                     "waypoints": [
                         [1, 1, 0],
-                        [9, 1, 0],
+                        [14, -3, 0],
                         [4, 9, 0],
                         [1, 9, 0]
                     ],
@@ -28,8 +28,8 @@
                     ]
                 },
                 "dynamic_obs_1": {
-                    "type": "adult",
-                    "obstacle_force_factor": 2.0,
+                    "type": "forklift",
+                    "obstacle_force_factor": 0.1,
                     "desire_force_factor": 3.0,
                     "amount": 1,
                     "chatting_probability": 0.3,
@@ -42,10 +42,11 @@
                     ],
                     "waypoints": [
                         [10, 10, 0],
+                        [20, 6, 0],
                         [11, 11, 0]
                     ],
                     "is_waypoint_relative": true,
-                    "mode": "loop",
+                    "mode": "random",
                     "triggers": [
                     ]
                 }

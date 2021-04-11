@@ -316,7 +316,10 @@ class ScenerioTask(ABSTask):
         # call service
         response = spawn_peds_srv.call(peds)
         if not response.success:
-            rospy.log_warn("failed to spawn peds")
+            rospy.logwarn("failed to spawn peds")
+        else:
+            rospy.loginfo("successfully spawned ped")
+
 
 
     def add_walker(self, scenerio_data, obstacle_name, obstacle_data):
