@@ -202,13 +202,13 @@ class ObservationCollector():
         self._human_behavior_token=(self._human_behavior=='talking').astype(np.int)
         # print(self._human_behavior)
 
-        rho_behavior_adult = np.array([],dtype=object).reshape(0,2)
-        rho_behavior_child = np.array([],dtype=object).reshape(0,2)
-        rho_behavior_elder = np.array([],dtype=object).reshape(0,2)
+        rho_behavior_adult = np.array([],dtype=object).reshape(0, 2)
+        rho_behavior_child = np.array([],dtype=object).reshape(0, 2)
+        rho_behavior_elder = np.array([],dtype=object).reshape(0, 2)
 
         for i, ty in enumerate(self._human_type):
             # filter the obstacles which are not in the visible range of the robot
-            if not self.IsInViewRange(6, [-2.618,2.618], rho_humans[i], theta_humans[i]):
+            if not self.IsInViewRange(20, [-2.618,2.618], rho_humans[i], theta_humans[i]):
                 continue
             if ty==0: # adult
                 rho_behavior=np.array([rho_humans[i],self._human_behavior[i]],dtype=object)
@@ -255,8 +255,8 @@ class ObservationCollector():
         #align the observation size
         observation_blank=len(merged_obs) - self.observation_space.shape[0]
         if observation_blank<0:
-            #add invalid value -1000 if the merged_obs are not full
-            merged_obs=np.hstack([merged_obs,-np.ones([-observation_blank,])*1000])
+            #add invalid value 1000 if the merged_obs are not full
+            merged_obs=np.hstack([merged_obs,np.ones([-observation_blank,])*1000])
         elif observation_blank>0:
             merged_obs=merged_obs[:-observation_blank]
         
