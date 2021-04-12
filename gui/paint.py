@@ -1012,8 +1012,8 @@ class ScenarioGUIApp(App):
         cur_obstacles = int(textinput_num_obstacles.text)
         for i in range(cur_obstacles):
             fob.write(str(mainbutton_motion_list[i].text))
-            if i < cur_obstacles - 1:
-                fob.write('\n')
+            #if i < cur_obstacles - 1: # better include always a new line, so that even if the motions are = '', the file will still have the right amount of lines
+            fob.write('\n')
             #mainbutton_motion_list[i].disabled = True # if buttons, they should be disabled
         fob.close()
 

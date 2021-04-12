@@ -9,8 +9,8 @@ from shutil import copyfile
 print('\nSTART parser.py\n')
 
 # check if all txt files exist and are not empty! (to not trow an error, but print a message if that is the case)
-# 'output/internal/watcher.txt' could be empty if no wathers are used at all
-my_path = ['output/internal/data.txt', 'output/internal/obstacle.txt', 'output/internal/vector.txt', 'output/internal/robot.txt', 'output/internal/motion.txt']
+# 'output/internal/watcher.txt' and 'output/internal/vector.txt' could be empty if no wathers and no waypoints are used at all
+my_path = ['output/internal/data.txt', 'output/internal/obstacle.txt', 'output/internal/robot.txt', 'output/internal/motion.txt']
 for my_file in my_path:
     if not (os.path.exists(my_file) and os.path.getsize(my_file) > 0):
         print('ERROR: File ' + my_file + ' does not exist or is empty!')
@@ -67,8 +67,12 @@ for line in lines:
             count_temp = count
             break
         else:
-            # obstacle_vel.append((float(line.split(':')[0]), float(line.split(':')[1]))) # old version
-            obstacle_vel.append(float(line))
+            if line != '' and line != '\n':
+                # obstacle_vel.append((float(line.split(':')[0]), float(line.split(':')[1]))) # old version
+                obstacle_vel.append(float(line))
+            else:
+                obstacle_vel.append(0.01) # TODO: 0.01 velocity for a static obstacle (it does not work with velocity = 0.0)
+                print('A really small default obstacle velocity of "0.01" will be used.')
 
 count_obstacles = count_temp - 12 - 1 # 12 not dynamic lines # 1 label 'Obstacle-watchers connections:'
 count = 0
@@ -85,7 +89,7 @@ for line in lines:
             # It is not a must that an obstacle has a watcher -> append '/' when this is the case instead of a watcher index.
             # Later on it don't have to be considered as a watcher and calculated to the watchers amount.
             if value == '' or value == '\n': # it could be '\n' since in the txt file a line is reserved for the watcher index
-                print('No watcher for obstacle ' + str(count-count_temp-1))
+                print('No watchers for obstacle ' + str(count-count_temp-1))
                 temp_array.append(('/'))
             else:
                 temp_array.append((int(value)))
@@ -96,8 +100,12 @@ for line in lines:
         for value in line.split(','):
             # The GUI implements dynamic obstacles => minimum one waypoint per obstacle should be always given
             if value == '' or value == '\n': # it could be '\n' since in the txt file a line is reserved for the waypoint index
-                print('ERROR: All obstacles schould be dynamic, so a minimum of one waypoint per obstacle is required!')
-                os._exit(0)
+                # Variant 1: if only dynamic obstacles should be allowed, comment out the following two lines!
+                #print('ERROR: All obstacles schould be dynamic, so a minimum of one waypoint per obstacle is required!')
+                #os._exit(0)
+                # Variant 2: allow not only dynamic obstacles, but also static obstacles (they do not need waypoints)
+                print('No waypoints for obstacle ' + str(count-count_temp-count_obstacles-2))
+                temp_array.append(('/'))
             else:
                 temp_array.append((int(value)))
         obstacle_waypoint_connections.append(temp_array) # assume the ordering is right starting from 0
@@ -132,7 +140,8 @@ for connection in obstacle_watcher_connections_2:
 waypoints_all_amount = 0
 for connection in obstacle_waypoint_connections:
     for waypoint in connection:
-        waypoints_all_amount += 1
+        if waypoint != '/': # this means no connection
+            waypoints_all_amount += 1
 
 # DEBUGGING
 print('Image corners:' + str(image_corners))
@@ -185,7 +194,7 @@ drawn_watchers_amount = 0
 # data from watcher.txt
 watchers = [] # form: [(x_center, y_center, radius), ...]
 
-# since watcher.txt could be empty and this is valid, with it should dealed differently
+# since watcher.txt could be empty and this is valid, with it should be dealed differently
 watcher_file = 'output/internal/watcher.txt'
 if not (os.path.exists(watcher_file) and os.path.getsize(watcher_file) > 0):
     print('File ' + watcher_file + ' does not exist or is empty! No watchers at all are used.')
@@ -197,20 +206,20 @@ else:
     with open('output/internal/watcher.txt') as file:
         lines_watchers = file.readlines()
 
-    for line in lines_watchers:
-        if line != '' and line != '\n':
-            drawn_watchers_amount += 1
+for line in lines_watchers:
+    if line != '' and line != '\n':
+        drawn_watchers_amount += 1
 
-    # check if the amount of watchers drawn on the map is the same as the amount of all watchers from the obstacle-watchers-connections given in the text fields
-    if watchers_all_amount != drawn_watchers_amount:
-        print('ERROR: Unmatching amount of watchers given in the text fields and drawn on the map! The scenario is incorrect, make a new one!')
-        os._exit(0)
+# check if the amount of watchers drawn on the map is the same as the amount of all watchers from the obstacle-watchers-connections given in the text fields
+if watchers_all_amount != drawn_watchers_amount:
+    print('ERROR: Unmatching amount of watchers given in the text fields and drawn on the map! The scenario is incorrect, make a new one!')
+    os._exit(0)
 
-    # parse the contents into a useful format
-    count = 0
-    for line in lines_watchers:
-        count += 1
-        watchers.append((float(line.split('watcher (x,y,radius): ')[1].split(',')[0]), float(line.split('watcher (x,y,radius): ')[1].split(',')[1]), float(line.split('watcher (x,y,radius): ')[1].split(',')[2])))
+# parse the contents into a useful format
+count = 0
+for line in lines_watchers:
+    count += 1
+    watchers.append((float(line.split('watcher (x,y,radius): ')[1].split(',')[0]), float(line.split('watcher (x,y,radius): ')[1].split(',')[1]), float(line.split('watcher (x,y,radius): ')[1].split(',')[2])))
 
 # DEBUGGING
 print('Watchers:' + str(watchers))
@@ -229,13 +238,23 @@ for line in lines_triggered_watchers:
 print('Triggered watchers:' + str(triggered_watchers))
 
 print('/**************** parsing vector.txt *****************/') # done!
-with open('output/internal/vector.txt') as file:
-    file_contents = file.read()
-    print(file_contents)
-
 lines_vectors = []
-with open('output/internal/vector.txt') as file:
-    lines_vectors = file.readlines()
+# data from vector.txt
+start_pos = [] # form: [(x, y), ...]
+end_pos = [] # form: [(x, y), ...]
+waypoints = [] # form: [(x, y), ...] # OR [((x_start, y_start),(x_end, y_end)), ...]
+
+# since vector.txt could be empty and this is valid, with it should be dealed differently
+vector_file = 'output/internal/vector.txt'
+if not (os.path.exists(vector_file) and os.path.getsize(vector_file) > 0):
+    print('File ' + vector_file + ' does not exist or is empty! No waypoints at all are used. All obstacles are static.')
+else:
+    with open('output/internal/vector.txt') as file:
+        file_contents = file.read()
+        print(file_contents)
+
+    with open('output/internal/vector.txt') as file:
+        lines_vectors = file.readlines()
 
 ## for when it is allowed only one waypoint per obstacle:
 #if int(len(lines_vectors)/2) != length_right:
@@ -246,11 +265,6 @@ with open('output/internal/vector.txt') as file:
 if waypoints_all_amount != int(len(lines_vectors)/2):
     print('ERROR: Unmatching amount of waypoints given in the text fields and drawn on the map! The scenario is incorrect, make a new one!')
     os._exit(0)
-
-# data from vector.txt
-start_pos = [] # form: [(x, y), ...]
-end_pos = [] # form: [(x, y), ...]
-waypoints = [] # form: [(x, y), ...] # OR [((x_start, y_start),(x_end, y_end)), ...]
 
 # parse the contents into a useful format
 count = 0
@@ -267,13 +281,16 @@ for line in lines_vectors:
 i = 0
 for obstacle in obstacles: # len(obstacles)=len(obstacle_waypoint_connections)
     for waypoint_index in obstacle_waypoint_connections[i]:
-        start_rel_x = start_pos[waypoint_index][0] - obstacle[0]
-        start_rel_y = start_pos[waypoint_index][1] - obstacle[1]
-    
-        end_rel_x = end_pos[waypoint_index][0] - obstacle[0]
-        end_rel_y = end_pos[waypoint_index][1] - obstacle[1]
-    
-        waypoints.append(((start_rel_x, start_rel_y), (end_rel_x, end_rel_y)))
+        if waypoint_index != '/':
+            start_rel_x = start_pos[waypoint_index][0] - obstacle[0]
+            start_rel_y = start_pos[waypoint_index][1] - obstacle[1]
+        
+            end_rel_x = end_pos[waypoint_index][0] - obstacle[0]
+            end_rel_y = end_pos[waypoint_index][1] - obstacle[1]
+        
+            waypoints.append(((start_rel_x, start_rel_y), (end_rel_x, end_rel_y)))
+        else:
+            waypoints.append((('/', '/'), ('/', '/'))) # only as a place holder
     i += 1
 
 # Transform start and end position to start and waypoints (use relative distances!) -> two ideas! In the json file as start position is meant the obstacle position at the beginning and not the start of the drawn line
@@ -329,6 +346,7 @@ lines_motion = []
 with open('output/internal/motion.txt') as file:
     lines_motion = file.readlines()
 
+# needed only if only dynamic obstacles are allowed, because then for every obstacle should a motion be specified, but for a static obstacle it is not needed
 if len(lines_motion) != length_right or len(obstacle_vel) != length_right: # or len(obstacle_watcher_connections_2) != length_right:
     print('ERROR: Unmatching amount of obstacles and motions! The scenario is incorrect, make a new one!')
     os._exit(0)
@@ -345,12 +363,18 @@ for line in lines_motion:
     # check if the given motion type is valid, otherwise terminate and print an error!
     motion_given = line.split('\n')[0]
     valid = 0
-    for motion_valid in motions_valid:
-        if motion_given == motion_valid:
-            valid = 1
-            break
+    if motion_given == '': # TODO: if the obstacle is static, no motion is necessary -> still it may need a default value to work
+        valid = 0.5
+    else:
+        for motion_valid in motions_valid:
+            if motion_given == motion_valid:
+                valid = 1
+                break
     if valid == 1:
         motion.append(motion_given)
+    elif valid == 0.5:
+        motion.append('yoyo') # TODO: a default value for the motion, if no motion was given (important for handling static obstacles)
+        print('The default motion type "yoyo" will be used.')
     else:
         print('ERROR: "' + motion_given + '" is an invalid motion type!')
         os._exit(0)
@@ -416,17 +440,26 @@ for obstacle in obstacles:
         obstacles_json += '"obstacle_force_factor": ' + obstactle_force_fact + ',\n\t\t\t\t\t'
         obstacles_json += '"desire_force_factor": ' + desire_force_fact + ',\n\t\t\t\t\t'
     obstacles_json += '"start_pos": [\n\t\t\t\t\t\t' + start_pos_x + ',\n\t\t\t\t\t\t' + start_pos_y + ',\n\t\t\t\t\t\t0'
-    obstacles_json += '\n\t\t\t\t\t],\n\t\t\t\t\t"waypoints": [\n\t\t\t\t\t\t'
+    obstacles_json += '\n\t\t\t\t\t],\n\t\t\t\t\t"waypoints": [\n'
 
     # since now we have obstacle-waypoints connections -> we do not have to take waypoints just line by line, but the coresponding lines! -> use the info from obstacle_waypoint_connections
     # Idea 1 for the waypoints (see above for the explanation)
+    count_temp = 0
     for waypoint in obstacle_waypoint_connections[i]: # use it just as counter = waypoints per obstacle, since in "waypoints[]" the waypoints are already sorted by obstacles
-        waypoint_x = str((waypoints[k][1][0])*scale_x*flip_x_axis) # the waypoints are relative to the obstacle position! -> new_start_point and shift should be irrelevant!
-        waypoint_y = str((waypoints[k][1][1])*scale_y*flip_y_axis) # scale and flip? are only relevant!
-        obstacles_json += '[\n\t\t\t\t\t\t\t' + waypoint_x + ',\n\t\t\t\t\t\t\t' + waypoint_y + ',\n\t\t\t\t\t\t\t0' + '\n\t\t\t\t\t\t]'
-        if k < (len(obstacle_waypoint_connections[i]) - 1):
-            obstacles_json += ','
-        obstacles_json +='\n'
+        if waypoint != '/':
+            waypoint_x = str((waypoints[k][1][0])*scale_x*flip_x_axis) # the waypoints are relative to the obstacle position! -> new_start_point and shift should be irrelevant!
+            waypoint_y = str((waypoints[k][1][1])*scale_y*flip_y_axis) # scale and flip? are only relevant!
+            obstacles_json += '\t\t\t\t\t\t[\n\t\t\t\t\t\t\t' + waypoint_x + ',\n\t\t\t\t\t\t\t' + waypoint_y + ',\n\t\t\t\t\t\t\t0' + '\n\t\t\t\t\t\t]'
+            if count_temp < (len(obstacle_waypoint_connections[i]) - 1):
+                obstacles_json += ','
+            obstacles_json +='\n'
+        else:
+            # TODO NEXT: just a temporary solution for allowing static obstacle
+            # --> later this obstacle should be moved under static obstacles in the json file!
+            # --> with relative goal coordinates 0 it crashes, so 0.01 was given
+            # --> obstacle velocity (= 0.01) and motion (= 'yoyo') are also not needed, but some default values should be still used
+            obstacles_json += '\t\t\t\t\t\t[\n\t\t\t\t\t\t\t' + '0.01' + ',\n\t\t\t\t\t\t\t' + '0.01' + ',\n\t\t\t\t\t\t\t0' + '\n\t\t\t\t\t\t]\n'
+        count_temp += 1
         k += 1
     
     obstacles_json += '\t\t\t\t\t],\n\t\t\t\t\t"is_waypoint_relative": true,\n\t\t\t\t\t'
