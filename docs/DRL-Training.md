@@ -283,10 +283,13 @@ Exemplary training curriculum:
 
 Now that you've trained your agent you surely want to deploy and evaluate it. For that purpose we've implemented a specific task mode in which you can specify your scenarios in a .json file. The agent will then be challenged according to the scenarios defined in the file. (*TODO: link zum scenario mode readme*).  
 
-- Firstly navigate to the directory:
+- Firstly, start the simulation:
 ```
-roscd arena_local_planner_drl/
-cd scripts/deployment/
+roslaunch arena_bringup start_training.launch num_envs:=1 train_mode:=true map_folder_name:={map to evaluate on}
+```
+- Now, navigate to this directory:
+```
+roscd arena_local_planner_drl/scripts/deployment/
 ```
 
 - Then run the ```run_agent.py``` script
