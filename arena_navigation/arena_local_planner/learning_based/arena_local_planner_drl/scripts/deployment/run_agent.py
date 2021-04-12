@@ -10,7 +10,7 @@ from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv, VecNorm
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.evaluation import evaluate_policy
 
-from task_generator.task_generator.tasks import get_predefined_task
+from task_generator.task_generator.tasks import StopReset
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.rl_agent.envs.flatland_gym_env import FlatlandEnv
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.tools.argsparser import parse_run_agent_args
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.tools.train_agent_utils import *
@@ -50,7 +50,7 @@ def make_env(PATHS: dict,
     def _init():
         env = FlatlandEnv(
             'eval_sim', PATHS.get('robot_setting'), PATHS.get('robot_as'), PARAMS['reward_fnc'], PARAMS['discrete_action_space'], 
-            goal_radius=0.50, max_steps_per_episode=max_steps_per_episode, train_mode=False, task_mode='staged', PATHS=PATHS, curr_stage=5,
+            goal_radius=0.3, max_steps_per_episode=max_steps_per_episode, train_mode=False, task_mode='staged', PATHS=PATHS, curr_stage=5,
             extended_eval=True)
         if log:
             # eval env
@@ -92,12 +92,15 @@ if __name__ == "__main__":
         # load agent
         agent = PPO.load(os.path.join(PATHS['model'], "best_model.zip"), env)
 
-        evaluate_policy(
-            model=agent,
-            env=env,
-            n_eval_episodes=eval_episodes,
-            deterministic=True,
-        )
+        try:
+            evaluate_policy(
+                model=agent,
+                env=env,
+                n_eval_episodes=eval_episodes,
+                deterministic=True,
+            )
+        except StopReset:
+            pass
 
     time = round(time.time()-start)
     print(f"Time passed:    {time}s")
