@@ -5,6 +5,12 @@
   <arg name="local_planner"   default="teb"/> 
   <arg name="rviz_file"       default="nav_LP"/>
 
+  <arg name="noise_mode"      default="0"/>
+  <param name="noise_mode" value="$(arg noise_mode)"/>
+
+  <arg name="delay"      default="1"/>
+  <param name="delay" value="$(arg delay)"/>
+
   <arg name="train_mode"      default="false"/>
   <arg name="disable_scenario"    default="true"/>
   <arg name="scenario_file"   default="empty_map.json"/>
@@ -69,6 +75,10 @@
     <arg name="odom_frame_id"     value="$(arg odom_frame_id)"/>
     <arg name="base_frame_id"     value="$(arg base_frame_id)"/>
     <arg name="odom_ground_truth" default="$(arg odom_ground_truth)"/>
+  </include>
+
+  <!-- start scan_noise node -->
+  <include file="$(find arena_bringup)/launch/sublaunch/scan_process.launch">
   </include>
 
   <!-- start task_generator node -->
