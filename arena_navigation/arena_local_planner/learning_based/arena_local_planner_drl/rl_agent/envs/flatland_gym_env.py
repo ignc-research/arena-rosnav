@@ -17,6 +17,7 @@ from geometry_msgs.msg import Twist
 from flatland_msgs.srv import StepWorld, StepWorldRequest
 from std_msgs.msg import Bool
 import time
+import math
 
 from rl_agent.utils.debug import timeit
 from task_generator.task_generator.tasks import *
@@ -37,6 +38,7 @@ class FlatlandEnv(gym.Env):
                  debug: bool = False,
                  task_mode: str = "staged",
                  PATHS: dict = dict(),
+                 extended_eval: bool = False,
                  *args, **kwargs):
         """Default env
         Flatland yaml node check the entries in the yaml file, therefore other robot related parameters cound only be saved in an other file.
@@ -48,9 +50,11 @@ class FlatlandEnv(gym.Env):
             robot_yaml_path (str): [description]
             setting_yaml_path ([type]): [description]
             reward_fnc (str): [description]
+            train_mode (bool): bool to differ between train and eval env during training
             is_action_space_discrete (bool): [description]
             safe_dist (float, optional): [description]. Defaults to None.
             goal_radius (float, optional): [description]. Defaults to 0.1.
+            extended_eval (bool): more episode info provided, no reset when crashing
         """
         super(FlatlandEnv, self).__init__()
 
@@ -77,8 +81,7 @@ class FlatlandEnv(gym.Env):
             else:
                 rospy.init_node(f'eval_env_{self.ns}', disable_signals=False)
 
-        # Define action and observation space
-        # They must be gym.spaces objects
+        self._extended_eval = extended_eval
         self._is_train_mode = rospy.get_param("/train_mode")
         self._is_action_space_discrete = is_action_space_discrete
         
@@ -97,7 +100,7 @@ class FlatlandEnv(gym.Env):
             safe_dist = 1.6*self._robot_radius
 
         self.reward_calculator = RewardCalculator(
-            robot_radius=self._robot_radius, safe_dist=1.2*self._robot_radius, goal_radius=goal_radius, rule=reward_fnc)
+            robot_radius=self._robot_radius, safe_dist=1.6*self._robot_radius, goal_radius=goal_radius, rule=reward_fnc)
 
         # action agent publisher
         if self._is_train_mode:
@@ -117,6 +120,13 @@ class FlatlandEnv(gym.Env):
 
         self._steps_curr_episode = 0
         self._max_steps_per_episode = max_steps_per_episode
+
+        # for extended eval
+        self._last_robot_pose = None
+        self._distance_travelled = 0
+        self._action_frequency = 1/rospy.get_param("/robot_action_rate")
+        self._collisions = 0
+        self._in_crash = False
  
     def setup_by_configuration(self, robot_yaml_path: str, settings_yaml_path: str):
         """get the configuration from the yaml file, including robot radius, discrete action space and continuous action space.
@@ -191,23 +201,44 @@ class FlatlandEnv(gym.Env):
         # calculate reward
         reward, reward_info = self.reward_calculator.get_reward(
             obs_dict['laser_scan'], obs_dict['goal_in_robot_frame'], 
-            action=action, global_plan=obs_dict['global_plan'], robot_pose=obs_dict['robot_pose'])
+            action=action, global_plan=obs_dict['global_plan'], 
+            robot_pose=obs_dict['robot_pose'], extended_eval=self._extended_eval)
         # print(f"cum_reward: {reward}")
         done = reward_info['is_done']
         
+        # extended eval info
+        if self._extended_eval:
+            if self._last_robot_pose is not None:
+                self._distance_travelled += FlatlandEnv.get_distance(
+                    self._last_robot_pose, obs_dict['robot_pose'])
+            if 'crash' in reward_info:
+                if reward_info['crash'] and not self._in_crash:
+                    self._collisions += 1
+                    # when crash occures, robot strikes obst for a few consecutive timesteps
+                    # we want to count it as only one collision
+                    self._in_crash = True    
+            else:
+                self._in_crash = False
+
+            self._last_robot_pose = obs_dict['robot_pose']
+    
         # info
         info = {}
+        
         if done:
             info['done_reason'] = reward_info['done_reason']
             info['is_success'] = reward_info['is_success']
-            self.reward_calculator.kdtree = None
 
         if self._steps_curr_episode > self._max_steps_per_episode:
             done = True
             info['done_reason'] = 0
             info['is_success'] = 0
-            self.reward_calculator.kdtree = None
 
+        if self._extended_eval:
+            if done:
+                info['collisions'] = self._collisions
+                info['distance_travelled'] = round(self._distance_travelled, 2)
+                info['time'] = self._steps_curr_episode * self._action_frequency
         return merged_obs, reward, done, info
 
     def reset(self):
@@ -220,12 +251,19 @@ class FlatlandEnv(gym.Env):
         self.task.reset()
         self.reward_calculator.reset()
         self._steps_curr_episode = 0
+        if self._extended_eval:
+            self._last_robot_pose = None
+            self._distance_travelled = 0
+            self._collisions = 0
         obs, _ = self.observation_collector.get_observations()
         return obs  # reward, done, info can't be included
 
     def close(self):
         pass
-
+    
+    @staticmethod
+    def get_distance(pose_1: Pose2D, pose_2: Pose2D):
+        return math.hypot(pose_2.x - pose_1.x, pose_2.y - pose_1.y)
 
 if __name__ == '__main__':
 

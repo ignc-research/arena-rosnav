@@ -100,16 +100,11 @@ class ObservationCollector():
             self._sim_step_client = rospy.ServiceProxy(
                 self._service_name_step, StepWorld)
 
-        self.first_obs = True
-        self.last = 0
-        self.last_r = 0
-
     def get_observation_space(self):
         return self.observation_space
 
     def get_observations(self):
         # apply action time horizon
-        timer = self._clock
         if self._is_train_mode:
             self.call_service_takeSimStep(self._action_frequency)
         else:
