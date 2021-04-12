@@ -1,0 +1,2 @@
+robot start position (x,y): 492.0,248.0
+robot end position (x,y): 298.0,527.0

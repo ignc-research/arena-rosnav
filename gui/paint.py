@@ -46,7 +46,7 @@ line_start_pos_ok = 1
 only_one_path = 0
 radius_current_global = 10. # init value of the radius
 radius_watcher_current_global = 25.  # init value of the watcher
-button2_activate = 0
+button3_activate = 0
 scrollable_area_global = ScrollView()
 index_sim = 0
 sim_array = []
@@ -104,16 +104,16 @@ class MyPaintWidgetCircleObstacle(Widget): # obstacle widget
         # Attention: the changes of the radous will be visualized only after the clicked mouse is moved slightly again
         global radius_current_global
         global radius_watcher_current_global
-        global button2_activate # make a difference between the radius of the obstacle and the one of the watcher
+        global button3_activate # make a difference between the radius of the obstacle and the one of the watcher
         if keycode[1] == 'numpadadd': # '+' clicked
-            if button2_activate == 0:
+            if button3_activate == 0:
                 radius_current_global += 1 # make the radius of the obstacle bigger
                 print('Radius obstacle >>, now: ' + str(radius_current_global))
             else:
                 radius_watcher_current_global += 1 # make the radius of the watcher bigger
                 print('Radius watcher >>, now: ' + str(radius_watcher_current_global))
         if keycode[1] == 'numpadsubstract': # '-' clicked
-            if button2_activate == 0:
+            if button3_activate == 0:
                 radius_current_global -= 1 # make the radius of the obstacle smaller
                 print ('Radius obstacle <<, now: ' + str(radius_current_global))
             else:
@@ -783,8 +783,8 @@ class ScenarioGUIApp(App):
         
         # create buttons
         button = Button(text='Click when ready with\nthe obstacle positions\n& setting the parameters\non the left', font_size=14)
-        button2 = Button(text='Click when ready with\nthe watchers', font_size=14)
-        button3 = Button(text='Click when ready with\nthe waypoints', font_size=14)
+        button2 = Button(text='Click when ready with\nthe waypoints', font_size=14)
+        button3 = Button(text='Click when ready with\nthe watchers', font_size=14)
         button4 = Button(text='Click when ready with\nrobot start and end\nposition & setting the\nparameters on the right', font_size=14)
         button5 = Button(text='Click when ready with\ndrawing a single path\nfrom start to end position\nto start the simulation (optional)\nor just click to continue', font_size=14)
         button6 = Button(text='Click to stop\nthe simulation to see\nthe triggered watchers\nor just click to FINISH', font_size=14)
@@ -861,13 +861,13 @@ class ScenarioGUIApp(App):
         parent.remove_widget(button_return)
         parent.remove_widget(mainbutton_obstacle_type)
 
-        parent.export_to_png("output/internal/obstacles.png")
+        parent.export_to_png("output/internal/1_obstacles.png")
         for child in parent_draw.children: # !
             parent_draw.remove_widget(child)
         parent.remove_widget(parent_draw)
 
         parent.add_widget(wimg_input_map) # !
-        parent_draw.add_widget(self.painter_circle_watcher)
+        parent_draw.add_widget(self.painter_line)
         parent.add_widget(parent_draw)
         parent.add_widget(layout_btn)
         parent.add_widget(layout_num_obstacles)
@@ -880,13 +880,11 @@ class ScenarioGUIApp(App):
         #parent.add_widget(scrollable_areas[0]) # for Idea 2 with the dropdown boxes
         #parent.add_widget(scrollable_areas[1]) # for Idea 2 with the dropdown boxes
 
-        wimg_obstacles = Image(source='output/internal/obstacles.png', size=(parent.width, parent.height))
+        wimg_obstacles = Image(source='output/internal/1_obstacles.png', size=(parent.width, parent.height))
         parent.add_widget(wimg_obstacles)
         button.disabled = True # disable the button, should be clicked only once!
         button2.disabled = False # enable the next button
         mainbutton_obstacle_type.disabled = True # the dropdown button should not be changed anymore
-        global button2_activate
-        button2_activate = 1
 
     def button2_callback(self, parent, parent_draw, button2, button3, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return, mainbutton_obstacle_type, wimg_input_map):
         print('The button <%s> is being pressed' % ' '.join(button2.text.split('\n')))
@@ -900,13 +898,13 @@ class ScenarioGUIApp(App):
         parent.remove_widget(mainbutton_obstacle_type)
         parent.remove_widget(scrollable_area_global)
 
-        parent.export_to_png("output/internal/watchers_obstacles.png")
+        parent.export_to_png("output/internal/2_obstacles_waypoints.png")
         for child in parent_draw.children:
             parent_draw.remove_widget(child)
         parent.remove_widget(parent_draw)
 
         parent.add_widget(wimg_input_map) # !
-        parent_draw.add_widget(self.painter_line)
+        parent_draw.add_widget(self.painter_circle_watcher)
         parent.add_widget(parent_draw)
         parent.add_widget(layout_btn)
         parent.add_widget(layout_num_obstacles)
@@ -916,12 +914,12 @@ class ScenarioGUIApp(App):
         parent.add_widget(mainbutton_obstacle_type)
         parent.add_widget(scrollable_area_global)
 
-        wimg_watchers_obstacles = Image(source='output/internal/watchers_obstacles.png', size=(parent.width, parent.height))
-        parent.add_widget(wimg_watchers_obstacles)
+        wimg_obstacles_waypoints = Image(source='output/internal/2_obstacles_waypoints.png', size=(parent.width, parent.height))
+        parent.add_widget(wimg_obstacles_waypoints)
         button2.disabled = True # disable the button, should be clicked only once!
         button3.disabled = False # enable the next button
-        global button2_activate
-        button2_activate = 0
+        global button3_activate
+        button3_activate = 1
 
     def button3_callback(self, parent, parent_draw, button3, button4, layout_btn, layout_origin, layout_res, layout_num_obstacles, button_return, mainbutton_obstacle_type, wimg_input_map):
         print('The button <%s> is being pressed' % ' '.join(button3.text.split('\n')))
@@ -935,7 +933,7 @@ class ScenarioGUIApp(App):
         parent.remove_widget(mainbutton_obstacle_type)
         parent.remove_widget(scrollable_area_global)
 
-        parent.export_to_png("output/internal/watchers_obstacles_waypoints.png")
+        parent.export_to_png("output/internal/3_obstacles_waypoints_watchers.png")
         for child in parent_draw.children:
             parent_draw.remove_widget(child)
         parent.remove_widget(parent_draw)
@@ -951,10 +949,12 @@ class ScenarioGUIApp(App):
         parent.add_widget(mainbutton_obstacle_type)
         parent.add_widget(scrollable_area_global)
 
-        wimg_watchers_obstacles_waypoints = Image(source='output/internal/watchers_obstacles_waypoints.png', size=(parent.width, parent.height))
-        parent.add_widget(wimg_watchers_obstacles_waypoints)
+        wimg_obstacles_waypoints_watchers = Image(source='output/internal/3_obstacles_waypoints_watchers.png', size=(parent.width, parent.height))
+        parent.add_widget(wimg_obstacles_waypoints_watchers)
         button3.disabled = True # disable the button, should be clicked only once!
         button4.disabled = False # enable the next button
+        global button3_activate
+        button3_activate = 0
 
     def button4_callback(self, parent, parent_draw, button4, button5, wimg_input_map, layout_btn, button_return, mainbutton_obstacle_type, textinput_num_obstacles, label_index_list, textinput_velocity_list, textinput_obstacle_watchers_connection_list, textinput_obstacle_waypoints_connection_list, mainbutton_motion_list, textinput_amount, textinput_chatting_probability, textinput_obstacle_force_factor, textinput_desire_force_factor):
         print('The button <%s> is being pressed' % ' '.join(button4.text.split('\n')))
@@ -1023,7 +1023,7 @@ class ScenarioGUIApp(App):
         parent.remove_widget(mainbutton_obstacle_type)
         scrollable_area_global.disabled = True # disable the scrolling behavior! (otherwise it will still be scrollable under the area saved as image) # still part of the last internal image
 
-        parent.export_to_png("output/internal/watchers_obstacles_waypoints_robot_positions.png")
+        parent.export_to_png("output/internal/4_obstacles_waypoints_watchers_robot_positions.png")
         for child in parent_draw.children:
             parent_draw.remove_widget(child)
         parent.remove_widget(parent_draw)
@@ -1032,11 +1032,11 @@ class ScenarioGUIApp(App):
         parent.add_widget(layout_btn)
         parent.add_widget(button_return)
         parent.add_widget(mainbutton_obstacle_type)
-        wimg_ready = Image(source='output/internal/watchers_obstacles_waypoints_robot_positions.png', size=(parent.width, parent.height))
+        wimg_ready = Image(source='output/internal/4_obstacles_waypoints_watchers_robot_positions.png', size=(parent.width, parent.height))
         parent.add_widget(wimg_ready)
         parent_draw.add_widget(self.painter_sim) # ! add the new widget after the map and after the image, so that it is above all
         parent.add_widget(parent_draw)
-        parent.export_to_png("output/internal/ready.png")
+        parent.export_to_png("output/internal/5_ready.png")
         
         button4.disabled = True # disable the button, should be clicked only once!
         button5.disabled = False # enable the next button
@@ -1090,8 +1090,8 @@ class ScenarioGUIApp(App):
                 triggered_watcher_temp = MyPaintWidgetTriggeredWatcher()
                 parent_draw.add_widget(triggered_watcher_temp)
                 triggered_watcher_temp.init(x_watcher_center, y_watcher_center, radius_watcher)
-                # load above the triggered watcher the image, where just the obstacles are saved (obstacles.png), so that the obstacles are still above the watchers as it should be
-                wimg_ready = Image(source='output/internal/obstacles.png', size=(parent.width, parent.height))
+                # load above the triggered watcher the image, where just the obstacles are saved (1_obstacles.png), so that the obstacles are still above the watchers as it should be
+                wimg_ready = Image(source='output/internal/1_obstacles.png', size=(parent.width, parent.height))
                 parent.add_widget(wimg_ready)
                 # nummerate the triggered watchers again, so that their ids are above and visible (still use their already given id "watcher_id" and not new ones)
                 label_triggered_watcher_num = Label(text=str(watcher_id), pos=(x_watcher_center-radius_watcher, y_watcher_center-radius_watcher), size=(radius_watcher*2, radius_watcher*2), color=(0,0,1), disabled_color=(0,0,1)) # place the number in the middle of the circle
@@ -1354,7 +1354,7 @@ class ScenarioGUIApp(App):
         fob.close()
         
         # save as an image (the triggered watchers are marked dark red and the path as well as the robot somewhere on it are visible)
-        parent.export_to_png("output/internal/sim.png")
+        parent.export_to_png("output/internal/6_sim.png")
 
         # DEBUGGING: uncomment the next line when ready with debugging
         import parser # run parser.py # better way, but it trolls a warning on windows (another way is to just make the warning silent)
@@ -1396,19 +1396,19 @@ class ScenarioGUIApp(App):
         parent.remove_widget(mainbutton_obstacle_type) # important so that the chosen type could be refreshed into the dropdown button !
 
         # delete the image when done, it should be just temporary, so that a new image with the same name could be later saved again ! (still another method is used)
-        #if os.path.exists("output/internal/obstacles_temp.png"):
-        #    os.remove("output/internal/obstacles_temp.png")
-        #parent.export_to_png("output/internal/obstacles_temp.png")
-        parent.export_to_png("output/internal/obstacles_temp__" + str(counter) + ".png")
+        #if os.path.exists("output/internal/0_obstacles_temp.png"):
+        #    os.remove("output/internal/0_obstacles_temp.png")
+        #parent.export_to_png("output/internal/0_obstacles_temp.png")
+        parent.export_to_png("output/internal/0_obstacles_temp__" + str(counter) + ".png")
         for child in parent_draw.children: # !
             parent_draw.remove_widget(child)
         parent.remove_widget(parent_draw)
         
         parent.add_widget(wimg_input_map) # !
 
-        #wimg_obstacles_temp = Image(source='output/internal/obstacles_temp.png', size=(parent.width, parent.height))
+        #wimg_obstacles_temp = Image(source='output/internal/0_obstacles_temp.png', size=(parent.width, parent.height))
         # the problem with the line above is that the name of the image file is always the same !? (so it interprets it as the same widget? it didn't help to delete the image when done!?)
-        wimg_obstacles_temp = Image(source="output/internal/obstacles_temp__" + str(counter) + ".png", size=(parent.width, parent.height))
+        wimg_obstacles_temp = Image(source="output/internal/0_obstacles_temp__" + str(counter) + ".png", size=(parent.width, parent.height))
         parent.add_widget(wimg_obstacles_temp)
 
         painter_circle_obstacle_new = MyPaintWidgetCircleObstacle() # generate another widget with the same behaviour!
@@ -1561,15 +1561,6 @@ class ScenarioGUIApp(App):
                             file.write(line)
 
         elif button2.disabled == False:
-            print('Drawing watchers is enabled -> return to the beginning of this stage!')
-            parent.remove_widget(painter_circle_watcher)
-            for child in parent_draw.children:
-                parent_draw.remove_widget(child)
-            painter_circle_watcher_new = MyPaintWidgetCircleWatcher() # generate another widget with the same behaviour!
-            parent_draw.add_widget(painter_circle_watcher_new)
-            if os.path.exists("output/internal/watcher.txt"):
-                os.remove("output/internal/watcher.txt") # reset the txt-file
-        elif button3.disabled == False:
             print('Drawing vectors is enabled -> return to the beginning of this stage!')
             parent.remove_widget(painter_line)
             for child in parent_draw.children:
@@ -1578,6 +1569,15 @@ class ScenarioGUIApp(App):
             parent_draw.add_widget(painter_line_new)
             if os.path.exists("output/internal/vector.txt"):
                 os.remove("output/internal/vector.txt") # reset the txt-file
+        elif button3.disabled == False:
+            print('Drawing watchers is enabled -> return to the beginning of this stage!')
+            parent.remove_widget(painter_circle_watcher)
+            for child in parent_draw.children:
+                parent_draw.remove_widget(child)
+            painter_circle_watcher_new = MyPaintWidgetCircleWatcher() # generate another widget with the same behaviour!
+            parent_draw.add_widget(painter_circle_watcher_new)
+            if os.path.exists("output/internal/watcher.txt"):
+                os.remove("output/internal/watcher.txt") # reset the txt-file
         elif button4.disabled == False:
             print('Drawing robot positions is enabled -> return to the beginning of this stage!')
             parent.remove_widget(painter_robot)
@@ -1631,8 +1631,8 @@ class ScenarioGUIApp(App):
         layout_connect.bind(minimum_height=layout_connect.setter('height'), minimum_width=layout_connect.setter('width'))
         label_connect_obstacle = Label(text='#', size_hint=(None,None), height=height_layout_connect/10, width=15) # 'Obstacle'
         label_connect_velocity = Label(text='Velocity', size_hint=(None,None), height=height_layout_connect/10, width=60)
-        label_connect_watchers = Label(text='Watchers', size_hint=(None,None), height=height_layout_connect/10, width=65)
         label_connect_waypoints = Label(text='Waypoints', size_hint=(None,None), height=height_layout_connect/10, width=70)
+        label_connect_watchers = Label(text='Watchers', size_hint=(None,None), height=height_layout_connect/10, width=65)
         label_connect_motion = Label(text='Motion', size_hint=(None,None), height=height_layout_connect/10, width=60)
         label_connect_amount = Label(text='Amount', size_hint=(None,None), height=height_layout_connect/10, width=60)
         label_connect_chatting_probability = Label(text='Chatting\nprobability', size_hint=(None,None), height=height_layout_connect/10, width=85)
@@ -1640,8 +1640,8 @@ class ScenarioGUIApp(App):
         label_connect_desire_force_factor = Label(text='Desire\nforce factor', size_hint=(None,None), height=height_layout_connect/10, width=85)
         layout_connect.add_widget(label_connect_obstacle)
         layout_connect.add_widget(label_connect_velocity)
-        layout_connect.add_widget(label_connect_watchers)
         layout_connect.add_widget(label_connect_waypoints)
+        layout_connect.add_widget(label_connect_watchers)
         layout_connect.add_widget(label_connect_motion)
         if pedestrians_bool == 1: # add textinput_amount and textinput_chatting_probability
             layout_connect.add_widget(label_connect_amount)
@@ -1655,12 +1655,12 @@ class ScenarioGUIApp(App):
             textinput_velocity_list.append(TextInput(text=obstacle_vel_default, multiline=False, write_tab=False, size_hint=(None,None), height=height_layout_connect/2/10, width=60)) # editable; give an example value already written in the box
             textinput_velocity_list[index].bind(focus=self.on_focus)
             layout_connect.add_widget(textinput_velocity_list[index])
-            textinput_obstacle_watchers_connection_list.append(TextInput(text=str(index), multiline=False, write_tab=False, size_hint=(None,None), height=height_layout_connect/2/10, width=65))
-            textinput_obstacle_watchers_connection_list[index].bind(focus=self.on_focus)
-            layout_connect.add_widget(textinput_obstacle_watchers_connection_list[index])
             textinput_obstacle_waypoints_connection_list.append(TextInput(text=str(index), multiline=False, write_tab=False, size_hint=(None,None), height=height_layout_connect/2/10, width=70))
             textinput_obstacle_waypoints_connection_list[index].bind(focus=self.on_focus)
             layout_connect.add_widget(textinput_obstacle_waypoints_connection_list[index])
+            textinput_obstacle_watchers_connection_list.append(TextInput(text=str(index), multiline=False, write_tab=False, size_hint=(None,None), height=height_layout_connect/2/10, width=65))
+            textinput_obstacle_watchers_connection_list[index].bind(focus=self.on_focus)
+            layout_connect.add_widget(textinput_obstacle_watchers_connection_list[index])
             mainbutton_motion_list.append(TextInput(text='yoyo', multiline=False, write_tab=False, size_hint=(None,None), height=height_layout_connect/2/10, width=60))
             mainbutton_motion_list[index].bind(focus=self.on_focus)
             layout_connect.add_widget(mainbutton_motion_list[index])
@@ -1694,16 +1694,16 @@ class ScenarioGUIApp(App):
         for index in range(int(textinput_num_obstacles.text)): # index starts with 0
             label_index_list.append(Label(text=str(index), size_hint_x=None, width=15, size_hint_y=None, height=height_layout_connect/2/10)) # height=28=height_layout_connect/2/10 to have place for 10 obstacle before it starts to scroll
             textinput_velocity_list.append(TextInput(text=obstacle_vel_default, multiline=False, write_tab=False, size_hint_y=None, height=height_layout_connect/2/10)) # editable; give an example value already written in the box
-            textinput_obstacle_watchers_connection_list.append(TextInput(text=str(index), multiline=False, write_tab=False, size_hint_y=None, height=height_layout_connect/2/10)) # editable; give an example value already written in the box
             textinput_obstacle_waypoints_connection_list.append(TextInput(text=str(index), multiline=False, write_tab=False, size_hint=(None,None), height=height_layout_connect/2/10, width=70))
+            textinput_obstacle_watchers_connection_list.append(TextInput(text=str(index), multiline=False, write_tab=False, size_hint_y=None, height=height_layout_connect/2/10)) # editable; give an example value already written in the box
             textinput_amount.append(TextInput(text='1', multiline=False, write_tab=False, size_hint_y=None, height=height_layout_connect/2/10))
             textinput_chatting_probability.append(TextInput(text='0.3', multiline=False, write_tab=False, size_hint_y=None, height=height_layout_connect/2/10))
             textinput_obstacle_force_factor.append(TextInput(text='1.0', multiline=False, write_tab=False, size_hint_y=None, height=height_layout_connect/2/10))
             textinput_desire_force_factor.append(TextInput(text='1.0', multiline=False, write_tab=False, size_hint_y=None, height=height_layout_connect/2/10))
             layout_connect.add_widget(label_index_list[index])
             layout_connect.add_widget(textinput_velocity_list[index])
-            layout_connect.add_widget(textinput_obstacle_watchers_connection_list[index])
             layout_connect.add_widget(textinput_obstacle_waypoints_connection_list[index])
+            layout_connect.add_widget(textinput_obstacle_watchers_connection_list[index])
             #layout_connect.add_widget(textinput_amount[index])
             #layout_connect.add_widget(textinput_chatting_probability[index])
             #layout_connect.add_widget(textinput_obstacle_force_factor[index])

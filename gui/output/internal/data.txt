@@ -11,7 +11,13 @@ Map origin:
 -6.0, -6.0, 0.0
 Obstacle velocities:
 0.3
+0.3
+0.3
 Obstacle-watchers connections:
 0
+1
+2
 Obstacle-waypoints connections:
 0
+1
+2

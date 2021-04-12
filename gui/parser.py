@@ -561,8 +561,8 @@ with open('output/user_data.txt') as file:
     print(file_contents)
 
 ### save further more the resulted scenario as an image (so only the map with everything on it), to be able later to compare the resulted map with the ones in rviz
-# ready.png image should be cut/cropped according to the relative map position and size
-im = Image.open(r"output/internal/ready.png")
+# 5_ready.png image should be cut/cropped according to the relative map position and size
+im = Image.open(r"output/internal/5_ready.png")
 width, height = im.size # size of orginal image: (800,600)=the size of the kivy window
 # cropped image of the following dimension
 left = image_corners[0][0]
@@ -573,8 +573,8 @@ im_scenario = im.crop((left, top, right, bottom))
 im_scenario.save("output/scenario.png")
 im_scenario.show() # show the image
 
-### save also the cutted image from sim.png with the dark red marked triggered watchers
-im_sim = Image.open(r"output/internal/sim.png")
+### save also the cutted image from 6_sim.png with the dark red marked triggered watchers
+im_sim = Image.open(r"output/internal/6_sim.png")
 im_scenario_sim = im_sim.crop((left, top, right, bottom))
 im_scenario_sim.save("output/scenario_sim.png")
 im_scenario_sim.show() # show the image
