@@ -63,11 +63,12 @@ robot_radius_rviz = 0.2 # hard coded robot radius in rviz in m
 # All parameters that are likely to be changed by a big evaluation run as global variables for faster value changing!
 # Important: set the image of the map, always place the map in the input folder for better structure (for now tested with map_small.png and map.png)
 # The tested maps up until now can be found under 'input/all_maps'.
-scenario_map = 'input/all_maps/map1.png' # default: 'input/all_maps/map1.png'
+scenario_map = 'input/all_maps/map1.png' # default: 'input/all_maps/map1.png' # big eval with map_empty_small
 number_obstacles_default = '3' # default: '3'
 map_resolution_default = '0.05' # default: '0.05'
 map_origin_default = '-6.0, -6.0, 0.0' # default: '-6.0, -6.0, 0.0'
 obstacle_vel_default = '0.3' # default: '0.3'
+obstacle_motion_default = 'yoyo' # default: 'yoyo'
 
 def my_callback(dt): # the event needs to be global, so that it can be stopped from a different button callback function
     pass
@@ -963,15 +964,11 @@ class ScenarioGUIApp(App):
         # saving data in files should be done here and not in button_callback, because there the button values are still not visible!
         fob.write('\nObstacle velocities:\n')
         for i in range(int(textinput_num_obstacles.text)):
-            fob.write(str(textinput_velocity_list[i].text))
-            if i < int(textinput_num_obstacles.text) - 1:
-                fob.write('\n')
-        fob.write('\nObstacle-watchers connections:\n')
+            fob.write(str(textinput_velocity_list[i].text) + '\n')
+        fob.write('Obstacle-watchers connections:\n')
         for i in range(int(textinput_num_obstacles.text)):
-            fob.write(str(textinput_obstacle_watchers_connection_list[i].text))
-            if i < int(textinput_num_obstacles.text) - 1:
-                fob.write('\n')
-        fob.write('\nObstacle-waypoints connections:\n')
+            fob.write(str(textinput_obstacle_watchers_connection_list[i].text) + '\n')
+        fob.write('Obstacle-waypoints connections:\n')
         for i in range(int(textinput_num_obstacles.text)):
             # the gui is implemented only for dynamic obstacles, so a minimum of one waypoint per obstacle is a must; nevertheless if it should work also without waypoints, so that the count of the waypoints is right, it is important for the parsing afterwards that the data.txt file has '\n' at the end
             if len(textinput_amount) == 0 and len(textinput_obstacle_force_factor) == 0:
@@ -1661,7 +1658,7 @@ class ScenarioGUIApp(App):
             textinput_obstacle_watchers_connection_list.append(TextInput(text=str(index), multiline=False, write_tab=False, size_hint=(None,None), height=height_layout_connect/2/10, width=65))
             textinput_obstacle_watchers_connection_list[index].bind(focus=self.on_focus)
             layout_connect.add_widget(textinput_obstacle_watchers_connection_list[index])
-            mainbutton_motion_list.append(TextInput(text='yoyo', multiline=False, write_tab=False, size_hint=(None,None), height=height_layout_connect/2/10, width=60))
+            mainbutton_motion_list.append(TextInput(text=obstacle_motion_default, multiline=False, write_tab=False, size_hint=(None,None), height=height_layout_connect/2/10, width=60))
             mainbutton_motion_list[index].bind(focus=self.on_focus)
             layout_connect.add_widget(mainbutton_motion_list[index])
             if pedestrians_bool == 1: # add textinput_amount and textinput_chatting_probability
@@ -1719,7 +1716,7 @@ class ScenarioGUIApp(App):
         layout_connect_2.bind(minimum_height=layout_connect_2.setter('height'))
         #for index in range(int(textinput_num_obstacles.text)):
         #    dropdown_motion_list.append(DropDown()) # drop-down menu with different motions
-        #    btn_yoyo_list.append(Button(text='yoyo', size_hint_y=None))
+        #    btn_yoyo_list.append(Button(text=obstacle_motion_default, size_hint_y=None))
         #    btn_circle_list.append(Button(text='circle', size_hint_y=None))
         #    mainbutton_motion_list.append(Button(text='move'))
         #    btn_yoyo_list[index].bind(on_release=lambda btn: dropdown_motion_list[index].select(btn_yoyo_list[index].text))

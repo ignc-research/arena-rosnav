@@ -9,8 +9,9 @@ from shutil import copyfile
 print('\nSTART parser.py\n')
 
 # check if all txt files exist and are not empty! (to not trow an error, but print a message if that is the case)
-# 'output/internal/watcher.txt' and 'output/internal/vector.txt' could be empty if no wathers and no waypoints are used at all
-my_path = ['output/internal/data.txt', 'output/internal/obstacle.txt', 'output/internal/robot.txt', 'output/internal/motion.txt']
+# 'output/internal/obstacle.txt', 'output/internal/watcher.txt' and 'output/internal/vector.txt' could be empty if no obstacles/wathers/wayypoints are used at all
+# if 'output/internal/obstacle.txt' is empty, 'output/internal/motion.txt' will be also empty
+my_path = ['output/internal/data.txt', 'output/internal/robot.txt']
 for my_file in my_path:
     if not (os.path.exists(my_file) and os.path.getsize(my_file) > 0):
         print('ERROR: File ' + my_file + ' does not exist or is empty!')
@@ -164,13 +165,18 @@ print('Obstacle force factor:' + str(obstacle_force_factor))
 print('Desire force factor:' + str(desire_force_factor))
 
 print('/**************** parsing obstacle.txt ***************/') # done!
-with open('output/internal/obstacle.txt') as file:
-    file_contents = file.read()
-    print(file_contents)
-
 lines_obstacles = []
-with open('output/internal/obstacle.txt') as file:
-    lines_obstacles = file.readlines()
+# since obstacle.txt could be empty and this is valid, with it should be dealed differently
+obstacle_file = 'output/internal/obstacle.txt'
+if not (os.path.exists(obstacle_file) and os.path.getsize(obstacle_file) > 0):
+    print('File ' + obstacle_file + ' does not exist or is empty! No obstacles at all are used.')
+else:
+    with open('output/internal/obstacle.txt') as file:
+        file_contents = file.read()
+        print(file_contents)
+
+    with open('output/internal/obstacle.txt') as file:
+        lines_obstacles = file.readlines()
 
 if len(lines_obstacles) != length_right:
     print('ERROR: Unmatching amount of obstacles given in the text field and drawn on the map! The scenario is incorrect, make a new one!')
@@ -338,13 +344,18 @@ for line in lines_robot:
 print('Robot start and end position:' + str(robot))
 
 print('/**************** parsing motion.txt ****************/') # done!
-with open('output/internal/motion.txt') as file:
-    file_contents = file.read()
-    print(file_contents)
-
 lines_motion = []
-with open('output/internal/motion.txt') as file:
-    lines_motion = file.readlines()
+# since motion.txt could be empty and this is valid, with it should be dealed differently
+motion_file = 'output/internal/motion.txt'
+if not (os.path.exists(motion_file) and os.path.getsize(motion_file) > 0):
+    print('File ' + motion_file + ' does not exist or is empty! No obstacles at all are used.')
+else:
+    with open('output/internal/motion.txt') as file:
+        file_contents = file.read()
+        print(file_contents)
+
+    with open('output/internal/motion.txt') as file:
+        lines_motion = file.readlines()
 
 # needed only if only dynamic obstacles are allowed, because then for every obstacle should a motion be specified, but for a static obstacle it is not needed
 if len(lines_motion) != length_right or len(obstacle_vel) != length_right: # or len(obstacle_watcher_connections_2) != length_right:
@@ -409,6 +420,8 @@ shift_y = map_origin[1]
 obstacles_json = ''
 k = 0
 i = 0
+if len(obstacles) == 0:
+    obstacles_json += '\n'
 for obstacle in obstacles:
     obstacle_num = str(i)
     # Important: because of how the gui works, scale_x and scale_y will always be the same, which is really good, because we need for example to scale the obstacle_radius, so that at the end the obstacle stays a circle and not an ellipse!
