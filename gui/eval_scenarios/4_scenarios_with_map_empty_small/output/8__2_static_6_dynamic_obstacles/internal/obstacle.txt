@@ -1,0 +1,8 @@
+obstacle (x,y,radius,type): 396.0,426.0,10.0,circle
+obstacle (x,y,radius,type): 396.0,349.0,10.0,circle
+obstacle (x,y,radius,type): 423.0,354.0,6.0,circle
+obstacle (x,y,radius,type): 421.0,336.0,6.0,circle
+obstacle (x,y,radius,type): 375.0,356.0,6.0,circle
+obstacle (x,y,radius,type): 374.0,335.0,6.0,circle
+obstacle (x,y,radius,type): 417.0,441.0,6.0,circle
+obstacle (x,y,radius,type): 376.0,442.0,6.0,circle
