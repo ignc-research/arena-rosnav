@@ -32,7 +32,33 @@ from kivy.animation import Animation
 from kivy.clock import Clock
 from functools import partial
 
-# global variables
+# All parameters that are likely to be changed by a big evaluation run as global variables for faster value changing!
+# Important: set the image of the map, always place the map in the input folder for better structure (for now tested with map_small.png and map.png)
+# The tested maps up until now can be found under 'input/all_maps'.
+scenario_map = 'input/all_maps/map1.png' # default: 'input/all_maps/map1.png' # big eval with map_empty_small
+number_obstacles_default = '3' # default: '3'
+map_resolution_default = '0.05' # default: '0.05'
+map_origin_default = '-6.0, -6.0, 0.0' # default: '-6.0, -6.0, 0.0'
+obstacle_vel_default = '0.3' # default: '0.3'
+obstacle_motion_default = 'yoyo' # default: 'yoyo'
+obstacle_radius_default = 10. # default radius = 10, diameter = 20
+watcher_radius_default = 25. # default radius = 25, diameter = 50
+pedestrians_group_amount_default = '1'
+pedestrians_chatting_probability_default = '0.3'
+obstacle_force_factor_default = '1.0'
+desire_force_factor_default = '1.0'
+# only for the watcher and waypoint ids there is no default value, since it is a counter from 0, based on the chosen number of obstacles
+# intead you can specify the number of static and dynamic obstacles you plan and if you start with placing the static obstacles on the map (!), the scrollable table on the right will be filled automatically correct
+# --> everything empty for the static obstacles and the counter for the watcher and waypoint ids starts with the first dynamic obstacle
+# leave the value for static and dynamic = 0, if you do not want to specify it every time, but if you do specify it, make sure that #static + #dynamic = #all
+number_static_obstacles_default = 0 # to not use default 0, to use default 1
+number_dynamic_obstacles_default = 0 # to not use default 0, to use default 2
+
+# hard coded parameters
+robot_vel_rviz = 0.3 # hard coded robot velocity in rviz in m/s
+robot_radius_rviz = 0.2 # hard coded robot radius in rviz in m
+
+# intern global variables
 color_r = 1
 color_g = 0
 color_b = 0
@@ -44,8 +70,6 @@ obstacle_start_pos_ok = 0 # it is better, when the default value is false
 watcher_start_pos_ok = 0 # it is better, when the default value is false
 line_start_pos_ok = 1
 only_one_path = 0
-radius_current_global = 10. # init value of the radius
-radius_watcher_current_global = 25.  # init value of the watcher
 button3_activate = 0
 scrollable_area_global = ScrollView()
 index_sim = 0
@@ -56,19 +80,9 @@ pos_scales = [] # consists of all three calculated scales
 map_res = 0.0
 robot_radius = 0.0
 M = 0 # max distance of the robot movement
-
-robot_vel_rviz = 0.3 # hard coded robot velocity in rviz in m/s
-robot_radius_rviz = 0.2 # hard coded robot radius in rviz in m
-
-# All parameters that are likely to be changed by a big evaluation run as global variables for faster value changing!
-# Important: set the image of the map, always place the map in the input folder for better structure (for now tested with map_small.png and map.png)
-# The tested maps up until now can be found under 'input/all_maps'.
-scenario_map = 'input/all_maps/map1.png' # default: 'input/all_maps/map1.png' # big eval with map_empty_small
-number_obstacles_default = '3' # default: '3'
-map_resolution_default = '0.05' # default: '0.05'
-map_origin_default = '-6.0, -6.0, 0.0' # default: '-6.0, -6.0, 0.0'
-obstacle_vel_default = '0.3' # default: '0.3'
-obstacle_motion_default = 'yoyo' # default: 'yoyo'
+obstacle_radius_current_global = 0 # current value of the radius, will be changed during the scenario making, so another default value is also necessary
+watcher_radius_current_global = 0 # current value of the radius
+num_obstacles_current_global = 0
 
 def my_callback(dt): # the event needs to be global, so that it can be stopped from a different button callback function
     pass
@@ -103,23 +117,23 @@ class MyPaintWidgetCircleObstacle(Widget): # obstacle widget
             keyboard.release()
         
         # Attention: the changes of the radous will be visualized only after the clicked mouse is moved slightly again
-        global radius_current_global
-        global radius_watcher_current_global
+        global obstacle_radius_current_global
+        global watcher_radius_current_global
         global button3_activate # make a difference between the radius of the obstacle and the one of the watcher
         if keycode[1] == 'numpadadd': # '+' clicked
             if button3_activate == 0:
-                radius_current_global += 1 # make the radius of the obstacle bigger
-                print('Radius obstacle >>, now: ' + str(radius_current_global))
+                obstacle_radius_current_global += 1 # make the radius of the obstacle bigger
+                print('Radius obstacle >>, now: ' + str(obstacle_radius_current_global))
             else:
-                radius_watcher_current_global += 1 # make the radius of the watcher bigger
-                print('Radius watcher >>, now: ' + str(radius_watcher_current_global))
+                watcher_radius_current_global += 1 # make the radius of the watcher bigger
+                print('Radius watcher >>, now: ' + str(watcher_radius_current_global))
         if keycode[1] == 'numpadsubstract': # '-' clicked
             if button3_activate == 0:
-                radius_current_global -= 1 # make the radius of the obstacle smaller
-                print ('Radius obstacle <<, now: ' + str(radius_current_global))
+                obstacle_radius_current_global -= 1 # make the radius of the obstacle smaller
+                print ('Radius obstacle <<, now: ' + str(obstacle_radius_current_global))
             else:
-                radius_watcher_current_global -= 1 # make the radius of the watcher smaller
-                print ('Radius watcher <<, now: ' + str(radius_watcher_current_global))
+                watcher_radius_current_global -= 1 # make the radius of the watcher smaller
+                print ('Radius watcher <<, now: ' + str(watcher_radius_current_global))
 
         # Return True to accept the key. Otherwise, it will be used by the system.
         return True
@@ -154,14 +168,14 @@ class MyPaintWidgetCircleObstacle(Widget): # obstacle widget
 
         with self.canvas:
             Color(color_r, color_g, color_b)
-            d = 20. # the init diameter of the obstacle (if the user do not move the mouse, the radius will stay 20/2=10)
+            d = 2*obstacle_radius_default # default = 20; the init diameter of the obstacle (if the user do not move the mouse, the radius will stay 20/2=10)
             #touch.ud['line'] = Line(points=(touch.x, touch.y)) # for debugging, for tracking the expanding of the circle radius
             touch.ud['ellipse'] = Ellipse(pos=(touch.x - d / 2, touch.y - d / 2), size=(d, d)) # should be shiftet, because the position specifies the bottom left corner of the ellipse’s bounding box
-            global radius_current_global
-            radius_current_global = d/2 # reset to the initial value
+            global obstacle_radius_current_global
+            obstacle_radius_current_global = d/2 # reset to the initial value
 
     def on_touch_move(self, touch):
-        global radius_current_global
+        global obstacle_radius_current_global
         global obstacle_start_pos_ok
         
         lines = []
@@ -175,7 +189,7 @@ class MyPaintWidgetCircleObstacle(Widget): # obstacle widget
             return
         
         #touch.ud['line'].points += [touch.x, touch.y] # for debugging, for tracking the expanding of the circle radius
-        d_now = 2*radius_current_global # update!
+        d_now = 2*obstacle_radius_current_global # update!
         touch.ud['ellipse'].pos = (touch.x - d_now / 2, touch.y - d_now / 2) # the circle is moved to a new position, as long as the mouse remains clicked
         touch.ud['ellipse'].size = (d_now, d_now) # the radius is changed to a new value, as long as the mouse remains clicked
 
@@ -194,8 +208,8 @@ class MyPaintWidgetCircleObstacle(Widget): # obstacle widget
         
         # reset to the initial value:
         obstacle_start_pos_ok = 0
-        global radius_current_global
-        radius_current_global = 10
+        global obstacle_radius_current_global
+        obstacle_radius_current_global = obstacle_radius_default
         
         # save the obstacle positions (x,y,radius) in a txt file
         fob = open('output/internal/obstacle.txt','a') # 'w'=write (overrides the content every time), better use 'a'=append but make sure the file is at first empty
@@ -267,11 +281,11 @@ class MyPaintWidgetCircleWatcher(Widget): # watcher widget (bigger then the obst
             Color(1, 1, 0)
             d = 50.
             touch.ud['ellipse2'] = Ellipse(pos=(touch.x - d / 2, touch.y - d / 2), size=(d, d)) # should be shiftet, because the position specifies the bottom left corner of the ellipse’s bounding box
-            global radius_watcher_current_global
-            radius_watcher_current_global = d/2 # reset to the initial value
+            global watcher_radius_current_global
+            watcher_radius_current_global = d/2 # reset to the initial value
 
     def on_touch_move(self, touch):
-        global radius_watcher_current_global
+        global watcher_radius_current_global
         
         lines = []
         with open('output/internal/internal.txt') as file:
@@ -310,7 +324,7 @@ class MyPaintWidgetCircleWatcher(Widget): # watcher widget (bigger then the obst
         #    touch.ud['ellipse2'].pos = (x_pos_now, y_pos_now)
 
         # Idea2: the same as with the obstacles: move the circle (if during this time, '+' or '-' from the leyboard is clicked, the radius of the circle will become bigger/smaller)
-        d_now = 2*radius_watcher_current_global # update!
+        d_now = 2*watcher_radius_current_global # update!
         touch.ud['ellipse2'].pos = (touch.x - d_now / 2, touch.y - d_now / 2) # the circle is moved to a new position, as long as the mouse remains clicked
         touch.ud['ellipse2'].size = (d_now, d_now) # the radius is changed to a new value, as long as the mouse remains clicked
 
@@ -329,8 +343,8 @@ class MyPaintWidgetCircleWatcher(Widget): # watcher widget (bigger then the obst
         
         # reset to the initial value:
         watcher_start_pos_ok = 0 # important, otherwise it can come to an error, for example by using the scrolling area (when you hold outside and then go inside the map)
-        global radius_watcher_current_global
-        radius_watcher_current_global = 25
+        global watcher_radius_current_global
+        watcher_radius_current_global = watcher_radius_default
 
         # save the watcher positions (x,y,radius) in a txt file
         fob = open('output/internal/watcher.txt','a')
@@ -831,7 +845,13 @@ class ScenarioGUIApp(App):
         textinput_origin.disabled = True # disable the area, the input can not be changed later on
         
         # the user should first say how many obstacles he put -> after that can be created the same amount of text boxes and drop down boxes as the amount of obstacles -> so putting obstacle velocity, watchers, motion etc. per obstacle can be done individually!
-        print('Number of obstacles: ' + textinput_num_obstacles.text)
+        global num_obstacles_current_global
+        # important error check, if it is given something different then integer, the next step will proceed with number of obstacles = 0
+        if textinput_num_obstacles.text.isnumeric(): # a double like 0.5 will also return false
+            num_obstacles_current_global = int(float(textinput_num_obstacles.text)) # first convert string to float and then to integer
+        else:
+            num_obstacles_current_global = 0
+        print('Number of obstacles: ' + str(num_obstacles_current_global))
 
         height_layout_connect = (Window.size[1]-height_up_border-height_layout_btn)*2
         width_layout_connect = 140
@@ -963,53 +983,52 @@ class ScenarioGUIApp(App):
         fob = open('output/internal/data.txt','a')
         # saving data in files should be done here and not in button_callback, because there the button values are still not visible!
         fob.write('\nObstacle velocities:\n')
-        for i in range(int(textinput_num_obstacles.text)):
+        for i in range(num_obstacles_current_global):
             fob.write(str(textinput_velocity_list[i].text) + '\n')
         fob.write('Obstacle-watchers connections:\n')
-        for i in range(int(textinput_num_obstacles.text)):
+        for i in range(num_obstacles_current_global):
             fob.write(str(textinput_obstacle_watchers_connection_list[i].text) + '\n')
         fob.write('Obstacle-waypoints connections:\n')
-        for i in range(int(textinput_num_obstacles.text)):
+        for i in range(num_obstacles_current_global):
             # the gui is implemented only for dynamic obstacles, so a minimum of one waypoint per obstacle is a must; nevertheless if it should work also without waypoints, so that the count of the waypoints is right, it is important for the parsing afterwards that the data.txt file has '\n' at the end
             if len(textinput_amount) == 0 and len(textinput_obstacle_force_factor) == 0:
                 fob.write(str(textinput_obstacle_waypoints_connection_list[i].text) + '\n')
             else:
                 fob.write(str(textinput_obstacle_waypoints_connection_list[i].text))
-                if i < int(textinput_num_obstacles.text) - 1:
+                if i < num_obstacles_current_global - 1:
                     fob.write('\n')
         # the above 4 parameters will be always there, but the following 4 parameters could be there or not, so this should be checked
         if len(textinput_amount) > 0:
             fob.write('\nAmount of pedestrians in the group:\n')
-            for i in range(int(textinput_num_obstacles.text)):
+            for i in range(num_obstacles_current_global):
                 fob.write(str(textinput_amount[i].text))
-                if i < int(textinput_num_obstacles.text) - 1:
+                if i < num_obstacles_current_global - 1:
                     fob.write('\n')
             fob.write('\nChatting probability:\n')
-            for i in range(int(textinput_num_obstacles.text)):
+            for i in range(num_obstacles_current_global):
                 if len(textinput_obstacle_force_factor) == 0:
                     fob.write(str(textinput_chatting_probability[i].text) + '\n')
                 else:
                     fob.write(str(textinput_chatting_probability[i].text))
-                    if i < int(textinput_num_obstacles.text) - 1:
+                    if i < num_obstacles_current_global - 1:
                         fob.write('\n')
         if len(textinput_obstacle_force_factor) > 0:
             fob.write('\nObstacle force factor:\n')
-            for i in range(int(textinput_num_obstacles.text)):
+            for i in range(num_obstacles_current_global):
                 fob.write(str(textinput_obstacle_force_factor[i].text))
-                if i < int(textinput_num_obstacles.text) - 1:
+                if i < num_obstacles_current_global - 1:
                     fob.write('\n')
             fob.write('\nDesire force factor:\n')
-            for i in range(int(textinput_num_obstacles.text)):
+            for i in range(num_obstacles_current_global):
                 fob.write(str(textinput_desire_force_factor[i].text) + '\n')
         fob.close()
         
         # save the motion values in a separate file (again assume that the order is right and it starts with the motion for obstacle 0)
         # if you are using the version with the dropdon buttons, remember that there is a restriction of max 20 obstacles, so check how many was given by the user and if there are more then 20, print an error and terminate the program
         fob = open('output/internal/motion.txt','w') # the button is clicked only once
-        cur_obstacles = int(textinput_num_obstacles.text)
-        for i in range(cur_obstacles):
+        for i in range(num_obstacles_current_global):
             fob.write(str(mainbutton_motion_list[i].text))
-            #if i < cur_obstacles - 1: # better include always a new line, so that even if the motions are = '', the file will still have the right amount of lines
+            #if i < num_obstacles_current_global - 1: # better include always a new line, so that even if the motions are = '', the file will still have the right amount of lines
             fob.write('\n')
             #mainbutton_motion_list[i].disabled = True # if buttons, they should be disabled
         fob.close()
@@ -1646,57 +1665,86 @@ class ScenarioGUIApp(App):
         if pedestrians_bool == 1 or vehicles_bool == 1: # add textinput_obstacle_force_factor and textinput_desire_force_factor
             layout_connect.add_widget(label_connect_obstacle_force_factor)
             layout_connect.add_widget(label_connect_desire_force_factor)
-        for index in range(int(textinput_num_obstacles.text)): # index starts with 0
+        id_count = 0
+        for index in range(num_obstacles_current_global): # index starts with 0
+            obstacle_vel_current = obstacle_vel_default # if the number of static and dynamic obstacles are not specified or they are specified but they are no static obstacles, take the default value
+            waypoint_id = str(id_count) # do not use 'index' here, since sometimes it should be different
+            watcher_id = str(id_count)
+            obstacle_motion_current = obstacle_motion_default
+            pedestrians_group_amount_current = pedestrians_group_amount_default
+            pedestrians_chatting_probability_current = pedestrians_chatting_probability_default
+            obstacle_force_factor_current = obstacle_force_factor_default
+            desire_force_factor_current = desire_force_factor_default
+            if not (number_static_obstacles_default == 0 and number_dynamic_obstacles_default == 0): # only if the number of static and dynamic obstacles are specified
+                if (number_static_obstacles_default + number_dynamic_obstacles_default == num_obstacles_current_global): # and only if #static + #dynamic = #all
+                    if index < number_static_obstacles_default: # the current obstacle is static
+                        obstacle_vel_current = '' # static obstacles do not need a velocity etc., only the label with the id
+                        waypoint_id = ''
+                        watcher_id = ''
+                        obstacle_motion_current = ''
+                        pedestrians_group_amount_current = ''
+                        pedestrians_chatting_probability_current = ''
+                        obstacle_force_factor_current = ''
+                        desire_force_factor_current = ''
+                    if index == number_static_obstacles_default: # the current obstacle is the first dynamic obstacle
+                        id_count = 0 # reset the counter for the waypoint and watcher ids
+                        waypoint_id = str(id_count) # update
+                        watcher_id = str(id_count) # update
+                else:
+                    if index == 0: # just print it only once
+                        print('Number of static obstacles + number of dynamic obstacles given is not equal to the number of obstacles all together!')
+            
             label_index_list.append(Label(text=str(index), size_hint_x=None, size_hint=(None,None), height=height_layout_connect/2/10, width=15)) # height=28=height_layout_connect/2/10 to have place for 10 obstacle before it starts to scroll
             layout_connect.add_widget(label_index_list[index])
-            textinput_velocity_list.append(TextInput(text=obstacle_vel_default, multiline=False, write_tab=False, size_hint=(None,None), height=height_layout_connect/2/10, width=60)) # editable; give an example value already written in the box
+            textinput_velocity_list.append(TextInput(text=obstacle_vel_current, multiline=False, write_tab=False, size_hint=(None,None), height=height_layout_connect/2/10, width=60)) # editable; give an example value already written in the box
             textinput_velocity_list[index].bind(focus=self.on_focus)
             layout_connect.add_widget(textinput_velocity_list[index])
-            textinput_obstacle_waypoints_connection_list.append(TextInput(text=str(index), multiline=False, write_tab=False, size_hint=(None,None), height=height_layout_connect/2/10, width=70))
+            textinput_obstacle_waypoints_connection_list.append(TextInput(text=waypoint_id, multiline=False, write_tab=False, size_hint=(None,None), height=height_layout_connect/2/10, width=70))
             textinput_obstacle_waypoints_connection_list[index].bind(focus=self.on_focus)
             layout_connect.add_widget(textinput_obstacle_waypoints_connection_list[index])
-            textinput_obstacle_watchers_connection_list.append(TextInput(text=str(index), multiline=False, write_tab=False, size_hint=(None,None), height=height_layout_connect/2/10, width=65))
+            textinput_obstacle_watchers_connection_list.append(TextInput(text=watcher_id, multiline=False, write_tab=False, size_hint=(None,None), height=height_layout_connect/2/10, width=65))
             textinput_obstacle_watchers_connection_list[index].bind(focus=self.on_focus)
             layout_connect.add_widget(textinput_obstacle_watchers_connection_list[index])
-            mainbutton_motion_list.append(TextInput(text=obstacle_motion_default, multiline=False, write_tab=False, size_hint=(None,None), height=height_layout_connect/2/10, width=60))
+            mainbutton_motion_list.append(TextInput(text=obstacle_motion_current, multiline=False, write_tab=False, size_hint=(None,None), height=height_layout_connect/2/10, width=60))
             mainbutton_motion_list[index].bind(focus=self.on_focus)
             layout_connect.add_widget(mainbutton_motion_list[index])
             if pedestrians_bool == 1: # add textinput_amount and textinput_chatting_probability
-                textinput_amount.append(TextInput(text='1', multiline=False, write_tab=False, size_hint=(None,None), height=height_layout_connect/2/10, width=60))
+                textinput_amount.append(TextInput(text=pedestrians_group_amount_current, multiline=False, write_tab=False, size_hint=(None,None), height=height_layout_connect/2/10, width=60))
                 textinput_amount[index].bind(focus=self.on_focus)
                 layout_connect.add_widget(textinput_amount[index])
-                textinput_chatting_probability.append(TextInput(text='0.3', multiline=False, write_tab=False, size_hint=(None,None), height=height_layout_connect/2/10, width=85))
+                textinput_chatting_probability.append(TextInput(text=pedestrians_chatting_probability_current, multiline=False, write_tab=False, size_hint=(None,None), height=height_layout_connect/2/10, width=85))
                 textinput_chatting_probability[index].bind(focus=self.on_focus)
                 layout_connect.add_widget(textinput_chatting_probability[index])
             if pedestrians_bool == 1 or vehicles_bool == 1: # add textinput_obstacle_force_factor and textinput_desire_force_factor
-                textinput_obstacle_force_factor.append(TextInput(text='1.0', multiline=False, write_tab=False, size_hint=(None,None), height=height_layout_connect/2/10, width=85))
+                textinput_obstacle_force_factor.append(TextInput(text=obstacle_force_factor_current, multiline=False, write_tab=False, size_hint=(None,None), height=height_layout_connect/2/10, width=85))
                 textinput_obstacle_force_factor[index].bind(focus=self.on_focus)
                 layout_connect.add_widget(textinput_obstacle_force_factor[index])
-                textinput_desire_force_factor.append(TextInput(text='1.0', multiline=False, write_tab=False, size_hint=(None,None), height=height_layout_connect/2/10, width=85))
+                textinput_desire_force_factor.append(TextInput(text=desire_force_factor_current, multiline=False, write_tab=False, size_hint=(None,None), height=height_layout_connect/2/10, width=85))
                 textinput_desire_force_factor[index].bind(focus=self.on_focus)
                 layout_connect.add_widget(textinput_desire_force_factor[index])
+            id_count += 1
         scrollable_area = ScrollView(scroll_type=['bars', 'content'] ,size_hint=(None, None), size=(width_layout_connect,height_layout_connect/2), pos=(Window.size[0]-width_left_border-140, Window.size[1]-height_up_border/2-height_layout_connect/2))
         scrollable_area.add_widget(layout_connect)
         return scrollable_area
 
     def set_obstacle_params_2(self, textinput_num_obstacles, label_index_list, textinput_velocity_list, textinput_obstacle_watchers_connection_list, textinput_obstacle_waypoints_connection_list, mainbutton_motion_list, textinput_amount, textinput_chatting_probability, textinput_obstacle_force_factor, textinput_desire_force_factor, height_layout_connect, width_layout_connect, width_left_border, height_up_border): # IDEA 2 - make text inputs only for the velocity and watchers -> for the motions make dropdown boxes
         ## not scrollable (if more then 10 obstacles -> too small boxes -> can not be read anymore!)
-        #layout_connect = GridLayout(cols=3, rows=int(textinput_num_obstacles.text), size=(width_layout_connect-50,height_layout_connect/2), size_hint=(None, None), pos=(Window.size[0]-width_left_border-140, Window.size[1]-height_up_border-height_layout_connect/2-30))
+        #layout_connect = GridLayout(cols=3, rows=num_obstacles_current_global, size=(width_layout_connect-50,height_layout_connect/2), size_hint=(None, None), pos=(Window.size[0]-width_left_border-140, Window.size[1]-height_up_border-height_layout_connect/2-30))
         ## scrollable (make place for setting up 10 obstacles before the area gets scrollable)
         btn_yoyo_list = []
         btn_circle_list = []
         dropdown_motion_list = []
         layout_connect = GridLayout(cols=3, size_hint_y=None)
         layout_connect.bind(minimum_height=layout_connect.setter('height'))
-        for index in range(int(textinput_num_obstacles.text)): # index starts with 0
+        for index in range(num_obstacles_current_global): # index starts with 0
             label_index_list.append(Label(text=str(index), size_hint_x=None, width=15, size_hint_y=None, height=height_layout_connect/2/10)) # height=28=height_layout_connect/2/10 to have place for 10 obstacle before it starts to scroll
             textinput_velocity_list.append(TextInput(text=obstacle_vel_default, multiline=False, write_tab=False, size_hint_y=None, height=height_layout_connect/2/10)) # editable; give an example value already written in the box
             textinput_obstacle_waypoints_connection_list.append(TextInput(text=str(index), multiline=False, write_tab=False, size_hint=(None,None), height=height_layout_connect/2/10, width=70))
             textinput_obstacle_watchers_connection_list.append(TextInput(text=str(index), multiline=False, write_tab=False, size_hint_y=None, height=height_layout_connect/2/10)) # editable; give an example value already written in the box
-            textinput_amount.append(TextInput(text='1', multiline=False, write_tab=False, size_hint_y=None, height=height_layout_connect/2/10))
-            textinput_chatting_probability.append(TextInput(text='0.3', multiline=False, write_tab=False, size_hint_y=None, height=height_layout_connect/2/10))
-            textinput_obstacle_force_factor.append(TextInput(text='1.0', multiline=False, write_tab=False, size_hint_y=None, height=height_layout_connect/2/10))
-            textinput_desire_force_factor.append(TextInput(text='1.0', multiline=False, write_tab=False, size_hint_y=None, height=height_layout_connect/2/10))
+            textinput_amount.append(TextInput(text=pedestrians_group_amount_default, multiline=False, write_tab=False, size_hint_y=None, height=height_layout_connect/2/10))
+            textinput_chatting_probability.append(TextInput(text=pedestrians_chatting_probability_default, multiline=False, write_tab=False, size_hint_y=None, height=height_layout_connect/2/10))
+            textinput_obstacle_force_factor.append(TextInput(text=obstacle_force_factor_default, multiline=False, write_tab=False, size_hint_y=None, height=height_layout_connect/2/10))
+            textinput_desire_force_factor.append(TextInput(text=desire_force_factor_default, multiline=False, write_tab=False, size_hint_y=None, height=height_layout_connect/2/10))
             layout_connect.add_widget(label_index_list[index])
             layout_connect.add_widget(textinput_velocity_list[index])
             layout_connect.add_widget(textinput_obstacle_waypoints_connection_list[index])
@@ -1710,11 +1758,11 @@ class ScenarioGUIApp(App):
 
         # multiple drop-down buttons does not work correctly => for now hard coded for max 20 obstacles
         ## not scrollable
-        #layout_connect_2 = GridLayout(cols=1, rows=int(textinput_num_obstacles.text), size=(50,height_layout_connect/2), size_hint=(None, None), pos=(Window.size[0]-width_left_border-50, Window.size[1]-height_up_border-height_layout_connect/2-30))
+        #layout_connect_2 = GridLayout(cols=1, rows=num_obstacles_current_global, size=(50,height_layout_connect/2), size_hint=(None, None), pos=(Window.size[0]-width_left_border-50, Window.size[1]-height_up_border-height_layout_connect/2-30))
         ## scrollable
         layout_connect_2 = GridLayout(cols=1, size_hint_y=None)
         layout_connect_2.bind(minimum_height=layout_connect_2.setter('height'))
-        #for index in range(int(textinput_num_obstacles.text)):
+        #for index in range(num_obstacles_current_global):
         #    dropdown_motion_list.append(DropDown()) # drop-down menu with different motions
         #    btn_yoyo_list.append(Button(text=obstacle_motion_default, size_hint_y=None))
         #    btn_circle_list.append(Button(text='circle', size_hint_y=None))
@@ -1728,7 +1776,7 @@ class ScenarioGUIApp(App):
         #    layout_connect_2.add_widget(mainbutton_motion_list[index])
         #    ##layout_connect.add_widget(self.dropdown_get()[index]) # even that does not work out
         ## alternative: create different variable names in a loop (not that good practice, better use a list) -> globals()['dropdown_motion_%s' % index] = DropDown() OR globals()["dropdown_motion_"+str(index)] = DropDown() # still does not work, the same as with the lists
-        self.dropdown_get(int(textinput_num_obstacles.text), layout_connect_2, mainbutton_motion_list, height_layout_connect) # for now hard coded for max 10 obstacles
+        self.dropdown_get(num_obstacles_current_global, layout_connect_2, mainbutton_motion_list, height_layout_connect) # for now hard coded for max 10 obstacles
         scrollable_area_2 = ScrollView(size_hint=(1, None), size=(50,height_layout_connect/2), pos=(Window.size[0]-width_left_border-50, Window.size[1]-height_up_border-height_layout_connect/2-30))
         scrollable_area_2.add_widget(layout_connect_2)
 
