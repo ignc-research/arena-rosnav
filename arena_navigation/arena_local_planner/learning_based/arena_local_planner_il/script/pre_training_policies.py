@@ -21,7 +21,7 @@ from stable_baselines3.common.policies import ActorCriticPolicy
 from stable_baselines3.common.type_aliases import GymEnv, MaybeCallback, Schedule
 from stable_baselines3.common.utils import explained_variance, get_schedule_fn
 from il_customer_policy import ILPolicy, ILPolicyContinuous
-from custom_policy import MLP_ARENA2D, MLP_ARENA2D_POLICY
+from custom_policy import MLP_ARENA2D, MLP_ARENA2D_POLICY, MLP_ARENA2D_CONTINUOUS_POLICY
 
 import h5py
 import glob
@@ -65,10 +65,7 @@ class pretrainPPO(PPO):
                 use_sde, sde_sample_freq, target_kl, tensorboard_log, create_eval_env, policy_kwargs, verbose, seed,device, _init_setup_model,
     )
         self._data_path = rospkg.RosPack().get_path('arena_local_planner_il') + '/data'
-        # load h5 data to class
-        if pretraining:
-            self._load_pretraindata(dataset_length)
-
+        self._is_action_space_discrete = env._is_action_space_discrete
         # use customer defined policy
         if use_customer_policy:
             if env._is_action_space_discrete:
@@ -81,38 +78,48 @@ class pretrainPPO(PPO):
                                                 )
                 self.policy.to(self.device)
             else:
-                self.policy_class = ILPolicyContinuous
+                self.policy_class = MLP_ARENA2D_CONTINUOUS_POLICY
                 self.policy = self.policy_class(self.observation_space,
                                                 self.action_space,
                                                 self.lr_schedule,
-                                                use_sde=self.use_sde,
-                                                batch_size=self.batch_size,
+                                                self.batch_size,
                                                 **self.policy_kwargs  # pytype:disable=not-instantiable
                                                 )
                 self.policy.to(self.device)
+            
+            # load h5 data to class
+        if pretraining:
+            self._load_pretraindata(dataset_length)
 
     def _load_pretraindata(self, dataset_length):
         '''
         load data from h5 files and do numpy dataset initialization
         '''
-        h5_path = glob.glob(self._data_path + '/*hdf5')
-        if not h5_path:
-            raise FileNotFoundError
+        if self._is_action_space_discrete:
+            h5_path = glob.glob(self._data_path + '/*hdf5')
+            if not h5_path:
+                raise FileNotFoundError
+            
+            actions, states = OrderedDict(), OrderedDict()
+            for addr in h5_path:
+                if addr.endswith('state.hdf5'):
+                    with h5py.File(addr, "r") as state_f:
+                        for i in state_f.keys():
+                            states[i] = np.array(state_f[i], dtype=np.float32)
+                            
+                elif addr.endswith('action.hdf5'):
+                    with h5py.File(addr, "r") as action_f:
+                        for i in action_f.keys():
+                            actions[i] = np.array(action_f[i][1], dtype=np.float32)
+        else:
+            ##################create continuous dummy data for debugging########
+            actions, states = OrderedDict(), OrderedDict()
+            for index in range(20000):
+                actions[str(index)] = np.random.randn(2,)
+                states[str(index)]  = np.random.randn(366,)
         
-        actions, states = OrderedDict(), OrderedDict()
-        for addr in h5_path:
-            if addr.endswith('state.hdf5'):
-                with h5py.File(addr, "r") as state_f:
-                    for i in state_f.keys():
-                        states[i] = np.array(state_f[i], dtype=np.float32)
-                        
-            elif addr.endswith('action.hdf5'):
-                with h5py.File(addr, "r") as action_f:
-                    for i in action_f.keys():
-                        actions[i] = np.array(action_f[i][1], dtype=np.float32)
-
-        self._actions_data = actions
-        self._states_data = states
+        self._actions_data = actions # (time->str, numpy.array(1,))
+        self._states_data = states   # (time->str, numpy.array(366,))
         # do data matching
         self._data_matching(dataset_length)
 
@@ -157,6 +164,8 @@ class pretrainPPO(PPO):
 
         if loss_str == "CE":
             objective = nn.CrossEntropyLoss()
+        if not self._is_action_space_discrete:
+            objective = nn.MSELoss()
         losses = 0
         last_1000ep_loss = 0
         iter_no = 0
@@ -187,14 +196,19 @@ class pretrainPPO(PPO):
     def _calc_loss(self, actions, states, policy, objective, device="cpu"):
         actions = actions.astype(float)
         states = states.astype(float)
-        
-        actions_v = th.from_numpy(actions).float().to(device).long()
+        if self._is_action_space_discrete:
+            actions_v = th.from_numpy(actions).float().to(device).long()
+        else:
+            actions_v = th.from_numpy(actions).float().to(device)
         states_v = th.from_numpy(states).float().to(device)
         states_v.requires_grad = True
 
         pred_actions, pred_values, log_prob = policy(states_v) #need to return a action_prob distribution
         #print(log_prob_list.requires_grad) #should be true
-        loss = objective(policy.log_prob_list, actions_v)
+        if self._is_action_space_discrete:
+            loss = objective(policy.log_prob_list, actions_v)
+        else:
+            loss = objective(pred_actions, actions_v)
         return loss, pred_actions
 
     def save_policy(self, addr:str):

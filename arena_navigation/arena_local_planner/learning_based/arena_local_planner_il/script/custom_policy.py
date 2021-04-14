@@ -127,124 +127,35 @@ class MLP_ARENA2D_POLICY(ActorCriticPolicy):
         self.log_prob_list = log_prob_list
         return actions, values, log_prob
 
-
-
-class DRL_LOCAL_PLANNER(BaseFeaturesExtractor):
+class MLP_ARENA2D_CONTINUOUS_POLICY(ActorCriticPolicy):
     """
-    Custom Convolutional Neural Network to serve as feature extractor ahead of the policy and value network.
-    Architecture was taken as reference from: https://arxiv.org/abs/1808.03841
-
-    :param observation_space: (gym.Space)
-    :param features_dim: (int) Number of features extracted.
-        This corresponds to the number of unit for the last layer.
+    Policy using the custom Multilayer Perceptron.
     """
 
-    def __init__(self, observation_space: gym.spaces.Box, features_dim: int = 128):
-        super(DRL_LOCAL_PLANNER, self).__init__(observation_space, features_dim)
-
-        self.cnn = nn.Sequential(
-            nn.Conv1d(1, 32, 5, 2),
-            nn.ReLU(),
-            nn.Conv1d(32, 32, 3, 2),
-            nn.ReLU(),
-            nn.Flatten(),
+    def __init__(
+            self,
+            observation_space: gym.spaces.Space,
+            action_space: gym.spaces.Space,
+            lr_schedule: Callable[[float], float],
+            batch_size,
+            net_arch: Optional[List[Union[int, Dict[str, List[int]]]]] = None,
+            activation_fn: Type[nn.Module] = nn.ReLU,
+            *args,
+            **kwargs,
+    ):
+        super(MLP_ARENA2D_CONTINUOUS_POLICY, self).__init__(
+            observation_space,
+            action_space,
+            lr_schedule,
+            net_arch,
+            activation_fn,
+            *args,
+            **kwargs,
         )
+        # Enable orthogonal initialization
+        self.ortho_init = True
+        self.batch_size = batch_size
 
-        # Compute shape by doing one forward pass
-        with th.no_grad():
-            # tensor_forward = th.as_tensor(observation_space.sample()[None]).float()
-            tensor_forward = th.randn(1, 1, _L)
-            n_flatten = self.cnn(tensor_forward).shape[1]
+    def _build_mlp_extractor(self) -> None:
+        self.mlp_extractor = MLP_ARENA2D(64)
 
-        self.fc_1 = nn.Sequential(
-            nn.Linear(n_flatten, 256 - _RS),
-            nn.ReLU(),
-        )
-
-        self.fc_2 = nn.Sequential(
-            nn.Linear(256, features_dim),
-            nn.ReLU()
-        )
-
-    def forward(self, observations: th.Tensor) -> th.Tensor:
-        """
-        :return: (th.Tensor),
-            extracted features by the network
-        """
-        laser_scan = th.unsqueeze(observations[:, :-_RS], 1)
-        robot_state = observations[:, -_RS:]
-
-        extracted_features = self.fc_1(self.cnn(laser_scan))
-        features = th.cat((extracted_features, robot_state), 1)
-
-        return self.fc_2(features)
-
-
-"""
-Global constant to be passed as an argument to the PPO of Stable-Baselines3 in order to build both the policy
-and value network.
-
-:constant policy_drl_local_planner: (dict)
-"""
-policy_kwargs_drl_local_planner = dict(features_extractor_class=DRL_LOCAL_PLANNER,
-                                       features_extractor_kwargs=dict(features_dim=128))
-
-
-class CNN_NAVREP(BaseFeaturesExtractor):
-    """
-    Custom Convolutional Neural Network (Nature CNN) to serve as feature extractor ahead of the policy and value head.
-    Architecture was taken as reference from: https://github.com/ethz-asl/navrep
-
-    :param observation_space: (gym.Space)
-    :param features_dim: (int) Number of features extracted.
-        This corresponds to the number of unit for the last layer.
-    """
-
-    def __init__(self, observation_space: gym.spaces.Box, features_dim: int = 32):
-        super(CNN_NAVREP, self).__init__(observation_space, features_dim)
-
-        self.cnn = nn.Sequential(
-            nn.Conv1d(1, 32, 8, 4),
-            nn.ReLU(),
-            nn.Conv1d(32, 64, 9, 4),
-            nn.ReLU(),
-            nn.Conv1d(64, 128, 6, 4),
-            nn.ReLU(),
-            nn.Conv1d(128, 256, 4, 4),
-            nn.ReLU(),
-            nn.Flatten(),
-        )
-
-        # Compute shape by doing one forward pass
-        with th.no_grad():
-            tensor_forward = th.randn(1, 1, _L)
-            n_flatten = self.cnn(tensor_forward).shape[1]
-
-        self.fc = nn.Sequential(
-            nn.Linear(n_flatten, features_dim - _RS),
-        )
-
-    def forward(self, observations: th.Tensor) -> th.Tensor:
-        """
-        :return: (th.Tensor) features,
-            extracted features by the network
-        """
-
-        laser_scan = th.unsqueeze(observations[:, :-_RS], 1)
-        robot_state = observations[:, -_RS:]
-
-        extracted_features = self.fc(self.cnn(laser_scan))
-        features = th.cat((extracted_features, robot_state), 1)
-
-        return features
-
-
-"""
-Global constant to be passed as an argument to the PPO of Stable-Baselines3 in order to build both the policy
-and value network.
-
-:constant policy_kwargs_navrep: (dict)
-"""
-policy_kwargs_navrep = dict(features_extractor_class=CNN_NAVREP,
-                            features_extractor_kwargs=dict(features_dim=32),
-                            net_arch=[dict(vf=[64, 64], pi=[64, 64])], activation_fn=th.nn.ReLU)

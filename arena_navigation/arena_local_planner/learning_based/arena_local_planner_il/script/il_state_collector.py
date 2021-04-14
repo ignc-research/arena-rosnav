@@ -131,13 +131,16 @@ class ILStateCollectorEnv(gym.Env):
             else:
                 self._curr_action = self._curr_action
         else:
-            self._curr_action = [linear_vel, angular_vel]
+            self._curr_cmd_vel = [linear_vel, angular_vel]
         
     def step(self, action):
         if not self.is_state_collector:
             self._pub_action(action)
         else:
-            self._pub_action(self._curr_action)
+            if self._is_action_space_discrete:
+                self._pub_action(self._curr_action)
+            else:
+                self._pub_action(action)
         #todo add time alignment
         start_time = rospy.get_time()
         self._steps_curr_episode += 1
@@ -209,7 +212,10 @@ class ILStateCollectorEnv(gym.Env):
 
     def get_action(self):
         current_time = rospy.get_time()
-        action_with_time = (current_time, self._curr_action)
+        if self._is_action_space_discrete:
+            action_with_time = (current_time, self._curr_action)
+        else:
+            action_with_time = (current_time, self._curr_cmd_vel)
         return action_with_time
 
     ################# from flatland env ####################### 
@@ -261,8 +267,8 @@ class ILStateCollectorEnv(gym.Env):
             action_msg.linear.x = self._discrete_acitons[action]['linear']
             action_msg.angular.z = self._discrete_acitons[action]['angular']
         else:
-            action_msg.linear.x = action[0]
-            action_msg.angular.z = action[1]
+            action_msg.linear.x = action[1][0]
+            action_msg.angular.z = action[1][1]
         self.agent_action_pub.publish(action_msg)
 
 
