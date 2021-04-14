@@ -1,6 +1,8 @@
 #! /usr/bin/env python
 from typing import Tuple
 
+from datetime import datetime
+
 from numpy.core.numeric import normalize_axis_tuple
 import rospy
 import random
@@ -52,19 +54,24 @@ class ObservationCollector():
         self._robot_pose = Pose2D()
         self._robot_vel = Twist()
         self._subgoal =  Pose2D()
+        self._cmd_vel = Twist()
         
 
         # message_filter subscriber: laserscan, robot_pose
         self._scan_sub = message_filters.Subscriber("scan", LaserScan)
         self._robot_state_sub = message_filters.Subscriber('plan_manager/robot_state', RobotStateStamped)
+
+        # command velocity subscriber
+        self._cmd_vel_sub = message_filters.Subscriber('cmd_vel', Twist)
         
         # message_filters.TimeSynchronizer: call callback only when all sensor info are ready
-        self.ts = message_filters.ApproximateTimeSynchronizer([self._scan_sub, self._robot_state_sub], 100,slop=0.05)#,allow_headerless=True)
+        #self.ts = message_filters.ApproximateTimeSynchronizer([self._scan_sub, self._robot_state_sub], 100,slop=0.05) #without synchronizing cmd_vel
+        self.ts = message_filters.ApproximateTimeSynchronizer([self._scan_sub, self._robot_state_sub, self._cmd_vel_sub], 100,slop=0.05,allow_headerless=True)
         self.ts.registerCallback(self.callback_observation_received)
         
         # topic subscriber: subgoal
         #TODO should we synchoronize it with other topics
-        self._subgoal_sub = message_filters.Subscriber('plan_manager/subgoal', PoseStamped) #self._subgoal_sub = rospy.Subscriber("subgoal", PoseStamped, self.callback_subgoal)
+        self._subgoal_sub = message_filters.Subscriber('move_base_simple/goal', PoseStamped)
         self._subgoal_sub.registerCallback(self.callback_subgoal)
         
         # service clients
@@ -78,6 +85,16 @@ class ObservationCollector():
     def get_observation_space(self):
         return self.observation_space
 
+    def get_observations_and_action(self):
+        # Get synchronized observations and return them along with the current command velocity (action).
+        # Since get_observations() is the only function called in record_rollouts.py that calls the step_world service,
+        # the cmd_vel (action) will still be synchronized with the observations
+        merged_obs, obs_dict = self.get_observations()
+        action = self._cmd_vel
+        # action.linear.x and action.angular.z are the only non-zero values and are python floats.
+        action = np.array([action.linear.x, action.angular.z])
+        return merged_obs, obs_dict, action
+    
     def get_observations(self):
         # reset flag 
         self._flag_all_received=False
@@ -86,9 +103,11 @@ class ObservationCollector():
             i=0
             while(self._flag_all_received==False):
                 self.call_service_takeSimStep()
+                print(f"waiting for synched observations: {i}")
                 i+=1
         # rospy.logdebug(f"Current observation takes {i} steps for Synchronization")
         #print(f"Current observation takes {i} steps for Synchronization")
+        
         scan=self._scan.ranges.astype(np.float32)
         rho, theta = ObservationCollector._get_goal_pose_in_robot_frame(self._subgoal,self._robot_pose)
         merged_obs = np.hstack([scan, np.array([rho,theta])])
@@ -118,11 +137,15 @@ class ObservationCollector():
         self._subgoal=self.process_subgoal_msg(msg_Subgoal)
         
         return
+
+
+    def callback_observation_received(self,msg_LaserScan,msg_RobotStateStamped, msg_cmd_vel):
+        self._cmd_vel = msg_cmd_vel
         
-    def callback_observation_received(self,msg_LaserScan,msg_RobotStateStamped):
         # process sensor msg
         self._scan=self.process_scan_msg(msg_LaserScan)
         self._robot_pose,self._robot_vel=self.process_robot_state_msg(msg_RobotStateStamped)
+
         # ask subgoal service
         #self._subgoal=self.call_service_askForSubgoal()
         self._flag_all_received=True
@@ -181,9 +204,11 @@ if __name__ == '__main__':
     state_collector=ObservationCollector(360,10)
     i=0
     r=rospy.Rate(100)
-    while(i<=1000):
+    while(i<=100):
         i=i+1
+        print(i)
         obs=state_collector.get_observations()
+        print(obs)
         
         time.sleep(0.001)
         
