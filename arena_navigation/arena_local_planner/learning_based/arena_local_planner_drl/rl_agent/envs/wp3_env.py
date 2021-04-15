@@ -312,7 +312,6 @@ class wp3Env(gym.Env):
         info = {}
         if done:
             info['done_reason'] = reward_info['done_reason']
-            info['is_success'] = reward_info['is_success']
             self.reward_calculator.kdtree = None
 
         if self._steps_curr_episode > self._max_steps_per_episode:
