@@ -1,3 +1,4 @@
+import argparse
 import time
 from datetime import datetime
 import os
@@ -8,6 +9,13 @@ from task_generator.tasks import get_predefined_task
 import rospy
 import rospkg
 import numpy as np
+from collections import OrderedDict
+import h5py
+
+parser = argparse.ArgumentParser(description='Process some integers.')
+parser.add_argument('-o', '--outputformat', type=str, help='choose output format: "h5" or "npz"', default='h5')
+parser.add_argument('-s', '--scenario', type=str, metavar="[scenario name]", default='/home/michael/catkin_ws/src/arena-rosnav/simulator_setup/scenerios/obstacle_map1_obs20.json', help='path of scenario json file for deployment')
+args = parser.parse_args()
 
 rospy.init_node("record_rollouts")
 
@@ -28,20 +36,40 @@ obs = env.reset()
 #TODO end recording loop with keypress or by ending when the scenario has been repeated the correct number of times
 observations = []
 actions = []
-for i in range(50):
+for i in range(10):
     print(i)
     merged_obs, obs_dict, action = env.observation_collector.get_observations_and_action()
     observations.append(merged_obs)
     actions.append(action)
 
-# save observations and actions in an npz file:
-date_str = datetime.now().strftime('%Y%m%d_%H-%M')
-path = str(f'./output/rollout_{date_str}')
-np.savez_compressed(
-    path,
-    observations = np.array(observations),
-    actions = np.array(actions)
-)
+# save rollouts
+if args.outputformat == 'h5':
+    date_str = datetime.now().strftime('%Y%m%d_%H-%M')
+    actions_dict, states_dict = OrderedDict(), OrderedDict()
+
+    for i in range(len(actions)):
+        actions_dict[str(i)] = actions[i]
+        states_dict[str(i)] = observations[i]
+    
+    file_action = h5py.File(f'./output/{date_str}_action.hdf5', "w")
+    file_state = h5py.File(f'./output/{date_str}_state.hdf5', "w")
+
+    file_action.create_dataset(str(actions_dict[0]), data=np.array(actions_dict))  #?
+    file_state.create_dataset(str(states_dict[0]), data=np.array(states_dict[1]))  #?
+
+    file_state.close()
+    file_action.close()
+    rospy.loginfo("h5py writer have been shut down.")
+
+if args.outputformat == 'npz':
+    # save observations and actions in an npz file:
+    date_str = datetime.now().strftime('%Y%m%d_%H-%M')
+    path = str(f'./output/rollout_{date_str}')
+    np.savez_compressed(
+        path,
+        observations = np.array(observations),
+        actions = np.array(actions)
+    )
 
 # How should the obstacles appear?
 #TODO need to reset task (either directly through task.reset() or indirectly through Flatlandenv.reset() to return robot and obstacles
