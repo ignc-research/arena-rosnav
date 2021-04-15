@@ -145,7 +145,7 @@ class MLP_HUMAN(nn.Module):
             nn.ReLU()
         ).to('cuda')
         self.body_net_human = nn.Sequential(
-            nn.Linear(114, 128),
+            nn.Linear(num_humans*human_state_size, 128),
             nn.ReLU(),
             nn.Linear(128, 96),
             nn.ReLU(),

@@ -65,75 +65,58 @@ class ObservationCollector():
         self.observation_space = ObservationCollector._stack_spaces((
             spaces.Box(low=-np.PINF, high=np.PINF, shape=(1,),dtype=np.float64), #time
             spaces.Box(low=0.0, high=lidar_range, shape=(num_lidar_beams,),dtype=np.float64), #lidar
-            # spaces.Box(low=0.0, high=10.0, shape=(1,),dtype=np.float64) ,
-            # spaces.Box(low=-np.pi, high=np.pi, shape=(1,),dtype=np.float64) ,
             spaces.Box(low=-np.PINF, high=np.PINF, shape=(self.num_humans_observation_max*19,),dtype=np.float64) # human states
         ))
 
-        self._laser_num_beams = rospy.get_param("/laser_num_beams")
-        # for frequency controlling
+        #get parameters
+        self._laser_num_beams = rospy.get_param("/laser_num_beams")  # for frequency controlling
         self._action_frequency = 1/rospy.get_param("/robot_action_rate")
-
-        self._clock = Clock()
-        self._scan = LaserScan()
-        self._robot_pose = Pose2D()
-        self._robot_vel = Twist()
-        self._subgoal = Pose2D()
-        self._globalplan = np.array([])
-
-        # train mode?
-        self._is_train_mode = rospy.get_param("/train_mode")
-
-        # synchronization parameters
-        self._first_sync_obs = True     # whether to return first sync'd obs or most recent
-        self.max_deque_size = 10
-        self._sync_slop = 0.05
-
-        self._laser_deque = deque()
-        self._rs_deque = deque()
-
-        # subscriptions
-        # self._scan_sub = rospy.Subscriber(
-        #     f'{self.ns_prefix}scan', LaserScan, self.callback_scan, tcp_nodelay=True)
-
-        # self._robot_state_sub = rospy.Subscriber(
-        #     f'{self.ns_prefix}robot_state', RobotStateStamped, self.callback_robot_state, tcp_nodelay=True)
-        self._scan_sub = message_filters.Subscriber( f'{self.ns_prefix}scan', LaserScan)
-        self._robot_state_sub = message_filters.Subscriber(f'{self.ns_prefix}robot_state', RobotStateStamped)
-        
-        # self._clock_sub = rospy.Subscriber(
-        #     f'{self.ns_prefix}clock', Clock, self.callback_clock, tcp_nodelay=True)
-       
-        self._subgoal_sub = rospy.Subscriber(
-            f'{self.ns_prefix}subgoal', PoseStamped, self.callback_subgoal)
-
-        self._globalplan_sub = rospy.Subscriber(
-            f'{self.ns_prefix}globalPlan', Path, self.callback_global_plan)
-
+        self._is_train_mode = rospy.get_param("/train_mode")   # train mode?
         # service clients
         if self._is_train_mode:
             self._service_name_step = f'{self.ns_prefix}step_world'
             self._sim_step_client = rospy.ServiceProxy(
                 self._service_name_step, StepWorld)
 
+        #define functions as variables 
+        self._clock = Clock()
+        self._scan = LaserScan()
+        self._robot_pose = Pose2D()
+        self._robot_vel = Twist()
+        self._subgoal = Pose2D()
+        self._globalplan = np.array([])
+        
         self.first_obs = True
         self.last = 0
         self.last_r = 0
         self.agent_state=[]
-        #human state subscriber
+
+        #subscribtions
+        self._scan_sub = message_filters.Subscriber( f'{self.ns_prefix}scan', LaserScan)  #subscribe to robot scan 
+        self._robot_state_sub = message_filters.Subscriber(f'{self.ns_prefix}robot_state', RobotStateStamped) #subscribe to robot state 
+        self._subgoal_sub = rospy.Subscriber(f'{self.ns_prefix}subgoal', PoseStamped, self.callback_subgoal)#subscribe to subgoal
+        self._globalplan_sub = rospy.Subscriber(f'{self.ns_prefix}globalPlan', Path, self.callback_global_plan) #subscribe to gloabalPlan
+        #human state subscriper
         self.num_humans=num_humans
         for i in range(num_humans):
-            self.agent_state.append(f'{self.ns_prefix}pedsim_agent_{i+1}/agent_state')
+            self.agent_state.append(f'{self.ns_prefix}pedsim_agent_{i+1}/agent_state') #making a a list of the topics names 
         self._sub_agent_state=[None]*num_humans
-        self._human_type, self._human_position, self._human_vel= [None]*num_humans,[None]*num_humans,[None]*num_humans
-        self._human_behavior=[None]*num_humans
-        self._human_type =np.array(self._human_type)
-        self._human_position=np.array(self._human_position)
-        self._human_vel=np.array(self._human_vel)
-        self._human_behavior=np.array(self._human_behavior)
         for i, topic in enumerate(self.agent_state):
-            self._sub_agent_state[i]=message_filters.Subscriber(topic, AgentState)
+            self._sub_agent_state[i]=message_filters.Subscriber(topic, AgentState) #subscribing to the topics of every Agent
+        #intilasing arrays for human states
+        self._human_type=np.array( [None]*num_humans)
+        self._human_position=np.array( [None]*num_humans)
+        self._human_vel=np.array( [None]*num_humans)
+        self._human_behavior=np.array( [None]*num_humans)
+ 
 
+        #synchronization parameters
+        self._first_sync_obs = True     # whether to return first sync'd obs or most recent
+        self.max_deque_size = 10
+        self._sync_slop = 0.05
+        self._laser_deque = deque()
+        self._rs_deque = deque()
+        
         # message_filters.TimeSynchronizer: call callback only when all sensor info are ready
         self.sychronized_list=[self._scan_sub, self._robot_state_sub]+self._sub_agent_state #[self._scan_sub, self._robot_state_sub]+self._adult+self._child+self._elder
         self.ts = message_filters.ApproximateTimeSynchronizer(self.sychronized_list, 10, slop=0.01) #,allow_headerless=True)
@@ -147,11 +130,11 @@ class ObservationCollector():
         self._flag_all_received=False
         if self._is_train_mode: 
         # sim a step forward until all sensor msg uptodate
-            i=0
+           # i=0
             while(self._flag_all_received==False):
                 # self._action_frequency
                 self.call_service_takeSimStep(0.1)
-                i+=1
+            #    i+=1
                 time.sleep(0.01)
             # print(f"Current observation takes {i} steps for Synchronization")
         else:
@@ -166,8 +149,8 @@ class ObservationCollector():
         else:
             scan = np.ones(self._laser_num_beams, dtype=float)*100
             
-        rho, theta = ObservationCollector._get_pose_in_robot_frame(
-            self._subgoal, self._robot_pose)
+        #claculating diffrent robot infos 
+        rho, theta = ObservationCollector._get_pose_in_robot_frame(self._subgoal, self._robot_pose)
         self.rot=np.arctan2(self._subgoal.y - self._robot_pose.y, self._subgoal.x - self._robot_pose.x)
         self.robot_vx = self._robot_vel.linear.x * np.cos(self.rot) + self._robot_vel.linear.y * np.sin(self.rot)
         self.robot_vy=self._robot_vel.linear.y* np.cos(self.rot) - self._robot_vel.linear.x * np.sin(self.rot)
