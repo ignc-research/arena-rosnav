@@ -19,9 +19,7 @@ args = parser.parse_args()
 
 rospy.init_node("record_rollouts")
 
-#TODO add arg parser to make "scenerios_json_path" a parameter
-task = get_predefined_task(mode="ScenerioTask", PATHS={
-                           "scenerios_json_path": "/home/michael/catkin_ws/src/arena-rosnav/simulator_setup/scenerios/obstacle_map1_obs20.json"})
+task = get_predefined_task(mode="ScenerioTask", PATHS={"scenerios_json_path": args.scenario})
 models_folder_path = rospkg.RosPack().get_path('simulator_setup')
 arena_local_planner_drl_folder_path = rospkg.RosPack().get_path(
     'arena_local_planner_drl')
@@ -36,11 +34,13 @@ obs = env.reset()
 #TODO end recording loop with keypress or by ending when the scenario has been repeated the correct number of times
 observations = []
 actions = []
-for i in range(10):
+for i in range(20000):
     print(i)
     merged_obs, obs_dict, action = env.observation_collector.get_observations_and_action()
     observations.append(merged_obs)
     actions.append(action)
+    if env.check_if_done(merged_obs, obs_dict):
+        env.reset()
 
 # save rollouts
 if args.outputformat == 'h5':

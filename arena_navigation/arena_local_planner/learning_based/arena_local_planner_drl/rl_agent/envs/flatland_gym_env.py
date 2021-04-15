@@ -151,6 +151,27 @@ class FlatlandEnv(gym.Env):
                 info['done_reason'] = 0
 
         return merged_obs, reward, done, info
+    
+    def check_if_done(self, merged_obs, obs_dict):
+        """
+        done_reasons:   0   -   exceeded max steps
+                        1   -   collision with obstacle
+                        2   -   goal reached
+        """
+        _, reward_info = self.reward_calculator.get_reward(
+            obs_dict['laser_scan'], obs_dict['goal_in_robot_frame'])
+        done = reward_info['is_done']
+
+        # info
+        info = {}
+        if done:
+            info['done_reason'] = reward_info['done_reason']
+        else:
+            if self._steps_curr_episode == self._max_steps_per_episode:
+                done = True
+                info['done_reason'] = 0
+        
+        return done
 
     def reset(self):
 
