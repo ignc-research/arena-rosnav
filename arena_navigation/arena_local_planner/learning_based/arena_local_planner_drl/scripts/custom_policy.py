@@ -57,21 +57,25 @@ class MLP_ARENA2D(nn.Module):
 
         # Body network
         self.body_net = nn.Sequential(
-            nn.Linear(_L+_RS, 64),
+            nn.Linear(_L, 128),
             nn.ReLU(),
-            nn.Linear(64, feature_dim),
+            nn.Linear(128, feature_dim),
             nn.ReLU()
         )
 
         # Policy network
         self.policy_net = nn.Sequential(
-            nn.Linear(feature_dim, last_layer_dim_pi),
+            nn.Linear(feature_dim+1+_RS, 64),
+            nn.ReLU(),
+            nn.Linear(64, last_layer_dim_pi),
             nn.ReLU()
         )
 
         # Value network
         self.value_net = nn.Sequential(
-            nn.Linear(feature_dim, last_layer_dim_vf),
+            nn.Linear(feature_dim+1+_RS, 64),
+            nn.ReLU(),
+            nn.Linear(64, last_layer_dim_pi),
             nn.ReLU()
         )
 
@@ -80,8 +84,16 @@ class MLP_ARENA2D(nn.Module):
         :return: (th.Tensor, th.Tensor) latent_policy, latent_value of the specified network.
             If all layers are shared, then ``latent_policy == latent_value``
         """
-        body_x = self.body_net(features)
-        return self.policy_net(body_x), self.value_net(body_x)
+        size=features.shape
+        time=features[:, 0].reshape(size[0], -1)
+        body_x = self.body_net(features[:, 1:_L+1])
+        robot_state=features[:, _L+1:_L+1+_RS]
+        # humans_state=features[:, _L+1:_L+1+num_humans*human_state_size]
+        # human_hidden=self.body_net_human(humans_state)
+        features_1 = th.cat((time, body_x), 1)
+        # features_2=th.cat((features_1, human_hidden), 1)
+        features=th.cat((features_1, robot_state), 1)
+        return self.policy_net(features), self.value_net(features)
 
 
 class MLP_ARENA2D_POLICY(ActorCriticPolicy):
@@ -112,7 +124,7 @@ class MLP_ARENA2D_POLICY(ActorCriticPolicy):
         self.ortho_init = True
 
     def _build_mlp_extractor(self) -> None:
-        self.mlp_extractor = MLP_ARENA2D(64)
+        self.mlp_extractor = MLP_ARENA2D(128)
 
 class MLP_HUMAN(nn.Module):
     """
@@ -145,7 +157,7 @@ class MLP_HUMAN(nn.Module):
             nn.ReLU()
         ).to('cuda')
         self.body_net_human = nn.Sequential(
-            nn.Linear(114, 128),
+            nn.Linear(human_state_size*num_humans, 128),
             nn.ReLU(),
             nn.Linear(128, 96),
             nn.ReLU(),
