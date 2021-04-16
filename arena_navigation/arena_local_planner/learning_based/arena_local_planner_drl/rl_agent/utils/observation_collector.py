@@ -36,7 +36,7 @@ from std_msgs.msg import Bool
 from rl_agent.utils.debug import timeit 
 
 class ObservationCollector():
-    def __init__(self, ns: str, num_lidar_beams: int, lidar_range: float, num_humans:int):
+    def __init__(self, ns: str, num_humans:int):
         """ a class to collect and merge observations
 
         Args:
@@ -60,17 +60,7 @@ class ObservationCollector():
         self._radius_elder= 0.3
         self._radius_robot= 0.3
 
-        # define observation_space
-        self.num_humans_observation_max=21
-        self.observation_space = ObservationCollector._stack_spaces((
-            spaces.Box(low=-np.PINF, high=np.PINF, shape=(1,),dtype=np.float64), #time
-            spaces.Box(low=0.0, high=lidar_range, shape=(num_lidar_beams,),dtype=np.float64), #lidar
-            # spaces.Box(low=0.0, high=10.0, shape=(1,),dtype=np.float64) ,
-            # spaces.Box(low=-np.pi, high=np.pi, shape=(1,),dtype=np.float64) ,
-            spaces.Box(low=-np.PINF, high=np.PINF, shape=(self.num_humans_observation_max*19,),dtype=np.float64) # human states
-        ))
-
-        self._laser_num_beams = rospy.get_param("/laser_num_beams")
+        # self._laser_num_beams = num_lidar_beams
         # for frequency controlling
         self._action_frequency = 1/rospy.get_param("/robot_action_rate")
 
@@ -168,6 +158,7 @@ class ObservationCollector():
             
         rho, theta = ObservationCollector._get_pose_in_robot_frame(
             self._subgoal, self._robot_pose)
+        # print( self.ns_prefix+'_goal_robot_theta', theta)
         self.rot=np.arctan2(self._subgoal.y - self._robot_pose.y, self._subgoal.x - self._robot_pose.x)
         self.robot_vx = self._robot_vel.linear.x * np.cos(self.rot) + self._robot_vel.linear.y * np.sin(self.rot)
         self.robot_vy=self._robot_vel.linear.y* np.cos(self.rot) - self._robot_vel.linear.x * np.sin(self.rot)
@@ -198,7 +189,7 @@ class ObservationCollector():
         obs_dict['human_type']=self._human_type
         obs_dict['human_behavior']=self._human_behavior
 
-        # semantic tokens
+        # semantic tokens TODO: different tokens for other behaviors
         self._human_behavior_token=(self._human_behavior=='talking').astype(np.int)
         # print(self._human_behavior)
 
@@ -206,10 +197,13 @@ class ObservationCollector():
         rho_behavior_child = np.array([],dtype=object).reshape(0, 2)
         rho_behavior_elder = np.array([],dtype=object).reshape(0, 2)
 
+        count_observable_humans=0
         for i, ty in enumerate(self._human_type):
             # filter the obstacles which are not in the visible range of the robot
-            if not self.IsInViewRange(20, [-2.618,2.618], rho_humans[i], theta_humans[i]):
+            if not self.isInViewRange(15, [-np.pi, np.pi], rho_humans[i], theta_humans[i]):
                 continue
+            else:
+                count_observable_humans=count_observable_humans+1
             if ty==0: # adult
                 rho_behavior=np.array([rho_humans[i],self._human_behavior[i]],dtype=object)
                 rho_behavior_adult=np.vstack([rho_behavior_adult, rho_behavior])
@@ -251,7 +245,17 @@ class ObservationCollector():
                 merged_obs = np.hstack([merged_obs,obs])
         obs_dict['adult_in_robot_frame'] = rho_behavior_adult
         obs_dict['child_in_robot_frame'] = rho_behavior_child
-        obs_dict['elder_in_robot_frame'] = rho_behavior_elder
+        obs_dict['elder_in_robot_frame'] = rho_behavior_elder        
+        #TODO more proper method is needed to supplement info blanks (finished)
+        if count_observable_humans==0:
+            obs_empty=np.array(self.robot_self_state+[0]*10)
+            merged_obs = np.hstack([merged_obs,obs_empty])
+            count_observable_humans=count_observable_humans+1
+        while count_observable_humans < 6 and count_observable_humans >0:
+            obs_copy=np.copy(merged_obs[-count_observable_humans*self.human_state_size:])
+            merged_obs = np.hstack([merged_obs, obs_copy])
+            count_observable_humans=count_observable_humans*2
+        # print('observe', count_observable_humans)
         #align the observation size
         observation_blank=len(merged_obs) - self.observation_space.shape[0]
         if observation_blank<0:
@@ -364,6 +368,7 @@ class ObservationCollector():
         # remove_nans_from_scan
         self._scan_stamp = msg_LaserScan.header.stamp.to_sec()
         scan = np.array(msg_LaserScan.ranges)
+        # print(self.ns_prefix+'scan', scan[89], scan[179], scan[269])
         scan[np.isnan(scan)] = msg_LaserScan.range_max
         msg_LaserScan.ranges = scan
         return msg_LaserScan
@@ -394,7 +399,25 @@ class ObservationCollector():
     def set_timestep(self, time_step):
         self.time_step=time_step
 
-    def IsInViewRange(self, distance, angleRange, rho_human, theta_human):
+    def setRobotSettings(self, num_lidar_beams, lidar_range, laser_angle_min, laser_angle_max, laser_angle_increment):
+        self.num_lidar_beams = num_lidar_beams
+        self.lidar_range = lidar_range
+        self.laser_angle_min = laser_angle_min
+        self.laser_angle_max = laser_angle_max
+        self.laser_angle_increment = laser_angle_increment
+        self.laser_beam_angles = np.arange(self.laser_angle_min, self.laser_angle_max, self.laser_angle_increment)
+
+    def setObservationSpace(self):
+        # define observation_space
+        self.num_humans_observation_max=21
+        self.human_state_size=19
+        self.observation_space = ObservationCollector._stack_spaces((
+            spaces.Box(low=-np.PINF, high=np.PINF, shape=(1,),dtype=np.float64), #time
+            spaces.Box(low=0.0, high=self.lidar_range, shape=(self.num_lidar_beams,),dtype=np.float64), #lidar
+            spaces.Box(low=-np.PINF, high=np.PINF, shape=(self.num_humans_observation_max*self.human_state_size,),dtype=np.float64) # human states
+        ))
+
+    def isInViewRange(self, distance, angleRange, rho_human, theta_human):
         if rho_human<=distance and theta_human<=angleRange[1] and theta_human>=angleRange[0]:
             return True
         else:
