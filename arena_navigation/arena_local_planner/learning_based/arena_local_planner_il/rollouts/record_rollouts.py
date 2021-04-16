@@ -34,6 +34,11 @@ observations = []
 actions = []
 while(True):
     merged_obs, obs_dict, action = env.observation_collector.get_observations_and_action()
+
+    reward, reward_info = env.reward_calculator.get_reward(
+            obs_dict['laser_scan'], obs_dict['goal_in_robot_frame'])
+    env.observation_collector.register_reward(reward)
+
     observations.append(merged_obs)
     actions.append(action)
     #TODO improvement: get info from check_if_done; if the robot collided, don't save (obs, action) to the arrays
@@ -47,17 +52,12 @@ while(True):
 # save rollouts
 if args.outputformat == 'h5':
     date_str = datetime.now().strftime('%Y%m%d_%H-%M')
-    actions_dict, states_dict = OrderedDict(), OrderedDict()
-
-    for i in range(len(actions)):
-        actions_dict[str(i)] = actions[i]
-        states_dict[str(i)] = observations[i]
-    
+        
     file_action = h5py.File(f'./output/{date_str}_action.hdf5', "w")
     file_state = h5py.File(f'./output/{date_str}_state.hdf5', "w")
-
-    file_action.create_dataset(str(actions_dict[0]), data=np.array(actions_dict))  #?
-    file_state.create_dataset(str(states_dict[0]), data=np.array(states_dict[1]))  #?
+    
+    file_action.create_dataset("actions", data=np.array(actions))
+    file_state.create_dataset("states", data=np.array(observations))
 
     file_state.close()
     file_action.close()
