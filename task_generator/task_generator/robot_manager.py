@@ -143,7 +143,8 @@ class RobotManager:
         self.move_robot(start_pos)
 
     def set_start_pos_goal_pos(self, start_pos: Union[Pose2D, None]
-                               = None, goal_pos: Union[Pose2D, None] = None, min_dist=7, min_dist_human=4, obs_dict=None):
+                               = None, goal_pos: Union[Pose2D, None] = None, min_dist=7, 
+                               min_dist_human=4, obs_dict=None, forbiddenPoints=None):
         """set up start position and the goal postion. Path validation checking will be conducted. If it failed, an
         exception will be raised.
 
@@ -173,6 +174,13 @@ class RobotManager:
                 elif tys[i]==3: #elder
                     forbiddenZones.append((coordinate[0],coordinate[1],self.safe_dist_elder*1.05))
 
+        if forbiddenPoints is not None:
+            # print("calculate the forbidden zones")
+            # print(forbiddenPoints)
+            for coordinate in forbiddenPoints: # use the safe_dist of elder becuase it is the largest among all types of humans
+                # print(coordinate)
+                forbiddenZones.append((coordinate[0],coordinate[1],self.safe_dist_elder*1.05))
+
 
         if start_pos is None or goal_pos is None:
             # if any of them need to be random generated, we set a higher threshold,otherwise only try once
@@ -183,7 +191,6 @@ class RobotManager:
         i_try = 0
         start_pos_ = None
         goal_pos_ = None
-        #print("free space",self._free_space_indices)
         while i_try < max_try_times:
             if start_pos is None:
                 start_pos_ = Pose2D()
@@ -209,6 +216,7 @@ class RobotManager:
             try:
                 # publish the goal, if the gobal plath planner can't generate a path, a, exception will be raised.
                 self.publish_goal(goal_pos_.x, goal_pos_.y, goal_pos_.theta)
+                self.setGoalInfoToPedsim(goal_pos_)
                 # print("publish goal")
                 break
             except rospy.ServiceException:
