@@ -8,11 +8,10 @@ Panels:
         - /Grid1
         - /my_robot1/Namespaces1
         - /TF1/Frames1
+        - /human1
         - /human1/MarkerArray1
         - /human1/MarkerArray4
         - /human1/MarkerArray7
-        - /human1/MarkerArray15
-        - /human1/MarkerArray16
       Splitter Ratio: 0.6526610255241394
     Tree Height: 796
   - Class: rviz/Selection
@@ -342,7 +341,53 @@ Visualization Manager:
           Value: true
         map:
           Value: true
+        sim_1_base_footprint:
+          Value: true
+        sim_1_laser_mount:
+          Value: true
         sim_1_odom:
+          Value: true
+        sim_2_base_footprint:
+          Value: true
+        sim_2_laser_mount:
+          Value: true
+        sim_2_odom:
+          Value: true
+        sim_3_base_footprint:
+          Value: true
+        sim_3_laser_mount:
+          Value: true
+        sim_3_odom:
+          Value: true
+        sim_4_base_footprint:
+          Value: true
+        sim_4_laser_mount:
+          Value: true
+        sim_4_odom:
+          Value: true
+        sim_5_base_footprint:
+          Value: true
+        sim_5_laser_mount:
+          Value: true
+        sim_5_odom:
+          Value: true
+        sim_6_base_footprint:
+          Value: true
+        sim_6_laser_mount:
+          Value: true
+        sim_6_odom:
+          Value: true
+        sim_7_base_footprint:
+          Value: true
+        sim_7_laser_mount:
+          Value: true
+        sim_7_odom:
+          Value: true
+        sim_8_base_footprint:
+          Value: true
+        sim_8_laser_mount:
+          Value: true
+        sim_8_odom:
           Value: true
       Marker Scale: 1
       Name: TF
@@ -356,7 +401,45 @@ Visualization Manager:
               {}
           eval_sim_odom:
             {}
+          sim_1_base_footprint:
+            sim_1_laser_mount:
+              {}
           sim_1_odom:
+            {}
+          sim_2_base_footprint:
+            sim_2_laser_mount:
+              {}
+          sim_2_odom:
+            {}
+          sim_3_base_footprint:
+            sim_3_laser_mount:
+              {}
+          sim_3_odom:
+            {}
+          sim_4_base_footprint:
+            sim_4_laser_mount:
+              {}
+          sim_4_odom:
+            {}
+          sim_5_base_footprint:
+            sim_5_laser_mount:
+              {}
+          sim_5_odom:
+            {}
+          sim_6_base_footprint:
+            sim_6_laser_mount:
+              {}
+          sim_6_odom:
+            {}
+          sim_7_base_footprint:
+            sim_7_laser_mount:
+              {}
+          sim_7_odom:
+            {}
+          sim_8_base_footprint:
+            sim_8_laser_mount:
+              {}
+          sim_8_odom:
             {}
       Update Interval: 0
       Value: true
@@ -611,10 +694,10 @@ Visualization Manager:
           Value: true
         - Class: rviz/MarkerArray
           Enabled: true
-          Marker Topic: /sim_1/flatland_server/debug/model/person_3
+          Marker Topic: /eval_sim/flatland_server/debug/model/person_3
           Name: MarkerArray
           Namespaces:
-            {}
+            "": true
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -669,7 +752,7 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Angle: -7.85500431060791
+      Angle: -6.269998073577881
       Class: rviz/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
@@ -679,11 +762,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 19.42056655883789
+      Scale: 38.787593841552734
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
-      X: 8.448629379272461
-      Y: -0.517240047454834
+      X: 10.955282211303711
+      Y: 6.4767913818359375
     Saved: ~
 Window Geometry:
   Displays:

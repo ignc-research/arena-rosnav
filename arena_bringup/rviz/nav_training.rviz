@@ -329,6 +329,8 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: false
+        eval_sim_odom:
+          Value: true
         map:
           Value: true
         sim_1_base_footprint:
@@ -344,11 +346,12 @@ Visualization Manager:
       Show Names: true
       Tree:
         map:
-          sim_1_base_footprint:
-            sim_1_laser_mount:
-              {}
-          sim_1_odom:
+          eval_sim_odom:
             {}
+          sim_1_odom:
+            sim_1_base_footprint:
+              sim_1_laser_mount:
+                {}
       Update Interval: 0
       Value: true
     - Class: rviz/MarkerArray
@@ -438,6 +441,14 @@ Visualization Manager:
         {}
       Queue Size: 100
       Value: false
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /sim_1/flatland_server/debug/layer/static
+      Name: MarkerArray
+      Namespaces:
+        "": true
+      Queue Size: 100
+      Value: true
     - Class: rviz/Marker
       Enabled: false
       Marker Topic: /sim_1/planning_vis/global_path
@@ -517,7 +528,7 @@ Visualization Manager:
           Marker Topic: /sim_1/flatland_server/debug/model/person_13
           Name: MarkerArray
           Namespaces:
-            {}
+            "": true
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -525,7 +536,7 @@ Visualization Manager:
           Marker Topic: /sim_1/flatland_server/debug/model/person_14
           Name: MarkerArray
           Namespaces:
-            {}
+            "": true
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -533,7 +544,7 @@ Visualization Manager:
           Marker Topic: /sim_1/flatland_server/debug/model/person_15
           Name: MarkerArray
           Namespaces:
-            {}
+            "": true
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -626,14 +637,50 @@ Visualization Manager:
           Value: true
       Enabled: true
       Name: human
-    - Class: rviz/MarkerArray
+    - Class: rviz/Group
+      Displays:
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /sim_1/flatland_server/debug/model/longwall_0
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /sim_1/flatland_server/debug/model/shortwall_0
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /sim_1/flatland_server/debug/model/shortwall_1
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /sim_1/flatland_server/debug/model/shortwall_3
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /sim_1/flatland_server/debug/model/shortwall_2
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
       Enabled: true
-      Marker Topic: /sim_1/flatland_server/debug/model/obstacle_polygon_static_00
-      Name: MarkerArray
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: true
+      Name: Walls
   Enabled: true
   Global Options:
     Background Color: 233; 185; 110
@@ -660,7 +707,7 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Angle: -7.85500431060791
+      Angle: -6.280001163482666
       Class: rviz/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
@@ -670,11 +717,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 49.18521499633789
+      Scale: 32.74252700805664
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
-      X: 2.833331823348999
-      Y: -3.7628819942474365
+      X: 11.957932472229004
+      Y: 7.151568412780762
     Saved: ~
 Window Geometry:
   Displays:
