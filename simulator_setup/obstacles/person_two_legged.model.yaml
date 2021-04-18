@@ -73,7 +73,7 @@ plugins:
     step_time: 0.6 #(in sec)
     var_step_time: 0.1
     leg_radius: 0.1 
-    var_leg_radius: 0.02
+    var_leg_radius: 0.01
 
   # - type: ModelTfPublisher
   #   name: tf_publisher_

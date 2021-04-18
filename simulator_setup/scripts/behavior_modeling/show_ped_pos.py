@@ -47,7 +47,7 @@ class Listener:
             combined_forces_magnitude = np.linalg.norm(combined_forces)
             talking_to_id = agent_state.talking_to_id
             listening_to_id = agent_state.listening_to_id
-            vel = np.array([agent_state.velocity.x, agent_state.velocity.y])
+            vel = np.array([agent_state.twist.linear.x, agent_state.twist.linear.y])
             vel_magnitude = np.linalg.norm(vel)
             acc = np.array([agent_state.acceleration.x, agent_state.acceleration.y])
             acc_magnitude = np.linalg.norm(acc)

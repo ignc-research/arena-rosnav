@@ -293,24 +293,56 @@ class ScenerioTask(ABSTask):
         spawn_peds_srv = rospy.ServiceProxy(spawn_peds_service_name, SpawnPeds)
         peds = []
 
-        ped = Ped()
-        ped.pos = Point(*obstacle_data["start_pos"])
-        ped.type = self.pedsim_types.index(obstacle_data["type"])
-        ped.number_of_peds = obstacle_data["amount"]
-        ped.vmax = obstacle_data["linear_velocity"] + np.random.uniform(-0.2, 0.2)
-        ped.chatting_probability = obstacle_data["chatting_probability"]
+        # get default ped
+        ped = self.get_default_ped()
+        # overwrite default ped with all values we find in the json file
+        if "start_pos" in obstacle_data:
+            ped.pos = Point(*obstacle_data["start_pos"])
+        if "type" in obstacle_data:
+            ped.type = self.pedsim_types.index(obstacle_data["type"])
+            ped.yaml_file = self.pedsim_types_model_paths[obstacle_data["type"]]
+        if "amount" in obstacle_data:
+            ped.number_of_peds = obstacle_data["amount"]
+        if "linear_velocity" in obstacle_data:
+            if "linear_velocity_std_deviation" in obstacle_data:
+                ped.vmax = obstacle_data["linear_velocity"] + np.random.uniform(-obstacle_data["linear_velocity_std_deviation"], obstacle_data["linear_velocity_std_deviation"])
+            else:
+                ped.vmax = obstacle_data["linear_velocity"]
+        if "chatting_probability" in obstacle_data:
+            ped.chatting_probability = obstacle_data["chatting_probability"]
+        if "tell_story_probability" in obstacle_data:
+            ped.tell_story_probability = obstacle_data["tell_story_probability"]
+        if "group_talking_probability" in obstacle_data:
+            ped.group_talking_probability = obstacle_data["group_talking_probability"]
+        if "talking_and_walking_probability" in obstacle_data:
+            ped.talking_and_walking_probability = obstacle_data["talking_and_walking_probability"]
+        
+        if "talking_base_time" in obstacle_data:
+            ped.talking_base_time = obstacle_data["talking_base_time"]
+        if "tell_story_base_time" in obstacle_data:
+            ped.tell_story_base_time = obstacle_data["tell_story_base_time"]
+        if "group_talking_base_time" in obstacle_data:
+            ped.group_talking_base_time = obstacle_data["group_talking_base_time"]
+        if "talking_and_walking_base_time" in obstacle_data:
+            ped.talking_and_walking_base_time = obstacle_data["talking_and_walking_base_time"]
 
-        mode = obstacle_data["mode"]
-        if mode in self.waypoint_modes:
-            ped.waypoint_mode = self.waypoint_modes.index(obstacle_data["mode"])
-        else:
-            ped.waypoint_mode = 0
+        if "max_talking_distance" in obstacle_data:
+            ped.max_talking_distance = obstacle_data["max_talking_distance"]
 
-        ped.force_factor_desired = obstacle_data["desire_force_factor"]
-        ped.force_factor_obstacle = obstacle_data["obstacle_force_factor"]
-        ped.force_factor_social = obstacle_data["social_force_factor"] if "social_force_factor" in obstacle_data else 2.0
-        ped.waypoints = [Point(waypoint[0], waypoint[1], 0.3) for waypoint in obstacle_data["waypoints"]]
-        ped.yaml_file = self.pedsim_types_model_paths[obstacle_data["type"]]
+        if "mode" in obstacle_data:
+            mode = obstacle_data["mode"]
+            if mode in self.waypoint_modes:
+                ped.waypoint_mode = self.waypoint_modes.index(obstacle_data["mode"])
+
+        if "force_factor_desired" in obstacle_data:
+            ped.force_factor_desired = obstacle_data["desire_force_factor"]
+        if "force_factor_obstacle" in obstacle_data:
+            ped.force_factor_obstacle = obstacle_data["obstacle_force_factor"]
+        if "force_factor_social" in obstacle_data:
+            ped.force_factor_social = obstacle_data["social_force_factor"] if "social_force_factor" in obstacle_data else 2.0
+        if "waypoints" in obstacle_data:
+            ped.waypoints = [Point(waypoint[0], waypoint[1], 0.3) for waypoint in obstacle_data["waypoints"]]
+
         peds.append(ped)
 
         # call service
@@ -344,6 +376,25 @@ class ScenerioTask(ABSTask):
         self.obstacles_manager.register_dynamic_obstacle_circle_tween2(
             obstacle_name, obstacle_radius, linear_velocity, start_pos, waypoints, is_waypoint_relative, mode, trigger_zones)
 
+
+    def get_default_ped(self):
+        ped = Ped()
+        ped.pos = Point(0, 0, 0)
+        ped.type = 0
+        ped.number_of_peds = 2
+        ped.vmax = 1.0 + np.random.uniform(-0.2, 0.2)
+        ped.chatting_probability = 0.001
+        ped.tell_story_probability = 0.001
+        ped.group_talking_probability = 0.001
+        ped.talking_and_walking_probability = 0.001
+        ped.max_talking_distance = 1.5
+        ped.waypoint_mode = 1
+        ped.force_factor_desired = 5.0
+        ped.force_factor_obstacle = 1.0
+        ped.force_factor_social = 2.0
+        ped.waypoints = [Point(0, 0, 0.3), Point(2, 2, 0.3)]
+        ped.yaml_file = self.pedsim_types_model_paths["adult"]
+        return ped
 
     @staticmethod
     def generate_scenerios_json_example(dst_json_path: str):

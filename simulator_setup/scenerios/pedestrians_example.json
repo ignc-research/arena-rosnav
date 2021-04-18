@@ -8,9 +8,24 @@
                     "type": "adult",
                     "obstacle_force_factor": 1.0,
                     "desire_force_factor": 5.0,
-                    "amount": 8,
-                    "chatting_probability": 0.0001,
+                    "amount": 2,
+
+                    "chatting_probability": 0.001,
+                    "talking_base_time": 12.0,
+
+                    "tell_story_probability": 0.001,
+                    "tell_story_base_time": 12.0,
+
+                    "group_talking_probability": 0.001,
+                    "group_talking_base_time": 12.0,
+
+                    "talking_and_walking_probability": 0.001,
+                    "talking_and_walking_base_time": 12.0,
+
+                    "max_talking_distance": 1.5,
+
                     "linear_velocity": 1.0,
+                    "linear_velocity_std_deviation": 0.2,
                     "start_pos": [
                         2,
                         -1.5,
