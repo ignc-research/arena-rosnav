@@ -28,7 +28,7 @@ class TaskGenerator:
         # if auto_reset is set to true, the task generator will automatically reset the task
         # this can be activated only when the mode set to 'ScenarioTask'
         auto_reset = rospy.get_param("~auto_reset")
-   
+
         # if the distance between the robot and goal_pos is smaller than this value, task will be reset
         self.timeout_= rospy.get_param("~timeout")
         self.timeout_= self.timeout_*60             # sec
@@ -37,7 +37,7 @@ class TaskGenerator:
         robot_odom_topic_name = rospy.get_param(
             "robot_odom_topic_name", "odom")
         
-        auto_reset = auto_reset and mode == "ScenarioTask"
+        auto_reset = auto_reset and mode == "scenario"
         self.curr_goal_pos_ = None
         
         

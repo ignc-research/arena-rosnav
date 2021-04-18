@@ -239,7 +239,7 @@ class ScenerioTask(ABSTask):
         
         assert json_path.is_file() and json_path.suffix == ".json"
         json_data = json.load(json_path.open())
-        rospy.loginfo("I will publish to the topi--dad---------------***********---c %s", json_data.keys())
+        
         self._scenerios_data = json_data["scenarios"]
         # current index of the scenerio
         self._idx_curr_scene = -1
