@@ -118,7 +118,7 @@ class ObservationCollector():
             i=0
             while(self._flag_all_received==False):
                 self.call_service_takeSimStep()
-                print(f"waiting for synched observations: {i}")
+                #print(f"waiting for synched observations: {i}")  # for debugging only
                 i+=1
         # rospy.logdebug(f"Current observation takes {i} steps for Synchronization")
         #print(f"Current observation takes {i} steps for Synchronization")
