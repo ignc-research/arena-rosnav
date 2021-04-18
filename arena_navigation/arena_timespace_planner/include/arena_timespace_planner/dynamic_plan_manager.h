@@ -66,11 +66,16 @@ public:
     GlobalData global_data_;
     MidData mid_data_;
     TargetTrajData local_traj_data_;
+
+    
     
     // dynamic obstacle info
+    std::string str_dynamic_obs_;
     std::vector<DynamicObstacleInfo::Ptr> obs_info_provider_;
 
     void initPlanModules(ros::NodeHandle &nh);
+
+    void updateDynamicObstacleInfo();
 
     bool kinoAstarTraj(Eigen::Vector2d & start_pos, Eigen::Vector2d & start_vel,Eigen::Vector2d &end_pos);
 

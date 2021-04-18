@@ -87,6 +87,9 @@ void DynamicReplanFSM::goalCallback(const geometry_msgs::PoseStampedPtr& msg){
     have_goal_=true;
     std::cout << "[Plan FSM]Goal set!" << std::endl;
 
+    // update dynamic obstacle state tracker
+    planner_manager_->updateDynamicObstacleInfo();
+    
     // change state: to GEN_NEW_GLOBAL
     if (exec_state_ == WAIT_GOAL){
         changeFSMExecState(GEN_NEW_GLOBAL, "TRIG");

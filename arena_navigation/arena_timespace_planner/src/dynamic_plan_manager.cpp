@@ -38,9 +38,8 @@ void DynamicPlanManager::initPlanModules(ros::NodeHandle &nh)
   // MovingObstacleInfo
   ros::master::V_TopicInfo topic_infos;
   ros::master::getTopics(topic_infos);
-  std::string str_dynamic_obs;
-  node_.param<std::string>("plan_manager/dynamic_obstacle_name",   str_dynamic_obs,    "obs");
-  std::cout << "parameter name="<< str_dynamic_obs<<std::endl;
+  node_.param<std::string>("plan_manager/dynamic_obstacle_name",   str_dynamic_obs_,    "obs");
+  std::cout << "parameter name="<< str_dynamic_obs_<<std::endl;
 
 	obs_info_provider_.reserve(100);
   for (ros::master::V_TopicInfo::iterator it = topic_infos.begin() ; it != topic_infos.end(); it++)
@@ -48,7 +47,7 @@ void DynamicPlanManager::initPlanModules(ros::NodeHandle &nh)
         const ros::master::TopicInfo& info = *it;
         //std::cout << "topic_name" << it - topic_infos.begin() << ": " << info.name << std::endl;
 
-        if (info.name.find(str_dynamic_obs) != std::string::npos) 
+        if (info.name.find(str_dynamic_obs_) != std::string::npos) 
         {
             std::cout << "topic_" << it - topic_infos.begin() << ": " << info.name << std::endl;
 			      obs_info_provider_.emplace_back(std::make_shared<DynamicObstacleInfo>(node_,info.name,grid_map_));
@@ -66,6 +65,33 @@ void DynamicPlanManager::initPlanModules(ros::NodeHandle &nh)
   bspline_optimizer_->a_star_.reset(new AStar);
   bspline_optimizer_->a_star_->initGridMap(grid_map_, Eigen::Vector2i(200, 200));
 
+}
+
+void DynamicPlanManager::updateDynamicObstacleInfo(){
+  //reset
+  obs_info_provider_.clear();
+  
+  // MovingObstacleInfo
+  ros::master::V_TopicInfo topic_infos;
+  ros::master::getTopics(topic_infos);
+  
+	obs_info_provider_.reserve(100);
+  for (ros::master::V_TopicInfo::iterator it = topic_infos.begin() ; it != topic_infos.end(); it++)
+  {
+        const ros::master::TopicInfo& info = *it;
+        //std::cout << "topic_name" << it - topic_infos.begin() << ": " << info.name << std::endl;
+
+        if (info.name.find(str_dynamic_obs_) != std::string::npos) 
+        {
+            std::cout << "topic_" << it - topic_infos.begin() << ": " << info.name << std::endl;
+			      obs_info_provider_.emplace_back(std::make_shared<DynamicObstacleInfo>(node_,info.name,grid_map_));
+        }
+
+  }
+
+  // reset mid_planner_timed_astar_
+  mid_planner_timed_astar_.reset(new TimedAstarSearch);
+  mid_planner_timed_astar_->init(node_,grid_map_,obs_info_provider_);
 }
 
 bool DynamicPlanManager::kinoAstarTraj(Eigen::Vector2d & start_pos, Eigen::Vector2d & start_vel,Eigen::Vector2d &end_pos){
