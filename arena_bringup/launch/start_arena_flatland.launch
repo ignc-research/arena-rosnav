@@ -24,9 +24,10 @@
   <param name="use_rviz"       value="$(arg use_rviz)"/>
 
   <!-- the folder name under the path simulator_setup/maps  -->
-  <arg name="map_folder_name" default="map_empty" />
-  <arg name="map_path" default="$(find simulator_setup)/maps/$(arg map_folder_name)/map.yaml" />
-  <param name="world_path" value="$(find simulator_setup)/maps/$(arg map_folder_name)/map.world.yaml" />
+  <arg name="map_file"        default="map_empty"/>
+  <!-- <arg name="map_folder_name" default="map_empty" /> -->
+  <arg name="map_path" default="$(find simulator_setup)/maps/$(arg map_file)/map.yaml" />
+  <param name="world_path" value="$(find simulator_setup)/maps/$(arg map_file)/map.world.yaml" />
 
   <!-- the velocity of randomly genelized obstacles  -->
   <arg name="obs_vel" default="0.3" />
