@@ -53,13 +53,13 @@ target_link_libraries(arena_path_search
 )
 
 
-add_executable(triangle 
-              src/delaunator_triangle.cpp
-)
+# add_executable(triangle 
+#               src/delaunator_triangle.cpp
+# )
 
-target_link_libraries(triangle
-  ${catkin_LIBRARIES}
-  ${PCL_LIBRARIES}
-)
+# target_link_libraries(triangle
+#   ${catkin_LIBRARIES}
+#   ${PCL_LIBRARIES}
+# )
 
 

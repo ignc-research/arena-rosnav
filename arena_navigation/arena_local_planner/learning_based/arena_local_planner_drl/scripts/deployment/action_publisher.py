@@ -13,16 +13,16 @@ class ActionPublisher():
 
         rospy.init_node('action_publisher', anonymous = True)
 
-        self._step_size = rospy.get_param("/step_size")
-        self._update_rate = rospy.get_param("/update_rate")
+        self._step_size = rospy.get_param("step_size")
+        self._update_rate = rospy.get_param("update_rate")
         # real time second in sim time
         self._real_second_in_sim = self._step_size * self._update_rate
-        self._action_publish_rate = rospy.get_param("/action_frequency")
+        self._action_publish_rate = rospy.get_param("/robot_action_rate")
 
         # apply rate in sim time
         rate = (1/self._action_publish_rate)/self._real_second_in_sim
 
-        ns_prefix = "/"
+        ns_prefix = "/eval_sim/"
         self._pub_cmd_vel = rospy.Publisher(
             f"{ns_prefix}cmd_vel", Twist, queue_size=1)
         self._pub_cycle_trigger = rospy.Publisher(
@@ -43,7 +43,7 @@ class ActionPublisher():
 
         while not rospy.is_shutdown():
             if self._sub.get_num_connections() < 1:
-                print(f"ActionPublisher: No publisher to '{ns_prefix}cmd_vel_pub' yet.. ")
+                print(f"ActionPublisher: No publisher to {ns_prefix}cmd_vel_pub yet.. ")
                 time.sleep(1)
                 continue
 

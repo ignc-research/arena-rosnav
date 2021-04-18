@@ -27,7 +27,7 @@ import os
 from sklearn.cluster import AgglomerativeClustering
 # gplan
 import gplan_analysis as gplan
-matplotlib.rcParams.update({'font.size': 18})
+matplotlib.rcParams.update({'font.size': 15})
 # 
 class newBag():
     def __init__(self, planner, file_name, bag_name):
@@ -814,8 +814,11 @@ def eval_cfg(cfg_file, filetype):
                         
                         planner_wpg = planner.split("_")[0] + "wpg" + wpg 
                         newBag(planner_wpg, curr_figure, curr_bag + "/" + file)
-                 
-            ax.legend(handles=legend_elements, loc=0)
+            
+            #box = ax.get_position()
+            #ax.set_position([box.x0, box.y0, box.width * 0.7, box.height])
+            #,bbox_to_anchor=(0.55, 0.3)
+            ax.legend(handles=legend_elements, loc=1)
             plt.subplots_adjust(top = 1, bottom = 0, right = 1, left = 0, hspace = 0, wspace = 0)
             plt.savefig(plot_file, bbox_inches = 'tight', pad_inches = 0)
             # reset plot cfg to default

@@ -61,7 +61,7 @@ timed_astar/allocate_num: 10000
 timed_astar/goal_tolerance: *goal_tolerance
 
 timed_astar/robot_radius: *robot_radius
-timed_astar/obstacle_radius: 0.3 #*obstacle_radius
+timed_astar/obstacle_radius: *obstacle_radius
 
 timed_astar/max_vel: *max_vel
 timed_astar/avg_vel: *avg_vel
@@ -98,7 +98,7 @@ optimization/order_: 3
 # Global planner: kinodynamic Astar (kino_astar/)
 kino_astar/allocate_num: 100000    # allocated memory num for search
 kino_astar/horizon: 100.0          # planning horizon, here as global planner we make it big
-kino_astar/max_vel: 3.0
+kino_astar/max_vel: 3.0            # maxum velocity of motion primitive, doesn't matter the value is big, as long as it explore effectively
 kino_astar/max_acc: 4.0
 kino_astar/w_time: 10.0            # for calculating g-cost
 kino_astar/max_tau: 0.6            # delta_time
