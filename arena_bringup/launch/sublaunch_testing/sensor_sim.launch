@@ -1,4 +1,5 @@
 <launch>
+  
     <!-- obst vel -->
 	<arg name="v_lin" default="0.3"/>
     <arg name="v_ang" default="0.1"/>
@@ -7,6 +8,7 @@
     <!-- Launch neural net ros wrapper -->
     <node pkg="sensor_simulator" type="sensorsim_node_tmgr.py" name="sensorsim_node" output="screen" ns="/sensorsim">
 
+        
         <!-- Subscriptions -->
         <!-- <remap from="~pose" to="/odom"/> -->
 

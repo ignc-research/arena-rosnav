@@ -4,7 +4,7 @@
         <!-- plan fsm -->
         <rosparam file="$(find arena_bringup)/launch/plan_fsm_param.yaml" command="load" /> <!-- ns="fsm"-->
         <!-- remapping clock for namespace -->
-        <remap from="/clock" to="/$(arg ns)/clock"/>
+        <remap from="/clock" to="$/(arg ns)/clock"/>
     </node>
 </launch>   
 

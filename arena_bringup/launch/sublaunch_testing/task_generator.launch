@@ -4,7 +4,7 @@
     <arg name="scenarios_json_path" default="$(find simulator_setup)/scenarios/empty_map.json"/>
 
     <arg name="auto_reset" default="true" />
-    <arg name="task_mode" default="ScenarioTask"/>
+    <arg name="task_mode" default="scenario"/>
     <arg name="delta" default="1.0"/>
     <arg name="timeout" default="2.0"/>     <!--  ************** minute  ***************  -->
     <!--  ************** task generator  ***************  -->

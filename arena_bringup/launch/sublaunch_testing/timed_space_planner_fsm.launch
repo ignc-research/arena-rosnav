@@ -1,0 +1,9 @@
+<launch>
+    <node pkg="arena_timespace_planner" name="time_space" type="time_space_planner_node" output="screen">
+        <!-- plan fsm -->
+        <rosparam file="$(find arena_bringup)/launch/plan_fsm_param.yaml" command="load" /> <!-- ns="fsm"-->
+    </node>
+</launch>   
+
+
+

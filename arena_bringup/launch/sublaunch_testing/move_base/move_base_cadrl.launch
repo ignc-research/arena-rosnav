@@ -1,5 +1,4 @@
 <launch>
-	
     <!-- move base -->
     <arg name="model" default="burger"/>
     <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
