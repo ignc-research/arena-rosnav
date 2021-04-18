@@ -27,12 +27,18 @@ DynamicObstacleInfo::DynamicObstacleInfo(ros::NodeHandle &nh, std::string topic_
     pos_=Eigen::Vector2d::Zero();
     vel_=Eigen::Vector2d::Zero();
     is_init_=true;
+    last_ros_time_=ros::Time::now();
+
 }
     
 void DynamicObstacleInfo::updateOdomCallback(visualization_msgs::MarkerArray::ConstPtr msg){
         
     // for nav_msgs::Odometry::ConstPtr msg
     //curr_pos(msg->pose.pose.position.x,msg->pose.pose.position.y);
+    if((ros::Time::now()-last_ros_time_).toSec()<0.01){
+        return;
+    }
+    last_ros_time_= ros::Time::now();
 
     Eigen::Vector2d curr_pos(msg->markers[0].pose.position.x,msg->markers[0].pose.position.y); 
         

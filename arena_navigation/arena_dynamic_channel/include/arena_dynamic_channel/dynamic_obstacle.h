@@ -25,6 +25,8 @@ struct DynamicObstacleInfo{
 private:
     GridMap::Ptr grid_map_;
     double resolution_;
+    int counter_;
+    ros::Time last_ros_time_;
 public:
     ros::NodeHandle node_;
     std::string topic_name_;
