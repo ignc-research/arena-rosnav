@@ -11,7 +11,7 @@ void DynamicReplanFSM::init(ros::NodeHandle &nh)
 
     /*  fsm param  */
     node_=nh;
-    node_.param("fsm/goal_tolerance",    goal_tolerance_, 0.5);
+    node_.param("fsm/goal_tolerance",    goal_tolerance_, 0.5); //sim1/plan_manager/fsm/goal_tolerance
     node_.param("fsm/subgoal_tolerance", subgoal_tolerance_, 2.0);
     node_.param("fsm/replan_time_thresh", t_replan_thresh_, 0.5); 
 
@@ -36,12 +36,14 @@ void DynamicReplanFSM::init(ros::NodeHandle &nh)
     //dynamic_occ_map_timer_= node_.createTimer(ros::Duration(1.0), &DynamicReplanFSM::updateDynamicMapCallback,this);
 
     /* ros communication with public node */
-    ros::NodeHandle public_nh;
+    ros::NodeHandle public_nh;  // sim1/goal
   	goal_sub_ =public_nh.subscribe("goal", 1, &DynamicReplanFSM::goalCallback,this);
   	odom_sub_ = public_nh.subscribe("odom", 1, &DynamicReplanFSM::odomCallback, this);
 
     cmd_vel_pub_ =public_nh.advertise<geometry_msgs::Twist>("cmd_vel",1000);
     subgoal_DRL_pub_  = public_nh.advertise<geometry_msgs::PoseStamped>("subgoal",10);
+    global_plan_pub_  = public_nh.advertise<nav_msgs::Path>("globalPlan",10);           ///ns/globalPlan
+
 
     /* visualization */
     vis_goal_pub_ =	        public_nh.advertise<visualization_msgs::Marker>("vis_goal", 20);
@@ -158,10 +160,13 @@ void DynamicReplanFSM::execFSMCallback(const ros::TimerEvent& e){
                     // reset simple samples and curr index
                     sample_wps_ = planner_manager_->global_data_.getSamples();
                     curr_wp_index_=0;
-
+                    // publish global path
+                    visualizePath(planner_manager_->global_data_.getGlobalPath(),global_plan_pub_);
+                    
                     // visualize global path & landmark
                     cout<<"[Plan Manager]GLOBAL_PLAN Success"<<endl;
                     visualizePath(planner_manager_->global_data_.getGlobalPath(),vis_global_path_pub_);
+                    
                     visualizePoints(planner_manager_->global_data_.getLandmarks(),0.2,Eigen::Vector4d(0.5, 0.5, 0.5, 0.6),vis_landmark_pub_);
                     changeFSMExecState(REPLAN_MID, "FSM");
                     
@@ -569,6 +574,7 @@ bool DynamicReplanFSM::getSubgoalGlobal(Eigen::Vector2d &subgoal){
     return true;
 }
 
+
 /* --------------------helper functions---------------------------- */
 void DynamicReplanFSM::changeFSMExecState(FSM_EXEC_STATE new_state, std::string pos_call) {
   string state_str[5] = {"INIT", "WAIT_GOAL", "GEN_NEW_GLOBAL", "REPLAN_MID", "EXEC_LOCAL" };
@@ -700,15 +706,8 @@ int main(int argc, char** argv)
     //ros::NodeHandle node_handle("~"); every topic will be with namespace
     //ros::NodeHandle nh("");
     ros::NodeHandle nh("~");
-
     DynamicReplanFSM dynamic_replan;
-
     dynamic_replan.init(nh);
-
-    // ros::Duration(1.0).sleep();
-    
-    DynamicReplanFSM plan_manager;
-    //plan_manager.init(nh);
 
     std::string ns = ros::this_node::getNamespace();
     ROS_INFO_STREAM(":\tPlan manager successfully loaded for namespace\t"<<ns);

@@ -74,6 +74,7 @@ private:
     // publisher
     ros::Publisher cmd_vel_pub_;
     ros::Publisher subgoal_DRL_pub_;
+    ros::Publisher global_plan_pub_;
     
     // vis publisher
     ros::Publisher vis_goal_pub_;
