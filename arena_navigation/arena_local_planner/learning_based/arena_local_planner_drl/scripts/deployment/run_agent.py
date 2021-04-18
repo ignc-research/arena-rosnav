@@ -31,7 +31,7 @@ def get_paths(args: dict, AGENT: str):
         'vecnorm': os.path.join(dir, 'agents', AGENT, 'vec_normalize.pkl'),
         'robot_setting' : os.path.join(rospkg.RosPack().get_path('simulator_setup'), 'robot', 'myrobot.model.yaml'),
         'robot_as' : os.path.join(dir, 'configs', 'default_settings.yaml'),
-        'scenario' : os.path.join(rospkg.RosPack().get_path('simulator_setup'), 'scenerios', args.scenario+'.json'),
+        'scenario' : os.path.join(rospkg.RosPack().get_path('simulator_setup'), 'scenarios', args.scenario+'.json'),
         'curriculum': os.path.join(dir, 'configs', 'training_curriculum_map1small.yaml'),
         'log': os.path.join(dir, 'evaluation_logs', AGENT)
     }
@@ -54,7 +54,7 @@ def make_env(PATHS: dict,
     def _init():
         env = FlatlandEnv(
             'eval_sim', PATHS['robot_setting'], PATHS['robot_as'], PARAMS['reward_fnc'], PARAMS['discrete_action_space'], 
-            goal_radius=0.4, max_steps_per_episode=max_steps_per_episode, train_mode=False, task_mode='scenario', PATHS=PATHS, curr_stage=4,
+            goal_radius=0.4, max_steps_per_episode=max_steps_per_episode, train_mode=False, task_mode='random', PATHS=PATHS, curr_stage=4,
             extended_eval=True)
         if log:
             # eval env
