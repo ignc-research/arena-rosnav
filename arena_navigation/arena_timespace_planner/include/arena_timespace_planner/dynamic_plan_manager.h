@@ -72,6 +72,9 @@ public:
 
     void initPlanModules(ros::NodeHandle &nh);
 
+    bool kinoAstarTraj(Eigen::Vector2d & start_pos, Eigen::Vector2d & start_vel,Eigen::Vector2d &end_pos);
+
+
     bool planGlobalTraj( Eigen::Vector2d &start_pos,  Eigen::Vector2d &end_pos);
     
     bool optimizeGlobalTraj(double ts,std::vector<Eigen::Vector2d> point_set, std::vector<Eigen::Vector2d> start_end_derivatives, UniformBspline & bspline_traj);

@@ -205,12 +205,13 @@ void DynamicReplanFSM::execFSMCallback(const ros::TimerEvent& e){
             //bool success =planner_manager_->planLocalTraj(curr_pos,curr_vel,curr_dir,mid_target_,target_vel);
 
             if(success){
-                mid_replan_count_=0;
+             
                 target_traj_data_ = planner_manager_->local_traj_data_;
                 visualizePath(target_traj_data_.getLocalPath(),vis_timed_astar_path_pub_);
 
                 cout<<"[Plan FSM]MID_REPLAN Success"<<endl;
                 changeFSMExecState(EXEC_LOCAL, "FSM");
+                mid_replan_count_=0;
             }else{
                 mid_replan_count_++;
                 // for debug
@@ -220,7 +221,7 @@ void DynamicReplanFSM::execFSMCallback(const ros::TimerEvent& e){
                 //target_traj_data_ = TargetTrajData();
                 ROS_ERROR("[Plan FSM]Failed to generate the mid trajectory!!!");
 
-                if(mid_replan_count_>10){
+                if(mid_replan_count_>2000){
                     changeFSMExecState(GEN_NEW_GLOBAL, "FSM");
                 }else{
                     changeFSMExecState(REPLAN_MID, "TRY one more");
@@ -343,7 +344,13 @@ void DynamicReplanFSM::trackTrajCallback(const ros::TimerEvent &e){
         v=0.0;
         w=0.0;
     }else{
-        double t_cur = (time_now - target_traj_data_.start_time_).toSec();
+        double t_cur;
+        if(mid_replan_count_>5){
+             t_cur = (time_now - target_traj_data_.start_time_).toSec();
+        }else{
+             t_cur = (time_now - target_traj_data_.start_time_).toSec();
+        }
+        
         v=0.0;
         w=0.0;
         target_traj_data_.getControlInput(t_cur,v,w);
@@ -351,7 +358,31 @@ void DynamicReplanFSM::trackTrajCallback(const ros::TimerEvent &e){
         //ROS_INFO_STREAM("vel: "<<v);
         //ROS_INFO_STREAM("rot vel: "<<w);
     }
+  
+    //bool occ = map->getFusedDynamicInflateOccupancy(odom_pos_);
+    // std::cout<<"occ----------------------"<<std::endl;
+    // bool occ= planner_manager_->grid_map_->getFusedInflateOccupancy(odom_pos_);
+    // std::cout<<"occ----------------------"<<std::endl;
+    // std::cout<<"occ"<<occ<<std::endl;
+    // if(occ){
+    //     in_collision_cnt++;
+    //     if(in_collision_cnt>100){
+    //         v=-1.5;
+    //     }
+    // }else{
+    //     in_collision_cnt=0;
+    // }
+    // if(mid_replan_count_>100){
+    //     v=-0.5;
+    // }
     
+    if(mid_replan_count_>5){
+        w=15*PI/180;
+    }
+
+        
+    
+
     twist_cmd.angular.x=0.0;
     twist_cmd.angular.y=0.0;
     twist_cmd.angular.z=w;
@@ -386,6 +417,10 @@ void DynamicReplanFSM::updateSubgoalDRLCallback(const ros::TimerEvent &e){
         }
         case 2:{
             subgoal_success=getSubgoalSimpleSample(subgoal);
+            break;
+        }
+        case 3:{
+            subgoal_success=getSubgoalGlobal(subgoal);
             break;
         }
         /* --------------Others ---------------*/
@@ -456,11 +491,29 @@ bool DynamicReplanFSM::getSubgoalTimedAstar(Eigen::Vector2d &subgoal){
         subgoal = end_pos_;
         return true;
     }
+    /* // if traj too short
+    Eigen::Vector2d pt_traj_end = target_traj_data_.pos_traj_.evaluateDeBoorT(1000);
+    if((odom_pos_- pt_traj_end).norm()< planning_horizen_){
+        subgoal = pt_traj_end;
+        return true;
+    }
+    double look_at_time=2;
+    Eigen::Vector2d pt_at_time=target_traj_data_.pos_traj_.evaluateDeBoorT(look_at_time);
+    double length = (odom_pos_- pt_at_time).norm();
 
+    if(length>planning_horizen_){
+        subgoal = pt_at_time;
+        return true;
+    }else{
+        //subgoal = odom_pos_ + (planning_horizen_/length)*(pt_at_time-odom_pos_);
+        subgoal = pt_at_time;
+        return true;
+    }
+ */
     // select the nearst waypoint on global path
     int subgoal_id=0;
     std::vector<Eigen::Vector2d> global_path=target_traj_data_.getLocalPath();
-
+    
     for(size_t i=0;i<global_path.size();i++){
         Eigen::Vector2d wp_pt=global_path[i];
         double dist_to_robot=(odom_pos_-wp_pt).norm();
@@ -473,8 +526,10 @@ bool DynamicReplanFSM::getSubgoalTimedAstar(Eigen::Vector2d &subgoal){
     }
     //cout<<"global_path.size()"<<global_path.size()<<endl;
     //cout<<"subgoal_id"<<subgoal_id<<endl;
+    
     if(subgoal_id>0){
         subgoal=global_path[subgoal_id];
+
         return true;
     }else{
         if(global_path.size()>2){
@@ -509,6 +564,10 @@ bool DynamicReplanFSM::getSubgoalSimpleSample(Eigen::Vector2d &subgoal){
     return true;
 }
 
+bool DynamicReplanFSM::getSubgoalGlobal(Eigen::Vector2d &subgoal){
+    subgoal=end_pos_;
+    return true;
+}
 
 /* --------------------helper functions---------------------------- */
 void DynamicReplanFSM::changeFSMExecState(FSM_EXEC_STATE new_state, std::string pos_call) {

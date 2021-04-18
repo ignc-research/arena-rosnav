@@ -68,6 +68,50 @@ void DynamicPlanManager::initPlanModules(ros::NodeHandle &nh)
 
 }
 
+bool DynamicPlanManager::kinoAstarTraj(Eigen::Vector2d & start_pos, Eigen::Vector2d & start_vel,Eigen::Vector2d &end_pos){
+    global_planner_kino_astar_->reset();
+    adjustStartAndTargetPoint(start_pos,end_pos);
+    Eigen::Vector2d start_acc = Eigen::Vector2d::Zero();
+    Eigen::Vector2d end_vel   = Eigen::Vector2d::Zero();
+
+    int status = global_planner_kino_astar_->search(start_pos, start_vel, start_acc, end_pos, end_vel, true);
+    
+    // second search // search again
+    if (status == global_planner_kino_astar_->NO_PATH) {
+      // retry searching with discontinuous initial state
+      global_planner_kino_astar_->reset();
+      status = global_planner_kino_astar_->search(start_pos, start_vel, start_acc, end_pos, end_vel, false);
+
+      if (status == global_planner_kino_astar_->NO_PATH) {
+        std::cout << "[kino replan]: Can't find path." << std::endl;
+        return false;
+
+      } else {
+        std::cout << "[kino replan]: kinodynamic search success." << std::endl;
+      }
+    } else 
+    {
+        std::cout << "[kino replan]: kinodynamic search success." << std::endl;
+    }
+
+    double sample_step_size = 0.1;
+    std::vector<Eigen::Vector2d> point_set,start_end_derivatives;
+    
+    global_planner_kino_astar_->getSamples(sample_step_size, point_set, start_end_derivatives);
+    if(point_set.size()<1){
+      return false;
+    }
+    // optimize global trajectory
+    UniformBspline global_traj;
+    bool optimize_success;
+    optimize_success=optimizeGlobalTraj(0.1,point_set,start_end_derivatives,global_traj);
+    if(!optimize_success){
+      ROS_WARN_STREAM("[kino replan]: trajectory optimize failed.");
+    }
+    local_traj_data_.resetData(global_traj);
+    return true;
+}
+
 bool DynamicPlanManager::planGlobalTraj( Eigen::Vector2d &start_pos,  Eigen::Vector2d &end_pos){
     std::cout<<"******************************************************"<<std::endl;
     std::cout<<"[kino replan]start----------------------------------"<<std::endl;
@@ -171,8 +215,16 @@ bool DynamicPlanManager::planMidTraj(Eigen::Vector2d & start_pos, Eigen::Vector2
   double local_time_horizon=pp_.local_time_horizon_;
   bool success;
 
+  // if initial pos is in collision
+  if(grid_map_->getDistanceStatic(start_pos)<0.3){
+    kinoAstarTraj(start_pos,start_vel,end_pos);
+    return false;
+  }
+
   success=mid_planner_timed_astar_->stateTimeAstarSearch(start_pos,start_vel,start_dir,end_pos,ts,local_time_horizon, point_set,start_end_derivatives,line_sets);
   
+  
+
   // special case when poinst set too small even success
   if(success && point_set.size()<5){
     success=false;
@@ -192,6 +244,14 @@ bool DynamicPlanManager::planMidTraj(Eigen::Vector2d & start_pos, Eigen::Vector2
       return false;
     }
   }else{
+    Eigen::Vector2d dummy_start_pt  =point_set.front();
+    // if(checkCollision(dummy_start_pt)){
+    //   Eigen::Vector2d pt1 = dummy_start_pt - (end_pos-dummy_start_pt)*0.5/((end_pos-dummy_start_pt).norm());
+    //   Eigen::Vector2d pt2 = dummy_start_pt - (end_pos-dummy_start_pt)*1.0/((end_pos-dummy_start_pt).norm());
+    //   point_set.insert(point_set.begin(),pt1);
+    //   point_set.insert(point_set.begin(),pt2);
+    //   point_set.insert(point_set.begin(),pt1);
+    // }
     // optimze traj
     bool optimize_success=optimizeBsplineTraj(ts,point_set,start_end_derivatives,mid_traj);
     local_traj_data_.resetData(mid_traj);
@@ -203,7 +263,7 @@ bool DynamicPlanManager::planMidTraj(Eigen::Vector2d & start_pos, Eigen::Vector2
       {
         local_traj_data_.resetData(mid_traj);
       }else{
-        //return true; //false
+        return false; //false
       }
     }else{
       ROS_WARN_STREAM("end mid optimize");
@@ -275,8 +335,15 @@ bool DynamicPlanManager::genOneshotTraj(Eigen::Vector2d & start_pos, Eigen::Vect
   }
   // double check
   Eigen::Vector2d dummy_start_pt  =point_set.front();
+  // if(checkCollision(dummy_start_pt)){
+  //   Eigen::Vector2d pt1 = dummy_start_pt - (target_pos-dummy_start_pt)*1/((target_pos-dummy_start_pt).norm());
+  //   Eigen::Vector2d pt2 = dummy_start_pt - (target_pos-dummy_start_pt)*2/((target_pos-dummy_start_pt).norm());
+  //   point_set.insert(point_set.begin(),pt1);
+  //   point_set.insert(point_set.begin(),pt2);
+  //   point_set.insert(point_set.begin(),pt1);
+  // }
   //Eigen::Vector2d dummy_target_pt =point_set.back();
-  adjustStartAndTargetPoint(dummy_start_pt,point_set.back());
+  //adjustStartAndTargetPoint(dummy_start_pt,point_set.back());
   //point_set[point_set.size()-1] = dummy_target_pt;
 
   // adjust direction part of the traj too make traj easy to track for non-holomonic robot

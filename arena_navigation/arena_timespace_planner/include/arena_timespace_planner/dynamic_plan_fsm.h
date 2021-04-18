@@ -57,6 +57,8 @@ private:
     double subgoal_pub_period_;
     int mid_replan_count_= 0;
 
+    int in_collision_cnt=0;
+
 
     /* ROS utils */
     ros::NodeHandle node_;
@@ -99,6 +101,7 @@ private:
     bool getSubgoalSpacialHorizon(Eigen::Vector2d &subgoal);
     bool getSubgoalTimedAstar(Eigen::Vector2d &subgoal);
     bool getSubgoalSimpleSample(Eigen::Vector2d &subgoal);
+    bool getSubgoalGlobal(Eigen::Vector2d &subgoal);
 
 
     /* helper functions */
