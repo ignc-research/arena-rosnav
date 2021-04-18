@@ -302,7 +302,8 @@ class ObstaclesManager:
         tmp_folder_path = os.path.join(rospkg.RosPack().get_path(
             'simulator_setup'), 'tmp_random_obstacles')
         os.makedirs(tmp_folder_path, exist_ok=True)
-        tmp_model_name = self.ns+"_dynamic_with_traj.model.yaml"
+        tmp_model_name = self.ns+"dynamic_with_traj.model.yaml" #_dynamic_with_traj
+        
         yaml_path = os.path.join(tmp_folder_path, tmp_model_name)
         # define body
         body = {}

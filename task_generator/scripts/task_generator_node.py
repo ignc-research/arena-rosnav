@@ -15,14 +15,20 @@ class TaskGenerator:
         self.sr = rospy.Publisher('/scenario_reset', Int16, queue_size=1)
         self.nr = 0
         mode = rospy.get_param("~task_mode")
+        
+        
         scenarios_json_path = rospy.get_param("~scenarios_json_path")
-        paths = {"scenarios_json_path": scenarios_json_path}
-        self.task = get_predefined_task(mode, PATHS=paths)
+       
+        paths = {"scenario": scenarios_json_path}
+  
+        self.task = get_predefined_task("",mode, PATHS=paths)
+       
 
 
         # if auto_reset is set to true, the task generator will automatically reset the task
         # this can be activated only when the mode set to 'ScenarioTask'
         auto_reset = rospy.get_param("~auto_reset")
+   
         # if the distance between the robot and goal_pos is smaller than this value, task will be reset
         self.timeout_= rospy.get_param("~timeout")
         self.timeout_= self.timeout_*60             # sec
@@ -30,8 +36,11 @@ class TaskGenerator:
         self.delta_ = rospy.get_param("~delta")
         robot_odom_topic_name = rospy.get_param(
             "robot_odom_topic_name", "odom")
+        
         auto_reset = auto_reset and mode == "ScenarioTask"
         self.curr_goal_pos_ = None
+        
+        
         if auto_reset:
             rospy.loginfo(
                 "Task Generator is set to auto_reset mode, Task will be automatically reset as the robot approaching the goal_pos")
@@ -76,6 +85,7 @@ class TaskGenerator:
     def reset_task(self):
         self.start_time_=time.time()
         info = self.task.reset()
+        
         # clear_costmaps()
         if info is not None:
             self.curr_goal_pos_ = info['robot_goal_pos']

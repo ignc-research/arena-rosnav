@@ -234,10 +234,13 @@ class ScenerioTask(ABSTask):
             scenerios_json_path (str): [description]
         """
         super().__init__(obstacles_manager, robot_manager)
+        
         json_path = Path(scenerios_json_path)
+        
         assert json_path.is_file() and json_path.suffix == ".json"
         json_data = json.load(json_path.open())
-        self._scenerios_data = json_data["scenerios"]
+        rospy.loginfo("I will publish to the topi--dad---------------***********---c %s", json_data.keys())
+        self._scenerios_data = json_data["scenarios"]
         # current index of the scenerio
         self._idx_curr_scene = -1
         # The times of current scenerio repeated
@@ -388,16 +391,22 @@ def get_predefined_task(ns: str, mode="random", start_stage: int = 1, PATHS: dic
     # either e.g. ns = 'sim1/' or ns = ''
 
     # get the map
+    
     service_client_get_map = rospy.ServiceProxy('/static_map', GetMap)
     map_response = service_client_get_map()
 
     # use rospkg to get the path where the model config yaml file stored
     models_folder_path = rospkg.RosPack().get_path('simulator_setup')
+    rospy.loginfo("I will publish to the topi-------------------------------------------------c %s", "c")
     # robot's yaml file is needed to get its radius.
     robot_manager = RobotManager(ns, map_response.map, os.path.join(
         models_folder_path, 'robot', "myrobot.model.yaml"))
 
+    rospy.loginfo("I will publish to the topidfsd-------------------------------------------------c %s", "d")
+    
     obstacles_manager = ObstaclesManager(ns, map_response.map)
+    rospy.loginfo("I will publish to the topi--dad-----------------------------------------------c %s", "e")
+    
     # only generate 3 static obstaticles
     # obstacles_manager.register_obstacles(3, os.path.join(
     # models_folder_path, "obstacles", 'random.model.yaml'), 'static')
@@ -423,6 +432,7 @@ def get_predefined_task(ns: str, mode="random", start_stage: int = 1, PATHS: dic
             ns, obstacles_manager, robot_manager, start_stage, PATHS)
     if mode == "scenario":
         rospy.set_param("/task_mode", "scenario")
+        
         task = ScenerioTask(obstacles_manager, robot_manager,
                             PATHS['scenario'])
     return task
