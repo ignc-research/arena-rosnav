@@ -38,16 +38,31 @@ while(True):
     reward, reward_info = env.reward_calculator.get_reward(
             obs_dict['laser_scan'], obs_dict['goal_in_robot_frame'])
     env.observation_collector.register_reward(reward)
-
-    observations.append(merged_obs)
-    actions.append(action)
-    #TODO improvement: get info from check_if_done; if the robot collided, don't save (obs, action) to the arrays
-    if env.check_if_done(merged_obs, obs_dict):
-        try:
+    #TODO still need to merge this reward into merged_obs! Otherwise there will be an off-by-one error
+    #Since the observation is needed before the reward can be computed
+    
+    done, info = env.check_if_done(reward_info)
+    if done:
+        if info['done_reason'] == 1:
+            # if the episode is done because the robot collided with an obstacle, ignore this episode
+            # reduce repeat count by 1 and start again
+            print('collision')
+            task._num_repeats_curr_scene -= 1
             env.reset()
-        except:
-            print('All scenarios have been evaluated!')
-            break
+        else:
+            observations.append(merged_obs)
+            actions.append(action)
+            # try resetting the environment: this will either reset the obstacles and robot and start another episode for recording
+            # or it will end the recording because all scenarios have been run their maximum number of times
+            try:
+                env.reset()
+            except:
+                print('All scenarios have been evaluated!')
+                break
+    else:
+        # if the episode is not done, save this timesteps's observations and actions to the arrays and continue the episode
+        observations.append(merged_obs)
+        actions.append(action)
 
 # save rollouts
 if args.outputformat == 'h5':
