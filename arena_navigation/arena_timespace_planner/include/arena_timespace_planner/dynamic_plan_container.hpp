@@ -315,16 +315,28 @@ public:
         Eigen::Vector2d acc = acc_traj_.evaluateDeBoorT(t_curr);
         //Eigen::Vector2d jerk= jerk_traj_.evaluateDeBoorT(t_curr);
         v=vel.norm();
-        if(std::abs(v)>10.0){
-            v=10.0;
+        if(std::abs(v)<2.0){
+            v=v;
+        }else{
+            v=2.0;
         }
-
+        
         if(v!=0.0){
             w=(vel(0)*acc(1) - vel(1)*acc(0))/vel.squaredNorm();
             //w=std::max(w,180*3.14/180);
-        }else{
-            w=30*3.14/180;
         }
+
+        if(std::abs(w)<60*3.14/180){
+            w = w;
+        }else{
+            if(w<0){
+                w=-60*3.14/180;
+            }else{
+                w= 60*3.14/180;
+            }
+        }
+        
+
     }
 
     // Eigen::Vector2d getPositionAtTime(double t_curr){
