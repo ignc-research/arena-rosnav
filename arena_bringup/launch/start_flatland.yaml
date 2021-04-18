@@ -1,12 +1,10 @@
 
 # global param 
 train_mode: &train_mode true
-ns_prefix: &ns_prefix sim
-num_envs: &num_envs 1
 
 robot_action_rate: &robot_action_rate 10
-laser_update_rate: &laser_update_rate 50
-odom_update_rate: &odom_update_rate 100
+laser_update_rate: &laser_update_rate 10
+odom_update_rate: &odom_update_rate 10
 
 
 step_size: &step_size 0.01
@@ -15,9 +13,7 @@ show_viz: &show_viz true
 viz_pub_rate: &viz_pub_rate 30
 
 obs_vel: &obs_vel 0.3
-map_folder_name: &map_folder_name map_empty
-map_path: &map_path $(find simulator_setup)/maps/$(arg map_folder_name)/map.yaml
-world_path: &world_path $(find simulator_setup)/maps/$(arg map_folder_name)/map.world.yaml
+
 
 
 

@@ -1,7 +1,14 @@
 <launch>
+<!-- map folder -->
+<arg name="ns_prefix"       value="sim" />
+
+<arg name="train_mode"      default="true" />
+<arg name="num_envs"        default="1" />
+<arg name="map_folder_name" default="map_empty" />
 
 <rosparam file="$(find arena_bringup)/launch/start_flatland.yaml" command="load" /> <!-- ns="fsm"-->
-
+<arg name="map_path" default="$(find simulator_setup)/maps/$(arg map_folder_name)/map.yaml" />
+<param name="world_path" value="$(find simulator_setup)/maps/$(arg map_folder_name)/map.world.yaml" />
 
   <!-- map server-->
   <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_path)">
