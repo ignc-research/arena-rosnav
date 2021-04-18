@@ -24,7 +24,13 @@
     <param name="controller_frequency" value="5.0" />
     <param name="controller_patience" value="15.0" />
     <param name="planner_frequency" value="1.0" />
-    
+    <param name="TebLocalPlannerROS/max_vel_x" value="2.0" />
+    <param name="TebLocalPlannerROS/max_vel_y" value="2.0" />
+    <param name="TebLocalPlannerROS/max_vel_theta" value="0.52" />
+    <param name="TebLocalPlannerROS/acc_lim_x" value="2.0" />
+    <param name="TebLocalPlannerROS/acc_lim_y" value="2.0" />
+    <param name="TebLocalPlannerROS/acc_lim_theta" value="0.8" />
+    <param name="TebLocalPlannerROS/max_vel_x_backwards" value="1.0" />
 
   </node>
 </launch>
