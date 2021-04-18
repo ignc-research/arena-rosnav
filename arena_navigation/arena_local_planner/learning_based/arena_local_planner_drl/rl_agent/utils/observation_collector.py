@@ -83,7 +83,7 @@ class ObservationCollector():
             f'{self.ns_prefix}scan', LaserScan, self.callback_scan, tcp_nodelay=True)
 
         self._robot_state_sub = rospy.Subscriber(
-            'odom', Odometry, self.callback_robot_state, tcp_nodelay=True)
+            f'{self.ns_prefix}odom', Odometry, self.callback_robot_state, tcp_nodelay=True)
         
         # self._clock_sub = rospy.Subscriber(
         #     f'{self.ns_prefix}clock', Clock, self.callback_clock, tcp_nodelay=True)
@@ -150,13 +150,6 @@ class ObservationCollector():
         theta = (np.arctan2(y_relative, x_relative) -
                  robot_pos.theta+4*np.pi) % (2*np.pi)-np.pi
         return rho, theta
-
-    @staticmethod
-    def is_synchronized(self, msg_Laser: LaserScan, msg_Robotpose: RobotStateStamped):
-        laser_stamp = round(msg_Laser.header.stamp.to_sec(), 4)
-        robot_stamp = round(msg_Robotpose.header.stamp.to_sec(), 4)
-
-        return bool(laser_stamp == robot_stamp)
 
     def get_sync_obs(self):
         laser_scan = None
