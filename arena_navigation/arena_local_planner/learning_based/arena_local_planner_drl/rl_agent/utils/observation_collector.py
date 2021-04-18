@@ -14,9 +14,9 @@ import threading
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Pose2D, PoseStamped, PoseWithCovarianceStamped
 from geometry_msgs.msg import Twist
-from arena_plan_msgs.msg import RobotState, RobotStateStamped
 from nav_msgs.msg import Path
 from rosgraph_msgs.msg import Clock
+from nav_msgs.msg import Odometry
 
 # services
 from flatland_msgs.srv import StepWorld, StepWorldRequest
@@ -83,7 +83,7 @@ class ObservationCollector():
             f'{self.ns_prefix}scan', LaserScan, self.callback_scan, tcp_nodelay=True)
 
         self._robot_state_sub = rospy.Subscriber(
-            f'{self.ns_prefix}robot_state', RobotStateStamped, self.callback_robot_state, tcp_nodelay=True)
+            'odom', Odometry, self.callback_robot_state, tcp_nodelay=True)
         
         # self._clock_sub = rospy.Subscriber(
         #     f'{self.ns_prefix}clock', Clock, self.callback_clock, tcp_nodelay=True)
@@ -249,11 +249,9 @@ class ObservationCollector():
         msg_LaserScan.ranges = scan
         return msg_LaserScan
 
-    def process_robot_state_msg(self, msg_RobotStateStamped: RobotStateStamped):
-        self._rs_stamp = msg_RobotStateStamped.header.stamp.to_sec()
-        state = msg_RobotStateStamped.state
-        pose3d = state.pose
-        twist = state.twist
+    def process_robot_state_msg(self, msg_Odometry):
+        pose3d = msg_Odometry.pose.pose
+        twist = msg_Odometry.twist.twist
         return self.pose3D_to_pose2D(pose3d), twist
 
     def process_pose_msg(self, msg_PoseWithCovarianceStamped):
