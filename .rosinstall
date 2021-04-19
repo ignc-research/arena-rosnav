@@ -1,6 +1,6 @@
 - git:
     local-name: ../forks/flatland
-    uri: https://github.com/dangaw255/flatland.git
+    uri: https://github.com/ignc-research/flatland.git
     version: behavior_modeling
     
 - git:
