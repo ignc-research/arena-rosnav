@@ -27,8 +27,6 @@ class FlatlandEnv(gym.Env):
 
     def __init__(self, 
                  ns: str,  
-                 robot_yaml_path: str, 
-                 settings_yaml_path: str, 
                  reward_fnc: str, 
                  is_action_space_discrete, 
                  safe_dist: float = None, 
@@ -47,8 +45,6 @@ class FlatlandEnv(gym.Env):
 
         Args:
             task (ABSTask): [description]
-            robot_yaml_path (str): [description]
-            setting_yaml_path ([type]): [description]
             reward_fnc (str): [description]
             train_mode (bool): bool to differ between train and eval env during training
             is_action_space_discrete (bool): [description]
@@ -85,8 +81,8 @@ class FlatlandEnv(gym.Env):
         self._is_train_mode = rospy.get_param("/train_mode")
         self._is_action_space_discrete = is_action_space_discrete
         
-        self.setup_by_configuration(robot_yaml_path, settings_yaml_path)
-        
+        self.setup_by_configuration(PATHS['robot_setting'], PATHS['robot_as'])
+
         # set rosparam
         rospy.set_param("/laser_num_beams", self._laser_num_beams)
         

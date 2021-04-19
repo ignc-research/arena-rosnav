@@ -53,7 +53,7 @@ def make_env(PATHS: dict,
     """
     def _init():
         env = FlatlandEnv(
-            'eval_sim', PATHS['robot_setting'], PATHS['robot_as'], PARAMS['reward_fnc'], PARAMS['discrete_action_space'], 
+            'eval_sim', PARAMS['reward_fnc'], PARAMS['discrete_action_space'], 
             goal_radius=0.4, max_steps_per_episode=max_steps_per_episode, train_mode=False, task_mode='random', PATHS=PATHS, curr_stage=4,
             extended_eval=True)
         if log:

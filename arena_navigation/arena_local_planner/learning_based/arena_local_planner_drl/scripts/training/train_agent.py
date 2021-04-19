@@ -122,7 +122,6 @@ def make_envs(rank: int,
             # train env
             env = FlatlandEnv(
                 f"sim_{rank+1}", 
-                PATHS['robot_setting'], PATHS['robot_as'], 
                 params['reward_fnc'], params['discrete_action_space'], 
                 goal_radius=params['goal_radius'], 
                 max_steps_per_episode=params['train_max_steps_per_episode'],
@@ -134,7 +133,6 @@ def make_envs(rank: int,
             env = Monitor(
                 FlatlandEnv(
                     f"eval_sim",
-                    PATHS['robot_setting'], PATHS['robot_as'], 
                     params['reward_fnc'], params['discrete_action_space'], 
                     goal_radius=params['goal_radius'], 
                     max_steps_per_episode=params['eval_max_steps_per_episode'], 
