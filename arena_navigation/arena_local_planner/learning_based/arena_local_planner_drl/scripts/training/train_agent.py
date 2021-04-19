@@ -206,12 +206,12 @@ if __name__ == "__main__":
 
     # instantiate train environment
     # when debug run on one process only
-    if not args.debug:
+    if not args.debug and ns_for_nodes:
         env = SubprocVecEnv(
             [make_envs(ns_for_nodes, i, params=params, PATHS=PATHS) 
                 for i in range(args.n_envs)], 
             start_method='fork')
-    else:
+    elif args.debug:
         env = DummyVecEnv(
             [make_envs(ns_for_nodes, i, params=params, PATHS=PATHS) 
                 for i in range(args.n_envs)])
@@ -230,8 +230,11 @@ if __name__ == "__main__":
 
     # instantiate eval environment
     # take task_manager from first sim (currently evaluation only provided for single process)
-    eval_env = DummyVecEnv(
-        [make_envs(ns_for_nodes, 0, params=params, PATHS=PATHS, train=False)])
+    if ns_for_nodes:
+        eval_env = DummyVecEnv(
+            [make_envs(ns_for_nodes, 0, params=params, PATHS=PATHS, train=False)])
+    else:
+        eval_env = env
 
     # try to load most recent vec_normalize obj (contains statistics like moving avg)
     if params['normalize']:
