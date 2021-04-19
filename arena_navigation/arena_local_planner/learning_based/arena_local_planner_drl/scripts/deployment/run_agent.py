@@ -40,7 +40,8 @@ def get_paths(args: dict, AGENT: str):
             os.makedirs(PATHS['log'])
     return PATHS
 
-def make_env(PATHS: dict, 
+def make_env(with_ns: bool,
+             PATHS: dict, 
              PARAMS: dict, 
              log: bool=False):
     """
@@ -52,8 +53,10 @@ def make_env(PATHS: dict,
     :return: (Callable)
     """
     def _init():
+        ns = f"eval_sim" if with_ns else ""
+
         env = FlatlandEnv(
-            'eval_sim', PARAMS['reward_fnc'], PARAMS['discrete_action_space'], 
+            ns, PARAMS['reward_fnc'], PARAMS['discrete_action_space'], 
             goal_radius=0.4, max_steps_per_episode=max_steps_per_episode, train_mode=False, task_mode='random', PATHS=PATHS, curr_stage=4,
             extended_eval=True)
         if log:
@@ -73,6 +76,9 @@ if __name__ == "__main__":
 
     assert len(AGENTS) > 0, "No agent name was given for evaluation"
 
+    ros_params = rospy.get_param_names()
+    ns_for_nodes = False if '/single_env' in ros_params else True
+
     start = time.time()
     while len(AGENTS) != 0:
         AGENT = AGENTS.pop(0)
@@ -87,7 +93,7 @@ if __name__ == "__main__":
         PARAMS = load_hyperparameters_json(PATHS)
         print_hyperparameters(PARAMS)
 
-        env = DummyVecEnv([make_env(PATHS, PARAMS, args.log)])
+        env = DummyVecEnv([make_env(ns_for_nodes, PATHS, PARAMS, args.log)])
         if PARAMS['normalize']:
             if not os.path.isfile(PATHS['vecnorm']):
                 # without it agent performance will be strongly altered

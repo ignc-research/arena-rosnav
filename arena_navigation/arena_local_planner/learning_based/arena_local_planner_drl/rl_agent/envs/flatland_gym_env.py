@@ -66,10 +66,7 @@ class FlatlandEnv(gym.Env):
 
 
         # process specific namespace in ros system
-        if ns is not None or ns !="":
-            self.ns_prefix = '/'+ns + '/'
-        else:
-            self.ns_prefix = ''
+        self.ns_prefix = '' if (ns == '' or ns is None) else '/'+ns+'/'
         
         if not debug:
             if train_mode:

@@ -91,6 +91,8 @@
   <include file="$(find arena_bringup)/launch/sublaunch_testing/timed_space_planner_fsm.launch">
   </include>
 
-  
-
+  <!-- makes sure that drl actions will be published according to sim time in eval mode-->
+  <group if="$(eval arg('train_mode') == false)">
+    <node name="action_publisher" pkg="arena_local_planner_drl" type="action_publisher.py"/>
+  </group>
 </launch>
