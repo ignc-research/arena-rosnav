@@ -38,8 +38,10 @@ while(True):
     reward, reward_info = env.reward_calculator.get_reward(
             obs_dict['laser_scan'], obs_dict['goal_in_robot_frame'])
     env.observation_collector.register_reward(reward)
-    #TODO still need to merge this reward into merged_obs! Otherwise there will be an off-by-one error
+    #TODO need to merge this reward into merged_obs! Otherwise there will be an off-by-one error
     #Since the observation is needed before the reward can be computed
+    #hotfix: overwrite reward with current value computed above:
+    merged_obs[-1] = reward
     
     done, info = env.check_if_done(reward_info)
     if done:
