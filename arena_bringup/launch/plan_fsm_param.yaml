@@ -25,7 +25,7 @@ robot_radius: &robot_radius 0.3                         # m
 obstacle_radius: &obstacle_radius 0.4                   # m
 obstacles_inflation: &obstacles_inflation 0.3           # m
 obstacle_name: &obstacle_name obstacle_dynamic_with_traj
-use_drl: &use_drl false                                  # true:  cmd_vel is published by drl or others; 
+use_drl: &use_drl true                                  # true:  cmd_vel is published by drl or others; 
                                                         # false: cmd_vel is published by traj tracker in plan_fsm
 # ----------------------------------------------------------------------------------
 # 1. FSM parameters (fsm/)

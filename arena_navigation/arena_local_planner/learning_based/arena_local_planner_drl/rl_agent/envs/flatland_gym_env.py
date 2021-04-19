@@ -69,7 +69,7 @@ class FlatlandEnv(gym.Env):
         if ns is not None or ns !="":
             self.ns_prefix = '/'+ns + '/'
         else:
-            self.ns_prefix = '/'
+            self.ns_prefix = ''
         
         if not debug:
             if train_mode:

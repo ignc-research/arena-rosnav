@@ -33,7 +33,7 @@ class ObstaclesManager:
                 The Plugin Tween2 can move the the obstacle along a trajectory which can be assigned by multiple waypoints with a constant velocity.Defaults to "RandomMove".
         """
         self.ns = ns
-        self.ns_prefix = "/" if ns == '' else "/"+ns+"/"
+        self.ns_prefix = "" if ns == '' else "/"+ns+"/"
 
         # a list of publisher to move the obstacle to the start pos.
         self._move_all_obstacles_start_pos_pubs = []

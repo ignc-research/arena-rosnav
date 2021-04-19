@@ -101,7 +101,8 @@ def get_paths(agent_name: str, args) -> dict:
 
     return PATHS
 
-def make_envs(rank: int, 
+def make_envs(with_ns: bool,
+              rank: int, 
               params: dict, 
               seed: int=0, 
               PATHS: dict=None, 
@@ -109,6 +110,7 @@ def make_envs(rank: int,
     """
     Utility function for multiprocessed env
     
+    :param with_ns: (bool) if the system was initialized with namespaces  
     :param rank: (int) index of the subprocess
     :param params: (dict) hyperparameters of agent to be trained
     :param seed: (int) the inital seed for RNG
@@ -118,10 +120,13 @@ def make_envs(rank: int,
     :return: (Callable)
     """
     def _init() -> Union[gym.Env, gym.Wrapper]:
+        train_ns = f"sim_{rank+1}" if with_ns else ""
+        eval_ns = f"eval_sim" if with_ns else ""
+
         if train:
             # train env
             env = FlatlandEnv(
-                f"sim_{rank+1}", 
+                train_ns, 
                 params['reward_fnc'], params['discrete_action_space'], 
                 goal_radius=params['goal_radius'], 
                 max_steps_per_episode=params['train_max_steps_per_episode'],
@@ -132,7 +137,7 @@ def make_envs(rank: int,
             # eval env
             env = Monitor(
                 FlatlandEnv(
-                    f"eval_sim",
+                    eval_ns,
                     params['reward_fnc'], params['discrete_action_space'], 
                     goal_radius=params['goal_radius'], 
                     max_steps_per_episode=params['eval_max_steps_per_episode'], 
@@ -146,26 +151,33 @@ def make_envs(rank: int,
     set_random_seed(seed)
     return _init
 
-def wait_for_nodes(n_envs: int, timeout: int=30, nodes_per_ns: int=3):
+def wait_for_nodes(with_ns: bool, n_envs: int, timeout: int=30, nodes_per_ns: int=3):
     """
     Checks for timeout seconds if all nodes to corresponding namespace are online.
     
+    :param with_ns: (bool) if the system was initialized with namespaces  
     :param n_envs: (int) number of virtual environments
     :param timeout: (int) seconds to wait for each ns
     :param nodes_per_ns: (int) usual number of nodes per ns 
     """
+    if with_ns:
+        assert with_ns and n_envs >= 1, f"Illegal number of environments parsed: {n_envs}"
+    else:
+        assert not with_ns and n_envs == 1, f"Simulation setup isn't compatible with the given number of envs"
+
     for i in range(n_envs):
         for k in range(timeout):
-            ns = rosnode.get_node_names(namespace='sim_'+str(i+1))
-
-            if len(ns) < nodes_per_ns:
-                warnings.warn(f"Check if all simulation parts of namespace '{'/sim_'+str(i+1)}' are running properly")
+            ns = 'sim_'+str(i+1) if with_ns else ''
+            namespaces = rosnode.get_node_names(namespace=ns)
+            
+            if len(namespaces) < nodes_per_ns:
+                warnings.warn(f"Check if all simulation parts of namespace '{ns}' are running properly")
                 warnings.warn(f"Trying to connect again..")
             else:
                 break
 
             assert (k < timeout-1
-            ), f"Timeout while trying to connect to nodes of '{'/sim_'+str(i+1)}'"
+            ), f"Timeout while trying to connect to nodes of '{ns}'"
 
             time.sleep(1)
 
@@ -180,9 +192,13 @@ if __name__ == "__main__":
     PATHS = get_paths(AGENT_NAME, args)
 
     print("________ STARTING TRAINING WITH:  %s ________\n" % AGENT_NAME)
+    
+    # for training with start_arena_flatland.launch
+    ros_params = rospy.get_param_names()
+    ns_for_nodes = False if '/single_env' in ros_params else True
 
     # check if simulations are booted
-    wait_for_nodes(n_envs=args.n_envs, timeout=5)
+    wait_for_nodes(with_ns=ns_for_nodes, n_envs=args.n_envs, timeout=5)
         
     # initialize hyperparameters (save to/ load from json)
     params = initialize_hyperparameters(
@@ -192,12 +208,12 @@ if __name__ == "__main__":
     # when debug run on one process only
     if not args.debug:
         env = SubprocVecEnv(
-            [make_envs(i, params=params, PATHS=PATHS) 
+            [make_envs(ns_for_nodes, i, params=params, PATHS=PATHS) 
                 for i in range(args.n_envs)], 
             start_method='fork')
     else:
         env = DummyVecEnv(
-            [make_envs(i, params=params, PATHS=PATHS) 
+            [make_envs(ns_for_nodes, i, params=params, PATHS=PATHS) 
                 for i in range(args.n_envs)])
 
     # threshold settings for training curriculum
@@ -215,7 +231,7 @@ if __name__ == "__main__":
     # instantiate eval environment
     # take task_manager from first sim (currently evaluation only provided for single process)
     eval_env = DummyVecEnv(
-        [make_envs(0, params=params, PATHS=PATHS, train=False)])
+        [make_envs(ns_for_nodes, 0, params=params, PATHS=PATHS, train=False)])
 
     # try to load most recent vec_normalize obj (contains statistics like moving avg)
     if params['normalize']:

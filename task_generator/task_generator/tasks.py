@@ -125,7 +125,7 @@ class StagedRandomTask(RandomTask):
     def __init__(self, ns: str, obstacles_manager: ObstaclesManager, robot_manager: RobotManager, start_stage: int = 1, PATHS=None):
         super().__init__(obstacles_manager, robot_manager)
         self.ns = ns
-        self.ns_prefix = "/" if ns == '' else "/"+ns+"/"
+        self.ns_prefix = "" if ns == '' else "/"+ns+"/"
 
         self._curr_stage = start_stage
         self._stages = dict()
@@ -397,15 +397,12 @@ def get_predefined_task(ns: str, mode="random", start_stage: int = 1, PATHS: dic
 
     # use rospkg to get the path where the model config yaml file stored
     models_folder_path = rospkg.RosPack().get_path('simulator_setup')
-    rospy.loginfo("I will publish to the topi-------------------------------------------------c %s", "c")
+    
     # robot's yaml file is needed to get its radius.
     robot_manager = RobotManager(ns, map_response.map, os.path.join(
         models_folder_path, 'robot', "myrobot.model.yaml"))
-
-    rospy.loginfo("I will publish to the topidfsd-------------------------------------------------c %s", "d")
     
     obstacles_manager = ObstaclesManager(ns, map_response.map)
-    rospy.loginfo("I will publish to the topi--dad-----------------------------------------------c %s", "e")
     
     # only generate 3 static obstaticles
     # obstacles_manager.register_obstacles(3, os.path.join(
@@ -432,7 +429,6 @@ def get_predefined_task(ns: str, mode="random", start_stage: int = 1, PATHS: dic
             ns, obstacles_manager, robot_manager, start_stage, PATHS)
     if mode == "scenario":
         rospy.set_param("/task_mode", "scenario")
-        
         task = ScenerioTask(obstacles_manager, robot_manager,
-                            PATHS['scenario'])
+            PATHS['scenario'])
     return task

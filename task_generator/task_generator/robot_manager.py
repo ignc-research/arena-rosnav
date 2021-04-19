@@ -31,7 +31,7 @@ class RobotManager:
 
         """
         self.ns = ns
-        self.ns_prefix = "/" if ns == "" else "/"+ns+"/"
+        self.ns_prefix = "" if ns == "" else "/"+ns+"/"
 
         self.is_training_mode = rospy.get_param("/train_mode")
         self.step_size = rospy.get_param("step_size")

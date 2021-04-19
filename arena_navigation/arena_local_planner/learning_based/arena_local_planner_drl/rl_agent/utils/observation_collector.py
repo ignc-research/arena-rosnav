@@ -44,7 +44,7 @@ class ObservationCollector():
         """
         self.ns = ns
         if ns is None or ns == "":
-            self.ns_prefix = "/"
+            self.ns_prefix = ""
         else:
             self.ns_prefix = "/"+ns+"/"
 
