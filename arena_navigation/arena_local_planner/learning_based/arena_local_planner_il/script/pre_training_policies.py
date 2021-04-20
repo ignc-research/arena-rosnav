@@ -111,17 +111,36 @@ class pretrainPPO(PPO):
                     with h5py.File(addr, "r") as action_f:
                         for i in action_f.keys():
                             actions[i] = np.array(action_f[i][1], dtype=np.float32)
+            self._actions_data = actions # (time->str, numpy.array(1,))
+            self._states_data = states   # (time->str, numpy.array(366,))
+            # do data matching
+            self._data_matching(dataset_length)
         else:
-            ##################create continuous dummy data for debugging########
-            actions, states = OrderedDict(), OrderedDict()
-            for index in range(20000):
-                actions[str(index)] = np.random.randn(2,)
-                states[str(index)]  = np.random.randn(366,)
-        
-        self._actions_data = actions # (time->str, numpy.array(1,))
-        self._states_data = states   # (time->str, numpy.array(366,))
-        # do data matching
-        self._data_matching(dataset_length)
+            h5_path = glob.glob(self._data_path + '/*hdf5')
+            if not h5_path:
+                raise FileNotFoundError
+
+            state_array, action_array = np.array([]), np.array([])
+            for addr in h5_path:
+                if addr.endswith('state.hdf5'):
+                    with h5py.File(addr, "r") as state_f:
+                        if state_array.size == 0:
+                            state_array = state_f['states'][:]
+                        else:
+                            state_array = np.concatenate((state_array, state_f['states'][:]))
+                            
+                elif addr.endswith('action.hdf5'):
+                    with h5py.File(addr, "r") as action_f:
+                        if action_array.size == 0:
+                            action_array = action_f['actions'][:]
+                        else:
+                            action_array = np.concatenate((action_array, action_f['actions'][:]))
+            # no need to synchronize
+            self._dataset = []
+            for index in range(action_array.shape[0]):
+                self._dataset.append((action_array[index], state_array[index]))
+            print("{} continuous action-state pairs...".format(self._dataset.__len__()))
+            
 
     def _data_matching(self, dataset_length):
         #before sampling first match actions and states according to time-slot
@@ -156,15 +175,18 @@ class pretrainPPO(PPO):
             actions.append(data[0])
             states.append(data[1])
         # return actions and states respectively
-        return np.array(actions, dtype=np.int32), np.array(states, dtype=np.float32)
+        if self._is_action_space_discrete:
+            return np.array(actions, dtype=np.int32), np.array(states, dtype=np.float32)
+        else:
+            return np.array(actions, dtype=np.float32), np.array(states, dtype=np.float32)
                                   
-    def pretrain(self, learning_rate, batch_size, policy_addr, epi=100, error_threshold=0.0001, loss_str="CE"):
+    def pretrain(self, learning_rate, batch_size, policy_addr, epi=100, error_threshold=0.001):
         # self.policy.net_arch using FlattenExtractor (pi=[64, 64], vf=[64, 64])
         optimizer = optim.Adam(self.policy.parameters(), lr=learning_rate)
 
-        if loss_str == "CE":
+        if self._is_action_space_discrete:
             objective = nn.CrossEntropyLoss()
-        if not self._is_action_space_discrete:
+        else:
             objective = nn.MSELoss()
         losses = 0
         last_1000ep_loss = 0
@@ -180,6 +202,7 @@ class pretrainPPO(PPO):
             last_1000ep_loss += loss.item()
 
             if iter_no % 1000 == 0:
+                print(pred_actions)
                 last_1000ep_loss = last_1000ep_loss/1000
                 print("episode: {} | evg_loss: {:.5f} | last_1000ep_loss: {:.5f}".format(iter_no, losses/iter_no, last_1000ep_loss))
                 #print(pred_actions)
@@ -187,7 +210,7 @@ class pretrainPPO(PPO):
                     print("training has been done!")
                     break
                 last_1000ep_loss = 0
-                if iter_no % 200000 == 0:
+                if iter_no % 100000 == 0:
                     self.save_policy(policy_addr)
             
             optimizer.step()
@@ -202,7 +225,7 @@ class pretrainPPO(PPO):
             actions_v = th.from_numpy(actions).float().to(device)
         states_v = th.from_numpy(states).float().to(device)
         states_v.requires_grad = True
-
+        actions_v.requres_grad = True
         pred_actions, pred_values, log_prob = policy(states_v) #need to return a action_prob distribution
         #print(log_prob_list.requires_grad) #should be true
         if self._is_action_space_discrete:

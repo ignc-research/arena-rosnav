@@ -167,7 +167,7 @@ class ILStateCollectorEnv(gym.Env):
         if done:
             info['done_reason'] = reward_info['done_reason']
         else:
-            if self._steps_curr_episode == self._max_steps_per_episode:
+            if self._steps_curr_episode == self._max_steps_per_episode and not self.is_state_collector:
                 done = True
                 print('current episode reward: %.3f' % self._epi_reward)
                 self._epi_reward = 0.
@@ -267,8 +267,8 @@ class ILStateCollectorEnv(gym.Env):
             action_msg.linear.x = self._discrete_acitons[action]['linear']
             action_msg.angular.z = self._discrete_acitons[action]['angular']
         else:
-            action_msg.linear.x = action[1][0]
-            action_msg.angular.z = action[1][1]
+            action_msg.linear.x = action[0]
+            action_msg.angular.z = action[1]
         self.agent_action_pub.publish(action_msg)
 
 
