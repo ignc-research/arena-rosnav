@@ -54,7 +54,7 @@ class ObservationCollector():
         self.safe_dist_child = 1.2
         self.safe_dist_elder = 1.5
         self.safe_dist_talking = 0.8
-        #settings for agents TODO: should be transferred from yaml files
+        #settings for agents TODO: should be transfered from yaml files
         self._radius_adult= 0.32
         self._radius_child= 0.25
         self._radius_elder= 0.3
@@ -422,6 +422,14 @@ class ObservationCollector():
             return True
         else:
             return False
+
+    def calculateDangerZone(self, vx, vy):
+        a = 0.55
+        r_static = 0.8
+        v = np.linalg.norm([vx, vy])
+        radius = a*v+ r_static
+        theta = 11*np.pi/6* np.exp(-1.4*v)+ np.pi/6
+        return radius, theta
 
     @staticmethod
     def process_global_plan_msg(globalplan):
