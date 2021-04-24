@@ -125,7 +125,8 @@ class ObstaclesManager:
                     self.obstacle_name_list.append(spawn_request.name)
                     break
             if i_curr_try == max_num_try:
-                raise rospy.ServiceException(f"({self.ns}) failed to register obstacles")
+                # raise rospy.ServiceException(f"({self.ns}) failed to register obstacles")
+                rospy.logwarn(f"({self.ns}) failed to register obstacles")
         return self
 
     def register_random_obstacles(self, num_obstacles: int, p_dynamic=0.5):
