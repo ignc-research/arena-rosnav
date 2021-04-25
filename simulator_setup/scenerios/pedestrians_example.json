@@ -8,18 +8,18 @@
                     "type": "adult",
                     "obstacle_force_factor": 1.0,
                     "desire_force_factor": 5.0,
-                    "amount": 2,
+                    "amount": 8,
 
                     "chatting_probability": 0.001,
                     "talking_base_time": 12.0,
 
-                    "tell_story_probability": 0.001,
-                    "tell_story_base_time": 12.0,
+                    "tell_story_probability": 0.0001,
+                    "tell_story_base_time": 15.0,
 
                     "group_talking_probability": 0.001,
                     "group_talking_base_time": 12.0,
 
-                    "talking_and_walking_probability": 0.001,
+                    "talking_and_walking_probability": 0.01,
                     "talking_and_walking_base_time": 12.0,
 
                     "max_talking_distance": 1.5,
@@ -47,21 +47,20 @@
                     "obstacle_force_factor": 0.1,
                     "desire_force_factor": 3.0,
                     "amount": 1,
-                    "chatting_probability": 0.3,
                     "obstacle_radius": 0.3,
                     "linear_velocity": 1.0,
                     "start_pos": [
-                        10,
-                        10,
+                        9,
+                        9,
                         0
                     ],
                     "waypoints": [
-                        [10, 10, 0],
-                        [20, 6, 0],
-                        [11, 11, 0]
+                        [6, 12, 0],
+                        [12, 12, 0],
+                        [12, 7, 0]
                     ],
                     "is_waypoint_relative": true,
-                    "mode": "random",
+                    "mode": "loop",
                     "triggers": [
                     ]
                 }

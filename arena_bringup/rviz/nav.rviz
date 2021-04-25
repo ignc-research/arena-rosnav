@@ -40,6 +40,9 @@ Panels:
         - /PointStamped6
         - /randomwanderer1
         - /randomwandererpose1
+        - /MarkerArray34
+        - /MarkerArray35
+        - /MarkerArray36
       Splitter Ratio: 0.2613365054130554
     Tree Height: 528
   - Class: rviz/Selection
@@ -59,7 +62,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: LaserScan
+    SyncSource: ""
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -361,6 +364,8 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: false
+        base:
+          Value: true
         base_footprint:
           Value: true
         laser_link:
@@ -674,7 +679,7 @@ Visualization Manager:
       Marker Topic: /flatland_server/debug/model/person_1_2
       Name: MarkerArray
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -682,7 +687,7 @@ Visualization Manager:
       Marker Topic: /flatland_server/debug/model/person_1_2
       Name: MarkerArray
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -690,7 +695,7 @@ Visualization Manager:
       Marker Topic: /flatland_server/debug/model/person_1_3
       Name: MarkerArray
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -698,7 +703,7 @@ Visualization Manager:
       Marker Topic: /flatland_server/debug/model/person_1_4
       Name: MarkerArray
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -706,7 +711,7 @@ Visualization Manager:
       Marker Topic: /flatland_server/debug/model/person_1_6
       Name: MarkerArray
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -714,7 +719,7 @@ Visualization Manager:
       Marker Topic: /flatland_server/debug/model/person_1_7
       Name: MarkerArray
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -730,7 +735,7 @@ Visualization Manager:
       Marker Topic: /flatland_server/debug/model/person_1_5
       Name: MarkerArray
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -882,6 +887,30 @@ Visualization Manager:
       Topic: /my_pose_stamped
       Unreliable: false
       Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /flatland_server/debug/model/agent_0_static_obstacle_0
+      Name: MarkerArray
+      Namespaces:
+        "": true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /flatland_server/debug/model/agent_0_static_obstacle_1
+      Name: MarkerArray
+      Namespaces:
+        "": true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /flatland_server/debug/model/agent_0_static_obstacle_2
+      Name: MarkerArray
+      Namespaces:
+        "": true
+      Queue Size: 100
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 0; 0; 0
@@ -918,11 +947,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 26.702709197998047
+      Scale: 29.05191421508789
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
-      X: 3.8657195568084717
-      Y: 4.919379711151123
+      X: 8.891839027404785
+      Y: 8.542101860046387
     Saved: ~
 Window Geometry:
   Displays:
@@ -941,4 +970,4 @@ Window Geometry:
     collapsed: false
   Width: 968
   X: 201
-  Y: 44
+  Y: 32
