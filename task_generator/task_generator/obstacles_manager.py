@@ -74,7 +74,7 @@ class ObstaclesManager:
         self.obstacle_name_list = []
         self._obstacle_name_prefix = 'obstacle'
         self.__peds=[]
-        print("om      77") 
+   
         #tell the pedsim the map border
         self._add_map_border_in_pedsim()
         print("om      80") 

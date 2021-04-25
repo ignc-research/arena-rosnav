@@ -1,0 +1,77 @@
+bodies:
+  - name: base
+    color: [1, 0.8, 0, 0.8]
+
+    footprints:
+      - type: polygon
+        points: [[-0.5, 0.3], [0.5, 0.3], [0.5, -0.3], [-0.5, -0.3]]
+        density: 1
+        layers: []
+
+  - name: left_fork
+    color: [1, 0.8, 0, 0.8]
+
+    footprints:
+      - type: polygon
+        points: [[0.5, 0.3], [1.1, 0.3], [1.1, 0.1], [0.5, 0.1]]
+        density: 1
+        layers: []
+
+  - name: right_fork
+    color: [1, 0.8, 0, 0.8]
+
+    footprints:
+      - type: polygon
+        points: [[0.5, -0.1], [1.1, -0.1], [1.1, -0.3], [0.5, -0.3]]
+        density: 1
+        layers: []
+
+joints:
+  - type: weld
+    name: left_fork_weld
+    bodies:
+      - name: base
+        anchor: [0.5, 0.3]
+      - name: left_fork
+        anchor: [0.5, 0.3]
+  - type: weld
+    name: right_fork_weld
+    bodies:
+      - name: base
+        anchor: [0.5, -0.3]
+      - name: right_fork
+        anchor: [0.5, -0.3]
+
+plugins:
+  # - type: Tween2
+  #   name: Tween2
+  #   body: base
+  #   mode: once
+  #   waypoints: [[1, 1, 0], [2, 2, 0], [2, 3, 0], [2, 10, 0]]
+  #   trigger_zones: []
+
+  # - type: SocialForce
+  #   name: SocialForce
+  #   body: base
+  #   goal_pose: [7, 4, 0]
+
+  - type: VehicleMovement
+    name: vehicle_movement
+    agent_topic: /pedsim_simulator/simulated_agents
+    base_body: base
+
+  # - type: Tween
+  #   name: Tween 
+  #   body: base
+  #   delta: [4, 0, 0]
+  #   duration: 5.0
+  #   mode: yoyo
+  #   easing: quadraticInOut
+
+  # - type: Simple
+  #   name: Simple
+  #   body: base
+  
+  # - type: ModelTfPublisher
+  #   name: tf_publisher
+  #   publish_tf_world: false
