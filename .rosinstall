@@ -1,7 +1,8 @@
+
 - git:
     local-name: ../forks/flatland
     uri: https://github.com/ignc-research/flatland
-    version: arena_human
+    version: sim_to_real
 
 #- git:
 #    local-name: ../forks/navigation
@@ -38,5 +39,5 @@
 
 - git:
     local-name: ../forks/pedsim_ros
-    uri: https://github.com/Sirupli/pedsim_ros
-    version: human_ros
+    uri: https://github.com/basselfa/pedsim_ros
+    version: sim_to_real

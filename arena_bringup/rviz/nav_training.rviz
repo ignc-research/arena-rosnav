@@ -329,6 +329,8 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: false
+        eval_sim_odom:
+          Value: true
         map:
           Value: true
         sim_1_base_footprint:
@@ -344,11 +346,12 @@ Visualization Manager:
       Show Names: true
       Tree:
         map:
-          sim_1_base_footprint:
-            sim_1_laser_mount:
-              {}
-          sim_1_odom:
+          eval_sim_odom:
             {}
+          sim_1_odom:
+            sim_1_base_footprint:
+              sim_1_laser_mount:
+                {}
       Update Interval: 0
       Value: true
     - Class: rviz/MarkerArray
@@ -517,7 +520,7 @@ Visualization Manager:
           Marker Topic: /sim_1/flatland_server/debug/model/person_13
           Name: MarkerArray
           Namespaces:
-            {}
+            "": true
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -525,7 +528,7 @@ Visualization Manager:
           Marker Topic: /sim_1/flatland_server/debug/model/person_14
           Name: MarkerArray
           Namespaces:
-            {}
+            "": true
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -533,7 +536,7 @@ Visualization Manager:
           Marker Topic: /sim_1/flatland_server/debug/model/person_15
           Name: MarkerArray
           Namespaces:
-            {}
+            "": true
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -670,7 +673,7 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 49.18521499633789
+      Scale: 23.611286163330078
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
       X: 2.833331823348999

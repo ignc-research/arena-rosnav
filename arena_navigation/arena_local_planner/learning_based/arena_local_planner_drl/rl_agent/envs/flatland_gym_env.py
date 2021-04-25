@@ -62,6 +62,8 @@ class FlatlandEnv(gym.Env):
             goal_radius (float, optional): [description]. Defaults to 0.1.
         """
         super(FlatlandEnv, self).__init__()
+    
+        print("fenv 65")
 
         self.ns = ns
         try:
@@ -70,7 +72,8 @@ class FlatlandEnv(gym.Env):
             if ns.split("_")[1]!='sim':
                 ns_int = int(ns.split("_")[1])
                 time.sleep(ns_int*2)
-            # else:
+            # else:ery environment enough time to initialize, if we dont put sleep,
+            # the tra
             #     time.sleep(3)
         except Exception:
             rospy.logwarn(f"Can't not determinate the number of the environment, training script may crash!")
@@ -97,11 +100,12 @@ class FlatlandEnv(gym.Env):
         
         # set rosparam
         rospy.set_param("/laser_num_beams", self._laser_num_beams)
+        print("fenv 102")
 
         # instantiate task manager
         self.task = get_predefined_task(
             ns, mode=task_mode, start_stage=kwargs['curr_stage'], PATHS=PATHS)
-        
+        print("fenv 108")
         # observation collector
         num_humans=self.task.obstacles_manager.num_humans
         self.observation_collector = ObservationCollector(
@@ -276,10 +280,10 @@ if __name__ == '__main__':
 
     flatland_env = FlatlandEnv()
     check_env(flatland_env, warn=True)
-
+    print("fenv 279")
     # init env
     obs = flatland_env.reset()
-
+    print("fenv 282")
     # run model
     n_steps = 200
     for step in range(n_steps):

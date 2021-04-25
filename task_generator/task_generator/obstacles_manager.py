@@ -49,7 +49,7 @@ class ObstaclesManager:
         rospy.wait_for_service(f'{self.ns_prefix}pedsim_simulator/remove_all_peds', timeout=20)
         rospy.wait_for_service(f'{self.ns_prefix}pedsim_simulator/add_obstacle', timeout=20)
         rospy.wait_for_service(f'{self.ns_prefix}pedsim_simulator/respawn_peds' , timeout=20)
-        rospy.wait_for_service(f'{self.ns_prefix}pedsim_simulator/spawn_ped' , timeout=20)
+        rospy.wait_for_service(f'{self.ns_prefix}pedsim_simulator/spawn_peds' , timeout=20)
         rospy.wait_for_service(f'{self.ns_prefix}pedsim_simulator/move_peds' , timeout=20)
         # allow for persistent connections to services
         self._srv_move_model = rospy.ServiceProxy(
@@ -69,17 +69,19 @@ class ObstaclesManager:
             f'{self.ns_prefix}pedsim_simulator/add_obstacle' ,SpawnObstacle, persistent=True)
         self.__move_peds_srv = rospy.ServiceProxy(
             f'{self.ns_prefix}pedsim_simulator/move_peds' ,MovePeds, persistent=True)
-
+        print("om      72") 
         self.update_map(map_)
         self.obstacle_name_list = []
         self._obstacle_name_prefix = 'obstacle'
         self.__peds=[]
-
+        print("om      77") 
         #tell the pedsim the map border
         self._add_map_border_in_pedsim()
+        print("om      80") 
 
         # remove all existing obstacles generated before create an instance of this class
         self.remove_obstacles()
+        print("om      84") 
 
     def update_map(self, new_map: OccupancyGrid):
         self.map = new_map
@@ -709,6 +711,7 @@ class ObstaclesManager:
 
         max_num_try = 2
         i_curr_try = 0
+        print("++++++++++++++++++++ calling om 712 ++++++++++++++++++++++++++++++++")
         while i_curr_try < max_num_try:
             # try to call service
             response=self.__respawn_peds_srv.call(srv.peds)
@@ -786,6 +789,7 @@ class ObstaclesManager:
             lineObstacle.start.x,lineObstacle.start.y=border_vertex[i,0],border_vertex[i,1]
             lineObstacle.end.x,lineObstacle.end.y=border_vertex[(i+1)%size,0],border_vertex[(i+1)%size,1]
             add_pedsim_srv.staticObstacles.obstacles.append(lineObstacle)
+        print("om      793" )
         self.__add_obstacle_srv.call(add_pedsim_srv)
 
     def move_all_peds(self, episode:int):
