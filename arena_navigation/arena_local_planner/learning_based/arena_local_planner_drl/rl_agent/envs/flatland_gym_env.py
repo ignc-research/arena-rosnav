@@ -63,7 +63,6 @@ class FlatlandEnv(gym.Env):
         """
         super(FlatlandEnv, self).__init__()
     
-        print("fenv 65")
 
         self.ns = ns
         try:
@@ -100,12 +99,10 @@ class FlatlandEnv(gym.Env):
         
         # set rosparam
         rospy.set_param("/laser_num_beams", self._laser_num_beams)
-        print("fenv 102")
 
         # instantiate task manager
         self.task = get_predefined_task(
             ns, mode=task_mode, start_stage=kwargs['curr_stage'], PATHS=PATHS)
-        print("fenv 108")
         # observation collector
         num_humans=self.task.obstacles_manager.num_humans
         self.observation_collector = ObservationCollector(
@@ -280,10 +277,10 @@ if __name__ == '__main__':
 
     flatland_env = FlatlandEnv()
     check_env(flatland_env, warn=True)
-    print("fenv 279")
+
     # init env
     obs = flatland_env.reset()
-    print("fenv 282")
+
     # run model
     n_steps = 200
     for step in range(n_steps):

@@ -120,7 +120,7 @@ def make_envs(rank: int,
     """
     def _init() -> Union[gym.Env, gym.Wrapper]:
         if train:
-            print("ta 123")
+        
             # train env
             env = FlatlandEnv(
                 f"sim_{rank+1}", 
@@ -146,7 +146,7 @@ def make_envs(rank: int,
                     ),
                 PATHS.get('eval'), info_keywords=("done_reason", "is_success"))
         env.seed(seed + rank)
-        print("ta 123")
+
         return env
     set_random_seed(seed)
     return _init
@@ -185,10 +185,9 @@ if __name__ == "__main__":
     PATHS = get_paths(AGENT_NAME, args)
 
     print("________ STARTING TRAINING WITH:  %s ________\n" % AGENT_NAME)
-    print("ta 186")
+
     # check if simulations are booted
     wait_for_nodes(n_envs=args.n_envs, timeout=5)
-    print("ta 189")    
     # initialize hyperparameters (save to/ load from json)
     params = initialize_hyperparameters(
         PATHS=PATHS, load_target=args.load, config_name=args.config, n_envs=args.n_envs)
@@ -204,7 +203,6 @@ if __name__ == "__main__":
         env = DummyVecEnv(
             [make_envs(i, params=params, PATHS=PATHS) 
                 for i in range(args.n_envs)])
-    print("ta 205")
     # threshold settings for training curriculum
     # type can be either 'succ' or 'rew'
     trainstage_cb = InitiateNewTrainStage(
@@ -212,7 +210,6 @@ if __name__ == "__main__":
         treshhold_type="succ", 
         upper_threshold=0.99, lower_threshold=0.3, 
         task_mode=params['task_mode'], verbose=1)
-    print("ta 213")
     # stop training on reward threshold callback
     stoptraining_cb = StopTrainingOnRewardThreshold(
         reward_threshold=35, verbose=1)

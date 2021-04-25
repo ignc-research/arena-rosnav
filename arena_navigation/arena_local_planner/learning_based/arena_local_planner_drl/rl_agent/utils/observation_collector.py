@@ -54,11 +54,13 @@ class ObservationCollector():
         self.safe_dist_child = 1.2
         self.safe_dist_elder = 1.5
         self.safe_dist_talking = 0.8
+        self.safe_dist_forklift = 1.5
         #settings for agents TODO: should be transferred from yaml files
         self._radius_adult= 0.32
         self._radius_child= 0.25
         self._radius_elder= 0.3
         self._radius_robot= 0.3
+        self._radius_forklift= 0.3
 
         # define observation_space
         self.num_humans_observation_max=21
@@ -188,7 +190,7 @@ class ObservationCollector():
         rho_behavior_adult = np.array([],dtype=object).reshape(0, 2)
         rho_behavior_child = np.array([],dtype=object).reshape(0, 2)
         rho_behavior_elder = np.array([],dtype=object).reshape(0, 2)
-
+        rho_behavior_forklift = np.array([],dtype=object).reshape(0, 2) 
         for i, ty in enumerate(self._human_type):
             # filter the obstacles which are not in the visible range of the robot
             if not self.IsInViewRange(20, [-2.618,2.618], rho_humans[i], theta_humans[i]):
@@ -232,9 +234,21 @@ class ObservationCollector():
                 obs=np.array(self.robot_self_state+[rho_humans[i], theta_humans[i]]+state+[safe_dist_,self._radius_elder,
                                                 self._radius_elder+safe_dist_+self._radius_robot, self._human_behavior_token[i]])
                 merged_obs = np.hstack([merged_obs,obs])
+            elif ty==4:  # forklift
+                rho_behavior=np.array([rho_humans[i],self._human_behavior[i]],dtype=object)
+                rho_behavior_forklift=np.vstack([rho_behavior_forklift, rho_behavior])
+                #determine the safe_dist for every human
+                safe_dist_=self.safe_dist_forklift
+                #robot centric 
+                state=ObservationCollector.rotate(self.robot_self_state[:2]+[self._human_position[i].x, self._human_position[i].y, self._human_vel[i].linear.x,self._human_vel[i].linear.y], self.rot)
+                obs=np.array(self.robot_self_state+[rho_humans[i], theta_humans[i]]+state+[safe_dist_,self._radius_forklift,
+                                                self._radius_forklift+safe_dist_+self._radius_robot, self._human_behavior_token[i]])
+                merged_obs = np.hstack([merged_obs,obs])
         obs_dict['adult_in_robot_frame'] = rho_behavior_adult
         obs_dict['child_in_robot_frame'] = rho_behavior_child
         obs_dict['elder_in_robot_frame'] = rho_behavior_elder
+        obs_dict['forklift_in_robot_frame'] = rho_behavior_forklift
+
         #align the observation size
         observation_blank=len(merged_obs) - self.observation_space.shape[0]
         if observation_blank<0:

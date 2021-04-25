@@ -413,7 +413,6 @@ def get_predefined_task(ns: str, mode="random", start_stage: int = 1, PATHS: dic
     # TODO In the future more Task will be supported and the code unrelated to
     # Tasks will be moved to other classes or functions.
     task = None
-    # print("+++++++++++++++++++mode is +++++++++++++++++++++++++",mode)
     if mode == "random":
         rospy.set_param("/task_mode", "random")
         obstacles_manager.register_random_obstacles(20, 0.4)
