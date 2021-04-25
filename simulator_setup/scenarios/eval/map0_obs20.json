@@ -48,7 +48,50 @@
 						"watcher_1"
 					]
 				},
-				
+				"dynamic_obs_2": {
+					"obstacle_radius": 0.655,
+					"linear_velocity": 0.3,
+					"type": "circle",
+					"start_pos": [
+						7.503999999999998,
+						-3.5879999999999983,
+						0
+					],
+					"waypoints": [
+						[
+							-0.131,
+							5.502000000000001,
+							0
+						]
+					],
+					"is_waypoint_relative": true,
+					"mode": "yoyo",
+					"triggers": [
+						"watcher_2"
+					]
+				},
+				"dynamic_obs_3": {
+					"obstacle_radius": 0.655,
+					"linear_velocity": 0.3,
+					"type": "circle",
+					"start_pos": [
+						10.91,
+						2.9620000000000015,
+						0
+					],
+					"waypoints": [
+						[
+							0.0,
+							-5.8950000000000005,
+							0
+						]
+					],
+					"is_waypoint_relative": true,
+					"mode": "yoyo",
+					"triggers": [
+						"watcher_3", "watcher_4", "watcher_5"
+					]
+				},
 				"dynamic_obs_4": {
 					"obstacle_radius": 0.655,
 					"linear_velocity": 0.3,
