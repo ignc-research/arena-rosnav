@@ -91,28 +91,6 @@
 					"triggers": [
 						"watcher_3"
 					]
-				},
-				"dynamic_obs_4": {
-					"obstacle_radius": 0.715,
-					"linear_velocity": 0.3,
-					"type": "circle",
-					"start_pos": [
-						4.3875,
-						20.162999999999997,
-						0
-					],
-					"waypoints": [
-						[
-							2.002,
-							3.4319999999999995,
-							0
-						]
-					],
-					"is_waypoint_relative": true,
-					"mode": "yoyo",
-					"triggers": [
-						"watcher_4"
-					]
 				}
 			},
 			"static_obstacles": {

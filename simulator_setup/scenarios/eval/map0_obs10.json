@@ -4,50 +4,7 @@
 			"scene_name": "new_scenario",
 			"repeats": 15,
 			"dynamic_obstacles": {
-				"dynamic_obs_0": {
-					"obstacle_radius": 0.655,
-					"linear_velocity": 0.3,
-					"type": "circle",
-					"start_pos": [
-						10.648,
-						2.307000000000002,
-						0
-					],
-					"waypoints": [
-						[
-							-0.393,
-							-6.026,
-							0
-						]
-					],
-					"is_waypoint_relative": true,
-					"mode": "yoyo",
-					"triggers": [
-						"watcher_0", "watcher_1", "watcher_2"
-					]
-				},
-				"dynamic_obs_1": {
-					"obstacle_radius": 0.655,
-					"linear_velocity": 0.3,
-					"type": "circle",
-					"start_pos": [
-						7.634999999999998,
-						-2.932999999999998,
-						0
-					],
-					"waypoints": [
-						[
-							0.524,
-							4.978,
-							0
-						]
-					],
-					"is_waypoint_relative": true,
-					"mode": "yoyo",
-					"triggers": [
-						"watcher_3"
-					]
-				},
+				
 				"dynamic_obs_2": {
 					"obstacle_radius": 0.655,
 					"linear_velocity": 0.3,

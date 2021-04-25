@@ -4,28 +4,7 @@
 			"scene_name": "new_scenario",
 			"repeats": 15,
 			"dynamic_obstacles": {
-				"dynamic_obs_0": {
-					"obstacle_radius": 0.655,
-					"linear_velocity": 0.3,
-					"type": "circle",
-					"start_pos": [
-						11.041,
-						2.5690000000000026,
-						0
-					],
-					"waypoints": [
-						[
-							0.131,
-							-5.3710000000000075,
-							0
-						]
-					],
-					"is_waypoint_relative": true,
-					"mode": "yoyo",
-					"triggers": [
-						"watcher_0", "watcher_1"
-					]
-				},
+				
 				"dynamic_obs_1": {
 					"obstacle_radius": 1.31,
 					"linear_velocity": 0.3,
