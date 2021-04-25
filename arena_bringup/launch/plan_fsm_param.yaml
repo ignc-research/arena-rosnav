@@ -10,7 +10,7 @@ goal_tolerance: &goal_tolerance 0.5
 subgoal_tolerance: &subgoal_tolerance 1.0
 
 planning_time_horizon: &planning_time_horizon 3.0       # sec look ahead time
-planning_horizen: &planning_horizen 2.5                 # m   look ahead distance
+planning_horizen: &planning_horizen 3.0                 # m   look ahead distance
 sensor_range: &sensor_range 3.5                         # m   laser sensor range
 
 max_vel: &max_vel 2.0                                 # m/s   robot max vel
