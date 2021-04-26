@@ -91,6 +91,9 @@ class ObstaclesManager:
         if self.useMaze:
             self.build_maze()
 
+        # human group pattern
+        self.circlePattern = True
+
     def update_map(self, new_map: OccupancyGrid):
         self.map = new_map
         # a tuple stores the indices of the non-occupied spaces. format ((y,....),(x,...)
@@ -666,7 +669,7 @@ class ObstaclesManager:
         srv = SpawnPeds()
         srv.peds = []
         # print(peds)
-        self.agent_topic_str=''        
+        self.agent_topic_str=''
         for ped in peds:            
             elements = [0, 1, 3]
             # probabilities = [0.4, 0.3, 0.3] np.random.choice(elements, 1, p=probabilities)[0]
@@ -718,7 +721,7 @@ class ObstaclesManager:
         rospy.set_param(f'{self.ns_prefix}agent_topic_string', self.agent_topic_str)
         return
 
-    def spawn_random_peds_in_world(self, n:int, safe_distance:float=3.5, forbidden_zones: Union[list, None] = None):
+    def spawn_random_peds_in_world(self, n:int, safe_distance:float=2.5, forbidden_zones: Union[list, None] = None):
         """
         Spawning n random pedestrians in the whole world.
         :param n number of pedestrians that will be spawned.
@@ -727,21 +730,27 @@ class ObstaclesManager:
         """
         ped_array =np.array([],dtype=object).reshape(0,3)
         # self.human_id+=1
+        # if  not self.circlePattern:
         for i in range(n):
             [x, y, theta] = get_random_pos_on_map(self._free_space_indices, self.map, safe_distance, forbidden_zones)
-            waypoints = np.array( [x, y, 2]).reshape(1, 3) # the first waypoint
+            waypoints = np.array( [x, y, 1]).reshape(1, 3) # the first waypoint
             # if random.uniform(0.0, 1.0) < 0.8:
-            safe_distance = safe_distance - 3 #the other waypoints don't need to avoid robot
+            safe_distance = 0.1 # the other waypoints don't need to avoid robot
             for j in range(1000):
                 dist = 0
                 while dist < 8:
                     [x2, y2, theta2] = get_random_pos_on_map(self._free_space_indices, self.map, safe_distance, forbidden_zones)
                     dist = np.linalg.norm([waypoints[-1,0] - x2,waypoints[-1,1] - y2])
                     # if dist>=8: print(dist)
-                waypoints = np.vstack([waypoints, [x2, y2, 2]])
-            self.human_waypoints.append(waypoints)
+                waypoints = np.vstack([waypoints, [x2, y2, 1]])
             ped=np.array([i+1, [x, y, 0.0], waypoints],dtype=object)
             ped_array=np.vstack([ped_array,ped])
+        # else:
+        #     waypoints=get_circluar_pattern_on_map(self._free_space_indices, self.map, n, gruppe_radius = 9.0, safe_dist=0.0, forbidden_zones = forbidden_zones)
+        #     # self.human_waypoints.append(waypoints)
+        #     for i in range(n):
+        #         ped=np.array([i+1, [waypoints[2*i, 0], waypoints[2*i, 1], 0.0], waypoints[2*i:2*i+2]],dtype=object)
+        #         ped_array=np.vstack([ped_array,ped])
         self.__respawn_peds(ped_array)
 
     def __remove_all_peds(self):
@@ -790,6 +799,15 @@ class ObstaclesManager:
         srv = MovePedsRequest()
         srv.episode = episode
         waypoints = np.array([]).reshape(0, 2)
+        if self.circlePattern:
+            wp_srv=get_circluar_pattern_on_map(self._free_space_indices, self.map, self.num_humans, gruppe_radius = 9.0, safe_dist=0.0)
+            waypoints=wp_srv[:,:2]
+            for wp in wp_srv:
+                p=Point()
+                p.x = wp[0]
+                p.y = wp[1]
+                p.z = wp[2]
+                srv.pattern_waypoints.append(p)
         max_num_try = 2
         i_curr_try = 0
         while i_curr_try < max_num_try:
@@ -803,18 +821,22 @@ class ObstaclesManager:
             else:
                 time.sleep(0.001)
                 break
-        for wp in response.waypoints:
-            waypoints = np.vstack([waypoints, [wp.x, wp.y]])
-        # print(waypoints[1, :])
-        return waypoints[1:, :] # the robot wp in pedsim is ignored
+        if  not self.circlePattern:
+            for wp in response.waypoints:
+                waypoints = np.vstack([waypoints, [wp.x, wp.y]])
+            # print(waypoints[1, :])
+            waypoints=waypoints[1:, :] # the robot wp in pedsim is ignored
+        return waypoints 
 
-#methods for mazes
+
+    ########################################################
+    #Methods for maze########################################
+    ########################################################
     def build_maze(self):
         self.maze=Maze()
         self.l_wall_shape, self.s_wall_shape, self._free_space_indices = self.maze.build_maze(self._free_space_indices, self.map)
         self.register_maze()
         # print('long wall centers2', self.l_walls)
-        # update_maze
 
     def register_maze(self):
         #4 short walls and 1 long wall
