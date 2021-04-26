@@ -6,14 +6,18 @@ import sys
 from stable_baselines3 import A2C
 from rl_agent.envs.flatland_gym_env import FlatlandEnv
 from task_generator.tasks import get_predefined_task
+from task_generator.clear_costmap import clear_costmaps
 import rospy
 import rospkg
 import numpy as np
 from collections import OrderedDict
 import h5py
 
-parser = argparse.ArgumentParser(description='Process some integers.')
-parser.add_argument('-o', '--outputformat', type=str, help='choose output format: "h5" or "npz"', default='h5')
+# services
+#from move_base.msg import *
+
+parser = argparse.ArgumentParser(description='.')
+parser.add_argument('-o', '--outputformat', type=str, help='choose output format: "h5" or "npz"', default='npz')
 parser.add_argument('-s', '--scenario', type=str, metavar="[scenario name]", default='/home/michael/catkin_ws/src/arena-rosnav/simulator_setup/scenerios/obstacle_map1_obs20.json', help='path of scenario json file for deployment')
 args = parser.parse_args()
 
@@ -28,6 +32,9 @@ env = FlatlandEnv(task, os.path.join(models_folder_path, 'robot', 'myrobot.model
                   os.path.join(arena_local_planner_drl_folder_path,
                                'configs', 'default_settings.yaml'), "rule_00", False,
                   )
+
+#self._service_name_clear_costmaps='/move_base/clear_costmaps'
+#self._clear_costmaps_client = rospy.ServiceProxy(self._service_name_clear_costmaps, ClearCostmaps)
 
 obs = env.reset()
 observations = []
@@ -50,6 +57,7 @@ while(True):
             # reduce repeat count by 1 and start again
             print('collision')
             task._num_repeats_curr_scene -= 1
+            clear_costmaps()
             env.reset()
         else:
             observations.append(merged_obs)
@@ -57,6 +65,7 @@ while(True):
             # try resetting the environment: this will either reset the obstacles and robot and start another episode for recording
             # or it will end the recording because all scenarios have been run their maximum number of times
             try:
+                clear_costmaps()
                 env.reset()
             except:
                 print('All scenarios have been evaluated!')
