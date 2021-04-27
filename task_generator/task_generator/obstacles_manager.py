@@ -673,7 +673,7 @@ class ObstaclesManager:
         # print(peds)
         self.agent_topic_str=''        
         for ped in peds:            
-            elements = [0, 1, 3,4]
+            elements = [0, 1, 2, 3]
             # probabilities = [0.4, 0.3, 0.3] np.random.choice(elements, 1, p=probabilities)[0]
             self.__ped_type=elements[(ped[0]-1)%4]
             if  self.__ped_type==0:
@@ -684,11 +684,11 @@ class ObstaclesManager:
                 self.agent_topic_str+=f',{self.ns_prefix}pedsim_agent_{ped[0]}/dynamic_child'
                 self.__ped_file=os.path.join(rospkg.RosPack().get_path(
                 'simulator_setup'), 'dynamic_obstacles/person_two_legged_child.model.yaml')
-            elif self.__ped_type==3:
+            elif self.__ped_type==2:
                 self.agent_topic_str+=f',{self.ns_prefix}pedsim_agent_{ped[0]}/dynamic_elder'
                 self.__ped_file=os.path.join(rospkg.RosPack().get_path(
                 'simulator_setup'), 'dynamic_obstacles/person_single_circle_elder.model.yaml')
-            elif self.__ped_type==4:
+            elif self.__ped_type==3:
                 self.agent_topic_str+=f',{self.ns_prefix}pedsim_agent_{ped[0]}/dynamic_forklift     '
                 self.__ped_file=os.path.join(rospkg.RosPack().get_path(
                 'simulator_setup'), 'dynamic_obstacles/forklift.model.yaml')
@@ -720,7 +720,7 @@ class ObstaclesManager:
             # try to call service
             response=self.__respawn_peds_srv.call(srv.peds)
             # response=self.__spawn_ped_srv.call(srv.peds)
-            if not response.finished:  # if service not succeeds, do something and redo service
+            if not response.success:  # if service not succeeds, do something and redo service
                 rospy.logwarn(
                     f"spawn human failed! trying again... [{i_curr_try+1}/{max_num_try} tried]")
                 # rospy.logwarn(response.message)
