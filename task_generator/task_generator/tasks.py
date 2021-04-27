@@ -79,8 +79,8 @@ class RandomTask(ABSTask):
                                 self.robot_manager.ROBOT_RADIUS)]
                     self.obstacles_manager.setForbidden_zones(forbiddenZones)
                     self.obstacles_manager.reset_pos_obstacles_random(forbidden_zones=forbiddenZones)
-   #                 if self.obstacles_manager.useMaze:
-    #                    self.obstacles_manager.update_maze()                    
+                    # if self.obstacles_manager.useMaze:
+                    #    self.obstacles_manager.update_maze()                    
                     break
                 except rospy.ServiceException as e:
                     rospy.logwarn(repr(e))
