@@ -5,7 +5,7 @@
 
 1:
   static: 0
-  dynamic: 15
+  dynamic: 5
 2:
   static: 0
   dynamic: 10
