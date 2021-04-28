@@ -55,8 +55,7 @@
     <node name="action_publisher" pkg="arena_local_planner_drl" type="action_publisher.py"/>
   </group>
 
-
-  <group if="$(eval arg('show_viz'))">
+ <group if="$(eval arg('show_viz'))">
   <include file="$(find arena_bringup)/launch/visualization_training.launch">
     <arg name="ns" value="sim_1" />
   </include>
