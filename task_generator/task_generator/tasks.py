@@ -197,15 +197,15 @@ class StagedRandomTask(RandomTask):
         self._remove_obstacles()
         
         static_obstacles = self._stages[self._curr_stage]['static']
-        dynamic_obstacles = self._stages[self._curr_stage]['dynamic']
+        dynamic_obstacles_human = self._stages[self._curr_stage]['dynamic_human']
+        dynamic_obstacles_robot = self._stages[self._curr_stage]['dynamic_robot']
 
-        self.obstacles_manager.register_random_static_obstacles(
-            self._stages[self._curr_stage]['static'])
-        self.obstacles_manager.register_human(
-            self._stages[self._curr_stage]['dynamic'])
+        self.obstacles_manager.register_random_static_obstacles(static_obstacles)
+        self.obstacles_manager.register_human(dynamic_obstacles_human)
+        self.obstacles_manager.register_robot(dynamic_obstacles_robot)
 
         print(
-            f"({self.ns}) Stage {self._curr_stage}: Spawning {static_obstacles} static and {dynamic_obstacles} dynamic obstacles!")
+            f"({self.ns}) Stage {self._curr_stage}: Spawning {static_obstacles} static and {dynamic_obstacles_human} dynamic human obstacles! and {dynamic_obstacles_robot} dynamic tobot obstacles!")
 
     def _read_stages_from_yaml(self):
         file_location = self._PATHS.get('curriculum')
