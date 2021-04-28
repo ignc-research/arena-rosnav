@@ -20,10 +20,6 @@ Panels:
         - /human1/MarkerArray8
         - /human1/MarkerArray9
         - /human1/MarkerArray10
-        - /human1/MarkerArray19
-        - /human1/MarkerArray20
-        - /MarkerArray1
-        - /MarkerArray2
       Splitter Ratio: 0.6526610255241394
     Tree Height: 796
   - Class: rviz/Selection
@@ -618,22 +614,6 @@ Visualization Manager:
           Value: true
         - Class: rviz/MarkerArray
           Enabled: true
-          Marker Topic: /sim_1/flatland_server/debug/model/obstacle_random_wanderer_01
-          Name: MarkerArray
-          Namespaces:
-            "": true
-          Queue Size: 100
-          Value: true
-        - Class: rviz/MarkerArray
-          Enabled: true
-          Marker Topic: /sim_1/flatland_server/debug/model/obstacle_random_wanderer_02
-          Name: MarkerArray
-          Namespaces:
-            "": true
-          Queue Size: 100
-          Value: true
-        - Class: rviz/MarkerArray
-          Enabled: true
           Marker Topic: /sim_1/flatland_server/debug/model/person_4
           Name: MarkerArray
           Namespaces:
@@ -650,22 +630,26 @@ Visualization Manager:
           Value: true
       Enabled: true
       Name: human
-    - Class: rviz/MarkerArray
+    - Class: rviz/Group
+      Displays:
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /sim_1/flatland_server/debug/model/obstacle_random_wanderer_01
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /sim_1/flatland_server/debug/model/obstacle_random_wanderer_02
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
       Enabled: true
-      Marker Topic: /sim_1/flatland_server/debug/model/obstacle_random_wanderer_01
-      Name: MarkerArray
-      Namespaces:
-        "": true
-      Queue Size: 100
-      Value: true
-    - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /sim_1/flatland_server/debug/model/person_9
-      Name: MarkerArray
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: true
+      Name: robots
   Enabled: true
   Global Options:
     Background Color: 233; 185; 110
