@@ -675,7 +675,7 @@ class ObstaclesManager:
         self.agent_topic_str=''   
         random_wanderer_id = 0  
         for ped in peds:            
-            elements = [0, 1, 2, 3]
+            elements = [0, 1, 3, 4]
             # probabilities = [0.4, 0.3, 0.3] np.random.choice(elements, 1, p=probabilities)[0]
             self.__ped_type=elements[(ped[0]-1)%4]
             if  self.__ped_type==0:
@@ -686,11 +686,11 @@ class ObstaclesManager:
                 self.agent_topic_str+=f',{self.ns_prefix}pedsim_agent_{ped[0]}/dynamic_child'
                 self.__ped_file=os.path.join(rospkg.RosPack().get_path(
                 'simulator_setup'), 'dynamic_obstacles/person_two_legged_child.model.yaml')
-            elif self.__ped_type==2:
+            elif self.__ped_type==3:
                 self.agent_topic_str+=f',{self.ns_prefix}pedsim_agent_{ped[0]}/dynamic_elder'
                 self.__ped_file=os.path.join(rospkg.RosPack().get_path(
                 'simulator_setup'), 'dynamic_obstacles/person_single_circle_elder.model.yaml')
-            elif self.__ped_type==3:
+            elif self.__ped_type==4:
                 self.agent_topic_str+=f',{self.ns_prefix}pedsim_agent_{ped[0]}/dynamic_forklift     '
                 self.__ped_file=os.path.join(rospkg.RosPack().get_path(
                 'simulator_setup'), 'dynamic_obstacles/big_forklift.model.yaml')
@@ -725,7 +725,7 @@ class ObstaclesManager:
         
             response=self.__respawn_peds_srv.call(srv.peds)
             # response=self.__spawn_ped_srv.call(srv.peds)
-            if not response.success:  # if service not succeeds, do something and redo service
+            if not response.finished:  # if service not succeeds, do something and redo service
                 rospy.logwarn(
                     f"spawn human failed! trying again... [{i_curr_try+1}/{max_num_try} tried]")
                 # rospy.logwarn(response.message)
@@ -735,7 +735,7 @@ class ObstaclesManager:
         self.__peds = peds
         rospy.set_param(f'{self.ns_prefix}agent_topic_string', self.agent_topic_str)
         model_yaml_file_path = os.path.join(rospkg.RosPack().get_path('simulator_setup'), 'dynamic_obstacles/random_wanderer.model.yaml')
-        # self.spawn_agents_in_flatland(random_wanderer_id,model_yaml_file_path)
+        self.spawn_agents_in_flatland(random_wanderer_id,model_yaml_file_path)
 
 
         return
