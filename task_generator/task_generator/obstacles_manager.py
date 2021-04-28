@@ -725,7 +725,7 @@ class ObstaclesManager:
         
             response=self.__respawn_peds_srv.call(srv.peds)
             # response=self.__spawn_ped_srv.call(srv.peds)
-            if not response.finished:  # if service not succeeds, do something and redo service
+            if not response.success:  # if service not succeeds, do something and redo service
                 rospy.logwarn(
                     f"spawn human failed! trying again... [{i_curr_try+1}/{max_num_try} tried]")
                 # rospy.logwarn(response.message)
