@@ -14,9 +14,12 @@ Panels:
         - /human1/MarkerArray2
         - /human1/MarkerArray3
         - /human1/MarkerArray4
-        - /human1/MarkerArray20
-        - /MarkerArray1
-        - /MarkerArray2
+        - /human1/MarkerArray5
+        - /human1/MarkerArray6
+        - /human1/MarkerArray7
+        - /human1/MarkerArray8
+        - /human1/MarkerArray9
+        - /human1/MarkerArray10
       Splitter Ratio: 0.6526610255241394
     Tree Height: 796
   - Class: rviz/Selection
@@ -36,7 +39,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: ""
+    SyncSource: LaserScan
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -338,6 +341,10 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: false
+        _base:
+          Value: true
+        _laser_link:
+          Value: true
         eval_sim_odom:
           Value: true
         map:
@@ -440,7 +447,7 @@ Visualization Manager:
       Marker Topic: /sim_1/planning_vis/goal
       Name: Marker
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
       Value: true
     - Class: rviz/Marker
@@ -463,7 +470,55 @@ Visualization Manager:
       Displays:
         - Class: rviz/MarkerArray
           Enabled: true
-          Marker Topic: /sim_1/flatland_server/debug/model/obstacle_random_wanderer_00
+          Marker Topic: /sim_1/flatland_server/debug/model/person_1
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /sim_1/flatland_server/debug/model/person_2
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /sim_1/flatland_server/debug/model/person_3
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /sim_1/flatland_server/debug/model/person_4
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /sim_1/flatland_server/debug/model/person_5
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /sim_1/flatland_server/debug/model/person_6
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /sim_1/flatland_server/debug/model/person_7
           Name: MarkerArray
           Namespaces:
             {}
@@ -479,63 +534,15 @@ Visualization Manager:
           Value: true
         - Class: rviz/MarkerArray
           Enabled: true
-          Marker Topic: /sim_1/flatland_server/debug/model/person_7
+          Marker Topic: /sim_1/flatland_server/debug/model/person_9
           Name: MarkerArray
           Namespaces:
             {}
-          Queue Size: 100
-          Value: true
-        - Class: rviz/MarkerArray
-          Enabled: true
-          Marker Topic: /sim_1/flatland_server/debug/model/person_6
-          Name: MarkerArray
-          Namespaces:
-            {}
-          Queue Size: 100
-          Value: true
-        - Class: rviz/MarkerArray
-          Enabled: true
-          Marker Topic: /sim_1/flatland_server/debug/model/person_1
-          Name: MarkerArray
-          Namespaces:
-            "": true
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
           Enabled: true
           Marker Topic: /sim_1/flatland_server/debug/model/person_10
-          Name: MarkerArray
-          Namespaces:
-            {}
-          Queue Size: 100
-          Value: true
-        - Class: rviz/MarkerArray
-          Enabled: true
-          Marker Topic: /sim_1/flatland_server/debug/model/person_11
-          Name: MarkerArray
-          Namespaces:
-            {}
-          Queue Size: 100
-          Value: true
-        - Class: rviz/MarkerArray
-          Enabled: true
-          Marker Topic: /sim_1/flatland_server/debug/model/person_12
-          Name: MarkerArray
-          Namespaces:
-            {}
-          Queue Size: 100
-          Value: true
-        - Class: rviz/MarkerArray
-          Enabled: true
-          Marker Topic: /sim_1/flatland_server/debug/model/person_13
-          Name: MarkerArray
-          Namespaces:
-            {}
-          Queue Size: 100
-          Value: true
-        - Class: rviz/MarkerArray
-          Enabled: true
-          Marker Topic: /sim_1/flatland_server/debug/model/person_14
           Name: MarkerArray
           Namespaces:
             {}
@@ -607,22 +614,6 @@ Visualization Manager:
           Value: true
         - Class: rviz/MarkerArray
           Enabled: true
-          Marker Topic: /sim_1/flatland_server/debug/model/person_3
-          Name: MarkerArray
-          Namespaces:
-            "": true
-          Queue Size: 100
-          Value: true
-        - Class: rviz/MarkerArray
-          Enabled: true
-          Marker Topic: /eval_sim/flatland_server/debug/layer/static
-          Name: MarkerArray
-          Namespaces:
-            "": true
-          Queue Size: 100
-          Value: true
-        - Class: rviz/MarkerArray
-          Enabled: true
           Marker Topic: /sim_1/flatland_server/debug/model/person_4
           Name: MarkerArray
           Namespaces:
@@ -634,27 +625,31 @@ Visualization Manager:
           Marker Topic: /sim_1/flatland_server/debug/model/person_5
           Name: MarkerArray
           Namespaces:
-            {}
+            "": true
           Queue Size: 100
           Value: true
       Enabled: true
       Name: human
-    - Class: rviz/MarkerArray
+    - Class: rviz/Group
+      Displays:
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /sim_1/flatland_server/debug/model/obstacle_random_wanderer_01
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /sim_1/flatland_server/debug/model/obstacle_random_wanderer_02
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
       Enabled: true
-      Marker Topic: /sim_1/flatland_server/debug/model/obstacle_random_wanderer_01
-      Name: MarkerArray
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: true
-    - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /sim_1/flatland_server/debug/model/person_9
-      Name: MarkerArray
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: true
+      Name: robots
   Enabled: true
   Global Options:
     Background Color: 233; 185; 110
@@ -681,7 +676,7 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Angle: -7.885009288787842
+      Angle: -7.865006446838379
       Class: rviz/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
@@ -691,7 +686,7 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 16.07124900817871
+      Scale: 20.050844192504883
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
       X: 2.833331823348999
