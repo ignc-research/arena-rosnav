@@ -1,8 +1,16 @@
+# Installation
+The evaluation script need some packages in order to work
+```
+pip install sklearn
+```
+
 # Evaluation
 
 The evaluation script will compare different planners provided as rosbags. The bags need to be recorded while running a scenario (see here), since some topics are needed by the script. The script file is located in script/scenario_eval.py
 
-Once the config id ready, one can easily start the evaluation by ```python scenario_eval.py test.yml png``` 
+Once the config id ready, one can easily start the evaluation by starting the simulation with the map from which the rosbags were recorded e.g. officemap and afterwards run:
+
+```python scenario_eval.py test.yml png``` 
 
 
 ## yml config
