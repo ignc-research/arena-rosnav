@@ -105,8 +105,9 @@ class FlatlandEnv(gym.Env):
             ns, mode=task_mode, start_stage=kwargs['curr_stage'], PATHS=PATHS)
         # observation collector
         num_humans=self.task.obstacles_manager.num_humans
+        num_robo_obstacles=self.task.obstacles_manager.num_robo_obstacles
         self.observation_collector = ObservationCollector(
-            self.ns, self._laser_num_beams, self._laser_max_range, num_humans)
+            self.ns, self._laser_num_beams, self._laser_max_range, num_humans,num_robo_obstacles)
         self.observation_space = self.observation_collector.get_observation_space()
         #csv writer
         self.csv_writer=CSVWriter()

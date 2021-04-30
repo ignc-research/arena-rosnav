@@ -202,10 +202,10 @@ class StagedRandomTask(RandomTask):
 
         self.obstacles_manager.register_random_static_obstacles(static_obstacles)
         self.obstacles_manager.register_human(dynamic_obstacles_human)
-        self.obstacles_manager.register_robot(dynamic_obstacles_robot)
+        self.obstacles_manager.register_robo_obstacle(dynamic_obstacles_robot)
 
         print(
-            f"({self.ns}) Stage {self._curr_stage}: Spawning {static_obstacles} static and {dynamic_obstacles_human} dynamic human obstacles! and {dynamic_obstacles_robot} dynamic tobot obstacles!")
+            f"({self.ns}) Stage {self._curr_stage}: Spawning {static_obstacles} static and {dynamic_obstacles_human} dynamic human obstacles! and {dynamic_obstacles_robot} dynamic robo obstacles!")
 
     def _read_stages_from_yaml(self):
         file_location = self._PATHS.get('curriculum')

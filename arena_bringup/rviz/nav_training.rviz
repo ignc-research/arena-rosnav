@@ -20,6 +20,9 @@ Panels:
         - /human1/MarkerArray8
         - /human1/MarkerArray9
         - /human1/MarkerArray10
+        - /robots1
+        - /robots1/MarkerArray1
+        - /robots1/MarkerArray2
       Splitter Ratio: 0.6526610255241394
     Tree Height: 796
   - Class: rviz/Selection
@@ -634,18 +637,18 @@ Visualization Manager:
       Displays:
         - Class: rviz/MarkerArray
           Enabled: true
-          Marker Topic: /sim_1/flatland_server/debug/model/obstacle_random_wanderer_01
+          Marker Topic: /sim_1/flatland_server/debug/model/robo_obstacle_01
           Name: MarkerArray
           Namespaces:
-            "": true
+            {}
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
           Enabled: true
-          Marker Topic: /sim_1/flatland_server/debug/model/obstacle_random_wanderer_02
+          Marker Topic: /sim_1/flatland_server/debug/model/robo_obstacle_02
           Name: MarkerArray
           Namespaces:
-            "": true
+            {}
           Queue Size: 100
           Value: true
       Enabled: true

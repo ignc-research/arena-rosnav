@@ -16,6 +16,7 @@ from geometry_msgs.msg import Pose2D, PoseStamped, PoseWithCovarianceStamped
 from geometry_msgs.msg import Twist
 from pedsim_msgs.msg import AgentState
 from arena_plan_msgs.msg import RobotState, RobotStateStamped
+from visualization_msgs.msg import Marker, MarkerArray
 from nav_msgs.msg import Path
 from rosgraph_msgs.msg import Clock
 
@@ -36,7 +37,7 @@ from std_msgs.msg import Bool
 from rl_agent.utils.debug import timeit 
 
 class ObservationCollector():
-    def __init__(self, ns: str, num_lidar_beams: int, lidar_range: float, num_humans:int):
+    def __init__(self, ns: str, num_lidar_beams: int, lidar_range: float, num_humans:int, num_robo_obstacles:int):
         """ a class to collect and merge observations
 
         Args:
@@ -55,12 +56,14 @@ class ObservationCollector():
         self.safe_dist_elder = 1.5
         self.safe_dist_talking = 0.8
         self.safe_dist_forklift = 1.5
+        self.safe_dist_randomwandrer = 1.5
         #settings for agents TODO: should be transferred from yaml files
         self._radius_adult= 0.32
         self._radius_child= 0.25
         self._radius_elder= 0.3
         self._radius_robot= 0.3
         self._radius_forklift= 0.3
+        self._radius_randomwandrer = 0.3
 
         # define observation_space
         self.num_humans_observation_max=21
@@ -92,7 +95,7 @@ class ObservationCollector():
         self.last = 0
         self.last_r = 0
         self.agent_state=[]
-
+        self.robo_obstacle_state=[]
         #subscribtions
         self._scan_sub = message_filters.Subscriber( f'{self.ns_prefix}scan', LaserScan)  #subscribe to robot scan 
         self._robot_state_sub = message_filters.Subscriber(f'{self.ns_prefix}robot_state', RobotStateStamped) #subscribe to robot state 
@@ -102,14 +105,30 @@ class ObservationCollector():
         self.num_humans=num_humans
         for i in range(num_humans):
             self.agent_state.append(f'{self.ns_prefix}pedsim_agent_{i+1}/agent_state') #making a a list of the topics names 
+
         self._sub_agent_state=[None]*num_humans
         for i, topic in enumerate(self.agent_state):
             self._sub_agent_state[i]=message_filters.Subscriber(topic, AgentState) #subscribing to the topics of every Agent
+        #robots state subscriper
+        self.num_robo_obstacles=num_robo_obstacles
+        for i in range(num_robo_obstacles):
+            if i <10 :
+             self.robo_obstacle_state.append(f'{self.ns_prefix}robo_obstacle_0{i+1}') #making a a list of the topics names 
+            else:
+                self.robo_obstacle_state.append(f'{self.ns_prefix}/robo_obstacle_{i+1}') #making a a list of the topics names 
+        self._sub_robo_obstacles_state=[None]*num_robo_obstacles
+        for i, topic in enumerate(self.robo_obstacle_state):
+            self._sub_robo_obstacles_state[i]=message_filters.Subscriber(topic, Marker) #subscribing to the topics of every robo osbstacle
+        
         #intilasing arrays for human states
         self._human_type=np.array( [None]*num_humans)
         self._human_position=np.array( [None]*num_humans)
         self._human_vel=np.array( [None]*num_humans)
         self._human_behavior=np.array( [None]*num_humans)
+       
+        #intilasing arrays for human states
+        self._robo_obstacle_position=np.array( [None]*num_robo_obstacles)
+        print("topics are ",self.robo_obstacle_state)
  
 
         #synchronization parameters
@@ -118,11 +137,13 @@ class ObservationCollector():
         self._sync_slop = 0.05
         self._laser_deque = deque()
         self._rs_deque = deque()
-        
+
+
         # message_filters.TimeSynchronizer: call callback only when all sensor info are ready
-        self.sychronized_list=[self._scan_sub, self._robot_state_sub]+self._sub_agent_state #[self._scan_sub, self._robot_state_sub]+self._adult+self._child+self._elder
-        self.ts = message_filters.ApproximateTimeSynchronizer(self.sychronized_list, 10, slop=0.01) #,allow_headerless=True)
+        self.sychronized_list=[self._scan_sub, self._robot_state_sub]+self._sub_agent_state  + self._sub_robo_obstacles_state #[self._scan_sub, self._robot_state_sub]+self._adult+self._child+self._elder
+        self.ts = message_filters.ApproximateTimeSynchronizer(self.sychronized_list, 10, slop=0.1) #,allow_headerless=True)
         self.ts.registerCallback(self.callback_observation_received)
+
 
     def get_observation_space(self):
         return self.observation_space
@@ -343,12 +364,21 @@ class ObservationCollector():
     def callback_observation_received(self, *msg):
         self._scan=self.process_scan_msg(msg[0])
         self._robot_pose,self._robot_vel=self.process_robot_state_msg(msg[1])
-        self.callback_agent_state(msg[2:])
+        self.callback_agent_state(msg[2:self.num_humans+2])
+        self.callback_robo_obstacle_state(msg[self.num_humans+3:])
+        # print("calling back")
+
         self._flag_all_received=True
 
     def callback_agent_state(self, msg):
-            for i, m in enumerate(msg):
-                self._human_type[i],self._human_position[i],self._human_vel[i], self._human_behavior[i]=self.process_agent_state(m)
+        for i, m in enumerate(msg):
+            self._human_type[i],self._human_position[i],self._human_vel[i], self._human_behavior[i]=self.process_agent_state(m)
+
+    def callback_robo_obstacle_state(self, msg):
+        # print("calling back massages ",msg)
+        for i, m in enumerate(msg):
+            self._robo_obstacle_position[i]=self.process_robo_obstacle_state(m)
+            # print("recieved",self._robo_obstacle_position[i])
 
     def process_agent_state(self,msg):
         human_type=msg.type
@@ -356,6 +386,11 @@ class ObservationCollector():
         human_twist=msg.twist
         human_behavior=msg.social_state.strip("\"")
         return human_type,human_pose, human_twist, human_behavior
+    
+    def process_robo_obstacle_state(self,msg):
+
+        robo_obstacle_pose=self.pose3D_to_pose2D(msg.pose)
+        return robo_obstacle_pose
 
     def process_scan_msg(self, msg_LaserScan: LaserScan):
         # remove_nans_from_scan
