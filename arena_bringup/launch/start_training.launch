@@ -15,6 +15,8 @@
   <arg name="obs_vel" default="0.3" />
   <!-- if it's false flatland server will not publish any debug related infomation and you will not able to visuzalize e.g robot, dynamic obstacles  -->
   <arg name="show_viz"  default="true"/>
+  <arg name="rviz_file"  default="nav_training"/>
+
   <!-- plan manager related params -->
   <!-- in meters -->
   <arg name="look_ahead_distance"   default="1.5"/>
@@ -58,6 +60,7 @@
   <group if="$(eval arg('show_viz'))">
   <include file="$(find arena_bringup)/launch/visualization_training.launch">
     <arg name="ns" value="sim_1" />
+    <arg name="rviz_file" value="$(arg rviz_file)" />
   </include>
   </group>
 
