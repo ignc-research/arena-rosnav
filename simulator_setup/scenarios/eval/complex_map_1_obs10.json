@@ -6,7 +6,7 @@
 			"dynamic_obstacles": {
 				"dynamic_obs_0": {
 					"obstacle_radius": 0.26625,
-					"linear_velocity": 0.3,
+					"linear_velocity": 0.2,
 					"type": "circle",
 					"start_pos": [
 						12.5955,
