@@ -158,6 +158,9 @@ class NN_tb3():
 
     def get_laser_observation(self):
         scan = copy.deepcopy(self.scan)
+        sub_array = np.hsplit(scan,4)  #adapt scan info when min and max angel equal to [-1.57,4.69] (rlca is [-3.14,3.14])
+        scan = np.concatenate((sub_array[3],sub_array[0],sub_array[1],sub_array[2]))   #adapt scan info when min and max angel equal to [-1.57,4.69] (rlca is [-3.14,3.14])
+
         scan[np.isnan(scan)] = 6.0
         scan[np.isinf(scan)] = 6.0
         raw_beam_num = len(scan)
