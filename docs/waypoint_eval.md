@@ -141,6 +141,7 @@ These can be found in the directory: arena-rosnav/arena_navigation/arena_local_p
     ```  
 - col-rl:
   - pip install mpi4py
+  - sudo apt install openssh-server
 
 
 1. [Terminal 1] Start the simulation with the respective local planners by setting the parameter local_planner (ie "teb"):
