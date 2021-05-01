@@ -12,7 +12,7 @@ default_cfg:
     plot_sm:         1        # plot static map
     plot_gp:         0        # plot global plan
     plot_subgoals:   0        # plot subgoals
-    folder:          "run_5/" # folder containing the planners
+    folder:          "run_2/" # folder containing the planners
 
 
 # ------------ figure block ------------
