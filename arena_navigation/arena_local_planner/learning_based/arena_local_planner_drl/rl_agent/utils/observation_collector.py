@@ -183,7 +183,11 @@ class ObservationCollector():
             high.extend(space.high.tolist())
         return spaces.Box(np.array(low).flatten(),np.array(high).flatten())
 
-
+    @staticmethod
+    def process_global_plan_msg_to_array(globalplan):
+        global_plan_2d = list(map(lambda p: ObservationCollector.pose3D_to_pose2D(p.pose), globalplan.poses))
+        global_plan_np = np.array(list(map(lambda p2d: [p2d.x,p2d.y], global_plan_2d)))
+        return global_plan_np
         
    
 

@@ -159,7 +159,7 @@ if __name__ == "__main__":
     env = DummyVecEnv([lambda: wp3Env(task, PATHS.get('robot_setting'), PATHS.get('robot_as'), discrete_action_space, goal_radius=1.25, max_steps_per_episode=150)] * n_envs)
    
     # instantiate eval environment
-    eval_env = Monitor(wp3Env(task, PATHS.get('robot_setting'), PATHS.get('robot_as'), discrete_action_space, goal_radius=1.25, max_steps_per_episode=150), PATHS.get('eval'), info_keywords=("done_reason","test"))
+    eval_env = Monitor(wp3Env(task, PATHS.get('robot_setting'), PATHS.get('robot_as'), discrete_action_space, goal_radius=1.25, max_steps_per_episode=150), PATHS.get('eval'), info_keywords=("done_reason","gp_len","wp_set"))
     eval_cb = EvalCallback(eval_env, n_eval_episodes=50, eval_freq=1, log_path=PATHS.get('eval'), best_model_save_path=PATHS.get('model'), deterministic=True)
 
     # determine mode

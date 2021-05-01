@@ -305,21 +305,23 @@ class wp3Env(gym.Env):
             goal_len=self.goal_len, 
             action_count= self._action_count,
             subgoal=self._action_msg.pose.position)
-
+		
         done = reward_info['is_done']
         print("reward:  {}".format(reward))
         # info
         info = {}
         if done:
             info['done_reason'] = reward_info['done_reason']
-            info['goal_len'] = self.goal_len
             self.reward_calculator.kdtree = None
+            info['gp_len'] = len(ObservationCollector.process_global_plan_msg_to_array(self._globalPlan))
+            info['wp_set'] = self._action_count
 
         if self._steps_curr_episode > self._max_steps_per_episode:
             done = True
             info['done_reason'] = 0
             info['is_success'] = 0
             self.reward_calculator.kdtree = None
+            info['gp_len'] = len(self._globalPlanArray)
 
         return merged_obs, reward, done, info
 
