@@ -72,13 +72,13 @@ docker restart ros
 
 
 ## Develop in VS Code
-1. Necessary extensions in VS Code
-   + Remote Development
-   + Docker
-2. After executing steps in "Create containers" part, enter the container by VS Code
-    a) Open Command Palette by `F1` or `CMD + Shift + p` (windows `Ctrl + Shift + p`)
-    b) Input `Attach to Running Container` and select Remote-Containers: Attach to Running Container
-    c) Then select container named /ros
-Now the VS Code will open a new window
+1. Necessary extensions in VS Code  
+   + Remote Development  
+   + Docker  
+2. After executing steps in "Create containers" part, enter the container by VS Code  
+    a) Open Command Palette by `F1` or `CMD + Shift + p` (windows `Ctrl + Shift + p`)  
+    b) Input `Attach to Running Container` and select Remote-Containers: Attach to Running Container  
+    c) Then select container named /ros  
+   Now the VS Code will open a new window  
     d) Select and open the folder you want by `CMD + o` (windows `Ctrl + o`)
 
