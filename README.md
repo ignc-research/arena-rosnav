@@ -51,6 +51,9 @@ Train DRL agents on ROS compatible simulations for autonomous navigation in high
 ## 1. Installation
 Please refer to [Installation.md](docs/Installation.md) for detailed explanations about the installation process.
 
+## 1.1. Docker
+We provide a Docker file to run our code on other operating systems. Please refer to [Docker.md](docs/Docker.md) for more information.
+
 ## 2. Usage
 
 ### DRL Training
