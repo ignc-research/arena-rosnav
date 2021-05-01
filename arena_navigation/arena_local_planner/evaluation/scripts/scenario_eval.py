@@ -834,8 +834,8 @@ def getMap(msg):
     # print(msg.markers[0])
     for p in msg.markers[0].points:
         if  2 < p.y < 25 :
-            points_x.append(p.x-6)
-            points_y.append(-p.y+6)
+            points_x.append(p.x-16.6)
+            points_y.append(-p.y+6.65)
     # plt.scatter(points_y, points_x)
     sm = [points_x, points_y]
 
@@ -849,7 +849,7 @@ def run(cfg_file, filetype):
     grid_step            = 2
         
     # static map
-    rospy.init_node("eval", anonymous=False)
+    rospy.init_node("eval", disable_signals=True)
     rospy.Subscriber('/flatland_server/debug/layer/static',MarkerArray, getMap)
     
 
