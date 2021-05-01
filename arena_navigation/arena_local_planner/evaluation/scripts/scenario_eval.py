@@ -29,6 +29,7 @@ from sklearn.cluster import AgglomerativeClustering
 import gplan_analysis as gplan
 matplotlib.rcParams.update({'font.size': 15})
 # 
+from termcolor import colored, cprint
 class newBag():
     def __init__(self, planner, file_name, bag_name):
         # planner
@@ -565,7 +566,6 @@ class newBag():
                     
                     # check if collision in cell
                     if p_x1 <= x and p_y1 <= y and  p_x2 <= x and p_y2 >= y and p_x3 >= x and p_y3 >= y and p_x4 >= x and p_y4 <= y:
-                        #print(cell_nr)
                         if cell_nr in zones:
                             zones[cell_nr].append([x,y])
                             # average center
@@ -664,6 +664,11 @@ class newBag():
         #         circle = plt.Circle((i[0], i[1]), radius, color=clr, fill = False, alpha = 1, lw = 2)
         #         ax.add_patch(circle)
 
+def fancy_print(msg,success):
+    if success:
+        cprint(msg + " "u'\N{check mark}', "green")
+    else:
+        cprint(msg, "yellow")
 
 def plot_arrow(start,end):
     global ax
@@ -730,22 +735,34 @@ def eval_cfg(cfg_file, filetype):
     cur_path    = str(pathlib.Path().absolute()) 
     parent_path = str(os.path.abspath(os.path.join(cur_path, os.pardir)))
     
+    fancy_print("loading config: " + cfg_file, 0)
     # load default config
     with open(cfg_file, "r") as ymlfile:
         cfg = yaml.safe_load(ymlfile)
     default_cfg = cfg["default_cfg"]
-    plt_cfg  = copy.deepcopy(default_cfg)
+    fancy_print("loading config: " + cfg_file, 1)
 
+
+
+    plt_cfg  = copy.deepcopy(default_cfg)
+  
     for curr_figure in cfg:
         # plot file name
-        plot_file = '../plots/' + curr_figure + "." + filetype 
+        cfg_folder = cfg_file.replace(".yml","")
+        cfg_folder = cfg_folder.replace(".yaml","")
+        if not os.path.exists('../plots/' + cfg_folder):
+            os.mkdir('../plots/' + cfg_folder)
+
+        plot_file        = '../plots/' + cfg_folder + "/" + curr_figure + "." + filetype 
+        plot_file_exists = os.path.isfile(plot_file)
         # print(curr_figure)
         if "custom_cfg" in curr_figure:
             for param in cfg[curr_figure]:
                 plt_cfg[param] = cfg[curr_figure][param]
             # print("----------------")
             # pp.pprint(plt_cfg)
-        elif "default" not in curr_figure and not os.path.isfile(plot_file):
+        
+        elif "default" not in curr_figure and not plot_file_exists:
             fig, ax  = plt.subplots(figsize=(6, 7))
 
             ca = curr_figure.split("_")
@@ -763,10 +780,7 @@ def eval_cfg(cfg_file, filetype):
 
 
             if not "empty" in map and plt_cfg["plot_sm"]:
-    #             # img = plt.imread("map_small.png")
-    #             # ax.imshow(img, extent=[-20, 6, -6, 27.3])
                 plt.scatter(sm[1], sm[0],s = 0.2 , c = "grey")
-    #             # plt.plot(sm[1], sm[0],"--")
 
             for planner in cfg[curr_figure]["planner"]:
                 # config plot param for planner
@@ -806,24 +820,19 @@ def eval_cfg(cfg_file, filetype):
                                  wpg in file
 
                     if file.endswith(".bag") and file_match:
-                        # fn = planner + "_" + mode
-                        # print(fn)
-    #                     # if "subsample" not in fn or "esdf" not in fn:
-    #                     #     fn.replace("02","03")
-    #                     # print(file, fn)
-                        
+
+                        fancy_print("Evaluate bag: " + file, 0)
                         planner_wpg = planner.split("_")[0] + "wpg" + wpg 
                         newBag(planner_wpg, curr_figure, curr_bag + "/" + file)
+                        fancy_print("Evaluate bag: " + file, 1)
+
             
-            #box = ax.get_position()
-            #ax.set_position([box.x0, box.y0, box.width * 0.7, box.height])
-            #,bbox_to_anchor=(0.55, 0.3)
+
             ax.legend(handles=legend_elements, loc=1)
             plt.subplots_adjust(top = 1, bottom = 0, right = 1, left = 0, hspace = 0, wspace = 0)
             plt.savefig(plot_file, bbox_inches = 'tight', pad_inches = 0)
             # reset plot cfg to default
             plt_cfg = copy.deepcopy(default_cfg)
-
 
     plt.show()
 
@@ -832,10 +841,15 @@ def getMap(msg):
     points_x = []
     points_y = []
     # print(msg.markers[0])
+    orig_x = -6
+    orig_y = -6
     for p in msg.markers[0].points:
-        if  2 < p.y < 25 :
-            points_x.append(p.x-16.6)
-            points_y.append(-p.y+6.65)
+    #     if  2 < p.y < 25 :
+        points_x.append( p.x + orig_x)
+        points_y.append(-p.y - orig_y)
+
+
+
     # plt.scatter(points_y, points_x)
     sm = [points_x, points_y]
 
@@ -846,7 +860,7 @@ def run(cfg_file, filetype):
 
     select_run = []
 
-    grid_step            = 2
+    grid_step  = 2
         
     # static map
     rospy.init_node("eval", disable_signals=True)
@@ -856,7 +870,9 @@ def run(cfg_file, filetype):
     # eval_cfg("eval_run3_empty.yml")
     # eval_cfg("eval_run3_map1.yml")
     # eval_cfg("eval_test.yml")
+    fancy_print("Start Evaluation: " + cfg_file, 0)
     eval_cfg(cfg_file, filetype)
+    fancy_print("Evaluation finished: " + cfg_file, 1)
 
 
 
@@ -871,10 +887,10 @@ if __name__=="__main__":
         else:
             filetype = "png"
     except Exception as e:
-        print(e)
-        print("\nCall this script like this: python scenario_eval.py '$config.yml' '$format'")
-        print("Example:  python scenario_eval.py 'test.yml' 'pdf'")
-        print("This will generate figures defined in test.yml as pdf files.")
-        print("If $format is left empty, output files will default to png.")
-        
+        cprint(e, 'red')
+        cprint("\nCall this script like this: python scenario_eval.py '$config.yml' '$format'", 'red')
+        cprint("Example:  python scenario_eval.py 'test.yml' 'pdf'", 'green')
+        cprint("This will generate figures defined in test.yml as pdf files.", 'red')
+        cprint("If $format is left empty, output files will default to png.\n", 'red')
+        # cprint('Hello, World!', 'red')
     run(yml_file, filetype)
