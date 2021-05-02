@@ -88,8 +88,8 @@ For example with `map_resolution` = 0.05, `scale` = 1.0, `X_rviz` = 0.3m and `Y_
 6. If you want to create multiple complicated scenarios where only one thing is different, be smart and create only one complicated scenario and then multiple easy, almost empty ones, where only the part that is different is generated and then from the resulted json file copy-paste the difference into the complicated scenario.
 
 | scenario_map = 'input/all_maps/map1.png' <br /> number_obstacles_default = '5' <br /> map_resolution_default = '0.05' </br> map_origin_default = '-6.0, -6.0, 0.0' </br> obstacle_vel_default = '0.3' </br> obstacle_motion_default = 'yoyo' </br> obstacle_radius_default = 10.0 # in px</br> watcher_radius_default = 25.0 # in px</br> number_static_obstacles_default = 2 </br> number_dynamic_obstacles_default = 3 | <img height="400" src="media/img/scenario_stat_dyn.png"> |
-|--| :--:| 
-| *Default parameters for easier creation* | *Scenario with both static and dynamic obstacles* |
+|:--| :--:| 
+| *Default parameters for easier creation* | *Example scenario with both static and dynamic obstacles* |
 
 ### Legend for the already used maps
 
