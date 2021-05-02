@@ -28,6 +28,8 @@
   <!-- trival params, you may change it but makes not much sense -->
   <arg name="viz_pub_rate" default="30" />
 
+  <arg name="show_pedsim_labels" default="true"/>
+
   <!--  PARAMS DON'T CHANGE THEM  -->
   <param name="update_rate" value="$(arg update_rate)" />
   <param name="use_sim_time" value="true" />
