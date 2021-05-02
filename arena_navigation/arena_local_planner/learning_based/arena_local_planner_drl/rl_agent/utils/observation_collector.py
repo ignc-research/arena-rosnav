@@ -67,6 +67,7 @@ class ObservationCollector():
 
         # define observation_space
         self.num_humans_observation_max=21
+        self.num_humans_observation_max = 12
         self.observation_space = ObservationCollector._stack_spaces((
             spaces.Box(low=-np.PINF, high=np.PINF, shape=(1,),dtype=np.float64), #time
             spaces.Box(low=0.0, high=lidar_range, shape=(num_lidar_beams,),dtype=np.float64), #lidar
@@ -127,8 +128,9 @@ class ObservationCollector():
         self._human_behavior=np.array( [None]*num_humans)
        
         #intilasing arrays for human states
+        self._robo_obstacle_type=np.array( [None]*num_robo_obstacles)
         self._robo_obstacle_position=np.array( [None]*num_robo_obstacles)
-        print("topics are ",self.robo_obstacle_state)
+        self._robo_obstacle_vel=np.array( [None]*num_robo_obstacles)
  
 
         #synchronization parameters
@@ -138,10 +140,9 @@ class ObservationCollector():
         self._laser_deque = deque()
         self._rs_deque = deque()
 
-
         # message_filters.TimeSynchronizer: call callback only when all sensor info are ready
         self.sychronized_list=[self._scan_sub, self._robot_state_sub]+self._sub_agent_state  + self._sub_robo_obstacles_state #[self._scan_sub, self._robot_state_sub]+self._adult+self._child+self._elder
-        self.ts = message_filters.ApproximateTimeSynchronizer(self.sychronized_list, 10, slop=0.1) #,allow_headerless=True)
+        self.ts = message_filters.ApproximateTimeSynchronizer(self.sychronized_list, 10, slop=0.1) 
         self.ts.registerCallback(self.callback_observation_received)
 
 
@@ -183,11 +184,14 @@ class ObservationCollector():
         obs_dict = {}
         obs_dict["laser_scan"] = scan
         obs_dict['goal_in_robot_frame'] = [rho,theta]
-
+        # initlaising array with dimensions an filling them up with coordinate of agents and rho(density)and theta (angle)
         rho_humans, theta_humans=np.empty([self.num_humans,]), np.empty([self.num_humans,])
         coordinate_humans= np.empty([2,self.num_humans])
+        # print("human",self._human_position)
+
         for  i, position in enumerate(self._human_position):
             #TODO temporarily use the same fnc of _get_pose_in_robot_frame (finished)
+            # print(self._human_position)
             coordinate_humans[0][i]=position.x
             coordinate_humans[1][i]=position.y
             rho_humans[i], theta_humans[i] = ObservationCollector._get_pose_in_robot_frame(position, self._robot_pose)
@@ -199,19 +203,20 @@ class ObservationCollector():
         self._human_vel=self._human_vel[human_pos_index]
         self._human_position=self._human_position[human_pos_index]
         self._human_behavior=self._human_behavior[human_pos_index]
-
+        # add them to obs_dict
         obs_dict['human_coordinates_in_robot_frame']=coordinate_humans
         obs_dict['human_type']=self._human_type
         obs_dict['human_behavior']=self._human_behavior
 
         # semantic tokens
         self._human_behavior_token=(self._human_behavior=='talking').astype(np.int)
-        # print(self._human_behavior)
+
 
         rho_behavior_adult = np.array([],dtype=object).reshape(0, 2)
         rho_behavior_child = np.array([],dtype=object).reshape(0, 2)
         rho_behavior_elder = np.array([],dtype=object).reshape(0, 2)
         rho_behavior_forklift = np.array([],dtype=object).reshape(0, 2) 
+        # 
         for i, ty in enumerate(self._human_type):
             # filter the obstacles which are not in the visible range of the robot
             if not self.IsInViewRange(20, [-2.618,2.618], rho_humans[i], theta_humans[i]):
@@ -224,10 +229,11 @@ class ObservationCollector():
                     safe_dist_=self.safe_dist_talking
                 else:
                     safe_dist_=self.safe_dist_adult
-                #robot centric 
+                #robot centric 4 elements in state
                 state=ObservationCollector.rotate(self.robot_self_state[:2]+[self._human_position[i].x, self._human_position[i].y, self._human_vel[i].linear.x,self._human_vel[i].linear.y], self.rot)
                 obs=np.array(self.robot_self_state+[rho_humans[i], theta_humans[i]]+state+[safe_dist_ ,self._radius_adult,
                                                 self._radius_adult+safe_dist_+self._radius_robot,self._human_behavior_token[i]])
+                
                 merged_obs = np.hstack([merged_obs,obs])
             elif ty==1: # child
                 rho_behavior=np.array([rho_humans[i],self._human_behavior[i]],dtype=object)
@@ -242,7 +248,7 @@ class ObservationCollector():
                 obs=np.array(self.robot_self_state+[rho_humans[i], theta_humans[i]]+state+[safe_dist_,self._radius_child,
                                                 self._radius_child+safe_dist_+self._radius_robot,self._human_behavior_token[i]])
                 merged_obs = np.hstack([merged_obs,obs])
-            elif ty==3: # elder
+            elif ty==2: # elder
                 rho_behavior=np.array([rho_humans[i],self._human_behavior[i]],dtype=object)
                 rho_behavior_elder=np.vstack([rho_behavior_elder, rho_behavior])
                 #determine the safe_dist for every human
@@ -255,7 +261,7 @@ class ObservationCollector():
                 obs=np.array(self.robot_self_state+[rho_humans[i], theta_humans[i]]+state+[safe_dist_,self._radius_elder,
                                                 self._radius_elder+safe_dist_+self._radius_robot, self._human_behavior_token[i]])
                 merged_obs = np.hstack([merged_obs,obs])
-            elif ty==4:  # forklift
+            elif ty==3:  # forklift
                 rho_behavior=np.array([rho_humans[i],self._human_behavior[i]],dtype=object)
                 rho_behavior_forklift=np.vstack([rho_behavior_forklift, rho_behavior])
                 #determine the safe_dist for every human
@@ -269,6 +275,49 @@ class ObservationCollector():
         obs_dict['child_in_robot_frame'] = rho_behavior_child
         obs_dict['elder_in_robot_frame'] = rho_behavior_elder
         obs_dict['forklift_in_robot_frame'] = rho_behavior_forklift
+
+
+      # initlaising array with dimensions an filling them up with coordinate of agents and rho(density)and theta (angle)
+        rho_robo_obstacles, theta_robo_obstacles=np.empty([self.num_robo_obstacles,]), np.empty([self.num_robo_obstacles,])
+        coordinate_robo_obstacles= np.empty([2,self.num_robo_obstacles])
+        # print("robo",self._robo_obstacle_position)
+        for  i, position in enumerate(self._robo_obstacle_position):
+            #TODO temporarily use the same fnc of _get_pose_in_robot_frame (finished)
+
+            coordinate_robo_obstacles[0][i]=position.x
+            coordinate_robo_obstacles[1][i]=position.y
+            rho_robo_obstacles[i], theta_robo_obstacles[i] = ObservationCollector._get_pose_in_robot_frame(position, self._robot_pose)
+
+        #sort the humans according to the relative position to robot
+        robo_obstacles_pos_index=np.argsort(rho_robo_obstacles)
+        rho_robo_obstacles, theta_robo_obstacles=rho_robo_obstacles[robo_obstacles_pos_index], theta_robo_obstacles[robo_obstacles_pos_index]
+        self._robo_obstacle_type =self._robo_obstacle_type[robo_obstacles_pos_index]
+        self._robo_obstacle_vel=self._robo_obstacle_vel[robo_obstacles_pos_index]
+        self._robo_obstacle_position=self._robo_obstacle_position[robo_obstacles_pos_index]
+     
+        # add them to obs_dict
+        obs_dict['robo_obstacle_in_robot_frame']=coordinate_robo_obstacles
+
+
+  
+        rho_behavior_randomwandrer = np.array([],dtype=object).reshape(0, 1) 
+        # 
+        for i, ty in enumerate(self._robo_obstacle_type):
+            # filter the obstacles which are not in the visible range of the robot
+            if not self.IsInViewRange(20, [-2.618,2.618], rho_robo_obstacles[i], theta_robo_obstacles[i]):
+                continue
+            if ty==7: # randomwandrer
+                rho_behavior=np.array([rho_robo_obstacles[i]],dtype=object)
+                rho_behavior_randomwandrer=np.vstack([rho_behavior_randomwandrer, rho_behavior])
+                #determine the safe_dist for every human
+                safe_dist_=self.safe_dist_randomwandrer
+                #robot centric 
+                state=ObservationCollector.rotate(self.robot_self_state[:2]+[self._robo_obstacle_position[i].x, self._robo_obstacle_position[i].y, self._robo_obstacle_vel[i].x,self._robo_obstacle_vel[i].y], self.rot)
+                obs=np.array(self.robot_self_state+[rho_robo_obstacles[i], theta_robo_obstacles[i]]+state+[safe_dist_ ,self._radius_adult, self._radius_randomwandrer+safe_dist_+self._radius_robot])
+                merged_obs = np.hstack([merged_obs,obs])
+
+        obs_dict['randomwandrer_in_robot_frame'] = rho_behavior_randomwandrer
+
 
         #align the observation size
         observation_blank=len(merged_obs) - self.observation_space.shape[0]
@@ -365,7 +414,7 @@ class ObservationCollector():
         self._scan=self.process_scan_msg(msg[0])
         self._robot_pose,self._robot_vel=self.process_robot_state_msg(msg[1])
         self.callback_agent_state(msg[2:self.num_humans+2])
-        self.callback_robo_obstacle_state(msg[self.num_humans+3:])
+        self.callback_robo_obstacle_state(msg[self.num_humans+2:])
         # print("calling back")
 
         self._flag_all_received=True
@@ -377,20 +426,22 @@ class ObservationCollector():
     def callback_robo_obstacle_state(self, msg):
         # print("calling back massages ",msg)
         for i, m in enumerate(msg):
-            self._robo_obstacle_position[i]=self.process_robo_obstacle_state(m)
-            # print("recieved",self._robo_obstacle_position[i])
+            self._robo_obstacle_type[i],self._robo_obstacle_position[i],self._robo_obstacle_vel[i]=self.process_robo_obstacle_state(m)
+        # print("recieved",self._robo_obstacle_type)
 
     def process_agent_state(self,msg):
         human_type=msg.type
         human_pose=self.pose3D_to_pose2D(msg.pose)
         human_twist=msg.twist
         human_behavior=msg.social_state.strip("\"")
+ 
         return human_type,human_pose, human_twist, human_behavior
     
     def process_robo_obstacle_state(self,msg):
-
+        robo_obstacle_type=msg.type
         robo_obstacle_pose=self.pose3D_to_pose2D(msg.pose)
-        return robo_obstacle_pose
+        robo_twist=msg.points[0]
+        return robo_obstacle_type,robo_obstacle_pose,robo_twist
 
     def process_scan_msg(self, msg_LaserScan: LaserScan):
         # remove_nans_from_scan

@@ -15,7 +15,9 @@ from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl
 _RS = 9  # robot state size 3
 self_state_dim = 9
 num_humans =  6  #
-human_state_size= 19 #size of human info 17
+num_robots =  4
+
+human_state_size= 19 #size of human info 19
 _HS= 19*21  # human state size
 HIDDEN_SHAPE_LSTM=32 # hidden size of lstm
 
