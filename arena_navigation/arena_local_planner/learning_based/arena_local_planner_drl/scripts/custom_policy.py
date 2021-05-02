@@ -15,11 +15,13 @@ from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl
 _RS = 9  # robot state size 3
 self_state_dim = 9
 num_humans =  6  #
-num_robots =  4
+num_robots =  2
 
 human_state_size= 19 #size of human info 19
+robo_obstacle_state_size= 18 #size of human info 19
 _HS= 19*21  # human state size
 HIDDEN_SHAPE_LSTM=32 # hidden size of lstm
+HIDDEN_SHAPE_GRU=32   # hidden size of gru
 
 ROBOT_SETTING_PATH = rospkg.RosPack().get_path('simulator_setup')
 yaml_ROBOT_SETTING_PATH = os.path.join(ROBOT_SETTING_PATH, 'robot', 'myrobot.model.yaml')
@@ -33,7 +35,6 @@ with open(yaml_ROBOT_SETTING_PATH, 'r') as fd:
             laser_angle_increment = plugin['angle']['increment']
             _L = int(round((laser_angle_max - laser_angle_min) / laser_angle_increment) + 1)  # num of laser beams
             break
-
 
 class MLP_ARENA2D(nn.Module):
     """
@@ -59,21 +60,25 @@ class MLP_ARENA2D(nn.Module):
 
         # Body network
         self.body_net = nn.Sequential(
-            nn.Linear(_L+_RS, 64),
+            nn.Linear(_L, 128),
             nn.ReLU(),
-            nn.Linear(64, feature_dim),
+            nn.Linear(128, feature_dim),
             nn.ReLU()
         )
 
         # Policy network
         self.policy_net = nn.Sequential(
-            nn.Linear(feature_dim, last_layer_dim_pi),
+            nn.Linear(feature_dim+1+_RS, 64),
+            nn.ReLU(),
+            nn.Linear(64, last_layer_dim_pi),
             nn.ReLU()
         )
 
         # Value network
         self.value_net = nn.Sequential(
-            nn.Linear(feature_dim, last_layer_dim_vf),
+            nn.Linear(feature_dim+1+_RS, 64),
+            nn.ReLU(),
+            nn.Linear(64, last_layer_dim_pi),
             nn.ReLU()
         )
 
@@ -82,8 +87,16 @@ class MLP_ARENA2D(nn.Module):
         :return: (th.Tensor, th.Tensor) latent_policy, latent_value of the specified network.
             If all layers are shared, then ``latent_policy == latent_value``
         """
-        body_x = self.body_net(features)
-        return self.policy_net(body_x), self.value_net(body_x)
+        size=features.shape
+        time=features[:, 0].reshape(size[0], -1)
+        body_x = self.body_net(features[:, 1:_L+1])
+        robot_state=features[:, _L+1:_L+1+_RS]
+        # humans_state=features[:, _L+1:_L+1+num_humans*human_state_size]
+        # human_hidden=self.body_net_human(humans_state)
+        features_1 = th.cat((time, body_x), 1)
+        # features_2=th.cat((features_1, human_hidden), 1)
+        features=th.cat((features_1, robot_state), 1)
+        return self.policy_net(features), self.value_net(features)
 
 
 class MLP_ARENA2D_POLICY(ActorCriticPolicy):
@@ -114,7 +127,7 @@ class MLP_ARENA2D_POLICY(ActorCriticPolicy):
         self.ortho_init = True
 
     def _build_mlp_extractor(self) -> None:
-        self.mlp_extractor = MLP_ARENA2D(64)
+        self.mlp_extractor = MLP_ARENA2D(128)
 
 class MLP_HUMAN(nn.Module):
     """
@@ -147,7 +160,7 @@ class MLP_HUMAN(nn.Module):
             nn.ReLU()
         ).to('cuda')
         self.body_net_human = nn.Sequential(
-            nn.Linear(num_humans*human_state_size, 128),
+            nn.Linear(human_state_size*num_humans, 128),
             nn.ReLU(),
             nn.Linear(128, 96),
             nn.ReLU(),
@@ -184,7 +197,7 @@ class MLP_HUMAN(nn.Module):
         time=features[:, 0].reshape(size[0], -1)
         body_x = self.body_net_laser(features[:, 1:_L+1])
         robot_state=features[:, _L+1:_L+1+_RS]
-        humans_state=features[:, _L+1:_L+1+num_humans*human_state_size]
+        humans_state=features[:, _L+1:_L+1+num_humans*human_state_size] 
         human_hidden=self.body_net_human(humans_state)
         features_1 = th.cat((time, body_x), 1)
         features_2=th.cat((features_1, human_hidden), 1)
@@ -507,15 +520,23 @@ class MLP_SARL(nn.Module):
             If all layers are shared, then ``latent_policy == latent_value``
         """
         size=features.shape
+        # print('feature size', size)
         time=features[:, 0].reshape(size[0], -1)
         body_x = self.body_net_fc(features[:, 1:_L+1])
-        # robot_state=features[:, _L+1:_L+1+_RS]
+        robot_state=features[:, _L+1:_L+1+_RS]
         humans_state=features[:, _L+1:_L+1+num_humans*human_state_size]
         humans_state=humans_state.reshape((humans_state.shape[0],-1,human_state_size)).flip([0,1])
+        # joint state includes robot state
         joint_state=self.body_net_human(humans_state) # feed through SARL
         features_1 = th.cat((time, body_x), 1)
-        features=th.cat((features_1,joint_state), 1)
-        return self.policy_net(features), self.value_net(features)
+        features_value=th.cat((features_1,joint_state), 1)
+        # print('value feature size', features_value.shape)
+        # humans_state = humans_state.permute(1, 0, 2)
+        # _, h_n = self.body_net_gru(humans_state) # feed through gru with initial hidden state = zeros
+        # human_features = h_n.view(h_n.shape[1], -1)
+        # features_2 = th.cat((features_1, robot_state), 1)
+        # features_policy = th.cat((features_2, human_features), 1)
+        return self.policy_net(features_value), self.value_net(features_value)
 
 
 
@@ -547,7 +568,7 @@ class MLP_SARL_POLICY(ActorCriticPolicy):
         self.ortho_init = True
 
     def _build_mlp_extractor(self) -> None:
-        self.features_dim=128
+        self.features_dim=64
         self.mlp_extractor = MLP_SARL(self.features_dim)
 
 class MLP_GRU(nn.Module):
@@ -579,11 +600,11 @@ class MLP_GRU(nn.Module):
             nn.ReLU()
         ).to('cuda')
 
-        self.body_net_gru = nn.GRU(input_size=human_state_size, hidden_size=HIDDEN_SHAPE_LSTM).to('cuda')
+        self.body_net_gru = nn.GRU(input_size=human_state_size, hidden_size=HIDDEN_SHAPE_GRU).to('cuda')
 
         # Policy network
         self.policy_net = nn.Sequential(
-            nn.Linear(feature_dim +1+ _RS + HIDDEN_SHAPE_LSTM, 96),
+            nn.Linear(feature_dim +1+ _RS + HIDDEN_SHAPE_GRU, 96),
             nn.ReLU(),
             nn.Linear(96, 64),
             nn.ReLU(),
@@ -593,7 +614,7 @@ class MLP_GRU(nn.Module):
 
         # Value network
         self.value_net = nn.Sequential(
-            nn.Linear(feature_dim + 1+_RS + HIDDEN_SHAPE_LSTM, 96),
+            nn.Linear(feature_dim + 1+_RS + HIDDEN_SHAPE_GRU, 96),
             nn.ReLU(),
             nn.Linear(96, 64),
             nn.ReLU(),
@@ -609,14 +630,14 @@ class MLP_GRU(nn.Module):
         size=features.shape
         time=features[:, 0].reshape(size[0], -1)
         body_x = self.body_net_fc(features[:, 1:_L+1])
-        robot_state=features[:, _L+1:_L+1+_RS]
-        humans_state=features[:, _L+1:_L+1+num_humans*human_state_size]
-        humans_state=humans_state.reshape((humans_state.shape[0],-1,human_state_size)).flip([0,1]).permute(1,0,2)
-        _, (h_n, _)=self.body_net_gru(humans_state) # feed through gru with initial hidden state = zeros
+        robot_state = features[:, _L+1:_L+1+_RS]
+        humans_state = features[:, _L+1:_L+1+num_humans*human_state_size]
+        humans_state = humans_state.reshape((humans_state.shape[0],-1,human_state_size)).flip([0,1]).permute(1,0,2)
+        _, h_n = self.body_net_gru(humans_state) # feed through gru with initial hidden state = zeros
         human_features = h_n.view(h_n.shape[1],-1)
         features_1 = th.cat((body_x, robot_state), 1)
         features_2 = th.cat((time, features_1), 1)
-        features=th.cat((features_2, human_features), 1)
+        features = th.cat((features_2, human_features), 1)
         return self.policy_net(features), self.value_net(features)
 
 

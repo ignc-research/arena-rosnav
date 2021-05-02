@@ -37,7 +37,7 @@ from std_msgs.msg import Bool
 from rl_agent.utils.debug import timeit 
 
 class ObservationCollector():
-    def __init__(self, ns: str, num_lidar_beams: int, lidar_range: float, num_humans:int, num_robo_obstacles:int):
+    def __init__(self, ns: str, num_humans:int, num_robo_obstacles:int):
         """ a class to collect and merge observations
 
         Args:
@@ -65,14 +65,6 @@ class ObservationCollector():
         self._radius_forklift= 0.3
         self._radius_randomwandrer = 0.3
 
-        # define observation_space
-        self.num_humans_observation_max=21
-        self.num_humans_observation_max = 12
-        self.observation_space = ObservationCollector._stack_spaces((
-            spaces.Box(low=-np.PINF, high=np.PINF, shape=(1,),dtype=np.float64), #time
-            spaces.Box(low=0.0, high=lidar_range, shape=(num_lidar_beams,),dtype=np.float64), #lidar
-            spaces.Box(low=-np.PINF, high=np.PINF, shape=(self.num_humans_observation_max*19,),dtype=np.float64) # human states
-        ))
 
         #get parameters
         self._laser_num_beams = rospy.get_param("/laser_num_beams")  # for frequency controlling
@@ -216,11 +208,14 @@ class ObservationCollector():
         rho_behavior_child = np.array([],dtype=object).reshape(0, 2)
         rho_behavior_elder = np.array([],dtype=object).reshape(0, 2)
         rho_behavior_forklift = np.array([],dtype=object).reshape(0, 2) 
-        # 
+
+        count_observable_humans=0  
         for i, ty in enumerate(self._human_type):
             # filter the obstacles which are not in the visible range of the robot
-            if not self.IsInViewRange(20, [-2.618,2.618], rho_humans[i], theta_humans[i]):
+            if not self.IsInViewRange(15, [-np.pi, np.pi], rho_humans[i], theta_humans[i]):
                 continue
+            else:
+                count_observable_humans=count_observable_humans+1
             if ty==0: # adult
                 rho_behavior=np.array([rho_humans[i],self._human_behavior[i]],dtype=object)
                 rho_behavior_adult=np.vstack([rho_behavior_adult, rho_behavior])
@@ -275,8 +270,17 @@ class ObservationCollector():
         obs_dict['child_in_robot_frame'] = rho_behavior_child
         obs_dict['elder_in_robot_frame'] = rho_behavior_elder
         obs_dict['forklift_in_robot_frame'] = rho_behavior_forklift
-
-
+        
+        #TODO more proper method is needed to supplement info blanks (finished)
+        if count_observable_humans==0:
+            obs_empty=np.array(self.robot_self_state+[0]*10)
+            merged_obs = np.hstack([merged_obs,obs_empty])
+            count_observable_humans=count_observable_humans+1
+        while count_observable_humans < 6 and count_observable_humans >0:
+            obs_copy=np.copy(merged_obs[-count_observable_humans*self.human_state_size:])
+            merged_obs = np.hstack([merged_obs, obs_copy])
+            count_observable_humans=count_observable_humans*2
+        # print('observe', count_observable_humans)
       # initlaising array with dimensions an filling them up with coordinate of agents and rho(density)and theta (angle)
         rho_robo_obstacles, theta_robo_obstacles=np.empty([self.num_robo_obstacles,]), np.empty([self.num_robo_obstacles,])
         coordinate_robo_obstacles= np.empty([2,self.num_robo_obstacles])
@@ -318,7 +322,7 @@ class ObservationCollector():
 
         obs_dict['randomwandrer_in_robot_frame'] = rho_behavior_randomwandrer
 
-
+        print("merged obs",merged_obs.size)
         #align the observation size
         observation_blank=len(merged_obs) - self.observation_space.shape[0]
         if observation_blank<0:
@@ -477,12 +481,38 @@ class ObservationCollector():
     def set_timestep(self, time_step):
         self.time_step=time_step
 
+    def setRobotSettings(self, num_lidar_beams, lidar_range, laser_angle_min, laser_angle_max, laser_angle_increment):
+        self.num_lidar_beams = num_lidar_beams
+        self.lidar_range = lidar_range
+        self.laser_angle_min = laser_angle_min
+        self.laser_angle_max = laser_angle_max
+        self.laser_angle_increment = laser_angle_increment
+        self.laser_beam_angles = np.arange(self.laser_angle_min, self.laser_angle_max, self.laser_angle_increment)
+
+    def setObservationSpace(self):
+        # define observation_space
+        self.num_humans_observation_max=21
+        self.human_state_size=19
+        self.observation_space = ObservationCollector._stack_spaces((
+            spaces.Box(low=-np.PINF, high=np.PINF, shape=(1,),dtype=np.float64), #time
+            spaces.Box(low=0.0, high=self.lidar_range, shape=(self.num_lidar_beams,),dtype=np.float64), #lidar
+            spaces.Box(low=-np.PINF, high=np.PINF, shape=(self.num_humans_observation_max*self.human_state_size,),dtype=np.float64) # human states
+        ))
+
     def IsInViewRange(self, distance, angleRange, rho_human, theta_human):
         if rho_human<=distance and theta_human<=angleRange[1] and theta_human>=angleRange[0]:
             return True
         else:
             return False
 
+    def calculateDangerZone(self, vx, vy):
+        a = 0.55
+        r_static = 0.8
+        v = np.linalg.norm([vx, vy])
+        radius = a*v+ r_static
+        theta = 11*np.pi/6* np.exp(-1.4*v)+ np.pi/6
+        return radius, theta
+        
     @staticmethod
     def process_global_plan_msg(globalplan):
         global_plan_2d = list(map(

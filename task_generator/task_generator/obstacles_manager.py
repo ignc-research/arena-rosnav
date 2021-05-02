@@ -23,6 +23,7 @@ from std_srvs.srv import SetBool, Empty
 import rospy
 import rospkg
 import shutil
+import time
 from .utils import *
 
 class ObstaclesManager:
@@ -797,15 +798,15 @@ class ObstaclesManager:
         # self.human_id+=1
         for i in range(n):
             [x, y, theta] = get_random_pos_on_map(self._free_space_indices, self.map, safe_distance, forbidden_zones)
-            waypoints = np.array( [x, y, 2]).reshape(1, 3) # the first waypoint
+            waypoints = np.array( [x, y, 1]).reshape(1, 3) # the first waypoint
             # if random.uniform(0.0, 1.0) < 0.8:
-            safe_distance = safe_distance - 3 #the other waypoints don't need to avoid robot
+            safe_distance = 0.1 # the other waypoints don't need to avoid robot
             for j in range(1000):
                 dist = 0
                 while dist < 8:
                     [x2, y2, theta2] = get_random_pos_on_map(self._free_space_indices, self.map, safe_distance, forbidden_zones)
                     dist = np.linalg.norm([waypoints[-1,0] - x2,waypoints[-1,1] - y2])
-                waypoints = np.vstack([waypoints, [x2, y2, 2]])
+                waypoints = np.vstack([waypoints, [x2, y2, 1]])
             ped=np.array([i+1, [x, y, 0.0], waypoints],dtype=object)
             ped_array=np.vstack([ped_array,ped])
         self.__respawn_peds(ped_array)
