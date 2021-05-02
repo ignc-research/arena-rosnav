@@ -834,8 +834,8 @@ def getMap(msg):
     # print(msg.markers[0])
     for p in msg.markers[0].points:
         if  2 < p.y < 25 :
-            points_x.append(p.x-16.6)
-            points_y.append(-p.y+6.65)
+            points_x.append(p.x)
+            points_y.append(-p.y)
     # plt.scatter(points_y, points_x)
     sm = [points_x, points_y]
 
