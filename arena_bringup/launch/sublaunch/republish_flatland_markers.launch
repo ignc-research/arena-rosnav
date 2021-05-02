@@ -1,0 +1,6 @@
+<launch>
+  <arg name="ns" default="sim_1"/>
+
+  <node name="republish_flatland_markers" pkg="arena_util_scripts" type="republish_flatland_markers.py" ns="$(arg ns)" output="screen">
+  </node>
+</launch>

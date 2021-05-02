@@ -4,7 +4,7 @@
   <arg name="kbd_teleop" default="false"/>
   <arg name="rqt_teleop" default="false"/>
   <arg name="visualize" default="false"/>
-  <arg name="scene_file" default="$(find simulator_setup)/maps/pedsim_scenario.xml"/>
+  <arg name="scene_file" default="$(find simulator_setup)/pedsim_scenarios/empty.xml"/>
   <arg name="default_queue_size" default="100"/>
   <arg name="max_robot_speed" default="1.5"/>
   <arg name="robot_mode" default="1"/>
