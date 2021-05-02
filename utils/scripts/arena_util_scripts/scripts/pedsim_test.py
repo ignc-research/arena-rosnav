@@ -61,9 +61,10 @@ def example2():
     rospack = rospkg.RosPack()
     respawn_peds_service_name = "pedsim_simulator/respawn_peds"
     rospy.wait_for_service(respawn_peds_service_name, 6.0)
+    time.sleep(4)
     respawn_ped_srv = rospy.ServiceProxy(respawn_peds_service_name, SpawnPeds)
 
-    for _ in range(20):
+    for _ in range(40):
         peds = []
 
         ped1 = Ped()

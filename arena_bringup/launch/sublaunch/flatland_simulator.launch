@@ -43,7 +43,7 @@
 
   <!--  ************** rviz  ***************  -->
   <group if="$(arg use_rviz)">
-    <node name="flatland_rviz" pkg="rviz" type="rviz" output="screen" args="-d $(find arena_bringup)/rviz/$(arg rviz_file).rviz"/>
-  </group>    
+    <node name="flatland_rviz" pkg="rviz" type="rviz" output="screen" args="-d $(find arena_bringup)/rviz/$(arg rviz_file).rviz" launch-prefix="bash -c 'sleep 1; $0 $@' "/>
+  </group>
 
 </launch>
