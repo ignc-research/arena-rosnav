@@ -85,10 +85,10 @@ python sim_evaluation_v2.py $HOME/catkin_ws/src/arena-rosnav/arena_navigation/ar
 ## Color convention for plots
 
 Colors for planners:
-MPC  tab:red
-TEB  tab:blue
-RLCA tab:green
-R0   tab:pink
-R1   tab:purple
-R2   tab:orange
+MPC  tab:red,
+TEB  tab:blue,
+RLCA tab:green,
+R0   tab:pink,
+R1   tab:purple,
+R2   tab:orange,
 R4   tab:cyan
