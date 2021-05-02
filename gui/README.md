@@ -51,8 +51,9 @@ The file `nav2.rviz` is different from `nav.rviz` only by two things - the map i
 7. The folder `eval_scenarios` consists of example scenarios with difficult maps and a lot of obstacles for evaluation runs.
 
 ### Rules for using the paint program
-
-<div style="text-align:center"><img src="media/img/flowchart.png" /></div>
+<p align="center">
+  <img src="media/img/flowchart.png">
+</p>
 
 1. The first thing to do is to set the number of obstacles, the resolution and the origin of the uploaded map.
 
