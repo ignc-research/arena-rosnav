@@ -1,5 +1,12 @@
 # Drawing panel for designing scenarios easily
 
+### Overview
+The GUI represents an user interface for creating scenarios more intuitive, a lot faster and in a much simpler way. The generated Kivy-App is not only easy to install, set up and run, but also easy to modify and extend. It was already positive evaluated during a big evaluation run, where certain approaches were tested on 100 different scenarios, created correctly from the GUI within only a couple of hours. Using the GUI for the first time without reading its rules is of course possible, but may not be enough to use its entire potential. Using it after reading the rules should be pretty much straight-forward. But using the App after reading also the small tips, written in this documentation should allow the user to create a scenario every time even faster and faster.
+
+| <img src="media/img/example_scenario1_presentation_faster_x4_cropped.gif"> | <img src="media/img/example_scenario2_presentation_faster_x4_cropped.gif"> |
+|:--:| :--:| 
+| *Scenario with 3 dynamic obstacles* | *Scenario with 20 dynamic obstacles* |
+
 ### Requirements
 1. Install Ubuntu 18.04.
 2. Install [Kivy](https://kivy.org/doc/stable/gettingstarted/installation.html#install-pip). <br />
@@ -44,6 +51,9 @@ The file `nav2.rviz` is different from `nav.rviz` only by two things - the map i
 7. The folder `eval_scenarios` consists of example scenarios with difficult maps and a lot of obstacles for evaluation runs.
 
 ### Rules for using the paint program
+
+<div style="text-align:center"><img src="media/img/flowchart.png" /></div>
+
 1. The first thing to do is to set the number of obstacles, the resolution and the origin of the uploaded map.
 
 2. From the dropdown button on the left should be chosed the obstacle type. If nothing has been selected, the default type 'circle' (red) will be used. After that obstacles in form of circles with different colors (types) could be placed with a mouse click on the map. To change the position of the current obstacle, the clicked mouse could be moved in all directions, but only on the map. To change the radius of the obstacle, while the mouse is still clicked, the '+' and '-' button from the keyboard could be used to make it bigger or smaller. To see the changes the mouse should be moved slightly to triger the event. In the center of the new obstacle will appear an index, with which the obstacle will be saved. Different types of obstacles are supported in the same scenario.
