@@ -10,8 +10,8 @@ def mlp(input_dim, mlp_dims, last_relu=False):
     mlp_dims = [input_dim] + mlp_dims
     for i in range(len(mlp_dims) - 1):
         layers.append(nn.Linear(mlp_dims[i], mlp_dims[i + 1]))
-        if i != len(mlp_dims) - 2 or last_relu:
-            layers.append(nn.ReLU())
+        # if i != len(mlp_dims) - 2 or last_relu:
+        layers.append(nn.ReLU())
     net = nn.Sequential(*layers)
     return net
 #torch implementation of numpy.isin method
@@ -27,7 +27,7 @@ class ValueNetwork(nn.Module):
         self.self_state_dim = self_state_dim
         self.global_state_dim = mlp1_dims[-1]
         self.mlp1 = mlp(input_dim, mlp1_dims, last_relu=True)
-        self.mlp2 = mlp(mlp1_dims[-1], mlp2_dims)
+        self.mlp2 = mlp(mlp1_dims[-1], mlp2_dims, last_relu=True)
         self.with_global_state = with_global_state
         self.device='cuda'
         if with_global_state:
@@ -57,7 +57,7 @@ class ValueNetwork(nn.Module):
             occupancy_maps = build_occupancy_maps(human_states,self.cell_size,self.cell_num,self.om_channel_size)
             state = torch.cat([state, occupancy_maps.to(self.device)], dim=2).float()
         size = state.shape
-
+        # print('size', size)
         mlp1_output = self.mlp1(state) #.view((-1, size[2]))
         mlp2_output = self.mlp2(mlp1_output)
 
@@ -65,7 +65,8 @@ class ValueNetwork(nn.Module):
         if self.with_global_state:
             # compute attention scores
             global_state = torch.mean(mlp1_output.view(size[0], size[1], -1), 1, keepdim=True)
-            global_state = global_state.expand((size[0], size[1], self.global_state_dim)).view(size[0],-1, self.global_state_dim) #contiguous().         
+            global_state = global_state.expand((size[0], size[1], self.global_state_dim)).\
+                contiguous().view(size[0],-1, self.global_state_dim) #contiguous().
             attention_input = torch.cat([mlp1_output, global_state], dim=2)
         else:
             attention_input = mlp1_output
@@ -87,11 +88,12 @@ class ValueNetwork(nn.Module):
         weighted_feature = torch.sum(torch.mul(weights, features), dim=1)
         # concatenate agent's state with global weighted humans' state
         joint_state = torch.cat([self_state, weighted_feature], dim=1)
+        # print('joint size', joint_state.shape)
         # value = self.mlp3(joint_state)
         return joint_state
 
 
-def build_occupancy_maps(human_states,cell_size,cell_num,om_channel_size):
+def build_occupancy_maps(human_states, cell_size, cell_num, om_channel_size):
     """
     :param human_states:
     :return: tensor of shape (# human - 1, self.cell_num ** 2)
@@ -161,7 +163,7 @@ def build_occupancy_maps(human_states,cell_size,cell_num,om_channel_size):
     return occupancy_maps
 
 #[sarl] configs
-mlp1_dims = [128, 96]
+mlp1_dims = [512, 128, 96]
 mlp2_dims = [96, 64]
 attention_dims = [96, 96, 1]
 mlp3_dims = [150, 100, 100, 1]
@@ -169,8 +171,8 @@ multiagent_training = False
 with_om = True
 with_global_state = True
 #[om] configs
-cell_num = 4
-cell_size = 1
+cell_num = 24
+cell_size = 0.3   # the size of humans
 om_channel_size = 3
 
 class SARL(object):
@@ -186,8 +188,8 @@ class SARL(object):
         self.cell_num=cell_num
         self.om_channel_size=om_channel_size
         self.self_state_dim=9
-        self.human_state_dim=9
-        self.input_dim=18+48
+        self.human_state_dim=10
+        self.input_dim=self.self_state_dim+self.human_state_dim+ cell_num ** 2 * om_channel_size
 
     def build_net(self):
         self.with_om = with_om
@@ -317,5 +319,6 @@ def predict(state):
 
     if self.phase == 'train':
         self.last_state = self.transform(state)
+
 
     return max_action

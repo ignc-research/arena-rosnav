@@ -15,6 +15,7 @@ from geometry_msgs.msg import Pose2D, Twist, Point
 from pedsim_srvs.srv import SpawnPeds
 from pedsim_srvs.srv import SpawnObstacle,SpawnObstacleRequest
 from pedsim_srvs.srv import MovePeds,MovePedsRequest
+from visualization_msgs.msg import Marker, MarkerArray
 from pedsim_msgs.msg import Ped
 from pedsim_msgs.msg import LineObstacle
 from pedsim_msgs.msg import LineObstacles
@@ -22,6 +23,7 @@ from std_srvs.srv import SetBool, Empty
 import rospy
 import rospkg
 import shutil
+import time
 from .utils import *
 
 class ObstaclesManager:
@@ -120,7 +122,7 @@ class ObstaclesManager:
             self.__remove_all_peds()
             self.spawn_random_peds_in_world(num_obstacles)
         elif type_obstacle == 'robot':
-            self.spawn_random_robots_in_world(num_obstacles)
+            self.spawn_random_robo_obstacles_in_world(num_obstacles)
         else:
             count_same_type = sum(
                 1 if obstacle_name.startswith(name_prefix) else 0
@@ -151,7 +153,6 @@ class ObstaclesManager:
                     spawn_request.pose.y = y
                     spawn_request.pose.theta = theta
                     # try to call service
-                    print("using the _srv_spawn_model service")
                     response = self._srv_spawn_model.call(spawn_request)
                     if not response.success:  # if service not succeeds, do something and redo service
                         rospy.logwarn(
@@ -222,14 +223,14 @@ class ObstaclesManager:
         self.num_humans=num_obstacles
         self.register_obstacles(num_obstacles, model_path, type_obstacle='human')
 
-    def register_robot(self, num_obstacles: int):
+    def register_robo_obstacle(self, num_obstacles: int):
         """register dynamic obstacles human.
 
         Args:
             num_obstacles (int): number of the obstacles.
         """
         model_path = os.path.join(rospkg.RosPack().get_path('simulator_setup'), 'dynamic_obstacles/random_wanderer.model.yaml')
-    
+        self.num_robo_obstacles=num_obstacles
         self.register_obstacles(num_obstacles, model_path, type_obstacle='robot')
 
 
@@ -708,11 +709,6 @@ class ObstaclesManager:
                 self.agent_topic_str+=f',{self.ns_prefix}pedsim_agent_{ped[0]}/dynamic_forklift     '
                 self.__ped_file=os.path.join(rospkg.RosPack().get_path(
                 'simulator_setup'), 'dynamic_obstacles/big_forklift.model.yaml')
-            # elif self.__ped_type==5:
-
-                # # self.agent_topic_str+=f',{self.ns_prefix}flatland_agent_{ped[0]}/dynamic_randomwandrer' 
-                # random_wanderer_id +=1
-                # continue
 
             msg = Ped()
             msg.id = ped[0]
@@ -731,7 +727,7 @@ class ObstaclesManager:
                 p.z = pos[2]
                 msg.waypoints.append(p)
             srv.peds.append(msg)
-            print(ped[0], msg.type)
+
 
         max_num_try = 2
         i_curr_try = 0
@@ -755,8 +751,8 @@ class ObstaclesManager:
 
         return
 
-    def __respawn_robots(self,robots_array): 
-        for robot in robots_array:      
+    def __respawn_robo_obstacles(self,robo_obstacles_array): 
+        for robo_obstacle in robo_obstacles_array:      
             # But we don't want to keep it in the name of the topic otherwise it won't be easy to visualize them in riviz
             model_yaml_file_path = os.path.join(rospkg.RosPack().get_path('simulator_setup'), 'dynamic_obstacles/random_wanderer.model.yaml')
             model_name = os.path.basename(model_yaml_file_path).split('.')[0]
@@ -764,15 +760,15 @@ class ObstaclesManager:
             name_prefix = self._obstacle_name_prefix + '_' + model_name
             spawn_request = SpawnModelRequest()
             spawn_request.yaml_path =  model_yaml_file_path
-            spawn_request.name = f'{name_prefix}_{robot[0]:02d}'
+            spawn_request.name = f'{"robo_obstacle"}_{robo_obstacle[0]:02d}'
             spawn_request.ns = rospy.get_namespace()
             # x, y, theta = get_random_pos_on_map(self._free_space_indices, self.map,)
             # set the postion of the obstacle out of the map to hidden them
             
             theta = theta = random.uniform(-math.pi, math.pi)
 
-            spawn_request.pose.x = robot[1][0]
-            spawn_request.pose.y = robot[1][1]
+            spawn_request.pose.x = robo_obstacle[1][0]
+            spawn_request.pose.y = robo_obstacle[1][1]
             spawn_request.pose.theta = theta
 
             max_num_try = 2
@@ -785,8 +781,8 @@ class ObstaclesManager:
                     rospy.logwarn(response.message)
                     i_curr_try += 1
                 else:
-                    rospy.logwarn(f"({self.ns}) spawn object robot {spawn_request.name} sucsseded! ")
-                break
+                    # rospy.logwarn(f"({self.ns}) spawn object robot {spawn_request.name} sucsseded! ")
+                   break
         
         return
  
@@ -802,35 +798,34 @@ class ObstaclesManager:
         # self.human_id+=1
         for i in range(n):
             [x, y, theta] = get_random_pos_on_map(self._free_space_indices, self.map, safe_distance, forbidden_zones)
-            waypoints = np.array( [x, y, 2]).reshape(1, 3) # the first waypoint
+            waypoints = np.array( [x, y, 1]).reshape(1, 3) # the first waypoint
             # if random.uniform(0.0, 1.0) < 0.8:
-            safe_distance = safe_distance - 3 #the other waypoints don't need to avoid robot
+            safe_distance = 0.1 # the other waypoints don't need to avoid robot
             for j in range(1000):
                 dist = 0
                 while dist < 8:
                     [x2, y2, theta2] = get_random_pos_on_map(self._free_space_indices, self.map, safe_distance, forbidden_zones)
                     dist = np.linalg.norm([waypoints[-1,0] - x2,waypoints[-1,1] - y2])
-                    # if dist>=8: print(dist)
-                waypoints = np.vstack([waypoints, [x2, y2, 2]])
+                waypoints = np.vstack([waypoints, [x2, y2, 1]])
             ped=np.array([i+1, [x, y, 0.0], waypoints],dtype=object)
             ped_array=np.vstack([ped_array,ped])
         self.__respawn_peds(ped_array)
 
-    def spawn_random_robots_in_world(self, n:int, safe_distance:float=3.5, forbidden_zones: Union[list, None] = None):
+    def spawn_random_robo_obstacles_in_world(self, n:int, safe_distance:float=3.5, forbidden_zones: Union[list, None] = None):
         """
         Spawning n random robot in the whole world.
         :param n number of robot that will be spawned.
         :param map the occupancy grid of the current map (TODO: the map should be updated every spawn)
         :safe_distance [meter] for sake of not exceeding the safety distance at the beginning phase
         """
-        robot_array =np.array([],dtype=object).reshape(0,2)
+        robo_obstacles_array =np.array([],dtype=object).reshape(0,2)
         # self.human_id+=1
         for i in range(n):
             [x, y, theta] = get_random_pos_on_map(self._free_space_indices, self.map, safe_distance, forbidden_zones)
             waypoints = np.array( [x, y, 2]).reshape(1, 3) # the first waypoint
-            robot=np.array([i+1, [x, y, 0.0]],dtype=object)
-            robot_array=np.vstack([robot_array,robot])
-        self.__respawn_robots(robot_array)
+            robo_obstacle=np.array([i+1, [x, y, 0.0]],dtype=object)
+            robo_obstacles_array=np.vstack([robo_obstacles_array,robo_obstacle])
+        self.__respawn_robo_obstacles(robo_obstacles_array)
 
     def __remove_all_peds(self):
         """

@@ -105,8 +105,13 @@ class FlatlandEnv(gym.Env):
             ns, mode=task_mode, start_stage=kwargs['curr_stage'], PATHS=PATHS)
         # observation collector
         num_humans=self.task.obstacles_manager.num_humans
+        num_robo_obstacles=self.task.obstacles_manager.num_robo_obstacles
         self.observation_collector = ObservationCollector(
-            self.ns, self._laser_num_beams, self._laser_max_range, num_humans)
+            self.ns, num_humans,num_robo_obstacles)
+        self.observation_collector.setRobotSettings(self._laser_num_beams, self._laser_max_range,
+                                                                                                    self.laser_angle_min, self.laser_angle_max, 
+                                                                                                    self.laser_angle_increment)
+        self.observation_collector.setObservationSpace()
         self.observation_space = self.observation_collector.get_observation_space()
         #csv writer
         self.csv_writer=CSVWriter()
@@ -166,6 +171,9 @@ class FlatlandEnv(gym.Env):
                     self._laser_num_beams = int(
                         round((laser_angle_max-laser_angle_min)/laser_angle_increment)+1)
                     self._laser_max_range = plugin['range']
+                    self.laser_angle_min = laser_angle_min
+                    self.laser_angle_max = laser_angle_max
+                    self.laser_angle_increment = laser_angle_increment
 
         with open(settings_yaml_path, 'r') as fd:
             setting_data = yaml.safe_load(fd)

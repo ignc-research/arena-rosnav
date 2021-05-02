@@ -143,7 +143,7 @@ class RobotManager:
         self.move_robot(start_pos)
 
     def set_start_pos_goal_pos(self, start_pos: Union[Pose2D, None]
-                               = None, goal_pos: Union[Pose2D, None] = None, min_dist=7, min_dist_human=4, obs_dict=None):
+                               = None, goal_pos: Union[Pose2D, None] = None, min_dist=7, min_dist_human=4, obs_dict=None, forbiddenPoints=None):
         """set up start position and the goal postion. Path validation checking will be conducted. If it failed, an
         exception will be raised.
 
@@ -172,6 +172,13 @@ class RobotManager:
                     forbiddenZones.append((coordinate[0],coordinate[1],self.safe_dist_child*1.05))
                 elif tys[i]==3: #elder
                     forbiddenZones.append((coordinate[0],coordinate[1],self.safe_dist_elder*1.05))
+
+        if forbiddenPoints is not None:
+            # print("calculate the forbidden zones")
+            # print(forbiddenPoints)
+            for coordinate in forbiddenPoints: # use the safe_dist of elder becuase it is the largest among all types of humans
+                # print(coordinate)
+                forbiddenZones.append((coordinate[0],coordinate[1],self.safe_dist_elder*1.05))
 
 
         if start_pos is None or goal_pos is None:
