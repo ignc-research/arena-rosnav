@@ -87,6 +87,10 @@ For example with `map_resolution` = 0.05, `scale` = 1.0, `X_rviz` = 0.3m and `Y_
 5. You can change the default value of every text input on the gui, as well as of the robot and watcher default radius with the corresponding global variables on top of the `paint.py` script. You can even specify the number of static and dynamic obstacles, so that some of the fields are filled directly correct for you, saving you a lot of time. For this is important to remember, to always start with placing the static obstacles on the map and then continue with the dynamic ones.
 6. If you want to create multiple complicated scenarios where only one thing is different, be smart and create only one complicated scenario and then multiple easy, almost empty ones, where only the part that is different is generated and then from the resulted json file copy-paste the difference into the complicated scenario.
 
+<p align="center">
+  <img src="media/img/scenario_stat_dyn.png">
+</p>
+
 ### Legend for the already used maps
 
 Ros launch with the flag `map_file:="<map_name>"`. For example for `map1` use `map_file:="map1"`.
