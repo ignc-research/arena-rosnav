@@ -13,7 +13,9 @@ default_cfg:
     plot_gp:         0        # plot global plan
     plot_subgoals:   0        # plot subgoals
     folder:          "run_4/" # folder containing the planners
-
+    map_origin:
+        x: 0
+        y: 0
 
 # ------------ figure block ------------
 # Each figure name needs to be unique
