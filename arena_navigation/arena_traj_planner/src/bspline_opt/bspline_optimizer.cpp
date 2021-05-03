@@ -46,10 +46,10 @@ std::vector<std::pair<int, int>> BsplineOptimizer::initControlPoints(Eigen::Matr
     /*** Segment the initial trajectory according to obstacles ***/
     constexpr int ENOUGH_INTERVAL = 2;
     double step_size = grid_map_->getResolution() / ((init_points.col(0) - init_points.rightCols(1)).norm() / (init_points.cols() - 1)) / 1.5;
-    ROS_WARN_STREAM("Segment 0: step_size="<<step_size);
+    //ROS_WARN_STREAM("Segment 0: step_size="<<step_size);
     step_size=std::min(std::max(0.01,step_size),1.0);
     step_size=0.01;
-    ROS_WARN_STREAM("Segment 0.2: step_size="<<step_size);
+    //ROS_WARN_STREAM("Segment 0.2: step_size="<<step_size);
 
     int in_id, out_id;
     vector<std::pair<int, int>> segment_ids;
@@ -57,7 +57,7 @@ std::vector<std::pair<int, int>> BsplineOptimizer::initControlPoints(Eigen::Matr
     bool occ, last_occ = false;
     bool flag_got_start = false, flag_got_end = false, flag_got_end_maybe = false;
     int i_end = (int)init_points.cols() - order_ ;//- ((int)init_points.cols() - 2 * order_) / 3; // only check closed 2/3 points.
-    ROS_WARN_STREAM("Segment 0: i_end="<<i_end);
+    //ROS_WARN_STREAM("Segment 0: i_end="<<i_end);
 
     // search for all segement in collision for the initial ctrl_pts
     for (int i = order_; i <= i_end; ++i)
@@ -108,13 +108,13 @@ std::vector<std::pair<int, int>> BsplineOptimizer::initControlPoints(Eigen::Matr
       }
     }
     // cout << endl;
-    ROS_WARN_STREAM("Segment 1:******************");
+    //ROS_WARN_STREAM("Segment 1:******************");
     for (size_t i = 0; i < segment_ids.size(); i++)
     {
       cout << "segment_ids=" << segment_ids[i].first << " ~ " << segment_ids[i].second << endl;
     }
 
-    ROS_WARN_STREAM("Segment size: "<<segment_ids.size());
+    //ROS_WARN_STREAM("Segment size: "<<segment_ids.size());
     // return in advance
     if (segment_ids.size() == 0)
     {
@@ -173,7 +173,7 @@ std::vector<std::pair<int, int>> BsplineOptimizer::initControlPoints(Eigen::Matr
       bounds[i] = std::pair<int, int>(id_low_bound, id_up_bound);
     }
 
-    ROS_WARN_STREAM("Segment 3: calculate bounds finish********* ");
+    //ROS_WARN_STREAM("Segment 3: calculate bounds finish********* ");
 
     /*** Adjust segment length ***/
     vector<std::pair<int, int>> adjusted_segment_ids(segment_ids.size());
@@ -211,7 +211,7 @@ std::vector<std::pair<int, int>> BsplineOptimizer::initControlPoints(Eigen::Matr
       }
     }
 
-    ROS_WARN_STREAM("Segment 4: Segment length finish********* ");
+    //ROS_WARN_STREAM("Segment 4: Segment length finish********* ");
     // Used for return
     vector<std::pair<int, int>> final_segment_ids;
 
@@ -351,7 +351,7 @@ std::vector<std::pair<int, int>> BsplineOptimizer::initControlPoints(Eigen::Matr
       }
     }
    
-    ROS_WARN("Segment 5 end: final size= %f  ******************",final_segment_ids.size());
+    //ROS_WARN("Segment 5 end: final size= %f  ******************",final_segment_ids.size());
 
     return final_segment_ids;
 }

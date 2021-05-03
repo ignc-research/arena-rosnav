@@ -52,7 +52,7 @@ private:
     TimedAstarParam param_;
     std::vector<double> action_v_set_;
     std::vector<double> action_w_set_;
-    double SAFE_DIST_;
+    double SAFE_DIST_,SAFE_TIME_;
     double ROBOT_RADIUS_;
     double OBSTACLE_RADIUS_; 
     double TIME_HORIZON_;
@@ -61,6 +61,7 @@ private:
     size_t SLICE_NUM_;
     double GOAL_RADIUS_;
     size_t NUM_SAMPLE_EDGE_;
+    double SENSOR_RANGE_;
     
 
     // map
@@ -88,6 +89,10 @@ private:
 
     // counter
     int  iter_num_;
+    int  sample_num_;
+
+    // reach_goal
+    bool reached_goal_;
     
     Vec2i posToIndex(Vec2d pos);
 
@@ -100,9 +105,15 @@ private:
 
     double estimateHeuristic(PathNodePtr &curr_node,Vec2d goal_pos, Vec2d start_pos);
 
-    bool checkCollision(const PathNodePtr &curr_node, PathNodePtr &next_node,Graph *graph_t, double & dist_to_collid, double & time_to_collid);
+    void setNeighborNodeActionDuration(const PathNodePtr &curr_node, PathNodePtr &next_node);
 
-    double computeCollisionTime(const Vec2d &p_ir, const Vec2d &v_ir, const double &duration);
+    bool checkCollisionFree(const PathNodePtr &curr_node, PathNodePtr &next_node,Graph *graph_t, double & dist_to_collid, double & time_to_collid);
+
+    double computeCollisionTime(const Vec2d &p_ir, const Vec2d &v_ir);
+
+    //double computeCollisionTimeAll(const Vec2d &p_r, const Vec2d &v_r, Graph *graph_t);
+
+    void checkStartNodeSafety(const PathNodePtr &start_node, Graph *graph_t);
 
     void retrievePath(PathNodePtr end_node);
 
@@ -120,7 +131,7 @@ public:
                     const std::vector<double>& angles,const Vec2d& robot,const Vec2d& goal,
                     const double & dir_start,const double & time_start);
 
-
+    std::vector<Eigen::Vector2d> getVistedNodes();
     std::vector<Eigen::Vector2d> getPath();
 
     std::vector<Eigen::Vector2d> getTrajectory(double ts,double local_time_horizon);

@@ -55,6 +55,9 @@ private:
     double t_replan_thresh_;        // sec
     int subgoal_drl_mode_;       // 0: spacial horizon, 1:time_astar
     double subgoal_pub_period_;
+    int mid_replan_count_= 0;
+
+    int in_collision_cnt=0;
 
 
     /* ROS utils */
@@ -71,6 +74,7 @@ private:
     // publisher
     ros::Publisher cmd_vel_pub_;
     ros::Publisher subgoal_DRL_pub_;
+    ros::Publisher global_plan_pub_;
     
     // vis publisher
     ros::Publisher vis_goal_pub_;
@@ -98,6 +102,7 @@ private:
     bool getSubgoalSpacialHorizon(Eigen::Vector2d &subgoal);
     bool getSubgoalTimedAstar(Eigen::Vector2d &subgoal);
     bool getSubgoalSimpleSample(Eigen::Vector2d &subgoal);
+    bool getSubgoalGlobal(Eigen::Vector2d &subgoal);
 
 
     /* helper functions */

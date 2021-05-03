@@ -1341,7 +1341,7 @@ void GridMap::publishStaticESDF(){
       indexToPos(Eigen::Vector2i(x, y), pos);
       //pos(2) = mp_.esdf_slice_height_;
 
-      dist = getDistance(pos);
+      dist = getDistanceStatic(pos);
       dist = std::min(dist, max_dist);
       dist = std::max(dist, min_dist);
 

@@ -11,6 +11,7 @@ void DynamicPlanManager::initPlanModules(ros::NodeHandle &nh)
   node_.param("plan_manager/max_vel",   pp_.max_vel_, 2.0);
   node_.param("plan_manager/max_acc",   pp_.max_acc_, 3.0);
   node_.param("plan_manager/max_jerk",  pp_.max_jerk_, 4.0);
+  //node_.param("plan_manager/time_resolution",  pp_.time_resolution_, 1.0);
   node_.param("plan_manager/feasibility_tolerance",   pp_.feasibility_tolerance_, 0.05);
   node_.param("plan_manager/control_points_distance", pp_.ctrl_pt_dist_, 0.4);
   node_.param("plan_manager/use_distinctive_trajs",   pp_.use_distinctive_trajs_, true);
@@ -37,9 +38,8 @@ void DynamicPlanManager::initPlanModules(ros::NodeHandle &nh)
   // MovingObstacleInfo
   ros::master::V_TopicInfo topic_infos;
   ros::master::getTopics(topic_infos);
-  std::string str_dynamic_obs;
-  node_.param<std::string>("plan_manager/dynamic_obstacle_name",   str_dynamic_obs,    "obs");
-  std::cout << "parameter name="<< str_dynamic_obs<<std::endl;
+  node_.param<std::string>("plan_manager/dynamic_obstacle_name",   str_dynamic_obs_,    "obs");
+  std::cout << "parameter name="<< str_dynamic_obs_<<std::endl;
 
 	obs_info_provider_.reserve(100);
   for (ros::master::V_TopicInfo::iterator it = topic_infos.begin() ; it != topic_infos.end(); it++)
@@ -47,7 +47,7 @@ void DynamicPlanManager::initPlanModules(ros::NodeHandle &nh)
         const ros::master::TopicInfo& info = *it;
         //std::cout << "topic_name" << it - topic_infos.begin() << ": " << info.name << std::endl;
 
-        if (info.name.find(str_dynamic_obs) != std::string::npos) 
+        if (info.name.find(str_dynamic_obs_) != std::string::npos) 
         {
             std::cout << "topic_" << it - topic_infos.begin() << ": " << info.name << std::endl;
 			      obs_info_provider_.emplace_back(std::make_shared<DynamicObstacleInfo>(node_,info.name,grid_map_));
@@ -63,8 +63,79 @@ void DynamicPlanManager::initPlanModules(ros::NodeHandle &nh)
   bspline_optimizer_->setParam(node_);
   bspline_optimizer_->setEnvironment(grid_map_);
   bspline_optimizer_->a_star_.reset(new AStar);
-  bspline_optimizer_->a_star_->initGridMap(grid_map_, Eigen::Vector2i(100, 100));
+  bspline_optimizer_->a_star_->initGridMap(grid_map_, Eigen::Vector2i(200, 200));
 
+}
+
+void DynamicPlanManager::updateDynamicObstacleInfo(){
+  //reset
+  obs_info_provider_.clear();
+  
+  // MovingObstacleInfo
+  ros::master::V_TopicInfo topic_infos;
+  ros::master::getTopics(topic_infos);
+  
+	obs_info_provider_.reserve(100);
+  for (ros::master::V_TopicInfo::iterator it = topic_infos.begin() ; it != topic_infos.end(); it++)
+  {
+        const ros::master::TopicInfo& info = *it;
+        //std::cout << "topic_name" << it - topic_infos.begin() << ": " << info.name << std::endl;
+
+        if (info.name.find(str_dynamic_obs_) != std::string::npos) 
+        {
+            std::cout << "topic_" << it - topic_infos.begin() << ": " << info.name << std::endl;
+			      obs_info_provider_.emplace_back(std::make_shared<DynamicObstacleInfo>(node_,info.name,grid_map_));
+        }
+
+  }
+
+  // reset mid_planner_timed_astar_
+  mid_planner_timed_astar_.reset(new TimedAstarSearch);
+  mid_planner_timed_astar_->init(node_,grid_map_,obs_info_provider_);
+}
+
+bool DynamicPlanManager::kinoAstarTraj(Eigen::Vector2d & start_pos, Eigen::Vector2d & start_vel,Eigen::Vector2d &end_pos){
+    global_planner_kino_astar_->reset();
+    adjustStartAndTargetPoint(start_pos,end_pos);
+    Eigen::Vector2d start_acc = Eigen::Vector2d::Zero();
+    Eigen::Vector2d end_vel   = Eigen::Vector2d::Zero();
+
+    int status = global_planner_kino_astar_->search(start_pos, start_vel, start_acc, end_pos, end_vel, true);
+    
+    // second search // search again
+    if (status == global_planner_kino_astar_->NO_PATH) {
+      // retry searching with discontinuous initial state
+      global_planner_kino_astar_->reset();
+      status = global_planner_kino_astar_->search(start_pos, start_vel, start_acc, end_pos, end_vel, false);
+
+      if (status == global_planner_kino_astar_->NO_PATH) {
+        std::cout << "[kino replan]: Can't find path." << std::endl;
+        return false;
+
+      } else {
+        std::cout << "[kino replan]: kinodynamic search success." << std::endl;
+      }
+    } else 
+    {
+        std::cout << "[kino replan]: kinodynamic search success." << std::endl;
+    }
+
+    double sample_step_size = 0.1;
+    std::vector<Eigen::Vector2d> point_set,start_end_derivatives;
+    
+    global_planner_kino_astar_->getSamples(sample_step_size, point_set, start_end_derivatives);
+    if(point_set.size()<1){
+      return false;
+    }
+    // optimize global trajectory
+    UniformBspline global_traj;
+    bool optimize_success;
+    optimize_success=optimizeGlobalTraj(0.1,point_set,start_end_derivatives,global_traj);
+    if(!optimize_success){
+      ROS_WARN_STREAM("[kino replan]: trajectory optimize failed.");
+    }
+    local_traj_data_.resetData(global_traj);
+    return true;
 }
 
 bool DynamicPlanManager::planGlobalTraj( Eigen::Vector2d &start_pos,  Eigen::Vector2d &end_pos){
@@ -120,7 +191,7 @@ bool DynamicPlanManager::planGlobalTraj( Eigen::Vector2d &start_pos,  Eigen::Vec
     
     global_data_.resetData(global_traj);
     // in case start_pos trapped 
-    local_traj_data_.resetData(global_traj);
+    //local_traj_data_.resetData(global_traj);
 
     return true;
 
@@ -163,27 +234,54 @@ bool DynamicPlanManager::optimizeGlobalTraj(double ts,std::vector<Eigen::Vector2
 }
 
 bool DynamicPlanManager::planMidTraj(Eigen::Vector2d & start_pos, Eigen::Vector2d & start_vel,  double & start_dir,  Eigen::Vector2d & end_pos,std::vector<std::pair<Eigen::Vector2d,Eigen::Vector2d>> &line_sets){
-  
+  std::cout<<"[planMidTraj]timed astar search start 1"<<std::endl;
   std::vector<Eigen::Vector2d> point_set,start_end_derivatives;
   
-  double ts=0.1;
+  double ts=pp_.ctrl_pt_dist_ / pp_.max_vel_;
   double local_time_horizon=pp_.local_time_horizon_;
   bool success;
 
+  // if initial pos is in collision
+  if(grid_map_->getDistanceStatic(start_pos)<0.3){
+    kinoAstarTraj(start_pos,start_vel,end_pos);
+    return false;
+  }
+
   success=mid_planner_timed_astar_->stateTimeAstarSearch(start_pos,start_vel,start_dir,end_pos,ts,local_time_horizon, point_set,start_end_derivatives,line_sets);
   
+  
+
+  // special case when poinst set too small even success
+  if(success && point_set.size()<5){
+    success=false;
+    end_pos=point_set.back();
+  }
+  std::cout<<"[planMidTraj]timed astar search finish 1"<<std::endl;
   UniformBspline mid_traj;
   // if no timed_astar solution available
   if(!success){
     Eigen::Vector2d end_vel =Eigen::Vector2d::Zero();
     bool oneshot_success=genOneshotTraj(start_pos, start_vel,start_dir,end_pos,end_vel, mid_traj);
+    std::cout<<"[planMidTraj]timed astar search finish 2"<<std::endl;
     if(oneshot_success){
       local_traj_data_.resetData(mid_traj);
+      return true;
+    }else{
+      return false;
     }
-    return false;
   }else{
+    Eigen::Vector2d dummy_start_pt  =point_set.front();
+    // if(checkCollision(dummy_start_pt)){
+    //   Eigen::Vector2d pt1 = dummy_start_pt - (end_pos-dummy_start_pt)*0.5/((end_pos-dummy_start_pt).norm());
+    //   Eigen::Vector2d pt2 = dummy_start_pt - (end_pos-dummy_start_pt)*1.0/((end_pos-dummy_start_pt).norm());
+    //   point_set.insert(point_set.begin(),pt1);
+    //   point_set.insert(point_set.begin(),pt2);
+    //   point_set.insert(point_set.begin(),pt1);
+    // }
     // optimze traj
     bool optimize_success=optimizeBsplineTraj(ts,point_set,start_end_derivatives,mid_traj);
+    local_traj_data_.resetData(mid_traj);
+    
     if(!optimize_success){
       Eigen::Vector2d end_vel =Eigen::Vector2d::Zero();
       bool oneshot_success=genOneshotTraj(start_pos, start_vel,start_dir,end_pos,end_vel, mid_traj);
@@ -191,7 +289,7 @@ bool DynamicPlanManager::planMidTraj(Eigen::Vector2d & start_pos, Eigen::Vector2
       {
         local_traj_data_.resetData(mid_traj);
       }else{
-        return false;
+        return false; //false
       }
     }else{
       ROS_WARN_STREAM("end mid optimize");
@@ -225,6 +323,10 @@ bool DynamicPlanManager::genOneshotTraj(Eigen::Vector2d & start_pos, Eigen::Vect
   bool flag_too_far;
   ts *= 1.5; // ts will be divided by 1.5 in the next
   do{
+    if(ts<0.001){
+      // ts is too small, not reasonable
+      return false;
+    }
     ts /= 1.5;
     point_set.clear();
     flag_too_far = false;
@@ -259,8 +361,15 @@ bool DynamicPlanManager::genOneshotTraj(Eigen::Vector2d & start_pos, Eigen::Vect
   }
   // double check
   Eigen::Vector2d dummy_start_pt  =point_set.front();
+  // if(checkCollision(dummy_start_pt)){
+  //   Eigen::Vector2d pt1 = dummy_start_pt - (target_pos-dummy_start_pt)*1/((target_pos-dummy_start_pt).norm());
+  //   Eigen::Vector2d pt2 = dummy_start_pt - (target_pos-dummy_start_pt)*2/((target_pos-dummy_start_pt).norm());
+  //   point_set.insert(point_set.begin(),pt1);
+  //   point_set.insert(point_set.begin(),pt2);
+  //   point_set.insert(point_set.begin(),pt1);
+  // }
   //Eigen::Vector2d dummy_target_pt =point_set.back();
-  adjustStartAndTargetPoint(dummy_start_pt,point_set.back());
+  //adjustStartAndTargetPoint(dummy_start_pt,point_set.back());
   //point_set[point_set.size()-1] = dummy_target_pt;
 
   // adjust direction part of the traj too make traj easy to track for non-holomonic robot

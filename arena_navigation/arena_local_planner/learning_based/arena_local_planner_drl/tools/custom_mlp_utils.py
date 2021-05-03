@@ -4,10 +4,25 @@ import argparse
 
 def get_net_arch(args: argparse.Namespace):
     """ function to convert input args into valid syntax for the PPO """
-    body = parse_string(args.body)
-    policy = parse_string(args.pi)
-    value = parse_string(args.vf)
-    return body + [dict(vf=value, pi=policy)]
+    body, policy, value = None, None, None
+    
+    if not args.body == '':
+        body = parse_string(args.body)
+    if not args.pi == '':
+        policy = parse_string(args.pi)
+    if not args.vf == '':
+        value = parse_string(args.vf)
+    
+    if body is None:
+        body = []
+    vf_pi = dict()
+    if value is not None:
+        vf_pi['vf'] = value
+    if policy is not None:
+        vf_pi['pi'] = policy
+
+    return body + [vf_pi]
+        
 
 
 def parse_string(string: str):

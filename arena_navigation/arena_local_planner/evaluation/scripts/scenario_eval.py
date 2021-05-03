@@ -1,10 +1,13 @@
 # for data
-import rosbag
+import sys
+import copy
+import pprint as pp
 import bagpy
 from bagpy import bagreader
 import pandas as pd
 import json
 import rospkg
+import yaml
 # for plots
 import matplotlib
 import matplotlib.pyplot as plt
@@ -24,16 +27,17 @@ import os
 from sklearn.cluster import AgglomerativeClustering
 # gplan
 import gplan_analysis as gplan
-matplotlib.rcParams.update({'font.size': 18})
+matplotlib.rcParams.update({'font.size': 15})
 # 
+from termcolor import colored, cprint
 class newBag():
     def __init__(self, planner, file_name, bag_name):
         # planner
-        self.planner = planner
-        self.file_name = file_name
+        self.planner         = planner.split("wpg")[0]
+        self.wpg             = planner.split("wpg")[1]
+        self.file_name       = file_name
         # csv dir
-        self.bag_name = bag_name
-        self.csv_dir = bag_name.replace(".bag","")
+        self.csv_dir         = bag_name.replace(".bag","")
         # bag topics
         self.odom_topic      = "/sensorsim/police/odom"
         self.collision_topic = "/sensorsim/police/collision"
@@ -47,20 +51,21 @@ class newBag():
         # eval bags
         self.bag = bagreader(bag_name)
         eps = self.split_runs()
-        self.evalPath(planner,file_name,eps)
+        if len(eps) != 0:
+            self.evalPath(self.planner, file_name, eps)
+        else:
+            print("no resets for: " + bag_name)
 
 
     def make_json(self, data):
         fn = self.file_name
         fa = fn.split("_")
+        fn = fa[0] +"_"+ fa[1] + "_" + fa[2] + "_" + self.wpg
 
-        # adjust file name
-        if "0" not in fa[2]:
-            fa[2] = "0" + fa[2]
-        fn = fa[0] + "_" + fa[1] + "_" + "obs" + fa[2] + "_" + fa[3].replace("_","") + fa[4]
-
-        with open("quantitative/" + fn + ".json", 'w') as outfile:
-            json.dump(data, outfile, indent=2)
+        jfile = "quantitative/" + self.planner + "_" + fn + ".json"
+        if not os.path.isfile(jfile): 
+            with open(jfile, 'w') as outfile:
+                json.dump(data, outfile, indent=2)
 
     def make_txt(self,file,msg,ron="a"):
         file = file.replace("/","_") + ".txt"
@@ -83,8 +88,7 @@ class newBag():
         # get odometry
         
         odom_csv = self.bag.message_by_topic(self.odom_topic)
-        df_odom = pd.read_csv(odom_csv, error_bad_lines=False)
-
+        df_odom  = pd.read_csv(odom_csv, error_bad_lines=False)
 
         df_collision = []
         df_subg      = []
@@ -102,7 +106,7 @@ class newBag():
             df_subg  = pd.read_csv(subg_csv, error_bad_lines=False)
 
             gp       = self.bag.message_by_topic(self.gp_topic)
-            df_gp    = pd.read_csv(gp, error_bad_lines=False)
+            # df_gp    = pd.read_csv(gp, error_bad_lines=False)
 
             wpg      = self.bag.message_by_topic(self.wpg_topic)
             df_wpg   = pd.read_csv(wpg, error_bad_lines=False)
@@ -117,126 +121,155 @@ class newBag():
 
         t_col = []
    
+        try:
+            for i in range(len(df_collision)): 
+                t_col.append(df_collision.loc[i, "Time"])   
+                
+            self.nc_total = len(t_col)
+            # get reset time
+            reset_csv = self.bag.message_by_topic("/scenario_reset")
+            df_reset  = pd.read_csv(reset_csv, error_bad_lines=False)
+            t_reset   = []
+            for i in range(len(df_reset)): 
+                t_reset.append(df_reset.loc[i, "Time"])
 
-        for i in range(len(df_collision)): 
-            t_col.append(df_collision.loc[i, "Time"])   
+            # subgoals
+            sg_n = 0
+            subgoal_x = []
+            subgoal_y = []
+
+            # wpg
+            wpg_n = 0
+            wpg_x = []
+            wpg_y = []
+
+            pose_x = []
+            pose_y = []
+            t = []
+
+            bags = {}
+            # run idx
+            n = 0
+            # collsion pos
+            col_xy = []
+            nc = 0
             
-        self.nc_total = len(t_col)
-        # get reset time
-        reset_csv   = self.bag.message_by_topic("/scenario_reset")
-        df_reset    = pd.read_csv(reset_csv, error_bad_lines=False)
-        t_reset     = []
-        for i in range(len(df_reset)): 
-            t_reset.append(df_reset.loc[i, "Time"])
-
-        # subgoals
-        sg_n = 0
-        subgoal_x = []
-        subgoal_y = []
-
-        # wpg
-        wpg_n = 0
-        wpg_x = []
-        wpg_y = []
-
-        pose_x = []
-        pose_y = []
-        t = []
-
-        bags = {}
-        # run idx
-        n = 0
-        # collsion pos
-        col_xy = []
-        nc = 0
-
-        global start, select_run
-
-        for i in range(len(df_odom)): 
-            current_time = df_odom.loc[i, "Time"]
-            x = df_odom.loc[i, "pose.pose.position.x"]
-            x = round(x,2)
-            y = df_odom.loc[i, "pose.pose.position.y"]
-            y = round(y,2)
-            reset = t_reset[n]
-
-            # print(reset)
-
-            # check if respawned
-            
-            start_x = start[0] + 0.5
-
-            if current_time > reset-6 and n < len(t_reset)-1 and x < start_x:
-                n += 1
-                # store the run
-                if n in select_run or len(select_run) == 0:
-                    bags["run_"+str(n)] = [pose_x, pose_y, t, col_xy, subgoal_x, subgoal_y, wpg_x, wpg_y]
-
-                # reset 
-                wpg_x     = []
-                wpg_y     = []
-
-                subgoal_x = []
-                subgoal_y = []
-
-                pose_x    = []
-                pose_y    = []
-                t         = []
-
-                col_xy    = []
-   
-            if n+1 in select_run or len(select_run) == 0:
-
-                if  len(pose_x) > 0:
-                    pose_x.append(x)
-                    pose_y.append(y)
-                elif x < start_x:
-                    pose_x.append(x)
-                    pose_y.append(y)
-
-                t.append(current_time)
-                # get trajectory
-
-                # check for col
-                if len(t_col) > nc:
-                    if current_time >= t_col[nc]:
-                        col_xy.append([x,y])
-                        nc += 1
-
-                # check for goals
-                if len(df_subg) > 0:
-                    sg_t = round(df_subg.loc[sg_n, "Time"],3)
-                    sg_x = round(df_subg.loc[sg_n, "pose.position.x"],3)
-                    sg_y = round(df_subg.loc[sg_n, "pose.position.y"],3)
-
-                    if current_time > sg_t and sg_n < len(df_subg) - 1:
-
-                        subgoal_x.append(sg_x)
-                        subgoal_y.append(sg_y)
-
-                        sg_n += 1
-
-                if len(df_wpg) > 0:
-                    wp_t = round(df_wpg.loc[wpg_n, "Time"],3)
-                    wp_x = round(df_wpg.loc[wpg_n, "pose.position.x"],3)
-                    wp_y = round(df_wpg.loc[wpg_n, "pose.position.y"],3)
-
-                    if current_time > wp_t and wpg_n < len(df_wpg) - 1:
-
-                        wpg_x.append(wp_x)
-                        wpg_y.append(wp_y)
-
-                        wpg_n += 1
+            old_x = None
+            old_y = None
+            dist2_oldp = 100
 
 
-        # remove first 
-        if "run_1" in bags:    
-            bags.pop("run_1")
+            global start, select_run
 
-        df = pd.DataFrame(data=bags)
-        run_csv = self.csv_dir + "/" + self.csv_dir.rsplit('/', 1)[-1] + ".csv"
-        df.to_csv(run_csv,index=False)   
-        print("csv created in: " + self.csv_dir)    
+            for i in range(len(df_odom)): 
+                current_time = df_odom.loc[i, "Time"]
+                x = df_odom.loc[i, "pose.pose.position.x"]
+                x = round(x,2)
+                y = df_odom.loc[i, "pose.pose.position.y"]
+                y = round(y,2)
+                reset = t_reset[n]
+
+                # print(reset)
+
+                # check if respawned
+                
+                start_x = start[0] + 0.5
+
+                # if current_time > reset-6 and n < len(t_reset)-1 and x < start_x:
+                if current_time > reset and n < len(t_reset)-1:
+                    n += 1
+                    # store the run
+                    if n in select_run or len(select_run) == 0:
+                        bags["run_"+str(n)] = [pose_x, pose_y, t, col_xy, subgoal_x, subgoal_y, wpg_x, wpg_y]
+
+                    # reset 
+                    wpg_x     = []
+                    wpg_y     = []
+
+                    subgoal_x = []
+                    subgoal_y = []
+
+                    pose_x    = []
+                    pose_y    = []
+                    t         = []
+
+                    col_xy    = []
+    
+                if n+1 in select_run or len(select_run) == 0:
+
+                    # if  len(pose_x) > 0:
+                    #     pose_x.append(x)
+                    #     pose_y.append(y)
+                    # elif x < start_x:
+
+                    #     pose_x.append(x)
+                    #     pose_y.append(y)
+
+                    # check distance to last pos
+                    # print(old_x)
+                    if old_x != None:
+                        dist2_oldp = math.sqrt((x-old_x)**2+(y-old_y)**2)
+                        # fancy_print(dist2_oldp,0)
+
+                    # append pos if pose is empty
+                    if len(pose_x) == 0:
+                        pose_x.append(x)
+                        pose_y.append(y)
+                    # check if adjacent pos is too far (reset ?)
+                    elif dist2_oldp < 5:
+                        pose_x.append(x)
+                        pose_y.append(y)
+
+                        t.append(current_time)
+                        # get trajectory
+
+                        # check for col
+                        if len(t_col) > nc:
+                            if current_time >= t_col[nc]:
+                                col_xy.append([x,y])
+                                nc += 1
+
+                        # check for goals
+                        if len(df_subg) > 0:
+                            sg_t = round(df_subg.loc[sg_n, "Time"],3)
+                            sg_x = round(df_subg.loc[sg_n, "pose.position.x"],3)
+                            sg_y = round(df_subg.loc[sg_n, "pose.position.y"],3)
+
+                            if current_time > sg_t and sg_n < len(df_subg) - 1:
+
+                                subgoal_x.append(sg_x)
+                                subgoal_y.append(sg_y)
+
+                                sg_n += 1
+
+                        if len(df_wpg) > 0:
+                            wp_t = round(df_wpg.loc[wpg_n, "Time"],3)
+                            wp_x = round(df_wpg.loc[wpg_n, "pose.position.x"],3)
+                            wp_y = round(df_wpg.loc[wpg_n, "pose.position.y"],3)
+
+                            if current_time > wp_t and wpg_n < len(df_wpg) - 1:
+
+                                wpg_x.append(wp_x)
+                                wpg_y.append(wp_y)
+
+                                wpg_n += 1
+
+                    old_x = x
+                    old_y = y
+
+
+            # remove first 
+            if "run_1" in bags:    
+                bags.pop("run_1")
+
+            df = pd.DataFrame(data=bags)
+            run_csv = self.csv_dir + "/" + self.csv_dir.rsplit('/', 1)[-1] + ".csv"
+            df.to_csv(run_csv,index=False)   
+            print("csv created in: " + self.csv_dir)  
+        except Exception as e:
+            # otherwise run had zero collisions
+            print(e)
+            bags = {}
         return bags
     
     def average(self,lst): 
@@ -246,9 +279,9 @@ class newBag():
              return 0
 
     def plot_global_plan(self,run_n,pwp):
-        global plot_gp
+        global plt_cfg
 
-        if plot_gp and self.plot_gp:
+        if plt_cfg["plot_gp"] and self.plot_gp:
             csv_dir = self.csv_dir 
             # print(csv_dir+"/scenario_reset.csv")
             if os.path.isfile(csv_dir+"/sensorsim-police-gplan.csv") and os.path.isfile(csv_dir+"/scenario_reset.csv"): 
@@ -266,7 +299,7 @@ class newBag():
                 self.plot_gp = False
 
     def plot_collisions(self, xya, clr):
-        global ax, plot_collisions, lgnd
+        global ax, plt_cfg, lgnd
         all_cols_x = []
         all_cols_y = []
         col_exists = False
@@ -276,7 +309,7 @@ class newBag():
                 all_cols_x.append(-col_xy[1])
                 all_cols_y.append(col_xy[0])
 
-                if plot_collisions:
+                if plt_cfg["plot_collisions"]:
                     circle = plt.Circle((-col_xy[1], col_xy[0]), 0.3, color=clr, fill = True, alpha = 0.3)
                     ax.add_patch(circle)
                     
@@ -288,7 +321,7 @@ class newBag():
 
     def evalPath(self, planner, file_name, bags):
         col_xy = []
-        global ax, lgnd, axlim, plot_trj, plot_subgoals, plot_gp, plot_collisions
+        global ax, axlim, plt_cfg, line_clr, line_stl
 
         durations = [] 
         trajs = []
@@ -296,9 +329,9 @@ class newBag():
 
         # self.make_txt(file_name, "\n"+"Evaluation of "+planner+":") --txt
         axlim = {}
-        axlim["x_min"] = 100
+        axlim["x_min"] =  100
         axlim["x_max"] = -100
-        axlim["y_min"] = 100
+        axlim["y_min"] =  100
         axlim["y_max"] = -100
 
         json_data              = {}
@@ -346,13 +379,14 @@ class newBag():
                 path_length = np.sum(np.sqrt(dist_array)) 
                 # for av
                 trajs.append(path_length)
-                if path_length > 0 and plot_trj:
-                    ax.plot(y, x, lgnd[planner], alpha=0.2)
+                if path_length > 0 and plt_cfg["plot_trj"]:
+                    # print(lgnd)
+                    ax.plot(y, x, line_clr, linestyle = line_stl, alpha=0.2)
                     ax.set_xlabel("x in [m]")
                     ax.set_ylabel("y in [m]")
 
                 pwp = True
-                if plot_subgoals:
+                if plt_cfg["plot_subgoals"]:
                     if len(wp_y) > 0 and len(wp_x) > 0:
                         pwp = False
                         ax.plot(wp_y, wp_x, "s", color='g', alpha=0.1)
@@ -378,7 +412,7 @@ class newBag():
                 # plot global plan
                 n_run = run.replace("run_","")
                 n_run = int(n_run)
-                if plot_gp:
+                if plt_cfg["plot_gp"]:
                     self.plot_global_plan(n_run,pwp)
 
                 # append current run to txt
@@ -416,8 +450,8 @@ class newBag():
         # self.make_txt(file_name,msg_col)
 
         self.make_json(json_data)
-        if plot_collisions:
-            self.plot_collisions(col_xy,lgnd[planner])
+        if plt_cfg["plot_collisions"]:
+            self.plot_collisions(col_xy,line_clr)
 
     def fit_cluster(self,ca):
 
@@ -439,7 +473,7 @@ class newBag():
         plt.ylim(-4,24)
 
     def make_grid(self, acxy, clr):
-        global ax, plot_grid, grid_step
+        global ax, plt_cfg, grid_step
 
         # max grid size
         cx_min = min(acxy[0]) 
@@ -502,7 +536,7 @@ class newBag():
             cells[i][j] = [n_cell ,x1, y1, x2, y2, x3, y3, x4, y4]
 
 
-            if plot_grid:
+            if plt_cfg["plot_grid"]:
                 # plot coordinates 
                 circle = plt.Circle((x1, y1), 0.1, color=clr, fill = True, alpha = 1)
                 ax.add_patch(circle)
@@ -529,7 +563,7 @@ class newBag():
         self.find_zones(cells,acxy,clr)
 
     def find_zones(self, cells, acxy, clr):
-        global ax, plot_zones, grid_step
+        global ax, plt_cfg, grid_step
         zones = {}
 
         for i in range(len(acxy[0])):
@@ -557,7 +591,6 @@ class newBag():
                     
                     # check if collision in cell
                     if p_x1 <= x and p_y1 <= y and  p_x2 <= x and p_y2 >= y and p_x3 >= x and p_y3 >= y and p_x4 >= x and p_y4 <= y:
-                        #print(cell_nr)
                         if cell_nr in zones:
                             zones[cell_nr].append([x,y])
                             # average center
@@ -590,7 +623,7 @@ class newBag():
         col_tol = 5
         filtered_zones = {}
 
-        if plot_zones:
+        if plt_cfg["plot_zones"]:
             for i in zones:
                 nof_cols = len(zones[i])
                 
@@ -650,12 +683,17 @@ class newBag():
 
             break
 
-        # if plot_zones:
+        # if plt_cfg[plot_zones]:
         #     for i in merged:
         #         radius = 1
         #         circle = plt.Circle((i[0], i[1]), radius, color=clr, fill = False, alpha = 1, lw = 2)
         #         ax.add_patch(circle)
 
+def fancy_print(msg,success):
+    if success:
+        cprint(msg + " "u'\N{check mark}', "green")
+    else:
+        cprint(msg, "yellow")
 
 def plot_arrow(start,end):
     global ax
@@ -675,7 +713,7 @@ def plot_dyn_obst(ob_xy):
 
 def read_scn_file(map, ob):
     # gets start / goal of each scenario as global param
-    global start, goal, plot_obst
+    global start, goal, plt_cfg
     # find json path
     rospack = rospkg.RosPack()
     json_path = rospack.get_path('simulator_setup')+'/scenarios/eval/'
@@ -707,7 +745,7 @@ def read_scn_file(map, ob):
         ep_y = sp_y + wp_y
         ep   = [ep_x, ep_y]
 
-        if plot_obst:
+        if plt_cfg["plot_obst"]:
             plot_dyn_obst(sp)
             plot_dyn_obst(ep)
             plot_arrow(sp,wp)
@@ -716,328 +754,173 @@ def read_scn_file(map, ob):
     start = data["robot"]["start_pos"]
     goal  = data["robot"]["goal_pos"]
 
-def eval_all(a,map,ob,vel,run="all_runs/",saved_name=""):
-    global ax, sm, lgnd, start, goal, axlim, plot_sm
-    fig, ax = plt.subplots(figsize=(6, 7))
-    
-    read_scn_file(map, ob) 
+def eval_cfg(cfg_file, filetype):
+    global ax, sm, start, goal, axlim, plt_cfg, line_clr, line_stl
 
-    mode =  map + "_" + ob + "_" + vel 
-    # fig.suptitle(mode, fontsize=16)
-    # plot static map
-    if not "empty" in map and plot_sm:
-        # img = plt.imread("map_small.png")
-        # ax.imshow(img, extent=[-20, 6, -6, 27.3])
-        plt.scatter(sm[1], sm[0],s = 0.2 , c = "grey")
-        # plt.plot(sm[1], sm[0],"--")
-        
-    # return
     cur_path    = str(pathlib.Path().absolute()) 
     parent_path = str(os.path.abspath(os.path.join(cur_path, os.pardir)))
-    bag_path    = parent_path + "/bags/scenarios/" + run
-
-
-    for planner in a:
-        curr_bag = bag_path + planner
-        for file in os.listdir(curr_bag):
-            if file.endswith(".bag") and map in file and ob in file and vel in file:
-                fn = planner + "_" + mode
-                if "subsample" not in fn or "esdf" not in fn:
-                    fn.replace("02","03")
-                # print(fn)
-                
-                newBag(planner, fn, curr_bag + "/" + file)
-
-
-                # print(fn)
     
-    # dhow legend labels once per planner
+    fancy_print("loading config: " + cfg_file, 0)
+    # load default config
+    with open(cfg_file, "r") as ymlfile:
+        cfg = yaml.safe_load(ymlfile)
+    default_cfg = cfg["default_cfg"]
+    fancy_print("loading config: " + cfg_file, 1)
+
+
+
+    plt_cfg  = copy.deepcopy(default_cfg)
+  
+    for curr_figure in cfg:
+        # plot file name
+        cfg_folder = cfg_file
+        # cfg_folder = cfg_folder.replace(".yaml","")
+        if not os.path.exists('../plots/' + cfg_folder):
+            os.mkdir('../plots/' + cfg_folder)
+
+        plot_file        = '../plots/' + cfg_folder + "/" + curr_figure + "." + filetype 
+        # plot_file_exists = os.path.isfile(plot_file)
+        plot_file_exists = False
+        # print(curr_figure)
+        if "custom_cfg" in curr_figure:
+            for param in cfg[curr_figure]:
+                plt_cfg[param] = cfg[curr_figure][param]
+            # print("----------------")
+            # pp.pprint(plt_cfg)
+        
+        elif "default" not in curr_figure and not plot_file_exists:
+            fig, ax  = plt.subplots(figsize=(6, 7))
+
+            ca = curr_figure.split("_")
+            map  = ca[0]
+            ob   = ca[1]
+            vel  = ca[2]
+            read_scn_file(map, ob) 
+            mode =  map + "_" + ob + "_" + vel 
+            fig.canvas.set_window_title(curr_figure)
+
+            legend_elements = []
+            if plt_cfg["plot_gp"]:
+                gp_el = Line2D([0], [0], color="tab:cyan", lw=4, label="Global Plan")
+                legend_elements.append(gp_el)
+
+
+            if not "empty" in map and plt_cfg["plot_sm"]:
+                # offs_x = cfg[curr_figure]["map_origin"][0]
+                # offs_y = cfg[curr_figure]["map_origin"][1]
+                plt.scatter(sm[1], sm[0],s = 0.2 , c = "grey")
+
+            for planner in cfg[curr_figure]["planner"]:
+                # config plot param for planner
+                plot_param  = cfg[curr_figure]["planner"][planner]
+                if "folder" in plot_param:
+                    dir = plot_param["folder"]
+                else:
+                    dir = plt_cfg["folder"]
+                if "wpg" in plot_param:
+                    wpg     = plot_param["wpg"]
+                else:
+                    wpg = ""
+
+                model   = plot_param["model"]
+                style   = plot_param["linestyle"]
     
-    legend_elements = []
-    el = Line2D([0], [0], color="tab:cyan", lw=4, label="Global Plan")
-    legend_elements.append(el)
-    for l in lgnd:
-            clr = lgnd[l]
-            mrk = ""
-            if l == "cadrl":
-                l = "STH-WP"
-            if l == "esdf":
-                l = "LM-WP"
-            if l == "subsample":
-                l = "SUB-WP"
-            if "_" in clr:
-                clr = lgnd[l].split("_")[1]
-                mrk = lgnd[l].split("_")[0]
-                el = Line2D([0], [0], color=clr, lw=4, label=l, marker = mrk, linestyle='None')
-            else:
-                el = Line2D([0], [0], color=clr, lw=4, label=l, marker = mrk)
-            legend_elements.append(el)
-    ax.legend(handles=legend_elements, loc=0)
-    
-    # ax.set_ylim([start[0]-1, goal[0]+1])
 
-    # ax.set_xlim([-16, 3])
-    # ax.set_ylim([-4, 24])
+                # print(planner, dir, model, style, wpg)
+
+                bag_path = parent_path + "/bags/scenarios/" + dir
+                curr_bag = bag_path + model
 
 
-    # legend = plt.imread("legend/legend1_4.png")
-    # imbox = OffsetImage(legend,zoom="0.5")
-    # xy = [100,200]
-    # ab = AnnotationBox(imbox,xy,xybox=(0,0),boxcoords="op")
+                style_arr = style.split(",")
+                line_clr  = style_arr[0]
+                line_stl  = style_arr[1]
+                el        = Line2D([0], [0], color=line_clr, lw=4, label=planner, marker = "", linestyle=line_stl)
+                legend_elements.append(el)
 
-    plt.subplots_adjust(top = 1, bottom = 0, right = 1, left = 0, hspace = 0, wspace = 0)
-    plt.savefig('../plots/' + saved_name + mode + '.pdf', bbox_inches = 'tight', pad_inches = 0)
+                for file in os.listdir(curr_bag):
 
+                    # check if file matches ids
 
-    # plt.savefig('../plots/' + saved_name + mode + '.png')
+                    file_match = map in file and \
+                                 ob  in file and \
+                                 vel in file and \
+                                 wpg in file
+
+                    if file.endswith(".bag") and file_match:
+
+                        fancy_print("Evaluate bag: " + file, 0)
+                        planner_wpg = planner.split("_")[0] + "wpg" + wpg 
+                        newBag(planner_wpg, curr_figure, curr_bag + "/" + file)
+                        fancy_print("Evaluate bag: " + file, 1)
+
+            
+
+            ax.legend(handles=legend_elements, loc=1)
+            plt.subplots_adjust(top = 1, bottom = 0, right = 1, left = 0, hspace = 0, wspace = 0)
+            plt.savefig(plot_file, bbox_inches = 'tight', pad_inches = 0)
+            # reset plot cfg to default
+            plt_cfg = copy.deepcopy(default_cfg)
+
+    plt.show()
 
 def getMap(msg):
-    global ax, sm
+    global ax, sm, map_orig
+
+    map_orig = [0, 0]
     points_x = []
     points_y = []
     # print(msg.markers[0])
+    orig_x = 0
+    orig_y = 0  
     for p in msg.markers[0].points:
-        if  2 < p.y < 25 :
-            points_x.append(p.x-6)
-            points_y.append(-p.y+6)
+    #     if  2 < p.y < 25 :
+        points_x.append( p.x + orig_x)
+        points_y.append(-p.y - orig_y)
+
+
+
     # plt.scatter(points_y, points_x)
     sm = [points_x, points_y]
 
-def run():
-    global ax, sm, lgnd, grid_step, select_run
-    global plot_trj, plot_zones, plot_obst, plot_collisions, plot_grid, plot_sm, plot_gp, plot_subgoals
+def run(cfg_file, filetype):
+    global ax, sm, grid_step, select_run
+    global plt_cfg
+    plt_cfg = {}
+
     select_run = []
-    # ToDo: merge nearby zones 
-    # legend
-    lgnd          = {}
-    lgnd["arena"] = "tab:purple"
-    lgnd["cadrl"] = "tab:red"
-    lgnd["dwa"]   = "tab:blue"
-    lgnd["mpc"]   = "tab:green"
-    lgnd["teb"]   = "tab:orange"
 
-    lgnd["esdf"] = "tab:brown"
-    lgnd["subsample"] = "tab:grey"
-
-    # plots
-    grid_step       = 2
-    plot_sm         = False
-    plot_obst       = False
-    plot_trj        = False
-    plot_zones      = False
-    plot_collisions = False
-    plot_grid       = False
-    plot_gp         = False
+    grid_step  = 2
+        
     # static map
-    rospy.init_node("eval", anonymous=False)
+    rospy.init_node("eval", disable_signals=True)
     rospy.Subscriber('/flatland_server/debug/layer/static',MarkerArray, getMap)
     
 
-    # # map
-    # #  5 01
-    # eval_all(["arena","cadrl","dwa","mpc","teb"],"map1","5","vel_03")
-    # # 10 01
-    # eval_all(["arena","cadrl","dwa","mpc","teb"],"map1","10","vel_03")
-    # # 20 01
-    # eval_all(["arena","cadrl","dwa","mpc","teb"],"map1","20","vel_03")
-
-
-    # # empty map
-    # #  5 01
-    # eval_all(["arena","cadrl","dwa","mpc","teb"],"empty","5","vel_03")    
-    # #  10 01
-    # eval_all(["arena","cadrl","dwa","mpc","teb"],"empty","10","vel_03")    
-    # #  20 01
-    # eval_all(["arena","cadrl","dwa","mpc","teb"],"empty","20","vel_03")
+    # eval_cfg("eval_run3_empty.yml")
+    # eval_cfg("eval_run3_map1.yml")
+    # eval_cfg("eval_test.yml")
+    fancy_print("Start Evaluation: " + cfg_file, 0)
+    eval_cfg(cfg_file, filetype)
+    fancy_print("Evaluation finished: " + cfg_file, 1)
 
 
 
-
-    # eval_all(["arena","cadrl","dwa","mpc","teb"],"map1","5","vel_01") ------- all old runs ---------
-    # # 10 01
-    # eval_all(["arena","cadrl","dwa","mpc","teb"],"map1","10","vel_01")
-    # # 20 01
-    # eval_all(["arena","cadrl","dwa","mpc","teb"],"map1","20","vel_01")
-    
-
-    # eval_all(["arena","cadrl","dwa","mpc","teb"],"map1","5","vel_02")
-    # # 10 01
-    # eval_all(["arena","cadrl","dwa","mpc","teb"],"map1","10","vel_02")
-    # # 20 01
-    # eval_all(["arena","cadrl","dwa","mpc","teb"],"map1","20","vel_02")
-
-
-    # eval_all(["arena","cadrl","dwa","mpc","teb"],"map1","5","vel_03")
-    # # 10 01
-    # eval_all(["arena","cadrl","dwa","mpc","teb"],"map1","10","vel_03")
-    # # 20 01
-    # eval_all(["arena","cadrl","dwa","mpc","teb"],"map1","20","vel_03")
-
-
-    # #  5 01
-    # eval_all(["arena","cadrl","dwa","mpc","teb"],"empty","5","vel_01")
-    # # 10 01
-    # eval_all(["arena","cadrl","dwa","mpc","teb"],"empty","10","vel_01")
-    # # 20 01
-    # eval_all(["arena","cadrl","dwa","mpc","teb"],"empty","20","vel_01")
-
-    # #  5 01
-    # eval_all(["arena","cadrl","dwa","mpc","teb"],"empty","5","vel_02")    
-    # #  10 01
-    # eval_all(["arena","cadrl","dwa","mpc","teb"],"empty","10","vel_02")    
-    # #  20 01
-    # eval_all(["arena","cadrl","dwa","mpc","teb"],"empty","20","vel_02")
-
-    # #  5 01
-    # eval_all(["arena","cadrl","dwa","mpc","teb"],"empty","5","vel_03")    
-    # #  10 01
-    # eval_all(["arena","cadrl","dwa","mpc","teb"],"empty","10","vel_03")    
-    # #  20 01
-    # eval_all(["arena","cadrl","dwa","mpc","teb"],"empty","20","vel_03")
-
-
-
-
-    # -------------------------------------- run 2 --------------------------------------
-
-    # # empty map 
-    # # 20
-    # eval_all(["esdf","subsample"],"empty","20","vel_01","run_2/") 
-    # eval_all(["esdf","subsample"],"empty","20","vel_02","run_2/")
-    # eval_all(["esdf","subsample"],"empty","20","vel_03","run_2/")
-    # # 10
-    # eval_all(["esdf","subsample"],"empty","10","vel_01","run_2/")
-    # eval_all(["esdf","subsample"],"empty","10","vel_02","run_2/")
-    # eval_all(["esdf","subsample"],"empty","10","vel_03","run_2/")
-    # # 5
-    # eval_all(["esdf","subsample"],"empty","5","vel_01","run_2/")
-    # eval_all(["esdf","subsample"],"empty","5","vel_02","run_2/")
-    # eval_all(["esdf","subsample"],"empty","5","vel_03","run_2/")
-
-
-    # # # map 1 
-    # # # 20
-    # eval_all(["esdf","subsample"],"map1","20","vel_01","run_2/")
-    # eval_all(["esdf","subsample"],"map1","20","vel_02","run_2/")
-    # eval_all(["esdf","subsample"],"map1","20","vel_03","run_2/")
-    # # # 10
-    # eval_all(["esdf","subsample"],"map1","10","vel_01","run_2/")
-    # eval_all(["esdf","subsample"],"map1","10","vel_02","run_2/")
-    # eval_all(["esdf","subsample"],"map1","10","vel_03","run_2/")
-    # # # 5
-    # eval_all(["esdf","subsample"],"map1","5","vel_01","run_2/")
-    # eval_all(["esdf","subsample"],"map1","5","vel_02","run_2/")
-    # eval_all(["esdf","subsample"],"map1","5","vel_03","run_2/")
-    
-
-
-    # select_run = [5,10,15,20,25]
-    # plot_zones    = False
-    # plot_subgoals = True
-
-
-    # 1- 6
-    # lgnd = {}
-    # lgnd["subsample"] = "tab:purple"
-    # lgnd["waypoints"] = "s_tab:green"
-    # eval_all(["subsample"],"empty","20" ,"vel_02",saved_name="01_")
-    # lgnd = {}
-    # lgnd["esdf"]      = "tab:blue"
-    # lgnd["waypoints"] = "^_tab:grey"
-    # eval_all(["esdf"],"empty","20","vel_02",saved_name="02_")
-    # lgnd = {}
-    # lgnd["cadrl"]     = "tab:red"
-    # lgnd["waypoints"] = "o_tab:cyan"
-    # eval_all(["cadrl"],"empty","20","vel_02",saved_name="03_")
-
-
-    # lgnd = {}
-    # lgnd["subsample"] = "tab:purple"
-    # lgnd["waypoints"] = "s_tab:green"
-    # eval_all(["subsample"],"map1","20" ,"vel_02",saved_name="04_")
-    # lgnd = {}
-    # lgnd["esdf"]      = "tab:blue"
-    # lgnd["waypoints"] = "^_tab:grey"
-    # eval_all(["esdf"],"map1","20","vel_02",saved_name="05_")
-    # lgnd = {}
-    # lgnd["cadrl"]     = "tab:red"
-    # lgnd["waypoints"] = "o_tab:cyan"
-    # eval_all(["cadrl"],"map1","20","vel_02",saved_name="06_")
-
-
-
-
-    # 13 - 18
-
-    select_run = []
-    plot_zones    = True
-    plot_subgoals = False
-
-    lgnd          = {}
-    lgnd["cadrl"] = "tab:red"
-    lgnd["teb"]   = "tab:orange"
-    lgnd["mpc"]   = "tab:green"
-
-    lgnd["esdf"] = "tab:blue"
-    lgnd["subsample"] = "tab:purple"
-
-    # eval_all(["subsample","esdf","cadrl","teb","mpc"],"empty","5" ,"vel_02",saved_name="13_")
-    # eval_all(["subsample","esdf","cadrl","teb","mpc"],"empty","10","vel_02",saved_name="14_")
-    # eval_all(["subsample","esdf","cadrl","teb","mpc"],"empty","20","vel_02",saved_name="15_")
-
-    # eval_all(["subsample","esdf","cadrl","teb","mpc"],"map1","5" ,"vel_02",saved_name="16_")
-    # eval_all(["subsample","esdf","cadrl","teb","mpc"],"map1","10","vel_02",saved_name="17_")
-    # eval_all(["subsample","esdf","cadrl","teb","mpc"],"map1","20","vel_02",saved_name="18_")
-
-
-
-
-
-    # all runs ------------------------------
-    planner = ["subsample","esdf","cadrl","teb","mpc"]
-    # empty map 
-    # 20
-    eval_all(planner,"empty","20","vel_01") 
-    eval_all(planner,"empty","20","vel_02")
-    eval_all(planner,"empty","20","vel_03")
-    # 10
-    eval_all(planner,"empty","10","vel_01")
-    eval_all(planner,"empty","10","vel_02")
-    eval_all(planner,"empty","10","vel_03")
-    # 5
-    eval_all(planner,"empty","5","vel_01")
-    eval_all(planner,"empty","5","vel_02")
-    eval_all(planner,"empty","5","vel_03")
-
-
-    # map 1 
-    # 20
-    eval_all(planner,"map1","20","vel_01")
-    eval_all(planner,"map1","20","vel_02")
-    eval_all(planner,"map1","20","vel_03")
-    # 10
-    eval_all(planner,"map1","10","vel_01")
-    eval_all(planner,"map1","10","vel_02")
-    eval_all(planner,"map1","10","vel_03")
-    # 5
-    eval_all(planner,"map1","5","vel_01")
-    eval_all(planner,"map1","5","vel_02")
-    eval_all(planner,"map1","5","vel_03")
-
-    plt.show()
     rospy.spin()
 
 if __name__=="__main__":
-    run()
 
-    # example
-    # csv_dir = "../bags/scenarios/run_2/subsample/cadrl_map1_obs20_vel_03_subsampling"
-    # print(csv_dir+"/scenario_reset.csv")
-    # esdf    = gplan.gplan_to_df(csv_dir+"/sensorsim-police-gplan.csv",csv_dir+"/scenario_reset.csv")
-    # gplan.plot_run(esdf, 5)
-
-    # file_dir = "../bags/scenarios/run_2/subsample/cadrl_map1_ob20_vel_03_subsampling/"
-    # esdf = gplan.gplan_to_df(file_dir+"sensorsim-police-gplan.csv",file_dir+"scenario_reset.csv")
-    # gplan.plot_run(esdf, 10)
-
-    # plt.show()
+    try:
+        yml_file = sys.argv[1]
+        if len(sys.argv) > 2:
+            filetype = sys.argv[2]
+        else:
+            filetype = "png"
+    except Exception as e:
+        cprint(e, 'red')
+        cprint("\nCall this script like this: python scenario_eval.py '$config.yml' '$format'", 'red')
+        cprint("Example:  python scenario_eval.py 'test.yml' 'pdf'", 'green')
+        cprint("This will generate figures defined in test.yml as pdf files.", 'red')
+        cprint("If $format is left empty, output files will default to png.\n", 'red')
+        # cprint('Hello, World!', 'red')
+    run(yml_file, filetype)

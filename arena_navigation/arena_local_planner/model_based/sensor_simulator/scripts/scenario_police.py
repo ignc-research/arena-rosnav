@@ -27,6 +27,7 @@ class police():
         self.sg_wpg_received = False
 
         self.update_cluster = True
+        self.gp_published = False
 
  
         # sub
@@ -37,7 +38,7 @@ class police():
         rospy.Subscriber('/odom',Odometry, self.cb_odom)
         rospy.Subscriber('/subgoal',PoseStamped, self.cb_subgoal)
         rospy.Subscriber('/subgoal_wpg',PoseStamped, self.cb_subgoal_wpg)
-        rospy.Subscriber('/globalPlan',Path, self.cb_global_path)
+        rospy.Subscriber('/vis_global_path',Path, self.cb_global_path)
         # rospy.Subscriber('/obst_odom',Clusters, self.cb_cluster)
 
 
@@ -113,9 +114,10 @@ class police():
             self.pub_subg_wpg.publish(self.subgoal_wgp)
             self.sg_wpg_received = False
 
-        if self.gp_received:
+        if self.gp_received and not self.gp_published:
             self.pub_subgp.publish(self.global_path)
             self.gp_received = False
+            self.gp_published = True
 
         # print(self.subgoal)
 

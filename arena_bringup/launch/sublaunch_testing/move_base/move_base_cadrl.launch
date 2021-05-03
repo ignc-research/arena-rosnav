@@ -1,0 +1,41 @@
+<launch>
+    <!-- move base -->
+    <arg name="model" default="burger"/>
+    <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+        <rosparam file="$(find conventional)/config/costmap_common_params_$(arg model).yaml" command="load" ns="global_costmap" />
+        <rosparam file="$(find conventional)/config/costmap_common_params_$(arg model).yaml" command="load" ns="local_costmap" />   
+        <rosparam file="$(find conventional)/config/local_costmap_params.yaml" command="load" />
+        <rosparam file="$(find conventional)/config/global_costmap_params.yaml" command="load" />
+    </node>
+    
+    
+    <arg name="tb3_speed" default="1.5"/>
+    <arg name="file" default="cadrl_node_tb3.py"/>
+    <!-- Launch neural net ros wrapper -->
+    <node pkg="cadrl_ros" type="cadrl_node_tb3.py" name="cadrl_node" output="screen" ns="/cadrl">
+        
+        <!-- Publications -->
+        <remap from="~other_vels" to="other_vels"/>
+        <remap from="~nn_cmd_vel" to="/cmd_vel"/>
+        <remap from="~pose_marker" to="pose_marker"/>
+        <remap from="~path_marker" to="path_marker"/>
+        <remap from="~goal_path_marker" to="goal_path_marker"/>
+        <remap from="~agent_marker" to="other_agents_marker"/>
+        <remap from="~agent_markers" to="other_agents_markers"/>
+        
+        <!-- Subscriptions -->
+        <remap from="~pose" to="/odom"/>
+        <remap from="~velocity" to="velocity"/>
+        <remap from="~safe_actions" to="local_path_finder/safe_actions"/>
+        <remap from="~planner_mode" to="planner_fsm/mode"/>
+        <remap from="~goal" to="/goal"/>
+        <remap from="~subgoal" to="/subgoal"/>
+        <remap from="~clusters" to="/obst_odom"/>
+        <remap from="~peds" to="ped_manager/ped_recent"/>
+        
+        <!-- Parameters -->
+        <param name="~tb3_speed" value="$(arg tb3_speed)"/>
+
+    </node>
+
+</launch>

@@ -23,9 +23,9 @@ typedef std::shared_ptr<Graph> GraphPtr;
 constexpr size_t INIT_INDEX = 0;
 constexpr size_t GOAL_INDEX = 1;
 constexpr size_t PHASE1_INDEX = 2;
-constexpr size_t PHASE2_INDEX = 5;
+constexpr size_t PHASE2_INDEX = 3;
 constexpr size_t PHASE3_INDEX = 4;
-constexpr size_t PHASE4_INDEX = 3;
+constexpr size_t PHASE4_INDEX = 5;
 constexpr size_t PEDS_START = 6;
 #define PI 3.14159265
 
@@ -59,7 +59,12 @@ struct TimedAstarParam{
     
     // time 
     double TIME_HORIZON;
-    size_t TIME_SLICE_NUM; 
+    size_t TIME_SLICE_NUM;
+
+    // sensor range
+    double SENSOR_RANGE; 
+
+    double SAFE_TIME;
 };
 
 /* build in hyperpara */
@@ -190,7 +195,7 @@ struct PathNode
     
 	enum state node_state{UNDEFINED};
 
-    //current
+    //  current
     Index eid;              // the halfedge index = next
     Index tid;              // the triangle index = floor(eid / 3.0)
     Index sid;              // the slice index of timed graph
@@ -203,16 +208,21 @@ struct PathNode
 
     double dir;             // [rad] current direction of the car
 
-    //input
+    //  input
     double v_in;
     double w_in;
 
-    //duration
+    //  duration
     double dur_v;
     double dur_w;
 
-    //cost
+    //  cost
     double G, H;             // accumulated cost-to-go and heuristic
+
+    // collide check
+    double time_to_collide;
+    double dist_to_collide;
+    bool is_unsafe=false;
 
     // parent node
     std::shared_ptr<PathNode> parent;   // the parent node pointer
@@ -234,8 +244,6 @@ struct PathNode
         
         this->tid = static_cast<Index>(floor(eid / 3.0));
     }
-
-    
 
 };
 

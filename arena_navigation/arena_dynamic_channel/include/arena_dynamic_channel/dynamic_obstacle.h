@@ -15,7 +15,7 @@
 //#include <geometry_msgs/PoseStamped.h>
 
 #include <visualization_msgs/MarkerArray.h>
-#include <std_msgs/Float32.h>
+#include <std_msgs/Float64.h>
 
 #include <vector>
 #include <arena_mapping/mapping.h>
@@ -25,6 +25,8 @@ struct DynamicObstacleInfo{
 private:
     GridMap::Ptr grid_map_;
     double resolution_;
+    int counter_;
+    ros::Time last_ros_time_;
 public:
     ros::NodeHandle node_;
     std::string topic_name_;

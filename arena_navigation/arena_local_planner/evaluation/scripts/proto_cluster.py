@@ -34,6 +34,7 @@ cols
 # %%
 bags = {}
 pose_x = np.asarray([1,2,3,4]).T
+
 pose_y = np.asarray([2,2,3,4]).T
 t = np.asarray([3,2,3,4]).T
 col_xy = np.asarray([4,2,3,4]).T
@@ -45,12 +46,16 @@ bags["run_1"] = [pose_x, pose_y, t, col_xy, subgoal_x, subgoal_y, wpg_x, wpg_y]
 bags["run_2"] = [pose_x, pose_y, t, col_xy, subgoal_x, subgoal_y, wpg_x, wpg_y]
 # %%
 df = pd.DataFrame(data=bags)
+df2 = df.to_dict()
 df.to_csv("test.csv",index=False)
 # %%
 df
 # %%
-df2 = df.to_dict()
-
+df2
+# %%
+runs = pd.read_excel('runs_ex.xlsx',engine='openpyxl') 
+type(runs)
+runs.to_excel("output.xlsx") 
 # %%
 df2["run_2"]
 # %%

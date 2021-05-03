@@ -1,6 +1,7 @@
 ## Evaluations
 We provide tools to evaluate the planners.
-### Usage
+## Usage
+### Recording
 #### 1) Start Simulation
 ```
 roslaunch arena_bringup start_arena_flatland.launch disable_scenario:="false" map_file:="map1" scenario_file:="eval/obstacle_map1_obs10.json" local_planner:="teb"
@@ -40,3 +41,6 @@ Explanation:
 rostopic echo /scenario_reset
 ```
 This will display the reset count. Once the resets reach the max nr of repeats (set up in the json file), the robot should stay at the goal position. Then you can stop the recording.
+## Plotting
+Once you have recorded all files, we provide scripts to plot qualitative and quantitative results. Please refer to [Qualitative.md](https://github.com/ignc-research/arena-rosnav/tree/local_planner_subgoalmode/arena_navigation/arena_local_planner/evaluation/readme.md) for qualitative plots (trajectories) and [Quantitative.md](https://github.com/ignc-research/arena-rosnav/tree/local_planner_subgoalmode/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/readme.md) for quantitative plot instructions.
+

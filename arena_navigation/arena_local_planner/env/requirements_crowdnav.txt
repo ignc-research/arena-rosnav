@@ -44,7 +44,7 @@ numpy==1.19.5
 Pillow==7.2.0
 pyglet==1.5.0
 pyparsing==2.4.7
-pyrvo2==0.0.0
+pyrvo2
 python-dateutil==2.8.1
 python-qt-binding==0.4.3
 PyYAML==5.3.1

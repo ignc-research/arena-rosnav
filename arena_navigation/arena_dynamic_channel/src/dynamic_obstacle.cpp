@@ -17,8 +17,8 @@ DynamicObstacleInfo::DynamicObstacleInfo(ros::NodeHandle &nh, std::string topic_
     // init subscriber for obstacles state
     ros::NodeHandle public_nh_;
     obs_odom_sub_=public_nh_.subscribe(topic_name_, 1, &DynamicObstacleInfo::updateOdomCallback,this);
-    std::string vel_topic_name=topic_name_+"_vel";
-    obs_vel_pub_ =public_nh_.advertise<std_msgs::Float32>(vel_topic_name,1);
+    //std::string vel_topic_name=topic_name_+"_vel";
+    //obs_vel_pub_ =public_nh_.advertise<std_msgs::Float64>(vel_topic_name,1);
 
     // init subscriber for robot state
     robot_odom_sub_ = public_nh_.subscribe("odom", 1, &DynamicObstacleInfo::updateRobotOdomCallback,this);
@@ -27,12 +27,18 @@ DynamicObstacleInfo::DynamicObstacleInfo(ros::NodeHandle &nh, std::string topic_
     pos_=Eigen::Vector2d::Zero();
     vel_=Eigen::Vector2d::Zero();
     is_init_=true;
+    last_ros_time_=ros::Time::now();
+
 }
     
 void DynamicObstacleInfo::updateOdomCallback(visualization_msgs::MarkerArray::ConstPtr msg){
         
     // for nav_msgs::Odometry::ConstPtr msg
     //curr_pos(msg->pose.pose.position.x,msg->pose.pose.position.y);
+    if((ros::Time::now()-last_ros_time_).toSec()<0.01){
+        return;
+    }
+    last_ros_time_= ros::Time::now();
 
     Eigen::Vector2d curr_pos(msg->markers[0].pose.position.x,msg->markers[0].pose.position.y); 
         
@@ -55,9 +61,9 @@ void DynamicObstacleInfo::updateOdomCallback(visualization_msgs::MarkerArray::Co
     if(!is_init_){
         updateDynamicOcc();
     }
-    std_msgs::Float32 velocity;
-    velocity.data=vel_.norm();
-    obs_vel_pub_.publish(velocity);
+    //std_msgs::Float64 velocity;
+    //velocity.data= (double)vel_.norm();
+    //obs_vel_pub_.publish(velocity);
 
 }
 

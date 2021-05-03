@@ -5,13 +5,17 @@ from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl
 
 def training_args(parser):
     """ program arguments training script """
+    parser.add_argument('--n_envs', type=int, default=1, help='number of parallel environments')
     parser.add_argument('--no-gpu', action='store_true', help='disables gpu for training')
+    parser.add_argument('--debug', action='store_true', help='disables multiprocessing in order to debug')
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('--agent', type=str,
-                        choices=['MLP_ARENA2D', 'DRL_LOCAL_PLANNER', 'CNN_NAVREP'],
+                        choices=['MLP_ARENA2D', 'AGENT_1', 'AGENT_2', 'AGENT_3', 'AGENT_4', 'AGENT_5', 'AGENT_6', 'AGENT_7', 'AGENT_8', 'AGENT_9', 'AGENT_10', 'AGENT_11', 'AGENT_12', 'AGENT_13', 'AGENT_14', 'AGENT_15', 'AGENT_16', 'AGENT_17', 'AGENT_18', 'AGENT_19', 'AGENT_20'],
                         help='predefined agent to train')
     group.add_argument('--custom-mlp', action='store_true', help='enables training with custom multilayer perceptron')
-    group.add_argument('--load', type=str, metavar="[agent name]", help='agent to be loaded for training')
+    group.add_argument('--load', type=str, metavar='[agent name]', help='agent to be loaded for training')
+    parser.add_argument('--config', type=str, metavar='[config name]', default='default', help='name of the json file containing' 
+    'the hyperparameters')
     parser.add_argument('--n', type=int, help='timesteps in total to be generated for training')
     parser.add_argument('-log', '--eval_log', action='store_true', help='enables storage of evaluation data')
     parser.add_argument('--tb', action='store_true', help='enables tensorboard logging')
@@ -20,6 +24,7 @@ def training_args(parser):
 def run_agent_args(parser):
     parser.add_argument('--no-gpu', action='store_true', help='disables gpu for training')
     parser.add_argument('--load', type=str, metavar="[agent name]", help='agent to be loaded for training')
+    parser.add_argument('--log', action='store_true', help='store log file with episode information')
     parser.add_argument('-s', '--scenario', type=str, metavar="[scenario name]", default='scenario1', help='name of scenario file for deployment')
     parser.add_argument('-v', '--verbose', choices=['0', '1'], default='1')
 

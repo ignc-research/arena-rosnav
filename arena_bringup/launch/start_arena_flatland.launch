@@ -1,80 +1,100 @@
 <launch>
-    
   <param name="use_sim_time" value="true"/>
 
-  <arg name="local_planner"   default="teb"/>
+  <arg name="train_mode"       default="false"/>
+  <param name="train_mode" value="$(arg train_mode)" />
+  
+  <arg name="local_planner"   default="teb"/> 
   <arg name="rviz_file"       default="nav_LP"/>
-
-  <arg name="train_mode"      default="false"/>
   <arg name="disable_scenario"    default="true"/>
   <arg name="scenario_file"   default="empty_map.json"/>
   <arg name="reset"   default="true"/>
 
+  <!-- To make the training more efficient make sure this step_size*laser_update_rate == 1  -->
+  <arg name="step_size" default="0.01"/>
+  <arg name="update_rate" default="250"/>
+  <arg name="show_viz"  default="true"/>
+  <arg name="viz_pub_rate" default="30" />
+  <arg name="use_rviz" default="true"/>
+  
+  <param name="update_rate" value="$(arg update_rate)" />
+  <param name="step_size" value="$(arg step_size)" /> 
+  <param name="show_viz" value="$(arg show_viz)"/>
+  <param name="viz_pub_rate" value="$(arg viz_pub_rate)"/>
+  <param name="use_rviz"       value="$(arg use_rviz)"/>
+  <param name="single_env"       value="true"/>
 
+  <!-- the folder name under the path simulator_setup/maps  -->
+  <arg name="map_file"        default="map_empty"/>
+  <!-- <arg name="map_folder_name" default="map_empty" /> -->
+  <arg name="map_path" default="$(find simulator_setup)/maps/$(arg map_file)/map.yaml" />
+  <param name="world_path" value="$(find simulator_setup)/maps/$(arg map_file)/map.world.yaml" />
+
+  <!-- the velocity of randomly genelized obstacles  -->
+  <arg name="obs_vel" default="0.3" />
+  <param name="obs_vel" value="$(arg obs_vel)" /> 
+ 
+
+  <!--  PARAMS DON'T CHANGE THEM  -->
+  <param name="robot_action_rate"     value="10"/>
+  <param name="laser_update_rate"     value="10"/>
+
+
+  <!-- DRL action frequency -->
+  <arg name="action_frequency" default="10"/>
+  <param name="action_frequency" value="$(arg action_frequency)"/>
 
   <!-- Map parameters -->
-
-  <arg name="map_file"        default="map_empty"/>
-  <arg name="map_path"        default="$(find simulator_setup)/maps/$(arg map_file)/map.yaml"/>
-  <arg name="world_path"      default="$(find simulator_setup)/maps/$(arg map_file)/map.world.yaml"/>
-
   <arg name="global_frame_id"   value="map"/>
   <arg name="odom_frame_id"     value="odom"/>
   <arg name="base_frame_id"     value="base_footprint"/>
-  
   <arg name="odom_ground_truth" default="/odometry/ground_truth"/>
 
-  <!-- Visualization -->
-  <arg name="use_viz"         default="true"/>
-  <param name="train_mode"    value="$(arg train_mode)"/>
-  <param name="use_viz"       value="$(arg use_viz)"/>
 
-
-  <!-- <arg name="scan_topic" default="scan"/> default laser topic in flatland -->
-  
- <!-- use simulator and rviz-->
-  <include file="$(find arena_bringup)/launch/sublaunch/flatland_simulator.launch">
-    <arg name="world_path"      value="$(arg world_path)"/>
-
-
-    <!-- <arg name="update_rate"     default="1000.0"/>
-    <arg name="step_size"       default="0.005"/> -->
-
-    <arg name="update_rate"     default="1000.0"/>
-    <arg name="step_size"       default="0.005"/>
-
-    <arg name="show_viz"        default="true"/>
-
-    <arg name="viz_pub_rate"    default="50.0"/>
-    <arg name="use_rviz"        default="$(arg use_viz)"/>  
-    <arg name="train_mode"      value="$(arg train_mode)"/>
-    <arg name="rviz_file"       value="$(arg rviz_file)"/>
+ <!-- use simulator-->
+  <include file="$(find arena_bringup)/launch/sublaunch_testing/flatland_simulator.launch">
+    <arg name="show_viz"  value="$(arg show_viz)"/>
+    <arg name="use_rviz"  value="$(arg use_rviz)"/>
+    <arg name="rviz_file" value="$(arg rviz_file)"/>
   </include>
 
   <!-- map server-->
   <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_path)">
    <param name="frame_id" value="$(arg global_frame_id)"/>
+
   </node>
   
   <!-- use fake localization-->
-  <include file="$(find arena_bringup)/launch/sublaunch/fake_localization.launch">
+  <include file="$(find arena_bringup)/launch/sublaunch_testing/fake_localization.launch">
+
     <arg name="global_frame_id"   value="$(arg global_frame_id)"/>
     <arg name="odom_frame_id"     value="$(arg odom_frame_id)"/>
-    <arg name="base_frame_id"     value="$(arg base_frame_id)"/>
-    <arg name="odom_ground_truth" default="$(arg odom_ground_truth)"/>
   </include>
 
   <!-- start task_generator node -->
-  <include file="$(find arena_bringup)/launch/sublaunch/task_generator.launch" unless="$(arg disable_scenario)">
-   <arg name="scenarios_json_path" value="$(find simulator_setup)/scenarios/$(arg scenario_file)"/>
-   <arg name="auto_reset" value="$(arg reset)"/>
-  </include>
-   <include file="$(find arena_bringup)/launch/sublaunch/sensor_sim.launch" unless="$(arg disable_scenario)">
+  <arg name="timeout"        default="3.0"/>
+  <include file="$(find arena_bringup)/launch/sublaunch_testing/task_generator.launch" unless="$(eval arg('disable_scenario') or arg('train_mode'))">
+   <arg name="scenarios_json_path"  value="$(find simulator_setup)/scenarios/$(arg scenario_file)"/>
+   <arg name="auto_reset"           value="$(arg reset)"/>
+   <arg name="timeout"              value="$(arg timeout)"/>
   </include>
 
-  <!-- move_base plan manager: which provide basic global planner and cost map -->
-  <include file="$(find arena_bringup)/launch/sublaunch/move_base/move_base_$(arg local_planner).launch"/>
+  <include file="$(find arena_bringup)/launch/sublaunch_testing/sensor_sim.launch" unless="$(eval arg('disable_scenario') or arg('train_mode'))">
+  </include>
+
   
-  <!-- start time_space plan manager FSM-->
-  <!-- <include file="$(find arena_bringup)/launch/sublaunch/timed_space_planner_fsm.launch"/> -->
+
+  <!-- move_base plan manager: which provide basic global planner and cost map -->
+  <include file="$(find arena_bringup)/launch/sublaunch_testing/move_base/move_base_$(arg local_planner).launch">
+  </include>
+
+
+  <!-- start time space plan fsm-->
+  <include file="$(find arena_bringup)/launch/sublaunch_testing/timed_space_planner_fsm.launch">
+  </include>
+
+  <!-- makes sure that drl actions will be published according to sim time in eval mode-->
+  <group if="$(eval arg('train_mode') == false)">
+    <node name="action_publisher" pkg="arena_local_planner_drl" type="action_publisher.py"/>
+  </group>
 </launch>

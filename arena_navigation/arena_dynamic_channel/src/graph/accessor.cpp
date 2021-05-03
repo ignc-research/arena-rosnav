@@ -215,7 +215,7 @@ size_t locateCurrentFace(const Delaunator* graph, const double px, const double 
             return i;
         }
     }
-    std::cout<<"locate 4-----------------------"<<std::endl;
+    
     return INVALID_INDEX;
 }
 

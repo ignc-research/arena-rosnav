@@ -1,0 +1,10 @@
+
+<launch>
+  <arg name="ns"/>
+
+  <!-- launch flatland server -->
+  <node name="flatland_server" pkg="flatland_server" type="flatland_server" output="screen" ns="$(arg ns)">  
+    <!-- remapping for namespace -->
+    <remap from="/clock" to="/$(arg ns)/clock"/>
+  </node>
+</launch>

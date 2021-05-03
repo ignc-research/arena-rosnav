@@ -1,0 +1,31 @@
+<launch>
+    <arg name="ns" />
+
+    <!-- Don't change it if you don't know what does it mean! -->
+    <arg name="global_frame_id"   value="map"/>
+    <arg name="odom_frame_id"     value="$(arg ns)_odom"/>
+    <arg name="base_frame_id"     value="$(arg ns)_footprint"/>
+
+    <!-- use fake localization-->
+    <include file="$(find arena_bringup)/launch/sublaunch_training/fake_localization.launch">
+      <arg name="ns"                value="$(arg ns)"/>
+      <arg name="global_frame_id"   value="$(arg global_frame_id)"/>
+      <arg name="odom_frame_id"     value="$(arg odom_frame_id)"/>
+    </include>
+
+    <!-- use move base-->
+    <!-- <include file="$(find arena_bringup)/launch/sublaunch_training/move_base.launch">
+      <arg name="ns"                value="$(arg ns)"/>
+    </include> -->
+
+    <!-- start time space plan fsm-->
+    <include file="$(find arena_bringup)/launch/sublaunch_training/timed_space_planner_fsm.launch">
+      <arg name="ns"                value="$(arg ns)"/>
+    </include>
+    
+    <!-- use simulator and rviz-->
+    <include file="$(find arena_bringup)/launch/sublaunch_training/flatland_simulator.launch">
+        <arg name="ns" value="$(arg ns)"/>
+    </include>
+
+  </launch>

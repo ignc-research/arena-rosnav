@@ -1,0 +1,150 @@
+{
+	"scenarios": [
+		{
+			"scene_name": "new_scenario",
+			"repeats": 15,
+			"dynamic_obstacles": {
+				"dynamic_obs_0": {
+					"obstacle_radius": 0.5325,
+					"linear_velocity": 0.3,
+					"type": "circle",
+					"start_pos": [
+						12.75525,
+						13.5255,
+						0
+					],
+					"waypoints": [
+						[
+							-1.97025,
+							-1.4909999999999999,
+							0
+						]
+					],
+					"is_waypoint_relative": true,
+					"mode": "yoyo",
+					"triggers": [
+						"watcher_1"
+					]
+				},
+				"dynamic_obs_1": {
+					"obstacle_radius": 0.5325,
+					"linear_velocity": 0.3,
+					"type": "circle",
+					"start_pos": [
+						8.974499999999999,
+						7.18875,
+						0
+					],
+					"waypoints": [
+						[
+							1.11825,
+							2.71575,
+							0
+						]
+					],
+					"is_waypoint_relative": true,
+					"mode": "yoyo",
+					"triggers": [
+						"watcher_0"
+					]
+				},
+				"dynamic_obs_2": {
+					"obstacle_radius": 0.5325,
+					"linear_velocity": 0.3,
+					"type": "circle",
+					"start_pos": [
+						13.128,
+						9.0525,
+						0
+					],
+					"waypoints": [
+						[
+							-0.05324999999999697,
+							-2.289750000000003,
+							0
+						]
+					],
+					"is_waypoint_relative": true,
+					"mode": "yoyo",
+					"triggers": [
+						"watcher_2"
+					]
+				},
+				"dynamic_obs_3": {
+					"obstacle_radius": 0.5325,
+					"linear_velocity": 0.3,
+					"type": "circle",
+					"start_pos": [
+						3.17025,
+						3.35475,
+						0
+					],
+					"waypoints": [
+						[
+							-2.07675,
+							-1.3312500000000014,
+							0
+						]
+					],
+					"is_waypoint_relative": true,
+					"mode": "yoyo",
+					"triggers": [
+						"watcher_3"
+					]
+				}
+			},
+			"static_obstacles": {
+
+			},
+			"robot": {
+				"start_pos": [
+					20.6895,
+					2.6624999999999983,
+					0.0
+				],
+				"goal_pos": [
+					3.8625,
+					16.613999999999997,
+					0.0
+				]
+			},
+			"watchers": {
+				"watcher_0": {
+					"pos": [
+						9.87975,
+						8.307
+					],
+					"range": 1.75725
+				},
+				"watcher_1": {
+					"pos": [
+						11.37075,
+						13.099499999999999
+					],
+					"range": 1.54425
+				},
+				"watcher_2": {
+					"pos": [
+						13.341,
+						7.93425
+					],
+					"range": 1.65075
+				},
+				"watcher_3": {
+					"pos": [
+						2.7442499999999996,
+						2.71575
+					],
+					"range": 1.54425
+				},
+				"watcher_4": {
+					"pos": [
+						1.5727499999999999,
+						15.016499999999999
+					],
+					"range": 1.11825
+				}
+			}
+		}
+	]
+}

@@ -121,6 +121,7 @@ class NN_tb3():
         print("new goal: "+str([self.goal.pose.position.x,self.goal.pose.position.y])) 
 
     def cbSubGoal(self,msg):
+        self.stop_moving_flag = False
         self.sub_goal.x = msg.pose.position.x
         self.sub_goal.y = msg.pose.position.y
         # print "new subgoal: "+str(self.sub_goal)

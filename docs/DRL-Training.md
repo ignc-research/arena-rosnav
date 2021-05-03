@@ -9,7 +9,7 @@ As a fundament for our Deep Reinforcement Learning approaches [StableBaselines3]
 * Networks will get trained, evaluated and saved
 * Load your trained agent to continue training
 * Optionally log training and evaluation data
-* Enable and modify training curriculum
+* Enable and modify training curriculuu
 
 
 ##### Quick Start
@@ -212,32 +212,48 @@ Exemplary training curriculum:
 
 Now that you've trained your agent you surely want to deploy and evaluate it. For that purpose we've implemented a specific task mode in which you can specify your scenarios in a .json file. The agent will then be challenged according to the scenarios defined in the file. (*TODO: link zum scenario mode readme*).  
 
-- Firstly navigate to the directory:
+- Firstly, you need to start the *simulation environment*:
 ```
-roscd arena_local_planner_drl/
-cd scripts/deployment/
+roslaunch arena_bringup start_arena_flatland.launch map_file:="map1"  disable_scenario:="false" scenario_file:="eval/obstacle_map1_obs20.json"
 ```
 
-- Then run the ```run_agent.py``` script
+- Then, start the *time-space plan manager*:
+```
+roslaunch arena_bringup timed_space_planner_fsm.launch
+```
+
+- Afterwards, start the *action publisher*:
+```
+roscd arena_local_planner_drl/scripts/deployment/
+python action_publisher.py
+```
+
+- Then run the ```run_agent.py``` script.
+```python run_agent.py --load DRL_LOCAL_PLANNER_2021_03_22__19_33 --scenario obstacle_map1_obs20```
 
 **Generic program call**:
 ```
+roscd arena_local_planner_drl/scripts/deployment/
 run_agent.py --load [agent_name] -s [scenario_name] -v [number] [optional flag]
 ```
 
 | Program call         | Flags                            | Usage                                 |Description                                         |
 | -------------------- | -------------------------------- |-------------------------------------- |--------------------------------------------------- | 
 | ```run_agent.py```   |```--load ```                     | *agent_name* ([see below](#load-a-dnn-for-training))     | loads agent to the given name
-|                      |```-s``` or ```--scenario```      | *scenario_name*                       | loads the scenarios to the given .json file name
+|                      |```-s``` or ```--scenario```      | *scenario_name* (as in *../scenario/eval/*)                       | loads the scenarios to the given .json file name
 |                      |(optional)```-v``` or ```--verbose```| *0 or 1*                              | verbose level
 |                      |(optional) ```--no-gpu```           | *None*                                | disables the gpu for the evaluation
 
 
 
-- example call:
+- Example call:
 ``` 
-python run_agent.py --load CNN_NAVREP_2021_01_15__23_28 -s scenario1 --no-gpu
+python run_agent.py --load DRL_LOCAL_PLANNER_2021_03_22__19_33 -s obstacle_map1_obs20
 ```
+**Notes**: 
+- Make sure that drl mode is activated in *Parameter.yaml* (*../arena-rosnav/arena_bringup/launch*)
+- Make sure that the simulation speed doesn't overlap the agent's calculation time for an action (an obvious indicator: same action gets published multiple times successively)
+- If your agent was trained with normalized observations it's necessary to provide the vec_normalize.pkl 
 
 
 #### Important Directories
@@ -248,3 +264,23 @@ python run_agent.py --load CNN_NAVREP_2021_01_15__23_28 -s scenario1 --no-gpu
 |```../arena_local_planner_drl/configs```| yaml files containing robots action spaces and the training curriculum
 |```../arena_local_planner_drl/training_logs```| tensorboard logs and evaluation logs
 |```../arena_local_planner_drl/scripts```| python file containing the predefined DNN architectures and the training script
+
+
+#### Evaluation
+Firstly, you need to start the *simulation environment*:
+```
+roslaunch arena_bringup start_arena_flatland.launch map_file:="map1"  disable_scenario:="false"
+```
+
+Then, start the *time-space plan manager*:
+```
+roslaunch arena_bringup timed_space_planner_fsm.launch
+```
+
+Afterwards start the *action publisher*:
+```
+roscd arena_local_planner_drl/scripts/deployment/
+python action_publisher.py
+```
+
+Now 
