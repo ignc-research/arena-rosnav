@@ -175,8 +175,13 @@ class newBag():
                 
                 start_x = start[0] + 0.5
 
+                dist2_oldp = 0
+                if old_x != None:
+                    dist2_oldp = math.sqrt((x-old_x)**2+(y-old_y)**2)
+
                 # if current_time > reset-6 and n < len(t_reset)-1 and x < start_x:
-                if current_time > reset and n < len(t_reset)-1:
+                # if current_time > reset and n < len(t_reset)-1:
+                if dist2_oldp > 1 and n < len(t_reset)-1:
                     n += 1
                     # store the run
                     if n in select_run or len(select_run) == 0:
@@ -198,31 +203,13 @@ class newBag():
                     old_x = None
                     old_y = None
 
-                dist2_oldp = 0
-                if old_x != None:
-                    dist2_oldp = math.sqrt((x-old_x)**2+(y-old_y)**2)
                 if n+1 in select_run or len(select_run) == 0 and dist2_oldp < 1:
-
-                    # if  len(pose_x) > 0:
-                    #     pose_x.append(x)
-                    #     pose_y.append(y)
-                    # elif x < start_x:
-
-                    #     pose_x.append(x)
-                    #     pose_y.append(y)
-
-                    # check distance to last pos
-                    # print(old_x)
-                    if old_x != None:
-                        dist2_oldp = math.sqrt((x-old_x)**2+(y-old_y)**2)
-                        # fancy_print(dist2_oldp,0)
 
                     # append pos if pose is empty
                     if len(pose_x) == 0:
                         pose_x.append(x)
                         pose_y.append(y)
-                    # check if adjacent pos is too far (reset ?)
-                    # elif dist2_oldp < 5:
+                  
                     pose_x.append(x)
                     pose_y.append(y)
 
