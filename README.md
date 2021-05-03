@@ -1,13 +1,12 @@
 # IROS21 information
-To test the code and reproduce the experiments, switch to the branch [local_planner_subgoalmode](https://github.com/ignc-research/arena-rosnav/tree/local_planner_subgoalmode). Follow the installation steps in [Installation.md](https://github.com/ignc-research/arena-rosnav/blob/local_planner_subgoalmode/docs/Installation.md). Afterwards, follow the steps in [Evaluations.md](https://github.com/ignc-research/arena-rosnav/blob/local_planner_subgoalmode/docs/Evaluations.md).
+To test the code and reproduce the experiments, follow the installation steps in [Installation.md](https://github.com/ignc-research/arena-rosnav/blob/local_planner_subgoalmode/docs/Installation.md). Afterwards, follow the steps in [Evaluations.md](https://github.com/ignc-research/arena-rosnav/blob/local_planner_subgoalmode/docs/Evaluations.md).
 
 To test the different **Waypoint Generators**, follow the steps in [waypoint_eval.md](https://github.com/ignc-research/arena-rosnav/blob/local_planner_subgoalmode/docs/waypoint_eval.md)
 
 **DRL agents** are located in the [agents folder](https://github.com/ignc-research/arena-rosnav/tree/local_planner_subgoalmode/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/agents).
 
 # UPDATE
-The main development branch is local_planner_subgoalmode, which contains the latest functionalities and modules. We recommend to start testing out this repo there. It will be merged into the master branch as soon as possible. 
-
+The main development branch is local_planner_subgoalmode, which contains the latest functionalities and modules. We recommend to start testing out this repo from here on. 
 # Arena-Rosnav
 
 A flexible, high-performance 2D simulator with configurable agents, multiple sensors, and benchmark scenarios for testing robotic navigation. 
@@ -38,6 +37,11 @@ Train DRL agents on ROS compatible simulations for autonomous navigation in high
 * Modular structure for extension of new functionalities and approaches
 
 
+### Recent Updates
+
+- 26.01.2021: Added Scenario Tasks: generate your own scenario by specifying a scenario.json 
+
+
 ### Documentation & References
 * How to use flatland: http://flatland-simulator.readthedocs.io
 * ros navigation stack: http://wiki.ros.org/navigation
@@ -45,15 +49,17 @@ Train DRL agents on ROS compatible simulations for autonomous navigation in high
 * Full documentation and system design is released this week
 
 ## 1. Installation
-Please refer to [Installation.md](docs/Installation.md) for detailed explanations about the installation process.  
-  If you want to use Docker, please refer to our [Dockerfile](Docker) 
+Please refer to [Installation.md](docs/Installation.md) for detailed explanations about the installation process.
+
+## 1.1. Docker
+We provide a Docker file to run our code on other operating systems. Please refer to [Docker.md](docs/Docker.md) for more information.
 
 ## 2. Usage
 
 ### DRL Training
 
 Please refer to [DRL-Training.md](docs/DRL-Training.md) for detailed explanations about agent, policy and training setups.
-For the IROS21 paper, please switch to the branch local_planner and follow the installation steps. Afterwards, 
+
 ### 2.1 Test the simulation environment and task generator
 
 * In one terminal, start simulation. You can specify the following parameters: 
@@ -66,7 +72,7 @@ For the IROS21 paper, please switch to the branch local_planner and follow the i
    * map
 
 ```bash
-roslaunch arena_bringup start_arena_flatland.launch train_mode:=false use_viz:=true local_planner:=dwa map_file:=map1 obs_vel:=0.3
+roslaunch arena_bringup start_arena_flatland.launch train_mode:=false use_viz:=true local_planner:=mpc map_file:=map1 obs_vel:=0.3
 ```
 Now you can click on the generate task button in rviz to generator a new random task (random obstacles and goal is published to /goal). It will automatically navigate to that goal, once you start one of our local planners, which are triggered by a new /goal. If you starte with task_mode "manual" you can specify your goal using the specify Flatland Navigation goal (using normal 2D navigation goal will trigger the move_base planner, thus only works with teb and dwa)
 
@@ -98,7 +104,7 @@ Export turtlebot model for simulation
 
 ```bash
 
-roslaunch arena_bringup start_arena_flatland.launch  train_mode:=true 	use_viz:=true  task_mode:=random
+roslaunch arena_bringup start_arena_flatland.launch  train_mode:=true 	use_viz:=true  task_mode=random
 
 ```
 * In another terminal
@@ -106,7 +112,7 @@ roslaunch arena_bringup start_arena_flatland.launch  train_mode:=true 	use_viz:=
 ```
 workon rosnav
 roscd arena_local_planner_drl
-python scripts/training/train_example.py
+python scripts/training/training_example.py
 ```
 first **activate your python3 env**, which contains libaraies stable_baseline3, geometry2
 then python run the script.
@@ -327,7 +333,7 @@ As a fundament for our Deep Reinforcement Learning approaches [StableBaselines3]
 * In one terminnal, start simulation
 
 ```bash
-roslaunch arena_bringup start_arena_flatland.launch train_mode:=true use_viz:=true task_mode:=random
+roslaunch arena_bringup start_arena_flatland.launch  train_mode:=true 	use_viz:=true  task_mode=random
 ```
 * In another terminal
 
