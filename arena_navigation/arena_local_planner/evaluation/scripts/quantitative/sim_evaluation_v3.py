@@ -499,12 +499,12 @@ if __name__ == "__main__": # execute code
     ### this code block creates dataframes containing all evaluation file's summarized data ###
     # hyperparameters specifying the contents of files and the wanted structure for the datasets
     cols = ["time","path","collision","success"]    # define the quantities to measure
-    obs = ["obs05","obs10","obs20"] # define different obstacles numbers, names must match file names
+    obs = ["obs10","obs20"] # define different obstacles numbers, names must match file names
     vel = ["vel02","vel03"] # define different velocities, names must match file names
-    maps = ["map1","empty"] # define the maps trained on, names must match file names
-    wpgen = ["subsampling","spatialhorizon","timespace","classic"] # NOTE: classic MUST be in the back
-    planner = ["drl1","drl2","drl3","cadrl","rlca","ego","mpc","teb"] # all planners, NOTE: classic planners MUST be in the back!!!
-    classic = ["ego","mpc","teb"] # classic planners
+    maps = ["map0","open","map1","empty"] # define the maps trained on, names must match file names
+    wpgen = ["spatialhorizon"] # NOTE: classic MUST be in the back
+    planner = ["R0","R1","R2","R4","RLCA","MPC","TEB"] # all planners, NOTE: classic planners MUST be in the back!!!
+    classic = ["RLCA","MPC","TEB"] # classic planners
 
     # different kinds of datasets for visualization and latex table formatting
     param_list = {"obs":obs,"vel":vel} # just a dict with the parameters to measure
@@ -531,32 +531,39 @@ if __name__ == "__main__": # execute code
     labels = { # labels which will be used in the plots e.g. xticks, x/ylabels, titles, legend
         "cadrl":"CADRL", 
         "esdf": "LM-WP",
-        "mpc": "MPC",
+        "MPC": "MPC",
         "subsampling": "SUB-WP",
-        "teb": "TEB",
+        "TEB": "TEB",
         "drl1": "DRL1",
         "drl2": "DRL2",
         "drl3": "DRL3",
+        "RLCA":"RLCA",
+        "ego": "EGO",
+        "R0": "DRL1",
+        "R1": "DRL2",
+        "R2": "DRL3",
+        "R4": "DRL4",
         "ego": "EGO",
         "spatialhorizon": "STH-WP",
         "timespace": "TS-WP",
         "rlca": "COL-RL",
         "map1": "Map 1",
         "empty": "Empty Map",
+        "map0": "Map 0",
+        "open": "Open Field",
         #-------------------------------------
         "classic": "Classic",
         "obs" : "Obstacle Number",
         "vel" : "Velocity"
         }
     colors = {  # color scheme for local planners plus classic planners
-        "cadrl":"tab:red",
-        "drl1": "tab:blue",
-        "drl2": "tab:green",
-        "drl3": "tab:purple",
-        "teb": "tab:orange",
-        "mpc": "tab:cyan",
-        "ego": "tab:grey",
-        "rlca": "tab:brown"
+        "MPC":"tab:red",
+        "TEB": "tab:blue",
+        "RLCA": "tab:green",
+        "R0": "tab:pink",
+        "R1": "tab:purple",
+        "R2": "tab:orange",
+        "R4": "tab:cyan"
         }
  
     colors_wp = { # color scheme for waypoint generator plus classic planners

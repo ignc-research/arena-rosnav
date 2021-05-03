@@ -81,3 +81,14 @@ python sim_evaluation_v2.py $HOME/catkin_ws/src/arena-rosnav/arena_navigation/ar
 python sim_evaluation_v2.py $HOME/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/run_3 --metrics time success path collision --quantity vel --byplanner --withclassic
 python sim_evaluation_v2.py $HOME/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/run_3 --metrics time success path collision --quantity vel --byplanner --withclassic --allplot_quantity obs
 python sim_evaluation_v2.py $HOME/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/run_3 --metrics time success path collision --quantity vel --byplanner --withclassic --allplot_quantity vel
+
+## Color convention for plots
+
+Colors for planners:
+MPC  tab:red,
+TEB  tab:blue,
+RLCA tab:green,
+R0   tab:pink,
+R1   tab:purple,
+R2   tab:orange,
+R4   tab:cyan
