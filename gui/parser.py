@@ -521,7 +521,7 @@ robot_json += '\n\t\t\t\t"goal_pos": ['
 robot_json += '\n\t\t\t\t\t' + robot_end_x + ',\n\t\t\t\t\t' + robot_end_y + ',\n\t\t\t\t\t0.0\n\t\t\t\t]'
 
 # make the basic structure of the json file
-final_string += '{\n\t"scenerios": [\n\t\t{\n\t\t\t"scene_name": "new_scenario",\n\t\t\t"repeats": 5,\n\t\t\t"dynamic_obstacles": {'
+final_string += '{\n\t"scenarios": [\n\t\t{\n\t\t\t"scene_name": "new_scenario",\n\t\t\t"repeats": 5,\n\t\t\t"dynamic_obstacles": {'
 final_string += obstacles_json
 final_string += '\n\t\t\t},\n'
 final_string += '\t\t\t"static_obstacles": {\n\n\t\t\t},\n\t\t\t"robot": {'
@@ -539,10 +539,10 @@ with open('output/new_scenario.json') as file:
     file_contents = file.read()
     print(file_contents)
 
-# copy and paste the file to arena-rosnav/simulator-setup/scenerios, where all scenarious are stored
-copyfile('output/new_scenario.json', '../simulator_setup/scenerios/new_scenario.json')
+# copy and paste the file to arena-rosnav/simulator-setup/scenarios, where all scenarious are stored
+copyfile('output/new_scenario.json', '../simulator_setup/scenarios/new_scenario.json')
 # to do it manuelly from the console, from arena-rosnav/gui run:
-# $ sudo cp output/new_scenario.json ../simulator_setup/scenerios/
+# $ sudo cp output/new_scenario.json ../simulator_setup/scenarios/
 
 # when ready -> validate the json: https://jsonformatter.curiousconcept.com/
 
