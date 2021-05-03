@@ -146,13 +146,13 @@ Still, to become the json file at the end all steps and no mistakes should be do
     * When uploading the map, the map will automatically scale, so that it fills the area in the best way. The new dimensions (width and height) of the map on the gui, as well as its four corners should be manually calculated. Its new starting point (bottom left corner) is the most important point.
     * Another thing is considering the given on the textinput field map resolution and map origin, if it is different then (0.0,0.0).
  
-   So all steps for scaling the map are: </br>
+   So all steps for scaling the map as well as all positions and distances are: </br>
    <p align="center">
     <img src="media/img/map_scale.png">
    </p>
    
    Example: </br>
-   `radius-gui * scale * map_resolution = radius_rviz` with `map_resolution` = user input, depending on the map and `scale` = different for each map, calculated intern after the map image has been uploaded on the gui; after running `paint.py` its value could be checked in the intern txt file `data.txt` under 'positions scale' (the first value on the left).
+   `radius_gui * scale * map_resolution = radius_rviz` with `map_resolution` = user input, depending on the map and `scale` = different for each map, calculated intern after the map image has been uploaded on the gui; after running `paint.py` its value could be checked in the intern txt file `data.txt` under 'positions scale' (the first value on the left).
 
 3. To add additional obstacle type or to remove already existing one from the dropdown button search in `paint.py` for `dropdown_obstacle_type`. From there delete a button or create a new one and bind it to the dropdown button. A new button will need a callback function, where a new color for its visualization should be defined. A pair of obstacle type and its RGB color should be also added to the global array `obstacle_type`. In addition to the color change, also the obstacle type name could be written above the obstacle. If you think that this makes the map too crowded, you can only make a test run, where you put on the map an obstacle from each type with the name above it and save this as an image to show the user all obstacle color-types pairs and then comment out the names. This happens in the function `on_touch_up()` inside of the obstacle widget `MyPaintWidgetCircleObstacle`.
 
