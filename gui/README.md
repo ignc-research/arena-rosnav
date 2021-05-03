@@ -38,7 +38,7 @@ The GUI represents an user interface for creating scenarios more intuitive, a lo
 **Attention:** Rosnav and kivy_env might not be able to stay active at the same time, so activate kivy_env for the gui and rosnav for launching.
 8. In `arena-rosnav` run for example <br />
 `$ roslaunch arena_bringup start_arena_flatland.launch local_planner:="teb" use_viz:="true" map_file:="map1" rviz_file:="nav2"`. <br />
-The file `nav2.rviz` is different from `nav.rviz` only by two things - the map is horizontal and the first couple of obstacles are visible with the start of rviz. The program still works will all available rviz files, just the visualization will be slightly defferent. Please take a look also at the section `Legend for the already tested maps` below.
+The file `nav2.rviz` is different from `nav.rviz` only by two things - the map is horizontal and the first couple of obstacles are visible with the start of rviz. The program still works will all available rviz files, just the visualization will be slightly defferent. Make sure also that the map (`.png` file, `.yaml` file etc.), here `map1` is in the folder `../simulator_setup/maps`. Please take a look at the section `Legend for the already tested maps` below.
 
 ### Folder structure
 1. The root folder consist of both executable files `paint.py` and `parser.py`, as well as the `README.md` file.
@@ -93,7 +93,7 @@ For example with `map_resolution` = 0.05, `scale` = 1.0, `X_rviz` = 0.3m and `Y_
 
 ### Legend for the already used maps
 
-Ros launch with the flag `map_file:="<map_name>"`. For example for `map1` use `map_file:="map1"`.
+Ros launch with the flag `map_file:="<map_name>"`. For example for `map1` use `map_file:="map1"`. Make sure that the maps (`.png` file, `.yaml` file etc.) are in the folder `../simulator_setup/maps`.
 
 | Map                      | Resolution  | Origin (x,y)   |
 | ------------------------ | ----------- | -------------- |
