@@ -1,0 +1,175 @@
+{
+    "scenarios": [
+    {
+            "scene_name": "obstacle_map_1",
+            "repeats": 5,
+            "dynamic_obstacles": {
+                "dynamic_obs_0": {
+                    "obstacle_radius": 0.3,
+                    "linear_velocity": 0.1,
+                    "start_pos": [
+                        4,
+                        -3,
+                        0
+                    ],
+                    "waypoints": [
+                        [
+                            -3,
+                            3,
+                            0
+                        ]
+                    ],
+                    "is_waypoint_relative": true,
+                    "mode": "yoyo",
+                    "triggers": [
+                        "watcher_0"
+                    ]
+                },
+                "dynamic_obs_1": {
+                    "obstacle_radius": 0.3,
+                    "linear_velocity": 0.1,
+                    "start_pos": [
+                        6,
+                        2,
+                        0
+                    ],
+                    "waypoints": [
+                        [
+                            -4,
+                            -2,
+                            0
+                        ]
+                    ],
+                    "is_waypoint_relative": true,
+                    "mode": "yoyo",
+                    "triggers": [
+                        "watcher_1"
+                    ]
+                },
+                "dynamic_obs_2": {
+                    "obstacle_radius": 0.3,
+                    "linear_velocity": 0.1,
+                    "start_pos": [
+                        15,
+                        8.5,
+                        0
+                    ],
+                    "waypoints": [
+                        [
+                            -10,
+                            4,
+                            0
+                        ]
+                    ],
+                    "is_waypoint_relative": true,
+                    "mode": "yoyo",
+                    "triggers": [
+                        "watcher_2"
+                    ]
+                },
+
+                "dynamic_obs_3": {
+                    "obstacle_radius": 0.3,
+                    "linear_velocity": 0.1,
+                    "start_pos": [
+                        14,
+                        2,
+                        0
+                    ],
+                    "waypoints": [
+                        [
+                            -6,
+                            6,
+                            0
+                        ]
+                    ],
+                    "is_waypoint_relative": true,
+                    "mode": "yoyo",
+                    "triggers": [
+                        "watcher_3"
+                    ]
+                },
+
+                "dynamic_obs_4": {
+                    "obstacle_radius": 0.3,
+                    "linear_velocity": 0.1,
+                    "start_pos": [
+                        15,
+                        10.5,
+                        0
+                    ],
+                    "waypoints": [
+                        [
+                            -5,
+                            6,
+                            0
+                        ]
+                    ],
+                    "is_waypoint_relative": true,
+                    "mode": "yoyo",
+                    "triggers": [
+                        "watcher_4"
+                    ]
+                }
+
+
+
+
+
+            },
+            "static_obstacles": {
+
+            },
+            "robot": {
+                "start_pos": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "goal_pos": [
+                    22,
+                    9,
+                    0
+                ]
+            },
+            "watchers": {
+                "watcher_0": {
+                    "pos": [
+                        4,
+                        -2
+                    ],
+                    "range": 3
+                },
+                "watcher_1": {
+                    "pos": [
+                        5,
+                        2
+                    ],
+                    "range": 2
+                },
+                "watcher_2": {
+                    "pos": [
+                        13,
+                        7.5
+                    ],
+                    "range": 3
+                },
+                "watcher_3": {
+                    "pos": [
+                        12,
+                        4
+                    ],
+                    "range": 4.5
+                },
+                "watcher_4": {
+                    "pos": [
+                        14,
+                        11.5
+                    ],
+                    "range": 3
+                }
+            }
+        }
+    ]
+
+}

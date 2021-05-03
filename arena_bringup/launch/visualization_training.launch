@@ -1,0 +1,25 @@
+
+<launch>
+  <arg name="ns" default="sim_1"/>
+  <arg name="rviz_file"       default="nav_LP"/>
+  <!-- if true use rviz for visualization otherwise use flatland_viz-->
+  <arg name="use_rviz" default="true"/>
+
+
+
+  <env name="ROSCONSOLE_FORMAT" value="[${severity} ${time} ${logger}]: ${message}" />
+
+  <!--  ************** flatland viz  ***************  -->
+  <!-- TEST not Passed, dont use it  -->
+    <!-- <node name="flatland_viz" pkg="flatland_viz" type="flatland_viz" output="screen" required="false" ns="$(arg ns)" unless="$(arg use_rviz)"/> -->
+
+
+
+    
+  <!--  ************** rviz  ***************  -->
+  <group if="$(arg use_rviz)">
+    <node name="flatland_rviz" pkg="rviz" type="rviz" output="screen" ns="$(arg ns)" args="-d $(find arena_bringup)/rviz/$(arg rviz_file).rviz">
+
+    </node>
+  </group>    
+</launch>

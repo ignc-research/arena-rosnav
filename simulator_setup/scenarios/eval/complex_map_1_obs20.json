@@ -1,0 +1,564 @@
+{
+	"scenarios": [
+		{
+			"scene_name": "new_scenario",
+			"repeats": 15,
+			"dynamic_obstacles": {
+				"dynamic_obs_0": {
+					"obstacle_radius": 0.26625,
+					"linear_velocity": 0.2,
+					"type": "circle",
+					"start_pos": [
+						12.64875,
+						7.08225,
+						0
+					],
+					"waypoints": [
+						[
+							0.5325,
+							2.2897499999999997,
+							0
+						]
+					],
+					"is_waypoint_relative": true,
+					"mode": "yoyo",
+					"triggers": [
+						"watcher_0"
+					]
+				},
+				"dynamic_obs_1": {
+					"obstacle_radius": 0.26625,
+					"linear_velocity": 0.3,
+					"type": "circle",
+					"start_pos": [
+						8.7615,
+						7.1354999999999995,
+						0
+					],
+					"waypoints": [
+						[
+							1.4909999999999999,
+							2.18325,
+							0
+						]
+					],
+					"is_waypoint_relative": true,
+					"mode": "yoyo",
+					"triggers": [
+						"watcher_1"
+					]
+				},
+				"dynamic_obs_2": {
+					"obstacle_radius": 0.26625,
+					"linear_velocity": 0.3,
+					"type": "circle",
+					"start_pos": [
+						12.3825,
+						13.419,
+						0
+					],
+					"waypoints": [
+						[
+							-1.917,
+							-1.118250000000003,
+							0
+						]
+					],
+					"is_waypoint_relative": true,
+					"mode": "yoyo",
+					"triggers": [
+						"watcher_2"
+					]
+				},
+				"dynamic_obs_3": {
+					"obstacle_radius": 0.26625,
+					"linear_velocity": 0.3,
+					"type": "circle",
+					"start_pos": [
+						7.1107499999999995,
+						8.67975,
+						0
+					],
+					"waypoints": [
+						[
+							2.13,
+							1.650750000000003,
+							0
+						]
+					],
+					"is_waypoint_relative": true,
+					"mode": "yoyo",
+					"triggers": [
+						"watcher_3"
+					]
+				},
+				"dynamic_obs_4": {
+					"obstacle_radius": 0.26625,
+					"linear_velocity": 0.3,
+					"type": "circle",
+					"start_pos": [
+						9.1875,
+						11.715,
+						0
+					],
+					"waypoints": [
+						[
+							-2.07675,
+							-0.69225,
+							0
+						]
+					],
+					"is_waypoint_relative": true,
+					"mode": "yoyo",
+					"triggers": [
+						"watcher_4"
+					]
+				},
+				"dynamic_obs_5": {
+					"obstacle_radius": 0.3195,
+					"linear_velocity": 0.3,
+					"type": "circle",
+					"start_pos": [
+						5.30025,
+						12.08775,
+						0
+					],
+					"waypoints": [
+						[
+							3.3015,
+							2.0235,
+							0
+						]
+					],
+					"is_waypoint_relative": true,
+					"mode": "yoyo",
+					"triggers": [
+						"watcher_5"
+					]
+				},
+				
+				"dynamic_obs_8": {
+					"obstacle_radius": 0.26625,
+					"linear_velocity": 0.3,
+					"type": "circle",
+					"start_pos": [
+						1.25325,
+						1.97025,
+						0
+					],
+					"waypoints": [
+						[
+							1.86375,
+							1.597499999999997,
+							0
+						]
+					],
+					"is_waypoint_relative": true,
+					"mode": "yoyo",
+					"triggers": [
+						"watcher_8"
+					]
+				},
+				"dynamic_obs_9": {
+					"obstacle_radius": 0.26625,
+					"linear_velocity": 0.3,
+					"type": "circle",
+					"start_pos": [
+						7.00425,
+						3.5677499999999998,
+						0
+					],
+					"waypoints": [
+						[
+							0.852,
+							-1.8637499999999985,
+							0
+						]
+					],
+					"is_waypoint_relative": true,
+					"mode": "yoyo",
+					"triggers": [
+						"watcher_9"
+					]
+				},
+				"dynamic_obs_10": {
+					"obstacle_radius": 0.26625,
+					"linear_velocity": 0.3,
+					"type": "circle",
+					"start_pos": [
+						9.56025,
+						1.8105,
+						0
+					],
+					"waypoints": [
+						[
+							1.75725,
+							1.54425,
+							0
+						]
+					],
+					"is_waypoint_relative": true,
+					"mode": "yoyo",
+					"triggers": [
+						"watcher_10"
+					]
+				},
+				"dynamic_obs_11": {
+					"obstacle_radius": 0.26625,
+					"linear_velocity": 0.3,
+					"type": "circle",
+					"start_pos": [
+						13.4475,
+						3.35475,
+						0
+					],
+					"waypoints": [
+						[
+							1.704,
+							-1.54425,
+							0
+						]
+					],
+					"is_waypoint_relative": true,
+					"mode": "yoyo",
+					"triggers": [
+						"watcher_11"
+					]
+				},
+				"dynamic_obs_12": {
+					"obstacle_radius": 0.26625,
+					"linear_velocity": 0.3,
+					"type": "circle",
+					"start_pos": [
+						19.1985,
+						9.584999999999999,
+						0
+					],
+					"waypoints": [
+						[
+							2.50275,
+							-0.852,
+							0
+						]
+					],
+					"is_waypoint_relative": true,
+					"mode": "yoyo",
+					"triggers": [
+						"watcher_12"
+					]
+				},
+				"dynamic_obs_13": {
+					"obstacle_radius": 0.26625,
+					"linear_velocity": 0.3,
+					"type": "circle",
+					"start_pos": [
+						20.583,
+						13.9515,
+						0
+					],
+					"waypoints": [
+						[
+							-1.5975,
+							-1.278,
+							0
+						]
+					],
+					"is_waypoint_relative": true,
+					"mode": "yoyo",
+					"triggers": [
+						"watcher_13"
+					]
+				},
+				"dynamic_obs_14": {
+					"obstacle_radius": 0.26625,
+					"linear_velocity": 0.3,
+					"type": "circle",
+					"start_pos": [
+						10.944749999999999,
+						9.74475,
+						0
+					],
+					"waypoints": [
+						[
+							1.54425,
+							0.585750000000003,
+							0
+						]
+					],
+					"is_waypoint_relative": true,
+					"mode": "yoyo",
+					"triggers": [
+						"watcher_14"
+					]
+				},
+				"dynamic_obs_15": {
+					"obstacle_radius": 0.26625,
+					"linear_velocity": 0.3,
+					"type": "circle",
+					"start_pos": [
+						10.6785,
+						15.815249999999999,
+						0
+					],
+					"waypoints": [
+						[
+							-2.60925,
+							-1.01175,
+							0
+						]
+					],
+					"is_waypoint_relative": true,
+					"mode": "yoyo",
+					"triggers": [
+						"watcher_15"
+					]
+				},
+				"dynamic_obs_16": {
+					"obstacle_radius": 0.26625,
+					"linear_velocity": 0.3,
+					"type": "circle",
+					"start_pos": [
+						21.5415,
+						5.80425,
+						0
+					],
+					"waypoints": [
+						[
+							-2.71575,
+							-0.79875,
+							0
+						]
+					],
+					"is_waypoint_relative": true,
+					"mode": "yoyo",
+					"triggers": [
+						"watcher_16"
+					]
+				},
+				"dynamic_obs_17": {
+					"obstacle_radius": 0.26625,
+					"linear_velocity": 0.3,
+					"type": "circle",
+					"start_pos": [
+						0.7739999999999999,
+						6.86925,
+						0
+					],
+					"waypoints": [
+						[
+							1.4377499999999999,
+							3.461250000000003,
+							0
+						]
+					],
+					"is_waypoint_relative": true,
+					"mode": "yoyo",
+					"triggers": [
+						"watcher_17"
+					]
+				},
+				"dynamic_obs_18": {
+					"obstacle_radius": 0.26625,
+					"linear_velocity": 0.3,
+					"type": "circle",
+					"start_pos": [
+						16.69575,
+						6.922499999999999,
+						0
+					],
+					"waypoints": [
+						[
+							-0.15975,
+							-2.343,
+							0
+						]
+					],
+					"is_waypoint_relative": true,
+					"mode": "yoyo",
+					"triggers": [
+						"watcher_18"
+					]
+				},
+				"dynamic_obs_19": {
+					"obstacle_radius": 0.26625,
+					"linear_velocity": 0.3,
+					"type": "circle",
+					"start_pos": [
+						18.506249999999998,
+						3.195,
+						0
+					],
+					"waypoints": [
+						[
+							-1.4909999999999999,
+							-1.5975000000000015,
+							0
+						]
+					],
+					"is_waypoint_relative": true,
+					"mode": "yoyo",
+					"triggers": [
+						"watcher_19"
+					]
+				}
+			},
+			"static_obstacles": {
+
+			},
+			"robot": {
+				"start_pos": [
+					22.02075,
+					1.917,
+					0.0
+				],
+				"goal_pos": [
+					2.5844999999999985,
+					16.454250000000002,
+					0.0
+				]
+			},
+			"watchers": {
+				"watcher_0": {
+					"pos": [
+						13.341,
+						8.094
+					],
+					"range": 1.65075
+				},
+				"watcher_1": {
+					"pos": [
+						9.87975,
+						8.14725
+					],
+					"range": 1.65075
+				},
+				"watcher_2": {
+					"pos": [
+						11.637,
+						12.4605
+					],
+					"range": 1.33125
+				},
+				"watcher_3": {
+					"pos": [
+						8.3355,
+						9.4785
+					],
+					"range": 1.54425
+				},
+				"watcher_4": {
+					"pos": [
+						8.3355,
+						11.289
+					],
+					"range": 1.65075
+				},
+				"watcher_5": {
+					"pos": [
+						6.897749999999999,
+						13.206
+					],
+					"range": 2.13
+				},
+				"watcher_6": {
+					"pos": [
+						5.7795,
+						16.0815
+					],
+					"range": 1.54425
+				},
+				"watcher_7": {
+					"pos": [
+						1.7325,
+						15.2295
+					],
+					"range": 1.278
+				},
+				"watcher_8": {
+					"pos": [
+						2.42475,
+						2.8754999999999997
+					],
+					"range": 1.65075
+				},
+				"watcher_9": {
+					"pos": [
+						7.21725,
+						2.50275
+					],
+					"range": 1.4377499999999999
+				},
+				"watcher_10": {
+					"pos": [
+						10.30575,
+						2.50275
+					],
+					"range": 1.3845
+				},
+				"watcher_11": {
+					"pos": [
+						14.67225,
+						2.8754999999999997
+					],
+					"range": 1.75725
+				},
+				"watcher_12": {
+					"pos": [
+						20.52975,
+						9.10575
+					],
+					"range": 1.75725
+				},
+				"watcher_13": {
+					"pos": [
+						19.99725,
+						13.25925
+					],
+					"range": 1.33125
+				},
+				"watcher_14": {
+					"pos": [
+						11.637,
+						9.74475
+					],
+					"range": 1.1715
+				},
+				"watcher_15": {
+					"pos": [
+						9.719999999999999,
+						15.2295
+					],
+					"range": 1.704
+				},
+				"watcher_16": {
+					"pos": [
+						20.476499999999998,
+						5.538
+					],
+					"range": 1.704
+				},
+				"watcher_17": {
+					"pos": [
+						1.67925,
+						6.922499999999999
+					],
+					"range": 1.33125
+				},
+				"watcher_18": {
+					"pos": [
+						16.962,
+						6.01725
+					],
+					"range": 1.65075
+				},
+				"watcher_19": {
+					"pos": [
+						18.9855,
+						2.6625
+					],
+					"range": 1.65075
+				}
+			}
+		}
+	]
+}

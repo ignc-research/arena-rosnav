@@ -1,0 +1,1665 @@
+default: 
+    plot_trj: 1
+    plot_zones: 1
+    plot_obst: 1
+    plot_collisions: 1
+    plot_grid: 0
+    plot_sm: 1
+    plot_gp: 0 
+    plot_subgoals: 0
+    folder: "run_3/" 
+
+# all wpg       --------------
+
+# fig 1
+empty_obs20_vel02_DRL:
+    
+    plt_selector:
+            plot_sm:  1
+            plot_trj: 1
+        
+    planner:
+        cadrl:
+            - run_3/
+            - tab:red,-
+            - ""
+        drl1:
+            - run_3/
+            - tab:blue,-
+            - ""
+        drl2:
+            - run_3/
+            - tab:purple,-
+            - ""
+        drl3:
+            - run_3/
+            - tab:gray,-
+            - ""
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - ""
+# fig 2
+empty_obs20_vel02_classic_DRL:
+    
+    plt_selector:
+            plot_sm:  1
+            plot_trj: 1
+        
+    planner:
+        ego: 
+            - run_3/
+            - tab:brown,-
+            - ""
+        teb: 
+            - run_3/
+            - tab:orange,-
+            - ""
+        mpc:
+            - run_3/
+            - tab:green,-
+            - ""
+        cadrl:
+            - run_3/
+            - tab:red,-
+            - ""
+        drl1:
+            - run_3/
+            - tab:blue,-
+            - ""
+        drl2:
+            - run_3/
+            - tab:purple,-
+            - ""
+        drl3:
+            - run_3/
+            - tab:gray,-
+            - ""
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - ""
+# fig 1a
+empty_obs20_vel03_DRL:
+    
+    plt_selector:
+            plot_sm:  1
+            plot_trj: 1
+        
+    planner:
+        cadrl:
+            - run_3/
+            - tab:red,-
+            - ""
+        drl1:
+            - run_3/
+            - tab:blue,-
+            - ""
+        drl2:
+            - run_3/
+            - tab:purple,-
+            - ""
+        drl3:
+            - run_3/
+            - tab:gray,-
+            - ""
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - ""
+# fig 2a
+empty_obs20_vel03_classic_DRL:
+    
+    plt_selector:
+            plot_sm:  1
+            plot_trj: 1
+        
+    planner:
+        ego: 
+            - run_3/
+            - tab:brown,-
+            - ""
+        teb: 
+            - run_3/
+            - tab:orange,-
+            - ""
+        mpc:
+            - run_3/
+            - tab:green,-
+            - ""
+        cadrl:
+            - run_3/
+            - tab:red,-
+            - ""
+        drl1:
+            - run_3/
+            - tab:blue,-
+            - ""
+        drl2:
+            - run_3/
+            - tab:purple,-
+            - ""
+        drl3:
+            - run_3/
+            - tab:gray,-
+            - ""
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - ""
+# fig 1b
+empty_obs10_vel02_DRL:
+    
+    plt_selector:
+            plot_sm:  1
+            plot_trj: 1
+        
+    planner:
+        cadrl:
+            - run_3/
+            - tab:red,-
+            - ""
+        drl1:
+            - run_3/
+            - tab:blue,-
+            - ""
+        drl2:
+            - run_3/
+            - tab:purple,-
+            - ""
+        drl3:
+            - run_3/
+            - tab:gray,-
+            - ""
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - ""
+# fig 2b
+empty_obs10_vel02_classic_DRL:
+    
+    plt_selector:
+            plot_sm:  1
+            plot_trj: 1
+        
+    planner:
+        ego: 
+            - run_3/
+            - tab:brown,-
+            - ""
+        teb: 
+            - run_3/
+            - tab:orange,-
+            - ""
+        mpc:
+            - run_3/
+            - tab:green,-
+            - ""
+        cadrl:
+            - run_3/
+            - tab:red,-
+            - ""
+        drl1:
+            - run_3/
+            - tab:blue,-
+            - ""
+        drl2:
+            - run_3/
+            - tab:purple,-
+            - ""
+        drl3:
+            - run_3/
+            - tab:gray,-
+            - ""
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - ""
+# fig 1c
+empty_obs10_vel03_DRL:
+    
+    plt_selector:
+            plot_sm:  1
+            plot_trj: 1
+        
+    planner:
+        cadrl:
+            - run_3/
+            - tab:red,-
+            - ""
+        drl1:
+            - run_3/
+            - tab:blue,-
+            - ""
+        drl2:
+            - run_3/
+            - tab:purple,-
+            - ""
+        drl3:
+            - run_3/
+            - tab:gray,-
+            - ""
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - ""
+# fig 2c
+empty_obs10_vel03_classic_DRL:
+    
+    plt_selector:
+            plot_sm:  1
+            plot_trj: 1
+        
+    planner:
+        ego: 
+            - run_3/
+            - tab:brown,-
+            - ""
+        teb: 
+            - run_3/
+            - tab:orange,-
+            - ""
+        mpc:
+            - run_3/
+            - tab:green,-
+            - ""
+        cadrl:
+            - run_3/
+            - tab:red,-
+            - ""
+        drl1:
+            - run_3/
+            - tab:blue,-
+            - ""
+        drl2:
+            - run_3/
+            - tab:purple,-
+            - ""
+        drl3:
+            - run_3/
+            - tab:gray,-
+            - ""
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - ""
+# fig 1d
+empty_obs05_vel02_DRL:
+    
+    plt_selector:
+            plot_sm:  1
+            plot_trj: 1
+        
+    planner:
+        cadrl:
+            - run_3/
+            - tab:red,-
+            - ""
+        drl1:
+            - run_3/
+            - tab:blue,-
+            - ""
+        drl2:
+            - run_3/
+            - tab:purple,-
+            - ""
+        drl3:
+            - run_3/
+            - tab:gray,-
+            - ""
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - ""
+
+# fig 2d
+empty_obs05_vel02_classic_DRL:
+    
+    plt_selector:
+            plot_sm:  1
+            plot_trj: 1
+        
+    planner:
+        ego: 
+            - run_3/
+            - tab:brown,-
+            - ""
+        teb: 
+            - run_3/
+            - tab:orange,-
+            - ""
+        mpc:
+            - run_3/
+            - tab:green,-
+            - ""
+        cadrl:
+            - run_3/
+            - tab:red,-
+            - ""
+        drl1:
+            - run_3/
+            - tab:blue,-
+            - ""
+        drl2:
+            - run_3/
+            - tab:purple,-
+            - ""
+        drl3:
+            - run_3/
+            - tab:gray,-
+            - ""
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - ""
+# fig 1e
+empty_obs05_vel03_DRL:
+    
+    plt_selector:
+            plot_sm:  1
+            plot_trj: 1
+        
+    planner:
+        cadrl:
+            - run_3/
+            - tab:red,-
+            - ""
+        drl1:
+            - run_3/
+            - tab:blue,-
+            - ""
+        drl2:
+            - run_3/
+            - tab:purple,-
+            - ""
+        drl3:
+            - run_3/
+            - tab:gray,-
+            - ""
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - ""
+# fig 2e
+empty_obs05_vel03_classic_DRL:
+    
+    plt_selector:
+            plot_sm:  1
+            plot_trj: 1
+        
+    planner:
+        ego: 
+            - run_3/
+            - tab:brown,-
+            - ""
+        teb: 
+            - run_3/
+            - tab:orange,-
+            - ""
+        mpc:
+            - run_3/
+            - tab:green,-
+            - ""
+        cadrl:
+            - run_3/
+            - tab:red,-
+            - ""
+        drl1:
+            - run_3/
+            - tab:blue,-
+            - ""
+        drl2:
+            - run_3/
+            - tab:purple,-
+            - ""
+        drl3:
+            - run_3/
+            - tab:gray,-
+            - ""
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - ""
+# wpg spatialhorizon --------------
+# fig 3
+empty_obs20_vel02_DRL_spatialhorizon:
+    
+    plt_selector:
+            plot_sm:  1
+            plot_trj: 1
+        
+    planner:
+        cadrl:
+            - run_3/
+            - tab:red,-
+            - "spatialhorizon"
+        drl1:
+            - run_3/
+            - tab:blue,-
+            - "spatialhorizon"
+        drl2:
+            - run_3/
+            - tab:purple,-
+            - "spatialhorizon"
+        drl3:
+            - run_3/
+            - tab:gray,-
+            - "spatialhorizon"
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "spatialhorizon"
+# fig 4
+empty_obs20_vel02_classic_DRL_spatialhorizon:
+    
+    plt_selector:
+            plot_sm:  1
+            plot_trj: 1
+        
+    planner:
+        ego: 
+            - run_3/
+            - tab:brown,-
+            - "spatialhorizon"
+        teb: 
+            - run_3/
+            - tab:orange,-
+            - "spatialhorizon"
+        mpc:
+            - run_3/
+            - tab:green,-
+            - "spatialhorizon"
+        cadrl:
+            - run_3/
+            - tab:red,-
+            - "spatialhorizon"
+        drl1:
+            - run_3/
+            - tab:blue,-
+            - "spatialhorizon"
+        drl2:
+            - run_3/
+            - tab:purple,-
+            - "spatialhorizon"
+        drl3:
+            - run_3/
+            - tab:gray,-
+            - "spatialhorizon"
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "spatialhorizon"
+# fig 3a
+empty_obs20_vel03_DRL_spatialhorizon:
+    
+    plt_selector:
+            plot_sm:  1
+            plot_trj: 1
+        
+    planner:
+        cadrl:
+            - run_3/
+            - tab:red,-
+            - "spatialhorizon"
+        drl1:
+            - run_3/
+            - tab:blue,-
+            - "spatialhorizon"
+        drl2:
+            - run_3/
+            - tab:purple,-
+            - "spatialhorizon"
+        drl3:
+            - run_3/
+            - tab:gray,-
+            - "spatialhorizon"
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "spatialhorizon"
+# fig 4a
+empty_obs20_vel03_classic_DRL_spatialhorizon:
+    
+    plt_selector:
+            plot_sm:  1
+            plot_trj: 1
+        
+    planner:
+        ego: 
+            - run_3/
+            - tab:brown,-
+            - "spatialhorizon"
+        teb: 
+            - run_3/
+            - tab:orange,-
+            - "spatialhorizon"
+        mpc:
+            - run_3/
+            - tab:green,-
+            - "spatialhorizon"
+        cadrl:
+            - run_3/
+            - tab:red,-
+            - "spatialhorizon"
+        drl1:
+            - run_3/
+            - tab:blue,-
+            - "spatialhorizon"
+        drl2:
+            - run_3/
+            - tab:purple,-
+            - "spatialhorizon"
+        drl3:
+            - run_3/
+            - tab:gray,-
+            - "spatialhorizon"
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "spatialhorizon"
+# fig 3b
+empty_obs10_vel02_DRL_spatialhorizon:
+    
+    plt_selector:
+            plot_sm:  1
+            plot_trj: 1
+        
+    planner:
+        cadrl:
+            - run_3/
+            - tab:red,-
+            - "spatialhorizon"
+        drl1:
+            - run_3/
+            - tab:blue,-
+            - "spatialhorizon"
+        drl2:
+            - run_3/
+            - tab:purple,-
+            - "spatialhorizon"
+        drl3:
+            - run_3/
+            - tab:gray,-
+            - "spatialhorizon"
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "spatialhorizon"
+# fig 4b
+empty_obs10_vel02_classic_DRL_spatialhorizon:
+    
+    plt_selector:
+            plot_sm:  1
+            plot_trj: 1
+        
+    planner:
+        ego: 
+            - run_3/
+            - tab:brown,-
+            - "spatialhorizon"
+        teb: 
+            - run_3/
+            - tab:orange,-
+            - "spatialhorizon"
+        mpc:
+            - run_3/
+            - tab:green,-
+            - "spatialhorizon"
+        cadrl:
+            - run_3/
+            - tab:red,-
+            - "spatialhorizon"
+        drl1:
+            - run_3/
+            - tab:blue,-
+            - "spatialhorizon"
+        drl2:
+            - run_3/
+            - tab:purple,-
+            - "spatialhorizon"
+        drl3:
+            - run_3/
+            - tab:gray,-
+            - "spatialhorizon"
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "spatialhorizon"
+# fig 3c
+empty_obs10_vel03_DRL_spatialhorizon:
+    
+    plt_selector:
+            plot_sm:  1
+            plot_trj: 1
+        
+    planner:
+        cadrl:
+            - run_3/
+            - tab:red,-
+            - "spatialhorizon"
+        drl1:
+            - run_3/
+            - tab:blue,-
+            - "spatialhorizon"
+        drl2:
+            - run_3/
+            - tab:purple,-
+            - "spatialhorizon"
+        drl3:
+            - run_3/
+            - tab:gray,-
+            - "spatialhorizon"
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "spatialhorizon"
+# fig 4c
+empty_obs10_vel03_classic_DRL_spatialhorizon:
+    
+    plt_selector:
+            plot_sm:  1
+            plot_trj: 1
+        
+    planner:
+        ego: 
+            - run_3/
+            - tab:brown,-
+            - "spatialhorizon"
+        teb: 
+            - run_3/
+            - tab:orange,-
+            - "spatialhorizon"
+        mpc:
+            - run_3/
+            - tab:green,-
+            - "spatialhorizon"
+        cadrl:
+            - run_3/
+            - tab:red,-
+            - "spatialhorizon"
+        drl1:
+            - run_3/
+            - tab:blue,-
+            - "spatialhorizon"
+        drl2:
+            - run_3/
+            - tab:purple,-
+            - "spatialhorizon"
+        drl3:
+            - run_3/
+            - tab:gray,-
+            - "spatialhorizon"
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "spatialhorizon"
+# fig 3d
+empty_obs05_vel02_DRL_spatialhorizon:
+    
+    plt_selector:
+            plot_sm:  1
+            plot_trj: 1
+        
+    planner:
+        cadrl:
+            - run_3/
+            - tab:red,-
+            - "spatialhorizon"
+        drl1:
+            - run_3/
+            - tab:blue,-
+            - "spatialhorizon"
+        drl2:
+            - run_3/
+            - tab:purple,-
+            - "spatialhorizon"
+        drl3:
+            - run_3/
+            - tab:gray,-
+            - "spatialhorizon"
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "spatialhorizon"
+# fig 4d
+empty_obs05_vel02_classic_DRL_spatialhorizon:
+    plt_selector:
+            plot_sm:  1
+            plot_trj: 1
+        
+    planner:
+        ego: 
+            - run_3/
+            - tab:brown,-
+            - "spatialhorizon"
+        teb: 
+            - run_3/
+            - tab:orange,-
+            - "spatialhorizon"
+        mpc:
+            - run_3/
+            - tab:green,-
+            - "spatialhorizon"
+        cadrl:
+            - run_3/
+            - tab:red,-
+            - "spatialhorizon"
+        drl1:
+            - run_3/
+            - tab:blue,-
+            - "spatialhorizon"
+        drl2:
+            - run_3/
+            - tab:purple,-
+            - "spatialhorizon"
+        drl3:
+            - run_3/
+            - tab:gray,-
+            - "spatialhorizon"
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "spatialhorizon"
+
+# fig 3e
+empty_obs05_vel03_DRL_spatialhorizon:
+    
+    plt_selector:
+            plot_sm:  1
+            plot_trj: 1
+        
+    planner:
+        cadrl:
+            - run_3/
+            - tab:red,-
+            - "spatialhorizon"
+        drl1:
+            - run_3/
+            - tab:blue,-
+            - "spatialhorizon"
+        drl2:
+            - run_3/
+            - tab:purple,-
+            - "spatialhorizon"
+        drl3:
+            - run_3/
+            - tab:gray,-
+            - "spatialhorizon"
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "spatialhorizon"
+
+# fig 4e
+empty_obs05_vel03_classic_DRL_spatialhorizon:
+    
+    plt_selector:
+            plot_sm:  1
+            plot_trj: 1
+        
+    planner:
+        ego: 
+            - run_3/
+            - tab:brown,-
+            - "spatialhorizon"
+        teb: 
+            - run_3/
+            - tab:orange,-
+            - "spatialhorizon"
+        mpc:
+            - run_3/
+            - tab:green,-
+            - "spatialhorizon"
+        cadrl:
+            - run_3/
+            - tab:red,-
+            - "spatialhorizon"
+        drl1:
+            - run_3/
+            - tab:blue,-
+            - "spatialhorizon"
+        drl2:
+            - run_3/
+            - tab:purple,-
+            - "spatialhorizon"
+        drl3:
+            - run_3/
+            - tab:gray,-
+            - "spatialhorizon"
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "spatialhorizon"
+# wpg timespace      --------------
+# fig 5
+empty_obs20_vel02_DRL_timespace:
+    
+    plt_selector:
+            plot_sm:  1
+            plot_trj: 1
+        
+    planner:
+        cadrl:
+            - run_3/
+            - tab:red,-
+            - "timespace"
+        drl1:
+            - run_3/
+            - tab:blue,-
+            - "timespace"
+        drl2:
+            - run_3/
+            - tab:purple,-
+            - "timespace"
+        drl3:
+            - run_3/
+            - tab:gray,-
+            - "timespace"
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "timespace"
+
+# fig 6
+empty_obs20_vel02_classic_DRL_timespace:
+    
+    plt_selector:
+            plot_sm:  1
+            plot_trj: 1
+        
+    planner:
+        ego: 
+            - run_3/
+            - tab:brown,-
+            - "timespace"
+        teb: 
+            - run_3/
+            - tab:orange,-
+            - "timespace"
+        mpc:
+            - run_3/
+            - tab:green,-
+            - "timespace"
+        cadrl:
+            - run_3/
+            - tab:red,-
+            - "timespace"
+        drl1:
+            - run_3/
+            - tab:blue,-
+            - "timespace"
+        drl2:
+            - run_3/
+            - tab:purple,-
+            - "timespace"
+        drl3:
+            - run_3/
+            - tab:gray,-
+            - "timespace"
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "timespace"
+
+# fig 5a
+empty_obs20_vel03_DRL_timespace:
+    
+    plt_selector:
+            plot_sm:  1
+            plot_trj: 1
+        
+    planner:
+        cadrl:
+            - run_3/
+            - tab:red,-
+            - "timespace"
+        drl1:
+            - run_3/
+            - tab:blue,-
+            - "timespace"
+        drl2:
+            - run_3/
+            - tab:purple,-
+            - "timespace"
+        drl3:
+            - run_3/
+            - tab:gray,-
+            - "timespace"
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "timespace"
+
+# fig 6a
+empty_obs20_vel03_classic_DRL_timespace:
+    
+    plt_selector:
+            plot_sm:  1
+            plot_trj: 1
+        
+    planner:
+        ego: 
+            - run_3/
+            - tab:brown,-
+            - "timespace"
+        teb: 
+            - run_3/
+            - tab:orange,-
+            - "timespace"
+        mpc:
+            - run_3/
+            - tab:green,-
+            - "timespace"
+        cadrl:
+            - run_3/
+            - tab:red,-
+            - "timespace"
+        drl1:
+            - run_3/
+            - tab:blue,-
+            - "timespace"
+        drl2:
+            - run_3/
+            - tab:purple,-
+            - "timespace"
+        drl3:
+            - run_3/
+            - tab:gray,-
+            - "timespace"
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "timespace"
+
+# fig 5b
+empty_obs10_vel02_DRL_timespace:
+    
+    plt_selector:
+            plot_sm:  1
+            plot_trj: 1
+        
+    planner:
+        cadrl:
+            - run_3/
+            - tab:red,-
+            - "timespace"
+        drl1:
+            - run_3/
+            - tab:blue,-
+            - "timespace"
+        drl2:
+            - run_3/
+            - tab:purple,-
+            - "timespace"
+        drl3:
+            - run_3/
+            - tab:gray,-
+            - "timespace"
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "timespace"
+# fig 6b
+empty_obs10_vel02_classic_DRL_timespace:
+    
+    plt_selector:
+            plot_sm:  1
+            plot_trj: 1
+        
+    planner:
+        ego: 
+            - run_3/
+            - tab:brown,-
+            - "timespace"
+        teb: 
+            - run_3/
+            - tab:orange,-
+            - "timespace"
+        mpc:
+            - run_3/
+            - tab:green,-
+            - "timespace"
+        cadrl:
+            - run_3/
+            - tab:red,-
+            - "timespace"
+        drl1:
+            - run_3/
+            - tab:blue,-
+            - "timespace"
+        drl2:
+            - run_3/
+            - tab:purple,-
+            - "timespace"
+        drl3:
+            - run_3/
+            - tab:gray,-
+            - "timespace"
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "timespace"
+# fig 5c
+empty_obs10_vel03_DRL_timespace:
+    
+    plt_selector:
+            plot_sm:  1
+            plot_trj: 1
+        
+    planner:
+        cadrl:
+            - run_3/
+            - tab:red,-
+            - "timespace"
+        drl1:
+            - run_3/
+            - tab:blue,-
+            - "timespace"
+        drl2:
+            - run_3/
+            - tab:purple,-
+            - "timespace"
+        drl3:
+            - run_3/
+            - tab:gray,-
+            - "timespace"
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "timespace"
+# fig 6c
+empty_obs10_vel03_classic_DRL_timespace:
+    
+    plt_selector:
+            plot_sm:  1
+            plot_trj: 1
+        
+    planner:
+        ego: 
+            - run_3/
+            - tab:brown,-
+            - "timespace"
+        teb: 
+            - run_3/
+            - tab:orange,-
+            - "timespace"
+        mpc:
+            - run_3/
+            - tab:green,-
+            - "timespace"
+        cadrl:
+            - run_3/
+            - tab:red,-
+            - "timespace"
+        drl1:
+            - run_3/
+            - tab:blue,-
+            - "timespace"
+        drl2:
+            - run_3/
+            - tab:purple,-
+            - "timespace"
+        drl3:
+            - run_3/
+            - tab:gray,-
+            - "timespace"
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "timespace"
+# fig 5d
+empty_obs05_vel02_DRL_timespace:
+    
+    plt_selector:
+            plot_sm:  1
+            plot_trj: 1
+        
+    planner:
+        cadrl:
+            - run_3/
+            - tab:red,-
+            - "timespace"
+        drl1:
+            - run_3/
+            - tab:blue,-
+            - "timespace"
+        drl2:
+            - run_3/
+            - tab:purple,-
+            - "timespace"
+        drl3:
+            - run_3/
+            - tab:gray,-
+            - "timespace"
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "timespace"
+# fig 6d
+empty_obs05_vel02_classic_DRL_timespace:
+    
+    plt_selector:
+            plot_sm:  1
+            plot_trj: 1
+        
+    planner:
+        ego: 
+            - run_3/
+            - tab:brown,-
+            - "timespace"
+        teb: 
+            - run_3/
+            - tab:orange,-
+            - "timespace"
+        mpc:
+            - run_3/
+            - tab:green,-
+            - "timespace"
+        cadrl:
+            - run_3/
+            - tab:red,-
+            - "timespace"
+        drl1:
+            - run_3/
+            - tab:blue,-
+            - "timespace"
+        drl2:
+            - run_3/
+            - tab:purple,-
+            - "timespace"
+        drl3:
+            - run_3/
+            - tab:gray,-
+            - "timespace"
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "timespace"
+# fig 5e
+empty_obs05_vel03_DRL_timespace:
+    
+    plt_selector:
+            plot_sm:  1
+            plot_trj: 1
+        
+    planner:
+        cadrl:
+            - run_3/
+            - tab:red,-
+            - "timespace"
+        drl1:
+            - run_3/
+            - tab:blue,-
+            - "timespace"
+        drl2:
+            - run_3/
+            - tab:purple,-
+            - "timespace"
+        drl3:
+            - run_3/
+            - tab:gray,-
+            - "timespace"
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "timespace"
+# fig 6e
+empty_obs05_vel03_classic_DRL_timespace:
+    
+    plt_selector:
+            plot_sm:  1
+            plot_trj: 1
+        
+    planner:
+        ego: 
+            - run_3/
+            - tab:brown,-
+            - "timespace"
+        teb: 
+            - run_3/
+            - tab:orange,-
+            - "timespace"
+        mpc:
+            - run_3/
+            - tab:green,-
+            - "timespace"
+        cadrl:
+            - run_3/
+            - tab:red,-
+            - "timespace"
+        drl1:
+            - run_3/
+            - tab:blue,-
+            - "timespace"
+        drl2:
+            - run_3/
+            - tab:purple,-
+            - "timespace"
+        drl3:
+            - run_3/
+            - tab:gray,-
+            - "timespace"
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "timespace"
+# wpg subsampling    --------------
+# fig 7 
+empty_obs20_vel02_DRL_subsampling:
+    
+    plt_selector:
+            plot_sm:  1
+            plot_trj: 1
+        
+    planner:
+        cadrl:
+            - run_3/
+            - tab:red,-
+            - "subsampling"
+        drl1:
+            - run_3/
+            - tab:blue,-
+            - "subsampling"
+        drl2:
+            - run_3/
+            - tab:purple,-
+            - "subsampling"
+        drl3:
+            - run_3/
+            - tab:gray,-
+            - "subsampling"
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "subsampling"
+# fig 8
+empty_obs20_vel02_classic_DRL_subsampling:
+    
+    plt_selector:
+            plot_sm:  1
+            plot_trj: 1
+        
+    planner:
+        ego: 
+            - run_3/
+            - tab:brown,-
+            - "subsampling"
+        teb: 
+            - run_3/
+            - tab:orange,-
+            - "subsampling"
+        mpc:
+            - run_3/
+            - tab:green,-
+            - "subsampling"
+        cadrl:
+            - run_3/
+            - tab:red,-
+            - "subsampling"
+        drl1:
+            - run_3/
+            - tab:blue,-
+            - "subsampling"
+        drl2:
+            - run_3/
+            - tab:purple,-
+            - "subsampling"
+        drl3:
+            - run_3/
+            - tab:gray,-
+            - "subsampling"
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "subsampling"
+
+# fig 7a 
+empty_obs20_vel03_DRL_subsampling:
+    
+    plt_selector:
+            plot_sm:  1
+            plot_trj: 1
+        
+    planner:
+        cadrl:
+            - run_3/
+            - tab:red,-
+            - "subsampling"
+        drl1:
+            - run_3/
+            - tab:blue,-
+            - "subsampling"
+        drl2:
+            - run_3/
+            - tab:purple,-
+            - "subsampling"
+        drl3:
+            - run_3/
+            - tab:gray,-
+            - "subsampling"
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "subsampling"
+
+# fig 8a
+empty_obs20_vel03_classic_DRL_subsampling:
+    
+    plt_selector:
+            plot_sm:  1
+            plot_trj: 1
+        
+    planner:
+        ego: 
+            - run_3/
+            - tab:brown,-
+            - "subsampling"
+        teb: 
+            - run_3/
+            - tab:orange,-
+            - "subsampling"
+        mpc:
+            - run_3/
+            - tab:green,-
+            - "subsampling"
+        cadrl:
+            - run_3/
+            - tab:red,-
+            - "subsampling"
+        drl1:
+            - run_3/
+            - tab:blue,-
+            - "subsampling"
+        drl2:
+            - run_3/
+            - tab:purple,-
+            - "subsampling"
+        drl3:
+            - run_3/
+            - tab:gray,-
+            - "subsampling"
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "subsampling"
+
+# fig 7b 
+empty_obs10_vel02_DRL_subsampling:
+    
+    plt_selector:
+            plot_sm:  1
+            plot_trj: 1
+        
+    planner:
+        cadrl:
+            - run_3/
+            - tab:red,-
+            - "subsampling"
+        drl1:
+            - run_3/
+            - tab:blue,-
+            - "subsampling"
+        drl2:
+            - run_3/
+            - tab:purple,-
+            - "subsampling"
+        drl3:
+            - run_3/
+            - tab:gray,-
+            - "subsampling"
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "subsampling"
+
+# fig 8b
+empty_obs10_vel02_classic_DRL_subsampling:
+    
+    plt_selector:
+            plot_sm:  1
+            plot_trj: 1
+        
+    planner:
+        ego: 
+            - run_3/
+            - tab:brown,-
+            - "subsampling"
+        teb: 
+            - run_3/
+            - tab:orange,-
+            - "subsampling"
+        mpc:
+            - run_3/
+            - tab:green,-
+            - "subsampling"
+        cadrl:
+            - run_3/
+            - tab:red,-
+            - "subsampling"
+        drl1:
+            - run_3/
+            - tab:blue,-
+            - "subsampling"
+        drl2:
+            - run_3/
+            - tab:purple,-
+            - "subsampling"
+        drl3:
+            - run_3/
+            - tab:gray,-
+            - "subsampling"
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "subsampling"
+
+# fig 7c 
+empty_obs10_vel03_DRL_subsampling:
+    
+    plt_selector:
+            plot_sm:  1
+            plot_trj: 1
+        
+    planner:
+        cadrl:
+            - run_3/
+            - tab:red,-
+            - "subsampling"
+        drl1:
+            - run_3/
+            - tab:blue,-
+            - "subsampling"
+        drl2:
+            - run_3/
+            - tab:purple,-
+            - "subsampling"
+        drl3:
+            - run_3/
+            - tab:gray,-
+            - "subsampling"
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "subsampling"
+
+# fig 8c
+empty_obs10_vel03_classic_DRL_subsampling:
+    
+    plt_selector:
+            plot_sm:  1
+            plot_trj: 1
+        
+    planner:
+        ego: 
+            - run_3/
+            - tab:brown,-
+            - "subsampling"
+        teb: 
+            - run_3/
+            - tab:orange,-
+            - "subsampling"
+        mpc:
+            - run_3/
+            - tab:green,-
+            - "subsampling"
+        cadrl:
+            - run_3/
+            - tab:red,-
+            - "subsampling"
+        drl1:
+            - run_3/
+            - tab:blue,-
+            - "subsampling"
+        drl2:
+            - run_3/
+            - tab:purple,-
+            - "subsampling"
+        drl3:
+            - run_3/
+            - tab:gray,-
+            - "subsampling"
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "subsampling"
+
+# fig 7d 
+empty_obs05_vel02_DRL_subsampling:
+    
+    plt_selector:
+            plot_sm:  1
+            plot_trj: 1
+        
+    planner:
+        cadrl:
+            - run_3/
+            - tab:red,-
+            - "subsampling"
+        drl1:
+            - run_3/
+            - tab:blue,-
+            - "subsampling"
+        drl2:
+            - run_3/
+            - tab:purple,-
+            - "subsampling"
+        drl3:
+            - run_3/
+            - tab:gray,-
+            - "subsampling"
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "subsampling"
+
+# fig 8d
+empty_obs05_vel02_classic_DRL_subsampling:
+    
+    plt_selector:
+            plot_sm:  1
+            plot_trj: 1
+        
+    planner:
+        ego: 
+            - run_3/
+            - tab:brown,-
+            - "subsampling"
+        teb: 
+            - run_3/
+            - tab:orange,-
+            - "subsampling"
+        mpc:
+            - run_3/
+            - tab:green,-
+            - "subsampling"
+        cadrl:
+            - run_3/
+            - tab:red,-
+            - "subsampling"
+        drl1:
+            - run_3/
+            - tab:blue,-
+            - "subsampling"
+        drl2:
+            - run_3/
+            - tab:purple,-
+            - "subsampling"
+        drl3:
+            - run_3/
+            - tab:gray,-
+            - "subsampling"
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "subsampling"
+
+# fig 7e 
+empty_obs05_vel03_DRL_subsampling:
+    
+    plt_selector:
+            plot_sm:  1
+            plot_trj: 1
+        
+    planner:
+        cadrl:
+            - run_3/
+            - tab:red,-
+            - "subsampling"
+        drl1:
+            - run_3/
+            - tab:blue,-
+            - "subsampling"
+        drl2:
+            - run_3/
+            - tab:purple,-
+            - "subsampling"
+        drl3:
+            - run_3/
+            - tab:gray,-
+            - "subsampling"
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "subsampling"
+
+# fig 8e
+empty_obs05_vel03_classic_DRL_subsampling:
+    
+    plt_selector:
+            plot_sm:  1
+            plot_trj: 1
+        
+    planner:
+        ego: 
+            - run_3/
+            - tab:brown,-
+            - "subsampling"
+        teb: 
+            - run_3/
+            - tab:orange,-
+            - "subsampling"
+        mpc:
+            - run_3/
+            - tab:green,-
+            - "subsampling"
+        cadrl:
+            - run_3/
+            - tab:red,-
+            - "subsampling"
+        drl1:
+            - run_3/
+            - tab:blue,-
+            - "subsampling"
+        drl2:
+            - run_3/
+            - tab:purple,-
+            - "subsampling"
+        drl3:
+            - run_3/
+            - tab:gray,-
+            - "subsampling"
+        rlca:
+            - run_3/
+            - tab:cyan,-
+            - "subsampling"
+

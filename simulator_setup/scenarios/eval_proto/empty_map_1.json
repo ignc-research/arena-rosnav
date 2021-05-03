@@ -1,0 +1,120 @@
+{
+    "scenarios": [
+        {
+            "scene_name": "empty_map_1",
+            "repeats": 5,
+            "dynamic_obstacles": {
+
+                "dynamic_obs_2": {
+                    "obstacle_radius": 0.3,
+                    "linear_velocity": 0.1,
+                    "start_pos": [
+                        21,
+                        7,
+                        0
+                    ],
+                    "waypoints": [
+                        [
+                            -10,
+                            0,
+                            0
+                        ]
+                    ],
+                    "is_waypoint_relative": true,
+                    "mode": "yoyo",
+                    "triggers": [
+                        "watcher_2"
+                    ]
+                },
+
+                "dynamic_obs_3": {
+                    "obstacle_radius": 0.3,
+                    "linear_velocity": 0.1,
+                    "start_pos": [
+                        19,
+                        9,
+                        0
+                    ],
+                    "waypoints": [
+                        [
+                            -20,
+                            -5,
+                            0
+                        ]
+                    ],
+                    "is_waypoint_relative": true,
+                    "mode": "yoyo",
+                    "triggers": [
+                        "watcher_3"
+                    ]
+                },
+
+                "dynamic_obs_4": {
+                    "obstacle_radius": 0.3,
+                    "linear_velocity": 0.1,
+                    "start_pos": [
+                        20,
+                        4,
+                        0
+                    ],
+                    "waypoints": [
+                        [
+                            -20,
+                            6,
+                            0
+                        ]
+                    ],
+                    "is_waypoint_relative": true,
+                    "mode": "yoyo",
+                    "triggers": [
+                        "watcher_4"
+                    ]
+                }
+
+
+
+
+
+            },
+            "static_obstacles": {
+
+            },
+            "robot": {
+                "start_pos": [
+                    0.0,
+                    7.0,
+                    0.0
+                ],
+                "goal_pos": [
+                    24,
+                    7,
+                    0
+                ]
+            },
+            "watchers": {
+
+                "watcher_2": {
+                    "pos": [
+                        21,
+                        7
+                    ],
+                    "range": 6
+                },
+                "watcher_3": {
+                    "pos": [
+                        16,
+                        7
+                    ],
+                    "range": 5
+                },
+                "watcher_4": {
+                    "pos": [
+                        17,
+                        4
+                    ],
+                    "range": 5
+                }
+            }
+        }
+    ]
+}

@@ -1,0 +1,233 @@
+# Each yml file should start with the default cfg block, these parameters will apply to all
+# figures below in order to prevent redundant parameter definitions:
+
+
+
+
+# python scenario_eval.py test_mao.yml png
+# ------------ default config block ------------
+# 1: will plot, 0: will not plot
+default_cfg:
+    plot_trj:        1        # plot agent trajectory
+    plot_zones:      0        # plot collision zones
+    plot_grid:       0        # zone grid
+    plot_obst:       1        # plot obstacles (start, end, direction)
+    plot_collisions: 1        # plot a circle where agent collided
+    plot_sm:         0        # plot static map
+    plot_gp:         0        # plot global plan
+    plot_subgoals:   0        # plot subgoals
+    folder:          "run_3/" # folder containing the planners
+
+
+# ------------ figure block ------------
+# Each figure name needs to be unique
+# naming convention: $map_obs$n_vel$v_$name (unique)
+# $map             : name of the map 
+# $n               : number of obstacles
+# $v               : obstacle velocity
+# $name            : an arbitary name
+# ---------------------------------------
+
+# fig 1
+# in figure 1 we want to have the empty map with 20 obstacles and vel of 0.2
+# The script will generate a "map1_obs20_vel02_testplot1.pdf" file inside plots/
+# We can include any amount of plots to this figure by adding them to "planner"
+# In figure 1 we want to compare three wpg's for the cadrl model
+
+map1_obs20_vel02_plot: 
+    planner:
+        mpc:
+            folder: "run_3/" # model from folder "run_2/"  
+            model:  "mpc"
+            linestyle: "tab:red,-"
+        teb:
+            model:  "teb"
+            linestyle: "tab:blue,--"
+        cadrl_sh:
+            model:  "cadrl"
+            linestyle: "tab:grey,-."
+            wpg:       "spatialhorizon"
+        rlca_sh:
+            model:  "rlca"
+            linestyle: "tab:green,-."
+            wpg:       "spatialhorizon"
+
+
+map1_obs20_vel03_plot: 
+    planner:
+        mpc:
+            folder: "run_3/" # model from folder "run_2/"  
+            model:  "mpc"
+            linestyle: "tab:red,-"
+        teb:
+            model:  "teb"
+            linestyle: "tab:blue,--"
+        cadrl_sh:
+            model:  "cadrl"
+            linestyle: "tab:grey,-."
+            wpg:       "spatialhorizon"
+        rlca_sh:
+            model:  "rlca"
+            linestyle: "tab:green,-."
+            wpg:       "spatialhorizon"
+
+
+
+
+map1_obs10_vel02_plot: 
+    planner:
+        mpc:
+            folder: "run_3/" # model from folder "run_2/"  
+            model:  "mpc"
+            linestyle: "tab:red,-"
+        teb:
+            model:  "teb"
+            linestyle: "tab:blue,--"
+        cadrl_sh:
+            model:  "cadrl"
+            linestyle: "tab:grey,-."
+            wpg:       "spatialhorizon"
+        rlca_sh:
+            model:  "rlca"
+            linestyle: "tab:green,-."
+            wpg:       "spatialhorizon"
+
+
+map1_obs10_vel03_plot: 
+    planner:
+        mpc:
+            folder: "run_3/" # model from folder "run_2/"  
+            model:  "mpc"
+            linestyle: "tab:red,-"
+        teb:
+            model:  "teb"
+            linestyle: "tab:blue,--"
+        cadrl_sh:
+            model:  "cadrl"
+            linestyle: "tab:grey,-."
+            wpg:       "spatialhorizon"
+        rlca_sh:
+            model:  "rlca"
+            linestyle: "tab:green,-."
+            wpg:       "spatialhorizon"
+
+
+
+
+#-------------------------------------------------------
+empty_obs20_vel02_plot: 
+    planner:
+        mpc:
+            folder: "run_3/" # model from folder "run_2/"  
+            model:  "mpc"
+            linestyle: "tab:red,-"
+        teb:
+            model:  "teb"
+            linestyle: "tab:blue,--"
+        cadrl_sh:
+            model:  "cadrl"
+            linestyle: "tab:grey,-."
+            wpg:       "spatialhorizon"
+        rlca_sh:
+            model:  "rlca"
+            linestyle: "tab:green,-."
+            wpg:       "spatialhorizon"
+
+
+empty_obs20_vel03_plot: 
+    planner:
+        mpc:
+            folder: "run_3/" # model from folder "run_2/"  
+            model:  "mpc"
+            linestyle: "tab:red,-"
+        teb:
+            model:  "teb"
+            linestyle: "tab:blue,--"
+        cadrl_sh:
+            model:  "cadrl"
+            linestyle: "tab:grey,-."
+            wpg:       "spatialhorizon"
+        rlca_sh:
+            model:  "rlca"
+            linestyle: "tab:green,-."
+            wpg:       "spatialhorizon"
+
+
+
+
+empty_obs10_vel02_plot: 
+    planner:
+        mpc:
+            folder: "run_3/" # model from folder "run_2/"  
+            model:  "mpc"
+            linestyle: "tab:red,-"
+        teb:
+            model:  "teb"
+            linestyle: "tab:blue,--"
+        cadrl_sh:
+            model:  "cadrl"
+            linestyle: "tab:grey,-."
+            wpg:       "spatialhorizon"
+        rlca_sh:
+            model:  "rlca"
+            linestyle: "tab:green,-."
+            wpg:       "spatialhorizon"
+
+
+empty_obs10_vel03_plot: 
+    planner:
+        mpc:
+            folder: "run_3/" # model from folder "run_2/"  
+            model:  "mpc"
+            linestyle: "tab:red,-"
+        teb:
+            model:  "teb"
+            linestyle: "tab:blue,--"
+        cadrl_sh:
+            model:  "cadrl"
+            linestyle: "tab:grey,-."
+            wpg:       "spatialhorizon"
+        rlca_sh:
+            model:  "rlca"
+            linestyle: "tab:green,-."
+            wpg:       "spatialhorizon"
+            
+            
+
+
+
+
+
+
+
+
+# fig 2
+# Suppose in fig 2 we want to plot the zones, static map and obstacles
+# we can override these parameters by using the custom_cfg block
+# figure 2 will have the same comparison as fig 1 with additional information
+# ------------ figure block ------------
+# naming convention: custom_cfg_$name
+# $name:             any name (but needs to be unique)
+
+
+
+# custom_cfg_2: 
+#     plot_zones: 1 
+#     plot_sm:    0
+#     plot_obst:  1
+
+# map1_obs20_vel02_testplot2:
+#     planner:
+#         cadrl_sh:
+#             model:     "cadrl"
+#             linestyle: "tab:red,-"
+#             wpg:       "spatialhorizon"
+#         cadrl_ts:
+#             model:     "cadrl"
+#             linestyle: "tab:blue,--"
+#             wpg:       "timespace"
+#         cadrl_ss:
+#             model:     "cadrl"
+#             linestyle: "tab:grey,-."
+#             wpg:       "subsampling"
+

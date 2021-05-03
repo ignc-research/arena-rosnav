@@ -1,0 +1,332 @@
+{
+    "scenarios": [
+        {
+            "scene_name": "scene_1",
+            "lin_v": 0.14,
+            "repeats": 5,
+            "dynamic_obstacles": {
+                "dynamic_obs_0": {
+                    "obstacle_radius": 0.3,
+                    "linear_velocity": 0.1,
+                    "start_pos": [
+                        0,
+                        4,
+                        0
+                    ],
+                    "waypoints": [
+                        [
+                           -1,
+                            -1,
+                            0
+                        ]
+                    ],
+                    "is_waypoint_relative": true,
+                    "mode": "yoyo",
+                    "triggers": [
+                        "watcher_0"
+                    ]
+                },
+                "dynamic_obs_1": {
+                    "obstacle_radius": 0.3,
+                    "linear_velocity": 0.1,
+                    "start_pos": [
+                        5,
+                        -0.26,
+                        0
+                    ],
+                    "waypoints": [
+                        [
+                            -2,
+                            2,
+                            0
+                        ]
+                    ],
+                    "is_waypoint_relative": true,
+                    "mode": "yoyo",
+                    "triggers": [
+                        "watcher_1"
+                    ]
+                },
+                "dynamic_obs_2": {
+                    "obstacle_radius": 0.3,
+                    "linear_velocity": 0.08,
+                    "start_pos": [
+                        3,
+                        9,
+                        0
+                    ],
+                    "waypoints": [
+                        [
+                            3,
+                            0,
+                            0
+                        ]
+                    ],
+                    "is_waypoint_relative": true,
+                    "mode": "yoyo",
+                    "triggers": [
+                        "watcher_2"
+                    ]
+                },
+                "dynamic_obs_3": {
+                    "obstacle_radius": 0.3,
+                    "linear_velocity": 0.08,
+                    "start_pos": [
+                        8,
+                        4,
+                        0
+                    ],
+                    "waypoints": [
+                        [
+                            -2,
+                            -2,
+                            0
+                        ]
+                    ],
+                    "is_waypoint_relative": true,
+                    "mode": "yoyo",
+                    "triggers": [
+                        "watcher_3"
+                    ]
+                },
+                "dynamic_obs_4": {
+                    "obstacle_radius": 0.3,
+                    "linear_velocity": 0.08,
+                    "start_pos": [
+                        8,
+                        13,
+                        0
+                    ],
+                    "waypoints": [
+                        [
+                            -4,
+                            0,
+                            0
+                        ]
+                    ],
+                    "is_waypoint_relative": true,
+                    "mode": "yoyo",
+                    "triggers": [
+                        "watcher_4"
+                    ]
+                }
+            },
+            "static_obstacles": {
+                "static_obs_0": {
+                    "shape": "circle",
+                    "x": 0,
+                    "y": -2.6,
+                    "radius": 1
+                },
+                "static_obs_1": {
+                    "shape": "circle",
+                    "x": 9.22,
+                    "y": -1.2,
+                    "radius": 1.3
+                },
+                "static_obs_2": {
+                    "shape": "circle",
+                    "x": 12.2,
+                    "y": -1.2,
+                    "radius": 1.3
+                },
+                "static_obs_3": {
+                    "shape": "circle",
+                    "x": 19,
+                    "y": -0.2,
+                    "radius": 1
+                },
+                "static_obs_4": {
+                    "shape": "circle",
+                    "x": 18.4,
+                    "y": 1.34,
+                    "radius": 1
+                },
+                "static_obs_5": {
+                    "shape": "circle",
+                    "x": 20,
+                    "y": 2.6,
+                    "radius": 1.3
+                },
+                "static_obs_6": {
+                    "shape": "circle",
+                    "x": -4.2,
+                    "y": 9.36,
+                    "radius": 1
+                },
+                "static_obs_7": {
+                    "shape": "circle",
+                    "x": -2.8,
+                    "y": 7.2,
+                    "radius": 1
+                },
+                "static_obs_8": {
+                    "shape": "circle",
+                    "x": -3.84,
+                    "y": 5.17,
+                    "radius": 1
+                },
+                "static_obs_9": {
+                    "shape": "circle",
+                    "x": -4.23,
+                    "y": 3.277,
+                    "radius": 1
+                },
+                "static_obs_10": {
+                    "shape": "circle",
+                    "x": 3.6,
+                    "y": 6.4,
+                    "radius": 1.3
+                },
+                "static_obs_11": {
+                    "shape": "circle",
+                    "x": 3.6,
+                    "y": 3.6,
+                    "radius": 1.3
+                },
+                "static_obs_12": {
+                    "shape": "circle",
+                    "x": 14,
+                    "y": 6,
+                    "radius": 1.7
+                },
+                "static_obs_13": {
+                    "shape": "circle",
+                    "x": 0.74,
+                    "y": 14.3,
+                    "radius": 1.7
+                },
+                "static_obs_14": {
+                    "shape": "circle",
+                    "x": 4.4,
+                    "y": 14.3,
+                    "radius": 1.7
+                },
+                "static_obs_15": {
+                    "shape": "circle",
+                    "x": 16.5,
+                    "y": 18.5,
+                    "radius": 0.7
+                },
+                "static_obs_16": {
+                    "shape": "circle",
+                    "x": 14.4,
+                    "y": 18,
+                    "radius": 0.8
+                },
+                "static_obs_17": {
+                    "shape": "circle",
+                    "x": 12,
+                    "y": 17.7,
+                    "radius": 1.2
+                },
+                "static_obs_18": {
+                    "shape": "circle",
+                    "x": 14.8,
+                    "y": 11.63,
+                    "radius": 0.7
+                },
+                "static_obs_19": {
+                    "shape": "circle",
+                    "x": 16.5,
+                    "y": 11.63,
+                    "radius": 0.7
+                },
+                "static_obs_20": {
+                    "shape": "circle",
+                    "x": 18.2,
+                    "y": 11.63,
+                    "radius": 0.7
+                },
+                "static_obs_21": {
+                    "shape": "circle",
+                    "x": 19.8,
+                    "y": 11.63,
+                    "radius": 0.7
+                },
+                "static_obs_22": {
+                    "shape": "circle",
+                    "x": 24.5,
+                    "y": 15.53,
+                    "radius": 1.2
+                },
+                "static_obs_23": {
+                    "shape": "circle",
+                    "x": 24.3,
+                    "y": 17.7,
+                    "radius": 1.2
+                },
+                "static_obs_24": {
+                    "shape": "circle",
+                    "x": 9,
+                    "y": 9.4,
+                    "radius": 1.7
+                }
+            },
+            "robot": {
+                "start_pos": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "goal_pos": [
+                    -6,
+                    -6,
+                    0
+                ]
+            },
+            "watchers": {
+ 
+                "watcher_0": {
+                    "pos": [
+                        10,
+                        4
+                    ],
+                    "range": 5
+                },
+                "watcher_1": {
+                    "pos": [
+                        15,
+                        0
+                    ],
+                    "range": 4
+                },
+                "watcher_2": {
+                    "pos": [
+                        3,
+                        9
+                    ],
+                    "range": 4
+                },
+                "watcher_3": {
+                    "pos": [
+                        8,
+                        4
+                    ],
+                    "range": 4
+                },
+                "watcher_4": {
+                    "pos": [
+                        8,
+                        13
+                    ],
+                    "range": 4
+                },
+                "watcher_5": {
+                    "pos": [
+                        14,
+                        10
+                    ],
+                    "range": 5
+                },
+                "watcher_6": {
+                    "pos": [
+                        18,
+                        13
+                    ],
+                    "range": 4
+                }
+            }
+        }
+    ]
+}

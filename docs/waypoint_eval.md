@@ -1,0 +1,280 @@
+# Waypoint-generator and new DRL agent Evaluations
+
+## Installation
+1. Install arena-rosnav according to docs/Installation.md
+  * remember the installation in on **local_planner_subgoalmode** branch, otherwise *rosws update* may install different packages in *src/forks*)
+    ``` 
+    git checkout local_planner_subgoalmode
+    ```
+  * remember catkin_make always with *realse* and *python3*
+    ```
+    catkin_make -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=/usr/bin/python3
+    ```
+  * rememeber source in new terminal
+    ```
+    source devel/setup.zsh
+    or
+    source devel/setup.sh
+    ```
+
+2. Make sure you are inside your venv when you start the commands
+3. Make sure your python path is correct by sourcing everything before you start the commands
+- echo $PYTHONPATH should output smt like this: 
+```
+/home/user/catkin_ws/devel/lib/python3/dist-packages:
+/home/user/catkin_ws/src/arena-rosnav:
+/home/user/geometry2_ws/devel/lib/python3/dist-packages:
+/opt/ros/melodic/lib/python2.7/dist-packages
+```
+## [EVAL Group1] Run DRL1,2,3 agents:
+1. [Parameter setting] select **subgoal mode** in the *plan_fsm_param.yaml* file located at
+```
+src/arena-rosnav/arena_bringup/launch/plan_fsm_param.yaml
+```
+subgoal_mode:
+- Change to 
+  - 0:  spatial-horizon-wp, 
+  - 1:  time-space-wp, 
+  - 2:  subsampling-wp
+  
+
+2. [Terminal 1] Start the *simulation environment* with the specific scenario e.g. map1, 20 obstacles:
+```
+roslaunch arena_bringup start_arena_flatland.launch map_file:="map1"  disable_scenario:="false" scenario_file:="eval/obstacle_map1_obs20.json"
+```
+* roslaunch parameters:
+  * map_file:
+    * map1
+    * map_empty
+  * disable_scenario: false
+  * scenario_file:
+    * eval/obstacle_map1_obs5.json
+    * eval/obstacle_map1_obs10.json
+    * eval/obstacle_map1_obs20.json
+    * eval/obstacle_empty_obs5.json
+    * eval/obstacle_empty_obs10.json
+    * eval/obstacle_empty_obs20.json
+
+3. [Terminal 2] **Wait until all the obstacles in simulation environment are loaded**, start the *time-space plan manager*:
+```
+roslaunch arena_bringup timed_space_planner_fsm.launch
+```
+
+4. [Terminal 3] Afterwards, start the *action publisher*:
+```
+roscd arena_local_planner_drl/scripts/deployment/
+```
+```
+python action_publisher.py
+```
+5. [Terminal 4] Start rosbag recording and name it with following convention: planner_map_obstacles_velocity_subgoal_mode
+```
+rosbag record -o drl1_map1_obs20_vel01_spatialhorizon /scenario_reset -e "(.*)police(.*)"
+
+```
+* rosbag parameter
+  * name of the bag: 
+    * [local_planner]_ [map_name]_ obs[number]_ vel[obs_velocity_magnitude]_ [subgoal_mode]
+    * example1: drl1_map1_obs20_vel01_spatialhorizon
+    * example2: mpc_map_obs10_vel02_timespace 
+    * example3: teb_map_obs10_vel03_subsampling 
+
+Explanation:
+* this command will record all topics necessary for evaluation
+* -e "(.*)police(.*)": records all topics containing "police"
+* drl1_map1_ob20_vel_01: name of bag file, in this example the drl1 planner was recorded in map1 with 20 obstacles with lin_vel = 0.1
+
+
+
+
+6. [Terminal 5] Run the ```run_agent.py``` script.
+
+```
+roscd arena_local_planner_drl/scripts/deployment/
+```
+
+```
+python run_agent.py --load drl1 --scenario obstacle_map1_obs20
+```
+* change drl planner:
+  * --load drl1
+  * --load drl2
+  * --load drl3
+* scenario_file:
+    * --scenario obstacle_map1_obs5.json
+    * --scenario obstacle_map1_obs10.json
+    * --scenario obstacle_map1_obs20.json
+    * --scenario obstacle_empty_obs5.json
+    * --scenario obstacle_empty_obs10.json
+    * --scenario obstacle_empty_obs20.json
+
+#### After one test is over (15runs), stop the rosbag command and all other windows and go to the scenario.json files. Change the linear velocity of every dynamic obstacle and/or change your planner/subgoal mode in the scenario.json file and plan_fsm_param.yaml. Afterwards, start from step 1) again. (start simulation and start rosbag command again). If there are any issues while recording and you want to record a new recording, just stop the rosbag command and simulation and start over again. The rosbags will be saved as a new file. 
+
+#### If you want to check the current scenario progress:
+```
+rostopic echo /scenario_reset
+```
+This will display the reset count. Once the resets reach the max nr of repeats (set up in the json file), the robot should stay at the goal position. Then you can stop the recording.
+
+
+1. Once the test runs finished (after 15 runs), 
+- stop the rosbag record (rosbag will be saved in the directory where you executed the command)
+- stop the run_agent.py script 
+- stop the simulation environment
+- stop action publisher and timespace manager as well
+- change the parameters inside the plan_manager.yaml if neccessary (subgoal mode)
+- change the parameters inside the scenario.json if neccessary (obstacle velocity)
+- start again from step 1 with new scenarios/parameters
+
+## [EVAL Group2] RUN TEB,MPC, DWA, CADRL, COL-RL
+
+0. Install Dependencies:
+DRL based local planners need some dependencies to be installed in order to run correctly.  
+These can be found in the directory: arena-rosnav/arena_navigation/arena_local_planner/env
+- cadrl:
+  - pip install tensorflow==1.4.1
+  - pip install numpy
+  - build ford msg package in your catkin ws: 
+    ``` 
+    git clone https://bitbucket.org/acl-swarm/ford_msgs/src/master/ 
+    catkin_make 
+    ```  
+- col-rl:
+  - pip install mpi4py
+  - sudo apt install openssh-server
+
+
+1. [Terminal 1] Start the simulation with the respective local planners by setting the parameter local_planner (ie "teb"):
+
+```
+roslaunch arena_bringup start_arena_flatland.launch local_planner:="teb" map_file:="map1"  disable_scenario:="false" scenario_file:="eval/obstacle_map1_obs20.json" 
+```
+below commands 2. and 3. not necessary for teb mpc and dwa !
+
+2. Set which wp-generator to use by setting the parameter in the yaml file .
+[Parameter setting] select **subgoal mode** in the *plan_fsm_param.yaml* file located at
+```
+src/arena-rosnav/arena_bringup/launch/plan_fsm_param.yaml
+```
+subgoal_mode:
+- Change to 
+  - 0:  spatial-horizon-wp, 
+  - 1:  time-space-wp, 
+  - 2:  subsampling-wp
+ 
+3. [Terminal 2] Start the plan manager :
+
+```
+roslaunch arena_bringup timed_space_planner_fsm.launch
+```
+
+* roslaunch parameters:
+  * local_planner:
+    * teb
+    * mpc
+    * dwa
+    * cadrl
+    * rl_collision_avoidance
+  * map_file:
+    * map1
+    * map_empty
+  * disable_scenario: false
+  * scenario_file:
+    * eval/obstacle_map1_obs5.json
+    * eval/obstacle_map1_obs10.json
+    * eval/obstacle_map1_obs20.json
+    * eval/obstacle_map_obs5.json
+    * eval/obstacle_map_obs10.json
+    * eval/obstacle_map_obs20.json
+
+For arena local planner, an additional Terminal is needed (first terminal can be set to teb):
+```
+roscd arena_ros/scripts/
+python arena_node_tb3.py
+```
+
+4. [Terminal 3] Start rosbag recording and name it with following convention: planner_map_obstacles_velocity_subgoal_mode
+```
+rosbag record -o mpc_map1_obs20_vel01_spatialhorizon /scenario_reset -e "(.*)police(.*)"
+
+```
+* rosbag parameter
+  * name of the bag: 
+    * [local_planner]_ [map_name]_ obs[number]_ vel[obs_velocity_magnitude]_ [subgoal_mode]
+    * example1: drl1_map1_obs20_vel01_spatialhorizon
+    * example2: mpc_map_obs10_vel02_timespace 
+    * example3: teb_map_obs10_vel03_subsampling 
+
+
+
+Explanation:
+* this command will record all topics necessary for evaluation
+* -e "(.*)police(.*)": records all topics containing "police"
+* cadrl_map1_ob10_vel_01: name of bag file, in this example the cadrl planner was recorded in map1 with 10 obstacles with lin_vel = 0.1
+
+#### After one test run is over, stop the rosbag command and the simulation and go to the scenario.json files. Change the linear velocity of every dynamic obstacle and/or change your planner/subgoal mode in the scenario.json file and plan_fsm_param.yaml. Afterwards, start from step 1) again. (start simulation and start rosbag command again). If there are any issues while recording and you want to record a new recording, just stop the rosbag command and simulation and start over again. The rosbags will be saved as a new file. 
+
+#### If you want to check the current scenario progress:
+```
+rostopic echo /scenario_reset
+```
+This will display the reset count. Once the resets reach the max nr of repeats (set up in the json file), the robot should stay at the goal position. Then you can stop the recording.
+
+
+## [Additional Notes]: Verify the simulation
+
+Once the simulation has started, you can check if these three topics are published:
+``` 
+rostopic list
+```
+* /scenario_reset
+* /sensorsim/police/collision
+* /sensorsim/police/odom
+
+When using "teb", "dwa" or "mpc" you need to start the scenario by manually putting a "2D Nav Goal" once. After each reset the goal will automatically set. If everything worked you can continue to step 2)
+
+#### Record Rosbags
+```
+rosbag record -o cadrl_map1_ob10_vel_01 /scenario_reset -e "(.*)police(.*)"
+```
+Explanation:
+* this command will record all topics necessary for evaluation
+* -e "(.*)police(.*)": records all topics containing "police"
+* cadrl_map1_ob10_vel_01: name of bag file, in this example the cadrl planner was recorded in map1 with 10 obstacles with lin_vel = 0.1
+
+#### After one test run is over, stop the rosbag command and go to the scenario.json files. Change the linear velocity of every dynamic obstacle in the scenario.json file and start from step 1) again. (start simulation and start rosbag command again). If there are any issues while recording and you want to record a new recording, just stop the rosbag command and simulation and start over again. The rosbags will be saved as a new file. 
+
+#### If you want to check the current scenario progress:
+```
+rostopic echo /scenario_reset
+```
+This will display the reset count. Once the resets reach the max nr of repeats (set up in the json file), the robot should stay at the goal position. Then you can stop the recording.
+
+## [Others] Run Ego Planner
+
+In order to test ego local planner:
+
+1. change the parameter "use_drl" to be false in *plan_fsm_param.yaml*
+```
+src/arena-rosnav/arena_bringup/launch/plan_fsm_param.yaml
+```
+* use_drl false
+
+
+2. start *simulation environment*
+
+You can choose with or wihout scenarios loaded
+* without senarios:
+```
+roslaunch arena_bringup start_arena_flatland.launch map_file:="map1"
+```
+* with senarios:
+```
+roslaunch arena_bringup start_arena_flatland.launch map_file:="map1"  disable_scenario:="false" scenario_file:="eval/obstacle_map1_obs20.json"
+```
+
+3. start the *time-space plan manager*:
+```
+roslaunch arena_bringup timed_space_planner_fsm.launch
+```
+4. in rviz set a goal position using *FlatlandNav Goal*

@@ -1,0 +1,21 @@
+<launch>
+<node pkg="arena_timespace_planner" name="time_space" type="time_space_planner_node" output="screen">
+    <!-- plan fsm -->
+    <rosparam file="$(find arena_timespace_planner)/launch/config/plan_fsm_param.yaml" command="load" /> <!-- ns="fsm" ns="global_costmap" -->
+    
+    <!-- plan manager -->
+    <!-- <rosparam file="$(find arena_timespace_planner)/launch/config/plan_manager_param.yaml" command="load" ns="plan_manager"/> ns="global_costmap" -->
+    
+    <!-- Mapping -->
+    <!-- <rosparam file="$(find arena_timespace_planner)/launch/config/gridmap_param.yaml" command="load" ns="sdf_map"/>  -->
+    
+    <!-- global planner -->
+    <!-- <rosparam file="$(find arena_timespace_planner)/launch/config/global_plan_optimization_param.yaml" command="load" ns="optimization_ESDF"/>  -->
+    <!-- <rosparam file="$(find arena_timespace_planner)/launch/config/global_plan_param.yaml" command="load" ns="kino_astar"/>  -->
+    
+    <!-- mid planner -->
+    <!-- <rosparam file="$(find arena_timespace_planner)/launch/config/timed_astar_param.yaml" command="load" ns="timed_astar"/> 
+    <rosparam file="$(find arena_timespace_planner)/launch/config/local_plan_optimization_param.yaml" command="load" ns="optimization"/>  -->
+
+</node>
+</launch>

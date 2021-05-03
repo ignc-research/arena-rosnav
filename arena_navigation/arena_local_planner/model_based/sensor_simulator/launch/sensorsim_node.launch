@@ -1,0 +1,28 @@
+<launch>
+    <!-- Launch neural net ros wrapper -->
+    <arg name="use_task_manager" default="false"/>
+
+
+    <group if="$(arg use_task_manager)">
+        <node pkg="sensor_simulator" type="sensorsim_node_tmgr.py" name="sensorsim_node" output="screen" ns="/sensorsim">
+        </node>
+    </group>
+
+
+    <!-- param -->
+	<arg name="v_lin" default="0.3"/>
+    <arg name="v_ang" default="0.05"/>
+    <arg name="usm" default="true"/>
+    <group unless="$(arg use_task_manager)">
+        <node pkg="sensor_simulator" type="sensorsim_node.py" name="sensorsim_node" output="screen" ns="/sensorsim">
+
+            <param name="~vx"  value = "$(arg v_lin)"/>
+            <param name="~vz"  value = "$(arg v_ang)"/>
+            <param name="~usm" value = "$(arg usm)"/>
+
+        </node>
+    </group>
+
+
+
+</launch>
