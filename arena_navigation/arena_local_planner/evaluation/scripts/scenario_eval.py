@@ -127,9 +127,9 @@ class newBag():
                 
             self.nc_total = len(t_col)
             # get reset time
-            reset_csv   = self.bag.message_by_topic("/scenario_reset")
-            df_reset    = pd.read_csv(reset_csv, error_bad_lines=False)
-            t_reset     = []
+            reset_csv = self.bag.message_by_topic("/scenario_reset")
+            df_reset  = pd.read_csv(reset_csv, error_bad_lines=False)
+            t_reset   = []
             for i in range(len(df_reset)): 
                 t_reset.append(df_reset.loc[i, "Time"])
 
@@ -153,6 +153,11 @@ class newBag():
             # collsion pos
             col_xy = []
             nc = 0
+            
+            old_x = None
+            old_y = None
+            dist2_oldp = 100
+
 
             global start, select_run
 
@@ -170,7 +175,8 @@ class newBag():
                 
                 start_x = start[0] + 0.5
 
-                if current_time > reset-6 and n < len(t_reset)-1 and x < start_x:
+                # if current_time > reset-6 and n < len(t_reset)-1 and x < start_x:
+                if current_time > reset and n < len(t_reset)-1:
                     n += 1
                     # store the run
                     if n in select_run or len(select_run) == 0:
@@ -191,46 +197,65 @@ class newBag():
     
                 if n+1 in select_run or len(select_run) == 0:
 
-                    if  len(pose_x) > 0:
+                    # if  len(pose_x) > 0:
+                    #     pose_x.append(x)
+                    #     pose_y.append(y)
+                    # elif x < start_x:
+
+                    #     pose_x.append(x)
+                    #     pose_y.append(y)
+
+                    # check distance to last pos
+                    # print(old_x)
+                    if old_x != None:
+                        dist2_oldp = math.sqrt((x-old_x)**2+(y-old_y)**2)
+                        # fancy_print(dist2_oldp,0)
+
+                    # append pos if pose is empty
+                    if len(pose_x) == 0:
                         pose_x.append(x)
                         pose_y.append(y)
-                    elif x < start_x:
+                    # check if adjacent pos is too far (reset ?)
+                    elif dist2_oldp < 5:
                         pose_x.append(x)
                         pose_y.append(y)
 
-                    t.append(current_time)
-                    # get trajectory
+                        t.append(current_time)
+                        # get trajectory
 
-                    # check for col
-                    if len(t_col) > nc:
-                        if current_time >= t_col[nc]:
-                            col_xy.append([x,y])
-                            nc += 1
+                        # check for col
+                        if len(t_col) > nc:
+                            if current_time >= t_col[nc]:
+                                col_xy.append([x,y])
+                                nc += 1
 
-                    # check for goals
-                    if len(df_subg) > 0:
-                        sg_t = round(df_subg.loc[sg_n, "Time"],3)
-                        sg_x = round(df_subg.loc[sg_n, "pose.position.x"],3)
-                        sg_y = round(df_subg.loc[sg_n, "pose.position.y"],3)
+                        # check for goals
+                        if len(df_subg) > 0:
+                            sg_t = round(df_subg.loc[sg_n, "Time"],3)
+                            sg_x = round(df_subg.loc[sg_n, "pose.position.x"],3)
+                            sg_y = round(df_subg.loc[sg_n, "pose.position.y"],3)
 
-                        if current_time > sg_t and sg_n < len(df_subg) - 1:
+                            if current_time > sg_t and sg_n < len(df_subg) - 1:
 
-                            subgoal_x.append(sg_x)
-                            subgoal_y.append(sg_y)
+                                subgoal_x.append(sg_x)
+                                subgoal_y.append(sg_y)
 
-                            sg_n += 1
+                                sg_n += 1
 
-                    if len(df_wpg) > 0:
-                        wp_t = round(df_wpg.loc[wpg_n, "Time"],3)
-                        wp_x = round(df_wpg.loc[wpg_n, "pose.position.x"],3)
-                        wp_y = round(df_wpg.loc[wpg_n, "pose.position.y"],3)
+                        if len(df_wpg) > 0:
+                            wp_t = round(df_wpg.loc[wpg_n, "Time"],3)
+                            wp_x = round(df_wpg.loc[wpg_n, "pose.position.x"],3)
+                            wp_y = round(df_wpg.loc[wpg_n, "pose.position.y"],3)
 
-                        if current_time > wp_t and wpg_n < len(df_wpg) - 1:
+                            if current_time > wp_t and wpg_n < len(df_wpg) - 1:
 
-                            wpg_x.append(wp_x)
-                            wpg_y.append(wp_y)
+                                wpg_x.append(wp_x)
+                                wpg_y.append(wp_y)
 
-                            wpg_n += 1
+                                wpg_n += 1
+
+                    old_x = x
+                    old_y = y
 
 
             # remove first 
@@ -304,9 +329,9 @@ class newBag():
 
         # self.make_txt(file_name, "\n"+"Evaluation of "+planner+":") --txt
         axlim = {}
-        axlim["x_min"] = 100
+        axlim["x_min"] =  100
         axlim["x_max"] = -100
-        axlim["y_min"] = 100
+        axlim["y_min"] =  100
         axlim["y_max"] = -100
 
         json_data              = {}
@@ -748,13 +773,14 @@ def eval_cfg(cfg_file, filetype):
   
     for curr_figure in cfg:
         # plot file name
-        cfg_folder = cfg_file.replace(".yml","")
-        cfg_folder = cfg_folder.replace(".yaml","")
+        cfg_folder = cfg_file
+        # cfg_folder = cfg_folder.replace(".yaml","")
         if not os.path.exists('../plots/' + cfg_folder):
             os.mkdir('../plots/' + cfg_folder)
 
         plot_file        = '../plots/' + cfg_folder + "/" + curr_figure + "." + filetype 
-        plot_file_exists = os.path.isfile(plot_file)
+        # plot_file_exists = os.path.isfile(plot_file)
+        plot_file_exists = False
         # print(curr_figure)
         if "custom_cfg" in curr_figure:
             for param in cfg[curr_figure]:
@@ -780,6 +806,8 @@ def eval_cfg(cfg_file, filetype):
 
 
             if not "empty" in map and plt_cfg["plot_sm"]:
+                # offs_x = cfg[curr_figure]["map_origin"][0]
+                # offs_y = cfg[curr_figure]["map_origin"][1]
                 plt.scatter(sm[1], sm[0],s = 0.2 , c = "grey")
 
             for planner in cfg[curr_figure]["planner"]:
@@ -837,7 +865,9 @@ def eval_cfg(cfg_file, filetype):
     plt.show()
 
 def getMap(msg):
-    global ax, sm
+    global ax, sm, map_orig
+
+    map_orig = [0, 0]
     points_x = []
     points_y = []
     # print(msg.markers[0])
