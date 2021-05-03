@@ -31,8 +31,8 @@ The GUI represents an user interface for creating scenarios more intuitive, a lo
 4. Execute the `paint.py` file. <br />
 `$ python paint.py`
 5. Generate a new scenario in the paint app. Look at the rules! When ready, the next script `parser.py` will automatically start. <br />
-6. The generated json file will be saved under the name `new_scenario.json` in the `output` folder as well as in the folder `arena-rosnav/simulator_setup/scenerios/`, where all scenarios are stored.
-7. Modify the `arena-rosnav/arena_bringup/launch/sublaunch/task_generator.launch` file, changing the name of the expected json file to `new_scenario.json`. <br />
+6. The generated json file will be saved under the name `new_scenario.json` in the `output` folder as well as in the folder `arena-rosnav/simulator_setup/scenarios/`, where all scenarios are stored.
+7. Modify the `arena-rosnav/arena_bringup/launch/sublaunch_testing/task_generator.launch` file, changing the name of the expected json file to `new_scenario.json`. <br />
 8. Activate rosnav. <br />
 `$ workon rosnav` <br />
 **Attention:** Rosnav and kivy_env might not be able to stay active at the same time, so activate kivy_env for the gui and rosnav for launching.
