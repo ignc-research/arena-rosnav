@@ -146,8 +146,10 @@ Still, to become the json file at the end all steps and no mistakes should be do
     * When uploading the map, the map will automatically scale, so that it fills the area in the best way. The new dimensions (width and height) of the map on the gui, as well as its four corners should be manually calculated. Its new starting point (bottom left corner) is the most important point.
     * Another thing is considering the given on the textinput field map resolution and map origin, if it is different then (0.0,0.0).
  
-   So the steps are: </br>
-   size and positions of the map on the gui --(scale & new-start)--> size of the original png image of the map --(size*resolution & positions+origin)--> size and starting point on the map in rviz
+   So all steps for scaling the map are: </br>
+   <p align="center">
+    <img src="media/img/map_scale.png">
+   </p>
    
    Example: </br>
    `radius-gui * scale * map_resolution = radius_rviz` with `map_resolution` = user input, depending on the map and `scale` = different for each map, calculated intern after the map image has been uploaded on the gui; after running `paint.py` its value could be checked in the intern txt file `data.txt` under 'positions scale' (the first value on the left).
