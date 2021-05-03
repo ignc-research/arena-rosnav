@@ -134,7 +134,6 @@ If the command failed to compile:
 cd $HOME/geometry2_ws
 catkin_make -DPYTHON_EXECUTABLE=/usr/bin/python3
 ```
-After that you can try to import tf in python3 and no error is supposed to be shown up.
 
 * Set python path in .zshrc (or .bash if you use that)
 ```
@@ -146,16 +145,14 @@ source /$HOME/catkin_ws/devel/setup.zsh
 export PYTHONPATH=$HOME/catkin_ws/src/arena-rosnav:${PYTHONPATH}
 export PYTHONPATH=$HOME/geometry2_ws/devel/lib/python3/dist-packages:${PYTHONPATH}
 ```
-
-* Install MPC-Planner
-
+Add this line above "source/opt/ros/melodic/setup.zsh"
 ```
-cd $HOME/catkin_ws/src/forks/navigation/local_planner/mpc/mpc_local_planner
-rosdep install mpc_local_planner
+export PYTHONPATH=""
 ```
 
-* (optional) Install CADRL dependencies (venv always activated!) 
+* Install CADRL dependencies (venv always activated!) 
 ```
+workon rosnav
 cd $HOME/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/model_based/cadrl_ros
 pip install -r requirements_cadrl.txt
 ```
@@ -172,12 +169,4 @@ pull latest ignc-flatland version
 ```
 cd $HOME/catkin_ws/src/forks/flatland
 git pull
-```
-## Notes
-If you develop on the branch drl_multiprocessing, go inside the forks/flatland folder and checkout to the branch dev_multi_lei, afterwards catkin_make.
-
-After switching branches you need to do the catkin_make command:
-```
-cd $HOME/catkin_ws
-catkin_make -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=/usr/bin/python3
 ```
