@@ -1,0 +1,1 @@
+obstacle (x,y,radius,type): 403.0,399.0,10.0,circle

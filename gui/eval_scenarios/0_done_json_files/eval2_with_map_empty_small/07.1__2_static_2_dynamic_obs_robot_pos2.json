@@ -1,0 +1,129 @@
+{
+	"scenerios": [
+		{
+			"scene_name": "new_scenario",
+			"repeats": 5,
+			"dynamic_obstacles": {
+				"dynamic_obs_0": {
+					"obstacle_radius": 0.5,
+					"linear_velocity": 0.01,
+					"type": "circle",
+					"start_pos": [
+						0.20000000000000018,
+						-2.15,
+						0
+					],
+					"waypoints": [
+						[
+							0.01,
+							0.01,
+							0
+						]
+					],
+					"is_waypoint_relative": true,
+					"mode": "yoyo",
+					"triggers": [
+						
+					]
+				},
+				"dynamic_obs_1": {
+					"obstacle_radius": 0.5,
+					"linear_velocity": 0.01,
+					"type": "circle",
+					"start_pos": [
+						0.10000000000000053,
+						2.3499999999999996,
+						0
+					],
+					"waypoints": [
+						[
+							0.01,
+							0.01,
+							0
+						]
+					],
+					"is_waypoint_relative": true,
+					"mode": "yoyo",
+					"triggers": [
+						
+					]
+				},
+				"dynamic_obs_2": {
+					"obstacle_radius": 0.5,
+					"linear_velocity": 0.3,
+					"type": "circle",
+					"start_pos": [
+						1.5500000000000007,
+						-1.7000000000000002,
+						0
+					],
+					"waypoints": [
+						[
+							3.850000000000003,
+							3.7499999999999973,
+							0
+						]
+					],
+					"is_waypoint_relative": true,
+					"mode": "yoyo",
+					"triggers": [
+						"watcher_0"
+					]
+				},
+				"dynamic_obs_3": {
+					"obstacle_radius": 0.5,
+					"linear_velocity": 0.3,
+					"type": "circle",
+					"start_pos": [
+						-1.3499999999999996,
+						-1.6499999999999995,
+						0
+					],
+					"waypoints": [
+						[
+							-3.3000000000000003,
+							3.75,
+							0
+						]
+					],
+					"is_waypoint_relative": true,
+					"mode": "yoyo",
+					"triggers": [
+						"watcher_1"
+					]
+				}
+			},
+			"static_obstacles": {
+
+			},
+			"robot": {
+				"start_pos": [
+					-1.8999999999999995,
+					5.700000000000001,
+					0.0
+				],
+				"goal_pos": [
+					-2.0999999999999996,
+					-4.85,
+					0.0
+				]
+			},
+			"watchers": {
+				"watcher_0": {
+					"pos": [
+						3.700000000000001,
+						0.10000000000000053
+					],
+					"range": 2.45
+				},
+				"watcher_1": {
+					"pos": [
+						-2.9499999999999997,
+						0.10000000000000053
+					],
+					"range": 2.35
+				}
+			}
+		}
+	]
+}

@@ -194,8 +194,14 @@ class newBag():
                     t         = []
 
                     col_xy    = []
-    
-                if n+1 in select_run or len(select_run) == 0:
+
+                    old_x = None
+                    old_y = None
+
+                dist2_oldp = 0
+                if old_x != None:
+                    dist2_oldp = math.sqrt((x-old_x)**2+(y-old_y)**2)
+                if n+1 in select_run or len(select_run) == 0 and dist2_oldp < 1:
 
                     # if  len(pose_x) > 0:
                     #     pose_x.append(x)
@@ -216,43 +222,43 @@ class newBag():
                         pose_x.append(x)
                         pose_y.append(y)
                     # check if adjacent pos is too far (reset ?)
-                    elif dist2_oldp < 0.15:
-                        pose_x.append(x)
-                        pose_y.append(y)
+                    # elif dist2_oldp < 5:
+                    pose_x.append(x)
+                    pose_y.append(y)
 
-                        t.append(current_time)
-                        # get trajectory
+                    t.append(current_time)
+                    # get trajectory
 
-                        # check for col
-                        if len(t_col) > nc:
-                            if current_time >= t_col[nc]:
-                                col_xy.append([x,y])
-                                nc += 1
+                    # check for col
+                    if len(t_col) > nc:
+                        if current_time >= t_col[nc]:
+                            col_xy.append([x,y])
+                            nc += 1
 
-                        # check for goals
-                        if len(df_subg) > 0:
-                            sg_t = round(df_subg.loc[sg_n, "Time"],3)
-                            sg_x = round(df_subg.loc[sg_n, "pose.position.x"],3)
-                            sg_y = round(df_subg.loc[sg_n, "pose.position.y"],3)
+                    # check for goals
+                    if len(df_subg) > 0:
+                        sg_t = round(df_subg.loc[sg_n, "Time"],3)
+                        sg_x = round(df_subg.loc[sg_n, "pose.position.x"],3)
+                        sg_y = round(df_subg.loc[sg_n, "pose.position.y"],3)
 
-                            if current_time > sg_t and sg_n < len(df_subg) - 1:
+                        if current_time > sg_t and sg_n < len(df_subg) - 1:
 
-                                subgoal_x.append(sg_x)
-                                subgoal_y.append(sg_y)
+                            subgoal_x.append(sg_x)
+                            subgoal_y.append(sg_y)
 
-                                sg_n += 1
+                            sg_n += 1
 
-                        if len(df_wpg) > 0:
-                            wp_t = round(df_wpg.loc[wpg_n, "Time"],3)
-                            wp_x = round(df_wpg.loc[wpg_n, "pose.position.x"],3)
-                            wp_y = round(df_wpg.loc[wpg_n, "pose.position.y"],3)
+                    if len(df_wpg) > 0:
+                        wp_t = round(df_wpg.loc[wpg_n, "Time"],3)
+                        wp_x = round(df_wpg.loc[wpg_n, "pose.position.x"],3)
+                        wp_y = round(df_wpg.loc[wpg_n, "pose.position.y"],3)
 
-                            if current_time > wp_t and wpg_n < len(df_wpg) - 1:
+                        if current_time > wp_t and wpg_n < len(df_wpg) - 1:
 
-                                wpg_x.append(wp_x)
-                                wpg_y.append(wp_y)
+                            wpg_x.append(wp_x)
+                            wpg_y.append(wp_y)
 
-                                wpg_n += 1
+                            wpg_n += 1
 
                     old_x = x
                     old_y = y

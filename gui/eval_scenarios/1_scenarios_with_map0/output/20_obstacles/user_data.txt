@@ -1,0 +1,25 @@
+Map resolution:
+0.05
+Map origin:
+[-16.6, -6.65, 0.0]
+ObstacleID - ObstacleType - Velocity - WatchersIDs(triggered-/+/?) - WaypointsIDs - Motion:
+0 - circle - 0.3 - 0(?) - 0 - yoyo
+1 - circle - 0.3 - 1(?) - 1 - yoyo
+2 - circle - 0.3 - 2(?) - 2 - yoyo
+3 - circle - 0.3 - 3(?),4(?),5(?) - 3 - yoyo
+4 - circle - 0.3 - 6(?) - 4 - yoyo
+5 - circle - 0.3 - 7(?) - 5 - yoyo
+6 - circle - 0.3 - 8(?) - 6 - yoyo
+7 - circle - 0.3 - 9(?) - 7 - yoyo
+8 - circle - 0.3 - 10(?) - 8 - yoyo
+9 - circle - 0.3 - 11(?) - 9 - yoyo
+10 - circle - 0.3 - 12(?) - 10 - yoyo
+11 - circle - 0.3 - 13(?) - 11 - yoyo
+12 - circle - 0.3 - 14(?) - 12 - yoyo
+13 - circle - 0.3 - 15(?) - 13 - yoyo
+14 - circle - 0.3 - 16(?) - 14 - yoyo
+15 - circle - 0.3 - 17(?) - 15 - yoyo
+16 - circle - 0.3 - 18(?) - 16 - yoyo
+17 - circle - 0.3 - 19(?) - 17 - yoyo
+18 - circle - 0.3 - 20(?) - 18 - yoyo
+19 - circle - 0.3 - 21(?) - 19 - yoyo

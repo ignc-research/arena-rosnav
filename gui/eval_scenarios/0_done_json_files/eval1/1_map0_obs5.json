@@ -1,0 +1,179 @@
+{
+	"scenerios": [
+		{
+			"scene_name": "new_scenario",
+			"repeats": 5,
+			"dynamic_obstacles": {
+				"dynamic_obs_0": {
+					"obstacle_radius": 0.655,
+					"linear_velocity": 0.3,
+					"type": "circle",
+					"start_pos": [
+						11.041,
+						2.5690000000000026,
+						0
+					],
+					"waypoints": [
+						[
+							0.131,
+							-5.3710000000000075,
+							0
+						]
+					],
+					"is_waypoint_relative": true,
+					"mode": "yoyo",
+					"triggers": [
+						"watcher_0", "watcher_1"
+					]
+				},
+				"dynamic_obs_1": {
+					"obstacle_radius": 1.31,
+					"linear_velocity": 0.3,
+					"type": "circle",
+					"start_pos": [
+						16.674,
+						12.001000000000003,
+						0
+					],
+					"waypoints": [
+						[
+							3.536999999999993,
+							-4.061,
+							0
+						]
+					],
+					"is_waypoint_relative": true,
+					"mode": "yoyo",
+					"triggers": [
+						"watcher_2"
+					]
+				},
+				"dynamic_obs_2": {
+					"obstacle_radius": 1.31,
+					"linear_velocity": 0.3,
+					"type": "circle",
+					"start_pos": [
+						22.307000000000002,
+						-3.0639999999999983,
+						0
+					],
+					"waypoints": [
+						[
+							0.0,
+							6.026000000000008,
+							0
+						]
+					],
+					"is_waypoint_relative": true,
+					"mode": "yoyo",
+					"triggers": [
+						"watcher_3"
+					]
+				},
+				"dynamic_obs_3": {
+					"obstacle_radius": 0.655,
+					"linear_velocity": 0.3,
+					"type": "circle",
+					"start_pos": [
+						-4.024000000000001,
+						0.8660000000000023,
+						0
+					],
+					"waypoints": [
+						[
+							-3.4059999999999966,
+							-2.358,
+							0
+						]
+					],
+					"is_waypoint_relative": true,
+					"mode": "yoyo",
+					"triggers": [
+						"watcher_5"
+					]
+				},
+				"dynamic_obs_4": {
+					"obstacle_radius": 1.965,
+					"linear_velocity": 0.3,
+					"type": "circle",
+					"start_pos": [
+						36.455,
+						13.311000000000002,
+						0
+					],
+					"waypoints": [
+						[
+							5.502000000000001,
+							-4.454000000000001,
+							0
+						]
+					],
+					"is_waypoint_relative": true,
+					"mode": "yoyo",
+					"triggers": [
+						"watcher_4"
+					]
+				}
+			},
+			"static_obstacles": {
+
+			},
+			"robot": {
+				"start_pos": [
+					45.363,
+					16.193000000000005,
+					0.0
+				],
+				"goal_pos": [
+					-13.194,
+					-3.456999999999998,
+					0.0
+				]
+			},
+			"watchers": {
+				"watcher_0": {
+					"pos": [
+						12.088999999999999,
+						1.2590000000000021
+					],
+					"range": 2.62
+				},
+				"watcher_1": {
+					"pos": [
+						11.826999999999998,
+						-2.277999999999998
+					],
+					"range": 2.358
+				},
+				"watcher_2": {
+					"pos": [
+						18.115000000000002,
+						10.298000000000004
+					],
+					"range": 3.2750000000000004
+				},
+				"watcher_3": {
+					"pos": [
+						22.307000000000002,
+						-0.4439999999999982
+					],
+					"range": 4.061
+				},
+				"watcher_4": {
+					"pos": [
+						38.944,
+						10.953000000000001
+					],
+					"range": 5.371
+				},
+				"watcher_5": {
+					"pos": [
+						-4.155000000000001,
+						-0.05099999999999838
+					],
+					"range": 2.096
+				}
+			}
+		}
+	]
+}

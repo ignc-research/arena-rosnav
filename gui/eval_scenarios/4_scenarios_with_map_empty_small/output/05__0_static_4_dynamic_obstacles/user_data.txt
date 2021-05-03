@@ -1,0 +1,9 @@
+Map resolution:
+0.05
+Map origin:
+[-6.0, -6.0, 0.0]
+ObstacleID - ObstacleType - Velocity - WatchersIDs(triggered-/+/?) - WaypointsIDs - Motion:
+0 - circle - 0.3 - 0(?) - 0 - yoyo
+1 - circle - 0.3 - 1(?) - 1 - yoyo
+2 - circle - 0.3 - 2(?) - 2 - yoyo
+3 - circle - 0.3 - 3(?) - 3 - yoyo
