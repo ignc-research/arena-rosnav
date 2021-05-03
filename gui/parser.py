@@ -467,7 +467,7 @@ for obstacle in obstacles:
                 obstacles_json += ','
             obstacles_json +='\n'
         else:
-            # TODO NEXT: just a temporary solution for allowing static obstacle
+            # TODO NEXT: just a temporary solution for allowing a static obstacle
             # --> later this obstacle should be moved under static obstacles in the json file!
             # --> with relative goal coordinates 0 it crashes, so 0.01 was given
             # --> obstacle velocity (= 0.01) and motion (= 'yoyo') are also not needed, but some default values should be still used
