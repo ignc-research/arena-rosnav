@@ -156,7 +156,7 @@ class newBag():
             
             old_x = None
             old_y = None
-            dist2_oldp = 100
+            dist2_oldp = 2500
 
 
             global start, select_run
@@ -216,7 +216,7 @@ class newBag():
                         pose_x.append(x)
                         pose_y.append(y)
                     # check if adjacent pos is too far (reset ?)
-                    elif dist2_oldp < 5:
+                    elif dist2_oldp < 0.15:
                         pose_x.append(x)
                         pose_y.append(y)
 
@@ -856,7 +856,7 @@ def eval_cfg(cfg_file, filetype):
 
             
 
-            ax.legend(handles=legend_elements, loc=1)
+            #ax.legend(handles=legend_elements, loc=1)
             plt.subplots_adjust(top = 1, bottom = 0, right = 1, left = 0, hspace = 0, wspace = 0)
             plt.savefig(plot_file, bbox_inches = 'tight', pad_inches = 0)
             # reset plot cfg to default
@@ -872,7 +872,7 @@ def getMap(msg):
     points_y = []
     # print(msg.markers[0])
     orig_x = 0
-    orig_y = 0  
+    orig_y = 0
     for p in msg.markers[0].points:
     #     if  2 < p.y < 25 :
         points_x.append( p.x + orig_x)
