@@ -1,0 +1,20 @@
+Image corners:
+270.0,270.0
+270.0,530.0
+530.0,530.0
+530.0,270.0
+Positions scale:
+1.0,1.0,0.325,0.43333333333333335,0.325,0.43333333333333335
+Map resolution:
+0.05
+Map origin:
+-6.0, -6.0, 0.0
+Obstacle velocities:
+
+
+Obstacle-watchers connections:
+
+
+Obstacle-waypoints connections:
+
+
