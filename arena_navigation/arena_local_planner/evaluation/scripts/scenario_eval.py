@@ -877,8 +877,8 @@ def getMap(msg):
     points_x = []
     points_y = []
     # print(msg.markers[0])
-    orig_x = 0
-    orig_y = 0
+    orig_x = -16.6
+    orig_y = -6.65
     for p in msg.markers[0].points:
     #     if  2 < p.y < 25 :
         points_x.append( p.x + orig_x)
