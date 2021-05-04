@@ -6,24 +6,24 @@ import sys
 from stable_baselines3 import A2C
 from rl_agent.envs.flatland_gym_env import FlatlandEnv
 from task_generator.tasks import get_predefined_task
-from task_generator.clear_costmap import clear_costmaps
 import rospy
 import rospkg
 import numpy as np
 from collections import OrderedDict
 import h5py
 
-# services
-#from move_base.msg import *
+
+rospy.init_node("record_rollouts", disable_signals=True)
 
 parser = argparse.ArgumentParser(description='.')
 parser.add_argument('-o', '--outputformat', type=str, help='choose output format: "h5" or "npz"', default='npz')
 parser.add_argument('-s', '--scenario', type=str, metavar="[scenario name]", default='/home/michael/catkin_ws/src/arena-rosnav/simulator_setup/scenerios/obstacle_map1_obs20.json', help='path of scenario json file for deployment')
 args = parser.parse_args()
 
-rospy.init_node("record_rollouts")
+task = get_predefined_task(mode="ScenerioTask", PATHS={"scenerios_json_path": args.scenario})  # json scenario
+#task = get_predefined_task(mode="random", PATHS={"scenerios_json_path": args.scenario})  # random scenario
+#task = get_predefined_task(mode="staged", start_stage = 1, PATHS={"scenerios_json_path": args.scenario, "curriculum": "/home/michael/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/configs/training_curriculum.yaml"})  # staged scenarios
 
-task = get_predefined_task(mode="ScenerioTask", PATHS={"scenerios_json_path": args.scenario})
 models_folder_path = rospkg.RosPack().get_path('simulator_setup')
 arena_local_planner_drl_folder_path = rospkg.RosPack().get_path(
     'arena_local_planner_drl')
@@ -33,9 +33,6 @@ env = FlatlandEnv(task, os.path.join(models_folder_path, 'robot', 'myrobot.model
                                'configs', 'default_settings.yaml'), "rule_00", False,
                   )
 
-#self._service_name_clear_costmaps='/move_base/clear_costmaps'
-#self._clear_costmaps_client = rospy.ServiceProxy(self._service_name_clear_costmaps, ClearCostmaps)
-
 obs = env.reset()
 observations = []
 actions = []
@@ -44,11 +41,6 @@ while(True):
 
     reward, reward_info = env.reward_calculator.get_reward(
             obs_dict['laser_scan'], obs_dict['goal_in_robot_frame'])
-    env.observation_collector.register_reward(reward)
-    #TODO need to merge this reward into merged_obs! Otherwise there will be an off-by-one error
-    #Since the observation is needed before the reward can be computed
-    #hotfix: overwrite reward with current value computed above:
-    merged_obs[-1] = reward
     
     done, info = env.check_if_done(reward_info)
     if done:
@@ -57,17 +49,20 @@ while(True):
             # reduce repeat count by 1 and start again
             print('collision')
             task._num_repeats_curr_scene -= 1
-            clear_costmaps()
+            time.sleep(1.0)
+            #task.next_stage()
             env.reset()
+            time.sleep(2.0)
         else:
             observations.append(merged_obs)
             actions.append(action)
             # try resetting the environment: this will either reset the obstacles and robot and start another episode for recording
             # or it will end the recording because all scenarios have been run their maximum number of times
             try:
-                clear_costmaps()
+                #task.next_stage()
                 env.reset()
-            except:
+            except Exception as e:
+                print(e)
                 print('All scenarios have been evaluated!')
                 break
     else:

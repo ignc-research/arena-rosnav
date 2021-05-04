@@ -16,6 +16,8 @@ import rospy
 from geometry_msgs.msg import Twist
 from flatland_msgs.srv import StepWorld, StepWorldRequest
 import time
+import subprocess
+from std_srvs.srv import Empty
 
 
 class FlatlandEnv(gym.Env):
@@ -58,6 +60,9 @@ class FlatlandEnv(gym.Env):
         # action agent publisher
         self.agent_action_pub = rospy.Publisher('cmd_vel', Twist, queue_size=1)
         # service clients
+        self._service_clear_costmap='/move_base/clear_costmaps'
+        self._service_clear_client = rospy.ServiceProxy(self._service_clear_costmap, Empty)
+
         self._is_train_mode = rospy.get_param("train_mode")
         if self._is_train_mode:
             self._service_name_step = '/step_world'
@@ -170,8 +175,19 @@ class FlatlandEnv(gym.Env):
                 info['done_reason'] = 0
         
         return done, info
-
+    
+    def clear_costmaps(self):
+        bashCommand = "rosservice call /move_base/clear_costmaps"
+        process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
+        output, error = process.communicate()
+        self._service_clear_client()
+        return output, error
+    
     def reset(self):
+
+        # clear costmaps
+        out, err = self.clear_costmaps()
+        print(f"output: {out}, error: {err}")
 
         # set task
         # regenerate start position end goal position of the robot and change the obstacles accordingly

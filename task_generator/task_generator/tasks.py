@@ -133,11 +133,14 @@ class StagedRandomTask(RandomTask):
         self._initiate_stage()
 
     def next_stage(self):
+        print(self._stages)
         if self._curr_stage < len(self._stages):
             self._curr_stage += 1
-            self._update_curr_stage_json()
+            #self._update_curr_stage_json()  #TODO had to remove this for rollout recording
             self._remove_obstacles()
             self._initiate_stage()
+        else:
+            raise StopReset("All stages have been evaluated!")
 
     def _initiate_stage(self):
         static_obstacles = self._stages[self._curr_stage]['static']

@@ -2,7 +2,7 @@
 	"scenerios": [
 		{
 			"scene_name": "new_scenario",
-			"repeats": 5,
+			"repeats": 1,
 			"dynamic_obstacles": {
 
 			},

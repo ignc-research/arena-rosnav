@@ -41,25 +41,11 @@ class ObservationCollector():
             lidar_range (float): [description]
         """
        
-        """#TODO this is the original Flatland observation space add a switch
         # define observation_space
         self.observation_space = ObservationCollector._stack_spaces((
             spaces.Box(low=0, high=lidar_range, shape=(num_lidar_beams,), dtype=np.float32),
             spaces.Box(low=0, high=10, shape=(1,), dtype=np.float32) ,
             spaces.Box(low=-np.pi, high=np.pi, shape=(1,), dtype=np.float32) 
-        ))
-        """
-
-        #TODO this is the observation_space for Jiuyun's environment
-        self._current_reward = 0
-        # define observation_space (for Jiayun's IL environment)
-        self.observation_space = ObservationCollector._stack_spaces((
-            spaces.Box(low=0, high=lidar_range, shape=(num_lidar_beams,), dtype=np.float32),
-            spaces.Box(low=-5, high=30, shape=(1,), dtype=np.float32) ,
-            spaces.Box(low=-5, high=25, shape=(1,), dtype=np.float32) ,
-            spaces.Box(low=-np.pi, high=np.pi, shape=(1,), dtype=np.float32),
-	        spaces.Box(low=np.array([-5, -5]), high=np.array([30, 25]), dtype=np.float32),
-            spaces.Box(low=-10, high=15, shape=(1,), dtype=np.float32)
         ))
 
         # flag of new sensor info
@@ -125,18 +111,7 @@ class ObservationCollector():
         
         scan=self._scan.ranges.astype(np.float32)
         rho, theta = ObservationCollector._get_goal_pose_in_robot_frame(self._subgoal,self._robot_pose)
-
-        """#TODO merged_obs from original Flatlandenv. add a switch
         merged_obs = np.hstack([scan, np.array([rho,theta])])
-        """
-
-        #TODO merged_obs for Jiayun's IL environment:
-        rob_x, rob_y, rob_theta = self._robot_pose.x, self._robot_pose.y, self._robot_pose.theta
-        goal_x, goal_y = self._subgoal.x, self._subgoal.y
-        #merged_obs = np.hstack([scan, np.array([rho,theta])])
-        merged_obs = np.hstack([scan, np.array([rob_x, rob_y, rob_theta, goal_x, goal_y, self._current_reward])])
-        #merged_obs = np.hstack([scan, np.array([rob_x, rob_y, rob_theta, goal_x, goal_y])])
-        # </>merged_obs for Jiayun's IL environment
 
         obs_dict = {}
         obs_dict["laser_scan"] = scan
@@ -218,11 +193,6 @@ class ObservationCollector():
             low.extend(space.low.tolist())
             high.extend(space.high.tolist())
         return spaces.Box(np.array(low).flatten(),np.array(high).flatten())
-    
-    #TODO for Jiayun's IL environment
-    def register_reward(self, reward):
-        self._current_reward = reward
-
 
 
 

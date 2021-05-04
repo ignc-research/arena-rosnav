@@ -2,7 +2,7 @@
 	"scenerios": [
 		{
 			"scene_name": "new_scenario",
-			"repeats": 5,
+			"repeats": 1,
 			"dynamic_obstacles": {
 
 			},
@@ -11,7 +11,7 @@
 			},
 			"robot": {
 				"start_pos": [
-					2.6500000000000004,
+					1.6500000000000004,
 					5.75,
 					0.0
 				],
