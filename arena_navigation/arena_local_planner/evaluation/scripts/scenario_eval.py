@@ -849,12 +849,18 @@ def eval_cfg(cfg_file, filetype):
 
             
 
-            #ax.legend(handles=legend_elements, loc=1)
-            ax.spines["top"].set_visible(False)
-            ax.spines["right"].set_visible(False)
-            ax.spines["left"].set_visible(True)
-            plt.subplots_adjust(top = 1, bottom = 0, right = 1, left = 0, hspace = 0, wspace = 0)
-            plt.savefig(plot_file, bbox_inches = 'tight', pad_inches = 0)
+            ax.legend(handles=legend_elements, loc="lower right")
+
+            ax.spines["right"].set_visible(True)
+            color_name = "grey"
+            ax.spines["top"].set_color(color_name)
+            ax.spines["bottom"].set_color(color_name)
+            ax.spines["left"].set_color(color_name)
+            ax.spines["right"].set_color(color_name)
+
+            #plt.subplots_adjust(top = 1, bottom = 0, right = 1, left = 0, hspace = 0, wspace = 0)
+            
+            plt.savefig(plot_file, bbox_inches = 'tight', pad_inches = 0.04,  fontsize=24)
 
             # reset plot cfg to default
             plt_cfg = copy.deepcopy(default_cfg)
