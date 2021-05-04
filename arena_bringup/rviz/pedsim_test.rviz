@@ -5,8 +5,6 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Global Options1
-        - /flatland_models_sim_11
-        - /pedsim_labels1
       Splitter Ratio: 0.6526610255241394
     Tree Height: 506
   - Class: rviz/Selection
@@ -26,7 +24,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: ""
+    SyncSource: LaserScan
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -334,7 +332,7 @@ Visualization Manager:
       Marker Topic: /flatland_server/debug/layer/static_3d
       Name: static_layer_3d
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -342,7 +340,7 @@ Visualization Manager:
       Marker Topic: /flatland_server/debug/layer/static
       Name: static_layer
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
       Value: true
     - Alpha: 1
@@ -411,14 +409,30 @@ Visualization Manager:
     - Class: rviz/MarkerArray
       Enabled: true
       Marker Topic: /sim_1/flatland_markers
-      Name: flatland_models_sim_1
+      Name: flatland_markers_sim_1
+      Namespaces:
+        {}
+      Queue Size: 100
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /sim_1/pedsim_labels
+      Name: pedsim_labels_sim_1
+      Namespaces:
+        {}
+      Queue Size: 100
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /flatland_markers
+      Name: flatland_markers
       Namespaces:
         "": true
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
       Enabled: true
-      Marker Topic: /sim_1/pedsim_labels
+      Marker Topic: /pedsim_labels
       Name: pedsim_labels
       Namespaces:
         marker: true
