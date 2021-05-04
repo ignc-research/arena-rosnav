@@ -276,10 +276,19 @@ class ObservationCollector():
             obs_empty=np.array(self.robot_self_state+[0]*10)
             merged_obs = np.hstack([merged_obs,obs_empty])
             count_observable_humans=count_observable_humans+1
-        while count_observable_humans < 6 and count_observable_humans >0:
+        while count_observable_humans < 5 and count_observable_humans >0:
             obs_copy=np.copy(merged_obs[-count_observable_humans*self.human_state_size:])
             merged_obs = np.hstack([merged_obs, obs_copy])
             count_observable_humans=count_observable_humans*2
+        
+        #align the observation size
+        observation_blank=len(merged_obs) - self.observation_space.shape[0] +self.num_robo_obstacles_observation_max*self.robo_obstacle_state_size
+        if observation_blank<0:
+            #add invalid value 1000 if the merged_obs are not full
+            merged_obs=np.hstack([merged_obs,np.ones([-observation_blank,])*1000])
+        elif observation_blank>0:
+            merged_obs=merged_obs[:-observation_blank]
+        
         # print('observe', count_observable_humans)
       # initlaising array with dimensions an filling them up with coordinate of agents and rho(density)and theta (angle)
         rho_robo_obstacles, theta_robo_obstacles=np.empty([self.num_robo_obstacles,]), np.empty([self.num_robo_obstacles,])
@@ -306,10 +315,14 @@ class ObservationCollector():
   
         rho_behavior_randomwandrer = np.array([],dtype=object).reshape(0, 1) 
         # 
+        count_observable_robo_obstacles= 0
         for i, ty in enumerate(self._robo_obstacle_type):
             # filter the obstacles which are not in the visible range of the robot
             if not self.IsInViewRange(20, [-2.618,2.618], rho_robo_obstacles[i], theta_robo_obstacles[i]):
                 continue
+            else:
+                count_observable_robo_obstacles = count_observable_robo_obstacles +1
+
             if ty==7: # randomwandrer
                 rho_behavior=np.array([rho_robo_obstacles[i]],dtype=object)
                 rho_behavior_randomwandrer=np.vstack([rho_behavior_randomwandrer, rho_behavior])
@@ -321,8 +334,16 @@ class ObservationCollector():
                 merged_obs = np.hstack([merged_obs,obs])
 
         obs_dict['randomwandrer_in_robot_frame'] = rho_behavior_randomwandrer
-
-        print("merged obs",merged_obs.size)
+        #TODO more proper method is needed to supplement info blanks (finished)
+        if count_observable_robo_obstacles==0:
+            obs_empty=np.array(self.robot_self_state+[0]*9)
+            merged_obs = np.hstack([merged_obs,obs_empty])
+            count_observable_robo_obstacles=count_observable_robo_obstacles+1
+        while count_observable_robo_obstacles < 2 and count_observable_robo_obstacles >0:
+            obs_copy=np.copy(merged_obs[-count_observable_robo_obstacles*self.robo_obstacle_state_size:])
+            merged_obs = np.hstack([merged_obs, obs_copy])
+            count_observable_robo_obstacles=count_observable_robo_obstacles*2
+        
         #align the observation size
         observation_blank=len(merged_obs) - self.observation_space.shape[0]
         if observation_blank<0:
@@ -331,6 +352,8 @@ class ObservationCollector():
         elif observation_blank>0:
             merged_obs=merged_obs[:-observation_blank]
         
+       
+
         return merged_obs, obs_dict
 
     @staticmethod
@@ -493,10 +516,14 @@ class ObservationCollector():
         # define observation_space
         self.num_humans_observation_max=21
         self.human_state_size=19
+        self.num_robo_obstacles_observation_max=10
+        self.robo_obstacle_state_size=18
         self.observation_space = ObservationCollector._stack_spaces((
             spaces.Box(low=-np.PINF, high=np.PINF, shape=(1,),dtype=np.float64), #time
             spaces.Box(low=0.0, high=self.lidar_range, shape=(self.num_lidar_beams,),dtype=np.float64), #lidar
-            spaces.Box(low=-np.PINF, high=np.PINF, shape=(self.num_humans_observation_max*self.human_state_size,),dtype=np.float64) # human states
+            spaces.Box(low=-np.PINF, high=np.PINF, shape=(self.num_humans_observation_max*self.human_state_size,),dtype=np.float64), # human states
+            spaces.Box(low=-np.PINF, high=np.PINF, shape=(self.num_robo_obstacles_observation_max*self.robo_obstacle_state_size,),dtype=np.float64) # human states
+
         ))
 
     def IsInViewRange(self, distance, angleRange, rho_human, theta_human):

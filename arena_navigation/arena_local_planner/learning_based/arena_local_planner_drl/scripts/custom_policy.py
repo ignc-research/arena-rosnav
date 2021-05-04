@@ -14,9 +14,9 @@ from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl
 # _RS = 2+2*6  # robot state size+ human state size
 _RS = 9  # robot state size 3
 self_state_dim = 9
-num_humans =  6  #
-num_robots =  2
-
+num_humans =  5  #
+num_robo_obstacles =  2
+max_num_humans= 21
 human_state_size= 19 #size of human info 19
 robo_obstacle_state_size= 18 #size of human info 19
 _HS= 19*21  # human state size
@@ -160,7 +160,7 @@ class MLP_HUMAN(nn.Module):
             nn.ReLU()
         ).to('cuda')
         self.body_net_human = nn.Sequential(
-            nn.Linear(human_state_size*num_humans, 128),
+            nn.Linear(human_state_size*num_humans+num_robo_obstacles*robo_obstacle_state_size, 128),
             nn.ReLU(),
             nn.Linear(128, 96),
             nn.ReLU(),
@@ -198,9 +198,10 @@ class MLP_HUMAN(nn.Module):
         body_x = self.body_net_laser(features[:, 1:_L+1])
         robot_state=features[:, _L+1:_L+1+_RS]
         humans_state=features[:, _L+1:_L+1+num_humans*human_state_size] 
-        human_hidden=self.body_net_human(humans_state)
+        robo_obstacles_state=features[:, _L+1+max_num_humans*human_state_size :_L+1+max_num_humans*human_state_size+num_robo_obstacles*robo_obstacle_state_size]   
+        human_robo_hidden=self.body_net_human(th.cat((humans_state, robo_obstacles_state), 1))
         features_1 = th.cat((time, body_x), 1)
-        features_2=th.cat((features_1, human_hidden), 1)
+        features_2=th.cat((features_1, human_robo_hidden), 1)
         features=th.cat((features_2, robot_state), 1)
         return self.policy_net(features), self.value_net(features)
 

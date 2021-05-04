@@ -718,6 +718,9 @@ class ObstaclesManager:
             msg.pos.z = ped[1][2]
             msg.type = self.__ped_type
             msg.number_of_peds = 1
+            msg.force_factor_desired = 2.0
+            msg.force_factor_obstacle = 1.0
+            msg.force_factor_social = 1.0
             msg.yaml_file = self.__ped_file
             msg.waypoints = []
             for pos in ped[2]:
