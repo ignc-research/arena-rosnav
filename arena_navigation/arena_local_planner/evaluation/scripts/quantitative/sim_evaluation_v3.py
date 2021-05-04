@@ -100,29 +100,36 @@ def order_data(data,param_list,wpgen,planner,maps,classic,quantity): # create wp
     for param in params:
         data[param] = parameter_col[param]
     data.index = ["{0}_{1}".format(data["wpgen"][i],data["planner"][i]) for i in range(len(data))] # set new indices with {wpgen}_{planner}
+
+    # dropping data with "none" in columns
+    data = data.loc[data["map"]!="none"]
+    data = data.loc[data["wpgen"]!="none"]
+    data = data.loc[data["planner"]!="none"]
+    for param in params:
+        data = data.loc[data[param]!="none"]
+
     return data.sort_index()
 
-def get_table(data,wpgen,planner,map,param_list,cols):
+def get_table(data,wpgen,planner,maps,param_list,cols):
     params = [*param_list.keys()]
-    data_top = data.groupby(params+["wpgen","planner"]).mean() # instantly means over map (columns that are left out of groupby will be meaned)
-    data_map = data.groupby(["map"]+["wpgen","planner"]).mean() # mean over obs and vel, order in group by decides the hierarchy
-    data_overall = data.groupby(["wpgen","planner"]).mean()
-    top_table = {}
+    data_grouped = data.groupby(["map"]+params+["wpgen","planner"]).mean() 
+    data_overall = data.groupby(params+["wpgen","planner"]).mean()
+    table = {}
+    table["overall"] = {}
+    for map in maps:
+        table[map] = {}
+        for p in param_list[params[0]]: # first hierarchy 1st param (obs), 2nd hierarchy 2nd param (vel), NOTE: change hierarchy by changing param_list order
+            table[map][p] = pd.concat([data_grouped.loc[map].loc[p].loc[p2] for p2 in param_list[params[1]]],axis=1)
+        table[map] = pd.concat([table[map][p] for p in param_list[params[0]]],axis=1).round(2)
     for p in param_list[params[0]]: # first hierarchy 1st param (obs), 2nd hierarchy 2nd param (vel), NOTE: change hierarchy by changing param_list order
-        top_table[p] = pd.concat([data_top.loc[p].loc[p2] for p2 in param_list[params[1]]],axis=1)
-    top_table = pd.concat([top_table[p] for p in param_list[params[0]]],axis=1).round(2)
-    bot_table = pd.concat([data_overall]+[data_map.loc[map] for map in maps],axis=1).round(2)
-    return top_table,bot_table
+        table["overall"][p] = pd.concat([data_overall.loc[p].loc[p2] for p2 in param_list[params[1]]],axis=1)
+    table["overall"] = pd.concat([table["overall"][p] for p in param_list[params[0]]],axis=1).round(2)
+    return table
     """
-    top table structure:
+    table structure for each map respectively:
                 obs05               obs10                       obs20
             vel02 vel03    vel02   vel03   vel02   vel03
             time|path|collision|succces (for every vel)   
-    planner
-
-    bottom table structure:
-                overall                         map1            empty
-            time|path|collision|success         (follows structure in maps list)
     planner
     """
 
@@ -501,8 +508,8 @@ if __name__ == "__main__": # execute code
     cols = ["time","path","collision","success"]    # define the quantities to measure
     obs = ["obs10","obs20"] # define different obstacles numbers, names must match file names
     vel = ["vel03"] # define different velocities, names must match file names
-    maps = ["map0"] # define the maps trained on, names must match file names
-    wpgen = ["spatialhorizon"] # NOTE: classic MUST be in the back
+    maps = ["map1","empty","open"] # define the maps trained on, names must match file names
+    wpgen = ["spatialhorizon","classic"] # NOTE: classic MUST be in the back
     planner = ["R0","R1","R2","R4","RLCA","MPC","TEB"] # all planners, NOTE: classic planners MUST be in the back!!!
     classic = ["RLCA","MPC","TEB"] # classic planners
 
@@ -512,12 +519,13 @@ if __name__ == "__main__": # execute code
     data = order_data(raw_data,param_list,wpgen,planner,maps,classic,quantity)
     ############
 
-
     ### this code block creates a df in table format needed for latex and may also create csv files of the df ###
-    top_table,bot_table = get_table(data,wpgen,planner,map,param_list,cols)
+    table = get_table(data,wpgen,planner,maps,param_list,cols)
     if latex:
         text_file = open("latex_table.txt", "w")
-        text_file.write(top_table.to_latex()+bot_table.to_latex())
+        for t in table:
+            text_file.write("\nTable for: "+t+"\n")
+            text_file.write(table[t].to_latex())
         text_file.close()
 
     if csv:
