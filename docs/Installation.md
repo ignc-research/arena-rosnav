@@ -156,8 +156,8 @@ workon rosnav
 cd $HOME/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/model_based/cadrl_ros
 pip install -r requirements_cadrl.txt
 ```
-If you encounter errors, e.g. sopecific versions not found, please manually install the packages with an available version.
-  You only need this to run our cadrl node, if you dont plan to use it, skip this step.
+If you encounter errors, e.g. specific versions not found, please manually install the packages with an available version.
+You only need this to run our cadrl node, if you dont plan to use it, skip this step.
 
 ## Update after developing flatland code
 After changes inside the forks/flatland folder you should do the following steps to fetch the latest version:
