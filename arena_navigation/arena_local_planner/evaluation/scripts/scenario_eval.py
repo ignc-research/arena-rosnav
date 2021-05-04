@@ -850,11 +850,12 @@ def eval_cfg(cfg_file, filetype):
             
 
             #ax.legend(handles=legend_elements, loc=1)
+            ax.spines["top"].set_visible(False)
+            ax.spines["right"].set_visible(False)
+            ax.spines["left"].set_visible(True)
             plt.subplots_adjust(top = 1, bottom = 0, right = 1, left = 0, hspace = 0, wspace = 0)
             plt.savefig(plot_file, bbox_inches = 'tight', pad_inches = 0)
-            ax.spines["top"].set_visible(True)
-            ax.spines["right"].set_visible(True)
-            ax.spines["left"].set_visible(True)
+
             # reset plot cfg to default
             plt_cfg = copy.deepcopy(default_cfg)
 
@@ -866,9 +867,9 @@ def getMap(msg):
     map_orig = [0, 0]
     points_x = []
     points_y = []
-    # print(msg.markers[0])
-    orig_x = -16.6
-    orig_y = -6.65
+    # print(msg.markers[0]) map0 -16.6 -6.65  ,  map1 empty: -6 -6  , open field: 0 0
+    orig_x = 0
+    orig_y = 0
     for p in msg.markers[0].points:
     #     if  2 < p.y < 25 :
         points_x.append( p.x + orig_x)
