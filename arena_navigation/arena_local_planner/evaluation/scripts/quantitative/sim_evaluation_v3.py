@@ -284,6 +284,9 @@ def plot_metrics(data,labels,colors,wpgen,planner,maps,param_list,quantity,metri
         ########################## plot by waypoint generator ###########################################
         else:
             for wp in wpgen:
+                # skip plotting only classic planners, NOTE: can be commented out if necessary
+                if wp == "classic":
+                    continue
                 wp_data = map_data.loc[wp]
                 for metric in metrics:
                     fig, ax = plt.subplots(figsize = figsize)
