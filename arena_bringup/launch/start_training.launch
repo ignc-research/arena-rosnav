@@ -28,7 +28,8 @@
   <!-- trival params, you may change it but makes not much sense -->
   <arg name="viz_pub_rate" default="30" />
 
-  <arg name="show_pedsim_labels" default="true"/>
+  <arg name="show_pedsim_labels" default="false"/>
+  <arg name="republish_flatland_markers" default="false"/>
 
   <!--  PARAMS DON'T CHANGE THEM  -->
   <param name="update_rate" value="$(arg update_rate)" />
@@ -67,7 +68,7 @@
   </group>
 
   <!-- republish flatland markers in one big MarkerArray -->
-  <include file="$(find arena_bringup)/launch/sublaunch/republish_flatland_markers.launch">
+  <include file="$(find arena_bringup)/launch/sublaunch/republish_flatland_markers.launch" if="$(arg republish_flatland_markers)">
     <arg name="ns" value="$(arg ns_prefix)_1" />
   </include>
 

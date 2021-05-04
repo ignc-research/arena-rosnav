@@ -9,6 +9,7 @@
   <arg name="step_size" default="0.01"/>
   <param name="step_size" value="$(arg step_size)" /> 
   <arg name="show_pedsim_labels" default="true"/>
+  <arg name="republish_flatland_markers" default="true"/>
 
   <!-- Map parameters -->
   <arg name="map_file"        default="map_empty"/>
@@ -53,7 +54,7 @@
   </include>
 
   <!-- republish flatland markers in one big MarkerArray -->
-  <include file="$(find arena_bringup)/launch/sublaunch/republish_flatland_markers.launch">
+  <include file="$(find arena_bringup)/launch/sublaunch/republish_flatland_markers.launch" if="$(arg republish_flatland_markers)">
     <arg name="ns" value="/" />
   </include>
 

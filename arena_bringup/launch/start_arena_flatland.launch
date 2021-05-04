@@ -7,6 +7,8 @@
   <arg name="train_mode"      default="false"/>
   <param name="train_mode"    value="$(arg train_mode)"/>
 
+  <arg name="show_pedsim_labels" default="false"/>
+  <arg name="republish_flatland_markers" default="false"/>
 
 
   <!-- Map parameters -->
@@ -76,6 +78,15 @@
     <arg name="timeout_subgoal"         default="30."/>   <!-- sec, double-->
   </include>
 
-  
+  <!-- republish flatland markers in one big MarkerArray -->
+  <include file="$(find arena_bringup)/launch/sublaunch/republish_flatland_markers.launch" if="$(arg republish_flatland_markers)">
+    <arg name="ns" value="/" />
+  </include>
+
+  <!-- publish labels for pedsim agents -->
+  <include file="$(find arena_bringup)/launch/sublaunch/show_pedsim_labels.launch" if="$(arg show_pedsim_labels)">
+    <arg name="ns" value="/" />
+  </include>
+
     
 </launch>

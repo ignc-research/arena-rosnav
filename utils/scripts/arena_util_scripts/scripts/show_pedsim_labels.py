@@ -96,7 +96,6 @@ class LabelPublisher:
 
 
     def publish_labels(self):
-        rate = rospy.Rate(10)
         while not rospy.is_shutdown():
             # wait for agent positions to be filled
             if self.simulated_agents is None:
@@ -117,7 +116,7 @@ class LabelPublisher:
 
                 self.marker_pub.publish(markers)
 
-            rate.sleep()
+            time.sleep(0.1)
 
     def run(self):
         self.publish_labels()

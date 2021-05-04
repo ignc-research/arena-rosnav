@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import rospy
+import time
 from visualization_msgs.msg import Marker
 from visualization_msgs.msg import MarkerArray
 from flatland_msgs.msg import DebugTopicList
@@ -16,10 +17,11 @@ class MarkerPublisher:
         rospy.init_node('marker_publisher', anonymous=True)
         self.markers = {}  # key: flatland debug topic name, value: FlatlandSubscriber object
         self.markers_pub = rospy.Publisher(rospy.get_namespace() + 'flatland_markers', MarkerArray, queue_size=10)
-        rospy.Subscriber(rospy.get_namespace() + "flatland_server/debug/topics", DebugTopicList, self.debug_topics_callback)
+        self.debug_topics_sub = rospy.Subscriber(rospy.get_namespace() + "flatland_server/debug/topics", DebugTopicList, self.debug_topics_callback)
 
     
     def debug_topics_callback(self, msg):
+        print("debug topics callback:", msg.topics)
         # remove topics/markers/subscribers of deleted models
         current_topics = list(self.markers.keys())  # make list so we get a copy of the keys
         for topic in current_topics:
@@ -40,7 +42,7 @@ class MarkerPublisher:
 
 
     def publish_markers(self):
-        rate = rospy.Rate(50)
+        rate = 1.0 / 50.0  # 50Hz
         while not rospy.is_shutdown():
             marker_array = MarkerArray()
 
@@ -53,7 +55,7 @@ class MarkerPublisher:
                 marker_array.markers[i].id = i
 
             self.markers_pub.publish(marker_array)
-            rate.sleep()
+            time.sleep(rate)
 
 
     def run(self):
