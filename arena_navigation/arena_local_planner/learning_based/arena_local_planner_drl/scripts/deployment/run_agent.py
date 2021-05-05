@@ -64,54 +64,52 @@ def make_env(PATHS: dict,
 if __name__ == "__main__":
     args, _ = parse_run_agent_args()
 
-<<<<<<< HEAD
-    print("START RUNNING AGENT:    %s" % params['agent_name'])
-    print_hyperparameters(params)
+    # print("START RUNNING AGENT:    %s" % params['agent_name'])
+    # print_hyperparameters(params)
     
-    # initialize gym env
-    env = DummyVecEnv(
-        [lambda: FlatlandEnv(
-            'eval_sim', PATHS.get('robot_setting'), PATHS.get('robot_as'), params['reward_fnc'], params['discrete_action_space'], 
-            goal_radius=0.25, max_steps_per_episode=max_steps_per_episode, train_mode=False, task_mode=params['task_mode'], PATHS=PATHS, curr_stage=1)
-        ])
-    if params['normalize']:
-        assert os.path.isfile(PATHS['vecnorm']
-        ), "Couldn't find VecNormalize pickle, without it agent performance will be strongly altered"
-        env = VecNormalize.load(PATHS['vecnorm'], env)
+    # # initialize gym env
+    # env = DummyVecEnv(
+    #     [lambda: FlatlandEnv(
+    #         'eval_sim', PATHS.get('robot_setting'), PATHS.get('robot_as'), params['reward_fnc'], params['discrete_action_space'], 
+    #         goal_radius=0.25, max_steps_per_episode=max_steps_per_episode, train_mode=False, task_mode=params['task_mode'], PATHS=PATHS, curr_stage=1)
+    #     ])
+    # if params['normalize']:
+    #     assert os.path.isfile(PATHS['vecnorm']
+    #     ), "Couldn't find VecNormalize pickle, without it agent performance will be strongly altered"
+    #     env = VecNormalize.load(PATHS['vecnorm'], env)
 
-    # load agent
-    agent = PPO.load(os.path.join(PATHS['model'], "best_model.zip"), env)
+    # # load agent
+    # agent = PPO.load(os.path.join(PATHS['model'], "best_model.zip"), env)
     
-    # evaluate_policy(
-    #     model=agent,
-    #     env=env,
-    #     n_eval_episodes=1000,
-    #     deterministic=True,
-    # )
+    # # evaluate_policy(
+    # #     model=agent,
+    # #     env=env,
+    # #     n_eval_episodes=1000,
+    # #     deterministic=True,
+    # # )
 
-    env.reset()
-    first_obs = True
+    # env.reset()
+    # first_obs = True
 
-    # iterate through each scenario max_repeat times
-    while True:
-        if first_obs:
-            # send action 'stand still' in order to get first obs
-            if params['discrete_action_space']:
-                obs, rewards, dones, info = env.step([6])
-            else:
-                obs, rewards, dones, info = env.step([[0.0, 0.0]])
-            first_obs = False
-            cum_reward = 0.0
+    # # iterate through each scenario max_repeat times
+    # while True:
+    #     if first_obs:
+    #         # send action 'stand still' in order to get first obs
+    #         if params['discrete_action_space']:
+    #             obs, rewards, dones, info = env.step([6])
+    #         else:
+    #             obs, rewards, dones, info = env.step([[0.0, 0.0]])
+    #         first_obs = False
+    #         cum_reward = 0.0
 
-        # timer = time.time()
-        action, _ = agent.predict(obs, deterministic=True)
-        # print(f"Action predict time: {(time.time()-timer)*2.5} (sim time)")
+    #     # timer = time.time()
+    #     action, _ = agent.predict(obs, deterministic=True)
+    #     # print(f"Action predict time: {(time.time()-timer)*2.5} (sim time)")
 
-        # clip action
-        if not params['discrete_action_space']:
-            action = np.maximum(
-                np.minimum(agent.action_space.high, action), agent.action_space.low)
-=======
+    #     # clip action
+    #     if not params['discrete_action_space']:
+    #         action = np.maximum(
+    #             np.minimum(agent.action_space.high, action), agent.action_space.low)
     if args.load:
         AGENTS = []
         AGENTS.append(args.load)
@@ -177,34 +175,22 @@ if __name__ == "__main__":
     #     if not params['discrete_action_space']:
     #         action = np.maximum(
     #             np.minimum(agent.action_space.high, action), agent.action_space.low)
->>>>>>> 897f9733f452706c6b4d831f27e1a4660461c63d
         
     #     # apply action
     #     obs, rewards, done, info = env.step(action)
 
     #     cum_reward += rewards
         
-<<<<<<< HEAD
-        if done:
-            if args.verbose == '1':
-                if info[0]['done_reason'] == 0:
-                    done_reason = "exceeded max steps"
-                elif info[0]['done_reason'] == 1:
-                    done_reason = "collision"
-                elif info[0]['done_reason'] >= 3:
-                    done_reason = "exceeded safety distance"
-                else:
-                    done_reason = "goal reached"
-=======
-    #     if done:
-    #         if args.verbose == '1':
-    #             if info[0]['done_reason'] == 0:
-    #                 done_reason = "exceeded max steps"
-    #             elif info[0]['done_reason'] == 1:
-    #                 done_reason = "collision"
-    #             else:
-    #                 done_reason = "goal reached"
->>>>>>> 897f9733f452706c6b4d831f27e1a4660461c63d
+        # if done:
+        #     if args.verbose == '1':
+        #         if info[0]['done_reason'] == 0:
+        #             done_reason = "exceeded max steps"
+        #         elif info[0]['done_reason'] == 1:
+        #             done_reason = "collision"
+        #         elif info[0]['done_reason'] >= 3:
+        #             done_reason = "exceeded safety distance"
+        #         else:
+        #             done_reason = "goal reached"
                 
     #             print("Episode finished with reward of %f (finish reason: %s)"% (cum_reward, done_reason))
     #         env.reset()
