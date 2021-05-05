@@ -61,9 +61,9 @@ rosws update .
 <arg name="scene_file" default="$(find simulator_setup)/pedsim_scenarios/empty.xml"/>
 
 <node name="pedsim_simulator" pkg="pedsim_simulator" type="pedsim_simulator" output="screen">
-<param name="simulation_factor" value="$(arg simulation_factor)" type="double"/>
-<param name="update_rate" value="$(arg update_rate)" type="double"/>
-<param name="scene_file" value="$(arg scene_file)" type="string"/>
+    <param name="simulation_factor" value="$(arg simulation_factor)" type="double"/>
+    <param name="update_rate" value="$(arg update_rate)" type="double"/>
+    <param name="scene_file" value="$(arg scene_file)" type="string"/>
 </node>
 ```
 Pedsim was originally meant to be started using a scenario.xml file. In our version you can spawn agents dynamically but you still need to provide a scenario.xml file. Best practice is to just use an empty scenario. For the above snippet to work you need a file called **empty.xml** in this folder:
