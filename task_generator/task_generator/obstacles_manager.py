@@ -90,7 +90,6 @@ class ObstaclesManager:
         self.l_wall_list=[]
         if self.useMaze:
             self.build_maze()
-
         # human group pattern
         self.circlePattern = True
 
@@ -132,6 +131,8 @@ class ObstaclesManager:
         name_prefix = self._obstacle_name_prefix + '_' + model_name
         if type_obstacle == 'human':
             self.__remove_all_peds()
+            if self.circlePattern:
+                self.register_static_walls()
             self.spawn_random_peds_in_world(num_obstacles)
         else:
             count_same_type = sum(
@@ -703,7 +704,6 @@ class ObstaclesManager:
                 p.z = pos[2]
                 msg.waypoints.append(p)
             srv.peds.append(msg)
-
         max_num_try = 2
         i_curr_try = 0
         while i_curr_try < max_num_try:
@@ -800,7 +800,7 @@ class ObstaclesManager:
         srv.episode = episode
         waypoints = np.array([]).reshape(0, 2)
         if self.circlePattern:
-            wp_srv=get_circluar_pattern_on_map(self._free_space_indices, self.map, self.num_humans, gruppe_radius = 9.0, safe_dist=0.0)
+            wp_srv=get_circluar_pattern_on_map(self._free_space_indices, self.map, self.num_humans, gruppe_radius = 7.5, safe_dist=0.0)
             waypoints=wp_srv[:,:2]
             for wp in wp_srv:
                 p=Point()
@@ -819,16 +819,14 @@ class ObstaclesManager:
                 # rospy.logwarn(response.message)
                 i_curr_try += 1
             else:
-                time.sleep(0.001)
+                # time.sleep(0.001)
                 break
         if  not self.circlePattern:
             for wp in response.waypoints:
                 waypoints = np.vstack([waypoints, [wp.x, wp.y]])
             # print(waypoints[1, :])
             waypoints=waypoints[1:, :] # the robot wp in pedsim is ignored
-        return waypoints 
-
-
+        return waypoints
     ########################################################
     #Methods for maze########################################
     ########################################################
@@ -840,7 +838,7 @@ class ObstaclesManager:
 
     def register_maze(self):
         #4 short walls and 1 long wall
-        self.register_walls(4, 1, self.l_wall_shape, self.s_wall_shape)
+        self.register_walls_of_maze(4, 1, self.l_wall_shape, self.s_wall_shape)
     
     def update_maze(self):
         shortWallCenters, longWallCenters, theta_short_list, theta_long_list, shortWallVertices, longWallVertices= self.maze.update_maze()
@@ -864,7 +862,7 @@ class ObstaclesManager:
         # print('long', longWallVertices)
         self._add_wall_into_pedsim(longWallVertices)
 
-    def register_walls(self, num_short_walls: int, num_long_walls: int, vertices_long: np.ndarray, vertices_short: np.ndarray):
+    def register_walls_of_maze(self, num_short_walls: int, num_long_walls: int, vertices_long: np.ndarray, vertices_short: np.ndarray):
         """register walls with polygon shape.
         Args:
             num_walls (int): number of the obstacles.
@@ -973,3 +971,44 @@ class ObstaclesManager:
                 lineObstacle.end.x, lineObstacle.end.y= v[(i+1)%size,0], v[(i+1)%size,1]
                 add_pedsim_srv.staticObstacles.obstacles.append(lineObstacle)
         self.__add_obstacle_srv.call(add_pedsim_srv)
+
+    def register_static_walls(self):
+        vertices1= np.array([[6.7, 18.35], 
+                                    [14.7, 18.35], 
+                                    [14.7, 14.35], 
+                                    [6.7, 14.35]])
+        self.register_walls(vertices1, 1)
+        vertices2= np.array([[6.7, -4.45], 
+                                    [14.7, -4.45], 
+                                    [14.7, -0.45], 
+                                    [6.7, -0.45]])
+        self.register_walls(vertices2, 2)
+            
+
+    def register_walls(self, vertices, i:int):
+        model_path= self._generate_wall_yaml(vertices, True)
+        max_num_try = 5
+        i_curr_try = 0
+        while i_curr_try < max_num_try:
+            spawn_request = SpawnModelRequest()
+            spawn_request.yaml_path = model_path
+            spawn_request.name = f'staticwall_{i}'
+            spawn_request.ns = rospy.get_namespace()
+            spawn_request.pose.x = 0.0
+            spawn_request.pose.y = 0.0
+            spawn_request.pose.theta = 0.0
+            # try to call service
+            response = self._srv_spawn_model.call(spawn_request)
+            if not response.success:  # if service not succeeds, do something and redo service
+                rospy.logwarn(
+                    f"({self.ns}) spawn object {spawn_request.name} failed! trying again... [{i_curr_try+1}/{max_num_try} tried]")
+                rospy.logwarn(response.message)
+                i_curr_try += 1
+            else:
+                # self.s_wall_list.append(spawn_request.name)
+                # #tell the info of polygon obstacles to pedsim
+                # self._add_wall_into_pedsim(shortWallVertices)
+                break
+        if i_curr_try == max_num_try:
+            raise rospy.ServiceException(f"({self.ns}) failed to register walls")
+        os.remove(model_path)
