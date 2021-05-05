@@ -142,9 +142,9 @@ class RobotManager:
             self._free_space_indices, self.map, self.ROBOT_RADIUS)
         self.move_robot(start_pos)
 
-    def set_start_pos_goal_pos(self, start_pos: Union[Pose2D, None]
-                               = None, goal_pos: Union[Pose2D, None] = None, isCirclePattern:bool,
-                               min_dist=7, obs_dict=None, forbiddenPoints=None):
+    def set_start_pos_goal_pos(self, isCirclePattern:bool, start_pos: Union[Pose2D, None]= None, 
+                                                                goal_pos: Union[Pose2D, None] = None, min_dist=7,
+                                                                obs_dict=None, forbiddenPoints=None):
         """set up start position and the goal postion. Path validation checking will be conducted. If it failed, an
         exception will be raised.
 
