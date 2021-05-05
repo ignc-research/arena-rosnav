@@ -270,7 +270,7 @@ class ObservationCollector():
     def _get_pose_in_robot_frame(agent_pos: Pose2D, robot_pos: Pose2D):
         y_relative = agent_pos.y - robot_pos.y
         x_relative = agent_pos.x - robot_pos.x
-        rho = (x_relative**2+y_relative**2)**0.5
+        rho =  np.linalg.norm([y_relative, x_relative])
         theta = (np.arctan2(y_relative, x_relative) -
                  robot_pos.theta+5*np.pi) % (2*np.pi)-np.pi
         return rho, theta
@@ -418,7 +418,7 @@ class ObservationCollector():
         ))
 
     def isInViewRange(self, distance, angleRange, rho_human, theta_human):
-        if rho_human<=distance and theta_human<=angleRange[1] and theta_human>=angleRange[0]:
+        if rho_human <= distance and theta_human <= angleRange[1] and theta_human >= angleRange[0]:
             return True
         else:
             return False
@@ -430,6 +430,13 @@ class ObservationCollector():
         radius = a*v+ r_static
         theta = 11*np.pi/6* np.exp(-1.4*v)+ np.pi/6
         return radius, theta
+
+    def _get_robot_pose_in_human_frame(robot_pos: Pose2D, human_pos: Pose2D):
+        y_relative = robot_pos.y - human_pos.y
+        x_relative = robot_pos.x - human_pos.x
+        theta = (np.arctan2(y_relative, x_relative) -
+                 robot_pos.theta+5*np.pi) % (2*np.pi)-np.pi
+        return theta
 
     @staticmethod
     def process_global_plan_msg(globalplan):
