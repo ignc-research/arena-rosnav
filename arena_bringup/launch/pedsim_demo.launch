@@ -1,0 +1,73 @@
+<launch>
+  <env name="ROSCONSOLE_FORMAT" value="[${severity} ${time} ${logger}]: ${message}" />
+    
+  <param name="use_sim_time" value="true"/>
+  <arg name="rviz_file"       default="pedsim_test"/>
+  <arg name="train_mode"      default="false"/>
+  <param name="train_mode"    value="$(arg train_mode)"/>
+  <arg name="step_size" default="0.01"/>
+  <param name="step_size" value="$(arg step_size)" /> 
+  <arg name="show_pedsim_labels" default="true"/>
+  <arg name="republish_flatland_markers" default="true"/>
+
+  <!-- Map parameters -->
+  <arg name="map_file"        default="map_empty"/>
+  <arg name="map_path"        default="$(find simulator_setup)/maps/$(arg map_file)/map.yaml"/>
+  <arg name="world_path"      default="$(find simulator_setup)/maps/$(arg map_file)/map.world.yaml"/>
+  <param name="world_path" value="$(find simulator_setup)/maps/$(arg map_file)/map.world.yaml" />
+
+  <arg name="global_frame_id"   value="map"/>
+  <arg name="odom_frame_id"     value="odom"/>
+  <arg name="base_frame_id"     value="base_footprint"/>
+  <arg name="odom_ground_truth" default="/odometry/ground_truth"/>
+
+  <!-- Visualization -->
+  <arg name="use_rviz"        default="true"/>  # controls wether to use rviz or flatland-rviz
+  <arg name="show_viz"        default="true"/>  # controls wether flatland publishes markers for its models
+  <param name="show_viz"      value="$(arg show_viz)"/>
+
+ <!-- use flatland simulator and rviz-->
+  <include file="$(find arena_bringup)/launch/sublaunch/flatland_simulator.launch">
+    <arg name="world_path"      value="$(arg world_path)"/>
+    <!-- <arg name="update_rate"     default="50.0"/> -->
+    <arg name="update_rate"     default="50.0"/>
+    <arg name="step_size"       default="$(arg step_size)"/>
+    <arg name="show_viz"        default="true"/>
+    <arg name="viz_pub_rate"    default="30.0"/>
+    <arg name="use_rviz"        default="$(arg use_rviz)"/>  
+    <arg name="train_mode"      value="$(arg train_mode)"/>
+    <arg name="rviz_file"       value="$(arg rviz_file)"/>
+  </include>
+
+  <!-- map server-->
+  <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_path)">
+   <param name="frame_id" value="$(arg global_frame_id)"/>
+  </node>
+  
+  <!-- use fake localization-->
+  <include file="$(find arena_bringup)/launch/sublaunch/fake_localization.launch">
+    <arg name="global_frame_id"   value="$(arg global_frame_id)"/>
+    <arg name="odom_frame_id"     value="$(arg odom_frame_id)"/>
+    <arg name="base_frame_id"     value="$(arg base_frame_id)"/>
+    <arg name="odom_ground_truth" default="$(arg odom_ground_truth)"/>
+  </include>
+
+  <!-- republish flatland markers in one big MarkerArray -->
+  <include file="$(find arena_bringup)/launch/sublaunch/republish_flatland_markers.launch" if="$(arg republish_flatland_markers)">
+    <arg name="ns" value="/" />
+  </include>
+
+  <!-- publish labels for pedsim agents -->
+  <include file="$(find arena_bringup)/launch/sublaunch/show_pedsim_labels.launch" if="$(arg show_pedsim_labels)">
+    <arg name="ns" value="/" />
+  </include>
+
+  <!-- pedsim -->
+  <include file="$(find arena_bringup)/launch/sublaunch/pedsim.launch">
+  </include>
+
+  <!-- pedsim demo -->
+  <node name="pedsim_test" pkg="arena_util_scripts" type="pedsim_demo.py">
+  </node>
+
+</launch>
