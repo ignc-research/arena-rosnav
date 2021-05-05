@@ -156,7 +156,7 @@ class newBag():
             
             old_x = None
             old_y = None
-            dist2_oldp = 100
+            dist2_oldp = 2500
 
 
             global start, select_run
@@ -175,8 +175,13 @@ class newBag():
                 
                 start_x = start[0] + 0.5
 
+                dist2_oldp = 0
+                if old_x != None:
+                    dist2_oldp = math.sqrt((x-old_x)**2+(y-old_y)**2)
+
                 # if current_time > reset-6 and n < len(t_reset)-1 and x < start_x:
-                if current_time > reset and n < len(t_reset)-1:
+                # if current_time > reset and n < len(t_reset)-1:
+                if dist2_oldp > 1 and n < len(t_reset)-1:
                     n += 1
                     # store the run
                     if n in select_run or len(select_run) == 0:
@@ -198,31 +203,13 @@ class newBag():
                     old_x = None
                     old_y = None
 
-                dist2_oldp = 0
-                if old_x != None:
-                    dist2_oldp = math.sqrt((x-old_x)**2+(y-old_y)**2)
                 if n+1 in select_run or len(select_run) == 0 and dist2_oldp < 1:
-
-                    # if  len(pose_x) > 0:
-                    #     pose_x.append(x)
-                    #     pose_y.append(y)
-                    # elif x < start_x:
-
-                    #     pose_x.append(x)
-                    #     pose_y.append(y)
-
-                    # check distance to last pos
-                    # print(old_x)
-                    if old_x != None:
-                        dist2_oldp = math.sqrt((x-old_x)**2+(y-old_y)**2)
-                        # fancy_print(dist2_oldp,0)
 
                     # append pos if pose is empty
                     if len(pose_x) == 0:
                         pose_x.append(x)
                         pose_y.append(y)
-                    # check if adjacent pos is too far (reset ?)
-                    # elif dist2_oldp < 5:
+                  
                     pose_x.append(x)
                     pose_y.append(y)
 
@@ -316,7 +303,7 @@ class newBag():
                 all_cols_y.append(col_xy[0])
 
                 if plt_cfg["plot_collisions"]:
-                    circle = plt.Circle((-col_xy[1], col_xy[0]), 0.3, color=clr, fill = True, alpha = 0.3)
+                    circle = plt.Circle((-col_xy[1], col_xy[0]), 0.3, color=clr, fill = True, alpha = 0.6)
                     ax.add_patch(circle)
                     
                 col_exists = True
@@ -387,7 +374,7 @@ class newBag():
                 trajs.append(path_length)
                 if path_length > 0 and plt_cfg["plot_trj"]:
                     # print(lgnd)
-                    ax.plot(y, x, line_clr, linestyle = line_stl, alpha=0.2)
+                    ax.plot(y, x, line_clr, linestyle = line_stl, alpha=0.5)
                     ax.set_xlabel("x in [m]")
                     ax.set_ylabel("y in [m]")
 
@@ -395,10 +382,10 @@ class newBag():
                 if plt_cfg["plot_subgoals"]:
                     if len(wp_y) > 0 and len(wp_x) > 0:
                         pwp = False
-                        ax.plot(wp_y, wp_x, "s", color='g', alpha=0.1)
+                        ax.plot(wp_y, wp_x, "s", color='g', alpha=0.2)
                     elif len(sg_y) > 0 and len(sg_x) > 0:
                         pwp = False
-                        ax.plot(sg_y, sg_x, "^", color='k', alpha=0.1)
+                        ax.plot(sg_y, sg_x, "^", color='k', alpha=0.2)
                     
 
                 duration = t[len(t)-1] - t[0]
@@ -861,10 +848,21 @@ def eval_cfg(cfg_file, filetype):
                         fancy_print("Evaluate bag: " + file, 1)
 
             
+            #map0: lower left, empty: upper left, open: lower left
+            ax.legend(handles=legend_elements, loc="lower left")
 
-            ax.legend(handles=legend_elements, loc=1)
-            plt.subplots_adjust(top = 1, bottom = 0, right = 1, left = 0, hspace = 0, wspace = 0)
-            plt.savefig(plot_file, bbox_inches = 'tight', pad_inches = 0)
+            ax.spines["right"].set_visible(True)
+            color_name = "grey"
+            ax.spines["top"].set_color(color_name)
+            ax.spines["bottom"].set_color(color_name)
+            ax.spines["left"].set_color(color_name)
+            ax.spines["right"].set_color(color_name)
+
+            #plt.subplots_adjust(top = 1, bottom = 0, right = 1, left = 0, hspace = 0, wspace = 0)
+            #plt.title("Trajectories on {0}".format(map) , fontweight='bold', fontsize=16)
+
+            plt.savefig(plot_file, bbox_inches = 'tight', pad_inches = 0.04,  fontsize=24)
+
             # reset plot cfg to default
             plt_cfg = copy.deepcopy(default_cfg)
 
@@ -876,9 +874,9 @@ def getMap(msg):
     map_orig = [0, 0]
     points_x = []
     points_y = []
-    # print(msg.markers[0])
-    orig_x = 0
-    orig_y = 0  
+    # print(msg.markers[0]) map0 -16.6 -6.65  ,  map1 empty: -6 -6  , open field: 0 0
+    orig_x = -16.6
+    orig_y = -6.65
     for p in msg.markers[0].points:
     #     if  2 < p.y < 25 :
         points_x.append( p.x + orig_x)

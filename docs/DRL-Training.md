@@ -17,7 +17,7 @@ As a fundament for our Deep Reinforcement Learning approaches [StableBaselines3]
 * In one terminnal, start simulation
 
 ```bash
-roslaunch arena_bringup start_arena_flatland.launch  train_mode:=true 	use_viz:=true  task_mode=random
+roslaunch arena_bringup start_arena_flatland.launch  train_mode:=true 	use_viz:=true  task_mode:=random
 ```
 * In another terminal
 

@@ -6,7 +6,7 @@
 			"dynamic_obstacles": {
 				"dynamic_obs_0": {
 					"obstacle_radius": 0.715,
-					"linear_velocity": 0.3,
+					"linear_velocity": 0.2,
 					"type": "circle",
 					"start_pos": [
 						6.3180000000000005,
@@ -28,7 +28,7 @@
 				},
 				"dynamic_obs_1": {
 					"obstacle_radius": 0.715,
-					"linear_velocity": 0.3,
+					"linear_velocity": 0.2,
 					"type": "circle",
 					"start_pos": [
 						9.893,
@@ -50,7 +50,7 @@
 				},
 				"dynamic_obs_2": {
 					"obstacle_radius": 0.715,
-					"linear_velocity": 0.3,
+					"linear_velocity": 0.2,
 					"type": "circle",
 					"start_pos": [
 						5.603000000000001,
@@ -73,7 +73,7 @@
 				
 				"dynamic_obs_4": {
 					"obstacle_radius": 0.715,
-					"linear_velocity": 0.3,
+					"linear_velocity": 0.2,
 					"type": "circle",
 					"start_pos": [
 						12.753,
@@ -95,7 +95,7 @@
 				},
 				"dynamic_obs_5": {
 					"obstacle_radius": 0.715,
-					"linear_velocity": 0.3,
+					"linear_velocity": 0.2,
 					"type": "circle",
 					"start_pos": [
 						17.043,
@@ -117,7 +117,7 @@
 				},
 				"dynamic_obs_6": {
 					"obstacle_radius": 0.715,
-					"linear_velocity": 0.3,
+					"linear_velocity": 0.2,
 					"type": "circle",
 					"start_pos": [
 						14.397499999999999,
@@ -139,7 +139,7 @@
 				},
 				"dynamic_obs_7": {
 					"obstacle_radius": 0.715,
-					"linear_velocity": 0.3,
+					"linear_velocity": 0.2,
 					"type": "circle",
 					"start_pos": [
 						3.8155000000000006,
@@ -161,7 +161,7 @@
 				},
 				"dynamic_obs_8": {
 					"obstacle_radius": 0.715,
-					"linear_velocity": 0.3,
+					"linear_velocity": 0.2,
 					"type": "circle",
 					"start_pos": [
 						9.607,
@@ -183,7 +183,7 @@
 				},
 				"dynamic_obs_9": {
 					"obstacle_radius": 0.715,
-					"linear_velocity": 0.3,
+					"linear_velocity": 0.2,
 					"type": "circle",
 					"start_pos": [
 						13.039,

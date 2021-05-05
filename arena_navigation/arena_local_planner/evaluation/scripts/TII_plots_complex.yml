@@ -55,78 +55,78 @@ complex_obs20_vel03:
 
        
 
-# complex_obs20_vel03:            
-#     planner:                                
-#         MPC:                          # name of the planner (will be used in plot legend)
-#             model:     "MPC"             # folder name containing the bags for desired model
-#             linestyle: "tab:red,-"         # linestyle and color for all plots related to this planner
-#         TEB:
-#             model:     "TEB"
-#             linestyle: "tab:blue,--"
-#         RLCA:
-#             model:     "RLCA"
-#             linestyle: "tab:green,-."
-#         R0:
-#             model:     "R0"
-#             linestyle: "tab:pink,--"
-#         R1:
-#             model:     "R1"
-#             linestyle: "tab:purple,-."
-#         R2:
-#             model:     "R2"
-#             linestyle: "tab:orange,--"
-#         R4:
-#             model:     "R4"
-#             linestyle: "tab:cyan,-."
+complex_obs20_vel03:            
+    planner:                                
+        MPC:                          # name of the planner (will be used in plot legend)
+            model:     "MPC"             # folder name containing the bags for desired model
+            linestyle: "tab:red,-"         # linestyle and color for all plots related to this planner
+        TEB:
+            model:     "TEB"
+            linestyle: "tab:blue,--"
+        RLCA:
+            model:     "RLCA"
+            linestyle: "tab:green,-."
+        R0:
+            model:     "R0"
+            linestyle: "tab:pink,--"
+        R1:
+            model:     "R1"
+            linestyle: "tab:purple,-."
+        R2:
+            model:     "R2"
+            linestyle: "tab:orange,--"
+        R4:
+            model:     "R4"
+            linestyle: "tab:cyan,-."
 
 
 
-# complex_obs10_vel02:            
-#     planner:                                
-#         MPC:                          # name of the planner (will be used in plot legend)
-#             model:     "MPC"             # folder name containing the bags for desired model
-#             linestyle: "tab:red,-"         # linestyle and color for all plots related to this planner
-#         TEB:
-#             model:     "TEB"
-#             linestyle: "tab:blue,--"
-#         RLCA:
-#             model:     "RLCA"
-#             linestyle: "tab:green,-."
-#         R0:
-#             model:     "R0"
-#             linestyle: "tab:pink,--"
-#         R1:
-#             model:     "R1"
-#             linestyle: "tab:purple,-."
-#         R2:
-#             model:     "R2"
-#             linestyle: "tab:orange,--"
-#         R4:
-#             model:     "R4"
-#             linestyle: "tab:cyan,-."
+complex_obs10_vel02:            
+    planner:                                
+        MPC:                          # name of the planner (will be used in plot legend)
+            model:     "MPC"             # folder name containing the bags for desired model
+            linestyle: "tab:red,-"         # linestyle and color for all plots related to this planner
+        TEB:
+            model:     "TEB"
+            linestyle: "tab:blue,--"
+        RLCA:
+            model:     "RLCA"
+            linestyle: "tab:green,-."
+        R0:
+            model:     "R0"
+            linestyle: "tab:pink,--"
+        R1:
+            model:     "R1"
+            linestyle: "tab:purple,-."
+        R2:
+            model:     "R2"
+            linestyle: "tab:orange,--"
+        R4:
+            model:     "R4"
+            linestyle: "tab:cyan,-."
 
 
 
-# complex_obs10_vel03:            
-#     planner:                                
-#         MPC:                          # name of the planner (will be used in plot legend)
-#             model:     "MPC"             # folder name containing the bags for desired model
-#             linestyle: "tab:red,-"         # linestyle and color for all plots related to this planner
-#         TEB:
-#             model:     "TEB"
-#             linestyle: "tab:blue,--"
-#         RLCA:
-#             model:     "RLCA"
-#             linestyle: "tab:green,-."
-#         R0:
-#             model:     "R0"
-#             linestyle: "tab:pink,--"
-#         R1:
-#             model:     "R1"
-#             linestyle: "tab:purple,-."
-#         R2:
-#             model:     "R2"
-#             linestyle: "tab:orange,--"
-#         R4:
-#             model:     "R4"
-#             linestyle: "tab:cyan,-."
+complex_obs10_vel03:            
+    planner:                                
+        MPC:                          # name of the planner (will be used in plot legend)
+            model:     "MPC"             # folder name containing the bags for desired model
+            linestyle: "tab:red,-"         # linestyle and color for all plots related to this planner
+        TEB:
+            model:     "TEB"
+            linestyle: "tab:blue,--"
+        RLCA:
+            model:     "RLCA"
+            linestyle: "tab:green,-."
+        R0:
+            model:     "R0"
+            linestyle: "tab:pink,--"
+        R1:
+            model:     "R1"
+            linestyle: "tab:purple,-."
+        R2:
+            model:     "R2"
+            linestyle: "tab:orange,--"
+        R4:
+            model:     "R4"
+            linestyle: "tab:cyan,-."

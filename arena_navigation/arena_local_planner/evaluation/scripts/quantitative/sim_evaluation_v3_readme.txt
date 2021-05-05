@@ -83,24 +83,12 @@ python sim_evaluation_v2.py $HOME/catkin_ws/src/arena-rosnav/arena_navigation/ar
 python sim_evaluation_v2.py $HOME/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/run_3 --metrics time success path collision --quantity vel --byplanner --withclassic --allplot_quantity vel
 
 
-
-	  "MPC"             # folder name containing the bags for desired model
-            linestyle: "tab:red,-"         # linestyle and color for all plots related to this planner
-        TEB:
-            model:     "TEB"
-            linestyle: "tab:blue,--"
-        RLCA:
-            model:     "RLCA"
-            linestyle: "tab:green,-."
-        R0:
-            model:     "R0"
-            linestyle: "tab:pink,--"
-        R1:
-            model:     "R1"
-            linestyle: "tab:purple,-."
-        R2:
-            model:     "R2"
-            linestyle: "tab:orange,--"
-        R4:
-            model:     "R4"
-            linestyle: "tab:cyan,-."
+Colors for planners:
+MPC: tab:red
+TEB: tab:blue
+RLCA tab:green
+R0   tab:pink
+R1   tab:purple
+R2   tab:orange
+R4   tab:cyan
+         
