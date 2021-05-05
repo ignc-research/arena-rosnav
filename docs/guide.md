@@ -1,4 +1,4 @@
-This documentation will help you set up Arena-Rosnav and provide an overview on how to start a simulation and how to use Arena-Rosnav for training and evaluation of robot navigation.
+This documentation will help you set up Arena-Rosnav and provide an overview on how to start a simulation and how to use Arena-Rosnav for training and evaluation of robot navigation. Please also check out the glossary on the bottom of this documentation for better understanding.
 
 # Installation
 ## Set up Ubuntu in Windows (For Windows users only)
@@ -69,6 +69,8 @@ You can specify the following parameters:
 ## Training the agent
 Please refer to [DRL-Training.md](https://github.com/ignc-research/arena-rosnav/blob/local_planner_subgoalmode/docs/DRL-Training.md) for detailed explanations about agent, policy and training setups.
 
+During training the agent will at first behave randomly and over time learns to navigate to the goal and avoid obstacles.
+
 #### Trouble Shooting
 While trying the Quickstart you might encouter the following error in the second terminal:
 ```
@@ -133,3 +135,7 @@ There is a script for plotting quantitative results called [sim_evaluation_v3.py
 ### 2. Qualitative plots
 Please refer to the [readme.md for qualitative plotting](https://github.com/ignc-research/arena-rosnav/blob/local_planner_subgoalmode/arena_navigation/arena_local_planner/evaluation/readme.md) on qualitative plots for instructions.
 
+# Glossary
+- global planner: calculates collision free global path from start to goal only considering the map layout
+- local planner: navigates the robot along the global path and reacts to local objects not considered by global path
+- waypoint generator: generates sub goals (waypoints) along global path which will each be targeted by the local planner
