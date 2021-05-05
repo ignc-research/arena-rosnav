@@ -15,7 +15,7 @@ from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.tools.train_agent_utils import *
 
 ### HYPERPARAMETERS ###
-max_steps_per_episode = 1000000
+max_steps_per_episode = 200
 
 if __name__ == "__main__":
     args, _ = parse_run_agent_args()
@@ -28,7 +28,7 @@ if __name__ == "__main__":
         'robot_setting' : os.path.join(rospkg.RosPack().get_path('simulator_setup'), 'robot', 'myrobot.model.yaml'),
         'robot_as' : os.path.join(rospkg.RosPack().get_path('arena_local_planner_drl'), 'configs', 'default_settings.yaml'),
         'scenario' : os.path.join(rospkg.RosPack().get_path('simulator_setup'), 'scenerios', args.scenario+'.json'),
-        'curriculum': os.path.join(dir, 'configs', 'training_curriculum_map1small.yaml')
+        'curriculum': os.path.join(dir, 'configs', 'training_curriculum.yaml')
     }
 
     assert os.path.isfile(
@@ -46,7 +46,7 @@ if __name__ == "__main__":
     env = DummyVecEnv(
         [lambda: FlatlandEnv(
             'eval_sim', PATHS.get('robot_setting'), PATHS.get('robot_as'), params['reward_fnc'], params['discrete_action_space'], 
-            goal_radius=0.25, max_steps_per_episode=max_steps_per_episode, train_mode=False, task_mode='scenario', PATHS=PATHS, curr_stage=4)
+            goal_radius=0.25, max_steps_per_episode=max_steps_per_episode, train_mode=False, task_mode=params['task_mode'], PATHS=PATHS, curr_stage=1)
         ])
     if params['normalize']:
         assert os.path.isfile(PATHS['vecnorm']
