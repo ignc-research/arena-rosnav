@@ -93,10 +93,10 @@ Spawns a number of agents in Pedsim. Additionally it spawns models in Flatland b
 |float64 | group_talking_probability | Probability entering StateGroupTalking | 0.01 |
 |float64 | talking_and_walking_probability | Probability entering StateTalkingAndWalking | 0.01 |
 |float64 | max_talking_distance | how close agents need to be, to be able to talk to them | 1.5 |
-|float64 | talking_base_time | time agent spends being in StateTalking | 10.0 |
-|float64 | tell_story_base_time | time agent spends being in StateTellStory | 10.0 |
-|float64 | group_talking_base_time | time agent spends being in StateGroupTalking | 10.0 |
-|float64 | talking_and_walking_base_time | time agent spends being in StateTalkingAndWalking | 10.0 |
+|float64 | talking_base_time | time agent spends being in StateTalking (***) | 10.0 |
+|float64 | tell_story_base_time | time agent spends being in StateTellStory (***) | 10.0 |
+|float64 | group_talking_base_time | time agent spends being in StateGroupTalking (***) | 10.0 |
+|float64 | talking_and_walking_base_time | time agent spends being in StateTalkingAndWalking (***) | 10.0 |
 |float64 | force_factor_desired | desired force will be multiplied by this factor | 1.0 |
 |float64 | force_factor_obstacle | obstacle force will be multiplied by this factor | 2.0 |
 |float64 | force_factor_social | social force will be multiplied by this factor | 2.0 |
@@ -107,6 +107,8 @@ Spawns a number of agents in Pedsim. Additionally it spawns models in Flatland b
 (*) not used currently; agents automatically increment their id, starting at 1
 
 (**) models are found in arena-rosnav/simulator_setup/dynamic_obstacles/
+
+(***) this value will be multiplied by a random factor (0.5 to 1.5) every time the state gets activated
 
 #### /pedsim_simulator/reset_all_peds
 Resets all agents to their starting position and resets their current destination. Uses SetBool Message. **data** field needs to be set to **true**.
