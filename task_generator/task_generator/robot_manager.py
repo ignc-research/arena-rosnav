@@ -16,7 +16,7 @@ from pedsim_msgs.msg import LineObstacles
 
 from nav_msgs.msg import OccupancyGrid, Path
 
-from .utils import generate_freespace_indices, get_random_pos_on_map
+from .utils import generate_freespace_indices, get_random_pos_on_map, get_robot_goal_on_map
 
 
 class RobotManager:
@@ -143,16 +143,16 @@ class RobotManager:
         self.move_robot(start_pos)
 
     def set_start_pos_goal_pos(self, start_pos: Union[Pose2D, None]
-                               = None, goal_pos: Union[Pose2D, None] = None, min_dist=7, 
-                               min_dist_human=4, obs_dict=None, forbiddenPoints=None):
+                               = None, goal_pos: Union[Pose2D, None] = None, isCirclePattern:bool,
+                               min_dist=7, obs_dict=None, forbiddenPoints=None):
         """set up start position and the goal postion. Path validation checking will be conducted. If it failed, an
         exception will be raised.
 
         Args:
             start_pos (Union[Pose2D,None], optional): start position. if None, it will be set randomly. Defaults to None.
             goal_pos (Union[Pose2D,None], optional): [description]. if None, it will be set randomly .Defaults to None.
+            isCirclePattern:bool.  if true, start_pos and goal_pos will be spawned around the circle, otherwise will be set randomly.
             min_dist (float): minimum distance between start_pos and goal_pos
-            min_dist_human(float): minumumn distance between start_pos and humans
             obs_dict: observations from the last time step
         Exception:
             Exception("can not generate a path with the given start position and the goal position of the robot")
@@ -192,22 +192,34 @@ class RobotManager:
         start_pos_ = None
         goal_pos_ = None
         while i_try < max_try_times:
-            if start_pos is None:
-                start_pos_ = Pose2D()
-                start_pos_.x, start_pos_.y, start_pos_.theta = get_random_pos_on_map(
-                    self._free_space_indices, self.map, self.ROBOT_RADIUS * 2,forbiddenZones)
-                #start_pos_.x, start_pos_.y, start_pos_.theta= -4.5, 3.5, 0
-
+            if isCirclePattern:
+                if start_pos is None:
+                    start_pos_ = Pose2D()
+                    # start_pos_.x, start_pos_.y, start_pos_.theta = get_random_pos_on_map(
+                    #     self._free_space_indices, self.map, self.ROBOT_RADIUS * 4)
+                    goal_pos_ = Pose2D()
+                    start_pose, end_pose = get_robot_goal_on_map(
+                        self._free_space_indices, self.map, 9 ,self.ROBOT_RADIUS ,forbiddenZones)
+                    start_pos_.x, start_pos_.y, start_pos_.theta= start_pose[0], start_pose[1], start_pose[2]
+                    goal_pos_.x, goal_pos_.y, goal_pos_.theta= end_pose[0] , end_pose[1] , end_pose[2]
+                    # print('g', goal_pos_.x)
+                else:
+                    start_pos_ = start_pos
+                    goal_pos_ = goal_pos
             else:
-                start_pos_ = start_pos
-            if goal_pos is None:
-                goal_pos_ = Pose2D()
-                goal_pos_.x, goal_pos_.y, goal_pos_.theta = get_random_pos_on_map(
-                    self._free_space_indices, self.map, self.ROBOT_RADIUS * 4)
-                #goal_pos_.x, goal_pos_.y, goal_pos_.theta= 9.5 , -4 , 0
-            else:
-                goal_pos_ = goal_pos
-
+                if start_pos is None:
+                    start_pos_ = Pose2D()
+                    start_pos_.x, start_pos_.y, start_pos_.theta = get_random_pos_on_map(
+                        self._free_space_indices, self.map, self.ROBOT_RADIUS * 4)
+                else:
+                    start_pos_ = start_pos
+                if goal_pos is None:
+                    goal_pos_ = Pose2D()
+                    goal_pos_.x, goal_pos_.y, goal_pos_.theta = get_random_pos_on_map(
+                        self._free_space_indices, self.map, self.ROBOT_RADIUS * 4)
+                    # goal_pos_.x, goal_pos_.y, goal_pos_.theta= 9.5 , -4 , 0
+                else:
+                    goal_pos_ = goal_pos
             if dist(start_pos_.x, start_pos_.y, goal_pos_.x, goal_pos_.y) < min_dist:
                 i_try += 1
                 continue
