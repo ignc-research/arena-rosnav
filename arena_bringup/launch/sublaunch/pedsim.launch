@@ -1,20 +1,11 @@
 <launch>
-  <arg name="scene_file" default="$(find simulator_setup)/pedsim_scenarios/empty.xml"/>
-  <arg name="default_queue_size" default="10"/>
-  <arg name="robot_mode" default="1"/>
-  <arg name="enable_groups" default="false"/>
   <arg name="simulation_factor" default="1"/>
   <arg name="update_rate" default="25.0"/>
-  <arg name="spawn_period" default="5.0"/>
+  <arg name="scene_file" default="$(find simulator_setup)/pedsim_scenarios/empty.xml"/>
 
   <node name="pedsim_simulator" pkg="pedsim_simulator" type="pedsim_simulator" output="screen">
-    <param name="scene_file" value="$(arg scene_file)" type="string"/>
-    <param name="default_queue_size" value="$(arg default_queue_size)" type="int"/>
-    <param name="robot_mode" value="$(arg robot_mode)" type="int"/>
-    <param name="enable_groups" value="$(arg enable_groups)" type="bool"/>
     <param name="simulation_factor" value="$(arg simulation_factor)" type="double"/>
     <param name="update_rate" value="$(arg update_rate)" type="double"/>
-    <param name="spawn_period" value="$(arg spawn_period)" type="double"/>
+    <param name="scene_file" value="$(arg scene_file)" type="string"/>
   </node>
-
 </launch>
