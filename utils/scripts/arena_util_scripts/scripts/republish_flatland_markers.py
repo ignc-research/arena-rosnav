@@ -21,7 +21,6 @@ class MarkerPublisher:
 
     
     def debug_topics_callback(self, msg):
-        print("debug topics callback:", msg.topics)
         # remove topics/markers/subscribers of deleted models
         current_topics = list(self.markers.keys())  # make list so we get a copy of the keys
         for topic in current_topics:

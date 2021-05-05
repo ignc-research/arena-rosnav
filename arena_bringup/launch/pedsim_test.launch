@@ -5,7 +5,6 @@
   <arg name="rviz_file"       default="pedsim_test"/>
   <arg name="train_mode"      default="false"/>
   <param name="train_mode"    value="$(arg train_mode)"/>
-  <!-- <arg name="step_size" default="0.05"/> -->
   <arg name="step_size" default="0.01"/>
   <param name="step_size" value="$(arg step_size)" /> 
   <arg name="show_pedsim_labels" default="true"/>
@@ -27,7 +26,7 @@
   <arg name="show_viz"        default="true"/>  # controls wether flatland publishes markers for its models
   <param name="show_viz"      value="$(arg show_viz)"/>
 
- <!-- use simulator and rviz-->
+ <!-- use flatland simulator and rviz-->
   <include file="$(find arena_bringup)/launch/sublaunch/flatland_simulator.launch">
     <arg name="world_path"      value="$(arg world_path)"/>
     <!-- <arg name="update_rate"     default="50.0"/> -->
