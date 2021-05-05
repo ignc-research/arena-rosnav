@@ -1,4 +1,4 @@
-In this documentation we will guide you through the installation process and explain how to use arena-rosnav for simulation, training and evaluation.
+In this documentation we will guide you through the installation process and explain how to start a simulation and use arena-rosnav for training and evaluation of robot navigation.
 
 # Installation
 ## Set up Ubuntu in Windows (For Windows users only)
@@ -42,8 +42,10 @@ Start Xlaunch and configure it the following way. In the end the configuration c
 - Choose Option: Disable access control
 #### Trouble Shooting
 If you encounter problems, you might go to Windows Defender Firewall -> Communication between Applications and Windows Firewall.
-Look for VcXsrv and change the Settings to both private and public checked.
+Look for VcXsrv and change the settings to both private and public checked.
 
 ## Installation of Arena-Rosnav
 For a detailed step-by-step instruction please refer to [Installation.md](https://github.com/ignc-research/arena-rosnav/blob/local_planner_subgoalmode/docs/Installation.md).
 
+# Usage
+## Start a simulation
