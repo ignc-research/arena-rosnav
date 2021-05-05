@@ -38,7 +38,7 @@ plugins:
     range: 8
      
     #for fc or trans 360
-    angle: {min: -1.5707963267948966, max: 4.694936014, increment:  0.017453292}
+    angle: {min: -1.570796327, max: 4.694936014, increment:  0.017453292}
 
     #for gru 64
     # angle: {min: -1.570796327, max: 4.694935688, increment:  0.0877}
