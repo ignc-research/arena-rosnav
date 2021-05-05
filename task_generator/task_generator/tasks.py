@@ -68,8 +68,9 @@ class RandomTask(ABSTask):
             fail_times = 0
             while fail_times < max_fail_times:
                 try:
-                    self.obstacles_manager.move_all_peds(episode)
-                    start_pos, goal_pos = self.robot_manager.set_start_pos_goal_pos(obs_dict=self.last_obs_dict)
+                    fP = self.obstacles_manager.move_all_peds(episode)
+                    self.obstacles_manager._add_map_border_into_pedsim()
+                    start_pos, goal_pos = self.robot_manager.set_start_pos_goal_pos(forbiddenPoints=fP, isCirclePattern=self.obstacles_manager.circlePattern)
                     forbiddenZones=[
                             (start_pos.x,
                                 start_pos.y,
@@ -80,7 +81,7 @@ class RandomTask(ABSTask):
                     self.obstacles_manager.setForbidden_zones(forbiddenZones)
                     self.obstacles_manager.reset_pos_obstacles_random(forbidden_zones=forbiddenZones)
                     if self.obstacles_manager.useMaze:
-                        self.obstacles_manager.update_maze()                    
+                        self.obstacles_manager.update_maze()
                     break
                 except rospy.ServiceException as e:
                     rospy.logwarn(repr(e))
