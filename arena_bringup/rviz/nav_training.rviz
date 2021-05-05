@@ -8,6 +8,7 @@ Panels:
         - /Grid1
         - /my_robot1/Namespaces1
         - /TF1/Frames1
+        - /Walls1/MarkerArray1
       Splitter Ratio: 0.6526610255241394
     Tree Height: 796
   - Class: rviz/Selection
@@ -348,10 +349,11 @@ Visualization Manager:
         map:
           eval_sim_odom:
             {}
+          sim_1_base_footprint:
+            sim_1_laser_mount:
+              {}
           sim_1_odom:
-            sim_1_base_footprint:
-              sim_1_laser_mount:
-                {}
+            {}
       Update Interval: 0
       Value: true
     - Class: rviz/MarkerArray
@@ -644,7 +646,7 @@ Visualization Manager:
           Marker Topic: /sim_1/flatland_server/debug/model/longwall_0
           Name: MarkerArray
           Namespaces:
-            "": true
+            {}
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -652,7 +654,7 @@ Visualization Manager:
           Marker Topic: /sim_1/flatland_server/debug/model/shortwall_0
           Name: MarkerArray
           Namespaces:
-            "": true
+            {}
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -660,7 +662,7 @@ Visualization Manager:
           Marker Topic: /sim_1/flatland_server/debug/model/shortwall_1
           Name: MarkerArray
           Namespaces:
-            "": true
+            {}
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -668,7 +670,7 @@ Visualization Manager:
           Marker Topic: /sim_1/flatland_server/debug/model/shortwall_3
           Name: MarkerArray
           Namespaces:
-            "": true
+            {}
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -676,11 +678,27 @@ Visualization Manager:
           Marker Topic: /sim_1/flatland_server/debug/model/shortwall_2
           Name: MarkerArray
           Namespaces:
-            "": true
+            {}
           Queue Size: 100
           Value: true
       Enabled: true
       Name: Walls
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /sim_1/flatland_server/debug/model/staticwall_1
+      Name: MarkerArray
+      Namespaces:
+        "": true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /sim_1/flatland_server/debug/model/staticwall_2
+      Name: MarkerArray
+      Namespaces:
+        "": true
+      Queue Size: 100
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 233; 185; 110
