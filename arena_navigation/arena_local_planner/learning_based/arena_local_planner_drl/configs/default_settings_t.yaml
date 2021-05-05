@@ -1,0 +1,26 @@
+robot:
+  discrete_actions:
+    - name: move_forward
+      linear: 0.30
+      angular: 0.0
+    - name: move_backward
+      linear: -0.15
+      angular: 0.0
+    - name: turn_left
+      linear: 0.15
+      angular: 0.35
+    - name: turn_right
+      linear: 0.15
+      angular: -0.35
+    - name: turn_strong_left
+      linear: 0.0
+      angular: 0.75
+    - name: turn_strong_right
+      linear: 0.0
+      angular: -0.75
+    - name: stop
+      linear: 0.0
+      angular: 0.0
+  continuous_actions:
+    linear_range: [0, 0.3]
+    angular_range: [-2.7, 2.7]
