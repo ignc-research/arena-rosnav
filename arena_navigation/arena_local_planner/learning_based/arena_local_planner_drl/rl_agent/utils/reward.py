@@ -51,6 +51,7 @@ class RewardCalculator():
             'rule_04': RewardCalculator._cal_reward_rule_04,
             'rule_05': RewardCalculator._cal_reward_rule_05,
             'rule_06': RewardCalculator._cal_reward_rule_06,
+            'rule_07': RewardCalculator._cal_reward_rule_07,
             }
         self.cal_func = self._cal_funcs[rule]
 
@@ -81,6 +82,7 @@ class RewardCalculator():
     adult_in_robot_frame:np.ndarray, 
     child_in_robot_frame:np.ndarray, 
     elder_in_robot_frame:np.ndarray, 
+    # isInDangerZone:np.ndarray, 
     current_time_step: float, 
     *args, **kwargs):
         """
@@ -195,6 +197,15 @@ class RewardCalculator():
         self._reward_adult_safety_dist1(adult_in_robot_frame, punishment=4) #0.05 0.07
         self._reward_child_safety_dist1(child_in_robot_frame, punishment=4)
         self._reward_elder_safety_dist1(elder_in_robot_frame, punishment=4)
+
+    def _cal_reward_rule_07(self, laser_scan: np.ndarray, goal_in_robot_frame: Tuple[float,float], isInDangerZone:np.ndarray,  current_time_step:float, *args,**kwargs):
+        
+        self._reward_goal_reached(goal_in_robot_frame, reward=2)
+        self._reward_safe_dist(laser_scan)
+        self._reward_collision(laser_scan, punishment=4)
+        self._reward_goal_approached3(goal_in_robot_frame,current_time_step)
+        self._reward_human_safety_dist(isInDangerZone, punishment=0.08) #0.05 0.07
+
         
     def _reward_goal_reached(self,
                              goal_in_robot_frame = Tuple[float,float], 
@@ -359,43 +370,57 @@ class RewardCalculator():
             self.curr_reward += reward
         self.last_goal_dist = goal_in_robot_frame[0]
 
+    def _reward_human_safety_dist(self, isInDangerZone, punishment = 80):
+            for danger in isInDangerZone:
+                if danger:
+                    self.curr_reward -= punishment
+
     def _reward_adult_safety_dist3(self, adult_in_robot_frame, punishment = 80):
         if adult_in_robot_frame.shape[0] != 0:
-            min_adult_dist=adult_in_robot_frame.min()
+            min_adult_dist=adult_in_robot_frame[0,0]
+            min_adult_behavior=adult_in_robot_frame[0,1]
             if self.last_adult_min is None:
                 self.last_adult_min=min_adult_dist
             else:
                 if self.last_adult_min>min_adult_dist:
                     self.last_adult_min=min_adult_dist
-            for dist in adult_in_robot_frame:
-                if dist<self.safe_dist_adult:
-                    self.curr_reward -= punishment*np.exp(1-dist/self.safe_dist_adult)
+            for dist in adult_in_robot_frame[:, 0]:
+                if min_adult_dist < self.safe_dist_adult and min_adult_behavior !='talking':
+                    self.curr_reward -= punishment*np.exp(1-dist / self.safe_dist_adult)
+                if min_adult_dist < self.safe_dist_talking and min_adult_behavior =='talking':
+                    self.curr_reward -= punishment*np.exp(1-dist / self.safe_dist_talking)
 
 
     def _reward_child_safety_dist3(self, child_in_robot_frame, punishment = 90):
         if child_in_robot_frame.shape[0]!=0:
-            min_child_dist=child_in_robot_frame.min()
+            min_child_dist=child_in_robot_frame[0,0]
+            min_child_behavior=child_in_robot_frame[0,1]
             if self.last_child_min is None:
                 self.last_child_min=min_child_dist
             else:
                 if self.last_child_min>min_child_dist:
                     self.last_child_min=min_child_dist
-            for dist in child_in_robot_frame:
-                if dist<self.safe_dist_child:
-                    self.curr_reward -= punishment*np.exp(1-dist/self.safe_dist_adult)
+            for dist in child_in_robot_frame[:, 0]:
+                if min_child_dist<self.safe_dist_child and min_child_behavior !='talking':
+                    self.curr_reward -= punishment*np.exp(1-dist / self.safe_dist_child)
+                if min_child_dist<self.safe_dist_talking and min_child_behavior =='talking':
+                    self.curr_reward -= punishment*np.exp(1-dist / self.safe_dist_talking)
 
 
     def _reward_elder_safety_dist3(self, elder_in_robot_frame, punishment = 100):
         if elder_in_robot_frame.shape[0]!=0:
-            min_elder_dist=elder_in_robot_frame.min()
+            min_elder_dist=elder_in_robot_frame[0,0]
+            min_elder_behavior=elder_in_robot_frame[0,1]
             if self.last_elder_min is None:
                 self.last_elder_min=min_elder_dist
             else:
                 if self.last_elder_min>min_elder_dist:
                     self.last_elder_min=min_elder_dist
-            for dist in elder_in_robot_frame:
-                if dist<self.safe_dist_elder:
-                    self.curr_reward -= punishment*np.exp(1-dist/self.safe_dist_adult)
+            for dist in elder_in_robot_frame[:, 0]:
+                if min_elder_dist<self.safe_dist_elder and min_elder_behavior !='talking':
+                    self.curr_reward -= punishment*np.exp(1-dist/self.safe_dist_elder)
+                if min_elder_dist<self.safe_dist_talking and min_elder_behavior =='talking':
+                    self.curr_reward -= punishment*np.exp(1-dist/self.safe_dist_talking)
 
     def _reward_collision(self,
                           laser_scan: np.ndarray, 
