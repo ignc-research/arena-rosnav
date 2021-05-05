@@ -104,7 +104,7 @@ Export turtlebot model for simulation
 
 ```bash
 
-roslaunch arena_bringup start_arena_flatland.launch  train_mode:=true 	use_viz:=true  task_mode=random
+roslaunch arena_bringup start_arena_flatland.launch  train_mode:=true 	use_viz:=true  task_mode:=random
 
 ```
 * In another terminal
