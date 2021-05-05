@@ -195,7 +195,7 @@ if __name__ == "__main__":
     
     # for training with start_arena_flatland.launch
     ros_params = rospy.get_param_names()
-    ns_for_nodes = False if '/single_env' in ros_params else True
+    ns_for_nodes = False if 'single_env' in ros_params else True
 
     # check if simulations are booted
     wait_for_nodes(with_ns=ns_for_nodes, n_envs=args.n_envs, timeout=5)
