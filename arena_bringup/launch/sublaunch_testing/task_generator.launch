@@ -1,7 +1,7 @@
 
 <launch>
 
-    <arg name="scenarios_json_path" default="$(find simulator_setup)/scenarios/empty_map.json"/>
+    <arg name="scenarios_json_path" default="$(find simulator_setup)/scenarios/new_scenario.json"/>
 
     <arg name="auto_reset" default="true" />
     <arg name="task_mode" default="scenario"/>

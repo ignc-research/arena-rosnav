@@ -1,0 +1,23 @@
+properties: 
+  # optional, defaults to 10, number of velocity iterations for the Box2D
+  # physics solver
+  velocity_iterations: 10
+
+  # optional, defaults to 10, number of position iterations for the Box2D
+  # physics solver
+  position_iterations: 10
+layers:  # Support for arbitrary number of layers
+  # - name: "robot"  # So that sensors can trigger on just the robot
+  - name: "static"
+    map: "map.yaml"  # leading / denotes absolute file path, otherwise relative
+    color: [0, 1, 0, 0]  # List of floats [r,g,b,a] to color debug boundary
+  - name: "ped"
+    # map: "../no_map/map.yaml"  # leading / denotes absolute file path, otherwise relative
+    color: [0, 1, 0, 0]  # List of floats [r,g,b,a] to color debug boundary
+  # - name: "2d"  # layer 0 named "2d"
+  #   map: "map.yaml"  # leading / denotes absolute file path, otherwise relative
+  #   color: [0, 1, 0, 1]  # List of floats [r,g,b,a] to color debug boundary
+  # - name: "3d"
+  #   map: "map.yaml"  # leading / denotes absolute file path, otherwise relative
+  #   color: [0, 1, 0, 0]  # List of floats [r,g,b,a] to color debug boundary
+

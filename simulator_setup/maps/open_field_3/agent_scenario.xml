@@ -1,0 +1,40 @@
+<waypoint id="Entry1" x="6" y="26" r="2"/>
+<waypoint id="Entry2" x="2" y="5" r="2"/>
+<waypoint id="Entry3" x="2" y="15" r="2"/>
+<waypoint id="Coffee" x="17" y="18" r="2"/>
+<waypoint id="WorkStation1" x="5.5" y="3" r="2"/>
+<waypoint id="KloenSchnack" x="3" y="23.5" r="2"/>
+<waypoint id="WorkStation2" x="12" y="8" r="2"/>
+<waypoint id="WorkStation3" x="10.5" y="17.5" r="2"/>
+<waypoint id="TempWP1" x="8" y="14.5" r="2"/>
+<waypoint id="TempWP2" x="14.5" y="3" r="2"/>
+<waypoint id="TempWP3" x="15" y="23" r="2"/>
+
+<agent x="6" y="26" n="1" dx="0" dy="0" type="0">
+    <addwaypoint id="Entry1"/>
+    <addwaypoint id="TempWP1"/>
+    <addwaypoint id="Entry2"/>
+    <addwaypoint id="TempWP1"/>
+</agent>
+
+<agent x="2" y="30" n="15" dx="0" dy="0" type="0">
+    <addwaypoint id="Entry3"/>
+    <addwaypoint id="WorkStation3"/>
+</agent>
+
+<agent x="3" y="23.5" n="15" dx="0" dy="0" type="0">
+</agent>
+
+<agent x="2" y="30" n="15" dx="0" dy="0" type="0">
+    <addwaypoint id="Coffee"/>
+    <addwaypoint id="TempWP2"/>
+    <addwaypoint id="WorkStation1"/>
+    <addwaypoint id="TempWP2"/>
+</agent>
+
+<agent x="2" y="30" n="15" dx="0" dy="0" type="0">
+    <addwaypoint id="Coffee"/>
+    <addwaypoint id="TempWP3"/>
+    <addwaypoint id="KloenSchnack"/>
+    <addwaypoint id="TempWP3"/>
+</agent>
