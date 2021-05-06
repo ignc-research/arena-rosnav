@@ -375,8 +375,14 @@ if __name__ == "__main__":
 
     # start training
     start = time.time()
-    model.learn(
-        total_timesteps = n_timesteps, callback=eval_cb, reset_num_timesteps=True)
+    try:
+        model.learn(
+            total_timesteps = n_timesteps, callback=eval_cb, reset_num_timesteps=True)
+    except KeyboardInterrupt:
+        model.env.close()
+        print(f'Keyboard interrupt after {time.time()-start}s!')
+        sys.exit()
+
     print(f'Time passed: {time.time()-start}s')
 
     # update the timesteps the model has trained in total
