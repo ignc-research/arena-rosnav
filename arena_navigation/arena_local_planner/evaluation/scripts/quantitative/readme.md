@@ -16,9 +16,9 @@ arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitativ
 
 3. make sure all json files consistently follow a naming convention
 
-"localPlanner_map_obsXX_velXX_waypointGenerator.json"
-the specific values dont matter, only that its consistent
-specific values will be specified in the script
+example: "localPlanner_map_obsXX_velXX_waypointGenerator.json"
+
+Labeling can be later specified in the script, just make sure that the naming is consistent throughout the files.
 
 - specifications in the script
 Go to the main function (bottom in the script) and specify values for the following:
