@@ -1,7 +1,5 @@
-Plot quantitative plots:
-
-- preparations:
-1. make sure you have all these packages installed
+# preparations:
+## 1. make sure you have all these packages installed
 ```
 matplotlib.pyplot
 numpy
@@ -9,31 +7,31 @@ pandas
 argparse
 glob
 ```
-2. make sure all json files you want to evaluate lie in one directory
+## 2. make sure all json files you want to evaluate lie in one directory
 
 path for run 3:
 arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/run_3
 
-3. make sure all json files consistently follow a naming convention
+## 3. make sure all json files consistently follow a naming convention
 
 example: "localPlanner_map_obsXX_velXX_waypointGenerator.json"
 
 Labeling can be later specified in the script, just make sure that the naming is consistent throughout the files.
 
-- specifications in the script
+# specifications in the script
 Go to the main function (bottom in the script) and specify values for the following:
-	- cols:		(usually not necessary to change), all metrics that are measured in the json
-	- obs:		values for the obstacle number
-	- vel:		values for the velocities
-	- maps:		maps
-	- wpgen:		waypoint generators, special case: set to classic only if you dont want to evaluate several waypoint generators
-	- planner:	planners
-	- classic:	which of the planners are classic planners (no waypoint generator), special case: classic = planner
-	- labels:	labels which will be used in the plots as e.g. labels, titles, legend
-	- colors:	color scheme for the planners
-	- colors_wp:	color scheme for the waypoint generators if you want to plot with --byplanner
+- cols:		(usually not necessary to change), all metrics that are measured in the json
+- obs:		values for the obstacle number
+- vel:		values for the velocities
+- maps:		maps
+- wpgen:		waypoint generators, special case: set to classic only if you dont want to evaluate several waypoint generators
+- planner:	planners
+- classic:	which of the planners are classic planners (no waypoint generator), special case: classic = planner
+- labels:	labels which will be used in the plots as e.g. labels, titles, legend
+- colors:	color scheme for the planners
+- colors_wp:	color scheme for the waypoint generators if you want to plot with --byplanner
 
-- usage:
+# usage:
 python sim_evaluation_v2.py [path] --metrics time path collision success --quantity obs --latex --csv --withclassic --byplanner --allplot_quantity obs
 - --metrics	
 	- plot these metrics, if not specified nothing will be plotted, none by default
@@ -60,22 +58,23 @@ other options:
 - -- nosubtitle	
 	- flag: dont show the local planner/waypoint generator in the subtitle, NOTE: can be usefull if you dont have many waypoint generators
 
-Remark 1:
+# Remarks
+- Remark 1:
 This script can be used to plot e.g. 5 local planner-waypoint generator combinations.
 Therefore specify in the main function of the script every combination as planners as well as classic planners.
 "classic" should the only waypoint generator.
 The script might then show errors, when trying to run this script with --byplanner flag.
 
-Remark 2:
+- Remark 2:
 When json files are missing, the script will substitute the missing files with zero vectors and print a message in the console.
 
-Remark 3:
+- Remark 3:
 The flags --latex and --csv are sufficient to provide once.
 
-Remark 4:
+- Remark 4:
 When an KeyError occures its mostly involving the labels and/or color dictionary. Check your mappings whether they are complete.
 
-If you want to get every possible plots:
+- If you want to get every possible plots:
 ```
 python sim_evaluation_v2.py [path] --metrics time success path collision --quantity obs
 python sim_evaluation_v2.py [path] --metrics time success path collision --quantity vel
@@ -88,7 +87,7 @@ python sim_evaluation_v2.py [path] --metrics time success path collision --quant
 python sim_evaluation_v2.py [path] --metrics time success path collision --quantity vel --byplanner --withclassic --allplot_quantity obs
 python sim_evaluation_v2.py [path] --metrics time success path collision --quantity vel --byplanner --withclassic --allplot_quantity vel
 ``` 
-example:
+- example:
 ```
 python sim_evaluation_v2.py $HOME/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/run_3 --metrics time success path collision --quantity obs
 python sim_evaluation_v2.py $HOME/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/run_3 --metrics time success path collision --quantity vel
@@ -101,7 +100,7 @@ python sim_evaluation_v2.py $HOME/catkin_ws/src/arena-rosnav/arena_navigation/ar
 python sim_evaluation_v2.py $HOME/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/run_3 --metrics time success path collision --quantity vel --byplanner --withclassic --allplot_quantity obs
 python sim_evaluation_v2.py $HOME/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/run_3 --metrics time success path collision --quantity vel --byplanner --withclassic --allplot_quantity vel
 ```
-## Color convention for plots
+# Color convention for plots
 
 Colors for planners:
 ```
