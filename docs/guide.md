@@ -36,10 +36,19 @@ Start Xlaunch and configure it the following way. In the end the configuration c
 ##### Display Settings
 - Choose Option: Multiple Windows
 - Set Display Number to 0
+
+![image](https://user-images.githubusercontent.com/79201799/117300099-8294d580-ae79-11eb-928a-7d722d150973.png)
+
 ##### Client Settings
 - Choose Option: Start no Client
+
+![image](https://user-images.githubusercontent.com/79201799/117300149-8e809780-ae79-11eb-8eba-1ff3b16d81b8.png)
+
 ##### Extra Settings
 - Choose Option: Disable access control
+
+![image](https://user-images.githubusercontent.com/79201799/117300283-b1ab4700-ae79-11eb-8579-00d2d9a829c7.png)
+
 #### Trouble Shooting
 If you encounter problems, you might go to Windows Defender Firewall -> Communication between Applications and Windows Firewall.
 Look for VcXsrv and change the settings to both private and public checked.
@@ -88,6 +97,7 @@ The most basic simulation can be started by using the following command. Please 
 roslaunch arena_bringup start_arena_flatland.launch  train_mode:=false
 ```
 RViz will open. Now you can click on the 2D Nav Goal button in RViz to set a goal anywhere on the map towards which the agent will move automatically and stop after reaching it.
+Warnings can be ignored as long as no error occurs.
 
 ![image](https://user-images.githubusercontent.com/79201799/117291472-58d6b100-ae6f-11eb-8c63-853db1e83fa7.png)
 
@@ -144,6 +154,8 @@ Note: The evaluation results will be recorded in .rosbag files in the directory 
 Please refer to the [readme.md for qualitative plotting](https://github.com/ignc-research/arena-rosnav/blob/local_planner_subgoalmode/arena_navigation/arena_local_planner/evaluation/readme.md) for instructions.
 ### 2. Quantitative plots
 There is a script for plotting quantitative results called [sim_evaluation_v3.py](https://github.com/ignc-research/arena-rosnav/tree/local_planner_subgoalmode/arena_navigation/arena_local_planner/evaluation/scripts/quantitative). The version number might change over time. How to use this script is explained in the [readme.md for quantitative plotting](https://github.com/ignc-research/arena-rosnav/blob/local_planner_subgoalmode/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/readme.md).
+
+Note: It's necessary to run the qualitative evaluation first in order to get the json files required for the quantitative evaluation.
 
 # Glossary
 - global planner: calculates collision free global path from start to goal only considering the map layout
