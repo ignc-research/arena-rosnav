@@ -206,12 +206,12 @@ if __name__ == "__main__":
 
     # instantiate train environment
     # when debug run on one process only
-    if not args.debug and not ns_for_nodes:
+    if not args.debug and ns_for_nodes:
         env = SubprocVecEnv(
             [make_envs(ns_for_nodes, i, params=params, PATHS=PATHS) 
                 for i in range(args.n_envs)], 
             start_method='fork')
-    elif args.debug:
+    else:
         env = DummyVecEnv(
             [make_envs(ns_for_nodes, i, params=params, PATHS=PATHS) 
                 for i in range(args.n_envs)])
@@ -379,14 +379,14 @@ if __name__ == "__main__":
         model.learn(
             total_timesteps = n_timesteps, callback=eval_cb, reset_num_timesteps=True)
     except KeyboardInterrupt:
-        model.env.close()
-        print(f'Keyboard interrupt after {time.time()-start}s!')
-        sys.exit()
+        print('KeyboardInterrupt..')
+        pass
 
+    model.env.close()
     print(f'Time passed: {time.time()-start}s')
 
     # update the timesteps the model has trained in total
     # update_total_timesteps_json(n_timesteps, PATHS)
-    print("training done!")
+    print('Training script will be terminated')
     sys.exit()
     
