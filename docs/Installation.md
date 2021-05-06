@@ -135,7 +135,7 @@ cd $HOME/geometry2_ws
 catkin_make -DPYTHON_EXECUTABLE=/usr/bin/python3
 ```
 
-* Set python path in .zshrc (or .bash if you use that)
+* Set python path in .zshrc (or .bashrc if you use that)
 ```
 nano ~/.zshrc
 ```
