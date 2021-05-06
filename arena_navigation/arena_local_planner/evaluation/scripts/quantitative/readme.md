@@ -74,6 +74,9 @@ The flags --latex and --csv are sufficient to provide once.
 - Remark 4:
 When an KeyError occures its mostly involving the labels and/or color dictionary. Check your mappings whether they are complete.
 
+- Remark 5:
+The plots will be saved into the directory in which the script is run.
+
 - If you want to get every possible plots:
 ```
 python sim_evaluation_v2.py [path] --metrics time success path collision --quantity obs
