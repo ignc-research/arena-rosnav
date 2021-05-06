@@ -20,7 +20,13 @@ Here, one should specify the map on which the rosbags were recorded.
 ```
 python scenario_eval.py test.yml png
 ``` 
-Where test.yml is the config file to specify which plots you want to create. More details below. Pay attention that each map may have different origins and you have to specify the origin within the scenario_eval-py script. (Currently the origin is hardcoded on line 845 but we plan to include that parameter into the config in future.)
+Where test.yml is the config file to specify which plots you want to create. More details below. Pay attention that each map may have different origins and you have to specify the origin within the scenario_eval-py script. (Currently the origin is hardcoded on line 845 but we plan to include that parameter into the config in future.) 
+
+Following files will be created: 
+* A new folder will be created inside the evaluations folder containing all the plots. 
+* Additionally, the .json files with all metrics for the [quantitative evaluation scripts](https://github.com/ignc-research/arena-rosnav/blob/local_planner_subgoalmode/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/sim_evaluation_v3.py) are generated inside [../evaluations/quantitative](https://github.com/ignc-research/arena-rosnav/tree/local_planner_subgoalmode/arena_navigation/arena_local_planner/evaluation/scripts/quantitative) 
+
+**Important**: One should put all the generated .json files into one specified folder in order to run the quantitative evaluation scripts properly. For more information about quantiative plots please refer to [quantitative.md](https://github.com/ignc-research/arena-rosnav/blob/local_planner_subgoalmode/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/readme.md)
 
 ## yml config
 
