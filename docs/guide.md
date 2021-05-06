@@ -53,7 +53,7 @@ Start Xlaunch and configure it the following way. In the end the configuration c
 If you encounter problems, you might go to Windows Defender Firewall -> Communication between Applications and Windows Firewall.
 Look for VcXsrv and change the settings to both private and public checked.
 
-### 3. Installation of Visual Studio Code and 
+### 3. Installation of Visual Studio Code and WSL-Extension
 We recommend you use Visual Studio Code as your programming environment. Please follow the instructions in this [VS Code with WSL tutorial](https://docs.microsoft.com/en-us/windows/wsl/tutorials/wsl-vscode).
 
 ## Installation of Arena-Rosnav
