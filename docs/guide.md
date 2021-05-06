@@ -91,6 +91,8 @@ Another source of error could be your ```PYTHONPATH```. Please check it with ```
 ```
 ```/opt/ros/melodic/lib/python2.7/dist-packages``` should be listed last. The order of the first 3 paths is not important.
 
+If not, please follow the instructions [Set python path in .zshrc (or .bashrc if you use that)](https://github.com/ignc-research/arena-rosnav/blob/local_planner_subgoalmode/docs/Installation.md#13-install-arena-rosnav-repo) in Installation.md.
+
 ## Start a simulation
 The most basic simulation can be started by using the following command. Please make sure you are working in your virtual environment by running ```workon rosnav``` beforehand.
 ```
