@@ -13,17 +13,13 @@ For Pedsim to work together with Arena-Rosnav it needs to be synced to Flatland 
 
 ## Examples
 
-| <img width="400" height="250" src="/img/takingawalk.gif"> | 
-|:--:|
-| *Human agents walking together* |
-
-| <img width="400" height="250" src="/img/grouping.gif"> | 
-|:--:|
-| *Human agents standing as a group* |
+| <img width="400" height="250" src="/img/takingawalk.gif"> | <img width="400" height="250" src="/img/grouping.gif"> | 
+|:--:|:--:|
+| *Human agents walking together* | *Human agents standing as a group* |
 
 | <img width="400" height="250" src="/img/forklift.gif"> | 
 |:--:|
-| *Forklift agents doing some work* |
+| *Forklift agent doing some work* |
 
 
 # Demo
