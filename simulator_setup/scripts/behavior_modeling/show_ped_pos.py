@@ -15,7 +15,7 @@ class Listener:
 
 
     def simulated_agents_callback(self, agent_states_msg):
-        self.stdscr.addstr(0, 0, "{} {:20} {:13} {:13} {:5} {:5} {:8} {:8} {:8} {:8} {:8} {:8}".format(
+        self.stdscr.addstr(0, 0, "{} {:20} {:13} {:13} {:5} {:5} {:8} {:8} {:8} {:8} {:8} {:8} {:5} {:5}".format(
             "id",
             "state",
             "talking_to",
@@ -28,6 +28,8 @@ class Listener:
             "combined",
             "vel",
             "acc",
+            "kdx",
+            "kdy",
         ))
         for i, agent_state in enumerate(agent_states_msg.agent_states):
             id = agent_state.id
@@ -51,7 +53,7 @@ class Listener:
             vel_magnitude = np.linalg.norm(vel)
             acc = np.array([agent_state.acceleration.x, agent_state.acceleration.y])
             acc_magnitude = np.linalg.norm(acc)
-            self.stdscr.addstr(i+1, 0, "{} {:20} {:13} {:13} {:5.1f} {:5.1f} {:8.2f} {:8.2f} {:8.2f} {:8.2f} {:8.2f} {:8.2f}".format(
+            self.stdscr.addstr(i+1, 0, "{} {:20} {:13} {:13} {:5.1f} {:5.1f} {:8.2f} {:8.2f} {:8.2f} {:8.2f} {:8.2f} {:8.2f} {:5.1f} {:5.1f}".format(
                 id,
                 social_state,
                 talking_to_id,
@@ -63,7 +65,9 @@ class Listener:
                 obstacle_force_magnitude,
                 combined_forces_magnitude,
                 vel_magnitude,
-                acc_magnitude)
+                acc_magnitude,
+                agent_state.keep_distance_to.x,
+                agent_state.keep_distance_to.y)
             )
         self.stdscr.refresh()
         
