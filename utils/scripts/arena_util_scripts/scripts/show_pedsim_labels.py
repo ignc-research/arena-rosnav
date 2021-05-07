@@ -68,7 +68,7 @@ class LabelPublisher:
             self.marker_ids = agent_ids
 
 
-    def create_label_marker(self, id, x, y, text, scale = 0.6, offset_x = 1.0):
+    def create_label_marker(self, id, x, y, text, scale = 0.4, offset_x = 1.0):
         marker = Marker()
         marker.header.frame_id = "map"
         marker.header.stamp = rospy.Time.now()
