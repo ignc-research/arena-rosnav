@@ -11,6 +11,17 @@ We also implemented the possibility to spawn a forklift agent that has the same 
 
 For Pedsim to work together with Arena-Rosnav it needs to be synced to Flatland Simulator. This is done via a flatland plugin that subscribes to the **simulated_agents** topic published by Pedsim and updates the position of the corresponding flatland models accordingly.
 
+## Examples
+
+| <img width="400" height="250" src="/img/takingawalk.gif"> | <img width="400" height="250" src="/img/grouping.gif"> | 
+|:--:|:--:|
+| *Human agents walking together* | *Human agents standing as a group* |
+
+| <img width="400" height="250" src="/img/forklift.gif"> | 
+|:--:|
+| *Forklift agent doing some work* |
+
+
 # Demo
 #### 1. Normal Arena-Rosnav Installation
 See [Installation Manual](https://github.com/ignc-research/arena-rosnav/blob/local_planner_subgoalmode/docs/Installation.md)
