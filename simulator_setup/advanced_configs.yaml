@@ -1,0 +1,10 @@
+vmax: 1.5
+chatting probability: 0.07
+tell_story_probability: 0.05
+group talking probability: 0.05
+talking and walking probability: 0.05
+max talking distance: 1.5
+talking base time: 10.0
+tell story base time: 10.0
+group talking base time: 10.0
+talking and walking base time: 10.0

@@ -9,9 +9,12 @@ import rospkg
 import json
 import yaml
 import numpy as np
+import copy
 
 
+def get_value_qspin_box(x) :
 
+    return x.value()
 def read_stages_from_yaml():
     dir = rospkg.RosPack().get_path('arena_local_planner_drl')
     
@@ -35,32 +38,56 @@ def write_stages_to_yaml(new_stages):
   
     if os.path.isfile(file_location):
         with open(file_location, "w") as file:
-            # file.seek(0) 
-            
-            # # to erase all data 
-            # file.truncate() 
             yaml.dump(new_stages, file, default_flow_style=False, sort_keys=False)
         assert isinstance(
             new_stages, dict), "'training_curriculum.yaml' has wrong fromat! Has to encode dictionary!"
+        file.close()
     else:
         raise FileNotFoundError(
             "Couldn't find 'training_curriculum.yaml' in %s " % file_location)
 
 
 def read_available_models_from_yaml():
-    dir = rospkg.RosPack().get_path('arena_local_planner_drl')
-
-    global available_models
+ 
     file_location = os.path.join(rospkg.RosPack().get_path('simulator_setup'), 'available_models.yaml')
     
     if os.path.isfile(file_location):
         with open(file_location, "r") as file:
-            available_models = yaml.load(file, Loader=yaml.FullLoader)
+            w.available_models = yaml.load(file, Loader=yaml.FullLoader)
         assert isinstance(
-            available_models, dict), "'available_models.yaml' has wrong fromat! Has to encode dictionary!"
+            w.available_models, dict), "'available_models.yaml' has wrong fromat! Has to encode dictionary!"
     else:
         raise FileNotFoundError(
             "Couldn't find 'available_models.yaml' in %s " % file_location)
+
+def write_obstacles_spawning_parameters_to_yaml(obstacles_spawning_parameters):
+    
+    file_location = os.path.join(rospkg.RosPack().get_path('simulator_setup'), 'obstacles_spawning_parameters.yaml')
+    
+    
+    if os.path.isfile(file_location):
+        with open(file_location, "w") as file:  
+            yaml.dump(obstacles_spawning_parameters, file, default_flow_style=False, sort_keys=False)
+        
+
+    else:
+        raise FileNotFoundError(
+            "Couldn't find 'obstacles_spawning_parameters.yaml' in %s " % file_location)
+
+def write_advanced_configs_to_yaml(advanced_configs):
+    
+    file_location = os.path.join(rospkg.RosPack().get_path('simulator_setup'), 'advanced_configs.yaml')
+    
+    
+    if os.path.isfile(file_location):
+        with open(file_location, "w") as file:  
+            yaml.dump(advanced_configs, file, default_flow_style=False, sort_keys=False)
+        
+
+    else:
+        raise FileNotFoundError(
+            "Couldn't find 'advanced_configs.yaml' in %s " % file_location)
+
 
 
 def clear_layout(layout):
@@ -84,14 +111,17 @@ class Window1(QWidget):
 
     
     def set_up_window1_ui(self): 
-            self.resize(450,350)
+            
             self.setWindowTitle('Training Curriculum Configs')
             self.num_stages_label = QLabel('Current num stages : ')
             self.num_stages_edit = QSpinBox()
             self.num_stages_edit.setValue(len( w._stages)  )
             self.num_stages_edit.textChanged.connect(self.update_window1)
-            self.advanced_group_box = QGroupBox("       advanced configs", self)
+            self.advanced_group_box = QGroupBox("", self)
             self.chBox = QCheckBox("Advanced", self.advanced_group_box)
+            self.grid_advanced_group_box = QGridLayout()
+            self.grid_advanced_group_box.setSpacing(10)
+            self.advanced_group_box.setLayout(self.grid_advanced_group_box)
 
             ### add the layout of the first window ###
             self.grid1 = QGridLayout()
@@ -103,6 +133,7 @@ class Window1(QWidget):
     def update_window1(self):
         ### only intiate layout reseting when number is valid otherwise print error massage
         if self.num_stages_edit.text() != '' :
+            # self.resize(1100,350)
             if int(self.num_stages_edit.text())> 20 or int(self.num_stages_edit.text())  <1 :
                 msg = QMessageBox()
                 msg.setIcon(QMessageBox.Critical)
@@ -118,13 +149,37 @@ class Window1(QWidget):
                 myFont.setBold(True)
                 label = QLabel('current num stages : ')
                 label.setFont(myFont)
+                self.chBox.setFont(myFont)
                 self.advanced_group_box.setFont(myFont)
                 self.grid1.addWidget(label, 1, 0)
                 self.grid1.addWidget(self.num_stages_edit, 1, 1)
                 self.grid1.addWidget(self.chBox, 1, 2)
-                self.grid1.addWidget(self.advanced_group_box, 2, 2)
+                self.grid1.addWidget(self.advanced_group_box,2,2,2,5)
 
+                ### setup layout and add probability widgets to the checkbox ###
+                
+ 
 
+                self.advanced_group_box_widgets = {'vmax':[QSlider(Qt.Horizontal),QLabel('')],'chatting probability':[QSlider(Qt.Horizontal),QLabel('')],'tell_story_probability':[QSlider(Qt.Horizontal),QLabel('')]
+                ,'group talking probability':[QSlider(Qt.Horizontal),QLabel('')],'talking and walking probability':[QSlider(Qt.Horizontal),QLabel('')]
+                ,'max talking distance':[QSlider(Qt.Horizontal),QLabel('')],'talking base time':[QSlider(Qt.Horizontal),QLabel('')],'tell story base time':[QSlider(Qt.Horizontal),QLabel('')]
+                ,'group talking base time':[QSlider(Qt.Horizontal),QLabel('')],'talking and walking base time':[QSlider(Qt.Horizontal),QLabel('')]}
+
+                for i,item in enumerate(list(self.advanced_group_box_widgets.items())):
+                    self.grid_advanced_group_box.addWidget(QLabel(item[0]),i,0)
+                    self.grid_advanced_group_box.addWidget(item[1][0],i,1)
+                    item[1][0].setTickPosition(1) 
+                    self.grid_advanced_group_box.addWidget(item[1][1],i,2)
+                    item[1][0].setMinimum(0)
+                    item[1][0].setMaximum(10)
+                    item[1][0].setObjectName(item[0])
+                    item[1][0].valueChanged.connect(self.updateLabel)
+                    item[1][0].setValue(5)
+
+                self.advanced_group_box.show()
+                self.advanced_group_box.hide()
+
+                ### connect functions with checkbox to show hide the advanced box  ###
                 self.on_button_advanced_configs_clicked(self.chBox.checkState())
                 self.chBox.stateChanged.connect(self.on_button_advanced_configs_clicked)
 
@@ -141,10 +196,11 @@ class Window1(QWidget):
               
                 ### generate for every stage variable entry boxes and add default values to them ###
                 self.training_curriculum_widgets =[]
+                w.obstacles_spawning_parameters = dict()
                 stages_values = list(w._stages.values())
                 for i in range(int(self.num_stages_edit.text())) :         
                     self.new_widgets = [QPushButton('stage num '+ str(i+1)),QSpinBox(),QSpinBox(),QSpinBox()]
-                    self.new_widgets[0].clicked.connect(partial(self.on_button_stage_clicked,'Stage '+ str(i+1)))
+                    self.new_widgets[0].clicked.connect(partial(self.on_button_stage_clicked,'Stage '+ str(i+1),i))
                     self.new_widgets[1].setValue(0)
                     self.new_widgets[2].setValue(5)
                     self.new_widgets[3].setValue(2)
@@ -155,27 +211,70 @@ class Window1(QWidget):
                         self.new_widgets[3].setValue(stages_values[i]['dynamic_robot'])
                     for j in range(4):
                         grid.addWidget(self.new_widgets[j], i+2, j,Qt.AlignTop)
+                   
+                    available_models_copy = copy.deepcopy(w.available_models)
+                    for x, available_models_copy_key in enumerate(list(available_models_copy.keys())) : 
+                        obstacles_count = self.new_widgets[x+1].value()
+                       
+                        ### check if ther no available models fro mthis type and divide th num obstacles in window on equally upon the duffrent available model of each type ###
+                        if available_models_copy[available_models_copy_key] is not  None :
+                            
+                            for item in  list(available_models_copy[available_models_copy_key].items()) :
+                                available_models_copy[available_models_copy_key][ item[0]]= [0,item[1]]
+                                
+                            while  obstacles_count> 0 :
+                                for item in  list(available_models_copy[available_models_copy_key].items()) :
+                                    if  obstacles_count== 0 :
+                                        break
+                                    available_models_copy[available_models_copy_key][ item[0]][0]= item[1][0]+1                        
+                                    obstacles_count = obstacles_count -1
+                          
+                    w.obstacles_spawning_parameters[i+1] = available_models_copy
+                    
+                    
+
+                        
+
                 self.grid1.addWidget(self.group_box_obstacles,2,0,2,2)
 
+
+    def updateLabel(self,value):
+
+               
+        key = self.sender().objectName()
+
+        if key in ['vmax','max talking distance'] :
+            value = 1 +  value/ 10
+        
+        elif key in ['chatting probability','tell_story_probability','group talking probability','talking and walking probability'] :
+            value =   value/ 100
+        else :
+            value =   value * 2
+
+         
+        self.advanced_group_box_widgets[key][1].setText(str(value))    
+   
 
     def on_button_advanced_configs_clicked(self,s):
         if s == Qt.Checked:
             self.advanced_group_box.show()
+            self.resize(1100,350)
         else: 
             self.advanced_group_box.hide()
+            self.resize(350,350)
 
-    def on_button_stage_clicked(self, button_name):
+    def on_button_stage_clicked(self, button_name,i):
 
         if not (self is  None):
 
             ### call a sub window and label it ###
             self.window_extended_stage= window_extended_stage()
-            self.window_extended_stage.set_up_ui_window_extended_stage(button_name)
+            self.window_extended_stage.set_up_ui_window_extended_stage(button_name,int(self.training_curriculum_widgets[i][1].text()),int(self.training_curriculum_widgets[i][2].text()),int(self.training_curriculum_widgets[i][3].text()))
             self.window_extended_stage.show()
 
         else:
             self.close()  # Close window.
-            self = None  # Discard reference.
+            self = None  # Discard reference
 
     def closeEvent(self, event):
    
@@ -190,31 +289,67 @@ class Window1(QWidget):
             new_stages ={}
             for i , training_curriculum_stage_widgets in enumerate(self.training_curriculum_widgets ) :
                 new_stages[i+1]= {'dynamic_human':int(training_curriculum_stage_widgets[2].text()),'dynamic_robot':int(training_curriculum_stage_widgets[3].text()),'static':int(training_curriculum_stage_widgets[1].text())}
+            
+            advanced_configs ={}
+            for item in list(self.advanced_group_box_widgets.items()) :
+                advanced_configs[item[0]]=float(item[1][1].text())
+            
             write_stages_to_yaml(new_stages)
+            write_obstacles_spawning_parameters_to_yaml(w.obstacles_spawning_parameters)
+            write_advanced_configs_to_yaml(advanced_configs)
+
             
 
 class window_extended_stage(QWidget):
     def __init__(self):
         super().__init__()
 
-    def set_up_ui_window_extended_stage(self,stage_name): 
+    def set_up_ui_window_extended_stage(self,stage_name,num_static,num_human,num_robot): 
+        self.stage_name = stage_name
         self.setObjectName("window_extended_"+stage_name)
         self.setWindowTitle(stage_name + ' extended configs')    
         window_extended_stage_grid = QGridLayout()
         self.setLayout(window_extended_stage_grid)
-    
-
+        
+        self.nums_obstacles_array = [num_static,num_human,num_robot]
+        nums_obstacles_array_counter = [num_static,num_human,num_robot]
         group_box_dict = {QGroupBox("        static obstacles"):[QGridLayout(),0], QGroupBox("        human obstacles"):[QGridLayout(),1],QGroupBox("        robot obstacles"):[QGridLayout(),2]}
         
         ### get available_models out of yaml Datei and write the values into the group boxes ###
-        available_models_values = list( available_models.values())
+        available_models_values = list( w.available_models.values())
+        self.available_models_qspin_boxes_array = []
         for box, layout in group_box_dict.items():
             box.setLayout(layout[0])
             
             if available_models_values[layout[1]] is not None:
+                
+                ### for every group box write 0 as start value in every QspinBox ###
+                available_models_qspin_boxes = []
                 for i,available_model in enumerate(list( available_models_values[layout[1]].keys())):
                     layout[0].addWidget(QLabel(available_model),i,0,Qt.AlignTop)
-                    layout[0].addWidget(QSpinBox(),i,1,Qt.AlignTop)
+                    available_models_qspin_boxes = available_models_qspin_boxes +[QSpinBox()]
+                    available_models_qspin_boxes[-1].setValue(0)
+                    layout[0].addWidget(available_models_qspin_boxes[-1],i,1,Qt.AlignTop)
+                ### add special case when ther are no available_models_values for this type of obtacles  ###
+
+
+                self.available_models_qspin_boxes_array = self.available_models_qspin_boxes_array +[available_models_qspin_boxes]
+
+                ### divide the number of obstacles equally on the available models ###
+                while  nums_obstacles_array_counter[layout[1]]> 0 :
+                    for qspinbox in  available_models_qspin_boxes:
+                        if  nums_obstacles_array_counter[layout[1]] == 0 :
+                            break
+                        qspinbox.setValue(qspinbox.value()+1)
+                        nums_obstacles_array_counter[layout[1]] = nums_obstacles_array_counter[layout[1]] -1
+            else :   
+                tmp = QSpinBox()
+                tmp.setValue(0)
+                self.available_models_qspin_boxes_array = self.available_models_qspin_boxes_array +[[tmp]]          
+
+
+                    
+            
 
             window_extended_stage_grid.addWidget(box,0,layout[1],Qt.AlignTop)
 
@@ -226,7 +361,34 @@ class window_extended_stage(QWidget):
                                             'Do you want to save the configs of s'+ self.objectName()[17:]+'?',
                                             QMessageBox.Yes | QMessageBox.No,
                                             QMessageBox.No)
-            # if reply == QMessageBox.Yes:
+        if reply == QMessageBox.Yes:
+            self.name_obstacles_array = ['static obstacles','human obstacles','robot obstacles']
+            for i in range(len(self.nums_obstacles_array)) :
+                # if self.nums_obstacles_array[i] == 0  :
+                #     continue
+                
+                summed_value= sum(list(map( get_value_qspin_box, self.available_models_qspin_boxes_array[i])))
+                if summed_value != self.nums_obstacles_array[i]:
+                    msg = QMessageBox()
+                    msg.setIcon(QMessageBox.Critical)
+                    msg.setText("invalid sum of "+ self.name_obstacles_array[i])
+                    msg.setInformativeText('please make the sum of '+ str(self.name_obstacles_array[i]+' equals to '+str(self.nums_obstacles_array[i])))
+                    msg.setWindowTitle("Error")
+                    msg.exec_()
+                    event.ignore()
+                    return
+            ### write the values to the array to save them to yaml later ###
+            for i in range(len(self.nums_obstacles_array)) :
+                if self.nums_obstacles_array[i] == 0  :
+                    continue
+                
+                for j,qspin_box in enumerate(self.available_models_qspin_boxes_array[i]) :
+                    available_model_name = list(w.obstacles_spawning_parameters[int(self.stage_name[6:])][self.name_obstacles_array[i]].keys())[j]
+                    w.obstacles_spawning_parameters[int(self.stage_name[6:])][self.name_obstacles_array[i]][available_model_name][0]= qspin_box.value()
+
+            write_obstacles_spawning_parameters_to_yaml(w.obstacles_spawning_parameters)
+               
+                            
 
 
 class main_window(QMainWindow):
@@ -238,6 +400,7 @@ class main_window(QMainWindow):
         self.w = None  
         self._stages = dict()
         self.available_models = dict()
+        self.obstacles_spawning_parameters = dict()
 
     def set_up_main_window_ui(self): 
         self.window = QWidget(self)
