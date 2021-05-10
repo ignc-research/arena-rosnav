@@ -186,8 +186,8 @@ class FlatlandEnv(gym.Env):
     def reset(self):
 
         # clear costmaps
-        out, err = self.clear_costmaps()
-        print(f"output: {out}, error: {err}")
+        #out, err = self.clear_costmaps()
+        #print(f"output: {out}, error: {err}")
 
         # set task
         # regenerate start position end goal position of the robot and change the obstacles accordingly

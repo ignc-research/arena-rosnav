@@ -11,6 +11,7 @@ import rospkg
 import numpy as np
 from collections import OrderedDict
 import h5py
+import subprocess
 
 
 rospy.init_node("record_rollouts", disable_signals=True)
@@ -33,6 +34,13 @@ env = FlatlandEnv(task, os.path.join(models_folder_path, 'robot', 'myrobot.model
                                'configs', 'default_settings.yaml'), "rule_00", False,
                   )
 
+def clear_costmaps():
+        bashCommand = "rosservice call /move_base/clear_costmaps"
+        process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
+        output, error = process.communicate()
+        #self._service_clear_client()
+        return output, error
+
 obs = env.reset()
 observations = []
 actions = []
@@ -49,10 +57,12 @@ while(True):
             # reduce repeat count by 1 and start again
             print('collision')
             task._num_repeats_curr_scene -= 1
-            time.sleep(1.0)
+            #time.sleep(1.0)
             #task.next_stage()
+            clear_costmaps()
             env.reset()
-            time.sleep(2.0)
+            clear_costmaps()
+            #time.sleep(2.0)
         else:
             observations.append(merged_obs)
             actions.append(action)
@@ -69,6 +79,7 @@ while(True):
         # if the episode is not done, save this timesteps's observations and actions to the arrays and continue the episode
         observations.append(merged_obs)
         actions.append(action)
+
 
 # save rollouts
 if args.outputformat == 'h5':
