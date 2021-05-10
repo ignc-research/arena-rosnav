@@ -59,5 +59,10 @@ plugins:
     name: vehicle_movement
     agent_topic: /pedsim_simulator/simulated_agents
     base_body: base
+    update_rate: 10
+    step_time: 0.3 #(in sec)
+    var_step_time: 0.1
+    agent_topic: /pedsim_simulator/simulated_agents
+    base_body: base
     safety_dist_body: safety_dist_circle
     safety_dist: 1.8
