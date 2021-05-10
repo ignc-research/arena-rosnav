@@ -88,6 +88,19 @@ def write_advanced_configs_to_yaml(advanced_configs):
         raise FileNotFoundError(
             "Couldn't find 'advanced_configs.yaml' in %s " % file_location)
 
+def read_advanced_configs_from_yaml():
+    
+    file_location = os.path.join(rospkg.RosPack().get_path('simulator_setup'), 'advanced_configs.yaml')
+    
+    
+    if os.path.isfile(file_location):
+        with open(file_location, "r") as file:
+            w.advanced_configs = yaml.load(file, Loader=yaml.FullLoader)
+
+    else:
+        raise FileNotFoundError(
+            "Couldn't find 'advanced_configs.yaml' in %s " % file_location)
+
 
 
 def clear_layout(layout):
@@ -108,6 +121,8 @@ class Window1(QWidget):
         read_stages_from_yaml()  
         ### get current available_models setting ###      
         read_available_models_from_yaml()
+        ### get current advanced_configs setting ###     
+        read_advanced_configs_from_yaml()
 
     
     def set_up_window1_ui(self): 
@@ -160,7 +175,7 @@ class Window1(QWidget):
                 
  
 
-                self.advanced_group_box_widgets = {'vmax':[QSlider(Qt.Horizontal),QLabel('')],'chatting probability':[QSlider(Qt.Horizontal),QLabel('')],'tell_story_probability':[QSlider(Qt.Horizontal),QLabel('')]
+                self.advanced_group_box_widgets = {'vmax':[QSlider(Qt.Horizontal),QLabel('')],'chatting probability':[QSlider(Qt.Horizontal),QLabel('')],'tell story probability':[QSlider(Qt.Horizontal),QLabel('')]
                 ,'group talking probability':[QSlider(Qt.Horizontal),QLabel('')],'talking and walking probability':[QSlider(Qt.Horizontal),QLabel('')]
                 ,'max talking distance':[QSlider(Qt.Horizontal),QLabel('')],'talking base time':[QSlider(Qt.Horizontal),QLabel('')],'tell story base time':[QSlider(Qt.Horizontal),QLabel('')]
                 ,'group talking base time':[QSlider(Qt.Horizontal),QLabel('')],'talking and walking base time':[QSlider(Qt.Horizontal),QLabel('')]}
@@ -174,7 +189,19 @@ class Window1(QWidget):
                     item[1][0].setMaximum(10)
                     item[1][0].setObjectName(item[0])
                     item[1][0].valueChanged.connect(self.updateLabel)
-                    item[1][0].setValue(5)
+                    ### calculate the values back ###
+                    value = 0
+                    if item[0] in ['vmax'] :
+                        value = ( w.advanced_configs[item[0]] -1)* 10 +0.1
+                    elif item[0] in ['max talking distance'] :
+                        value =( w.advanced_configs[item[0]]-1)* 5
+                    
+                    elif item[0] in ['chatting probability','tell story probability','group talking probability','talking and walking probability'] :
+                        value =   w.advanced_configs[item[0]]*10
+                    else :
+                        value =   w.advanced_configs[item[0]] / 2
+                    item[1][0].setValue(value)
+                   
 
                 self.advanced_group_box.show()
                 self.advanced_group_box.hide()
@@ -243,11 +270,13 @@ class Window1(QWidget):
                
         key = self.sender().objectName()
 
-        if key in ['vmax','max talking distance'] :
+        if key in ['vmax'] :
             value = 1 +  value/ 10
+        elif key in ['max talking distance'] :
+            value = 1+ value/ 5
         
-        elif key in ['chatting probability','tell_story_probability','group talking probability','talking and walking probability'] :
-            value =   value/ 100
+        elif key in ['chatting probability','tell story probability','group talking probability','talking and walking probability'] :
+            value =   value/10
         else :
             value =   value * 2
 
@@ -400,6 +429,7 @@ class main_window(QMainWindow):
         self.w = None  
         self._stages = dict()
         self.available_models = dict()
+        self.advanced_configs = dict()
         self.obstacles_spawning_parameters = dict()
 
     def set_up_main_window_ui(self): 
