@@ -30,9 +30,19 @@ python ./arena_configs_gui.py
 
 - Edit curriculum 
  <pre>
+| <img width="400" height="250" src="/img/edit_curriculum.jpg"> | <img width="400" height="250" src="/img/advanced_stage.jpg"> | 
+|:--:|:--:|
+| *Edit curriculum window* | *advanced_stage configs window.jpg |
 
-   <img width="400" height="250" src="/img/edit_curriculum.jpg"> 
 
-                  Edit curriculum  window   
+
+                  
 </pre> 
+Here the user can adjust the following :
+- Number of stages between 1 to 20 
+- Number of obstacles in each satge (static,human and robots) 
+- Propabilities of certain actions in the advanced window , max velocity, base time of each action and max talking distance (radius of agetns wher the start to interact with eachother)
+- 
+
+
 
