@@ -1,7 +1,7 @@
 1:
   static obstacles:
     shelf:
-    - 0
+    - 4
     - dynamic_obstacles/person_two_legged.model.yaml
   human obstacles:
     adult:

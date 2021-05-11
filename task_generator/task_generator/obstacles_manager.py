@@ -687,9 +687,10 @@ class ObstaclesManager:
         srv.peds = []
         self.agent_topic_str=''   
         curr_stage = rospy.get_param("/curr_stage", -1)
+        num_shelves= self.read_obstacles_spawning_parameters_from_yaml()[curr_stage]['static obstacles']['shelf'][0]
         obstacles_spawning_human= self.read_obstacles_spawning_parameters_from_yaml()[curr_stage]['human obstacles']
         advanced_configs = self.read_advanced_configs_parameters_from_yaml()
-       
+        shelves_waypoints = []
         
         i = 0
         while i < len(peds) :           
@@ -697,10 +698,15 @@ class ObstaclesManager:
                 for  x in range(item[1][0]):
                     ped = peds[i]
                     self.__ped_type= type
-                    self.agent_topic_str+=f',{self.ns_prefix}pedsim_agent_{ped[0]}/'+ item[0][0]
+                    self.agent_topic_str+=f',{self.ns_prefix}pedsim_agent_{ped[0]}/'+ item[0]
                     self.__ped_file=os.path.join(rospkg.RosPack().get_path(
                     'simulator_setup'), item[1][1])
-            
+                    # if item[0] == 'forklift':
+                    #     # shelves_waypoints = shelves_waypoints + 0.000000001
+
+                    #     ped[2] = ped[2][1:num_shelves]
+                        
+
                     msg = Ped()
                     msg.id = ped[0]
                     msg.pos = Point()
@@ -723,6 +729,7 @@ class ObstaclesManager:
                     msg.force_factor_obstacle = 1.0
                     msg.force_factor_social = 2.0
                     msg.yaml_file = self.__ped_file
+                    msg.waypoint_mode = 1
                     msg.waypoints = []
                     for pos in ped[2]:
                         p = Point()
@@ -862,8 +869,6 @@ class ObstaclesManager:
                 x2, y2= x1+np.cos(angle)*radius, y1+np.sin(angle)*radius
                 dist = np.linalg.norm([vertex[-1,0] - x2,vertex[-1,1] - y2])
             vertex=np.vstack([vertex,[x2[0],y2[0]]])
-        # print(num_border_vertex)
-        # print('start_pos',[x1, y1, theta1])
         return vertex
 
     def _add_map_border_in_pedsim(self):
