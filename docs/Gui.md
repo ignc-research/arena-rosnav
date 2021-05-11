@@ -30,7 +30,7 @@ python ./arena_configs_gui.py
 
 - Edit curriculum 
 
-| <img width="400" height="250" src="/img/edit_curriculum.jpg"> | <img width="400" height="250" src="/img/advanced_stage.jpg"> | 
+| <img width="400" height="250" src="/img/edit_curriculum.jpg"> | <img width="500" height="250" src="/img/advanced_stage.jpg"> | 
 |:--:|:--:|
 | *Edit curriculum window* | *advanced_stage configs window*|
 
