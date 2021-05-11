@@ -520,10 +520,10 @@ if __name__ == "__main__": # execute code
     cols = ["time","path","collision","success"]    # define the quantities to measure
     obs = ["obs10","obs20"] # define different obstacles numbers, names must match file names
     vel = ["vel03"] # define different velocities, names must match file names
-    maps = ["map1","empty","open"] # define the maps trained on, names must match file names
+    maps = ["map1","empty","open", "map0"] # define the maps trained on, names must match file names
     wpgen = ["spatialhorizon","classic"] # NOTE: classic MUST be in the back
-    planner = ["R0","R1","R2","R4","RLCA","MPC","TEB"] # all planners, NOTE: classic planners MUST be in the back!!!
-    classic = ["RLCA","MPC","TEB"] # classic planners
+    planner = ["R2","R4","MPC","TEB"] # all planners, NOTE: classic planners MUST be in the back!!!
+    classic = ["MPC","TEB"] # classic planners
 
     # different kinds of datasets for visualization and latex table formatting
     param_list = {"obs":obs,"vel":vel} # just a dict with the parameters to measure
