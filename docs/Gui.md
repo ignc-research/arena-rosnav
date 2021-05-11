@@ -1,6 +1,9 @@
 # General Information
 arena configs gui is a configs tool designed to automaise and simplify the process of adapting the agent training process to the customer needs 
 
+
+
+| <img width="400" height="250" src="/img/main_gui.jpg"> |
 Main features are : 
 - Edit curriculum 
 - Create New Model
@@ -13,4 +16,6 @@ Main features are :
 
 
 ## Usage
+
+- Edit curriculum 
 
