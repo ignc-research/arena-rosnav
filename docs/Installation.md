@@ -159,6 +159,17 @@ pip install -r requirements_cadrl.txt
 If you encounter errors, e.g. specific versions not found, please manually install the packages with an available version.
 You only need this to run our cadrl node, if you dont plan to use it, skip this step.
 
+
+* Inside forks/stable_baselines3
+```
+pip install -e .
+
+```
+* inside catkin_ws:
+```
+catkin_make -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=/usr/bin/python3
+```
+
 ## Update after developing flatland code
 After changes inside the forks/flatland folder you should do the following steps to fetch the latest version:
 ```
