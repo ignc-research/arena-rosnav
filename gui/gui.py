@@ -437,7 +437,7 @@ class main_window(QMainWindow):
         ### add label, size and center the main window ###
         self.setCentralWidget(self.window)
         self.setWindowTitle('Arena Configs')
-        self.resize(350, 150)
+        self.resize(450, 200)
         icon = QIcon()
         icon.addPixmap(QPixmap('icon.png'), QIcon.Selected, QIcon.On)
         self.setWindowIcon(icon)
@@ -454,12 +454,15 @@ class main_window(QMainWindow):
         self.button2.clicked.connect(self.on_button2_clicked)
         self.button3 = QPushButton('Create New Model')
         self.button3.clicked.connect(self.on_button3_clicked)
+        self.button4 = QPushButton('Create Custom Scenario')
+        self.button4.clicked.connect(self.on_button4_clicked)
        
         ### add the layout of the main window ###
         layout = QVBoxLayout()
         layout.addWidget(self.button1)
         layout.addWidget(self.button2)
         layout.addWidget(self.button3)
+        layout.addWidget(self.button4)
         self.window.setLayout(layout)
         self.show()
 
@@ -490,6 +493,15 @@ class main_window(QMainWindow):
             self.window3.setWindowTitle('New Model Configs')
 
             self.window3.show()
+        else:
+            self.w.close()  # Close window.
+            self.w = None  # Discard reference.
+    def on_button4_clicked(self, checked):
+        if self.w is None:
+            self.window4= SubWindow()
+            self.window4.setWindowTitle('New scenario Configs')
+
+            self.window4.show()
         else:
             self.w.close()  # Close window.
             self.w = None  # Discard reference.

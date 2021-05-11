@@ -685,52 +685,54 @@ class ObstaclesManager:
         """
         srv = SpawnPeds()
         srv.peds = []
-        # print(peds)
         self.agent_topic_str=''   
-     
-        for ped in peds:            
-            elements = [0, 1, 2, 3]
-          
-            # probabilities = [0.4, 0.3, 0.3] np.random.choice(elements, 1, p=probabilities)[0]
-            self.__ped_type=elements[(ped[0]-1)%4]
-            if  self.__ped_type==0:
-                self.agent_topic_str+=f',{self.ns_prefix}pedsim_agent_{ped[0]}/dynamic_human'
-                self.__ped_file=os.path.join(rospkg.RosPack().get_path(
-                'simulator_setup'), 'dynamic_obstacles/person_two_legged.model.yaml')
-            elif self.__ped_type==1:
-                self.agent_topic_str+=f',{self.ns_prefix}pedsim_agent_{ped[0]}/dynamic_child'
-                self.__ped_file=os.path.join(rospkg.RosPack().get_path(
-                'simulator_setup'), 'dynamic_obstacles/person_two_legged_child.model.yaml')
-            elif self.__ped_type==2:
-                self.agent_topic_str+=f',{self.ns_prefix}pedsim_agent_{ped[0]}/dynamic_elder'
-                self.__ped_file=os.path.join(rospkg.RosPack().get_path(
-                'simulator_setup'), 'dynamic_obstacles/person_single_circle_elder.model.yaml')
-            elif self.__ped_type==3:
-                self.agent_topic_str+=f',{self.ns_prefix}pedsim_agent_{ped[0]}/dynamic_forklift     '
-                self.__ped_file=os.path.join(rospkg.RosPack().get_path(
-                'simulator_setup'), 'dynamic_obstacles/big_forklift.model.yaml')
 
-            msg = Ped()
-            msg.id = ped[0]
-            msg.pos = Point()
-            msg.pos.x = ped[1][0]
-            msg.pos.y = ped[1][1]
-            msg.pos.z = ped[1][2]
-            msg.type = self.__ped_type
-            msg.number_of_peds = 1
-            msg.vmax = 0.8
-            msg.force_factor_desired = 1.0
-            msg.force_factor_obstacle = 1.0
-            msg.force_factor_social = 2.0
-            msg.yaml_file = self.__ped_file
-            msg.waypoints = []
-            for pos in ped[2]:
-                p = Point()
-                p.x = pos[0]
-                p.y = pos[1]
-                p.z = pos[2]
-                msg.waypoints.append(p)
-            srv.peds.append(msg)
+        curr_stage = rospy.get_param("/curr_stage", -1)
+        obstacles_spawning_human= self.read_obstacles_spawning_parameters_from_yaml()[curr_stage]['human obstacles']
+        advanced_configs = self.read_advanced_configs_parameters_from_yaml()
+       
+        
+        i = 0
+        while i < len(peds) :           
+            for type,item in enumerate(obstacles_spawning_human.items()) :
+                for  x in range(item[1][0]):
+                    ped = peds[i]
+                    self.__ped_type= type
+                    self.agent_topic_str+=f',{self.ns_prefix}pedsim_agent_{ped[0]}/'+ item[0][0]
+                    self.__ped_file=os.path.join(rospkg.RosPack().get_path(
+                    'simulator_setup'), item[1][1])
+            
+                    msg = Ped()
+                    msg.id = ped[0]
+                    msg.pos = Point()
+                    msg.pos.x = ped[1][0]
+                    msg.pos.y = ped[1][1]
+                    msg.pos.z = ped[1][2]
+                    msg.type = self.__ped_type
+                    msg.number_of_peds = 1
+                    msg.vmax = advanced_configs['vmax']
+                    msg.chatting_probability = advanced_configs['chatting probability']
+                    msg.tell_story_probability = advanced_configs['tell story probability']
+                    msg.group_talking_probability = advanced_configs['group talking probability']
+                    msg.talking_and_walking_probability = advanced_configs['talking and walking probability']
+                    msg.max_talking_distance = advanced_configs['max talking distance']
+                    msg.talking_base_time = advanced_configs['talking base time']
+                    msg.tell_story_base_time = advanced_configs['tell story base time']
+                    msg.group_talking_base_time = advanced_configs['group talking base time']
+                    msg.talking_and_walking_base_time = advanced_configs['talking and walking base time']
+                    msg.force_factor_desired = 1.0
+                    msg.force_factor_obstacle = 1.0
+                    msg.force_factor_social = 2.0
+                    msg.yaml_file = self.__ped_file
+                    msg.waypoints = []
+                    for pos in ped[2]:
+                        p = Point()
+                        p.x = pos[0]
+                        p.y = pos[1]
+                        p.z = pos[2]
+                        msg.waypoints.append(p)
+                    srv.peds.append(msg)
+                    i = i+1
 
 
         max_num_try = 2
@@ -756,38 +758,47 @@ class ObstaclesManager:
         return
 
     def __respawn_robo_obstacles(self,robo_obstacles_array): 
-        for robo_obstacle in robo_obstacles_array:      
-            # But we don't want to keep it in the name of the topic otherwise it won't be easy to visualize them in riviz
-            model_yaml_file_path = os.path.join(rospkg.RosPack().get_path('simulator_setup'), 'dynamic_obstacles/random_wanderer.model.yaml')
-            model_name = os.path.basename(model_yaml_file_path).split('.')[0]
-            model_name = model_name.replace(self.ns,'')        
-            name_prefix = self._obstacle_name_prefix + '_' + model_name
-            spawn_request = SpawnModelRequest()
-            spawn_request.yaml_path =  model_yaml_file_path
-            spawn_request.name = f'{"robo_obstacle"}_{robo_obstacle[0]:02d}'
-            spawn_request.ns = rospy.get_namespace()
-            # x, y, theta = get_random_pos_on_map(self._free_space_indices, self.map,)
-            # set the postion of the obstacle out of the map to hidden them
-            
-            theta = theta = random.uniform(-math.pi, math.pi)
 
-            spawn_request.pose.x = robo_obstacle[1][0]
-            spawn_request.pose.y = robo_obstacle[1][1]
-            spawn_request.pose.theta = theta
 
-            max_num_try = 2
-            i_curr_try = 0
-            while i_curr_try < max_num_try:
-                response = self._srv_spawn_model.call(spawn_request)
-                if not response.success:  # if service not succeeds, do something and redo service
-                    rospy.logwarn(
-                        f"({self.ns}) spawn object robot {spawn_request.name} failed! ")
-                    rospy.logwarn(response.message)
-                    i_curr_try += 1
-                else:
-                    # rospy.logwarn(f"({self.ns}) spawn object robot {spawn_request.name} sucsseded! ")
-                   break
-        
+
+
+        curr_stage = rospy.get_param("/curr_stage", -1)
+        obstacles_spawning_robots= self.read_obstacles_spawning_parameters_from_yaml()[curr_stage]['robot obstacles']
+        i = 0
+        while i < len(robo_obstacles_array) : 
+            for type,item in enumerate(obstacles_spawning_robots.items()) :
+                for  x in range(item[1][0]):
+                    robo_obstacle =robo_obstacles_array[i]
+                    model_yaml_file_path = os.path.join(rospkg.RosPack().get_path('simulator_setup'), item[1][1])
+                    model_name = os.path.basename(model_yaml_file_path).split('.')[0]
+                    model_name = model_name.replace(self.ns,'')        
+                    name_prefix = self._obstacle_name_prefix + '_' + model_name
+                    spawn_request = SpawnModelRequest()
+                    spawn_request.yaml_path =  model_yaml_file_path
+                    spawn_request.name = f'{"robo_obstacle"}_{robo_obstacle[0]:02d}'
+                    spawn_request.ns = rospy.get_namespace()
+
+                    
+                    theta = theta = random.uniform(-math.pi, math.pi)
+                    spawn_request.pose.x = robo_obstacle[1][0]
+                    spawn_request.pose.y = robo_obstacle[1][1]
+                    spawn_request.pose.theta = theta
+                    
+
+                    max_num_try = 2
+                    i_curr_try = 0
+                    while i_curr_try < max_num_try:
+                        response = self._srv_spawn_model.call(spawn_request)
+                        if not response.success:  # if service not succeeds, do something and redo service
+                            rospy.logwarn(
+                                f"({self.ns}) spawn object robot {spawn_request.name} failed! ")
+                            rospy.logwarn(response.message)
+                            i_curr_try += 1
+                        else:
+                            # rospy.logwarn(f"({self.ns}) spawn object robot {spawn_request.name} sucsseded! ")
+                           break
+                    i = i+1
+                
         return
  
 
@@ -878,3 +889,28 @@ class ObstaclesManager:
         srv.episode = episode
         self.__move_peds_srv.call(srv)
 
+    def read_obstacles_spawning_parameters_from_yaml(self):
+        
+        file_location = os.path.join(rospkg.RosPack().get_path('simulator_setup'), 'obstacles_spawning_parameters.yaml')
+        
+        
+        if os.path.isfile(file_location):
+            with open(file_location, "r") as file:
+                obstacles_spawning_parameters = yaml.load(file, Loader=yaml.FullLoader)       
+        assert isinstance(
+             obstacles_spawning_parameters, dict), "'obstacles_spawning_parameters.yaml' has wrong fromat! Has to encode dictionary!"
+                
+        return obstacles_spawning_parameters
+
+    def read_advanced_configs_parameters_from_yaml(self):
+        
+        file_location = os.path.join(rospkg.RosPack().get_path('simulator_setup'), 'advanced_configs.yaml')
+        
+        
+        if os.path.isfile(file_location):
+            with open(file_location, "r") as file:
+                advanced_configs = yaml.load(file, Loader=yaml.FullLoader)       
+        assert isinstance(
+             advanced_configs, dict), "'advanced_configs.yaml' has wrong fromat! Has to encode dictionary!"
+                
+        return advanced_configs
