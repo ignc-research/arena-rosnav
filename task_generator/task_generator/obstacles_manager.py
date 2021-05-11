@@ -718,6 +718,8 @@ class ObstaclesManager:
             msg.pos.z = ped[1][2]
             msg.type = self.__ped_type
             msg.number_of_peds = 1
+            msg.chatting_probability = 0.6
+            msg.max_talking_distance = 3.0
             msg.vmax = 0.8
             msg.force_factor_desired = 1.0
             msg.force_factor_obstacle = 1.0
@@ -805,7 +807,7 @@ class ObstaclesManager:
             waypoints = np.array( [x, y, 1]).reshape(1, 3) # the first waypoint
             # if random.uniform(0.0, 1.0) < 0.8:
             safe_distance = 0.1 # the other waypoints don't need to avoid robot
-            for j in range(1000):
+            for j in range(4):
                 dist = 0
                 while dist < 8:
                     [x2, y2, theta2] = get_random_pos_on_map(self._free_space_indices, self.map, safe_distance, forbidden_zones)
