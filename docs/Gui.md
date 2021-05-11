@@ -4,7 +4,7 @@ arena configs gui is a tool designed to automaise and simplify the process of ad
 
 
  <img width="400" height="250" src="/img/main_gui.jpg"> 
-                  *Gui main window*
+                  *Gui main window*   <br />
 
 Main features are : 
 - Edit curriculum 
