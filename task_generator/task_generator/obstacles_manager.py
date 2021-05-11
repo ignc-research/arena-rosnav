@@ -686,7 +686,6 @@ class ObstaclesManager:
         srv = SpawnPeds()
         srv.peds = []
         self.agent_topic_str=''   
-
         curr_stage = rospy.get_param("/curr_stage", -1)
         obstacles_spawning_human= self.read_obstacles_spawning_parameters_from_yaml()[curr_stage]['human obstacles']
         advanced_configs = self.read_advanced_configs_parameters_from_yaml()
@@ -733,8 +732,6 @@ class ObstaclesManager:
                         msg.waypoints.append(p)
                     srv.peds.append(msg)
                     i = i+1
-
-
         max_num_try = 2
         i_curr_try = 0
         while i_curr_try < max_num_try:
@@ -816,7 +813,7 @@ class ObstaclesManager:
             waypoints = np.array( [x, y, 1]).reshape(1, 3) # the first waypoint
             # if random.uniform(0.0, 1.0) < 0.8:
             safe_distance = 0.1 # the other waypoints don't need to avoid robot
-            for j in range(1000):
+            for j in range(4):
                 dist = 0
                 while dist < 8:
                     [x2, y2, theta2] = get_random_pos_on_map(self._free_space_indices, self.map, safe_distance, forbidden_zones)
