@@ -28,7 +28,7 @@ python ./arena_configs_gui.py
 
 ## Usage
 
-- Edit curriculum 
+### 1.Edit curriculum 
 
 | <img width="400" height="250" src="/img/edit_curriculum.jpg"> | <img width="500" height="250" src="/img/advanced_stage.jpg"> | 
 |:--:|:--:|
@@ -38,8 +38,17 @@ python ./arena_configs_gui.py
 Here the user can adjust the following :
 - Number of stages between 1 to 20 
 - Number of obstacles in each satge (static,human and robots) 
-- Propabilities of certain actions in the advanced window , max velocity, base time of each action and max talking distance (radius of agetns wher the start to interact with eachother)
-- 
+- Propabilities of certain actions in the advanced window , max velocity, base time of each action and max talking distance (radius of agetns wher the start to interact with eachother) - for further informations please refer to: https://github.com/ignc-research/arena-rosnav/blob/sim_to_real/docs/Pedsim.md
+- by clicking on the stage button selecting  the subtyps of  each of the three main obstacles types if not extra edited the  numbers of the types would  be divided equally on the subtyps
+
+
+
+ <pre>
+
+   <img width="400" height="250" src="/img/save-configs.jpg"> 
+
+                  saving dialogue    
+</pre>
 
 
 
