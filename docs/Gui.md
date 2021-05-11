@@ -32,7 +32,7 @@ python ./arena_configs_gui.py
 
 | <img width="400" height="250" src="/img/edit_curriculum.jpg"> | <img width="400" height="250" src="/img/advanced_stage.jpg"> | 
 |:--:|:--:|
-| *Edit curriculum window* | *advanced_stage configs window.jpg |
+| *Edit curriculum window* | *advanced_stage configs window*|
 
 
 Here the user can adjust the following :
