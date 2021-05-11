@@ -31,7 +31,7 @@ python ./arena_configs_gui.py
 - Edit curriculum 
  <pre>
 
-   <img width="400" height="250" src="/img/edit_curriculum .jpg"> 
+   <img width="400" height="250" src="/img/edit_curriculum.jpg"> 
 
                   Edit curriculum  window   
 </pre> 
