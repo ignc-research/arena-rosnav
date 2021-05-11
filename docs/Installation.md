@@ -181,3 +181,13 @@ pull latest ignc-flatland version
 cd $HOME/catkin_ws/src/forks/flatland
 git pull
 ```
+# Error Handling 
+if you encounter the error "world path not given", it is probably because you havent updated the forks repository or working on an old branch.
+In that case go to the arena-rosnav folder and do
+```
+rosws update
+```
+Subsequently, go to the forks/stable_baselines3 folder and do:
+```
+pip install -e .
+```
