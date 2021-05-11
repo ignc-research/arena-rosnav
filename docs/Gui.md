@@ -45,7 +45,7 @@ Here the user can adjust the following :
 
  <pre>
 
-   <img width="400" height="250" src="/img/save-configs.jpg"> 
+   <img width="550" height="250" src="/img/save-configs.jpg"> 
 
                   saving dialogue    
 </pre>
