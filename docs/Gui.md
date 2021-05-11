@@ -3,7 +3,9 @@ arena configs gui is a tool designed to automaise and simplify the process of ad
 
 
 
-| <img width="400" height="250" src="/img/main_gui.jpg"> |
+ <img width="400" height="250" src="/img/main_gui.jpg"> 
+ :--:
+ *Human agents walking together*
 
 Main features are : 
 - Edit curriculum 
