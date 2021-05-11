@@ -29,15 +29,12 @@ python ./arena_configs_gui.py
 ## Usage
 
 - Edit curriculum 
- <pre>
+
 | <img width="400" height="250" src="/img/edit_curriculum.jpg"> | <img width="400" height="250" src="/img/advanced_stage.jpg"> | 
 |:--:|:--:|
 | *Edit curriculum window* | *advanced_stage configs window.jpg |
 
 
-
-                  
-</pre> 
 Here the user can adjust the following :
 - Number of stages between 1 to 20 
 - Number of obstacles in each satge (static,human and robots) 
