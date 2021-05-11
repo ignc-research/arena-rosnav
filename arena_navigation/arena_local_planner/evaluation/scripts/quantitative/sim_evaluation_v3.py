@@ -164,12 +164,11 @@ def clear_missings(data,maps,wpgen,planner,param_list,quantity):
 
 def plot_metrics(data,labels,colors,wpgen,planner,maps,param_list,quantity,metrics,legendsoff,show,classic,withclassic,byplanner,nosubtitle):
     barwidth = 0.1 # NOTE: tuned manually
-    fontsize_ticks = 16
-    fontsize_title = 24
-    fontsize_subtitle = 16
-    fontsize_axlabel = 20
-    figsize = (6,6)
-
+    fontsize_ticks = 13
+    fontsize_title = 19
+    fontsize_subtitle = 14
+    fontsize_axlabel = 19
+    
     other_quantity = np.array([*param_list.keys()])[[x != quantity for x in [*param_list.keys()]]][0] # get the other quantity
     new_index = pd.MultiIndex.from_arrays([data["map"],data["wpgen"],data["planner"],data[other_quantity],data[quantity]], names=("map",'wpgen','planner',other_quantity,quantity))
     if byplanner:
@@ -189,7 +188,7 @@ def plot_metrics(data,labels,colors,wpgen,planner,maps,param_list,quantity,metri
                 if plan in classic: # ignore classic planners in planners
                     continue
                 for metric in metrics:
-                    fig, ax = plt.subplots(figsize = figsize)
+                    fig, ax = plt.subplots()
                     iterate = wpgen
                     if withclassic:
                         iterate = wpgen + classic
@@ -240,6 +239,7 @@ def plot_metrics(data,labels,colors,wpgen,planner,maps,param_list,quantity,metri
                         # Add xticks on the middle of the group bars
                         plt.xlabel('No. Obstacles', fontsize=fontsize_axlabel)
                         plt.xticks([r + ((len(iterate)-1)/2-0.5)*barwidth for r in range(xticks)], [int(obs.replace("obs","")) for obs in param_list["obs"]], fontsize=fontsize_ticks) # NOTE: hardcoded for obs quantity
+                        plt.yticks(fontsize=fontsize_ticks)
                         plt.ylabel('{}'.format(caption), fontsize=fontsize_axlabel)
                         plt.suptitle("{} over No. Obstacles".format(title), fontweight='bold', fontsize=fontsize_title)
                         if nosubtitle:
@@ -262,6 +262,7 @@ def plot_metrics(data,labels,colors,wpgen,planner,maps,param_list,quantity,metri
                         # Add xticks on the middle of the group bars
                         plt.xlabel('Obstacle Velocity', fontsize=fontsize_axlabel)
                         plt.xticks([r + ((len(iterate)-1)/2-0.5)*barwidth for r in range(xticks)], ["0.{0}".format(int(vel.replace("vel",""))) for vel in param_list["vel"]], fontsize=fontsize_ticks) # NOTE: hardcoded for vel quantity
+                        plt.yticks(fontsize=fontsize_ticks)
                         plt.ylabel('{}'.format(caption), fontsize=fontsize_axlabel)
                         plt.suptitle("{} over Obstacle Velocity".format(title), fontweight='bold', fontsize=fontsize_title)
                         if nosubtitle:
@@ -289,7 +290,7 @@ def plot_metrics(data,labels,colors,wpgen,planner,maps,param_list,quantity,metri
                     continue
                 wp_data = map_data.loc[wp]
                 for metric in metrics:
-                    fig, ax = plt.subplots(figsize = figsize)
+                    fig, ax = plt.subplots()
                     for i,plan in enumerate(planner):
                         if wp == "classic": # for plotting only classic planners r values have to be set differently and only for classic planners
                             if plan in classic:
@@ -348,6 +349,7 @@ def plot_metrics(data,labels,colors,wpgen,planner,maps,param_list,quantity,metri
                         if wp != "classic" and not withclassic:
                             planners_plotted = len(planner)-len(classic)
                         plt.xticks([r + (planners_plotted/2-0.5)*barwidth for r in range(xticks)], [int(obs.replace("obs","")) for obs in param_list["obs"]], fontsize=fontsize_ticks) # NOTE: hardcoded for obs quantity
+                        plt.yticks(fontsize=fontsize_ticks)
                         plt.ylabel('{}'.format(caption), fontsize=fontsize_axlabel)
                         plt.suptitle("{} over No. Obstacles".format(title), fontweight='bold', fontsize=fontsize_title)
                         if nosubtitle:
@@ -378,6 +380,7 @@ def plot_metrics(data,labels,colors,wpgen,planner,maps,param_list,quantity,metri
                         if wp != "classic" and not withclassic:
                             planners_plotted = len(planner)-len(classic)
                         plt.xticks([r + (planners_plotted/2-0.5)*barwidth for r in range(xticks)], ["0.{0}".format(int(vel.replace("vel",""))) for vel in param_list["vel"]], fontsize=fontsize_ticks) # NOTE: hardcoded for vel quantity
+                        plt.yticks(fontsize=fontsize_ticks)
                         plt.ylabel('{}'.format(caption), fontsize=fontsize_axlabel)
                         plt.suptitle("{} over Obstacle Velocity".format(title), fontweight='bold', fontsize=fontsize_title)
                         if nosubtitle:

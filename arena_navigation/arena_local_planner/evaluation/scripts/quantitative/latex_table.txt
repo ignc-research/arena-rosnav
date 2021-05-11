@@ -12,11 +12,11 @@ spatialhorizon & R2 &  169.59 &  49.16 &       4.50 &    97.92 &  205.49 &  59.1
 \bottomrule
 \end{tabular}
 
-Table for: map1
+Table for: map0
 \begin{tabular}{llrrrrrrrr}
 \toprule
-               &    &    time &   path &  collision &  success &    time &   path &  collision &  success \\
-wpgen & planner &         &        &            &          &         &        &            &          \\
+               &    &    time &    path &  collision &  success &    time &    path &  collision &  success \\
+wpgen & planner &         &         &            &          &         &         &            &          \\
 \midrule
 classic & MPC &  180.62 &  34.50 &       84.0 &    83.33 &   79.20 &  29.84 &       13.0 &    100.0 \\
                & TEB &   94.25 &  32.97 &        2.0 &   100.00 &   88.27 &  32.38 &       17.0 &    100.0 \\

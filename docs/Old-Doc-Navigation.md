@@ -1,4 +1,108 @@
-## DRL Agent Training
+## Arena-Navigation Launch files
+
+### 2.1 Test the simulation environment and task generator
+
+* In one terminal, start simulation. You can specify the following parameters: 
+
+   * train_mode:=<true, false> 
+   * use_viz:=<true, false> (default true)
+   * local_planner:=<teb,dwa,mpc,cadrl,arena2d> (default dwa)
+   * task_mode:=<random, manual, scenario> (default random)
+   * obs_vel:=<float> # maximum velocity of dynamic obstacles [m/s]. It is recommended to set a max velocity within [0.1,0.7] (default 0.3)
+   * map
+
+```bash
+roslaunch arena_bringup start_arena_flatland.launch train_mode:=false use_viz:=true local_planner:=mpc map_file:=map1 obs_vel:=0.3
+```
+Now you can click on the generate task button in rviz to generator a new random task (random obstacles and goal is published to /goal). It will automatically navigate to that goal, once you start one of our local planners, which are triggered by a new /goal. If you starte with task_mode "manual" you can specify your goal using the specify Flatland Navigation goal (using normal 2D navigation goal will trigger the move_base planner, thus only works with teb and dwa)
+
+### Run Arena2D models in Rosnav
+* start simulation as above, then navigate to the folder arena-rosnav/arena_navigation/arena_local_planner/learning_based/arena_ros/scripts/ and execute arena_node_tb3.py
+
+```
+python arena_node_tb3.py
+```
+### 2.2. [Quick start] start simulation env & plan manager
+````
+roslaunch arena_bringup start_arena_flatland.launch  train_mode:=false
+````
+start_flatland.launch will start several other sublaunch files and some neccesary ros packages:
+   1. **start simulator node**: start flatland, load robot model
+   2. **start map server node**: load map, which will provide occupancy grid used for mapping functions later
+   3. **start fake localization**: which will provide static tf map_to_odom, in order to have localization of the robot.
+   4. **start task generator node**: which provide task generation service for rviz_plugin(Generate Task)
+   5. **start plan manager node**: provide manager for robot state estimation, mapping, global planner and local planner,  which is the key for navigation framework. The move_base is contained, because currently we need its global_planner and mapping functions, later they won't be needed.
+   6. **/train_mode/**: 
+   * if true, the simulator(flatland) will provide a *step_world service* and the simulator will update its simulation when he receives a *step_world service request*.
+   * if true, the plan manager will generate subgoal topic always as goal(global goal) topic.
+   * if false, you can also use move_base action triggered by rviz_plugin button *2D Navigation Goal*. 
+
+### 2.3. [Quick start] test DRL training
+Export turtlebot model for simulation 
+
+* In one terminnal, export turtlebot model and start simulation
+
+```bash
+
+roslaunch arena_bringup start_arena_flatland.launch  train_mode:=true 	use_viz:=true  task_mode:=random
+
+```
+* In another terminal
+
+```
+workon rosnav
+roscd arena_local_planner_drl
+python scripts/training/training_example.py
+```
+first **activate your python3 env**, which contains libaraies stable_baseline3, geometry2
+then python run the script.
+
+Hint: During 2021-01-05 and 2021-01-10, arena_local_planner_drl package is still under the development, which means the api of the class could be drastically changed. Sorry about the inconvinience!
+
+### 2.4. Rviz plugins:
+   <p align="center">
+      <img width="600" height="480" src="img/rviz_plugin_intro.png">
+   </p>
+
+   1. 2D Nav Goal: triggers move_base action
+   2. Spawn Model: load a new model.yaml to flatland simulator
+   3. Arena Nav Goal: set (global) goal for arena navigation
+   4. Generate Task: change task, which changes the position of obstacles and set a new goal for arena navigation
+
+
+
+
+
+### 4. DRL Local planner(Training and Testing)
+<p align="center">
+  <img width="400" height="300" src="img/local_planner.png">
+  <img width="400" height="300" src="img/synchronization.png">
+</p>
+
+##### Communication:
+DRL local planner get the needed observation info by using ROS communication. This may slows down the training, but for current version we just keep it.
+
+DRL local planner get observation info from:
+   * flatland server: laser scan
+   * plan manager: robot state, subgoal
+
+DRL local planner send action command to flatland server
+   * flatland server: diff_drive
+
+##### Observation synchronization
+DRL local planner contains observation collector and we designed a synchronization mechanism for following important reasons & aspects:
+   1. In real world, each sensor has its own publishing rate and are different from each other
+   2. The action calculation should based on the observations that are synchronized, otherwise is useless.
+   3. The calculated action is only valid for a specified time horizon(control horizon),e.g. 0.2s. For different control horizon, the action space should be different. 
+      1. example 1: action is calculated every 0.01s, time horizon=0.01s, suppose calculated action=1m/s, in this time horizon the robot will actually move 0.01m.
+      2. example 2: action is calculated every 0.5s, time horizon=0.5s, suppose calculated action=1m/s, in this time horizon the robot will actually move 0.5m.
+      * From 1 & 2, one can see for a same action space, a different time horizon will result in different actual result.
+
+
+To be added...
+
+
+#### 4.1 DRL Agent Training
 
 As a fundament for our Deep Reinforcement Learning approaches [StableBaselines3](https://stable-baselines3.readthedocs.io/en/master/index.html) was used. 
 
@@ -9,7 +113,7 @@ As a fundament for our Deep Reinforcement Learning approaches [StableBaselines3]
 * Networks will get trained, evaluated and saved
 * Load your trained agent to continue training
 * Optionally log training and evaluation data
-* Enable and modify training curriculuu
+* Enable and modify training curriculum
 
 
 ##### Quick Start
@@ -17,7 +121,7 @@ As a fundament for our Deep Reinforcement Learning approaches [StableBaselines3]
 * In one terminnal, start simulation
 
 ```bash
-roslaunch arena_bringup start_arena_flatland.launch  train_mode:=true 	use_viz:=true  task_mode:=random
+roslaunch arena_bringup start_arena_flatland.launch  train_mode:=true 	use_viz:=true  task_mode=random
 ```
 * In another terminal
 
@@ -28,7 +132,7 @@ python scripts/training/train_agent.py --agent MLP_ARENA2D
 ```
 
 
-#### Program Arguments
+#### 4.1.1 Program Arguments
 
 **Generic program call**:
 ```
@@ -39,7 +143,7 @@ train_agent.py [agent flag] [agent_name | unique_agent_name | custom mlp params]
 | -------------------- | -------------------------------- |---------------------------------------------------------------- |--------------------------------------------------- | 
 | ``` train_agent.py```|```--agent```                     | *agent_name* ([see below](#training-with-a-predefined-dnn))   | initializes a predefined network from scratch
 |                      |```--load ```                     | *unique_agent_name* ([see below](#load-a-dnn-for-training))   | loads agent to the given name
-|                      |```--custom-mlp```                | _custom_mlp_params_ ([see below](#training-with-a-custom-mlp))| initializes custom MLP according to given arguments 
+|                      |```--custom-mlp```                | _custom mlp params_ ([see below](#training-with-a-custom-mlp))| initializes custom MLP according to given arguments 
 
 _Custom Multilayer Perceptron_ parameters will only be considered when ```--custom-mlp``` was set!
 |  Custom Mlp Flags | Syntax                | Description                                   |
@@ -79,7 +183,7 @@ In order to differentiate between agents with similar architectures but from dif
 
 The name consists of:
 ```
-[architecture]_[year]_[month]__[hour]_[minute]
+[architecture]_[year]_[month]_[day]__[hour]_[minute]
 ```
 
 To load a specific agent you simply use the flag ```--load```, e.g.:
@@ -90,7 +194,7 @@ train_agent.py --load MLP_ARENA2D_2021_01_19__03_20
 
 ##### Training with a custom MLP
 
-Instantiating a MLP architecture with an arbitrary number of layers and neurons for training was made as simple as possible by providing the option of using the ```--custom-mlp``` flag. By typing in the flag additional flags for the architecture of latent layers get accessible ([see above](#program-arguments)).
+Instantiating a MLP architecture with an arbitrary number of layers and neurons for training was made as simple as possible by providing the option of using the ```--custom-mlp``` flag. By typing in the flag additional flags for the architecture of latent layers get accessible ([see above](#411-program-arguments)).
 
 e.g. given following architecture:
 ```
@@ -114,7 +218,7 @@ program must be invoked as follows:
 train_agent.py --custom-mlp --body 256-128 --pi 256 --vf 16 --act_fn relu
 ```
 
-#### Hyperparameters
+#### 4.1.2 Hyperparameters
 
 You can modify the hyperparameters in the upper section of the training script which is located at:
 ```
@@ -137,14 +241,14 @@ Following hyperparameters can be adapted:
 | clip_range | Clipping parameter, it can be a function of the current progress remaining (from 1 to 0).
 | reward_fnc | Number of the reward function (defined in _../rl_agent/utils/reward.py_)
 | discrete_action_space | If robot uses discrete action space
-| task_mode | Mode tasks will be generated in (custom, random, staged). In custom mode one can place obstacles manually via Rviz. In random mode there's a fixed number of obstacles which are spawned randomly distributed on the map after each episode. In staged mode the training curriculum will be used to spawn obstacles. ([more info](#training-curriculum))
+| task_mode | Mode tasks will be generated in (custom, random, staged). In custom mode one can place obstacles manually via Rviz. In random mode there's a fixed number of obstacles which are spawned randomly distributed on the map after each episode. In staged mode the training curriculum will be used to spawn obstacles. ([more info](#414-training-curriculum))
 | curr_stage | When "staged" training is activated which stage to start the training with.
 
 ([more information on PPO implementation of SB3](https://stable-baselines3.readthedocs.io/en/master/modules/ppo.html))
 
 **Note**: For now further parameters like _max_steps_per_episode_ or _goal_radius_ have to be changed inline (where FlatlandEnv gets instantiated). _n_eval_episodes_ which will take place after _eval_freq_ timesteps can be changed also (where EvalCallback gets instantiated).
 
-#### Reward Functions
+#### 4.1.3 Reward Functions
 
 The reward functions are defined in
 ```
@@ -192,7 +296,8 @@ At present one can chose between two reward functions which can be set at the hy
 </tr>
 </table>
 
-#### Training Curriculum
+
+#### 4.1.4 Training Curriculum
 
 For the purpose of speeding up the training an exemplary training currucilum was implemented. But what exactly is a training curriculum you may ask. We basically divide the training process in difficulty levels, here the so called _stages_, in which the agent will meet an arbitrary number of obstacles depending on its learning progress. Different metrics can be taken into consideration to measure an agents performance.
 
@@ -208,55 +313,7 @@ Exemplary training curriculum:
 | 5               |  10              | 10                 |
 | 6               |  13              | 13                 |
 
-#### Run the trained agent
-
-Now that you've trained your agent you surely want to deploy and evaluate it. For that purpose we've implemented a specific task mode in which you can specify your scenarios in a .json file. The agent will then be challenged according to the scenarios defined in the file. (*TODO: link zum scenario mode readme*).  
-
-- Firstly, you need to start the *simulation environment*:
-```
-roslaunch arena_bringup start_arena_flatland.launch map_file:="map1"  disable_scenario:="false" scenario_file:="eval/obstacle_map1_obs20.json"
-```
-
-- Then, start the *time-space plan manager*:
-```
-roslaunch arena_bringup timed_space_planner_fsm.launch
-```
-
-- Afterwards, start the *action publisher*:
-```
-roscd arena_local_planner_drl/scripts/deployment/
-python action_publisher.py
-```
-
-- Then run the ```run_agent.py``` script.
-```python run_agent.py --load DRL_LOCAL_PLANNER_2021_03_22__19_33 --scenario obstacle_map1_obs20```
-
-**Generic program call**:
-```
-roscd arena_local_planner_drl/scripts/deployment/
-run_agent.py --load [agent_name] -s [scenario_name] -v [number] [optional flag]
-```
-
-| Program call         | Flags                            | Usage                                 |Description                                         |
-| -------------------- | -------------------------------- |-------------------------------------- |--------------------------------------------------- | 
-| ```run_agent.py```   |```--load ```                     | *agent_name* ([see below](#load-a-dnn-for-training))     | loads agent to the given name
-|                      |```-s``` or ```--scenario```      | *scenario_name* (as in *../scenario/eval/*)                       | loads the scenarios to the given .json file name
-|                      |(optional)```-v``` or ```--verbose```| *0 or 1*                              | verbose level
-|                      |(optional) ```--no-gpu```           | *None*                                | disables the gpu for the evaluation
-
-
-
-- Example call:
-``` 
-python run_agent.py --load DRL_LOCAL_PLANNER_2021_03_22__19_33 -s obstacle_map1_obs20
-```
-**Notes**: 
-- Make sure that drl mode is activated in *Parameter.yaml* (*../arena-rosnav/arena_bringup/launch*)
-- Make sure that the simulation speed doesn't overlap the agent's calculation time for an action (an obvious indicator: same action gets published multiple times successively)
-- If your agent was trained with normalized observations it's necessary to provide the vec_normalize.pkl 
-
-
-#### Important Directories
+#### 4.1.5 Important Directories
 
 |Path|Description|
 |-----|-----|
@@ -264,23 +321,3 @@ python run_agent.py --load DRL_LOCAL_PLANNER_2021_03_22__19_33 -s obstacle_map1_
 |```../arena_local_planner_drl/configs```| yaml files containing robots action spaces and the training curriculum
 |```../arena_local_planner_drl/training_logs```| tensorboard logs and evaluation logs
 |```../arena_local_planner_drl/scripts```| python file containing the predefined DNN architectures and the training script
-
-
-#### Evaluation
-Firstly, you need to start the *simulation environment*:
-```
-roslaunch arena_bringup start_arena_flatland.launch map_file:="map1"  disable_scenario:="false"
-```
-
-Then, start the *time-space plan manager*:
-```
-roslaunch arena_bringup timed_space_planner_fsm.launch
-```
-
-Afterwards start the *action publisher*:
-```
-roscd arena_local_planner_drl/scripts/deployment/
-python action_publisher.py
-```
-
-Now 

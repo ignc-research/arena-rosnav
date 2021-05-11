@@ -211,7 +211,7 @@ if __name__ == "__main__":
             [make_envs(ns_for_nodes, i, params=params, PATHS=PATHS) 
                 for i in range(args.n_envs)], 
             start_method='fork')
-    elif args.debug:
+    else:
         env = DummyVecEnv(
             [make_envs(ns_for_nodes, i, params=params, PATHS=PATHS) 
                 for i in range(args.n_envs)])
@@ -375,12 +375,18 @@ if __name__ == "__main__":
 
     # start training
     start = time.time()
-    model.learn(
-        total_timesteps = n_timesteps, callback=eval_cb, reset_num_timesteps=True)
+    try:
+        model.learn(
+            total_timesteps = n_timesteps, callback=eval_cb, reset_num_timesteps=True)
+    except KeyboardInterrupt:
+        print('KeyboardInterrupt..')
+        pass
+
+    model.env.close()
     print(f'Time passed: {time.time()-start}s')
 
     # update the timesteps the model has trained in total
     # update_total_timesteps_json(n_timesteps, PATHS)
-    print("training done!")
+    print('Training script will be terminated')
     sys.exit()
     
