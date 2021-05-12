@@ -1,5 +1,6 @@
 mkdir -p catkin_ws/src && cd catkin_ws/src
 git clone git@github.com:wittenator/arena-rosnav.git
+cd arena-rosnav
 
 sudo add-apt-repository universe
 sudo add-apt-repository multiverse
