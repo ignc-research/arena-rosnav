@@ -17,7 +17,6 @@ class LabelPublisher:
         self.simulated_agents = None
         self.marker_pub = rospy.Publisher(rospy.get_namespace() + 'pedsim_labels', MarkerArray, queue_size=10)
         self.agent_states_sub = rospy.Subscriber(rospy.get_namespace() + "pedsim_simulator/simulated_agents", AgentStates, self.simulated_agents_callback)
-        self.agent_types = ["adult", "child", "elder", "vehicle", "robot"]
         self.marker_ids = []
         self.last_agent_states_callback = rospy.get_rostime()
 
@@ -25,12 +24,6 @@ class LabelPublisher:
     def simulated_agents_callback(self, agent_states_msg):
         self.simulated_agents = agent_states_msg
         self.last_agent_states_callback = rospy.get_rostime()
-
-
-    def agent_type_to_string(self, type_id):
-        if type_id < len(self.agent_types):
-            return self.agent_types[type_id]
-        return "unknown type"
 
 
     def remove_all_markers(self):
@@ -61,9 +54,6 @@ class LabelPublisher:
         agent_ids.sort()
         self.marker_ids.sort()
         if agent_ids != self.marker_ids:
-            # TODO
-            # print(agent_ids)
-            # print(self.marker_ids)
             self.remove_all_markers()
             self.marker_ids = agent_ids
 
@@ -110,7 +100,7 @@ class LabelPublisher:
                     id = agent.id
                     pos_x = agent.pose.position.x
                     pos_y = agent.pose.position.y
-                    text = f"{agent.id} {self.agent_type_to_string(agent.type)}\n{agent.social_state}"
+                    text = f"{agent.id} {agent.type}\n{agent.social_state}"
                     marker = self.create_label_marker(id, pos_x, pos_y, text)
 
                     markers.markers.append(marker)
