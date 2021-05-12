@@ -1,3 +1,6 @@
+mkdir -p catkin_ws/src && cd catkin_ws/src
+git clone https://github.com/wittenator/arena-rosnav
+
 sudo add-apt-repository universe
 sudo add-apt-repository multiverse
 sudo add-apt-repository restricted
@@ -14,12 +17,12 @@ sudo aptitude install ros-melodic-desktop-full
 echo "source /opt/ros/melodic/setup.bash" >> ~/.bashrc
 source ~/.bashrc
 
-sudo aptitude install -y python-rosdep python-rosinstall python-rosinstall-generator python-wstool build-essential
+sudo aptitude -y install python-rosdep python-rosinstall python-rosinstall-generator python-wstool build-essential
 
 sudo rosdep init
 rosdep update
 
-sudo aptitude update && sudo aptitude install -y \
+sudo aptitude update && sudo aptitude -y install \
 libopencv-dev \
 liblua5.2-dev \
 screen \
@@ -34,3 +37,11 @@ libarmadillo-dev \
 ros-melodic-nlopt \
 
 poetry install
+
+PYTHONPATH=$(poetry run which python)
+
+rosws update
+source $HOME/.bashrc
+cd ../.. 
+catkin_make -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=$PYTHONPATH
+source devel/setup.sh
