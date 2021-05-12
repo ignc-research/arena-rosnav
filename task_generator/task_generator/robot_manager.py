@@ -40,6 +40,7 @@ class RobotManager:
         self.safe_dist_adult=1.0
         self.safe_dist_child=1.2
         self.safe_dist_elder=1.5
+        self.safe_dist_forklift = 1.5
 
         self.is_training_mode = rospy.get_param("/train_mode")
         self.step_size = rospy.get_param("step_size")
@@ -166,12 +167,16 @@ class RobotManager:
             coordinates=obs_dict['human_coordinates_in_robot_frame'].T
             tys=obs_dict['human_type']
             for i, coordinate in enumerate(coordinates):
-                if tys[i]==0: #adult
+                if tys[i]=='adult': 
                     forbiddenZones.append((coordinate[0],coordinate[1],self.safe_dist_adult*1.05))
-                elif tys[i]==1: #child
+                elif tys[i]=='child': 
                     forbiddenZones.append((coordinate[0],coordinate[1],self.safe_dist_child*1.05))
-                elif tys[i]==3: #elder
+                elif tys[i]=='elder': 
                     forbiddenZones.append((coordinate[0],coordinate[1],self.safe_dist_elder*1.05))
+                elif tys[i]=='forklift':
+                    forbiddenZones.append((coordinate[0],coordinate[1],self.safe_dist_forklift*1.05))
+
+
 
         if forbiddenPoints is not None:
             # print("calculate the forbidden zones")
