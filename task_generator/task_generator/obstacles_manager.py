@@ -697,16 +697,13 @@ class ObstaclesManager:
             for type,item in enumerate(obstacles_spawning_human.items()) :
                 for  x in range(item[1][0]):
                     ped = peds[i]
-                    self.__ped_type= type
+                    self.__ped_type=  item[0]
+                    # item[0]
+                    # print(item[0])
                     self.agent_topic_str+=f',{self.ns_prefix}pedsim_agent_{ped[0]}/'+ item[0]
                     self.__ped_file=os.path.join(rospkg.RosPack().get_path(
                     'simulator_setup'), item[1][1])
-                    # if item[0] == 'forklift':
-                    #     # shelves_waypoints = shelves_waypoints + 0.000000001
-
-                    #     ped[2] = ped[2][1:num_shelves]
-                        
-
+          
                     msg = Ped()
                     msg.id = ped[0]
                     msg.pos = Point()

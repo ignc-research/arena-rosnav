@@ -1,13 +1,14 @@
 #! /usr/bin/env python
 import threading
 from typing import Tuple
-
 from numpy.core.numeric import normalize_axis_tuple
 import rospy
+import rospkg
 import random
 import numpy as np
 from collections import deque
-
+import yaml
+import os
 import time  # for debuging
 import threading
 # observation msgs
@@ -49,23 +50,20 @@ class ObservationCollector():
             self.ns_prefix = "/"
         else:
             self.ns_prefix = "/"+ns+"/"
+        
+        self.safe_dists_human_type = self.read_saftey_distance_parameter_from_yaml()['human obstacle safety distance radius']
+        self.safe_dists_robot_factor = self.read_saftey_distance_parameter_from_yaml()['robot obstacle safety distance radius']
+        self.safe_dists_factor = self.read_saftey_distance_parameter_from_yaml()['safety distance factor']
+        self.obstacle_radius = self.read_saftey_distance_parameter_from_yaml()['obstacle radius']
 
-        #safety settings for different humans TODO: should be global setting
-        self.safe_dist_adult = 1.0 #in meter 1.0 1.5 2
-        self.safe_dist_child = 1.2
-        self.safe_dist_elder = 1.5
-        self.safe_dist_talking = 0.8
-        self.safe_dist_forklift = 1.5
+
+ 
         self.safe_dist_randomwandrer = 1.5
-        #settings for agents TODO: should be transferred from yaml files
-        self._radius_adult= 0.32
-        self._radius_child= 0.25
-        self._radius_elder= 0.3
+        
         self._radius_robot= 0.3
-        self._radius_forklift= 0.3
         self._radius_randomwandrer = 0.3
 
-
+        
         #get parameters
         self._laser_num_beams = rospy.get_param("/laser_num_beams")  # for frequency controlling
         self._action_frequency = 1/rospy.get_param("/robot_action_rate")
@@ -119,7 +117,7 @@ class ObservationCollector():
         self._human_vel=np.array( [None]*num_humans)
         self._human_behavior=np.array( [None]*num_humans)
        
-        #intilasing arrays for human states
+        #intilasing arrays for robo states
         self._robo_obstacle_type=np.array( [None]*num_robo_obstacles)
         self._robo_obstacle_position=np.array( [None]*num_robo_obstacles)
         self._robo_obstacle_vel=np.array( [None]*num_robo_obstacles)
@@ -203,7 +201,13 @@ class ObservationCollector():
         # semantic tokens
         self._human_behavior_token=(self._human_behavior=='talking').astype(np.int)
 
+        for item in self.safe_dists_human_type.items() :
+        # self.safe_dists_human_type = self.read_saftey_distance_parameter_from_yaml()['human obstacle safety distance radius']
+        # self.safe_dists_robot_factor = self.read_saftey_distance_parameter_from_yaml()['robot obstacle safety distance radius']
+        # self.safe_dists_factor = self.read_saftey_distance_parameter_from_yaml()['safety distance factor']
+        # self.obstacle_radius = self.read_saftey_distance_parameter_from_yaml()['obstacle radius']
 
+          obs_dict[item[0]+'_in_robot_frame'] = np.array([],dtype=object).reshape(0, 2)
         rho_behavior_adult = np.array([],dtype=object).reshape(0, 2)
         rho_behavior_child = np.array([],dtype=object).reshape(0, 2)
         rho_behavior_elder = np.array([],dtype=object).reshape(0, 2)
@@ -216,61 +220,21 @@ class ObservationCollector():
                 continue
             else:
                 count_observable_humans=count_observable_humans+1
-            if ty==0: # adult
+                
                 rho_behavior=np.array([rho_humans[i],self._human_behavior[i]],dtype=object)
-                rho_behavior_adult=np.vstack([rho_behavior_adult, rho_behavior])
+                
+                obs_dict[ty+'_in_robot_frame'] = np.vstack([obs_dict[ty+'_in_robot_frame'], rho_behavior])
                 #determine the safe_dist for every human
-                if self._human_behavior[i] =='talking':
-                    safe_dist_=self.safe_dist_talking
-                else:
-                    safe_dist_=self.safe_dist_adult
+                safe_dist_=self.safe_dists_human_type[ty] * self.safe_dists_factor[self._human_behavior[i]]
+                _radius =self.obstacle_radius[ty]
                 #robot centric 4 elements in state
                 state=ObservationCollector.rotate(self.robot_self_state[:2]+[self._human_position[i].x, self._human_position[i].y, self._human_vel[i].linear.x,self._human_vel[i].linear.y], self.rot)
-                obs=np.array(self.robot_self_state+[rho_humans[i], theta_humans[i]]+state+[safe_dist_ ,self._radius_adult,
-                                                self._radius_adult+safe_dist_+self._radius_robot,self._human_behavior_token[i]])
+                obs=np.array(self.robot_self_state+[rho_humans[i], theta_humans[i]]+state+[safe_dist_ ,_radius,
+                                                _radius+safe_dist_+self._radius_robot,self._human_behavior_token[i]])
                 
                 merged_obs = np.hstack([merged_obs,obs])
-            elif ty==1: # child
-                rho_behavior=np.array([rho_humans[i],self._human_behavior[i]],dtype=object)
-                rho_behavior_child=np.vstack([rho_behavior_child, rho_behavior])
-                #determine the safe_dist for every human
-                if self._human_behavior[i] =='talking':
-                    safe_dist_=self.safe_dist_talking
-                else:
-                    safe_dist_=self.safe_dist_child
-                #robot centric 
-                state=ObservationCollector.rotate(self.robot_self_state[:2]+[self._human_position[i].x, self._human_position[i].y, self._human_vel[i].linear.x,self._human_vel[i].linear.y],self.rot)
-                obs=np.array(self.robot_self_state+[rho_humans[i], theta_humans[i]]+state+[safe_dist_,self._radius_child,
-                                                self._radius_child+safe_dist_+self._radius_robot,self._human_behavior_token[i]])
-                merged_obs = np.hstack([merged_obs,obs])
-            elif ty==2: # elder
-                rho_behavior=np.array([rho_humans[i],self._human_behavior[i]],dtype=object)
-                rho_behavior_elder=np.vstack([rho_behavior_elder, rho_behavior])
-                #determine the safe_dist for every human
-                if self._human_behavior[i] =='talking':
-                    safe_dist_=self.safe_dist_talking
-                else:
-                    safe_dist_=self.safe_dist_elder
-                #robot centric 
-                state=ObservationCollector.rotate(self.robot_self_state[:2]+[self._human_position[i].x, self._human_position[i].y, self._human_vel[i].linear.x,self._human_vel[i].linear.y], self.rot)
-                obs=np.array(self.robot_self_state+[rho_humans[i], theta_humans[i]]+state+[safe_dist_,self._radius_elder,
-                                                self._radius_elder+safe_dist_+self._radius_robot, self._human_behavior_token[i]])
-                merged_obs = np.hstack([merged_obs,obs])
-            elif ty==3:  # forklift
-                rho_behavior=np.array([rho_humans[i],self._human_behavior[i]],dtype=object)
-                rho_behavior_forklift=np.vstack([rho_behavior_forklift, rho_behavior])
-                #determine the safe_dist for every human
-                safe_dist_=self.safe_dist_forklift
-                #robot centric 
-                state=ObservationCollector.rotate(self.robot_self_state[:2]+[self._human_position[i].x, self._human_position[i].y, self._human_vel[i].linear.x,self._human_vel[i].linear.y], self.rot)
-                obs=np.array(self.robot_self_state+[rho_humans[i], theta_humans[i]]+state+[safe_dist_,self._radius_forklift,
-                                                self._radius_forklift+safe_dist_+self._radius_robot, self._human_behavior_token[i]])
-                merged_obs = np.hstack([merged_obs,obs])
-        obs_dict['adult_in_robot_frame'] = rho_behavior_adult
-        obs_dict['child_in_robot_frame'] = rho_behavior_child
-        obs_dict['elder_in_robot_frame'] = rho_behavior_elder
-        obs_dict['forklift_in_robot_frame'] = rho_behavior_forklift
-        
+      
+     
         #TODO more proper method is needed to supplement info blanks (finished)
         if count_observable_humans==0:
             obs_empty=np.array(self.robot_self_state+[0]*10)
@@ -539,6 +503,19 @@ class ObservationCollector():
         radius = a*v+ r_static
         theta = 11*np.pi/6* np.exp(-1.4*v)+ np.pi/6
         return radius, theta
+
+    def read_saftey_distance_parameter_from_yaml(self):
+        
+        file_location = os.path.join(rospkg.RosPack().get_path('simulator_setup'), 'saftey_distance_parameter.yaml')
+        
+        
+        if os.path.isfile(file_location):
+            with open(file_location, "r") as file:
+                saftey_distance_parameter = yaml.load(file, Loader=yaml.FullLoader)       
+        assert isinstance(
+             saftey_distance_parameter, dict), "'saftey_distance_parameter.yaml' has wrong fromat! Has to encode dictionary!"
+                
+        return saftey_distance_parameter
         
     @staticmethod
     def process_global_plan_msg(globalplan):
