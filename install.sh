@@ -1,0 +1,36 @@
+sudo add-apt-repository universe
+sudo add-apt-repository multiverse
+sudo add-apt-repository restricted
+sudo apt update
+
+sudo apt-get install aptitude
+
+sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu bionic main" > /etc/apt/sources.list.d/ros-latest.list'
+apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
+
+sudo aptitude update
+sudo aptitude install ros-melodic-desktop-full
+
+echo "source /opt/ros/melodic/setup.bash" >> ~/.bashrc
+source ~/.bashrc
+
+sudo aptitude install -y python-rosdep python-rosinstall python-rosinstall-generator python-wstool build-essential
+
+sudo rosdep init
+rosdep update
+
+sudo aptitude update && sudo aptitude install -y \
+libopencv-dev \
+liblua5.2-dev \
+screen \
+python3-catkin-pkg-modules \
+python3-rospkg-modules \
+python3-empy \
+python3-setuptools \
+ros-melodic-navigation \
+ros-melodic-teb-local-planner \
+ros-melodic-mpc-local-planner \
+libarmadillo-dev \
+ros-melodic-nlopt \
+
+poetry install
