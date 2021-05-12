@@ -1,5 +1,5 @@
 mkdir -p catkin_ws/src && cd catkin_ws/src
-git clone https://github.com/wittenator/arena-rosnav
+git clone git@github.com:wittenator/arena-rosnav.git
 
 sudo add-apt-repository universe
 sudo add-apt-repository multiverse
@@ -38,7 +38,9 @@ ros-melodic-nlopt \
 
 poetry install
 
-PYTHONPATH=$(poetry run which python)
+poetry shell
+
+PYTHONPATH=$(which python)
 
 rosws update
 source $HOME/.bashrc
