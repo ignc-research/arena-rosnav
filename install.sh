@@ -12,7 +12,7 @@ sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu bionic main" > /etc/apt
 apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
 
 sudo aptitude update
-sudo aptitude install ros-melodic-desktop-full
+sudo aptitude -y install ros-melodic-desktop-full
 
 echo "source /opt/ros/melodic/setup.bash" >> ~/.bashrc
 source ~/.bashrc
