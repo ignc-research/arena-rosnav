@@ -164,6 +164,8 @@ class RobotManager:
         forbiddenZones=[]
         if obs_dict is not None:
             # print("calculate the forbidden zones")
+
+            ## TODO read it from Yaml and static obstacles
             coordinates=obs_dict['human_coordinates_in_robot_frame'].T
             tys=obs_dict['human_type']
             for i, coordinate in enumerate(coordinates):

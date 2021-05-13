@@ -677,8 +677,7 @@ class ObstaclesManager:
         """
         Spawning one pedestrian in the simulation. The type of pedestrian is randomly decided here.
         TODO: the task generator later can decide the number of the agents
-        ADULT = 0, CHILD = 1, ROBOT = 2, ELDER = 3,
-        ADULT_AVOID_ROBOT = 10, ADULT_AVOID_ROBOT_REACTION_TIME = 11
+
         :param  start_pos start position of the pedestrian.
         :param  wps waypoints the pedestrian is supposed to walk to.
         :param  id id of the pedestrian.
@@ -698,8 +697,6 @@ class ObstaclesManager:
                 for  x in range(item[1][0]):
                     ped = peds[i]
                     self.__ped_type=  item[0]
-                    # item[0]
-                    # print(item[0])
                     self.agent_topic_str+=f',{self.ns_prefix}pedsim_agent_{ped[0]}/'+ item[0]
                     self.__ped_file=os.path.join(rospkg.RosPack().get_path(
                     'simulator_setup'), item[1][1])
@@ -777,8 +774,7 @@ class ObstaclesManager:
                     spawn_request = SpawnModelRequest()
                     spawn_request.yaml_path =  model_yaml_file_path
                     spawn_request.name = f'{"robo_obstacle"}_{robo_obstacle[0]:02d}'
-                    spawn_request.ns = rospy.get_namespace()
-
+                    spawn_request.ns = item[0]
                     
                     theta = theta = random.uniform(-math.pi, math.pi)
                     spawn_request.pose.x = robo_obstacle[1][0]
