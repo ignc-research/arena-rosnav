@@ -20,6 +20,8 @@ catkin-pkg = "^0.4.23"
 netifaces = "^0.10.9"
 pathlib = "^1.0.1"
 stable-baselines3 = "^1.0"
+empy = "^3.3.4"
+setuptools = "^56.2.0"
 
 [tool.poetry.dev-dependencies]
 
