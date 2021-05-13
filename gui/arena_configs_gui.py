@@ -159,6 +159,7 @@ class Window1(QWidget):
             
             else :
             ### reset all widgets out of window 1 ###
+                clear_layout(self.grid_advanced_group_box)
                 clear_layout(self.grid1)
                 myFont=QFont()
                 myFont.setBold(True)
