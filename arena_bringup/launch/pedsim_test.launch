@@ -66,7 +66,7 @@
   <include file="$(find arena_bringup)/launch/sublaunch/pedsim.launch">
   </include>
 
-  <node name="pedsim_test" pkg="arena_util_scripts" type="pedsim_test.py">
+  <node name="pedsim_test" pkg="arena_util_scripts" type="pedsim_test.py" output="screen">
   </node>
 
 </launch>
