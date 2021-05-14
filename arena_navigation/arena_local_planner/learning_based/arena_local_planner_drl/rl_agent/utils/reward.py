@@ -21,6 +21,7 @@ class RewardCalculator():
         :param goal_radius (float): The minimum distance to goal that goal position is considered to be reached. 
         """
         self.curr_reward = 0
+        ## TODO read it from Yaml and static obstacles
         # additional info will be stored here and be returned alonge with reward.
         self.info = {}
         self.robot_radius = robot_radius

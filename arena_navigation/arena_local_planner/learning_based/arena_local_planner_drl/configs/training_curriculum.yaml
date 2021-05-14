@@ -1,6 +1,6 @@
 1:
-  dynamic_human: 10
-  dynamic_robot: 0
+  dynamic_human: 8
+  dynamic_robot: 1
   static: 0
 2:
   dynamic_human: 5
@@ -23,10 +23,6 @@
   dynamic_robot: 2
   static: 0
 7:
-  dynamic_human: 5
-  dynamic_robot: 2
-  static: 0
-8:
   dynamic_human: 5
   dynamic_robot: 2
   static: 0
