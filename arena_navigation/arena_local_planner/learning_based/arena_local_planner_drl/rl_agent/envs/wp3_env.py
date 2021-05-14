@@ -59,7 +59,7 @@ class wp3Env(gym.Env):
         super(wp3Env, self).__init__()
         # Define action and observation space
         # They must be gym.spaces objects
-                self.ns = ns
+        self.ns = ns
         try:
             # given every environment enough time to initialize, if we dont put sleep,
             # the training script may crash.
@@ -125,7 +125,7 @@ class wp3Env(gym.Env):
 
         self._steps_curr_episode = 0
         self._max_steps_per_episode = max_steps_per_episode
-                #global variables for subscriber callbacks
+        #global variables for subscriber callbacks
         self.range_circle = 1.5
         self._steps_curr_episode = 0
         self._robot_pose = PoseStamped()
@@ -136,7 +136,6 @@ class wp3Env(gym.Env):
         self._action_msg = PoseStamped()
         self._viz_msg = Path()
         self._viz_points = PoseStamped()
-
         self._robot_twist = [0]*2
         self.firstTime = 0
         self._previous_time = 0
@@ -358,10 +357,14 @@ class wp3Env(gym.Env):
 
         done = reward_info['is_done']
         print("reward:  {}".format(reward))
+                # extended eval info
+        if self._extended_eval:
+            self._update_eval_statistics(obs_dict, reward_info)
         # info
         info = {}
         if done:
             info['done_reason'] = reward_info['done_reason']
+            info['is_success'] = reward_info['is_success']
             self.reward_calculator.kdtree = None
             info['gp_len'] = len(ObservationCollector.process_global_plan_msg_to_array(self._globalPlan))
             info['wp_set'] = self._action_count
@@ -373,6 +376,13 @@ class wp3Env(gym.Env):
             self.reward_calculator.kdtree = None
             info['gp_len'] = len(self._globalPlanArray)
 
+                # for logging
+        if self._extended_eval:
+            if done:
+                info['collisions'] = self._collisions
+                info['distance_travelled'] = round(self._distance_travelled, 2)
+                info['time_safe_dist'] = self._safe_dist_counter * self._action_frequency
+                info['time'] = self._steps_curr_episode * self._action_frequency
         return merged_obs, reward, done, info
 
     def reset(self):
@@ -388,12 +398,54 @@ class wp3Env(gym.Env):
         self._steps_curr_episode = 0
         self.firstTime = 0
         self._action_count = 0
+
+        # extended eval info
+        if self._extended_eval:
+            self._last_robot_pose = None
+            self._distance_travelled = 0
+            self._safe_dist_counter = 0
+            self._collisions = 0
+
         obs, _ = self.observation_collector.get_observations()
         return obs  # reward, done, info can't be included
 
     def close(self):
         pass
 
+def _update_eval_statistics(self, obs_dict: dict, reward_info: dict):
+        """
+        Updates the metrics for extended eval mode
+
+        param obs_dict (dict): observation dictionary from ObservationCollector.get_observations(),
+            necessary entries: 'robot_pose'
+        param reward_info (dict): dictionary containing information returned from RewardCalculator.get_reward(),
+            necessary entries: 'crash', 'safe_dist'
+        """
+        # distance travelled
+        if self._last_robot_pose is not None:
+            self._distance_travelled += FlatlandEnv.get_distance(
+                self._last_robot_pose, obs_dict['robot_pose'])
+
+        # collision detector
+        if 'crash' in reward_info:
+            if reward_info['crash'] and not self._in_crash:
+                self._collisions += 1
+                # when crash occures, robot strikes obst for a few consecutive timesteps
+                # we want to count it as only one collision
+                self._in_crash = True    
+        else:
+            self._in_crash = False
+
+        # safe dist detector
+        if 'safe_dist' in reward_info:
+            if reward_info['safe_dist']:
+                self._safe_dist_counter += 1
+
+        self._last_robot_pose = obs_dict['robot_pose']
+
+@staticmethod
+def get_distance(pose_1: Pose2D, pose_2: Pose2D):
+    return math.hypot(pose_2.x - pose_1.x, pose_2.y - pose_1.y)
 
 if __name__ == '__main__':
 
