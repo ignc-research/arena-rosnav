@@ -3,6 +3,9 @@
 
   <arg name="train_mode"       default="false"/>
   <param name="train_mode" value="$(arg train_mode)" />
+
+  <arg name="useHumanMode"       default="false"/>
+  <param name="useHumanMode" value="$(arg useHumanMode)" />
   
   <arg name="local_planner"   default="teb"/> 
   <arg name="rviz_file"       default="nav_LP"/>
@@ -49,7 +52,11 @@
   <arg name="odom_frame_id"     value="odom"/>
   <arg name="base_frame_id"     value="base_footprint"/>
   <arg name="odom_ground_truth" default="/odometry/ground_truth"/>
-
+  
+  <!-- Launch light pedsim -->
+  <include file="$(find arena_bringup)/launch/sublaunch_testing/pedestrians_only.launch">
+      <!-- <arg name="ns" value="$(arg ns)" /> -->
+  </include>
 
  <!-- use simulator-->
   <include file="$(find arena_bringup)/launch/sublaunch_testing/flatland_simulator.launch">
