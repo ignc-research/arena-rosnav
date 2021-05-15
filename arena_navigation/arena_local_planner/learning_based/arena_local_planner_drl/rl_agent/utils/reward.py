@@ -1,6 +1,9 @@
 import numpy as np
 from numpy.lib.utils import safe_eval
 import rospy
+import yaml
+import os
+import rospkg
 from geometry_msgs.msg import Pose2D
 from typing import Tuple
 import scipy.spatial
@@ -30,6 +33,9 @@ class RewardCalculator():
         self.last_dist_to_path = None
         self.safe_dist = safe_dist
         #TODO: should be global setting
+        self.safe_dists_human_type = self.read_saftey_distance_parameter_from_yaml()['human obstacle safety distance radius']
+        self.safe_dists_robot_type = self.read_saftey_distance_parameter_from_yaml()['robot obstacle safety distance radius']
+        self.safe_dists_factor = self.read_saftey_distance_parameter_from_yaml()['safety distance factor']
         self.safe_dist_adult= 1.0
         self.safe_dist_child= 1.2
         self.safe_dist_elder= 1.5
@@ -523,3 +529,16 @@ class RewardCalculator():
         return dist, index
 
 
+    def read_saftey_distance_parameter_from_yaml(self):
+        
+        file_location = os.path.join(rospkg.RosPack().get_path('simulator_setup'), 'saftey_distance_parameter.yaml')
+        
+        
+        if os.path.isfile(file_location):
+            with open(file_location, "r") as file:
+                saftey_distance_parameter = yaml.load(file, Loader=yaml.FullLoader)       
+        assert isinstance(
+             saftey_distance_parameter, dict), "'saftey_distance_parameter.yaml' has wrong fromat! Has to encode dictionary!"
+                
+        return saftey_distance_parameter
+        

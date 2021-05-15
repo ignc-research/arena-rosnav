@@ -223,7 +223,6 @@ class ObservationCollector():
                 safe_dist_=self.safe_dists_human_type[ty] * self.safe_dists_factor[self._human_behavior[i]]
                 _radius =self.obstacle_radius[ty]
                 _human_behavior_token=self.human_behavior_tokens[self._human_behavior[i]]
-                print(_human_behavior_token)
                 #robot centric 4 elements in state
                 state=ObservationCollector.rotate(self.robot_self_state[:2]+[self._human_position[i].x, self._human_position[i].y, self._human_vel[i].linear.x,self._human_vel[i].linear.y], self.rot)
                 obs=np.array(self.robot_self_state+[rho_humans[i], theta_humans[i]]+state+[safe_dist_ ,_radius,
@@ -249,8 +248,7 @@ class ObservationCollector():
             merged_obs=np.hstack([merged_obs,np.ones([-observation_blank,])*1000])
         elif observation_blank>0:
             merged_obs=merged_obs[:-observation_blank]
-        
-        # print('observe', count_observable_humans)
+
       # initlaising array with dimensions an filling them up with coordinate of agents and rho(density)and theta (angle)
         rho_robo_obstacles, theta_robo_obstacles=np.empty([self.num_robo_obstacles,]), np.empty([self.num_robo_obstacles,])
         coordinate_robo_obstacles= np.empty([2,self.num_robo_obstacles])

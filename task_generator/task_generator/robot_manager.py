@@ -5,6 +5,8 @@ import os
 import threading
 from typing import Union
 import rospy
+import rospkg
+import os
 import tf
 import numpy as np
 from flatland_msgs.srv import MoveModel, MoveModelRequest, SpawnModelRequest, SpawnModel
@@ -37,6 +39,9 @@ class RobotManager:
         self.ns = ns
         self.ns_prefix = "/" if ns == "" else "/"+ns+"/"
 
+        self.safe_dists_human_type = self.read_saftey_distance_parameter_from_yaml()['human obstacle safety distance radius']
+        self.safe_dists_robot_type = self.read_saftey_distance_parameter_from_yaml()['robot obstacle safety distance radius']
+        self.safe_dists_factor = self.read_saftey_distance_parameter_from_yaml()['safety distance factor']
         self.safe_dist_adult=1.0
         self.safe_dist_child=1.2
         self.safe_dist_elder=1.5
@@ -168,16 +173,10 @@ class RobotManager:
             ## TODO read it from Yaml and static obstacles
             coordinates=obs_dict['human_coordinates_in_robot_frame'].T
             tys=obs_dict['human_type']
+            human_behavior=obs_dict['human_behavior']
             for i, coordinate in enumerate(coordinates):
-                if tys[i]=='adult': 
-                    forbiddenZones.append((coordinate[0],coordinate[1],self.safe_dist_adult*1.05))
-                elif tys[i]=='child': 
-                    forbiddenZones.append((coordinate[0],coordinate[1],self.safe_dist_child*1.05))
-                elif tys[i]=='elder': 
-                    forbiddenZones.append((coordinate[0],coordinate[1],self.safe_dist_elder*1.05))
-                elif tys[i]=='forklift':
-                    forbiddenZones.append((coordinate[0],coordinate[1],self.safe_dist_forklift*1.05))
-
+                
+                forbiddenZones.append((coordinate[0],coordinate[1],self.safe_dists_human_type[tys[i]]*1.05 * self.safe_dists_factor[human_behavior[i]]))
 
 
         if forbiddenPoints is not None:
@@ -185,7 +184,7 @@ class RobotManager:
             # print(forbiddenPoints)
             for coordinate in forbiddenPoints: # use the safe_dist of elder becuase it is the largest among all types of humans
                 # print(coordinate)
-                forbiddenZones.append((coordinate[0],coordinate[1],self.safe_dist_elder*1.05))
+                forbiddenZones.append((coordinate[0],coordinate[1],1.5*1.05))
 
 
         if start_pos is None or goal_pos is None:
@@ -297,3 +296,17 @@ class RobotManager:
             add_pedsim_srv.staticObstacles.obstacles.append(lineObstacle)
         # tell the pedsim the position of goal
         self.__add_obstacle_srv.call(add_pedsim_srv)
+
+    def read_saftey_distance_parameter_from_yaml(self):
+        
+        file_location = os.path.join(rospkg.RosPack().get_path('simulator_setup'), 'saftey_distance_parameter.yaml')
+        
+        
+        if os.path.isfile(file_location):
+            with open(file_location, "r") as file:
+                saftey_distance_parameter = yaml.load(file, Loader=yaml.FullLoader)       
+        assert isinstance(
+             saftey_distance_parameter, dict), "'saftey_distance_parameter.yaml' has wrong fromat! Has to encode dictionary!"
+                
+        return saftey_distance_parameter
+        
