@@ -15,8 +15,9 @@ from rospy.exceptions import ROSException
 
 from std_msgs.msg import Bool
 
-from .obstacles_manager import ObstaclesManager
-from .robot_manager import RobotManager
+from .obstacles_manager_human import ObstaclesManager
+from .obstacles_manager import ObstaclesManager as ObstaclesManager1
+from .robot_manager_human import RobotManager
 from pathlib import Path
 
 
@@ -32,7 +33,7 @@ class ABSTask(ABC):
     def __init__(self, obstacles_manager: ObstaclesManager, robot_manager: RobotManager):
         self.obstacles_manager = obstacles_manager
         self.robot_manager = robot_manager
-        rospy.wait_for_service('/static_map', timeout=20)
+        rospy.wait_for_service("/static_map")
         self._service_client_get_map = rospy.ServiceProxy('/static_map', GetMap)
         self._map_lock = Lock()
         rospy.Subscriber('/map', OccupancyGrid, self._update_map)
@@ -57,23 +58,31 @@ class RandomTask(ABSTask):
     def __init__(self, obstacles_manager: ObstaclesManager, robot_manager: RobotManager):
         super().__init__(obstacles_manager, robot_manager)
 
-    def reset(self):
+    def reset(self,obs_dict=None, episode:int=0, goal_radius:float = 0.1):
         """[summary]
         """
+        self.last_obs_dict=obs_dict
+        # self._episode=episode
+        self.robot_manager.setGoalRadius(goal_radius)
         with self._map_lock:
             max_fail_times = 3
             fail_times = 0
             while fail_times < max_fail_times:
                 try:
-                    start_pos, goal_pos = self.robot_manager.set_start_pos_goal_pos()
-                    self.obstacles_manager.reset_pos_obstacles_random(
-                        forbidden_zones=[
+                    fP = self.obstacles_manager.move_all_peds(episode)
+                    self.obstacles_manager._add_map_border_into_pedsim()
+                    start_pos, goal_pos = self.robot_manager.set_start_pos_goal_pos(forbiddenPoints=fP, isCirclePattern=self.obstacles_manager.circlePattern)
+                    forbiddenZones=[
                             (start_pos.x,
                                 start_pos.y,
                                 self.robot_manager.ROBOT_RADIUS),
                             (goal_pos.x,
                                 goal_pos.y,
-                                self.robot_manager.ROBOT_RADIUS)])
+                                self.robot_manager.ROBOT_RADIUS)]
+                    self.obstacles_manager.setForbidden_zones(forbiddenZones)
+                    self.obstacles_manager.reset_pos_obstacles_random(forbidden_zones=forbiddenZones)
+                    if self.obstacles_manager.useMaze:
+                        self.obstacles_manager.update_maze()
                     break
                 except rospy.ServiceException as e:
                     rospy.logwarn(repr(e))
@@ -126,7 +135,7 @@ class StagedRandomTask(RandomTask):
     def __init__(self, ns: str, obstacles_manager: ObstaclesManager, robot_manager: RobotManager, start_stage: int = 1, PATHS=None):
         super().__init__(obstacles_manager, robot_manager)
         self.ns = ns
-        self.ns_prefix = "" if ns == '' else "/"+ns+"/"
+        self.ns_prefix = "/" if ns == '' else "/"+ns+"/"
 
         self._curr_stage = start_stage
         self._stages = dict()
@@ -194,7 +203,7 @@ class StagedRandomTask(RandomTask):
 
         self.obstacles_manager.register_random_static_obstacles(
             self._stages[self._curr_stage]['static'])
-        self.obstacles_manager.register_random_dynamic_obstacles(
+        self.obstacles_manager.register_human(
             self._stages[self._curr_stage]['dynamic'])
 
         print(
@@ -229,7 +238,7 @@ class StagedRandomTask(RandomTask):
 
 
 class ScenerioTask(ABSTask):
-    def __init__(self, obstacles_manager: ObstaclesManager, robot_manager: RobotManager, scenerios_json_path: str):
+    def __init__(self, obstacles_manager: ObstaclesManager, obstacles_manager_human: ObstaclesManager, robot_manager: RobotManager, scenerios_json_path: str):
         """ The scenerio_json_path only has the "Scenerios" section, which contains a list of scenerios
         Args:
             scenerios_json_path (str): [description]
@@ -263,7 +272,7 @@ class ScenerioTask(ABSTask):
             robot_start_pos = robot_data["start_pos"]
             robot_goal_pos = robot_data["goal_pos"]
             info["robot_goal_pos"] = robot_goal_pos
-            self.robot_manager.set_start_pos_goal_pos(
+            self.robot_manager.set_start_pos_goal_pos(False,
                 Pose2D(*robot_start_pos), Pose2D(*robot_goal_pos))
             self._num_repeats_curr_scene += 1
             info['num_repeats_curr_scene'] = self._num_repeats_curr_scene
@@ -319,7 +328,7 @@ class ScenerioTask(ABSTask):
                     robot_data = scenerio_data["robot"]
                     robot_start_pos = robot_data["start_pos"]
                     robot_goal_pos = robot_data["goal_pos"]
-                    self.robot_manager.set_start_pos_goal_pos(
+                    self.robot_manager.set_start_pos_goal_pos(False,
                         Pose2D(*robot_start_pos), Pose2D(*robot_goal_pos))
 
                     self._num_repeats_curr_scene = 0
@@ -392,24 +401,25 @@ def get_predefined_task(ns: str, mode="random", start_stage: int = 1, PATHS: dic
     # either e.g. ns = 'sim1/' or ns = ''
 
     # get the map
-    rospy.wait_for_service('/static_map', timeout=20)    
+    rospy.wait_for_service("/static_map")
     service_client_get_map = rospy.ServiceProxy('/static_map', GetMap)
     map_response = service_client_get_map()
 
     # use rospkg to get the path where the model config yaml file stored
     models_folder_path = rospkg.RosPack().get_path('simulator_setup')
-    
     # robot's yaml file is needed to get its radius.
     robot_manager = RobotManager(ns, map_response.map, os.path.join(
         models_folder_path, 'robot', "myrobot.model.yaml"))
-    
-    obstacles_manager = ObstaclesManager(ns, map_response.map)
-    
+
+    obstacles_manager = ObstaclesManager(ns, map_response.map) #ob_human_mana
     # only generate 3 static obstaticles
     # obstacles_manager.register_obstacles(3, os.path.join(
     # models_folder_path, "obstacles", 'random.model.yaml'), 'static')
     # generate 5 static or dynamic obstaticles
-    # obstacles_manager.register_random_obstacles(20, 0.4)
+    # print('task_generator__________________reach here1')
+    # obstacles_manager_human.register_human(30)
+    # obstacles_manager=ObstaclesManager1(ns, map_response.map) #ob_normal_mana
+    # print('task_generator__________________reach here111111')
 
     # TODO In the future more Task will be supported and the code unrelated to
     # Tasks will be moved to other classes or functions.
@@ -431,5 +441,5 @@ def get_predefined_task(ns: str, mode="random", start_stage: int = 1, PATHS: dic
     if mode == "scenario":
         rospy.set_param("/task_mode", "scenario")
         task = ScenerioTask(obstacles_manager, robot_manager,
-            PATHS['scenario'])
+                            PATHS['scenario'])
     return task
