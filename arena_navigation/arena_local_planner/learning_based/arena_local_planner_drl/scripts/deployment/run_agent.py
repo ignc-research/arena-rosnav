@@ -17,8 +17,8 @@ from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl
 
 ### HYPERPARAMETERS ###
 AGENTS = ['AGENT_4_2021_04_02__01_07', 'AGENT_7_2021_04_01__07_53']
-max_steps_per_episode = 1000000
-eval_episodes = 10
+max_steps_per_episode = 512
+eval_episodes = 500
 
 def get_paths(args: dict, AGENT: str):
     dir = rospkg.RosPack().get_path('arena_local_planner_drl')
@@ -51,7 +51,7 @@ def make_env(PATHS: dict,
     def _init():
         env = FlatlandEnv(
             'eval_sim', PATHS.get('robot_setting'), PATHS.get('robot_as'), PARAMS['reward_fnc'], PARAMS['discrete_action_space'], 
-            goal_radius=0.3, max_steps_per_episode=max_steps_per_episode, train_mode=False, task_mode='staged', PATHS=PATHS, curr_stage=5,
+            goal_radius=0.3, max_steps_per_episode=max_steps_per_episode, train_mode=False, task_mode='staged', PATHS=PATHS, curr_stage=1,
             extended_eval=True)
         if log:
             # eval env
