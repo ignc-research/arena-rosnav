@@ -1,0 +1,41 @@
+robot:
+  discrete_actions:
+    - name: move_pref_1
+      linear: 0.4
+      angular: -0.524
+    - name: move_pref_2
+      linear: 0.4
+      angular: -0.314
+    - name: move_pref_3
+      linear: 0.4
+      angular: -0.105
+    - name: move_pref_4
+      linear: 0.4
+      angular: 0.105
+    - name: move_pref_5
+      linear: 0.4
+      angular: 0.314
+    - name: move_pref_6
+      linear: 0.4
+      angular: 0.524
+    - name: move_pref_half_1
+      linear: 0.2
+      angular: 0.524
+    - name: move_pref_half_2
+      linear: 0.2
+      angular: 0.0
+    - name: move_pref_half_3
+      linear: 0.2
+      angular: -0.524
+    - name: move_pref_zero_1
+      linear: 0.0
+      angular: 0.524
+    - name: move_pref_forward
+      linear: 0.4
+      angular: 0.0
+    - name: move_pref_zero_3
+      linear: 0.0
+      angular: -0.524
+  continuous_actions:
+    linear_range: [0, 1.5]  #0.7 1.2
+    angular_range: [-0.524, 0.524]  #+-1.6
