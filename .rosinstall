@@ -1,7 +1,7 @@
 - git:
     local-name: ../forks/flatland
     uri: https://github.com/ignc-research/flatland
-    version: dev_multi_lei
+    version: arena_human
 
 #- git:
 #    local-name: ../forks/navigation
@@ -30,3 +30,8 @@
     local-name: ../forks/navigation/msgs/ford
     uri: https://bitbucket.org/acl-swarm/ford_msgs/src/master/
     version: master
+
+- git:
+    local-name: ../forks/pedsim_ros
+    uri: https://github.com/Sirupli/pedsim_ros
+    version: human_ros
