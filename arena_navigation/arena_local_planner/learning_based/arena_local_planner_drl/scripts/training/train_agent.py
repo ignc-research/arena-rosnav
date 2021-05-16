@@ -1,5 +1,6 @@
-import os, sys
 import rospy
+HUMANMODE=rospy.get_param("/useHumanMode")
+import os, sys
 import time
 import rosnode
 from typing import Union
@@ -11,8 +12,10 @@ from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv, VecNorm
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.callbacks import EvalCallback, StopTrainingOnRewardThreshold
 from stable_baselines3.common.utils import set_random_seed
-
-from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.scripts.custom_policy import *
+if HUMANMODE:
+    from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.scripts.custom_policy_human import *
+else:
+    from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.scripts.custom_policy import *
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.rl_agent.envs.flatland_gym_env import FlatlandEnv
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.tools.argsparser import parse_training_args
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.tools.train_agent_utils import *
@@ -49,31 +52,56 @@ def get_paths(agent_name: str, args) -> dict:
     :param args (argparse.Namespace): Object containing the program arguments
     """
     dir = rospkg.RosPack().get_path('arena_local_planner_drl')
-
-    PATHS = {
-        'model': 
-            os.path.join(
-                dir, 'agents', agent_name),
-        'tb': 
-            os.path.join(
-                dir, 'training_logs', 'tensorboard', agent_name),
-        'eval': 
-            os.path.join(
-                dir, 'training_logs', 'train_eval_log', agent_name),
-        'robot_setting': 
-            os.path.join(
-                rospkg.RosPack().get_path('simulator_setup'),
-                'robot', 'myrobot' + '.model.yaml'),
-        'hyperparams':
-            os.path.join(
-                dir, 'configs', 'hyperparameters'),
-        'robot_as': 
-            os.path.join(
-                dir, 'configs', 'default_settings.yaml'),
-        'curriculum': 
-            os.path.join(
-                dir, 'configs', 'training_curriculum_map1small.yaml')
-    }
+    if not HUMANMODE:
+        PATHS = {
+            'model': 
+                os.path.join(
+                    dir, 'agents', agent_name),
+            'tb': 
+                os.path.join(
+                    dir, 'training_logs', 'tensorboard', agent_name),
+            'eval': 
+                os.path.join(
+                    dir, 'training_logs', 'train_eval_log', agent_name),
+            'robot_setting': 
+                os.path.join(
+                    rospkg.RosPack().get_path('simulator_setup'),
+                    'robot', 'myrobot' + '.model.yaml'),
+            'hyperparams':
+                os.path.join(
+                    dir, 'configs', 'hyperparameters'),
+            'robot_as': 
+                os.path.join(
+                    dir, 'configs', 'default_settings.yaml'),
+            'curriculum': 
+                os.path.join(
+                    dir, 'configs', 'training_curriculum_map1small.yaml')
+        }
+    else:
+        PATHS = {
+            'model': 
+                os.path.join(
+                    dir, 'agents', agent_name),
+            'tb': 
+                os.path.join(
+                    dir, 'training_logs', 'tensorboard', agent_name),
+            'eval': 
+                os.path.join(
+                    dir, 'training_logs', 'train_eval_log', agent_name),
+            'robot_setting': 
+                os.path.join(
+                    rospkg.RosPack().get_path('simulator_setup'),
+                    'robot', 'myrobot' + '.model.yaml'),
+            'hyperparams':
+                os.path.join(
+                    dir, 'configs', 'hyperparameters'),
+            'robot_as': 
+                os.path.join(
+                    dir, 'configs', 'default_settings_human.yaml'),
+            'curriculum': 
+                os.path.join(
+                    dir, 'configs', 'training_curriculum_human.yaml')
+        }
     # check for mode
     if args.load is None:
         os.makedirs(PATHS['model'])
@@ -288,6 +316,46 @@ if __name__ == "__main__":
                     gae_lambda = params['gae_lambda'],  batch_size = params['m_batch_size'], 
                     n_epochs = params['n_epochs'],      clip_range = params['clip_range'], 
                     tensorboard_log = PATHS['tb'],      verbose = 1
+                )
+        elif args.agent == "MLP_LSTM":
+                model = PPO(
+                    MLP_LSTM_POLICY, env, 
+                    gamma = params['gamma'],            n_steps = params['n_steps'], 
+                    ent_coef = params['ent_coef'],      learning_rate = params['learning_rate'], 
+                    vf_coef = params['vf_coef'],        max_grad_norm = params['max_grad_norm'], 
+                    gae_lambda = params['gae_lambda'],  batch_size = params['m_batch_size'], 
+                    n_epochs = params['n_epochs'],      clip_range = params['clip_range'], 
+                    tensorboard_log = PATHS['tb'],  verbose = 1
+                )
+        elif args.agent == "MLP_HUMAN":
+                model = PPO(
+                    MLP_HUMAN_POLICY, env, 
+                    gamma = params['gamma'],            n_steps = params['n_steps'], 
+                    ent_coef = params['ent_coef'],      learning_rate = params['learning_rate'], 
+                    vf_coef = params['vf_coef'],        max_grad_norm = params['max_grad_norm'], 
+                    gae_lambda = params['gae_lambda'],  batch_size = params['m_batch_size'], 
+                    n_epochs = params['n_epochs'],      clip_range = params['clip_range'], 
+                    tensorboard_log = PATHS['tb'],  verbose = 1
+                )
+        elif args.agent == "MLP_SARL":
+                model = PPO(
+                    MLP_SARL_POLICY, env, 
+                    gamma = params['gamma'],            n_steps = params['n_steps'], 
+                    ent_coef = params['ent_coef'],      learning_rate = params['learning_rate'], 
+                    vf_coef = params['vf_coef'],        max_grad_norm = params['max_grad_norm'], 
+                    gae_lambda = params['gae_lambda'],  batch_size = params['m_batch_size'], 
+                    n_epochs = params['n_epochs'],      clip_range = params['clip_range'], 
+                    tensorboard_log = PATHS['tb'],  verbose = 1
+                )
+        elif args.agent == "MLP_GRU":
+                model = PPO(
+                    MLP_GRU_POLICY, env, 
+                    gamma = params['gamma'],            n_steps = params['n_steps'], 
+                    ent_coef = params['ent_coef'],      learning_rate = params['learning_rate'], 
+                    vf_coef = params['vf_coef'],        max_grad_norm = params['max_grad_norm'], 
+                    gae_lambda = params['gae_lambda'],  batch_size = params['m_batch_size'], 
+                    n_epochs = params['n_epochs'],      clip_range = params['clip_range'], 
+                    tensorboard_log = PATHS['tb'],  verbose = 1
                 )
 
         elif args.agent in ['AGENT_1', 'AGENT_2', 'AGENT_3', 'AGENT_4', 'AGENT_9', 'AGENT_10', 'AGENT_11', 'AGENT_12', 'AGENT_17', 'AGENT_18']:
