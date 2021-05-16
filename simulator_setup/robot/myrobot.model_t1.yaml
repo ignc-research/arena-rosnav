@@ -1,8 +1,8 @@
 bodies:  # List of named bodies
   - name: base_footprint
     pose: [0, 0, 0] 
-    type: dynamic  
-    color: [0.2, 0.8, 0.2, 1.0] 
+    type: dynamic 
+    color: [0.2, 0.8, 0.2, 1.0]
     footprints:
       - type: circle
         radius: 0.3
@@ -22,30 +22,33 @@ plugins:
     body: base_footprint
     odom_frame_id: odom
     odom_pub: /odom  # topic odom is published on
-    pub_rate: 100
+    pub_rate: 20
   
   - type: Laser
-    name: static_laser
-    frame: laser_link
+    name: laser
+    frame: laser_mount
     topic: /scan
     body: base_footprint
     broadcast_tf: true
     origin: [0.0, 0.0, 0.0]
     # range: 3
-    #arena
-    range: 3.5
     # angle: {min: -3.12413936, max: 3.14159265359, increment: 0.01745}
-    # shifted for arena
-    # angle: {min: 0, max: 6.28319, increment: 0.01745330555}
-    angle: {min: -1.5707963267948966, max: 4.694936014, increment:  0.017453292}
 
-    # noise_std_dev: 0.015
-    # arena
+    #arena
+    range: 8
+     
+    #for fc or trans 360
+    angle: {min: -1.570796327, max: 4.694936014, increment:  0.017453292}
+
+    #for gru 64
+    # angle: {min: -1.570796327, max: 4.694935688, increment:  0.0877}
+
     noise_std_dev: 0.0
-    update_rate: 50
+    update_rate: 10
+    layers: ["all"]
 
 
   - type: ModelTfPublisher
     name: tf_publisher
-    publish_tf_world: false
+    publish_tf_world: true
     # exclude: ["approx_footprint"]

@@ -1,0 +1,48 @@
+# Turtlebot
+bodies:  # List of named bodies
+  - name: base
+    pose: [0, 0, 0] 
+    type: dynamic  
+    color: [1, 1, 1, 0.75] 
+    footprints:
+      - type: circle
+        radius: 0.5
+        center: [-1, 0.0]
+        density: 1
+
+      - type: polygon
+        sensor: true
+        points: [[-.45, -.05], [-.45, 0.05], [-.35, 0.05], [-.35, -0.05]]
+        layers: []
+        density: 1
+
+      - type: polygon
+        sensor: true
+        points: [[-.125, -.4], [-.125, -.3], [.125, -.3], [.125, -.4]]
+        density: 1
+
+      - type: polygon
+        sensor: true
+        points: [[-.125, .4], [-.125, .3], [.125, .3], [.125, .4]]
+        density: 100000
+plugins:
+  - type: DiffDrive 
+    name: turtlebot_drive 
+    body: base
+    odom_frame_id: map
+    pub_rate: 10
+    # odom_pose_noise: [0.1, 0.1, 0.1]
+    # odom_twist_noise: [0.1, 0.1, 0.1]
+    # odom_pose_covariance: [0.00, 0.01, 0.02, 0.03, 0.04, 0.05, 
+    #                         0.06, 0.07, 0.08, 0.09, 0.10, 0.11, 
+    #                         0.12, 0.13, 0.14, 0.15, 0.16, 0.17, 
+    #                         0.18, 0.19, 0.20, 0.21, 0.22, 0.23, 
+    #                         0.24, 0.25, 0.26, 0.27, 0.28, 0.29, 
+    #                         0.30, 0.31, 0.32, 0.33, 0.34, 0.35]
+    
+    
+
+
+  - type: ModelTfPublisher
+    name: tf_publisher
+    publish_tf_world: true
