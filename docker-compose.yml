@@ -1,7 +1,7 @@
 version: "3.3"
 services:
   ros:
-    build: .
+    image: llalal/docker:arena-rosnav
     command: "tail -f /dev/null"
     environment:
       DISPLAY: novnc:0.0
