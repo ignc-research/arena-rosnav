@@ -8,6 +8,7 @@ Panels:
         - /Grid1
         - /my_robot1/Namespaces1
         - /TF1/Frames1
+        - /human1
         - /human1/MarkerArray1
         - /human1/MarkerArray4
         - /human1/MarkerArray7
@@ -30,7 +31,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: ""
+    SyncSource: LaserScan
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -268,7 +269,7 @@ Visualization Manager:
       Color: 255; 0; 0
       Color Transformer: FlatColor
       Decay Time: 0
-      Enabled: false
+      Enabled: true
       Invert Rainbow: false
       Max Color: 255; 255; 255
       Max Intensity: 4096
@@ -285,7 +286,7 @@ Visualization Manager:
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
-      Value: false
+      Value: true
     - Alpha: 1
       Axes Length: 1
       Axes Radius: 0.10000000149011612
@@ -342,6 +343,20 @@ Visualization Manager:
           Value: true
         sim_1_odom:
           Value: true
+        sim_2_odom:
+          Value: true
+        sim_3_odom:
+          Value: true
+        sim_4_odom:
+          Value: true
+        sim_5_odom:
+          Value: true
+        sim_6_odom:
+          Value: true
+        sim_7_odom:
+          Value: true
+        sim_8_odom:
+          Value: true
       Marker Scale: 1
       Name: TF
       Show Arrows: true
@@ -355,6 +370,20 @@ Visualization Manager:
           eval_sim_odom:
             {}
           sim_1_odom:
+            {}
+          sim_2_odom:
+            {}
+          sim_3_odom:
+            {}
+          sim_4_odom:
+            {}
+          sim_5_odom:
+            {}
+          sim_6_odom:
+            {}
+          sim_7_odom:
+            {}
+          sim_8_odom:
             {}
       Update Interval: 0
       Value: true
@@ -434,7 +463,7 @@ Visualization Manager:
       Marker Topic: /eval_sim/inter_planner/planning_vis/goal
       Name: Marker
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
       Value: true
     - Class: rviz/Marker
@@ -460,7 +489,7 @@ Visualization Manager:
           Marker Topic: /eval_sim/flatland_server/debug/model/person_9
           Name: MarkerArray
           Namespaces:
-            {}
+            "": true
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -468,7 +497,7 @@ Visualization Manager:
           Marker Topic: /eval_sim/flatland_server/debug/model/person_8
           Name: MarkerArray
           Namespaces:
-            {}
+            "": true
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -476,7 +505,7 @@ Visualization Manager:
           Marker Topic: /eval_sim/flatland_server/debug/model/person_7
           Name: MarkerArray
           Namespaces:
-            {}
+            "": true
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -484,7 +513,7 @@ Visualization Manager:
           Marker Topic: /eval_sim/flatland_server/debug/model/person_6
           Name: MarkerArray
           Namespaces:
-            {}
+            "": true
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -492,7 +521,7 @@ Visualization Manager:
           Marker Topic: /eval_sim/flatland_server/debug/model/person_1
           Name: MarkerArray
           Namespaces:
-            {}
+            "": true
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -500,7 +529,7 @@ Visualization Manager:
           Marker Topic: /eval_sim/flatland_server/debug/model/person_10
           Name: MarkerArray
           Namespaces:
-            {}
+            "": true
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -508,7 +537,7 @@ Visualization Manager:
           Marker Topic: /eval_sim/flatland_server/debug/model/person_11
           Name: MarkerArray
           Namespaces:
-            {}
+            "": true
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -516,7 +545,7 @@ Visualization Manager:
           Marker Topic: /eval_sim/flatland_server/debug/model/person_12
           Name: MarkerArray
           Namespaces:
-            {}
+            "": true
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -524,7 +553,7 @@ Visualization Manager:
           Marker Topic: /eval_sim/flatland_server/debug/model/person_13
           Name: MarkerArray
           Namespaces:
-            {}
+            "": true
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -532,7 +561,7 @@ Visualization Manager:
           Marker Topic: /eval_sim/flatland_server/debug/model/person_14
           Name: MarkerArray
           Namespaces:
-            {}
+            "": true
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -540,31 +569,31 @@ Visualization Manager:
           Marker Topic: /eval_sim/flatland_server/debug/model/person_15
           Name: MarkerArray
           Namespaces:
-            {}
+            "": true
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
           Enabled: true
-          Marker Topic: /sim_1/flatland_server/debug/model/person_16
+          Marker Topic: /eval_sim/flatland_server/debug/model/person_16
           Name: MarkerArray
           Namespaces:
-            {}
+            "": true
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
           Enabled: true
-          Marker Topic: /sim_1/flatland_server/debug/model/person_17
+          Marker Topic: /eval_sim/flatland_server/debug/model/person_17
           Name: MarkerArray
           Namespaces:
-            {}
+            "": true
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
           Enabled: true
-          Marker Topic: /sim_1/flatland_server/debug/model/person_18
+          Marker Topic: /eval_sim/flatland_server/debug/model/person_18
           Name: MarkerArray
           Namespaces:
-            {}
+            "": true
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -580,7 +609,7 @@ Visualization Manager:
           Marker Topic: /eval_sim/flatland_server/debug/model/person_2
           Name: MarkerArray
           Namespaces:
-            {}
+            "": true
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -604,7 +633,7 @@ Visualization Manager:
           Marker Topic: /eval_sim/flatland_server/debug/model/person_3
           Name: MarkerArray
           Namespaces:
-            {}
+            "": true
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -612,7 +641,7 @@ Visualization Manager:
           Marker Topic: /eval_sim/flatland_server/debug/model/person_3
           Name: MarkerArray
           Namespaces:
-            {}
+            "": true
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -620,7 +649,7 @@ Visualization Manager:
           Marker Topic: /eval_sim/flatland_server/debug/model/person_4
           Name: MarkerArray
           Namespaces:
-            {}
+            "": true
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -628,7 +657,7 @@ Visualization Manager:
           Marker Topic: /eval_sim/flatland_server/debug/model/person_5
           Name: MarkerArray
           Namespaces:
-            {}
+            "": true
           Queue Size: 100
           Value: true
       Enabled: true
