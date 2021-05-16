@@ -1,3 +1,5 @@
+#!/bin/bash
+
 mkdir -p catkin_ws/src && 
 cd catkin_ws/src
 git clone git@github.com:wittenator/arena-rosnav.git
@@ -17,7 +19,7 @@ sudo aptitude update
 sudo aptitude -y install ros-noetic-desktop-full
 
 echo "source /opt/ros/noetic/setup.bash" >> ~/.bashrc
-source ~/.bashrc
+. ~/.bashrc
 
 sudo aptitude -y install python3-rosdep python3-rosinstall python3-rosinstall-generator python3-wstool build-essential
 sudo rosdep init
@@ -37,12 +39,11 @@ ros-noetic-geometry2
 
 poetry install
 
-source $(poetry env info --path)/bin/activate
-
-PYTHONPATH=$(which python)
+PYTHONPATH=$(poetry env info --path)
 
 rosws update
-source $HOME/.bashrc
-cd ../.. 
-catkin_make -DCMAKE_BUILD_TYPE=Release
-source devel/setup.sh
+. $HOME/.bashrc
+
+poetry run catkin_make -C ../.. -DCMAKE_BUILD_TYPE=Release
+
+. ../../devel/setup.sh

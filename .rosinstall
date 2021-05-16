@@ -6,12 +6,12 @@
 #- git:
 #    local-name: ../forks/navigation
 #    uri: https://github.com/ros-planning/navigation.git
-#    version: melodic-devel
+#    version: noetic-devel
 
 #- git:
 #    local-name: ../forks/geometry2
 #    uri: https://github.com/ros/geometry2.git
-#    version: melodic-devel
+#    version: noetic-devel
 
 - git:
     local-name: ../forks/stable-baselines3
@@ -21,7 +21,7 @@
 - git:
     local-name: ../forks/navigation/local_planner/teb
     uri: https://github.com/rst-tu-dortmund/teb_local_planner
-    version: melodic-devel
+    version: noetic-devel
 - git:
     local-name: ../forks/navigation/local_planner/mpc
     uri: https://github.com/rst-tu-dortmund/mpc_local_planner
