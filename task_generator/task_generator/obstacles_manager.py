@@ -91,7 +91,8 @@ class ObstaclesManager:
         if self.useMaze:
             self.build_maze()
         # human group pattern
-        self.circlePattern = True
+        self.circlePattern = False
+        self.mixRate = 0.3
 
     def update_map(self, new_map: OccupancyGrid):
         self.map = new_map
@@ -659,7 +660,7 @@ class ObstaclesManager:
             # pass
     def __respawn_peds(self, peds):
         """
-        Spawning one pedestrian in the simulation. The type of pedestrian is randomly decided here.
+        Spawning pedestrian in the simulation. The type of pedestrian is randomly decided here.
         TODO: the task generator later can decide the number of the agents
         ADULT = 0, CHILD = 1, ROBOT = 2, ELDER = 3,
         ADULT_AVOID_ROBOT = 10, ADULT_AVOID_ROBOT_REACTION_TIME = 11
@@ -669,22 +670,21 @@ class ObstaclesManager:
         """
         srv = SpawnPeds()
         srv.peds = []
-        # print(peds)
-        self.agent_topic_str=''
-        for ped in peds:            
+        # self.agent_topic_str=''
+        for ped in peds:
             elements = [0, 1, 3]
             # probabilities = [0.4, 0.3, 0.3] np.random.choice(elements, 1, p=probabilities)[0]
             self.__ped_type=elements[(ped[0]-1)%3]
             if  self.__ped_type==0:
-                self.agent_topic_str+=f',{self.ns_prefix}pedsim_agent_{ped[0]}/dynamic_human'
+                # self.agent_topic_str+=f',{self.ns_prefix}pedsim_agent_{ped[0]}/dynamic_human'
                 self.__ped_file=os.path.join(rospkg.RosPack().get_path(
                 'simulator_setup'), 'dynamic_obstacles/person_two_legged.model.yaml')
             elif self.__ped_type==1:
-                self.agent_topic_str+=f',{self.ns_prefix}pedsim_agent_{ped[0]}/dynamic_child'
+                # self.agent_topic_str+=f',{self.ns_prefix}pedsim_agent_{ped[0]}/dynamic_child'
                 self.__ped_file=os.path.join(rospkg.RosPack().get_path(
                 'simulator_setup'), 'dynamic_obstacles/person_two_legged_child.model.yaml')
             else:
-                self.agent_topic_str+=f',{self.ns_prefix}pedsim_agent_{ped[0]}/dynamic_elder'
+                # self.agent_topic_str+=f',{self.ns_prefix}pedsim_agent_{ped[0]}/dynamic_elder'
                 self.__ped_file=os.path.join(rospkg.RosPack().get_path(
                 'simulator_setup'), 'dynamic_obstacles/person_single_circle_elder.model.yaml')
             msg = Ped()
@@ -718,7 +718,7 @@ class ObstaclesManager:
             else:
                 break
         self.__peds = peds
-        rospy.set_param(f'{self.ns_prefix}agent_topic_string', self.agent_topic_str)
+        # rospy.set_param(f'{self.ns_prefix}agent_topic_string', self.agent_topic_str)
         return
 
     def spawn_random_peds_in_world(self, n:int, safe_distance:float=2.5, forbidden_zones: Union[list, None] = None):
@@ -800,8 +800,9 @@ class ObstaclesManager:
         srv.episode = episode
         waypoints = np.array([]).reshape(0, 2)
         if self.circlePattern:
-            wp_srv=get_circluar_pattern_on_map(self._free_space_indices, self.map, self.num_humans, gruppe_radius = 7.5, safe_dist=0.0)
-            waypoints=wp_srv[:,:2]
+            numCircleHuman=int(self.num_humans*self.mixRate)
+            wp_srv=get_circluar_pattern_on_map(self._free_space_indices, self.map, numCircleHuman, gruppe_radius = 7.5, safe_dist=0.0)
+            waypoints=wp_srv[:, :2]
             for wp in wp_srv:
                 p=Point()
                 p.x = wp[0]
@@ -819,13 +820,10 @@ class ObstaclesManager:
                 # rospy.logwarn(response.message)
                 i_curr_try += 1
             else:
-                # time.sleep(0.001)
                 break
-        if  not self.circlePattern:
-            for wp in response.waypoints:
-                waypoints = np.vstack([waypoints, [wp.x, wp.y]])
-            # print(waypoints[1, :])
-            waypoints=waypoints[1:, :] # the robot wp in pedsim is ignored
+        # if  not self.circlePattern:
+        for wp in response.waypoints:
+            waypoints = np.vstack([waypoints, [wp.x, wp.y]])
         return waypoints
     ########################################################
     #Methods for maze########################################
@@ -971,7 +969,9 @@ class ObstaclesManager:
                 lineObstacle.end.x, lineObstacle.end.y= v[(i+1)%size,0], v[(i+1)%size,1]
                 add_pedsim_srv.staticObstacles.obstacles.append(lineObstacle)
         self.__add_obstacle_srv.call(add_pedsim_srv)
-
+#############################
+#####methods for static walls####
+#############################
     def register_static_walls(self):
         vertices1= np.array([[6.7, 18.35], 
                                     [14.7, 18.35], 
@@ -1012,3 +1012,7 @@ class ObstaclesManager:
         if i_curr_try == max_num_try:
             raise rospy.ServiceException(f"({self.ns}) failed to register walls")
         os.remove(model_path)
+
+################################
+#####methods for static polygons####
+################################

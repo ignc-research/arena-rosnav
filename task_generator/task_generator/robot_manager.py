@@ -178,7 +178,6 @@ class RobotManager:
             # print("calculate the forbidden zones")
             # print(forbiddenPoints)
             for coordinate in forbiddenPoints: # use the safe_dist of elder becuase it is the largest among all types of humans
-                # print(coordinate)
                 forbiddenZones.append((coordinate[0],coordinate[1],self.safe_dist_elder*1.05))
 
 
@@ -199,7 +198,7 @@ class RobotManager:
                     #     self._free_space_indices, self.map, self.ROBOT_RADIUS * 4)
                     goal_pos_ = Pose2D()
                     start_pose, end_pose = get_robot_goal_on_map(
-                        self._free_space_indices, self.map, 9 ,self.ROBOT_RADIUS ,forbiddenZones)
+                        self._free_space_indices, self.map, 10 ,self.ROBOT_RADIUS ,forbiddenZones)
                     start_pos_.x, start_pos_.y, start_pos_.theta= start_pose[0], start_pose[1], start_pose[2]
                     goal_pos_.x, goal_pos_.y, goal_pos_.theta= end_pose[0] , end_pose[1] , end_pose[2]
                     # print('g', goal_pos_.x)

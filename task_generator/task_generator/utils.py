@@ -278,7 +278,7 @@ def update_freespace_indices(free_space_indices, map_: OccupancyGrid, vertexArra
             v3=vertexArray[(i+2)%size]-p
             v3=v3/np.linalg.norm(v3)
             c2=np.cross(v2,v3)
-            if c1*c2 <0:                
+            if c1*c2 <0:
                 mask.append(True)
                 break
         else:
