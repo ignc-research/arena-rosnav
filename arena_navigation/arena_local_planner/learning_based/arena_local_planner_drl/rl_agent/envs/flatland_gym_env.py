@@ -1,4 +1,6 @@
 #! /usr/bin/env python
+import rospy
+HUMANMODE=rospy.get_param("/useHumanMode")
 from operator import is_
 from random import randint
 import gym
@@ -7,12 +9,10 @@ from gym.spaces import space
 from typing import Union
 from stable_baselines3.common.env_checker import check_env
 import yaml
-from rl_agent.utils.observation_collector import ObservationCollector
+from rl_agent.utils.CSVWriter import CSVWriter
 from rl_agent.utils.reward import RewardCalculator
 from rl_agent.utils.debug import timeit
-from task_generator.tasks import ABSTask
 import numpy as np
-import rospy
 from geometry_msgs.msg import Twist
 from flatland_msgs.srv import StepWorld, StepWorldRequest
 from std_msgs.msg import Bool
@@ -20,7 +20,14 @@ import time
 import math
 
 from rl_agent.utils.debug import timeit
-from task_generator.task_generator.tasks import *
+if HUMANMODE:
+    from task_generator.task_generator.tasks_human import *
+    from task_generator.tasks_human import ABSTask
+    from rl_agent.utils.observation_collector_human import ObservationCollector
+else:
+    from task_generator.task_generator.tasks import *
+    from rl_agent.utils.observation_collector import ObservationCollector
+    from task_generator.tasks import ABSTask
 
 class FlatlandEnv(gym.Env):
     """Custom Environment that follows gym interface"""
@@ -55,6 +62,7 @@ class FlatlandEnv(gym.Env):
         super(FlatlandEnv, self).__init__()
 
         self.ns = ns
+        self.humanMode=HUMANMODE
         try:
             # given every environment enough time to initialize, if we dont put sleep,
             # the training script may crash.
@@ -82,15 +90,34 @@ class FlatlandEnv(gym.Env):
 
         # set rosparam
         rospy.set_param("/laser_num_beams", self._laser_num_beams)
+        # instantiate task manager
+        self.task = get_predefined_task(
+            ns, mode=task_mode, start_stage=kwargs['curr_stage'], PATHS=PATHS)
         
         # observation collector
-        self.observation_collector = ObservationCollector(
-            self.ns, self._laser_num_beams, self._laser_max_range)
-        self.observation_space = self.observation_collector.get_observation_space()
+        if self.humanMode:
+            num_humans=self.task.obstacles_manager.num_humans
+            self.observation_collector = ObservationCollector(self.ns, num_humans)
+            # give the robot settings to observation collector
+            print('reach here')
+            self.observation_collector.setRobotSettings(self._laser_num_beams, self._laser_max_range,
+                                                                                                        self.laser_angle_min, self.laser_angle_max, 
+                                                                                                        self.laser_angle_increment)
+            self.observation_collector.setObservationSpace()
+            self.observation_space = self.observation_collector.get_observation_space()
+        else:
+            self.observation_collector = ObservationCollector(
+                self.ns, self._laser_num_beams, self._laser_max_range)
+            self.observation_space = self.observation_collector.get_observation_space()
+
+        #csv writer
+        self.csv_writer=CSVWriter()
 
         # reward calculator
         if safe_dist is None:
             safe_dist = 1.6*self._robot_radius
+
+        self.goal_radius=goal_radius
 
         self.reward_calculator = RewardCalculator(
             robot_radius=self._robot_radius, safe_dist=1.6*self._robot_radius, goal_radius=goal_radius, 
@@ -107,13 +134,12 @@ class FlatlandEnv(gym.Env):
             self._service_name_step = f'{self.ns_prefix}step_world'
             self._sim_step_client = rospy.ServiceProxy(
             self._service_name_step, StepWorld)
-        
-        # instantiate task manager
-        self.task = get_predefined_task(
-            ns, mode=task_mode, start_stage=kwargs['curr_stage'], PATHS=PATHS)
 
         self._steps_curr_episode = 0
+        self._episode = 0
         self._max_steps_per_episode = max_steps_per_episode
+        #store the observations from the last step for spawning the robot
+        self.last_obs_dict=None
 
         # for extended eval
         self._action_frequency = 1/rospy.get_param("/robot_action_rate")
@@ -149,6 +175,9 @@ class FlatlandEnv(gym.Env):
                     self._laser_num_beams = int(
                         round((laser_angle_max-laser_angle_min)/laser_angle_increment)+1)
                     self._laser_max_range = plugin['range']
+                    self.laser_angle_min = laser_angle_min
+                    self.laser_angle_max = laser_angle_max
+                    self.laser_angle_increment = laser_angle_increment
 
         with open(settings_yaml_path, 'r') as fd:
             setting_data = yaml.safe_load(fd)
@@ -187,18 +216,26 @@ class FlatlandEnv(gym.Env):
         if self._is_action_space_discrete:
             action = self._translate_disc_action(action)
         self._pub_action(action)
-        #print(f"Linear: {action[0]}, Angular: {action[1]}")
+        print(f"Linear: {action[0]}, Angular: {action[1]}")
         self._steps_curr_episode += 1
 
         # wait for new observations
         merged_obs, obs_dict = self.observation_collector.get_observations()
 
         # calculate reward
-        reward, reward_info = self.reward_calculator.get_reward(
-            obs_dict['laser_scan'], obs_dict['goal_in_robot_frame'], 
-            action=action, global_plan=obs_dict['global_plan'], 
-            robot_pose=obs_dict['robot_pose'])
-        # print(f"cum_reward: {reward}")
+        if self.humanMode:
+            reward, reward_info = self.reward_calculator.get_reward(
+                obs_dict['laser_scan'], obs_dict['goal_in_robot_frame'], 
+                action=action, global_plan=obs_dict['global_plan'], 
+                robot_pose=obs_dict['robot_pose'], adult_in_robot_frame=obs_dict['adult_in_robot_frame'], 
+                child_in_robot_frame=obs_dict['child_in_robot_frame'],elder_in_robot_frame=obs_dict['elder_in_robot_frame'], 
+                current_time_step=self._steps_curr_episode/self._max_steps_per_episode)
+        else:
+            reward, reward_info = self.reward_calculator.get_reward(
+                obs_dict['laser_scan'], obs_dict['goal_in_robot_frame'], 
+                action=action, global_plan=obs_dict['global_plan'], 
+                robot_pose=obs_dict['robot_pose'])
+        print(f"current_reward: {reward}")
         done = reward_info['is_done']
         
         # extended eval info
@@ -211,11 +248,21 @@ class FlatlandEnv(gym.Env):
         if done:
             info['done_reason'] = reward_info['done_reason']
             info['is_success'] = reward_info['is_success']
+            if self.humanMode:
+                history_evaluation=self.reward_calculator.get_history_info()
+                history_evaluation=[self._episode]+history_evaluation+[info['done_reason']]
+                self.csv_writer.addData(np.array(history_evaluation))
 
         if self._steps_curr_episode > self._max_steps_per_episode:
             done = True
             info['done_reason'] = 0
             info['is_success'] = 0
+            if self.humanMode:
+                history_evaluation=self.reward_calculator.get_history_info()
+                history_evaluation=[self._episode]+history_evaluation+[info['done_reason']]
+                self.csv_writer.addData(np.array(history_evaluation))
+
+        self.last_obs_dict=obs_dict
 
         # for logging
         if self._extended_eval:
@@ -230,12 +277,19 @@ class FlatlandEnv(gym.Env):
 
         # set task
         # regenerate start position end goal position of the robot and change the obstacles accordingly
+        self._episode += 1
         self.agent_action_pub.publish(Twist())
         if self._is_train_mode:
             self._sim_step_client()
-        self.task.reset()
         self.reward_calculator.reset()
         self._steps_curr_episode = 0
+        if self.humanMode:
+            #reset start position end goal position  ped positions TODO : modify the reset mechnism
+            self.task.reset(self.last_obs_dict, self._episode, self.goal_radius)
+            # self.task.reset()
+            self.observation_collector.set_timestep(0.0)
+        else:
+            self.task.reset()
 
         # extended eval info
         if self._extended_eval:
