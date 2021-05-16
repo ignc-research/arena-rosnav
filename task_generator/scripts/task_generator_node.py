@@ -1,11 +1,14 @@
 #! /usr/bin/env python
-
-from logging import setLogRecordFactory
 import rospy
+HUMANMODE=rospy.get_param("/useHumanMode")
+from logging import setLogRecordFactory
 import time
 from std_srvs.srv import Empty, EmptyResponse
 from nav_msgs.msg import Odometry
-from task_generator.tasks import get_predefined_task
+if HUMANMODE:
+    from task_generator.tasks_human import get_predefined_task
+else:
+    from task_generator.tasks import get_predefined_task
 from std_msgs.msg import Int16
 # for clearing costmap
 from clear_costmap import clear_costmaps
@@ -78,7 +81,12 @@ class TaskGenerator:
 
     def reset_srv_callback(self, req):
         rospy.loginfo("Task Generator received task-reset request!")
-        self.task.reset()
+        if HUMANMODE:
+            #reset start position end goal position  ped positions TODO : modify the reset mechnism
+            self.task.reset(None, 1, 0.3)
+            self.observation_collector.set_timestep(0.0)
+        else:
+            self.task.reset()
         return EmptyResponse()
 
 
