@@ -1,0 +1,18 @@
+version: "3.3"
+services:
+  ros:
+    build: .
+    command: "tail -f /dev/null"
+    environment:
+      DISPLAY: novnc:0.0
+    volumes:
+      - .:/root/catkin_ws/src/arena-rosnav
+      
+  novnc:
+    image: theasp/novnc:latest
+    environment:
+      DISPLAY_WIDTH: 1920
+      DISPLAY_HEIGHT: 1080
+      RUN_XTERM: "no"
+    ports:
+      - "8080:8080"
