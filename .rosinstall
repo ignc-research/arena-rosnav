@@ -20,8 +20,8 @@
 
 - git:
     local-name: ../forks/navigation/local_planner/teb
-    uri: https://github.com/rst-tu-dortmund/teb_local_planner
-    version: master
+    uri: https://github.com/chelseabright96/teb_local_planner
+    version: noetic_devel
 - git:
     local-name: ../forks/navigation/local_planner/mpc
     uri: https://github.com/rst-tu-dortmund/mpc_local_planner

@@ -41,8 +41,8 @@ poetry install
 PYTHONPATH=$(poetry env info --path)
 
 rosws update
-. $HOME/.bashrc
 
+. ~/.bashrc
 poetry run catkin_make -C ../.. -DCMAKE_BUILD_TYPE=Release
 
 . ../../devel/setup.sh
