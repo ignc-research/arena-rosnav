@@ -6,7 +6,7 @@ services:
     environment:
       DISPLAY: novnc:0.0
     volumes:
-      - .:/root/catkin_ws/src/arena-rosnav
+      - ./:/root/catkin_ws/src/arena-rosnav/
       
   novnc:
     image: theasp/novnc:latest
