@@ -236,7 +236,11 @@ class FlatlandEnv(gym.Env):
 
         # calculate reward
         reward, reward_info = self.reward_calculator.get_reward(
-            obs_dict['laser_scan'], obs_dict['goal_in_robot_frame'], obs_dict['adult_in_robot_frame'], obs_dict['child_in_robot_frame'],obs_dict['elder_in_robot_frame'],  self._steps_curr_episode/self._max_steps_per_episode ) # obs_dict['adult_in_robot_frame'], obs_dict['child_in_robot_frame'],obs_dict['elder_in_robot_frame'],
+            obs_dict['laser_scan'], obs_dict['goal_in_robot_frame'], 
+            obs_dict['adult_in_robot_frame'], obs_dict['child_in_robot_frame'],
+            obs_dict['elder_in_robot_frame'],  self._steps_curr_episode/self._max_steps_per_episode, 
+            adult_distances=obs_dict['adult_distances'], child_distances=obs_dict['child_distances'],
+            elder_distances=obs_dict['elder_distances'])
             # obs_dict['laser_scan'], obs_dict['goal_in_robot_frame'], 
             # action=action, global_plan=obs_dict['global_plan'], 
             # robot_pose=obs_dict['robot_pose'])
@@ -329,9 +333,11 @@ class FlatlandEnv(gym.Env):
                 self._collisions += 1
                 # when crash occures, robot strikes obst for a few consecutive timesteps
                 # we want to count it as only one collision
-                self._in_crash = True    
+                self._in_crash = True
         else:
             self._in_crash = False
+        
+        print('iscrash', self._in_crash)
 
         # safe dist detector
         if 'safe_dist' in reward_info:
