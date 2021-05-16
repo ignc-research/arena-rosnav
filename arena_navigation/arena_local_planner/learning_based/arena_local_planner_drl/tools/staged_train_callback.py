@@ -50,7 +50,7 @@ class InitiateNewTrainStage(BaseCallback):
         assert (self.upper_threshold >= 0 and self.lower_threshold >= 0
         ), "upper/lower threshold have to be positive numbers"
         if self.threshhold_type == "succ":
-            assert (self.upper_threshold <= 1 and self.lower_threshold >= 0
+            assert (self.upper_threshold <= 2 and self.lower_threshold >= 0
             ), "succ thresholds have to be between [1.0, 0.0]"
 
         self.verbose = verbose
