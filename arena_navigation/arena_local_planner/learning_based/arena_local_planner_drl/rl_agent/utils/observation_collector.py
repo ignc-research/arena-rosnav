@@ -60,6 +60,9 @@ class ObservationCollector():
         self.human_behavior_tokens= copy.deepcopy(self.safe_dists_factor)
         for i,item in enumerate(list(self.human_behavior_tokens.items())):
             self.human_behavior_tokens[ item[0]] = i
+        self.human_type_ids= copy.deepcopy(self.safe_dists_human_type)
+        for i,item in enumerate(list(self.human_type_ids.items())):
+            self.human_type_ids[ item[0]] = i
 
 
 
@@ -205,8 +208,7 @@ class ObservationCollector():
         obs_dict['human_behavior']=self._human_behavior
 
 
-        for item in self.safe_dists_human_type.items() :
-            obs_dict[item[0]+'_in_robot_frame'] = np.array([],dtype=object).reshape(0, 2)
+        obs_dict['human_obstacles_in_robot_frame'] = np.array([],dtype=object).reshape(0, 4)
         
         count_observable_humans=0  
         for i, ty in enumerate(self._human_type):
@@ -216,9 +218,9 @@ class ObservationCollector():
             else:
                 count_observable_humans=count_observable_humans+1
                 
-                rho_behavior=np.array([rho_humans[i],self._human_behavior[i]],dtype=object)
+                rho_behavior=np.array([rho_humans[i],self._human_behavior[i],self._human_type[i],self.human_type_ids[self._human_type[i]]],dtype=object)
                 
-                obs_dict[ty+'_in_robot_frame'] = np.vstack([obs_dict[ty+'_in_robot_frame'], rho_behavior])
+                obs_dict['human_obstacles_in_robot_frame'] = np.vstack([obs_dict['human_obstacles_in_robot_frame'], rho_behavior])
                 #determine the safe_dist for every human
                 safe_dist_=self.safe_dists_human_type[ty] * self.safe_dists_factor[self._human_behavior[i]]
                 _radius =self.obstacle_radius[ty]

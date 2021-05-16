@@ -4,6 +4,7 @@ import rospy
 import yaml
 import os
 import rospkg
+import copy
 from geometry_msgs.msg import Pose2D
 from typing import Tuple
 import scipy.spatial
@@ -36,11 +37,20 @@ class RewardCalculator():
         self.safe_dists_human_type = self.read_saftey_distance_parameter_from_yaml()['human obstacle safety distance radius']
         self.safe_dists_robot_type = self.read_saftey_distance_parameter_from_yaml()['robot obstacle safety distance radius']
         self.safe_dists_factor = self.read_saftey_distance_parameter_from_yaml()['safety distance factor']
+        self.human_obstacles_last_min = copy.deepcopy(self.safe_dists_human_type)
+        for item in list(self.human_obstacles_last_min.items()):
+            self.human_obstacles_last_min[item[0]] = None
+        self.human_types_as_reason= copy.deepcopy(self.safe_dists_human_type)
+        for i,item in enumerate(list(self.human_types_as_reason.items())):
+            self.human_types_as_reason[ item[0]] = i + 3
+
+        
+        
         self.safe_dist_adult= 1.0
         self.safe_dist_child= 1.2
         self.safe_dist_elder= 1.5
         self.safe_dist_talking= 0.8
-
+        
         self.kdtree = None
         
         self.last_goal_dist = None
@@ -67,10 +77,10 @@ class RewardCalculator():
         """
         self.last_goal_dist = None
         self.last_dist_to_path = None
-        self.last_adult_min= None
-        self.last_child_min= None
-        self.last_elder_min= None
+        for item in list(self.human_obstacles_last_min.items()):
+           self.human_obstacles_last_min[item[0]] = None
         self.cum_reward=0
+  
 
     def _reset(self):
         """
@@ -80,14 +90,13 @@ class RewardCalculator():
         self.info = {}
 
     def get_history_info(self):
-        return [self.last_adult_min, self.last_child_min, self.last_elder_min, self.cum_reward]
+
+        return list(self.human_obstacles_last_min.values())  + [self.cum_reward]
     
     def get_reward(self, 
     laser_scan:np.ndarray, 
     goal_in_robot_frame: Tuple[float,float],  
-    adult_in_robot_frame:np.ndarray, 
-    child_in_robot_frame:np.ndarray, 
-    elder_in_robot_frame:np.ndarray, 
+    human_obstacles_in_robot_frame:np.ndarray, 
     current_time_step: float, 
     *args, **kwargs):
         """
@@ -97,7 +106,7 @@ class RewardCalculator():
             adult_in_robot_frame(np.ndarray)
         """
         self._reset()
-        self.cal_func(self, laser_scan, goal_in_robot_frame, adult_in_robot_frame, child_in_robot_frame, elder_in_robot_frame, current_time_step,*args,**kwargs)
+        self.cal_func(self, laser_scan, goal_in_robot_frame, human_obstacles_in_robot_frame, current_time_step,*args,**kwargs)
         self.cum_reward+=self.curr_reward
         return self.curr_reward, self.info
 
@@ -192,16 +201,14 @@ class RewardCalculator():
         self._reward_child_safety_dist(child_in_robot_frame, punishment=4)
         self._reward_elder_safety_dist(elder_in_robot_frame, punishment=4)
 
-    def _cal_reward_rule_06(self, laser_scan: np.ndarray, goal_in_robot_frame: Tuple[float,float], adult_in_robot_frame:np.ndarray, 
-                                                        child_in_robot_frame:np.ndarray, elder_in_robot_frame:np.ndarray,  current_time_step:float, *args,**kwargs):
+    def _cal_reward_rule_06(self, laser_scan: np.ndarray, goal_in_robot_frame: Tuple[float,float], human_obstacles_in_robot_frame:np.ndarray,  current_time_step:float, *args,**kwargs):
         
         self._reward_goal_reached(goal_in_robot_frame, reward=2)
         self._reward_safe_dist(laser_scan)
         self._reward_collision(laser_scan, punishment=4)
         self._reward_goal_approached3(goal_in_robot_frame,current_time_step)
-        self._reward_adult_safety_dist1(adult_in_robot_frame, punishment=4) #0.05 0.07
-        self._reward_child_safety_dist1(child_in_robot_frame, punishment=4)
-        self._reward_elder_safety_dist1(elder_in_robot_frame, punishment=4)
+        self._reward_human_obstacles_safety_dist(human_obstacles_in_robot_frame) #0.05 0.07
+
         
     def _reward_goal_reached(self,
                              goal_in_robot_frame = Tuple[float,float], 
@@ -292,7 +299,10 @@ class RewardCalculator():
                 self.info['is_success'] = 0
 
     def _reward_adult_safety_dist1(self, adult_in_robot_frame, punishment = 80):
+
+        
         if adult_in_robot_frame.shape[0] != 0:
+
             min_adult_dist=adult_in_robot_frame[0,0]
             min_adult_behavior=adult_in_robot_frame[0,1]
             if self.last_adult_min is None:
@@ -310,26 +320,35 @@ class RewardCalculator():
                 self.info['is_done'] = True
                 self.info['done_reason'] = 3 #hit adult
                 self.info['is_success'] = 0
+    
+    def  _reward_human_obstacles_safety_dist(self, human_obstacles_in_robot_frame):
+        ### split the array into multiple array depending on type 
 
-    def _reward_child_safety_dist1(self, child_in_robot_frame, punishment = 90):
-        if child_in_robot_frame.shape[0]!=0:
-            min_child_dist=child_in_robot_frame[0,0]
-            min_child_behavior=child_in_robot_frame[0,1]
-            if self.last_child_min is None:
-                self.last_child_min=min_child_dist
-            else:
-                if self.last_child_min>min_child_dist:
-                    self.last_child_min=min_child_dist
-            if min_child_dist<self.safe_dist_child and min_child_behavior != 'talking' :
-                self.curr_reward -= punishment
-                self.info['is_done'] = True
-                self.info['done_reason'] = 4 #hit child
-                self.info['is_success'] = 0
-            if min_child_dist<self.safe_dist_talking and min_child_behavior == 'talking' :
-                self.curr_reward -= punishment
-                self.info['is_done'] = True
-                self.info['done_reason'] = 4 #hit child
-                self.info['is_success'] = 0
+        human_obstacles_in_robot_frame = [human_obstacles_in_robot_frame[human_obstacles_in_robot_frame[:,3]==k] for k in np.unique(human_obstacles_in_robot_frame[:,3])]
+      
+        for human_obstacles_by_type_in_robot_frame in human_obstacles_in_robot_frame :
+
+            if human_obstacles_by_type_in_robot_frame.shape[0]!=0:
+                type = human_obstacles_by_type_in_robot_frame[0,2]
+                behavior = human_obstacles_by_type_in_robot_frame[0,1]
+                
+                min_human_obstacle_dist=human_obstacles_by_type_in_robot_frame[0,0]
+                min_human_obstacle_behavior=human_obstacles_by_type_in_robot_frame[0,1]
+                if self.human_obstacles_last_min[type] is None:
+                    self.human_obstacles_last_min[type]=min_human_obstacle_dist
+                else:
+                    if self.human_obstacles_last_min[type]>min_human_obstacle_dist:
+                        self.human_obstacles_last_min[type]=min_human_obstacle_dist
+               
+                safe_dist_=self.safe_dists_human_type[type] * self.safe_dists_factor[behavior]
+                punishment = 75 * self.safe_dists_human_type[type]
+                if min_human_obstacle_dist<safe_dist_:
+                    print(human_obstacles_by_type_in_robot_frame[0],punishment)
+                    self.curr_reward -= punishment
+                    self.info['is_done'] = True
+                    self.info['done_reason'] = self.human_types_as_reason[type] #hit child
+                    self.info['is_success'] = 0
+
 
     def _reward_elder_safety_dist1(self, elder_in_robot_frame, punishment = 100):
         if elder_in_robot_frame.shape[0]!=0:
@@ -340,6 +359,7 @@ class RewardCalculator():
             else:
                 if self.last_elder_min>min_elder_dist:
                     self.last_elder_min=min_elder_dist
+            
             if min_elder_dist<self.safe_dist_elder and min_elder_behavior !='talking':
                 self.curr_reward -= punishment
                 self.info['is_done'] = True
