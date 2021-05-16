@@ -10,7 +10,7 @@ def training_args(parser):
     parser.add_argument('--debug', action='store_true', help='disables multiprocessing in order to debug')
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('--agent', type=str,
-                        choices=['MLP_ARENA2D', 'AGENT_1', 'AGENT_2', 'AGENT_3', 'AGENT_4', 'AGENT_5', 'AGENT_6', 'AGENT_7', 'AGENT_8', 'AGENT_9', 'AGENT_10', 'AGENT_11', 'AGENT_12', 'AGENT_13', 'AGENT_14', 'AGENT_15', 'AGENT_16', 'AGENT_17', 'AGENT_18', 'AGENT_19', 'AGENT_20'],
+                        choices=['MLP_ARENA2D', 'MLP_LSTM','MLP_SARL', 'MLP_HUMAN', 'MLP_GRU', 'AGENT_1', 'AGENT_2', 'AGENT_3', 'AGENT_4', 'AGENT_5', 'AGENT_6', 'AGENT_7', 'AGENT_8', 'AGENT_9', 'AGENT_10', 'AGENT_11', 'AGENT_12', 'AGENT_13', 'AGENT_14', 'AGENT_15', 'AGENT_16', 'AGENT_17', 'AGENT_18', 'AGENT_19', 'AGENT_20'],
                         help='predefined agent to train')
     group.add_argument('--custom-mlp', action='store_true', help='enables training with custom multilayer perceptron')
     group.add_argument('--load', type=str, metavar='[agent name]', help='agent to be loaded for training')
