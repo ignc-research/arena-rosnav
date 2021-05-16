@@ -1,7 +1,6 @@
 #!/bin/bash
 
-mkdir -p catkin_ws/src && 
-cd catkin_ws/src
+mkdir -p catkin_ws/src && cd catkin_ws/src
 git clone --depth 1 git@github.com:wittenator/arena-rosnav.git
 cd arena-rosnav
 
