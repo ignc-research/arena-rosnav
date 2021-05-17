@@ -18,7 +18,7 @@ sudo aptitude update
 sudo aptitude -y install ros-noetic-desktop-full
 
 echo "source /opt/ros/noetic/setup.bash" >> ~/.bashrc
-. ~/.bashrc
+source ~/.bashrc
 
 sudo aptitude -y install python3-rosdep python3-rosinstall python3-rosinstall-generator python3-wstool build-essential
 sudo rosdep init
@@ -43,4 +43,4 @@ rosws update
 source ~/.bashrc
 poetry run catkin_make -C ../.. -DCMAKE_BUILD_TYPE=Release
 
-. ../../devel/setup.sh
+source ../../devel/setup.sh
