@@ -27,7 +27,7 @@ Now you may use docker-compose to simplify the container creation or use Docker 
 
 ### Start using Docker-Compose 
 
-3.
+3. Create network and run containers
 ```
 docker-compose up --build
 ```
