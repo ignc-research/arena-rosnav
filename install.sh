@@ -38,11 +38,9 @@ ros-noetic-geometry2
 
 poetry install
 
-PYTHONPATH=$(poetry env info --path)
-
 rosws update
 
-. ~/.bashrc
+source ~/.bashrc
 poetry run catkin_make -C ../.. -DCMAKE_BUILD_TYPE=Release
 
 . ../../devel/setup.sh
