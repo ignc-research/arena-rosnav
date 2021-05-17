@@ -33,7 +33,7 @@ import numpy as np
 
 from std_msgs.msg import Bool
 
-from rl_agent.utils.debug import timeit 
+# from rl_agent.utils.debug import timeit 
 
 class ObservationCollector():
     def __init__(self, ns: str, num_humans:int):
@@ -168,6 +168,7 @@ class ObservationCollector():
         obs_dict = {}
         obs_dict["laser_scan"] = scan
         obs_dict['goal_in_robot_frame'] = [rho,theta]
+        obs_dict['robot_pose'] = self._robot_pose
 
         rho_humans, theta_humans=np.empty([self.num_humans,]), np.empty([self.num_humans,])
         coordinate_humans= np.empty([2,self.num_humans])
@@ -185,13 +186,28 @@ class ObservationCollector():
         self._human_position=self._human_position[human_pos_index]
         self._human_behavior=self._human_behavior[human_pos_index]
 
+        rho_adult = np.array([])
+        rho_child = np.array([])
+        rho_elder = np.array([])
+
+        for i, ty in enumerate(self._human_type):
+            if ty==0: # adult
+                rho_adult=np.hstack([rho_adult, rho_humans[i]])
+            elif ty==1: # child
+                rho_child=np.hstack([rho_child, rho_humans[i]])
+            elif ty==3: # elder
+                rho_elder=np.hstack([rho_elder, rho_humans[i]])
+
+        obs_dict['adult_distances'] = rho_adult
+        obs_dict['child_distances'] = rho_child
+        obs_dict['elder_distances'] = rho_elder
+
         obs_dict['human_coordinates_in_robot_frame']=coordinate_humans
         obs_dict['human_type']=self._human_type
         obs_dict['human_behavior']=self._human_behavior
 
         # semantic tokens TODO: different tokens for other behaviors
         self._human_behavior_token=(self._human_behavior=='talking').astype(np.int)
-        # print(self._human_behavior)
 
         rho_behavior_adult = np.array([],dtype=object).reshape(0, 2)
         rho_behavior_child = np.array([],dtype=object).reshape(0, 2)
@@ -245,7 +261,7 @@ class ObservationCollector():
                 merged_obs = np.hstack([merged_obs,obs])
         obs_dict['adult_in_robot_frame'] = rho_behavior_adult
         obs_dict['child_in_robot_frame'] = rho_behavior_child
-        obs_dict['elder_in_robot_frame'] = rho_behavior_elder        
+        obs_dict['elder_in_robot_frame'] = rho_behavior_elder
         #TODO more proper method is needed to supplement info blanks (finished)
         if count_observable_humans==0:
             obs_empty=np.array(self.robot_self_state+[0]*10)
@@ -255,15 +271,13 @@ class ObservationCollector():
             obs_copy=np.copy(merged_obs[-count_observable_humans*self.human_state_size:])
             merged_obs = np.hstack([merged_obs, obs_copy])
             count_observable_humans=count_observable_humans*2
-        # print('observe', count_observable_humans)
         #align the observation size
         observation_blank=len(merged_obs) - self.observation_space.shape[0]
         if observation_blank<0:
             #add invalid value 1000 if the merged_obs are not full
             merged_obs=np.hstack([merged_obs,np.ones([-observation_blank,])*1000])
         elif observation_blank>0:
-            merged_obs=merged_obs[:-observation_blank]
-        
+            merged_obs=merged_obs[:-observation_blank]        
         return merged_obs, obs_dict
 
     @staticmethod
