@@ -4,13 +4,15 @@
 
 ##### Prerequisites
 
-In order to use the install script you need to have (Poetry)[https://python-poetry.org/docs/] installed and available in your shell.
+In order to use the install script you need to have [Poetry](https://python-poetry.org/docs/) installed and available in your shell.
 
 #### Installation
 
  Navigate to the directory, where you want your code to reside and execute our install script which sets everything up:
 
-'curl -sSL https://raw.githubusercontent.com/wittenator/arena-rosnav/local_planner_subgoalmode/install.sh | bash'
+```
+curl -sSL https://raw.githubusercontent.com/wittenator/arena-rosnav/local_planner_subgoalmode/install.sh | bash
+```
 
 
 If you have troubles with the installation we recommend to follow the manual installation procedure below and replacing `melodic` by `noetic` in the respective places. Pay attention to changing the ROS dependency branches in the `.rosinstall` as well.
