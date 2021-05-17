@@ -940,8 +940,8 @@ class ObstaclesManager:
             while i_curr_try < max_num_try:
                 response = self._srv_delete_model.call(delete_request)
                 if not response.success:  # if service not succeeds, do something and redo service
-                    # if  response.message[-14:]  == 'does not exist': 
-                    #     break
+                    if  response.message[-14:]  == 'does not exist': 
+                        break
                     rospy.logwarn(
                         f"({self.ns}) delete object robot {delete_request.name } failed! ")
                     rospy.logwarn(response.message)
@@ -949,7 +949,7 @@ class ObstaclesManager:
 
                     i_curr_try += 1
                 else:
-                    rospy.logwarn(f"({self.ns}) delete object robot {delete_request.name } sucsseded! ")
+                    # rospy.logwarn(f"({self.ns}) delete object robot {delete_request.name } sucsseded! ")
                     break
            
         
