@@ -11,13 +11,6 @@ from geometry_msgs.msg import Point
 
 rospack = rospkg.RosPack()
 
-ped_types = {
-    "adult" : 0,
-    "child" : 1,
-    "elder" : 2,
-    "forklift" : 3,
-}
-
 pedsim_types_model_paths = {
     "adult": os.path.join(rospack.get_path("simulator_setup"), "dynamic_obstacles", "person_two_legged.model.yaml"),
     "elder": os.path.join(rospack.get_path("simulator_setup"), "dynamic_obstacles", "person_two_legged.model.yaml"),
@@ -34,7 +27,7 @@ peds = []
 ped1 = Ped()
 ped1.id = 2
 ped1.pos = Point(1, 1, 0)
-ped1.type = ped_types["adult"]
+ped1.type = "adult"
 ped1.number_of_peds = 2
 ped1.vmax = 1.5
 ped1.force_factor_desired = 1.0
@@ -57,7 +50,7 @@ peds.append(ped1)
 ped2 = Ped()
 ped2.id = 2
 ped2.pos = Point(6, 3, 0)
-ped2.type = ped_types["adult"]
+ped2.type = "adult"
 ped2.number_of_peds = 6
 ped2.vmax = 2.0
 ped2.force_factor_desired = 2.0
@@ -80,9 +73,9 @@ peds.append(ped2)
 ped3 = Ped()
 ped3.id = 2
 ped3.pos = Point(8, 7, 0)
-ped3.type = ped_types["forklift"]
+ped3.type = "forklift"
 ped3.number_of_peds = 2
-ped3.vmax = 8.0
+ped3.vmax = 4.0
 ped3.force_factor_desired = 1.0
 ped3.force_factor_obstacle = 1.0
 ped3.force_factor_social = 2.0
