@@ -33,7 +33,7 @@ plugins:
   - type: Laser
     name: laser_front
     frame: laser_link
-    topic: randomwanderer/scan
+    topic: /randomwanderer/scan
     body: base
     broadcast_tf: true
     origin: [0, 0, 0]
