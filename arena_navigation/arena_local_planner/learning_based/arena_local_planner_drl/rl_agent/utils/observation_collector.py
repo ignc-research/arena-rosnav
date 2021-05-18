@@ -63,6 +63,9 @@ class ObservationCollector():
         self.human_type_ids= copy.deepcopy(self.safe_dists_human_type)
         for i,item in enumerate(list(self.human_type_ids.items())):
             self.human_type_ids[ item[0]] = i
+        self.robo_type_ids= copy.deepcopy(self.safe_dists_robot_type)
+        for i,item in enumerate(list(self.robo_type_ids.items())):
+            self.robo_type_ids[ item[0]] = i
 
 
 
@@ -277,8 +280,7 @@ class ObservationCollector():
         
 
 
-        for item in self.safe_dists_robot_type.items() :
-            obs_dict[item[0]+'_in_robot_frame'] = np.array([],dtype=object).reshape(0, 1)
+        obs_dict['robot_obstacles_in_robot_frame'] = np.array([],dtype=object).reshape(0,3)
 
         rho_behavior_randomwandrer = np.array([],dtype=object).reshape(0, 1) 
         # 
@@ -290,8 +292,8 @@ class ObservationCollector():
             else:
                 count_observable_robo_obstacles = count_observable_robo_obstacles +1
                 
-                rho_behavior=np.array([rho_robo_obstacles[i]],dtype=object)
-                obs_dict[ty+'_in_robot_frame'] = np.vstack([obs_dict[ty+'_in_robot_frame'], rho_behavior])
+                rho_behavior=np.array([rho_robo_obstacles[i],self._robo_obstacle_type[i],self.robo_type_ids[ self._robo_obstacle_type[i]]],dtype=object)
+                obs_dict['robot_obstacles_in_robot_frame'] = np.vstack([obs_dict['robot_obstacles_in_robot_frame'], rho_behavior])
                 #determine the safe_dist for every robot
                 safe_dist_=self.safe_dists_robot_type[ty] 
                 _radius =self.obstacle_radius[ty]
@@ -325,9 +327,12 @@ class ObservationCollector():
     def _get_pose_in_robot_frame(agent_pos: Pose2D, robot_pos: Pose2D):
         y_relative = agent_pos.y - robot_pos.y
         x_relative = agent_pos.x - robot_pos.x
-        rho = (x_relative**2+y_relative**2)**0.5
+        rho =  np.linalg.norm([y_relative, x_relative])
+        theta = 0
+     
         theta = (np.arctan2(y_relative, x_relative) -
-                 robot_pos.theta+5*np.pi) % (2*np.pi)-np.pi
+                robot_pos.theta+5*np.pi) % (2*np.pi)-np.pi
+    
         return rho, theta
 
     @staticmethod
