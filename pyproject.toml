@@ -10,7 +10,7 @@ url = "https://rospypi.github.io/simple/"
 secondary = true
 
 [tool.poetry.dependencies]
-python = "^3.6"
+python = "^3.8"
 rospy = "^1.15.7"
 rosbag = "^1.15.7"
 tf = "^1.12.1"
