@@ -1,7 +1,7 @@
 1:
-  dynamic_human: 8
+  dynamic_human: 18
   dynamic_robot: 2
-  static: 0
+  static: 3
 2:
   dynamic_human: 5
   dynamic_robot: 7

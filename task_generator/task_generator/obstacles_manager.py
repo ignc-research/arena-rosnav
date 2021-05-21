@@ -727,7 +727,7 @@ class ObstaclesManager:
                     msg.group_talking_base_time = advanced_configs['group talking base time']
                     msg.talking_and_walking_base_time = advanced_configs['talking and walking base time']
                     msg.force_factor_desired = 1.0
-                    msg.force_factor_obstacle = 1.0
+                    msg.force_factor_obstacle = 10.0
                     msg.force_factor_social = 2.0
                     msg.yaml_file = self.__ped_file
                     msg.waypoint_mode = 1

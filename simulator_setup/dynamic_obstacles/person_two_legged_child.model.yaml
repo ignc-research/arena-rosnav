@@ -84,11 +84,11 @@ plugins:
     var_leg_radius: 0.0
     safety_dist: 1.0
 
-  - type: PosePub
-    name: publish_human_pose
-    body: base_ped
-    odom_frame_id: odom
-    odom_pub: odom  # topic odom is published on
-    ground_truth_pub: dynamic_child
-    pub_rate: 10
+  # - type: PosePub
+  #   name: publish_human_pose
+  #   body: base_ped
+  #   odom_frame_id: odom
+  #   odom_pub: odom  # topic odom is published on
+  #   ground_truth_pub: dynamic_child
+  #   pub_rate: 10
 

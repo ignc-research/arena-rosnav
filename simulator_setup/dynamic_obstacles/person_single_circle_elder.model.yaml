@@ -67,12 +67,12 @@ plugins:
     enabled: true
     safety_dist: 1.2
 
-  - type: PosePub 
-    name: publish_human_pose
-    body: base
-    odom_frame_id: odom
-    odom_pub: odom  # topic odom is published on
-    ground_truth_pub: dynamic_elder
-    pub_rate: 10
+  # - type: PosePub 
+  #   name: publish_human_pose
+  #   body: base
+  #   odom_frame_id: odom
+  #   odom_pub: odom  # topic odom is published on
+  #   ground_truth_pub: dynamic_elder
+  #   pub_rate: 10
 
 
