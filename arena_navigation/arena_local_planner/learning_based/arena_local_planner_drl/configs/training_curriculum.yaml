@@ -1,28 +1,40 @@
 1:
-  dynamic_human: 8
-  dynamic_robot: 2
+  dynamic_human: 7
+  dynamic_robot: 0
   static: 0
 2:
-  dynamic_human: 5
-  dynamic_robot: 7
-  static: 0
+  dynamic_human: 8
+  dynamic_robot: 0
+  static: 3
 3:
-  dynamic_human: 5
-  dynamic_robot: 2
-  static: 0
+  dynamic_human: 9
+  dynamic_robot: 1
+  static: 2
 4:
-  dynamic_human: 5
-  dynamic_robot: 2
+  dynamic_human: 0
+  dynamic_robot: 3
   static: 0
 5:
-  dynamic_human: 5
-  dynamic_robot: 2
+  dynamic_human: 11
+  dynamic_robot: 5
   static: 0
 6:
-  dynamic_human: 5
-  dynamic_robot: 2
+  dynamic_human: 12
+  dynamic_robot: 5
   static: 0
 7:
-  dynamic_human: 5
-  dynamic_robot: 2
+  dynamic_human: 13
+  dynamic_robot: 6
+  static: 0
+8:
+  dynamic_human: 14
+  dynamic_robot: 6
+  static: 0
+9:
+  dynamic_human: 15
+  dynamic_robot: 7
+  static: 0
+10:
+  dynamic_human: 16
+  dynamic_robot: 7
   static: 0

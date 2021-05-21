@@ -120,7 +120,6 @@ def make_envs(rank: int,
     """
     def _init() -> Union[gym.Env, gym.Wrapper]:
         if train:
-        
             # train env
             env = FlatlandEnv(
                 f"sim_{rank+1}", 
@@ -146,7 +145,6 @@ def make_envs(rank: int,
                     ),
                 PATHS.get('eval'), info_keywords=("done_reason", "is_success"))
         env.seed(seed + rank)
-
         return env
     set_random_seed(seed)
     return _init
@@ -188,6 +186,7 @@ if __name__ == "__main__":
 
     # check if simulations are booted
     wait_for_nodes(n_envs=args.n_envs, timeout=5)
+
     # initialize hyperparameters (save to/ load from json)
     params = initialize_hyperparameters(
         PATHS=PATHS, load_target=args.load, config_name=args.config, n_envs=args.n_envs)
@@ -203,6 +202,7 @@ if __name__ == "__main__":
         env = DummyVecEnv(
             [make_envs(i, params=params, PATHS=PATHS) 
                 for i in range(args.n_envs)])
+
     # threshold settings for training curriculum
     # type can be either 'succ' or 'rew'
     trainstage_cb = InitiateNewTrainStage(
@@ -210,6 +210,7 @@ if __name__ == "__main__":
         treshhold_type="succ", 
         upper_threshold=0.99, lower_threshold=0.3, 
         task_mode=params['task_mode'], verbose=1)
+
     # stop training on reward threshold callback
     stoptraining_cb = StopTrainingOnRewardThreshold(
         reward_threshold=35, verbose=1)
@@ -241,7 +242,7 @@ if __name__ == "__main__":
     # eval_freq: evaluate the agent every eval_freq train timesteps
     eval_cb = EvalCallback(
         eval_env=eval_env,          train_env=env,
-        n_eval_episodes=50,         eval_freq=2**16, 
+        n_eval_episodes=20,         eval_freq=2**16, 
         log_path=PATHS['eval'],     best_model_save_path=PATHS['model'], 
         deterministic=True,         callback_on_eval_end=trainstage_cb,
         callback_on_new_best=stoptraining_cb)

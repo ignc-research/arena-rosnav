@@ -11,7 +11,7 @@ from flatland_msgs.srv import SpawnModel, SpawnModelRequest
 from flatland_msgs.srv import MoveModel, MoveModelRequest
 from flatland_msgs.srv import StepWorld
 from nav_msgs.msg import OccupancyGrid
-from geometry_msgs.msg import Pose2D, Twist, Point
+from geometry_msgs.msg import Pose2D, Twist, Point ,Pose
 from pedsim_srvs.srv import SpawnPeds
 from pedsim_srvs.srv import SpawnObstacle,SpawnObstacleRequest
 from pedsim_srvs.srv import SpawnInteractiveObstacles,SpawnInteractiveObstaclesRequest
@@ -20,6 +20,7 @@ from visualization_msgs.msg import Marker, MarkerArray
 from pedsim_msgs.msg import Ped
 from pedsim_msgs.msg import LineObstacle
 from pedsim_msgs.msg import LineObstacles
+from pedsim_msgs.msg import InteractiveObstacle
 from std_srvs.srv import SetBool, Empty, Trigger ,TriggerRequest
 import rospy
 import rospkg
@@ -233,6 +234,7 @@ class ObstaclesManager:
         'simulator_setup'), 'dynamic_obstacles/person_two_legged.model.yaml')
         self.num_humans=num_obstacles
         self.register_obstacles(num_obstacles, model_path, type_obstacle='human')
+
 
     def register_robo_obstacle(self, num_obstacles: int):
         """register dynamic obstacles human.
@@ -697,10 +699,13 @@ class ObstaclesManager:
         obstacles_spawning_human= self.read_obstacles_spawning_parameters_from_yaml()[curr_stage]['human obstacles']
         advanced_configs = self.read_advanced_configs_parameters_from_yaml()
         shelves_waypoints = []
-        
+
         i = 0
-        while i < len(peds) :           
+        while i < len(peds) :    
+                
             for type,item in enumerate(obstacles_spawning_human.items()) :
+               
+                
                 for  x in range(item[1][0]):
                     ped = peds[i]
                     self.__ped_type=  item[0]
@@ -746,7 +751,7 @@ class ObstaclesManager:
             # try to call service
         
             response=self.__respawn_peds_srv.call(srv.peds)
-            # response=self.__spawn_ped_srv.call(srv.peds)
+
             if not response.success:  # if service not succeeds, do something and redo service
                 rospy.logwarn(
                     f"spawn human failed! trying again... [{i_curr_try+1}/{max_num_try} tried]")
@@ -757,7 +762,6 @@ class ObstaclesManager:
         self.__peds = peds
         rospy.set_param(f'{self.ns_prefix}agent_topic_string', self.agent_topic_str)
 
-        # self.spawn_agents_in_flatland(random_wanderer_id,model_yaml_file_path)
 
 
         return
@@ -813,57 +817,49 @@ class ObstaclesManager:
         :param  id id of the pedestrian.
         """
         srv = SpawnInteractiveObstacles()
-        srv.InteractiveObstacle = []
+        srv.InteractiveObstacles = []
         self.agent_topic_str=''   
         curr_stage = rospy.get_param("/curr_stage", -1)
-        obstacles_static= self.read_obstacles_spawning_parameters_from_yaml()[curr_stage]['static obstacles']
-        
-        # i = 0
-        # while i < len(peds) :           
-        #     for type,item in enumerate(obstacles_spawning_human.items()) :
-        #         for  x in range(item[1][0]):
-        #             ped = peds[i]
-        #             self.__ped_type=  item[0]
-        #             self.agent_topic_str+=f',{self.ns_prefix}pedsim_agent_{ped[0]}/'+ item[0]
-        #             self.__ped_file=os.path.join(rospkg.RosPack().get_path(
-        #             'simulator_setup'), item[1][1])
+        interactive_static_obstacles_paramaeters= self.read_obstacles_spawning_parameters_from_yaml()[curr_stage]['static obstacles']
+        static_coordinates = []
+        i = 0
+        while i < len(interactive_static_obstacles) :           
+            for type,item in enumerate(interactive_static_obstacles_paramaeters.items()) :
+                for  x in range(item[1][0]):
+                    interactive_static_obstacle = interactive_static_obstacles[i]
+                    self.__interactive_static_obstacle_type=  item[0]
+                    self.agent_topic_str+=f',{self.ns_prefix}pedsim_agent_{interactive_static_obstacle[0]}/'+ item[0]
+                    self.__interactive_static_obstacle_file=os.path.join(rospkg.RosPack().get_path(
+                    'simulator_setup'), item[1][1])
           
-        #             msg = Ped()
-        #             msg.id = ped[0]
-        #             msg.pos = Point()
-        #             msg.pos.x = ped[1][0]
-        #             msg.pos.y = ped[1][1]
-        #             msg.pos.z = ped[1][2]
-        #             msg.type = self.__ped_type
-
-
-        #             msg.yaml_file = self.__ped_file
-        #             msg.waypoint_mode = 1
-        #             msg.waypoints = []
-        #             for pos in ped[2]:
-        #                 p = Point()
-        #                 p.x = pos[0]
-        #                 p.y = pos[1]
-        #                 p.z = pos[2]
-        #                 msg.waypoints.append(p)
-        #             srv.peds.append(msg)
-        #             i = i+1
-        # max_num_try = 2
-        # i_curr_try = 0
-        # while i_curr_try < max_num_try:
-        #     # try to call service
+                    msg = InteractiveObstacle()   
+                    msg.pose = Pose()
+                    msg.pose.position.x = interactive_static_obstacle[1][0]
+                    msg.pose.position.y = interactive_static_obstacle[1][1]
+                    msg.pose.position.z = interactive_static_obstacle[1][2]
+                    static_coordinates.append([float(interactive_static_obstacle[1][0]),float(interactive_static_obstacle[1][1])])
+                    msg.interaction_radius = 4.0
+                    msg.type = self.__interactive_static_obstacle_type
+                    msg.yaml_path = self.__interactive_static_obstacle_file
+                    srv.InteractiveObstacles.append(msg)
+                    i = i+1
+        max_num_try = 2
+        i_curr_try = 0
+        while i_curr_try < max_num_try:
+            # try to call service
         
-        #     response=self.__respawn_peds_srv.call(srv.peds)
-        #     # response=self.__spawn_ped_srv.call(srv.peds)
-        #     if not response.success:  # if service not succeeds, do something and redo service
-        #         rospy.logwarn(
-        #             f"spawn human failed! trying again... [{i_curr_try+1}/{max_num_try} tried]")
-        #         # rospy.logwarn(response.message)
-        #         i_curr_try += 1
-        #     else:
-        #         break
+            response=self.__respawn_interactive_obstacles_srv.call(srv.InteractiveObstacles)
+
+            if not response.success:  # if service not succeeds, do something and redo service
+                rospy.logwarn(
+                    f"spawn static obstacle failed! trying again... [{i_curr_try+1}/{max_num_try} tried]")
+                # rospy.logwarn(response.message)
+                i_curr_try += 1
+            else:
+                break
         # self.__peds = peds
-        # rospy.set_param(f'{self.ns_prefix}agent_topic_string', self.agent_topic_str)
+        rospy.set_param(f'{self.ns_prefix}static_coordinates', static_coordinates)
+        rospy.set_param(f'{self.ns_prefix}agent_topic_string', self.agent_topic_str)
 
 
 
@@ -877,6 +873,7 @@ class ObstaclesManager:
         :param map the occupancy grid of the current map (TODO: the map should be updated every spawn)
         :safe_distance [meter] for sake of not exceeding the safety distance at the beginning phase
         """
+        # print(forbidden_zones)
         ped_array =np.array([],dtype=object).reshape(0,3)
         # self.human_id+=1
         for i in range(n):
@@ -926,30 +923,32 @@ class ObstaclesManager:
 
     def __remove_all_robo_obstacles(self,num_obstacles):
         """
-        Removes all pedestrians, that has been spawned so far
+        Removes all obo_obstacles, that has been spawned so far
         """
-        print('safe1')
-        curr_stage = rospy.get_param("/curr_stage", -1)
-        obstacles_spawning_robots= self.read_obstacles_spawning_parameters_from_yaml()[curr_stage]['robot obstacles']
+       
+        remove_obstacles_stage =  rospy.get_param("/_remove_obstacles_stage")
+        if remove_obstacles_stage == -1 :
+            return   
+        num_obstacles=self.read_stages_from_yaml()[remove_obstacles_stage]['dynamic_robot']
+        # print('robo curr_stage',remove_obstacles_stage,num_obstacles)
+
         for i in range(num_obstacles) :             
             delete_request = DeleteModelRequest()
             delete_request.name = f'{"robo_obstacle"}_{i+1:02d}'
-            print(delete_request.name)
             max_num_try = 2
             i_curr_try = 0
             while i_curr_try < max_num_try:
                 response = self._srv_delete_model.call(delete_request)
                 if not response.success:  # if service not succeeds, do something and redo service
-                    if  response.message[-14:]  == 'does not exist': 
-                        break
+                    # if  response.message[-14:]  == 'does not exist': 
+                    #     break
                     rospy.logwarn(
                         f"({self.ns}) delete object robot {delete_request.name } failed! ")
                     rospy.logwarn(response.message)
-                    print(response.message[-14:])
 
                     i_curr_try += 1
                 else:
-                    # rospy.logwarn(f"({self.ns}) delete object robot {delete_request.name } sucsseded! ")
+                    rospy.logwarn(f"({self.ns}) delete object robot {delete_request.name } sucsseded! ")
                     break
            
         
@@ -1033,3 +1032,19 @@ class ObstaclesManager:
              advanced_configs, dict), "'advanced_configs.yaml' has wrong fromat! Has to encode dictionary!"
                 
         return advanced_configs
+    def read_stages_from_yaml(self):
+        dir = rospkg.RosPack().get_path('arena_local_planner_drl')
+        
+        
+        file_location = os.path.join( dir, 'configs', 'training_curriculum.yaml')
+        
+        if os.path.isfile(file_location):
+            with open(file_location, "r") as file:
+                _stages = yaml.load(file, Loader=yaml.FullLoader)
+            assert isinstance(
+                _stages, dict), "'training_curriculum.yaml' has wrong fromat! Has to encode dictionary!"
+            
+        else:
+            raise FileNotFoundError(
+                "Couldn't find 'training_curriculum.yaml' in %s " % file_location)
+        return _stages
