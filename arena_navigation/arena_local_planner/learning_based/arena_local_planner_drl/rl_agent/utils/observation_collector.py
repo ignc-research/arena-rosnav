@@ -152,7 +152,7 @@ class ObservationCollector():
         self.sychronized_list=[self._scan_sub, self._robot_state_sub]+self._sub_agent_state  + self._sub_robo_obstacles_state #[self._scan_sub, self._robot_state_sub]+self._adult+self._child+self._elder
         self.ts = message_filters.ApproximateTimeSynchronizer(self.sychronized_list, 10, slop=0.01) 
         self.ts.registerCallback(self.callback_observation_received)
-        rospy.set_param("/_initiating_stage", False)  
+        rospy.set_param("/_initiating_stage", False)
 
     def get_observation_space(self):
         return self.observation_space
@@ -171,7 +171,7 @@ class ObservationCollector():
                 self.call_service_takeSimStep(0.1)
                 i+=1
                 time.sleep(0.01)
-            print(f"Current observation takes {i} steps for Synchronization")
+            # print(f"Current observation takes {i} steps for Synchronization")
         else:
             try:
                 rospy.wait_for_message(

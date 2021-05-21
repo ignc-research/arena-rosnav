@@ -208,7 +208,7 @@ class RobotManager:
             # print("calculate the forbidden zones")
 
             ## TODO read it from Yaml and static obstacles
-            print( 'adding ',static_coordinates)
+            # print( 'adding ',static_coordinates)
             for i, coordinate in enumerate(static_coordinates):
                 
                 forbiddenZones.append((coordinate[0],coordinate[1],2.5))

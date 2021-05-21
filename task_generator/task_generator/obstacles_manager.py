@@ -84,8 +84,8 @@ class ObstaclesManager:
         self._obstacle_name_prefix = 'obstacle'
         self.__peds=[]
 
-        self.circlePattern = False
-        self.mixRate = 0.3
+        self.circlePattern = True
+        self.mixRate = 0.5
    
         #tell the pedsim the map border
         self._add_map_border_in_pedsim()
@@ -1124,3 +1124,37 @@ class ObstaclesManager:
         if i_curr_try == max_num_try:
             raise rospy.ServiceException(f"({self.ns}) failed to register walls")
         os.remove(model_path)
+
+    def _generate_wall_yaml(self, vertices, short: bool):
+        # since flatland  can only config the model by parsing the yaml file, we need to create a file for every random obstacle
+        wall_path = os.path.join(rospkg.RosPack().get_path(
+            'simulator_setup'), 'walls')
+        os.makedirs(wall_path, exist_ok=True)
+        if short:
+            wall_name = self.ns+"shortWall.model.yaml"
+        else:
+            wall_name = self.ns+"longWall.model.yaml"
+        yaml_path = os.path.join(wall_path, wall_name)
+        # define body
+        body = {}
+        body["name"] = "static_object"
+        body["type"] = "static"
+        body["color"] = [0.33, 0.34, 0.32, 0.75]
+        body["footprints"] = []
+
+        # define footprint
+        f = {}
+        f["density"] = 1
+        f['restitution'] = 0
+        f["layers"] = ["all"]
+        f["collision"] = 'true'
+        f["sensor"] = "false"
+        f["type"] = "polygon"
+        f["points"] = vertices.astype(np.float).tolist()
+
+        body["footprints"].append(f)
+        # define dict_file
+        dict_file = {'bodies': [body]}
+        with open(yaml_path, 'w') as fd:
+            yaml.dump(dict_file, fd)
+        return yaml_path

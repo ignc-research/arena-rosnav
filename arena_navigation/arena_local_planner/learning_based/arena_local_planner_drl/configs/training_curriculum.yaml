@@ -1,6 +1,6 @@
 1:
   dynamic_human: 18
-  dynamic_robot: 2
+  dynamic_robot: 0
   static: 3
 2:
   dynamic_human: 8
