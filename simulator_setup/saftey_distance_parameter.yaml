@@ -23,13 +23,13 @@ human obstacle safety distance radius:
   adult: 1.0
   child: 1.2
   elder: 1.5
-  forklift: 1.5
+  forklift: 1.8
 robot obstacle safety distance radius:
   random_wanderer: 1.5
 obstacle radius:
   adult: 0.32
   child: 0.25
   elder: 0.3
-  forklift : 0.3
+  forklift : 0.6
   random_wanderer: 0.3
   

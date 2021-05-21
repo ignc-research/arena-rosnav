@@ -13,7 +13,7 @@ bodies:
 
     footprints:
       - type: polygon
-        points: [[0.75, 0.45], [1.4, 0.45], [1.4, 0.2], [0.75, 0.2]]
+        points: [[0.65, 0.45], [1.4, 0.45], [1.4, 0.2], [0.65, 0.2]]
         density: 1
         layers: []
 
@@ -22,7 +22,7 @@ bodies:
 
     footprints:
       - type: polygon
-        points: [[0.75, -0.2], [1.4, -0.2], [1.4, -0.45], [0.75, -0.45]]
+        points: [[0.65, -0.2], [1.4, -0.2], [1.4, -0.45], [0.65, -0.45]]
         density: 1
         layers: []
 
@@ -43,16 +43,16 @@ joints:
     name: left_fork_weld
     bodies:
       - name: base
-        anchor: [0.75, 0.45]
+        anchor: [0.70, 0.35]
       - name: left_fork
-        anchor: [0.75, 0.45]
+        anchor: [0.70, 0.35]
   - type: weld
     name: right_fork_weld
     bodies:
       - name: base
-        anchor: [0.75, -0.45]
+        anchor: [0.70, -0.35]
       - name: right_fork
-        anchor: [0.75, -0.45]
+        anchor: [0.70, -0.35]
 
 plugins:
   - type: VehicleMovement

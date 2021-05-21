@@ -135,7 +135,7 @@ class StagedRandomTask(RandomTask):
         self.ns = ns
         self.ns_prefix = "/" if ns == '' else "/"+ns+"/"
 
-        self._curr_stage = start_stage
+        self._curr_stage = start_stage 
         self._stages = dict()
         self._PATHS = PATHS
         self._read_stages_from_yaml()
@@ -158,15 +158,26 @@ class StagedRandomTask(RandomTask):
 
         # subs for triggers
         self._sub_next = rospy.Subscriber(f"{self.ns_prefix}next_stage", Bool, self.next_stage)
-        self._sub_previous = rospy.Subscriber(f"{self.ns_prefix}previous_stage", Bool, self.previous_stage)
-
+        self._sub_previous = rospy.Subscriber(f"{self.ns_prefix}previous_stage", Bool, self.previous_stage)       
+        rospy.set_param("/_remove_obstacles_stage", -1)
         self._initiate_stage()
 
-    def next_stage(self, msg: Bool):
-        if self._curr_stage < len(self._stages):
-            self._curr_stage = self._curr_stage + 1
-            self._initiate_stage()
+        rospy.set_param("/_initiating_stage", False) 
+        rospy.set_param("/_reseting_obstacles", False) 
 
+        
+
+    def next_stage(self, msg: Bool):
+        
+        if self._curr_stage < len(self._stages):
+            
+            self._curr_stage = self._curr_stage + 1
+            rospy.set_param("/_initiating_stage", True)  
+            rospy.set_param("/_reseting_obstacles", True)
+            rospy.set_param("/_remove_obstacles_stage", self._curr_stage -1)
+            rospy.set_param("/curr_stage", self._curr_stage )    
+            self._initiate_stage()
+            rospy.set_param("/_reseting_obstacles", False) 
             if self.ns == "eval_sim":
                 rospy.set_param("/curr_stage", self._curr_stage)
                 with self._lock_json:
@@ -174,17 +185,25 @@ class StagedRandomTask(RandomTask):
                     
                 if self._curr_stage == len(self._stages):
                     rospy.set_param("/last_stage_reached", True)
+        
         else:
             print(
                 f"({self.ns}) INFO: Tried to trigger next stage but already reached last one")
+        
 
     def previous_stage(self, msg: Bool):
+         
+
         if self._curr_stage > 1:
+
+            rospy.set_param("/_remove_obstacles_stage", self._curr_stage +1)
+            rospy.set_param("/_initiating_stage", True) 
+            rospy.set_param("/_reseting_obstacles", True) 
             rospy.set_param("/last_stage_reached", False)
 
             self._curr_stage = self._curr_stage - 1
             self._initiate_stage()
-
+            rospy.set_param("/_reseting_obstacles", False) 
             if self.ns == "eval_sim":
                 rospy.set_param("/curr_stage", self._curr_stage)
                 with self._lock_json:
@@ -199,7 +218,6 @@ class StagedRandomTask(RandomTask):
         static_obstacles = self._stages[self._curr_stage]['static']
         dynamic_obstacles_human = self._stages[self._curr_stage]['dynamic_human']
         dynamic_obstacles_robot = self._stages[self._curr_stage]['dynamic_robot']
-
         self.obstacles_manager.register_random_static_obstacles(static_obstacles)
         self.obstacles_manager.register_human(dynamic_obstacles_human)
         self.obstacles_manager.register_robo_obstacle(dynamic_obstacles_robot)
