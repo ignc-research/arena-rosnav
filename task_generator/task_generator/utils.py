@@ -330,4 +330,89 @@ class Maze(object):
 
         return short_wall_centers, long_wall_centers, theta_short_list, theta_long_list, shortWallVertices, longWallVertices
 
+def get_circluar_pattern_on_map(free_space_indices, map_: OccupancyGrid, num_human:int, gruppe_radius:float, safe_dist: float, forbidden_zones: list = None):
+    """
+    Args:
+        indices_y_x(tuple): a 2 elementary tuple stores the indices of the non-occupied cells, the first element is the y-axis indices,
+            the second element is the x-axis indices.
+        map (OccupancyGrid): map proviced by the ros map service
+        forbidden_zones (list of 3 elementary tuple(x,y,r)): a list of zones which is forbidden
+    Returns:
+       x_in_meters, y_in_meters, theta
+    """
+    n_freespace_cells = len(free_space_indices[0])
+
+    border_vertex=np.array([]).reshape(0, 2)
+    #calculate map border
+    for idx in [0, n_freespace_cells-4]:
+        y_in_cells, x_in_cells = free_space_indices[0][idx], free_space_indices[1][idx]
+        y_in_meters = y_in_cells * map_.info.resolution + map_.info.origin.position.y
+        x_in_meters = x_in_cells * map_.info.resolution + map_.info.origin.position.x
+        border_vertex=np.vstack([border_vertex, [x_in_meters, y_in_meters]])
+    
+    map_center=np.array([(border_vertex[0,0]+border_vertex[1,0])/2, (border_vertex[0,1]+border_vertex[1,1])/2])
+
+    def is_pos_valid(x_in_meters, y_in_meters):
+        for forbidden_zone in forbidden_zones:
+            # print(forbidden_zone)
+            if (x_in_meters-forbidden_zone[0])**2+(y_in_meters-forbidden_zone[1])**2 < (forbidden_zone[2]+safe_dist)**2:
+                return False
+
+        # in pixel
+        cell_radius = int(safe_dist / map_.info.resolution)
+        x_index = int((x_in_meters - map_.info.origin.position.x) // map_.info.resolution)
+        y_index = int((y_in_meters - map_.info.origin.position.y) // map_.info.resolution)
+
+        # check occupancy around (x_index,y_index) with cell_radius
+        # TODO use numpy for checking
+        for i in range(x_index - cell_radius, x_index + cell_radius, 1):
+            for j in range(y_index - cell_radius, y_index + cell_radius, 1):
+                index = j * map_.info.width + i
+                if index >= len(map_.data):
+                    return False
+                try:
+                    value = map_.data[index]
+                except IndexError:
+                    print("IndexError: index: %d, map_length: %d" %
+                          (index, len(map_.data)))
+                    return False
+                if value != 0:
+
+                    return False
+        return True
+    
+    waypoints=np.array([]).reshape(0,3)
+
+    assert len(free_space_indices) == 2 and len(free_space_indices[0]) == len(
+        free_space_indices[1]), "free_space_indices is not correctly setup"
+    if forbidden_zones is None:
+        forbidden_zones = []
+    
+    angle_start = 2*np.pi*np.random.random(1)
+    radius = gruppe_radius
+    for i in range(num_human):
+        pos_valid = False
+        n_check_failed = 0
+        while not pos_valid:
+            angle = angle_start +  1*np.pi / num_human * np.random.random(1) + np.pi / num_human            
+            start_point = np.array([map_center[0] + np.cos(angle)[0]*radius, map_center[1] + np.sin(angle)[0]*radius, 1.0])
+            # print(start_point)
+            pos_valid = is_pos_valid(start_point[0], start_point[1])
+            # print(i)
+            if not pos_valid:
+                n_check_failed += 1
+                if n_check_failed > 100:
+                    raise Exception(
+                        "cann't find any no-occupied space please check the map information")
+            else:
+                angle_start = angle_start + angle
+                end_point = np.array([2*map_center[0] - start_point[0], 2*map_center[1] - start_point[1], 1.0])
+                # end_point = np.array([map_center[0], map_center[1], 1.0]) #only for testing
+                waypoints = np.vstack([waypoints, start_point])
+                waypoints = np.vstack([waypoints, end_point])
+                
+    #add blank waypoint for robot in pedsim
+    waypoints = np.vstack([np.ones([2,3])*100, waypoints])
+    return waypoints
+
 

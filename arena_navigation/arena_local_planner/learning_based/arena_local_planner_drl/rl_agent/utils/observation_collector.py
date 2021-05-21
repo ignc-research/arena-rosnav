@@ -144,7 +144,7 @@ class ObservationCollector():
 
         # message_filters.TimeSynchronizer: call callback only when all sensor info are ready
         self.sychronized_list=[self._scan_sub, self._robot_state_sub]+self._sub_agent_state  + self._sub_robo_obstacles_state #[self._scan_sub, self._robot_state_sub]+self._adult+self._child+self._elder
-        self.ts = message_filters.ApproximateTimeSynchronizer(self.sychronized_list, 10, slop=0.1) 
+        self.ts = message_filters.ApproximateTimeSynchronizer(self.sychronized_list, 10, slop=0.01) 
         self.ts.registerCallback(self.callback_observation_received)
 
 
@@ -156,13 +156,13 @@ class ObservationCollector():
         self._flag_all_received=False
         if self._is_train_mode: 
         # sim a step forward until all sensor msg uptodate
-           # i=0
+            i=0
             while(self._flag_all_received==False):
                 # self._action_frequency
                 self.call_service_takeSimStep(0.1)
-            #    i+=1
+                i+=1
                 time.sleep(0.01)
-            # print(f"Current observation takes {i} steps for Synchronization")
+            print(f"Current observation takes {i} steps for Synchronization")
         else:
             try:
                 rospy.wait_for_message(

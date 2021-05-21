@@ -82,6 +82,9 @@ class ObstaclesManager:
         self.obstacle_name_list = []
         self._obstacle_name_prefix = 'obstacle'
         self.__peds=[]
+
+        self.circlePattern = False
+        self.mixRate = 0.3
    
         #tell the pedsim the map border
         self._add_map_border_in_pedsim()
@@ -123,10 +126,12 @@ class ObstaclesManager:
         model_name = os.path.basename(model_yaml_file_path).split('.')[0]
         # But we don't want to keep it in the name of the topic otherwise it won't be easy to visualize them in riviz
         # print(model_name)
-        model_name = model_name.replace(self.ns,'')        
+        model_name = model_name.replace(self.ns,'')
         name_prefix = self._obstacle_name_prefix + '_' + model_name
         if type_obstacle == 'human':
             self.__remove_all_peds()
+            if self.circlePattern:
+                self.register_static_walls()
             self.spawn_random_peds_in_world(num_obstacles)
         elif type_obstacle == 'robot':
             self.__remove_all_robo_obstacles(num_obstacles)
@@ -1002,11 +1007,37 @@ class ObstaclesManager:
 
     def move_all_peds(self, episode:int):
         """
-        Move all pedestrians to a new initial place after every episode
+        Move all pedestrians to a new initial place at the beginning of every episode
         """
         srv = MovePedsRequest()
         srv.episode = episode
-        self.__move_peds_srv.call(srv)
+        waypoints = np.array([]).reshape(0, 2)
+        if self.circlePattern:
+            numCircleHuman=int(self.num_humans*self.mixRate)
+            wp_srv=get_circluar_pattern_on_map(self._free_space_indices, self.map, numCircleHuman, gruppe_radius = 7.5, safe_dist=0.0)
+            waypoints=wp_srv[:, :2]
+            for wp in wp_srv:
+                p=Point()
+                p.x = wp[0]
+                p.y = wp[1]
+                p.z = wp[2]
+                srv.pattern_waypoints.append(p)
+        max_num_try = 2
+        i_curr_try = 0
+        while i_curr_try < max_num_try:
+            # try to call service
+            response=self.__move_peds_srv.call(srv)
+            if not response.finished:  # if service not succeeds, do something and redo service
+                rospy.logwarn(
+                    f"move human failed! trying again... [{i_curr_try+1}/{max_num_try} tried]")
+                # rospy.logwarn(response.message)
+                i_curr_try += 1
+            else:
+                break
+        # if  not self.circlePattern:
+        for wp in response.waypoints:
+            waypoints = np.vstack([waypoints, [wp.x, wp.y]])
+        return waypoints
 
     def read_obstacles_spawning_parameters_from_yaml(self):
         
@@ -1033,3 +1064,47 @@ class ObstaclesManager:
              advanced_configs, dict), "'advanced_configs.yaml' has wrong fromat! Has to encode dictionary!"
                 
         return advanced_configs
+
+#############################
+#####methods for static walls####
+#############################
+    def register_static_walls(self):
+        vertices1= np.array([[6.7, 18.35], 
+                                    [14.7, 18.35], 
+                                    [14.7, 14.35], 
+                                    [6.7, 14.35]])
+        self.register_walls(vertices1, 1)
+        vertices2= np.array([[6.7, -4.45], 
+                                    [14.7, -4.45], 
+                                    [14.7, -0.45], 
+                                    [6.7, -0.45]])
+        self.register_walls(vertices2, 2)
+            
+
+    def register_walls(self, vertices, i:int):
+        model_path= self._generate_wall_yaml(vertices, True)
+        max_num_try = 5
+        i_curr_try = 0
+        while i_curr_try < max_num_try:
+            spawn_request = SpawnModelRequest()
+            spawn_request.yaml_path = model_path
+            spawn_request.name = f'staticwall_{i}'
+            spawn_request.ns = rospy.get_namespace()
+            spawn_request.pose.x = 0.0
+            spawn_request.pose.y = 0.0
+            spawn_request.pose.theta = 0.0
+            # try to call service
+            response = self._srv_spawn_model.call(spawn_request)
+            if not response.success:  # if service not succeeds, do something and redo service
+                rospy.logwarn(
+                    f"({self.ns}) spawn object {spawn_request.name} failed! trying again... [{i_curr_try+1}/{max_num_try} tried]")
+                rospy.logwarn(response.message)
+                i_curr_try += 1
+            else:
+                # self.s_wall_list.append(spawn_request.name)
+                # #tell the info of polygon obstacles to pedsim
+                # self._add_wall_into_pedsim(shortWallVertices)
+                break
+        if i_curr_try == max_num_try:
+            raise rospy.ServiceException(f"({self.ns}) failed to register walls")
+        os.remove(model_path)
