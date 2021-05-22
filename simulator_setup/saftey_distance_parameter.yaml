@@ -32,4 +32,5 @@ obstacle radius:
   elder: 0.3
   forklift : 0.6
   random_wanderer: 0.3
-  
+useDangerZone:
+  enable: false

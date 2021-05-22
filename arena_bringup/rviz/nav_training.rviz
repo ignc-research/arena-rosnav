@@ -652,13 +652,13 @@ Visualization Manager:
       Enabled: true
       Name: robots
     - Class: rviz/MarkerArray
-      Enabled: true
+      Enabled: false
       Marker Topic: /sim_1/pedsim_labels
       Name: MarkerArray
       Namespaces:
-        marker: true
+        {}
       Queue Size: 100
-      Value: true
+      Value: false
   Enabled: true
   Global Options:
     Background Color: 233; 185; 110

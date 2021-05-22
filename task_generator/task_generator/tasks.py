@@ -68,7 +68,7 @@ class RandomTask(ABSTask):
             fail_times = 0
             while fail_times < max_fail_times:
                 try:
-                    self.obstacles_manager.move_all_peds(episode)
+                    fP = self.obstacles_manager.move_all_peds(episode)
                     start_pos, goal_pos = self.robot_manager.set_start_pos_goal_pos(obs_dict=self.last_obs_dict)
                     forbiddenZones=[
                             (start_pos.x,

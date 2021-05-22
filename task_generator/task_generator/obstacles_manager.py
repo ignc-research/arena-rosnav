@@ -84,7 +84,7 @@ class ObstaclesManager:
         self._obstacle_name_prefix = 'obstacle'
         self.__peds=[]
 
-        self.circlePattern = True
+        self.circlePattern =False
         self.mixRate = 0.5
    
         #tell the pedsim the map border
@@ -1011,7 +1011,7 @@ class ObstaclesManager:
         srv = MovePedsRequest()
         srv.episode = episode
         waypoints = np.array([]).reshape(0, 2)
-        if self.circlePattern:
+        if self.circlePattern:            
             numCircleHuman=int(self.num_humans*self.mixRate)
             wp_srv=get_circluar_pattern_on_map(self._free_space_indices, self.map, numCircleHuman, gruppe_radius = 7.5, safe_dist=0.0)
             waypoints=wp_srv[:, :2]
@@ -1025,7 +1025,11 @@ class ObstaclesManager:
         i_curr_try = 0
         while i_curr_try < max_num_try:
             # try to call service
+            # print("reah herer move peds++++")
+            # time.sleep(0.05)
             response=self.__move_peds_srv.call(srv)
+            # print("reah herer move peds++++")
+            # print()
             if not response.finished:  # if service not succeeds, do something and redo service
                 rospy.logwarn(
                     f"move human failed! trying again... [{i_curr_try+1}/{max_num_try} tried]")

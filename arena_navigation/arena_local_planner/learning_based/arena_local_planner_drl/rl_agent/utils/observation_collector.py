@@ -115,7 +115,7 @@ class ObservationCollector():
         self.num_humans= self.read_stages_from_yaml()[self.curr_stage]['dynamic_human']
         for i in range(self.num_humans):
             self.agent_state.append(f'{self.ns_prefix}pedsim_agent_{i+1}/agent_state') #making a a list of the topics names 
-        print('topics are ',self.agent_state)
+        # print('topics are ',self.agent_state)
         self._sub_agent_state=[None]*self.num_humans
         for i, topic in enumerate(self.agent_state):
             self._sub_agent_state[i]=message_filters.Subscriber(topic, AgentState) #subscribing to the topics of every Agent
