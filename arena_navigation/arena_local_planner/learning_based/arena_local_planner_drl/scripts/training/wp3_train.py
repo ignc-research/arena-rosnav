@@ -136,7 +136,7 @@ def make_envs(with_ns: bool,
         else:
             # eval env
             env = Monitor(
-                FlatlandEnv(
+                wp3Env(
                     eval_ns,
                     params['reward_fnc'], params['discrete_action_space'], 
                     goal_radius=params['goal_radius'], 

@@ -15,7 +15,8 @@ import numpy as np
 import rospy
 from geometry_msgs.msg import Twist, PoseStamped, Pose2D
 from flatland_msgs.srv import StepWorld, StepWorldRequest
-from nav_msgs.msg import Odometry, Path
+from nav_msgs.msg import Odometry
+from nav_msgs.msg import Path as nav_Path
 from std_msgs.msg import Bool
 import time
 import math
@@ -90,6 +91,22 @@ class wp3Env(gym.Env):
              self.ns, self._laser_num_beams, self._laser_max_range)
         self.observation_space = self.observation_collector.get_observation_space()
 
+        #global variables for subscriber callbacks
+        self.range_circle = 1.5
+        self._steps_curr_episode = 0
+        self._robot_pose = PoseStamped()
+        self._globalPlan = nav_Path()
+        self._subgoal = Pose2D()
+        self._globalGoal = Pose2D()
+        self._ref_wp = PoseStamped()
+        self._action_msg = PoseStamped()
+        self._viz_msg = nav_Path()
+        self._viz_points = PoseStamped()
+        self._robot_twist = [0]*2
+        self.firstTime = 0
+        self._previous_time = 0
+        self._step_counter = 0
+
         # reward calculator
         if safe_dist is None:
             safe_dist = 1.6*self._robot_radius
@@ -102,15 +119,15 @@ class wp3Env(gym.Env):
         self._robot_state_sub = rospy.Subscriber('/odom', Odometry, self.cbRobotPosition)            # for robot orientation
         self._ref_wp_sub = rospy.Subscriber('/plan_manager/subgoal', PoseStamped, self.cbRefWp)                   # for subgoal position (reference point for circle)
         self._globalGoal = rospy.Subscriber('/goal', PoseStamped, self.cbGlobalGoal)                 # to set wp on global goal if circle touces it
-        self._globalPlan_sub = rospy.Subscriber('/plan_manager/globalPlan', Path, self.cbglobalPlan)
+        self._globalPlan_sub = rospy.Subscriber('/plan_manager/globalPlan', nav_Path, self.cbglobalPlan)
         self._twist_sub = rospy.Subscriber('/cmd_vel', Twist, self.cbTwist)                          # to calculate distance traveled 
         self._wp4train_reached =False
         # action agent publisher
         if self._is_train_mode:
-            self.agent_action_pub = rospy.Publisher(f'{self.ns_prefix}cmd_vel', Twist, queue_size=1)
+            self.agent_action_pub = rospy.Publisher(f'{self.ns_prefix}cmd_vel', PoseStamped, queue_size=1)
         else:
-            self.agent_action_pub = rospy.Publisher(f'{self.ns_prefix}cmd_vel_pub', Twist, queue_size=1)      # agent publishes a waypoint on a circle
-        self.circle_pub = rospy.Publisher('/zViz', Path, queue_size=1)                               # create the circle on which the wp are placed for visualization
+            self.agent_action_pub = rospy.Publisher(f'{self.ns_prefix}cmd_vel_pub', PoseStamped, queue_size=1)      # agent publishes a waypoint on a circle
+        self.circle_pub = rospy.Publisher('/zViz', nav_Path, queue_size=1)                               # create the circle on which the wp are placed for visualization
         
         # service clients
         self._is_train_mode = rospy.get_param("train_mode")
@@ -125,21 +142,6 @@ class wp3Env(gym.Env):
 
         self._steps_curr_episode = 0
         self._max_steps_per_episode = max_steps_per_episode
-        #global variables for subscriber callbacks
-        self.range_circle = 1.5
-        self._steps_curr_episode = 0
-        self._robot_pose = PoseStamped()
-        self._globalPlan = Path()
-        self._subgoal = Pose2D()
-        self._globalGoal = Pose2D()
-        self._ref_wp = PoseStamped()
-        self._action_msg = PoseStamped()
-        self._viz_msg = Path()
-        self._viz_points = PoseStamped()
-        self._robot_twist = [0]*2
-        self.firstTime = 0
-        self._previous_time = 0
-        self._step_counter = 0
         # for reward to calculate how many actions relative to path length
         self.goal_len = 0
         self._action_count = 0
@@ -250,7 +252,7 @@ class wp3Env(gym.Env):
         self._action_msg.header.frame_id ="map"
 
         #create circle on which waypoints can be spawned 
-        circle = Path()
+        circle = nav_Path()
         circle.header.frame_id ="map"
         circle.header.stamp = rospy.Time.now()
         
@@ -349,7 +351,7 @@ class wp3Env(gym.Env):
         reward, reward_info = self.reward_calculator.get_reward(
             obs_dict['laser_scan'], obs_dict['goal_in_robot_frame'],
             robot_pose=obs_dict['robot_pose'], 
-            globalPlan=self._globalPlan, 
+            global_plan=ObservationCollector.process_global_plan_msg(self._globalPlan), 
             action=new_action, 
             goal_len=self.goal_len, 
             action_count= self._action_count,
@@ -366,7 +368,7 @@ class wp3Env(gym.Env):
             info['done_reason'] = reward_info['done_reason']
             info['is_success'] = reward_info['is_success']
             self.reward_calculator.kdtree = None
-            info['gp_len'] = len(ObservationCollector.process_global_plan_msg_to_array(self._globalPlan))
+            info['gp_len'] = len(ObservationCollector.process_global_plan_msg(self._globalPlan))
             info['wp_set'] = self._action_count
 
         if self._steps_curr_episode > self._max_steps_per_episode:
@@ -374,7 +376,7 @@ class wp3Env(gym.Env):
             info['done_reason'] = 0
             info['is_success'] = 0
             self.reward_calculator.kdtree = None
-            info['gp_len'] = len(self._globalPlanArray)
+            info['gp_len'] = len(ObservationCollector.process_global_plan_msg(self._globalPlan))
 
                 # for logging
         if self._extended_eval:

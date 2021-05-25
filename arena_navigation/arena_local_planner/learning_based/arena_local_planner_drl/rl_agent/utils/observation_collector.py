@@ -66,6 +66,7 @@ class ObservationCollector():
         self._robot_vel = Twist()
         self._subgoal = Pose2D()
         self._globalplan = np.array([])
+        self._globalGoal = PoseStamped()
 
         # train mode?
         self._is_train_mode = rospy.get_param("/train_mode")
@@ -93,6 +94,9 @@ class ObservationCollector():
 
         self._globalplan_sub = rospy.Subscriber(
             f'{self.ns_prefix}globalPlan', Path, self.callback_global_plan)
+
+        self.sub_global_goal = rospy.Subscriber(
+            f'{self.ns_prefix}goal',PoseStamped, self.callback_globalGoal)
 
         # service clients
         if self._is_train_mode:
@@ -128,6 +132,7 @@ class ObservationCollector():
         else:
             scan = np.zeros(self._laser_num_beams, dtype=float)
             
+        rho_goal, theta_goal = ObservationCollector._get_goal_pose_in_robot_frame(self._globalGoal,self._subgoal)
         rho, theta = ObservationCollector._get_goal_pose_in_robot_frame(
             self._subgoal, self._robot_pose)
         merged_obs = np.hstack([scan, np.array([rho, theta])])
@@ -137,6 +142,7 @@ class ObservationCollector():
         obs_dict['goal_in_robot_frame'] = [rho, theta]
         obs_dict['global_plan'] = self._globalplan
         obs_dict['robot_pose'] = self._robot_pose
+        obs_dict['global_in_subgoal_frame'] = [rho_goal,theta_goal]
 
         self._laser_deque.clear()
         self._rs_deque.clear()
@@ -204,6 +210,10 @@ class ObservationCollector():
 
         except rospy.ServiceException as e:
             rospy.logdebug("step Service call failed: %s" % e)
+
+    def callback_globalGoal(self,msg_Subgoal):
+        self._globalGoal=self.process_subgoal_msg(msg_Subgoal)    
+        return
 
     def callback_clock(self, msg_Clock):
         self._clock = msg_Clock.clock.to_sec()
