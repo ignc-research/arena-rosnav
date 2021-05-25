@@ -31,6 +31,6 @@ obstacle radius:
   adult: 0.32
   child: 0.25
   elder: 0.3
-  forklift : 0.6
+  forklift : 0.7
   random_wanderer: 0.3
   

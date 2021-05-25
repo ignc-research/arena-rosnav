@@ -38,6 +38,6 @@ plugins:
     broadcast_tf: true
     origin: [0, 0, 0]
     range: 20
-    angle: {min: -1.0, max: 1.0, increment: 0.005}
+    angle: {min: -1.0, max: 1.0, increment: 0.2}
     noise_std_dev: 0.05
     update_rate: 40

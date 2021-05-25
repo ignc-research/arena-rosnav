@@ -42,10 +42,6 @@ class RobotManager:
         self.safe_dists_human_type = self.read_saftey_distance_parameter_from_yaml()['human obstacle safety distance radius']
         self.safe_dists_robot_type = self.read_saftey_distance_parameter_from_yaml()['robot obstacle safety distance radius']
         self.safe_dists_factor = self.read_saftey_distance_parameter_from_yaml()['safety distance factor']
-        self.safe_dist_adult=1.0
-        self.safe_dist_child=1.2
-        self.safe_dist_elder=1.5
-        self.safe_dist_forklift = 1.5
 
         self.is_training_mode = rospy.get_param("/train_mode")
         self.step_size = rospy.get_param("step_size")
@@ -183,7 +179,7 @@ class RobotManager:
             # print(forbiddenPoints)
             for coordinate in forbiddenPoints: # use the safe_dist of elder becuase it is the largest among all types of humans
                 # print(coordinate)
-                forbiddenZones.append((coordinate[0],coordinate[1],1.5**1.5 ))
+                forbiddenZones.append((coordinate[0],coordinate[1],1.8**1.5 ))
 
         if obs_dict is not None and len(obs_dict['robo_obstacle_coordinates_in_robot_frame']) > 0:
             # print("calculate the forbidden zones")
@@ -208,7 +204,6 @@ class RobotManager:
             # print("calculate the forbidden zones")
 
             ## TODO read it from Yaml and static obstacles
-            print( 'adding ',static_coordinates)
             for i, coordinate in enumerate(static_coordinates):
                 
                 forbiddenZones.append((coordinate[0],coordinate[1],2.5))
