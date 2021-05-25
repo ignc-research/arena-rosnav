@@ -10,6 +10,7 @@ import json
 import yaml
 import numpy as np
 import copy
+from FlatlandModelEditor import FlatlandModelEditor
 
 
 def get_value_qspin_box(x) :
@@ -482,7 +483,7 @@ class main_window(QMainWindow):
         ### add diffrent buttons to the main window and link them to functions ###
         self.button1 = QPushButton('Edit Training Curriculum')
         self.button1.clicked.connect(self.on_button1_clicked)
-        self.button2 = QPushButton('Edit Obstacles Profiles')
+        self.button2 = QPushButton('Edit Flatland Models')
         self.button2.clicked.connect(self.on_button2_clicked)
         self.button3 = QPushButton('Create New Model')
         self.button3.clicked.connect(self.on_button3_clicked)
@@ -510,11 +511,9 @@ class main_window(QMainWindow):
             self.w = None  # Discard reference.
 
     def on_button2_clicked(self, checked):
-
         if self.w is None:
-            self.window2 = SubWindow()
-            self.window2.setWindowTitle('Obstacles Profiles Configs')
-            self.window2.show()
+            self.flatland_model_editor_window = FlatlandModelEditor()
+            self.flatland_model_editor_window.show()
         else:
             self.w.close()  # Close window.
             self.w = None  # Discard reference.
