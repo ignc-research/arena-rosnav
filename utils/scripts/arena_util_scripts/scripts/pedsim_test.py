@@ -176,7 +176,7 @@ def test_interaction():
     rospy.wait_for_service(respawn_peds_service_name, 6.0)
     respawn_ped_srv = rospy.ServiceProxy(respawn_peds_service_name, SpawnPeds)
 
-    time.sleep(4)
+    time.sleep(1)
 
     peds = []
 
@@ -193,6 +193,11 @@ def test_interaction():
     ped1.tell_story_base_time = 20.0
     ped1.talking_and_walking_probability = 0.0
     ped1.talking_and_walking_base_time = 20.0
+
+    ped1.state_requesting_service_base_time = 30.0
+    ped1.state_receiving_service_base_time = 20.0
+    ped1.requesting_service_probability = 0.1
+
     ped1.vmax = 2.0
     ped1.force_factor_desired = 1.0
     ped1.force_factor_obstacle = 1.0
@@ -202,10 +207,12 @@ def test_interaction():
     ped1.yaml_file = os.path.join(rospack.get_path("simulator_setup"), "dynamic_obstacles", "person_two_legged.model.yaml")
     peds.append(ped1)
 
+
     ped2 = copy.deepcopy(ped1)
     ped2.pos = Point(6, 10, 0.1)
     ped2.type = "servicerobot"
     ped2.number_of_peds = 1
+    ped2.max_servicing_radius = 10.0
     ped2.waypoints = [Point(8, 10, 0.1), Point(8, 3, 0.1)]
     ped2.yaml_file = os.path.join(rospack.get_path("simulator_setup"), "dynamic_obstacles", "servicerobot.model.yaml")
     peds.append(ped2)
