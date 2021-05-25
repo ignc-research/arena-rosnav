@@ -3,7 +3,7 @@ bodies:
     color: [0.2, 0.2, 1.0, 0.9] 
     footprints:
       - type: circle
-        radius: 0.5
+        radius: 0.3
         center: [0.0, 0.0]
         density: 1.0
         layers: []
