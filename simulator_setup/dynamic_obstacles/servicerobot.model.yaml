@@ -1,0 +1,27 @@
+bodies:
+  - name: base
+    color: [0.2, 0.2, 1.0, 0.9] 
+    footprints:
+      - type: circle
+        radius: 0.3
+        center: [0.0, 0.0]
+        density: 1.0
+        layers: []
+
+  - name: safety_dist_circle
+    pose: [0.0, 0.0, 0.0]
+    color: [0.26, 0.3, 0, 0.3]
+    footprints:
+      - type: circle
+        radius: 1.8
+        center: [0.0, 0.0]
+        density: 1.0
+        layers: []
+
+plugins:
+  - type: VehicleMovement
+    name: vehicle_movement
+    agent_topic: /pedsim_simulator/simulated_agents
+    base_body: base
+    safety_dist_body: safety_dist_circle
+    safety_dist: 1.8
