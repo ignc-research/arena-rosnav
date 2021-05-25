@@ -242,7 +242,7 @@ if __name__ == "__main__":
     # eval_freq: evaluate the agent every eval_freq train timesteps
     eval_cb = EvalCallback(
         eval_env=eval_env,          train_env=env,
-        n_eval_episodes=20,         eval_freq=2**16, 
+        n_eval_episodes=20,         eval_freq=2**13, 
         log_path=PATHS['eval'],     best_model_save_path=PATHS['model'], 
         deterministic=True,         callback_on_eval_end=trainstage_cb,
         callback_on_new_best=stoptraining_cb)

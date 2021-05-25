@@ -99,7 +99,7 @@ class ObservationCollector():
         self._subgoal_sub = rospy.Subscriber(f'{self.ns_prefix}subgoal', PoseStamped, self.callback_subgoal)#subscribe to subgoal
         self._globalplan_sub = rospy.Subscriber(f'{self.ns_prefix}globalPlan', Path, self.callback_global_plan) #subscribe to gloabalPlan
         self._sub_next = rospy.Subscriber(f"{self.ns_prefix}next_stage", Bool, self.subscribe_obstacles_topics)
-        self._sub_next = rospy.Subscriber(f"{self.ns_prefix}previous_stage", Bool, self.subscribe_obstacles_topics)
+        self._sub_prev = rospy.Subscriber(f"{self.ns_prefix}previous_stage", Bool, self.subscribe_obstacles_topics)
         self.subscribe_obstacles_topics(True)
  
 
@@ -492,7 +492,7 @@ class ObservationCollector():
     def process_robo_obstacle_state(self,msg):
         robo_obstacle_type=msg.ns
         robo_obstacle_pose=self.pose3D_to_pose2D(msg.pose)
-        robo_twist=msg.points[0]
+        robo_twist=msg.scale
         return robo_obstacle_type,robo_obstacle_pose,robo_twist
 
     def process_scan_msg(self, msg_LaserScan: LaserScan):
