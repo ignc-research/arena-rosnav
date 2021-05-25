@@ -1,7 +1,7 @@
 1:
   static obstacles:
     shelf:
-    - 3
+    - 0
     - obstacles/shelf.yaml
   human obstacles:
     adult:
@@ -23,7 +23,7 @@
 2:
   static obstacles:
     shelf:
-    - 3
+    - 1
     - obstacles/shelf.yaml
   human obstacles:
     adult:
@@ -40,16 +40,38 @@
     - dynamic_obstacles/big_forklift.model.yaml
   robot obstacles:
     random_wanderer:
-    - 1
+    - 2
     - dynamic_obstacles/random_wanderer.model.yaml
 3:
+  static obstacles:
+    shelf:
+    - 2
+    - obstacles/shelf.yaml
+  human obstacles:
+    adult:
+    - 2
+    - dynamic_obstacles/person_two_legged.model.yaml
+    child:
+    - 2
+    - dynamic_obstacles/person_two_legged_child.model.yaml
+    elder:
+    - 2
+    - dynamic_obstacles/person_single_circle_elder.model.yaml
+    forklift:
+    - 2
+    - dynamic_obstacles/big_forklift.model.yaml
+  robot obstacles:
+    random_wanderer:
+    - 2
+    - dynamic_obstacles/random_wanderer.model.yaml
+4:
   static obstacles:
     shelf:
     - 4
     - obstacles/shelf.yaml
   human obstacles:
     adult:
-    - 3
+    - 2
     - dynamic_obstacles/person_two_legged.model.yaml
     child:
     - 2
@@ -59,28 +81,6 @@
     - dynamic_obstacles/person_single_circle_elder.model.yaml
     forklift:
     - 2
-    - dynamic_obstacles/big_forklift.model.yaml
-  robot obstacles:
-    random_wanderer:
-    - 1
-    - dynamic_obstacles/random_wanderer.model.yaml
-4:
-  static obstacles:
-    shelf:
-    - 5
-    - obstacles/shelf.yaml
-  human obstacles:
-    adult:
-    - 0
-    - dynamic_obstacles/person_two_legged.model.yaml
-    child:
-    - 0
-    - dynamic_obstacles/person_two_legged_child.model.yaml
-    elder:
-    - 0
-    - dynamic_obstacles/person_single_circle_elder.model.yaml
-    forklift:
-    - 0
     - dynamic_obstacles/big_forklift.model.yaml
   robot obstacles:
     random_wanderer:
@@ -96,44 +96,44 @@
     - 3
     - dynamic_obstacles/person_two_legged.model.yaml
     child:
-    - 3
+    - 2
     - dynamic_obstacles/person_two_legged_child.model.yaml
     elder:
-    - 3
+    - 2
     - dynamic_obstacles/person_single_circle_elder.model.yaml
     forklift:
     - 2
     - dynamic_obstacles/big_forklift.model.yaml
   robot obstacles:
     random_wanderer:
-    - 5
+    - 3
     - dynamic_obstacles/random_wanderer.model.yaml
 6:
   static obstacles:
     shelf:
-    - 0
+    - 3
     - obstacles/shelf.yaml
   human obstacles:
     adult:
     - 3
     - dynamic_obstacles/person_two_legged.model.yaml
     child:
-    - 3
+    - 2
     - dynamic_obstacles/person_two_legged_child.model.yaml
     elder:
-    - 3
+    - 2
     - dynamic_obstacles/person_single_circle_elder.model.yaml
     forklift:
-    - 3
+    - 2
     - dynamic_obstacles/big_forklift.model.yaml
   robot obstacles:
     random_wanderer:
-    - 5
+    - 4
     - dynamic_obstacles/random_wanderer.model.yaml
 7:
   static obstacles:
     shelf:
-    - 0
+    - 8
     - obstacles/shelf.yaml
   human obstacles:
     adult:
@@ -155,7 +155,7 @@
 8:
   static obstacles:
     shelf:
-    - 0
+    - 8
     - obstacles/shelf.yaml
   human obstacles:
     adult:
@@ -177,7 +177,7 @@
 9:
   static obstacles:
     shelf:
-    - 0
+    - 9
     - obstacles/shelf.yaml
   human obstacles:
     adult:
