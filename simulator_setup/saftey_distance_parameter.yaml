@@ -20,11 +20,16 @@ safety distance factor:
   ReachedShelf: 0.5
   Running: 1.4
   BackUp: 1.1
+  StateRequestingService: 0.6
+  StateReceivingService: 0.6
+  StateDrivingToInteraction: 1.4
+  StateProvidingService: 0.6
 human obstacle safety distance radius:
   adult: 1.0
   child: 1.2
   elder: 1.5
   forklift: 1.8
+  servicerobot: 1.0
 robot obstacle safety distance radius:
   random_wanderer: 1.5
 obstacle radius:
@@ -32,5 +37,6 @@ obstacle radius:
   child: 0.25
   elder: 0.3
   forklift : 0.6
+  servicerobot : 0.6
   random_wanderer: 0.3
   
