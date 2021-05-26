@@ -194,8 +194,8 @@ def test_interaction():
     ped1.talking_and_walking_probability = 0.0
     ped1.talking_and_walking_base_time = 20.0
 
-    ped1.state_requesting_service_base_time = 30.0
-    ped1.state_receiving_service_base_time = 20.0
+    ped1.requesting_service_base_time = 30.0
+    ped1.receiving_service_base_time = 20.0
     ped1.requesting_service_probability = 0.1
 
     ped1.vmax = 2.0
