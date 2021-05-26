@@ -6,4 +6,5 @@ bodies:
       - type: polygon
         points: [[-0.3, 0.9], [0.3, 0.9], [0.3, -0.9], [-0.3, -0.9]]
         density: 1
-        layers: []
+        layers: ["static"]
+        collision: false

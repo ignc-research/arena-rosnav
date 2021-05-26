@@ -6,15 +6,15 @@ bodies:
       - type: polygon
         points: [[-0.75, 0.45], [0.75, 0.45], [0.75, -0.45], [-0.75, -0.45]]
         density: 1
-        layers: []
+        layers: ["static"]
       - type: polygon
         points: [[0.75, 0.45], [1.4, 0.45], [1.4, 0.2], [0.75, 0.2]]
         density: 1
-        layers: []
+        layers: ["static"]
       - type: polygon
         points: [[0.75, -0.2], [1.4, -0.2], [1.4, -0.45], [0.75, -0.45]]
         density: 1
-        layers: []
+        layers: ["static"]
 
   - name: safety_dist_circle
     pose: [3, 0, 0]
