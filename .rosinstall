@@ -16,4 +16,4 @@
 - git:
     local-name: ../forks/pedsim_ros
     uri: https://github.com/ignc-research/pedsim_ros
-    version: sim_to_real
+    version: master
