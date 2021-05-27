@@ -14,8 +14,8 @@ import threading
 import copy
 # observation msgs
 from sensor_msgs.msg import LaserScan
-from geometry_msgs.msg import Pose2D, PoseStamped, PoseWithCovarianceStamped
-from geometry_msgs.msg import Twist
+from geometry_msgs.msg import Pose2D, PoseStamped, PoseWithCovarianceStamped 
+from geometry_msgs.msg import Twist 
 from pedsim_msgs.msg import AgentState
 from arena_plan_msgs.msg import RobotState, RobotStateStamped
 from visualization_msgs.msg import Marker, MarkerArray
@@ -135,7 +135,7 @@ class ObservationCollector():
         self._human_position=np.array( [None]*self.num_humans)
         self._human_vel=np.array( [None]*self.num_humans)
         self._human_behavior=np.array( [None]*self.num_humans)
-       
+
         #intilasing arrays for robo states
         self._robo_obstacle_type=np.array( [None]* self.num_robo_obstacles)
         self._robo_obstacle_position=np.array( [None]* self.num_robo_obstacles)
@@ -193,6 +193,7 @@ class ObservationCollector():
                                                      self._robot_pose.theta, self._robot_vel.angular.z, self._radius_robot, rho, theta]
         merged_obs = np.hstack([np.array([self.time_step]), scan])
         obs_dict = {}
+        obs_dict["robot_velocity"]= math.sqrt(self._robot_vel.linear.x*self._robot_vel.linear.x+self._robot_vel.linear.y*self._robot_vel.linear.y)
         obs_dict["laser_scan"] = scan
         obs_dict['goal_in_robot_frame'] = [rho,theta]
         # initlaising array with dimensions an filling them up with coordinate of agents and rho(density)and theta (angle)
@@ -219,7 +220,7 @@ class ObservationCollector():
             
                 coordinate_humans[0][i]=position.x
                 coordinate_humans[1][i]=position.y
-                rho_humans[i], theta_humans[i] = ObservationCollector._get_pose_in_robot_frame_for_humans(position, self._robot_pose)
+                rho_humans[i], theta_humans[i] = ObservationCollector._get_pose_in_robot_frame(position, self._robot_pose)
 
             #sort the humans according to the relative position to robot
             human_pos_index=np.argsort(rho_humans)
@@ -299,7 +300,7 @@ class ObservationCollector():
 
                 coordinate_robo_obstacles[0][i]=position.x
                 coordinate_robo_obstacles[1][i]=position.y
-                rho_robo_obstacles[i], theta_robo_obstacles[i] = ObservationCollector._get_pose_in_robot_frame_for_robots(position, self._robot_pose)
+                rho_robo_obstacles[i], theta_robo_obstacles[i] = ObservationCollector._get_pose_in_robot_frame(position, self._robot_pose)
 
             #sort the humans according to the relative position to robot
             robo_obstacles_pos_index=np.argsort(rho_robo_obstacles)
@@ -330,12 +331,12 @@ class ObservationCollector():
                     safe_dist_=self.safe_dists_robot_type[ty] 
                     _radius =self.obstacle_radius[ty]
                     state=ObservationCollector.rotate(self.robot_self_state[:2]+[self._robo_obstacle_position[i].x, self._robo_obstacle_position[i].y, self._robo_obstacle_vel[i].x,self._robo_obstacle_vel[i].y], self.rot)
-                    obs=np.array(self.robot_self_state+[rho_robo_obstacles[i], theta_robo_obstacles[i]]+state+[safe_dist_ ,_radius, _radius+safe_dist_+self._radius_robot])
+                    obs=np.array(self.robot_self_state+[rho_robo_obstacles[i], theta_robo_obstacles[i]]+state+[safe_dist_ ,_radius, _radius+safe_dist_+self._radius_robot,-1])
                     merged_obs = np.hstack([merged_obs,obs])
 
         #TODO more proper method is needed to supplement info blanks (finished)
         if count_observable_robo_obstacles==0:
-            obs_empty=np.array(self.robot_self_state+[0]*9)
+            obs_empty=np.array(self.robot_self_state+[0]*10)
             merged_obs = np.hstack([merged_obs,obs_empty])
             count_observable_robo_obstacles=count_observable_robo_obstacles+1
         while count_observable_robo_obstacles < 2 and count_observable_robo_obstacles >0:
@@ -366,29 +367,7 @@ class ObservationCollector():
     
         return rho, theta
 
-    @staticmethod
-    def _get_pose_in_robot_frame_for_humans(agent_pos: Pose2D, robot_pos: Pose2D):
-        y_relative = agent_pos.y - robot_pos.y
-        x_relative = agent_pos.x - robot_pos.x
-        rho =  np.linalg.norm([y_relative, x_relative])
-        theta = 0
-     
-        theta = (np.arctan2(y_relative, x_relative) -
-                robot_pos.theta+5*np.pi) % (2*np.pi)-np.pi
-    
-        return rho, theta
 
-    @staticmethod
-    def _get_pose_in_robot_frame_for_robots(agent_pos: Pose2D, robot_pos: Pose2D):
-        y_relative = agent_pos.y - robot_pos.y
-        x_relative = agent_pos.x - robot_pos.x
-        rho =  np.linalg.norm([y_relative, x_relative])
-        theta = 0
-     
-        theta = (np.arctan2(y_relative, x_relative) -
-                robot_pos.theta+5*np.pi) % (2*np.pi)-np.pi
-    
-        return rho, theta
 
     @staticmethod
     def is_synchronized(self, msg_Laser: LaserScan, msg_Robotpose: RobotStateStamped):
@@ -483,11 +462,11 @@ class ObservationCollector():
 
     def process_agent_state(self,msg):
         human_type=msg.type
-        human_pose=self.pose3D_to_pose2D(msg.pose)
+        human_pose=self.pose3D_to_pose2D(msg.pose)   
         human_twist=msg.twist
         human_behavior=msg.social_state.strip("\"")
  
-        return human_type,human_pose, human_twist, human_behavior
+        return human_type,human_pose, human_twist, human_behavior 
     
     def process_robo_obstacle_state(self,msg):
         robo_obstacle_type=msg.ns
@@ -542,7 +521,7 @@ class ObservationCollector():
         self.num_humans_observation_max=21
         self.human_state_size=19
         self.num_robo_obstacles_observation_max=10
-        self.robo_obstacle_state_size=18
+        self.robo_obstacle_state_size=19 
         self.observation_space = ObservationCollector._stack_spaces((
             spaces.Box(low=-np.PINF, high=np.PINF, shape=(1,),dtype=np.float64), #time
             spaces.Box(low=0.0, high=self.lidar_range, shape=(self.num_lidar_beams,),dtype=np.float64), #lidar
