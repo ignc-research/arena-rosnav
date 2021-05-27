@@ -177,10 +177,12 @@ class Window1(QWidget):
                 
  
 
-                self.advanced_group_box_widgets = {'vmax':[QSlider(Qt.Horizontal),QLabel('')],'chatting probability':[QSlider(Qt.Horizontal),QLabel('')],'tell story probability':[QSlider(Qt.Horizontal),QLabel('')]
-                ,'group talking probability':[QSlider(Qt.Horizontal),QLabel('')],'talking and walking probability':[QSlider(Qt.Horizontal),QLabel('')]
+                self.advanced_group_box_widgets = {'vmax':[QSlider(Qt.Horizontal),QLabel('')],'chatting probability':[QSlider(Qt.Horizontal),QLabel('')],
+                'tell story probability':[QSlider(Qt.Horizontal),QLabel('')],'group talking probability':[QSlider(Qt.Horizontal),QLabel('')]
+                ,'talking and walking probability':[QSlider(Qt.Horizontal),QLabel('')], 'requesting service probability':[QSlider(Qt.Horizontal),QLabel('')]
                 ,'max talking distance':[QSlider(Qt.Horizontal),QLabel('')],'talking base time':[QSlider(Qt.Horizontal),QLabel('')],'tell story base time':[QSlider(Qt.Horizontal),QLabel('')]
-                ,'group talking base time':[QSlider(Qt.Horizontal),QLabel('')],'talking and walking base time':[QSlider(Qt.Horizontal),QLabel('')],'use danger zone':[QSlider(Qt.Horizontal),QLabel('')]}
+                ,'group talking base time':[QSlider(Qt.Horizontal),QLabel('')],'talking and walking base time':[QSlider(Qt.Horizontal),QLabel('')],'receiving service base time':[QSlider(Qt.Horizontal),QLabel('')]
+                ,'requesting service base time':[QSlider(Qt.Horizontal),QLabel('')],'use danger zone':[QSlider(Qt.Horizontal),QLabel('')]}
 
                 for i,item in enumerate(list(self.advanced_group_box_widgets.items())):
                     self.grid_advanced_group_box.addWidget(QLabel(item[0]),i,0)
@@ -196,14 +198,16 @@ class Window1(QWidget):
                     if item[0] in ['vmax'] :
                         value = ( w.advanced_configs[item[0]] -1)* 10 +0.1
                     elif item[0] in ['max talking distance'] :
-                        value =( w.advanced_configs[item[0]]-1)* 5
-                    
+                        value =( w.advanced_configs[item[0]]-1)* 5                    
                     elif item[0] in ['chatting probability','tell story probability','group talking probability','talking and walking probability'] :
-                        value =   w.advanced_configs[item[0]]*10
+                        value =   w.advanced_configs[item[0]]*10            
+                    elif item[0] in ['requesting service probability'] :
+                        value =   w.advanced_configs[item[0]]*500                  
                     elif item[0] in ['use danger zone'] :
                         value =   w.advanced_configs[item[0]]
                         item[1][0].setMinimum(0)
                         item[1][0].setMaximum(1)
+                   
                     else :
                         value =   w.advanced_configs[item[0]] / 2
                     item[1][0].setValue(value)
@@ -309,6 +313,8 @@ class Window1(QWidget):
         
         elif key in ['chatting probability','tell story probability','group talking probability','talking and walking probability'] :
             value =   value/10
+        elif key in ['requesting service probability'] :
+            value =   value/500 
         elif key in ['use danger zone'] :
             value =   value== 1.0
         else :
