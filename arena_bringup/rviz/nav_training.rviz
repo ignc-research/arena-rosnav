@@ -348,6 +348,48 @@ Visualization Manager:
           Value: true
         sim_1_odom:
           Value: true
+        sim_2/laser_mount1:
+          Value: true
+        sim_2_base_footprint:
+          Value: true
+        sim_2_odom:
+          Value: true
+        sim_3/laser_mount1:
+          Value: true
+        sim_3_base_footprint:
+          Value: true
+        sim_3_odom:
+          Value: true
+        sim_4/laser_mount1:
+          Value: true
+        sim_4_base_footprint:
+          Value: true
+        sim_4_odom:
+          Value: true
+        sim_5/laser_mount1:
+          Value: true
+        sim_5_base_footprint:
+          Value: true
+        sim_5_odom:
+          Value: true
+        sim_6/laser_mount1:
+          Value: true
+        sim_6_base_footprint:
+          Value: true
+        sim_6_odom:
+          Value: true
+        sim_7/laser_mount1:
+          Value: true
+        sim_7_base_footprint:
+          Value: true
+        sim_7_odom:
+          Value: true
+        sim_8/laser_mount1:
+          Value: true
+        sim_8_base_footprint:
+          Value: true
+        sim_8_odom:
+          Value: true
       Marker Scale: 1
       Name: TF
       Show Arrows: true
@@ -362,6 +404,41 @@ Visualization Manager:
               {}
           sim_1_odom:
             {}
+          sim_2_base_footprint:
+            sim_2/laser_mount1:
+              {}
+          sim_2_odom:
+            {}
+          sim_3_base_footprint:
+            sim_3/laser_mount1:
+              {}
+          sim_3_odom:
+            {}
+          sim_4_base_footprint:
+            sim_4/laser_mount1:
+              {}
+          sim_4_odom:
+            {}
+          sim_5_base_footprint:
+            sim_5/laser_mount1:
+              {}
+          sim_5_odom:
+            {}
+          sim_6_base_footprint:
+            sim_6/laser_mount1:
+              {}
+          sim_6_odom:
+            {}
+          sim_7_base_footprint:
+            sim_7/laser_mount1:
+              {}
+          sim_7_odom:
+            {}
+          sim_8_base_footprint:
+            sim_8/laser_mount1:
+              {}
+          sim_8_odom:
+            {}
       Update Interval: 0
       Value: true
     - Class: rviz/MarkerArray
@@ -373,13 +450,13 @@ Visualization Manager:
       Queue Size: 100
       Value: false
     - Class: rviz/MarkerArray
-      Enabled: false
+      Enabled: true
       Marker Topic: flatland_server/debug/layer/static
       Name: static_layer
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
-      Value: false
+      Value: true
     - Class: rviz/MarkerArray
       Enabled: false
       Marker Topic: flatland_server/debug/model/walker_model0
@@ -685,7 +762,7 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Angle: -7.860006332397461
+      Angle: -6.275004863739014
       Class: rviz/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
@@ -695,11 +772,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 29.343250274658203
+      Scale: 33.2544059753418
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
-      X: 10.499874114990234
-      Y: 6.849964141845703
+      X: 12.986942291259766
+      Y: 6.748629093170166
     Saved: ~
 Window Geometry:
   Displays:
