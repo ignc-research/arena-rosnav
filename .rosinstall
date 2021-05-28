@@ -1,7 +1,7 @@
 - git:
     local-name: ../forks/flatland
     uri: https://github.com/ignc-research/flatland
-    version: arena_update_human
+    version: sim_to_real_used_as_master_branch
 
 - git:
     local-name: ../forks/navigation/msgs/ford
