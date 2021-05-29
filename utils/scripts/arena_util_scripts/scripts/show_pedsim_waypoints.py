@@ -23,6 +23,7 @@ class Publisher:
     def simulated_waypoints_callback(self, msg):
         self.simulated_waypoints = msg
         self.last_waypoints_callback = rospy.get_rostime()
+        self.remove_old_markers()
 
     def remove_all_markers(self):
         removal_marker = Marker()
@@ -41,16 +42,15 @@ class Publisher:
         # -> delete all markers
         if (rospy.get_rostime() - self.last_waypoints_callback) > rospy.Duration(1.0):
             self.remove_all_markers()
-            self.num_markers = 0
-            self.simulated_waypoints.waypoints = []
             return
 
         # delete all markers if number changes
         if self.num_markers != len(self.simulated_waypoints.waypoints):
+            self.num_markers = len(self.simulated_waypoints.waypoints)
             self.remove_all_markers()
             return
 
-    def create_circle_marker(self, id, x, y, r):
+    def create_circle_marker(self, id, x, y, radius, r = 0.0, g = 0.0, b = 1.0, a = 0.2):
         marker = Marker()
         marker.header.frame_id = "map"
         marker.header.stamp = rospy.Time.now()
@@ -65,13 +65,13 @@ class Publisher:
         marker.pose.orientation.y = 0.0
         marker.pose.orientation.z = 0.0
         marker.pose.orientation.w = 1.0
-        marker.scale.x = 2*r
-        marker.scale.y = 2*r
+        marker.scale.x = 2 * radius
+        marker.scale.y = 2 * radius
         marker.scale.z = 1.0
-        marker.color.a = 0.2
-        marker.color.r = 0.0
-        marker.color.g = 0.0
-        marker.color.b = 0.9
+        marker.color.a = a
+        marker.color.r = r
+        marker.color.g = g
+        marker.color.b = b
         marker.points = []
         marker.text = ""
         return marker
@@ -84,7 +84,6 @@ class Publisher:
                 continue
             else:
                 markers = MarkerArray()
-                self.remove_old_markers()
 
                 # iterate over waypoints
                 for i, wp in enumerate(self.simulated_waypoints.waypoints):
