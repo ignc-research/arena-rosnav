@@ -109,6 +109,7 @@ class RewardCalculator():
     goal_in_robot_frame: Tuple[float,float],  
     human_obstacles_in_robot_frame:np.ndarray,
     robot_obstacles_in_robot_frame,
+    robot_velocity,
     current_time_step: float, 
     *args, **kwargs):
         """
@@ -118,7 +119,7 @@ class RewardCalculator():
             adult_in_robot_frame(np.ndarray)
         """
         self._reset()
-        self.cal_func(self, laser_scan, goal_in_robot_frame, human_obstacles_in_robot_frame, robot_obstacles_in_robot_frame, current_time_step,*args,**kwargs)
+        self.cal_func(self, laser_scan, goal_in_robot_frame, human_obstacles_in_robot_frame, robot_obstacles_in_robot_frame, robot_velocity, current_time_step,*args,**kwargs)
         self.cum_reward+=self.curr_reward
         return self.curr_reward, self.info
 
@@ -169,14 +170,14 @@ class RewardCalculator():
         self._reward_goal_approached(
             goal_in_robot_frame, reward_factor=0.4, penalty_factor=0.5)
 
-    def _cal_reward_rule_03(self, laser_scan: np.ndarray, goal_in_robot_frame: Tuple[float,float], human_obstacles_in_robot_frame:np.ndarray, robot_obstacles_in_robot_frame:np.ndarray,   current_time_step:float, *args,**kwargs):
+    def _cal_reward_rule_03(self, laser_scan: np.ndarray, goal_in_robot_frame: Tuple[float,float], human_obstacles_in_robot_frame:np.ndarray, robot_obstacles_in_robot_frame:np.ndarray, robot_velocity:float,   current_time_step:float, *args,**kwargs):
         
         self._reward_goal_reached(goal_in_robot_frame, reward=2)
         self._reward_safe_dist(laser_scan)
         self._reward_collision(laser_scan, punishment=4)
         self._reward_goal_approached3(goal_in_robot_frame, current_time_step)
-        self._reward_human_obstacles_safety_dist_all(human_obstacles_in_robot_frame) #0.05 0.07
-        self._reward_robot_obstacles_safety_dist_all(robot_obstacles_in_robot_frame)
+        self._reward_human_obstacles_safety_dist_all(human_obstacles_in_robot_frame,robot_velocity) #0.05 0.07
+        self._reward_robot_obstacles_safety_dist_all(robot_obstacles_in_robot_frame,robot_velocity)
 
     def _cal_reward_rule_04(self, 
                             laser_scan: np.ndarray, 
@@ -362,7 +363,7 @@ class RewardCalculator():
                     self.info['done_reason'] = self.robot_types_as_reason[type] #hit
                     self.info['is_success'] = 0
 
-    def  _reward_human_obstacles_safety_dist_all(self, human_obstacles_in_robot_frame):
+    def  _reward_human_obstacles_safety_dist_all(self, human_obstacles_in_robot_frame, robot_velocity):
         ### split the array into multiple array depending on type 
 
         human_obstacles_in_robot_frame = [human_obstacles_in_robot_frame[human_obstacles_in_robot_frame[:,3]==k] for k in np.unique(human_obstacles_in_robot_frame[:,3])]
@@ -384,10 +385,10 @@ class RewardCalculator():
                     safe_dist_=self.safe_dists_human_type[type] * self.safe_dists_factor[behavior]
                     punishment = 0.07 * safe_dist_
                     if dist[0]<safe_dist_:
-                        self.curr_reward -= punishment*np.exp(1-dist[0]/safe_dist_)
+                        self.curr_reward -= punishment*np.exp(1-dist[0]/safe_dist_) + robot_velocity * 0.2
 
             
-    def  _reward_robot_obstacles_safety_dist_all(self, robot_obstacles_in_robot_frame):
+    def  _reward_robot_obstacles_safety_dist_all(self, robot_obstacles_in_robot_frame, robot_velocity):
         ### split the array into multiple array depending on type 
 
         robot_obstacles_in_robot_frame = [robot_obstacles_in_robot_frame[robot_obstacles_in_robot_frame[:,2]==k] for k in np.unique(robot_obstacles_in_robot_frame[:,2])]
@@ -408,7 +409,7 @@ class RewardCalculator():
                     safe_dist_=self.safe_dists_robot_type[type] 
                     punishment = 0.07* safe_dist_
                     if dist[0]<safe_dist_:
-                        self.curr_reward -= punishment*np.exp(1-dist[0]/safe_dist_)
+                        self.curr_reward -= punishment*np.exp(1-dist[0]/safe_dist_) + robot_velocity * 0.2
 
                 
    

@@ -9,7 +9,8 @@ human obstacles:
   adult: dynamic_obstacles/person_two_legged.model.yaml
   child: dynamic_obstacles/person_two_legged_child.model.yaml
   elder: dynamic_obstacles/person_single_circle_elder.model.yaml
-  forklift : dynamic_obstacles/big_forklift.model.yaml
+  forklift: dynamic_obstacles/big_forklift.model.yaml
+  servicerobot: dynamic_obstacles/servicerobot.model.yaml 
 robot obstacles:
   random_wanderer: dynamic_obstacles/random_wanderer.model.yaml
   

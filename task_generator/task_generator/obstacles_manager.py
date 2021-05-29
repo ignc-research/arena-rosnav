@@ -726,11 +726,15 @@ class ObstaclesManager:
                     msg.tell_story_probability = advanced_configs['tell story probability']
                     msg.group_talking_probability = advanced_configs['group talking probability']
                     msg.talking_and_walking_probability = advanced_configs['talking and walking probability']
+                    msg.requesting_service_probability= advanced_configs['requesting service probability']
                     msg.max_talking_distance = advanced_configs['max talking distance']
+                    msg.max_servicing_radius = advanced_configs['max servicing radius']
                     msg.talking_base_time = advanced_configs['talking base time']
                     msg.tell_story_base_time = advanced_configs['tell story base time']
                     msg.group_talking_base_time = advanced_configs['group talking base time']
                     msg.talking_and_walking_base_time = advanced_configs['talking and walking base time']
+                    msg.receiving_service_base_time = advanced_configs['receiving service base time']
+                    msg.requesting_service_base_time = advanced_configs['receiving service base time']
                     msg.force_factor_desired = 1.0
                     msg.force_factor_obstacle = 1.0
                     msg.force_factor_social = 2.0
