@@ -7,6 +7,7 @@
   <param name="train_mode"    value="$(arg train_mode)"/>
   <arg name="step_size" default="0.01"/>
   <param name="step_size" value="$(arg step_size)" /> 
+  <arg name="show_pedsim_forces" default="true"/>
   <arg name="show_pedsim_labels" default="true"/>
   <arg name="show_pedsim_waypoints" default="true"/>
   <arg name="republish_flatland_markers" default="true"/>
@@ -65,6 +66,11 @@
 
   <!-- publish pedsim waypoints -->
   <include file="$(find arena_bringup)/launch/sublaunch/show_pedsim_waypoints.launch" if="$(arg show_pedsim_waypoints)">
+    <arg name="ns" value="/" />
+  </include>
+
+  <!-- publish pedsim forces -->
+  <include file="$(find arena_bringup)/launch/sublaunch/show_pedsim_forces.launch" if="$(arg show_pedsim_forces)">
     <arg name="ns" value="/" />
   </include>
 

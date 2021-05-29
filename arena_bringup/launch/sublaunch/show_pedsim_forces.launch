@@ -1,0 +1,6 @@
+<launch>
+  <arg name="ns" default="sim_1"/>
+
+  <node name="show_pedsim_forces" pkg="arena_util_scripts" type="show_pedsim_forces.py" ns="$(arg ns)" output="screen">
+  </node>
+</launch>

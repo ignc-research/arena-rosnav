@@ -9,6 +9,7 @@
 
   <arg name="show_pedsim_labels" default="false"/>
   <arg name="republish_flatland_markers" default="false"/>
+  <arg name="show_pedsim_forces" default="false"/>
 
 
   <!-- Map parameters -->
@@ -88,5 +89,9 @@
     <arg name="ns" value="/" />
   </include>
 
+  <!-- publish pedsim forces -->
+  <include file="$(find arena_bringup)/launch/sublaunch/show_pedsim_forces.launch" if="$(arg show_pedsim_forces)">
+    <arg name="ns" value="/" />
+  </include>
     
 </launch>

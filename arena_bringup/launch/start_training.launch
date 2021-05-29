@@ -28,6 +28,7 @@
   <!-- trival params, you may change it but makes not much sense -->
   <arg name="viz_pub_rate" default="30" />
 
+  <arg name="show_pedsim_forces" default="false"/>
   <arg name="show_pedsim_labels" default="false"/>
   <arg name="republish_flatland_markers" default="false"/>
 
@@ -77,6 +78,10 @@
     <arg name="ns" value="$(arg ns_prefix)_1" />
   </include>
 
+  <!-- publish pedsim forces -->
+  <include file="$(find arena_bringup)/launch/sublaunch/show_pedsim_forces.launch" if="$(arg show_pedsim_forces)">
+    <arg name="ns" value="$(arg ns_prefix)_1" />
+  </include>
 
   <!-- set the log format -->
   <env name="ROSCONSOLE_FORMAT" value="[${severity} ${time} ${logger}]: ${message}" />
