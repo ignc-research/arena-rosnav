@@ -15,7 +15,9 @@ from geometry_msgs.msg import Pose2D, Twist, Point
 from pedsim_srvs.srv import SpawnPeds
 from pedsim_srvs.srv import SpawnObstacle,SpawnObstacleRequest
 from pedsim_srvs.srv import MovePeds,MovePedsRequest
+from pedsim_srvs.srv import SpawnZeroAgents
 from pedsim_msgs.msg import Ped
+from pedsim_msgs.msg import ZeroAgent
 from pedsim_msgs.msg import LineObstacle
 from pedsim_msgs.msg import LineObstacles
 from std_srvs.srv import SetBool, Empty
@@ -48,7 +50,9 @@ class ObstaclesManager:
         rospy.wait_for_service(f'{self.ns_prefix}delete_model', timeout=20)
         rospy.wait_for_service(f'{self.ns_prefix}spawn_model', timeout=20)
         rospy.wait_for_service(f'{self.ns_prefix}pedsim_simulator/remove_all_peds', timeout=20)
+        rospy.wait_for_service(f'{self.ns_prefix}pedsim_simulator/remove_all_polygons', timeout=20)
         rospy.wait_for_service(f'{self.ns_prefix}pedsim_simulator/add_obstacle', timeout=20)
+        rospy.wait_for_service(f'{self.ns_prefix}pedsim_simulator/add_polygon', timeout=20)
         rospy.wait_for_service(f'{self.ns_prefix}pedsim_simulator/respawn_peds' , timeout=20)
         rospy.wait_for_service(f'{self.ns_prefix}pedsim_simulator/spawn_ped' , timeout=20)
         rospy.wait_for_service(f'{self.ns_prefix}pedsim_simulator/move_peds' , timeout=20)
@@ -66,8 +70,12 @@ class ObstaclesManager:
             f'{self.ns_prefix}pedsim_simulator/respawn_peds' , SpawnPeds, persistent=True)
         self.__remove_all_peds_srv = rospy.ServiceProxy(
             f'{self.ns_prefix}pedsim_simulator/remove_all_peds' , SetBool, persistent=True)
+        self.__remove_all_polygons_srv = rospy.ServiceProxy(
+            f'{self.ns_prefix}pedsim_simulator/remove_all_polygons' , SetBool, persistent=True)
         self.__add_obstacle_srv = rospy.ServiceProxy(
             f'{self.ns_prefix}pedsim_simulator/add_obstacle' ,SpawnObstacle, persistent=True)
+        self.add_polygon_service_ = rospy.ServiceProxy(
+            f'{self.ns_prefix}pedsim_simulator/add_polygon' ,SpawnZeroAgents, persistent=True)
         self.__move_peds_srv = rospy.ServiceProxy(
             f'{self.ns_prefix}pedsim_simulator/move_peds' ,MovePeds, persistent=True)
 
@@ -131,10 +139,14 @@ class ObstaclesManager:
         model_name = model_name.replace(self.ns,'')        
         name_prefix = self._obstacle_name_prefix + '_' + model_name
         if type_obstacle == 'human':
-            self.__remove_all_peds()
+            # self.__remove_all_peds()
             if self.circlePattern:
                 self.register_static_walls()
             self.spawn_random_peds_in_world(num_obstacles)
+        elif type_obstacle == 'polygon':
+            # self.__remove_all_polygons()
+            if num_obstacles>0:
+                self.spawn_random_polygons_in_world(num_obstacles)
         else:
             count_same_type = sum(
                 1 if obstacle_name.startswith(name_prefix) else 0
@@ -233,7 +245,7 @@ class ObstaclesManager:
         model_path = os.path.join(rospkg.RosPack().get_path(
         'simulator_setup'), 'dynamic_obstacles/person_two_legged.model.yaml')
         self.num_humans=num_obstacles
-        self.register_obstacles(num_obstacles, model_path, type_obstacle='human')
+        self.register_obstacles(num_obstacles+self.num_polygons, model_path, type_obstacle='human')
 
     def register_random_static_obstacles(self, num_obstacles: int, num_vertices_min=3, num_vertices_max=5, min_obstacle_radius=0.5, max_obstacle_radius=2):
         """register static obstacles with polygon shape.
@@ -420,12 +432,12 @@ class ObstaclesManager:
             yaml.dump(dict_file, fd)
         return yaml_path, move_to_start_pos_pub
 
-    def _generate_static_obstacle_polygon_yaml(self, vertices):
+    def _generate_static_obstacle_polygon_yaml(self, vertices, i):
         # since flatland  can only config the model by parsing the yaml file, we need to create a file for every random obstacle
         tmp_folder_path = os.path.join(rospkg.RosPack().get_path(
             'simulator_setup'), 'tmp_random_obstacles')
         os.makedirs(tmp_folder_path, exist_ok=True)
-        tmp_model_name = self.ns+"_polygon_static.model.yaml"
+        tmp_model_name = self.ns+f"_polygon_static_{i}.model.yaml"
         yaml_path = os.path.join(tmp_folder_path, tmp_model_name)
         # define body
         body = {}
@@ -671,22 +683,28 @@ class ObstaclesManager:
         srv = SpawnPeds()
         srv.peds = []
         # self.agent_topic_str=''
-        for ped in peds:
-            elements = [0, 1, 3]
-            # probabilities = [0.4, 0.3, 0.3] np.random.choice(elements, 1, p=probabilities)[0]
-            self.__ped_type=elements[(ped[0]-1)%3]
-            if  self.__ped_type==0:
-                # self.agent_topic_str+=f',{self.ns_prefix}pedsim_agent_{ped[0]}/dynamic_human'
-                self.__ped_file=os.path.join(rospkg.RosPack().get_path(
-                'simulator_setup'), 'dynamic_obstacles/person_two_legged.model.yaml')
-            elif self.__ped_type==1:
+        for i, ped in enumerate(peds):
+            if(i<self.num_humans):
+                elements = [0, 1, 3]
+                # probabilities = [0.4, 0.3, 0.3] np.random.choice(elements, 1, p=probabilities)[0]
+                self.__ped_type=elements[(ped[0]-1)%3]
+                if  self.__ped_type==0:
+                    # self.agent_topic_str+=f',{self.ns_prefix}pedsim_agent_{ped[0]}/dynamic_human'
+                    self.__ped_file=os.path.join(rospkg.RosPack().get_path(
+                    'simulator_setup'), 'dynamic_obstacles/person_two_legged.model.yaml')
+                elif self.__ped_type==1:
+                    # self.agent_topic_str+=f',{self.ns_prefix}pedsim_agent_{ped[0]}/dynamic_child'
+                    self.__ped_file=os.path.join(rospkg.RosPack().get_path(
+                    'simulator_setup'), 'dynamic_obstacles/person_two_legged_child.model.yaml')
+                else:
+                    # self.agent_topic_str+=f',{self.ns_prefix}pedsim_agent_{ped[0]}/dynamic_elder'
+                    self.__ped_file=os.path.join(rospkg.RosPack().get_path(
+                    'simulator_setup'), 'dynamic_obstacles/person_single_circle_elder.model.yaml')
+            else:
+                self.__ped_type=4
                 # self.agent_topic_str+=f',{self.ns_prefix}pedsim_agent_{ped[0]}/dynamic_child'
                 self.__ped_file=os.path.join(rospkg.RosPack().get_path(
-                'simulator_setup'), 'dynamic_obstacles/person_two_legged_child.model.yaml')
-            else:
-                # self.agent_topic_str+=f',{self.ns_prefix}pedsim_agent_{ped[0]}/dynamic_elder'
-                self.__ped_file=os.path.join(rospkg.RosPack().get_path(
-                'simulator_setup'), 'dynamic_obstacles/person_single_circle_elder.model.yaml')
+                'simulator_setup'), 'obstacles/random.model.yaml')
             msg = Ped()
             msg.id = ped[0]
             msg.pos = Point()
@@ -1016,3 +1034,92 @@ class ObstaclesManager:
 ################################
 #####methods for static polygons####
 ################################
+    def __spawn_polygons(self, polygons):
+        """
+        Spawning zero velocity agents in the simulation. The type of pedestrian is randomly decided here.
+        ZEROER=4
+        :param  start_pos start position of the pedestrian.
+        :param  wps waypoints the pedestrian is supposed to walk to.
+        :param  id id of the pedestrian.
+        """
+        num_vertices_min = 3
+        num_vertices_max = 5
+        srv = SpawnZeroAgents()
+        srv.polygons = []
+        for i, po in enumerate(polygons):
+            num_vertices = random.randint(num_vertices_min, num_vertices_max)
+            vertices=self._generate_vertices_for_polygon_obstacle(num_vertices)
+            polygon_file, _ =self._generate_static_obstacle_polygon_yaml(vertices, i)
+            msg = ZeroAgent()
+            msg.id = po[0]
+            msg.pos = Point()
+            msg.pos.x = po[1][0]
+            msg.pos.y = po[1][1]
+            msg.pos.z = po[1][2]
+            msg.type = 4
+            msg.number_of_agents = 1
+            msg.yaml_file = polygon_file
+            msg.waypoints = []
+            for pos in po[2]:
+                p = Point()
+                p.x = pos[0]
+                p.y = pos[1]
+                p.z = pos[2]
+                msg.waypoints.append(p)
+            srv.polygons.append(msg)
+        max_num_try = 2
+        i_curr_try = 0
+        while i_curr_try < max_num_try:
+            # try to call service
+            response=self.add_polygon_service_.call(srv.polygons)
+            # response=self.__spawn_ped_srv.call(srv.peds)
+            if not response.finished:  # if service not succeeds, do something and redo service
+                rospy.logwarn(
+                    f"spawn polygon failed! trying again... [{i_curr_try+1}/{max_num_try} tried]")
+                # rospy.logwarn(response.message)
+                i_curr_try += 1
+            else:
+                break
+        return
+
+    def spawn_random_polygons_in_world(self, n:int, safe_distance:float=2.5, forbidden_zones: Union[list, None] = None):
+        """
+        Spawning n random pedestrians in the whole world.
+        :param n number of pedestrians that will be spawned.
+        :param map the occupancy grid of the current map (TODO: the map should be updated every spawn)
+        :safe_distance [meter] for sake of not exceeding the safety distance at the beginning phase
+        """
+        polygon_array =np.array([],dtype=object).reshape(0,3)
+        for i in range(n):
+            [x, y, theta] = get_random_pos_on_map(self._free_space_indices, self.map, safe_distance, forbidden_zones)
+            waypoints = np.array( [x, y, 1]).reshape(1, 3) # the first waypoint
+            safe_distance = 0.1 # the other waypoints don't need to avoid robot
+            for j in range(1000):
+                dist = 0
+                while dist < 8:
+                    [x2, y2, theta2] = get_random_pos_on_map(self._free_space_indices, self.map, safe_distance, forbidden_zones)
+                    dist = np.linalg.norm([waypoints[-1,0] - x2,waypoints[-1,1] - y2])
+                    # if dist>=8: print(dist)
+                waypoints = np.vstack([waypoints, [x2, y2, 1]])
+            polygon=np.array([i+1, [x, y, 0.0], waypoints],dtype=object)
+            polygon_array=np.vstack([polygon_array,polygon])
+        self.__spawn_polygons(polygon_array)
+
+    def __remove_all_polygons(self):
+        """
+        Removes all pedestrians, that has been spawned so far
+        """
+        srv = SetBool()
+        srv.data = True
+        self.__remove_all_polygons_srv.call(srv.data)
+        return
+
+    def register_polygon(self, num_obstacles: int):
+        """register dynamic obstacles human.
+
+        Args:
+            num_obstacles (int): number of the obstacles.        """
+        model_path = os.path.join(rospkg.RosPack().get_path(
+        'simulator_setup'), 'dynamic_obstacles/person_two_legged.model.yaml')
+        self.num_polygons=num_obstacles
+        # self.register_obstacles(self.num_polygons, model_path, type_obstacle='polygon')

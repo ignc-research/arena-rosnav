@@ -337,7 +337,7 @@ class FlatlandEnv(gym.Env):
         else:
             self._in_crash = False
         
-        print('iscrash', self._in_crash)
+        # print('iscrash', self._in_crash)
 
         # safe dist detector
         if 'safe_dist' in reward_info:

@@ -1,0 +1,23 @@
+{
+    "agent_name": "MLP_LSTM_2021_04_17__00_40_06",
+    "robot": "myrobot",
+    "batch_size": 24768,
+    "gamma": 0.98,
+    "n_steps": 3096,
+    "ent_coef": 0.0001,
+    "learning_rate": 2e-05,
+    "vf_coef": 0.2,
+    "max_grad_norm": 0.5,
+    "gae_lambda": 0.95,
+    "m_batch_size": 8,
+    "n_epochs": 3,
+    "clip_range": 0.2,
+    "train_max_steps_per_episode": 512,
+    "eval_max_steps_per_episode": 512,
+    "goal_radius": 0.25,
+    "reward_fnc": "rule_06",
+    "discrete_action_space": false,
+    "normalize": true,
+    "task_mode": "staged",
+    "curr_stage": 1
+}

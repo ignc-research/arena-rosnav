@@ -4,7 +4,7 @@
 # (will carry on training on last stage when threshhold reached)
 
 1:
-  static: 0
+  static: 7
   dynamic: 21
 2:
   static: 0

@@ -1,0 +1,23 @@
+{
+    "agent_name": "MLP_HUMAN_2021_05_03__00_31_49",
+    "robot": "myrobot",
+    "batch_size": 16384,
+    "gamma": 0.98,
+    "n_steps": 2048,
+    "ent_coef": 0.0001,
+    "learning_rate": 2e-05,
+    "vf_coef": 0.2,
+    "max_grad_norm": 0.5,
+    "gae_lambda": 0.95,
+    "m_batch_size": 8,
+    "n_epochs": 3,
+    "clip_range": 0.2,
+    "train_max_steps_per_episode": 512,
+    "eval_max_steps_per_episode": 512,
+    "goal_radius": 0.25,
+    "reward_fnc": "rule_07",
+    "discrete_action_space": false,
+    "normalize": true,
+    "task_mode": "staged",
+    "curr_stage": 1
+}

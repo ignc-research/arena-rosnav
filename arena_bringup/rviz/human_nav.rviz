@@ -8,7 +8,6 @@ Panels:
         - /Grid1
         - /my_robot1/Namespaces1
         - /TF1/Frames1
-        - /human1
         - /human1/MarkerArray1
         - /human1/MarkerArray4
         - /human1/MarkerArray7
@@ -343,20 +342,6 @@ Visualization Manager:
           Value: true
         sim_1_odom:
           Value: true
-        sim_2_odom:
-          Value: true
-        sim_3_odom:
-          Value: true
-        sim_4_odom:
-          Value: true
-        sim_5_odom:
-          Value: true
-        sim_6_odom:
-          Value: true
-        sim_7_odom:
-          Value: true
-        sim_8_odom:
-          Value: true
       Marker Scale: 1
       Name: TF
       Show Arrows: true
@@ -370,20 +355,6 @@ Visualization Manager:
           eval_sim_odom:
             {}
           sim_1_odom:
-            {}
-          sim_2_odom:
-            {}
-          sim_3_odom:
-            {}
-          sim_4_odom:
-            {}
-          sim_5_odom:
-            {}
-          sim_6_odom:
-            {}
-          sim_7_odom:
-            {}
-          sim_8_odom:
             {}
       Update Interval: 0
       Value: true
@@ -711,7 +682,7 @@ Visualization Manager:
       Marker Topic: /eval_sim/flatland_server/debug/model/staticwall_1
       Name: MarkerArray
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -719,9 +690,93 @@ Visualization Manager:
       Marker Topic: /eval_sim/flatland_server/debug/model/staticwall_2
       Name: MarkerArray
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
+    - Class: rviz/Group
+      Displays:
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /eval_sim/flatland_server/debug/model/polygon_1
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /eval_sim/flatland_server/debug/model/polygon_2
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /eval_sim/flatland_server/debug/model/polygon_3
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /eval_sim/flatland_server/debug/model/polygon_4
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /eval_sim/flatland_server/debug/model/polygon_5
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /eval_sim/flatland_server/debug/model/polygon_6
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /eval_sim/flatland_server/debug/model/polygon_7
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /eval_sim/flatland_server/debug/model/polygon_8
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /eval_sim/flatland_server/debug/model/polygon_9
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /eval_sim/flatland_server/debug/model/polygon_10
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+      Enabled: true
+      Name: polygons
   Enabled: true
   Global Options:
     Background Color: 255; 255; 255

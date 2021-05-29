@@ -1,0 +1,23 @@
+bodies:
+- color:
+  - 0.2
+  - 0.8
+  - 0.2
+  - 0.75
+  footprints:
+  - collision: 'true'
+    density: 1
+    layers:
+    - all
+    points:
+    - - 0.9470483405042922
+      - -0.2930634444586264
+    - - -0.07306271773149442
+      - -0.24667481465473884
+    - - -0.8739856227727978
+      - 0.5397382591133724
+    restitution: 0
+    sensor: 'false'
+    type: polygon
+  name: static_object
+  type: static

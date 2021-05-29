@@ -7,6 +7,7 @@ from typing import Union
 import rospy
 import tf
 import numpy as np
+import time
 from flatland_msgs.srv import MoveModel, MoveModelRequest, SpawnModelRequest, SpawnModel
 from flatland_msgs.srv import StepWorld
 from geometry_msgs.msg import Pose2D, PoseWithCovarianceStamped, PoseStamped
@@ -175,8 +176,6 @@ class RobotManager:
                     forbiddenZones.append((coordinate[0],coordinate[1],self.safe_dist_elder*1.05))
 
         if forbiddenPoints is not None:
-            # print("calculate the forbidden zones")
-            # print(forbiddenPoints)
             for coordinate in forbiddenPoints: # use the safe_dist of elder becuase it is the largest among all types of humans
                 forbiddenZones.append((coordinate[0],coordinate[1],self.safe_dist_elder*1.05))
 
@@ -209,13 +208,13 @@ class RobotManager:
                 if start_pos is None:
                     start_pos_ = Pose2D()
                     start_pos_.x, start_pos_.y, start_pos_.theta = get_random_pos_on_map(
-                        self._free_space_indices, self.map, self.ROBOT_RADIUS * 4)
+                        self._free_space_indices, self.map, self.ROBOT_RADIUS, forbidden_zones=forbiddenZones)
                 else:
                     start_pos_ = start_pos
                 if goal_pos is None:
                     goal_pos_ = Pose2D()
                     goal_pos_.x, goal_pos_.y, goal_pos_.theta = get_random_pos_on_map(
-                        self._free_space_indices, self.map, self.ROBOT_RADIUS * 4)
+                        self._free_space_indices, self.map, self.ROBOT_RADIUS, forbidden_zones=forbiddenZones)
                     # goal_pos_.x, goal_pos_.y, goal_pos_.theta= 9.5 , -4 , 0
                 else:
                     goal_pos_ = goal_pos

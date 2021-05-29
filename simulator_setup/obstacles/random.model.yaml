@@ -1,5 +1,6 @@
 bodies:
-- color: [1, 0.2, 0.1, 1.0]
+- name: random
+  color: [1, 0.2, 0.1, 1.0]
   footprints:
   - collision: 'true'
     density: 0
@@ -9,8 +10,13 @@ bodies:
     - [-0.38038702010670905, 0.6588496453645445]
     - [-0.38038702010670955, -0.6588496453645443]
     sensor: 'false'
-    type: polygon
-  name: random
+    type: polygon  
   pose: [0, 0, 0]
   type: dynamic
-plugins: []
+
+plugins:
+  - type: PolygonPlacement
+    name: polygon_placement
+    agent_topic: /pedsim_simulator/simulated_agents
+    base_body: random
+    update_rate: 10

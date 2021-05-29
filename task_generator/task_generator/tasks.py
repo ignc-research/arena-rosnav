@@ -199,12 +199,10 @@ class StagedRandomTask(RandomTask):
         
         static_obstacles = self._stages[self._curr_stage]['static']
         dynamic_obstacles = self._stages[self._curr_stage]['dynamic']
-
-        self.obstacles_manager.register_random_static_obstacles(
+        self.obstacles_manager.register_polygon(
             self._stages[self._curr_stage]['static'])
         self.obstacles_manager.register_human(
-            self._stages[self._curr_stage]['dynamic'])
-
+        self._stages[self._curr_stage]['dynamic'])
         print(
             f"({self.ns}) Stage {self._curr_stage}: Spawning {static_obstacles} static and {dynamic_obstacles} dynamic obstacles!")
 
