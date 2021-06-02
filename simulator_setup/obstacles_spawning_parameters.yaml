@@ -8,7 +8,7 @@
     - 2
     - dynamic_obstacles/person_two_legged.model.yaml
     child:
-    - 2
+    - 1
     - dynamic_obstacles/person_two_legged_child.model.yaml
     elder:
     - 1
