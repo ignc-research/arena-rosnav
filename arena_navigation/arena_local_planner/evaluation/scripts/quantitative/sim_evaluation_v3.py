@@ -47,10 +47,10 @@ def parsing(): # define what flags user can/must give as terminal input
 
 def summary(df,cols,f): # summary of the json files and returning as single row as pandas df with file name as index
     l =[]
-    l.append(np.mean(df["time"])) # calculate mean time
-    l.append(np.mean(df["path"])) # calculate mean path length
-    l.append(np.float(np.sum(df["collision"]))) # calculate total number of collisions
-    l.append(np.sum(df["collision"]<3)/len(df["collision"])*100) # calculate fraction of successes
+    l.append(np.mean(df["time"][1:-1])) # calculate mean time
+    l.append(np.mean(df["path"][1:-1])) # calculate mean path length
+    l.append(np.float(np.sum(df["collision"][1:-1]))) # calculate total number of collisions
+    l.append(np.sum(df["collision"]<3)/len(df["collision"][1:-1])*100) # calculate fraction of successes
     index_name = [f.split("/")[-1].replace(".json","")] # get the file name with out .json ending
     return pd.DataFrame([l], columns=cols, index=index_name)
 
