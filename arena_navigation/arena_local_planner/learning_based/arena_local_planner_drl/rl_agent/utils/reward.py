@@ -385,7 +385,8 @@ class RewardCalculator():
                     safe_dist_=self.safe_dists_human_type[type] * self.safe_dists_factor[behavior]
                     punishment = 0.07 * safe_dist_
                     if dist[0]<safe_dist_:
-                        self.curr_reward -= punishment*np.exp(1-dist[0]/safe_dist_) + robot_velocity * 0.2
+                        self.curr_reward -= punishment*np.exp(1-dist[0]/safe_dist_) 
+                        #+ robot_velocity * 0.2
 
             
     def  _reward_robot_obstacles_safety_dist_all(self, robot_obstacles_in_robot_frame, robot_velocity):
@@ -409,7 +410,8 @@ class RewardCalculator():
                     safe_dist_=self.safe_dists_robot_type[type] 
                     punishment = 0.07* safe_dist_
                     if dist[0]<safe_dist_:
-                        self.curr_reward -= punishment*np.exp(1-dist[0]/safe_dist_) + robot_velocity * 0.2
+                        self.curr_reward -= punishment*np.exp(1-dist[0]/safe_dist_) 
+                        #+ robot_velocity * 0.2
 
                 
    
