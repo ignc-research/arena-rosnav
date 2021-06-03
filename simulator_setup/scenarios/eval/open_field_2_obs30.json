@@ -2,10 +2,10 @@
 	"scenarios": [
 		{
 			"scene_name": "new_scenario",
-			"repeats": 5,
+			"repeats": 12,
 			"dynamic_obstacles": {
 				"dynamic_obs_0": {
-					"obstacle_radius": 0.715,
+					"obstacle_radius": 0.415,
 					"linear_velocity": 0.3,
 					"type": "circle",
 					"start_pos": [
@@ -27,7 +27,7 @@
 					]
 				},
 				"dynamic_obs_1": {
-					"obstacle_radius": 0.715,
+					"obstacle_radius": 0.415,
 					"linear_velocity": 0.3,
 					"type": "circle",
 					"start_pos": [
@@ -49,7 +49,7 @@
 					]
 				},
 				"dynamic_obs_2": {
-					"obstacle_radius": 0.715,
+					"obstacle_radius": 0.415,
 					"linear_velocity": 0.3,
 					"type": "circle",
 					"start_pos": [
@@ -71,7 +71,7 @@
 					]
 				},
 				"dynamic_obs_3": {
-					"obstacle_radius": 0.715,
+					"obstacle_radius": 0.415,
 					"linear_velocity": 0.3,
 					"type": "circle",
 					"start_pos": [
@@ -93,7 +93,7 @@
 					]
 				},
 				"dynamic_obs_4": {
-					"obstacle_radius": 0.715,
+					"obstacle_radius": 0.415,
 					"linear_velocity": 0.3,
 					"type": "circle",
 					"start_pos": [
@@ -115,7 +115,7 @@
 					]
 				},
 				"dynamic_obs_5": {
-					"obstacle_radius": 0.715,
+					"obstacle_radius": 0.415,
 					"linear_velocity": 0.3,
 					"type": "circle",
 					"start_pos": [
@@ -137,7 +137,7 @@
 					]
 				},
 				"dynamic_obs_6": {
-					"obstacle_radius": 0.715,
+					"obstacle_radius": 0.415,
 					"linear_velocity": 0.3,
 					"type": "circle",
 					"start_pos": [
@@ -159,7 +159,7 @@
 					]
 				},
 				"dynamic_obs_7": {
-					"obstacle_radius": 0.715,
+					"obstacle_radius": 0.415,
 					"linear_velocity": 0.3,
 					"type": "circle",
 					"start_pos": [
@@ -181,7 +181,7 @@
 					]
 				},
 				"dynamic_obs_8": {
-					"obstacle_radius": 0.715,
+					"obstacle_radius": 0.415,
 					"linear_velocity": 0.3,
 					"type": "circle",
 					"start_pos": [
@@ -203,7 +203,7 @@
 					]
 				},
 				"dynamic_obs_9": {
-					"obstacle_radius": 0.715,
+					"obstacle_radius": 0.415,
 					"linear_velocity": 0.3,
 					"type": "circle",
 					"start_pos": [
@@ -225,7 +225,7 @@
 					]
 				},
 				"dynamic_obs_10": {
-					"obstacle_radius": 0.715,
+					"obstacle_radius": 0.415,
 					"linear_velocity": 0.3,
 					"type": "circle",
 					"start_pos": [
@@ -247,7 +247,7 @@
 					]
 				},
 				"dynamic_obs_11": {
-					"obstacle_radius": 0.715,
+					"obstacle_radius": 0.415,
 					"linear_velocity": 0.3,
 					"type": "circle",
 					"start_pos": [
@@ -269,7 +269,7 @@
 					]
 				},
 				"dynamic_obs_12": {
-					"obstacle_radius": 0.715,
+					"obstacle_radius": 0.415,
 					"linear_velocity": 0.3,
 					"type": "circle",
 					"start_pos": [
@@ -291,7 +291,7 @@
 					]
 				},
 				"dynamic_obs_13": {
-					"obstacle_radius": 0.715,
+					"obstacle_radius": 0.415,
 					"linear_velocity": 0.3,
 					"type": "circle",
 					"start_pos": [
@@ -313,7 +313,7 @@
 					]
 				},
 				"dynamic_obs_14": {
-					"obstacle_radius": 0.715,
+					"obstacle_radius": 0.415,
 					"linear_velocity": 0.3,
 					"type": "circle",
 					"start_pos": [
@@ -335,7 +335,7 @@
 					]
 				},
 				"dynamic_obs_15": {
-					"obstacle_radius": 0.715,
+					"obstacle_radius": 0.415,
 					"linear_velocity": 0.3,
 					"type": "circle",
 					"start_pos": [
@@ -357,7 +357,7 @@
 					]
 				},
 				"dynamic_obs_16": {
-					"obstacle_radius": 0.715,
+					"obstacle_radius": 0.415,
 					"linear_velocity": 0.3,
 					"type": "circle",
 					"start_pos": [
@@ -379,7 +379,7 @@
 					]
 				},
 				"dynamic_obs_17": {
-					"obstacle_radius": 0.715,
+					"obstacle_radius": 0.415,
 					"linear_velocity": 0.3,
 					"type": "circle",
 					"start_pos": [
@@ -401,7 +401,7 @@
 					]
 				},
 				"dynamic_obs_18": {
-					"obstacle_radius": 0.715,
+					"obstacle_radius": 0.415,
 					"linear_velocity": 0.3,
 					"type": "circle",
 					"start_pos": [
@@ -423,7 +423,7 @@
 					]
 				},
 				"dynamic_obs_19": {
-					"obstacle_radius": 0.715,
+					"obstacle_radius": 0.415,
 					"linear_velocity": 0.3,
 					"type": "circle",
 					"start_pos": [
@@ -445,7 +445,7 @@
 					]
 				},
 				"dynamic_obs_20": {
-					"obstacle_radius": 0.715,
+					"obstacle_radius": 0.415,
 					"linear_velocity": 0.3,
 					"type": "circle",
 					"start_pos": [
@@ -467,7 +467,7 @@
 					]
 				},
 				"dynamic_obs_21": {
-					"obstacle_radius": 0.715,
+					"obstacle_radius": 0.415,
 					"linear_velocity": 0.3,
 					"type": "circle",
 					"start_pos": [
@@ -489,7 +489,7 @@
 					]
 				},
 				"dynamic_obs_22": {
-					"obstacle_radius": 0.715,
+					"obstacle_radius": 0.415,
 					"linear_velocity": 0.3,
 					"type": "circle",
 					"start_pos": [
@@ -511,7 +511,7 @@
 					]
 				},
 				"dynamic_obs_23": {
-					"obstacle_radius": 0.715,
+					"obstacle_radius": 0.415,
 					"linear_velocity": 0.3,
 					"type": "circle",
 					"start_pos": [
@@ -533,7 +533,7 @@
 					]
 				},
 				"dynamic_obs_24": {
-					"obstacle_radius": 0.715,
+					"obstacle_radius": 0.415,
 					"linear_velocity": 0.3,
 					"type": "circle",
 					"start_pos": [
@@ -555,7 +555,7 @@
 					]
 				},
 				"dynamic_obs_25": {
-					"obstacle_radius": 0.715,
+					"obstacle_radius": 0.415,
 					"linear_velocity": 0.3,
 					"type": "circle",
 					"start_pos": [
@@ -577,7 +577,7 @@
 					]
 				},
 				"dynamic_obs_26": {
-					"obstacle_radius": 0.715,
+					"obstacle_radius": 0.415,
 					"linear_velocity": 0.3,
 					"type": "circle",
 					"start_pos": [
@@ -599,7 +599,7 @@
 					]
 				},
 				"dynamic_obs_27": {
-					"obstacle_radius": 0.715,
+					"obstacle_radius": 0.415,
 					"linear_velocity": 0.3,
 					"type": "circle",
 					"start_pos": [
@@ -621,7 +621,7 @@
 					]
 				},
 				"dynamic_obs_28": {
-					"obstacle_radius": 0.715,
+					"obstacle_radius": 0.415,
 					"linear_velocity": 0.3,
 					"type": "circle",
 					"start_pos": [
@@ -643,7 +643,7 @@
 					]
 				},
 				"dynamic_obs_29": {
-					"obstacle_radius": 0.715,
+					"obstacle_radius": 0.415,
 					"linear_velocity": 0.3,
 					"type": "circle",
 					"start_pos": [
