@@ -135,7 +135,7 @@ cd $HOME/geometry2_ws
 catkin_make -DPYTHON_EXECUTABLE=/usr/bin/python3
 ```
 
-* Set python path in .zshrc (or .bash if you use that)
+* Set python path in .zshrc (or .bashrc if you use that)
 ```
 nano ~/.zshrc
 ```
@@ -156,8 +156,19 @@ workon rosnav
 cd $HOME/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/model_based/cadrl_ros
 pip install -r requirements_cadrl.txt
 ```
-If you encounter errors, e.g. sopecific versions not found, please manually install the packages with an available version.
-  You only need this to run our cadrl node, if you dont plan to use it, skip this step.
+If you encounter errors, e.g. specific versions not found, please manually install the packages with an available version.
+You only need this to run our cadrl node, if you dont plan to use it, skip this step.
+
+
+* Inside forks/stable_baselines3
+```
+pip install -e .
+
+```
+* inside catkin_ws:
+```
+catkin_make -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=/usr/bin/python3
+```
 
 ## Update after developing flatland code
 After changes inside the forks/flatland folder you should do the following steps to fetch the latest version:
@@ -169,4 +180,14 @@ pull latest ignc-flatland version
 ```
 cd $HOME/catkin_ws/src/forks/flatland
 git pull
+```
+# Error Handling 
+if you encounter the error "world path not given", it is probably because you havent updated the forks repository or working on an old branch.
+In that case go to the arena-rosnav folder and do
+```
+rosws update
+```
+Subsequently, go to the forks/stable_baselines3 folder and do:
+```
+pip install -e .
 ```

@@ -1,4 +1,5 @@
 import os
+import sys
 import rospy
 import rospkg
 import json
@@ -119,6 +120,7 @@ if __name__ == "__main__":
     time = round(time.time()-start)
     print(f"Time passed:    {time}s")
     print("EVALUATION DONE!")
+    sys.exit()
 
     # env.reset()
     # first_obs = True

@@ -47,10 +47,10 @@ def parsing(): # define what flags user can/must give as terminal input
 
 def summary(df,cols,f): # summary of the json files and returning as single row as pandas df with file name as index
     l =[]
-    l.append(np.mean(df["time"])) # calculate mean time
-    l.append(np.mean(df["path"])) # calculate mean path length
-    l.append(np.float(np.sum(df["collision"]))) # calculate total number of collisions
-    l.append(np.sum(df["collision"]<3)/len(df["collision"])*100) # calculate fraction of successes
+    l.append(np.mean(df["time"][1:-1])) # calculate mean time
+    l.append(np.mean(df["path"][1:-1])) # calculate mean path length
+    l.append(np.float(np.sum(df["collision"][1:-1]))) # calculate total number of collisions
+    l.append(np.sum(df["collision"]<3)/len(df["collision"][1:-1])*100) # calculate fraction of successes
     index_name = [f.split("/")[-1].replace(".json","")] # get the file name with out .json ending
     return pd.DataFrame([l], columns=cols, index=index_name)
 
@@ -100,29 +100,36 @@ def order_data(data,param_list,wpgen,planner,maps,classic,quantity): # create wp
     for param in params:
         data[param] = parameter_col[param]
     data.index = ["{0}_{1}".format(data["wpgen"][i],data["planner"][i]) for i in range(len(data))] # set new indices with {wpgen}_{planner}
+
+    # dropping data with "none" in columns
+    data = data.loc[data["map"]!="none"]
+    data = data.loc[data["wpgen"]!="none"]
+    data = data.loc[data["planner"]!="none"]
+    for param in params:
+        data = data.loc[data[param]!="none"]
+
     return data.sort_index()
 
-def get_table(data,wpgen,planner,map,param_list,cols):
+def get_table(data,wpgen,planner,maps,param_list,cols):
     params = [*param_list.keys()]
-    data_top = data.groupby(params+["wpgen","planner"]).mean() # instantly means over map (columns that are left out of groupby will be meaned)
-    data_map = data.groupby(["map"]+["wpgen","planner"]).mean() # mean over obs and vel, order in group by decides the hierarchy
-    data_overall = data.groupby(["wpgen","planner"]).mean()
-    top_table = {}
+    data_grouped = data.groupby(["map"]+params+["wpgen","planner"]).mean() 
+    data_overall = data.groupby(params+["wpgen","planner"]).mean()
+    table = {}
+    table["overall"] = {}
+    for map in maps:
+        table[map] = {}
+        for p in param_list[params[0]]: # first hierarchy 1st param (obs), 2nd hierarchy 2nd param (vel), NOTE: change hierarchy by changing param_list order
+            table[map][p] = pd.concat([data_grouped.loc[map].loc[p].loc[p2] for p2 in param_list[params[1]]],axis=1)
+        table[map] = pd.concat([table[map][p] for p in param_list[params[0]]],axis=1).round(2)
     for p in param_list[params[0]]: # first hierarchy 1st param (obs), 2nd hierarchy 2nd param (vel), NOTE: change hierarchy by changing param_list order
-        top_table[p] = pd.concat([data_top.loc[p].loc[p2] for p2 in param_list[params[1]]],axis=1)
-    top_table = pd.concat([top_table[p] for p in param_list[params[0]]],axis=1).round(2)
-    bot_table = pd.concat([data_overall]+[data_map.loc[map] for map in maps],axis=1).round(2)
-    return top_table,bot_table
+        table["overall"][p] = pd.concat([data_overall.loc[p].loc[p2] for p2 in param_list[params[1]]],axis=1)
+    table["overall"] = pd.concat([table["overall"][p] for p in param_list[params[0]]],axis=1).round(2)
+    return table
     """
-    top table structure:
+    table structure for each map respectively:
                 obs05               obs10                       obs20
             vel02 vel03    vel02   vel03   vel02   vel03
             time|path|collision|succces (for every vel)   
-    planner
-
-    bottom table structure:
-                overall                         map1            empty
-            time|path|collision|success         (follows structure in maps list)
     planner
     """
 
@@ -157,7 +164,11 @@ def clear_missings(data,maps,wpgen,planner,param_list,quantity):
 
 def plot_metrics(data,labels,colors,wpgen,planner,maps,param_list,quantity,metrics,legendsoff,show,classic,withclassic,byplanner,nosubtitle):
     barwidth = 0.1 # NOTE: tuned manually
-
+    fontsize_ticks = 13
+    fontsize_title = 19
+    fontsize_subtitle = 14
+    fontsize_axlabel = 19
+    
     other_quantity = np.array([*param_list.keys()])[[x != quantity for x in [*param_list.keys()]]][0] # get the other quantity
     new_index = pd.MultiIndex.from_arrays([data["map"],data["wpgen"],data["planner"],data[other_quantity],data[quantity]], names=("map",'wpgen','planner',other_quantity,quantity))
     if byplanner:
@@ -226,14 +237,15 @@ def plot_metrics(data,labels,colors,wpgen,planner,maps,param_list,quantity,metri
                     # plot labeling and title
                     if quantity == "obs":
                         # Add xticks on the middle of the group bars
-                        plt.xlabel('No. Obstacles', fontsize=15)
-                        plt.xticks([r + ((len(iterate)-1)/2-0.5)*barwidth for r in range(xticks)], [int(obs.replace("obs","")) for obs in param_list["obs"]]) # NOTE: hardcoded for obs quantity
-                        plt.ylabel('{}'.format(caption), fontsize=15)
-                        plt.suptitle("{} over No. Obstacles".format(title), fontweight='bold', fontsize=16)
+                        plt.xlabel('No. Obstacles', fontsize=fontsize_axlabel)
+                        plt.xticks([r + ((len(iterate)-1)/2-0.5)*barwidth for r in range(xticks)], [int(obs.replace("obs","")) for obs in param_list["obs"]], fontsize=fontsize_ticks) # NOTE: hardcoded for obs quantity
+                        plt.yticks(fontsize=fontsize_ticks)
+                        plt.ylabel('{}'.format(caption), fontsize=fontsize_axlabel)
+                        plt.suptitle("{} over No. Obstacles".format(title), fontweight='bold', fontsize=fontsize_title)
                         if nosubtitle:
-                            plt.title("Local Planner: {0}, Map: {1}".format(labels[plan],labels[map]))
+                            plt.title("Local Planner: {0}, Map: {1}".format(labels[plan],labels[map]), fontsize=fontsize_subtitle)
                         else:
-                            plt.title("Map: {1}".format(labels[map]))
+                            plt.title("Map: {1}".format(labels[map]), fontsize=fontsize_subtitle)
                         ax.grid('on')
                         # Create legend & Show graphic
                         if legendsoff:
@@ -248,14 +260,15 @@ def plot_metrics(data,labels,colors,wpgen,planner,maps,param_list,quantity,metri
                             plt.close()                            
                     if quantity == "vel":
                         # Add xticks on the middle of the group bars
-                        plt.xlabel('Obstacle Velocity', fontsize=15)
-                        plt.xticks([r + ((len(iterate)-1)/2-0.5)*barwidth for r in range(xticks)], ["0.{0}".format(int(vel.replace("vel",""))) for vel in param_list["vel"]]) # NOTE: hardcoded for vel quantity
-                        plt.ylabel('{}'.format(caption), fontsize=15)
-                        plt.suptitle("{} over Obstacle Velocity".format(title), fontweight='bold', fontsize=16)
+                        plt.xlabel('Obstacle Velocity', fontsize=fontsize_axlabel)
+                        plt.xticks([r + ((len(iterate)-1)/2-0.5)*barwidth for r in range(xticks)], ["0.{0}".format(int(vel.replace("vel",""))) for vel in param_list["vel"]], fontsize=fontsize_ticks) # NOTE: hardcoded for vel quantity
+                        plt.yticks(fontsize=fontsize_ticks)
+                        plt.ylabel('{}'.format(caption), fontsize=fontsize_axlabel)
+                        plt.suptitle("{} over Obstacle Velocity".format(title), fontweight='bold', fontsize=fontsize_title)
                         if nosubtitle:
-                            plt.title("Local Planner: {0}, Map: {1}".format(labels[plan],labels[map]))
+                            plt.title("Local Planner: {0}, Map: {1}".format(labels[plan],labels[map]), fontsize=fontsize_subtitle)
                         else:
-                            plt.title("Map: {1}".format(labels[map]))                        
+                            plt.title("Map: {1}".format(labels[map]), fontsize=fontsize_subtitle)                        
                         ax.grid('on')
                         # Create legend & Show graphic
                         if legendsoff:
@@ -272,6 +285,9 @@ def plot_metrics(data,labels,colors,wpgen,planner,maps,param_list,quantity,metri
         ########################## plot by waypoint generator ###########################################
         else:
             for wp in wpgen:
+                # skip plotting only classic planners, NOTE: can be commented out if necessary
+                if wp == "classic":
+                    continue
                 wp_data = map_data.loc[wp]
                 for metric in metrics:
                     fig, ax = plt.subplots()
@@ -326,22 +342,23 @@ def plot_metrics(data,labels,colors,wpgen,planner,maps,param_list,quantity,metri
                     # plot labels and title
                     if quantity == "obs":
                         # Add xticks on the middle of the group bars
-                        plt.xlabel('No. Obstacles', fontsize=15)
+                        plt.xlabel('No. Obstacles', fontsize=fontsize_axlabel)
                         planners_plotted = len(planner)
                         if wp == "classic":
                             planners_plotted = len(classic)
                         if wp != "classic" and not withclassic:
                             planners_plotted = len(planner)-len(classic)
-                        plt.xticks([r + (planners_plotted/2-0.5)*barwidth for r in range(xticks)], [int(obs.replace("obs","")) for obs in param_list["obs"]]) # NOTE: hardcoded for obs quantity
-                        plt.ylabel('{}'.format(caption), fontsize=15)
-                        plt.suptitle("{} over No. Obstacles".format(title), fontweight='bold', fontsize=16)
+                        plt.xticks([r + (planners_plotted/2-0.5)*barwidth for r in range(xticks)], [int(obs.replace("obs","")) for obs in param_list["obs"]], fontsize=fontsize_ticks) # NOTE: hardcoded for obs quantity
+                        plt.yticks(fontsize=fontsize_ticks)
+                        plt.ylabel('{}'.format(caption), fontsize=fontsize_axlabel)
+                        plt.suptitle("{} over No. Obstacles".format(title), fontweight='bold', fontsize=fontsize_title)
                         if nosubtitle:
                             if wp == "classic": # NOTE: if you dont want a subtitle with the wpgenerator comment the following lines out
-                                plt.title("Classic Navigation Systems, Map: {0}".format(labels[map]))
+                                plt.title("Classic Navigation Systems, Map: {0}".format(labels[map]), fontsize=fontsize_subtitle)
                             else:
-                                plt.title("Waypoint generator: {0}, Map: {1}".format(labels[wp],labels[map]))                            
+                                plt.title("Waypoint generator: {0}, Map: {1}".format(labels[wp],labels[map]), fontsize=fontsize_subtitle)                            
                         else:
-                            plt.title("Map: {1}".format(labels[map]))                         
+                            plt.title("Map: {1}".format(labels[map]), fontsize=fontsize_subtitle)                         
                         ax.grid('on')
                         # Create legend & Show graphic
                         if legendsoff:
@@ -356,22 +373,23 @@ def plot_metrics(data,labels,colors,wpgen,planner,maps,param_list,quantity,metri
                             plt.close()
                     if quantity == "vel":
                         # Add xticks on the middle of the group bars
-                        plt.xlabel('Obstacle Velocity', fontsize=15)
+                        plt.xlabel('Obstacle Velocity', fontsize=fontsize_axlabel)
                         planners_plotted = len(planner)
                         if wp == "classic":
                             planners_plotted = len(classic)
                         if wp != "classic" and not withclassic:
                             planners_plotted = len(planner)-len(classic)
-                        plt.xticks([r + (planners_plotted/2-0.5)*barwidth for r in range(xticks)], ["0.{0}".format(int(vel.replace("vel",""))) for vel in param_list["vel"]]) # NOTE: hardcoded for vel quantity
-                        plt.ylabel('{}'.format(caption), fontsize=15)
-                        plt.suptitle("{} over Obstacle Velocity".format(title), fontweight='bold', fontsize=16)
+                        plt.xticks([r + (planners_plotted/2-0.5)*barwidth for r in range(xticks)], ["0.{0}".format(int(vel.replace("vel",""))) for vel in param_list["vel"]], fontsize=fontsize_ticks) # NOTE: hardcoded for vel quantity
+                        plt.yticks(fontsize=fontsize_ticks)
+                        plt.ylabel('{}'.format(caption), fontsize=fontsize_axlabel)
+                        plt.suptitle("{} over Obstacle Velocity".format(title), fontweight='bold', fontsize=fontsize_title)
                         if nosubtitle:
                             if wp == "classic": # NOTE: if you dont want a subtitle with the wpgenerator comment the following lines out
-                                plt.title("Classic Navigation Systems, Map: {0}".format(labels[map]))
+                                plt.title("Classic Navigation Systems, Map: {0}".format(labels[map]), fontsize=fontsize_subtitle)
                             else:
-                                plt.title("Waypoint generator: {0}, Map: {1}".format(labels[wp],labels[map]))                            
+                                plt.title("Waypoint generator: {0}, Map: {1}".format(labels[wp],labels[map]), fontsize=fontsize_subtitle)                            
                         else:
-                            plt.title("Map: {1}".format(labels[map])) 
+                            plt.title("Map: {1}".format(labels[map]), fontsize=fontsize_subtitle) 
                         ax.grid('on')
                         # Create legend & Show graphic
                         if legendsoff:
@@ -387,6 +405,10 @@ def plot_metrics(data,labels,colors,wpgen,planner,maps,param_list,quantity,metri
 
 def get_all_plot(data,labels,colors,wpgen,planner,param_list,quantity,metrics,show,classic):
     barwidth = 0.1
+    fontsize_ticks = 16
+    fontsize_title = 24
+    fontsize_subtitle = 24
+    fontsize_axlabel = 24
 
     other_quantity = np.array([*param_list.keys()])[[x != quantity for x in [*param_list.keys()]]][0] # get the other quantity
     bar_number = (len(planner)-len(classic))*(len(wpgen)-1)+len(classic) # nonclassic planners*waypoints without classic + classic planners
@@ -457,17 +479,17 @@ def get_all_plot(data,labels,colors,wpgen,planner,param_list,quantity,metrics,sh
                 xpos = [r + (non_classic_planners_plotted/2-0.5)*barwidth for r in range(xticks)] # these are the xticks for the non-classical planner
                 xpos.append(xticks+(classic_planners_plotted/2-0.5)*barwidth) # the last tick for the classic planners
                 axs[maps.index(map),param_list[quantity].index(q)].set_xticks(xpos)
-                axs[maps.index(map),param_list[quantity].index(q)].set_xticklabels([labels[wp] for wp in wpgen])
-                axs[maps.index(map),param_list[quantity].index(q)].set(ylabel="{0}".format(caption))
+                axs[maps.index(map),param_list[quantity].index(q)].set_xticklabels([labels[wp] for wp in wpgen], fontsize=fontsize_ticks)
+                axs[maps.index(map),param_list[quantity].index(q)].set(ylabel="{0}".format(caption), fontsize=fontsize_axlabel)
                 if quantity == "vel":
-                    axs[maps.index(map),param_list[quantity].index(q)].set_title("Map: {0}, {1}: 0.{2}".format(labels[map],labels[quantity],int(q.replace(quantity,""))))
+                    axs[maps.index(map),param_list[quantity].index(q)].set_title("Map: {0}, {1}: 0.{2}".format(labels[map],labels[quantity],int(q.replace(quantity,""))), fontsize=fontsize_title)
                 else:
-                    axs[maps.index(map),param_list[quantity].index(q)].set_title("Map: {0}, {1}: {2}".format(labels[map],labels[quantity],int(q.replace(quantity,""))))
+                    axs[maps.index(map),param_list[quantity].index(q)].set_title("Map: {0}, {1}: {2}".format(labels[map],labels[quantity],int(q.replace(quantity,""))), fontsize=fontsize_title)
                 axs[0,0].legend(loc="upper left")
         for ax in axs.flat:
             ax.label_outer()
             ax.grid("on")
-        fig.suptitle("{0} over Navigation Systems for all scenarios".format(title), fontweight='bold', fontsize=16)
+        fig.suptitle("{0} over Navigation Systems for all scenarios".format(title), fontweight='bold', fontsize=fontsize_title)
         plt.savefig('all_in_one_plot_{0}_{1}.png'.format(metric,quantity))  
         if show:
             plt.show()
@@ -500,11 +522,11 @@ if __name__ == "__main__": # execute code
     # hyperparameters specifying the contents of files and the wanted structure for the datasets
     cols = ["time","path","collision","success"]    # define the quantities to measure
     obs = ["obs10","obs20"] # define different obstacles numbers, names must match file names
-    vel = ["vel02","vel03"] # define different velocities, names must match file names
-    maps = ["map0","open","map1","empty"] # define the maps trained on, names must match file names
-    wpgen = ["spatialhorizon"] # NOTE: classic MUST be in the back
-    planner = ["R0","R1","R2","R4","RLCA","MPC","TEB"] # all planners, NOTE: classic planners MUST be in the back!!!
-    classic = ["RLCA","MPC","TEB"] # classic planners
+    vel = ["vel03"] # define different velocities, names must match file names
+    maps = ["map1","empty","open", "map0"] # define the maps trained on, names must match file names
+    wpgen = ["spatialhorizon","classic"] # NOTE: classic MUST be in the back
+    planner = ["R2","R4","MPC","TEB"] # all planners, NOTE: classic planners MUST be in the back!!!
+    classic = ["MPC","TEB"] # classic planners
 
     # different kinds of datasets for visualization and latex table formatting
     param_list = {"obs":obs,"vel":vel} # just a dict with the parameters to measure
@@ -512,18 +534,19 @@ if __name__ == "__main__": # execute code
     data = order_data(raw_data,param_list,wpgen,planner,maps,classic,quantity)
     ############
 
-
     ### this code block creates a df in table format needed for latex and may also create csv files of the df ###
-    top_table,bot_table = get_table(data,wpgen,planner,map,param_list,cols)
+    table = get_table(data,wpgen,planner,maps,param_list,cols)
     if latex:
         text_file = open("latex_table.txt", "w")
-        text_file.write(top_table.to_latex()+bot_table.to_latex())
+        for t in table:
+            text_file.write("\nTable for: "+t+"\n")
+            text_file.write(table[t].to_latex())
         text_file.close()
 
     if csv:
         data.to_csv("evaluation_all_data.csv")
-        top_table.to_csv("evaluation_top_table.csv")
-        bot_table.to_csv("evaluation_bottom_table.csv")
+        for t in table:
+            table[t].to_csv("evaluation_{}_table.csv".format(t))
     ###########
 
 

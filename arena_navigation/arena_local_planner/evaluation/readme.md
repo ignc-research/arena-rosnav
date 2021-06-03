@@ -1,5 +1,5 @@
 # Installation
-The evaluation script need some packages in order to work
+The evaluation script need some packages in order to work and a python version above 3.7. We recommend to create a new venv for evaluation purposes.
 ```
 pip install sklearn
 ```
@@ -8,10 +8,25 @@ pip install sklearn
 
 The evaluation script will compare different planners provided as rosbags. The bags need to be recorded while running a scenario (see here), since some topics are needed by the script. The script file is located in script/scenario_eval.py
 
-Once the config id ready, one can easily start the evaluation by starting the simulation with the map from which the rosbags were recorded e.g. officemap and afterwards run:
+Once the config id ready, one can easily start the evaluation with the following steps
 
-```python scenario_eval.py test.yml png``` 
+ * Start Simulation
+```
+roslaunch arena_bringup start_arena_flatland.launch disable_scenario:="false" map_file:="map1" scenario_file:="eval/obstacle_map1_obs10.json" local_planner:="teb"
+```
+Here, one should specify the map on which the rosbags were recorded. 
+* Afterwards run:
 
+```
+python scenario_eval.py test.yml png
+``` 
+Where test.yml is the config file to specify which plots you want to create. More details below. Pay attention that each map may have different origins and you have to specify the origin within the scenario_eval-py script. (Currently the origin is hardcoded on line 845 but we plan to include that parameter into the config in future.) 
+
+Following files will be created: 
+* A new folder will be created inside the [../evaluations/plots](https://github.com/ignc-research/arena-rosnav/tree/local_planner_subgoalmode/arena_navigation/arena_local_planner/evaluation/plots) folder containing all the plots. 
+* Additionally, the .json files with all metrics for the [quantitative evaluation scripts](https://github.com/ignc-research/arena-rosnav/blob/local_planner_subgoalmode/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/sim_evaluation_v3.py) are generated inside [../evaluations/quantitative](https://github.com/ignc-research/arena-rosnav/tree/local_planner_subgoalmode/arena_navigation/arena_local_planner/evaluation/scripts/quantitative) 
+
+**Important**: One should put all the generated .json files into one specified folder in order to run the quantitative evaluation scripts properly. For more information about quantiative plots please refer to [quantitative.md](https://github.com/ignc-research/arena-rosnav/blob/local_planner_subgoalmode/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/readme.md)
 
 ## yml config
 

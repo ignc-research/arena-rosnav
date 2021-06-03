@@ -1,0 +1,64 @@
+
+Table for: overall
+\begin{tabular}{llrrrrrrrr}
+\toprule
+               &    &    time &   path &  collision &  success &    time &   path &  collision &  success \\
+wpgen & planner &         &        &            &          &         &        &            &          \\
+\midrule
+classic & MPC &  172.85 &  46.79 &      36.00 &    75.00 &  185.00 &  41.28 &       6.00 &    66.67 \\
+               & TEB &  124.36 &  43.57 &       4.75 &   100.00 &  135.66 &  46.58 &      10.00 &    95.83 \\
+spatialhorizon & R2 &  169.59 &  49.16 &       4.50 &    97.92 &  205.49 &  59.14 &       1.25 &   100.00 \\
+               & R4 &  135.45 &  42.47 &       0.75 &   100.00 &  182.25 &  51.07 &       3.25 &   100.00 \\
+\bottomrule
+\end{tabular}
+
+Table for: map0
+\begin{tabular}{llrrrrrrrr}
+\toprule
+               &    &    time &    path &  collision &  success &    time &    path &  collision &  success \\
+wpgen & planner &         &         &            &          &         &         &            &          \\
+\midrule
+classic & MPC &  180.62 &  34.50 &       84.0 &    83.33 &   79.20 &  29.84 &       13.0 &    100.0 \\
+               & TEB &   94.25 &  32.97 &        2.0 &   100.00 &   88.27 &  32.38 &       17.0 &    100.0 \\
+spatialhorizon & R2 &  125.67 &  36.67 &       17.0 &    91.67 &  241.33 &  68.68 &        0.0 &    100.0 \\
+               & R4 &  110.37 &  33.05 &        0.0 &   100.00 &  194.87 &  46.30 &        6.0 &    100.0 \\
+\bottomrule
+\end{tabular}
+
+Table for: empty
+\begin{tabular}{llrrrrrrrr}
+\toprule
+               &    &    time &   path &  collision &  success &    time &   path &  collision &  success \\
+wpgen & planner &         &        &            &          &         &        &            &          \\
+\midrule
+classic & MPC &  106.67 &  30.24 &       18.0 &    91.67 &   80.29 &  28.96 &        0.0 &    100.0 \\
+               & TEB &   93.79 &  32.09 &        8.0 &   100.00 &  109.46 &  34.68 &        8.0 &    100.0 \\
+spatialhorizon & R2 &  107.80 &  30.39 &        0.0 &   100.00 &  122.19 &  34.42 &        0.0 &    100.0 \\
+               & R4 &   49.64 &  28.11 &        0.0 &   100.00 &  119.00 &  35.06 &        0.0 &    100.0 \\
+\bottomrule
+\end{tabular}
+
+Table for: open
+\begin{tabular}{llrrrrrrrr}
+\toprule
+               &    &    time &   path &  collision &  success &    time &   path &  collision &  success \\
+wpgen & planner &         &        &            &          &         &        &            &          \\
+\midrule
+classic & TEB &  100.12 &  38.02 &        4.0 &    100.0 &  123.00 &  45.78 &        9.0 &    83.33 \\
+spatialhorizon & R2 &  144.50 &  41.85 &        1.0 &    100.0 &  161.42 &  46.46 &        0.0 &   100.00 \\
+               & R4 &  146.17 &  39.42 &        3.0 &    100.0 &  120.21 &  35.77 &        0.0 &   100.00 \\
+\bottomrule
+\end{tabular}
+
+Table for: map0
+\begin{tabular}{llrrrrrrrr}
+\toprule
+               &    &    time &   path &  collision &  success &    time &   path &  collision &  success \\
+wpgen & planner &         &        &            &          &         &        &            &          \\
+\midrule
+classic & MPC &  231.26 &  75.63 &        6.0 &     50.0 &  395.50 &  65.03 &        5.0 &      0.0 \\
+               & TEB &  209.29 &  71.19 &        5.0 &    100.0 &  221.92 &  73.47 &        6.0 &    100.0 \\
+spatialhorizon & R2 &  300.38 &  87.73 &        0.0 &    100.0 &  297.00 &  86.98 &        5.0 &    100.0 \\
+               & R4 &  235.61 &  69.29 &        0.0 &    100.0 &  294.92 &  87.16 &        7.0 &    100.0 \\
+\bottomrule
+\end{tabular}
