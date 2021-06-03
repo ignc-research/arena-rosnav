@@ -194,7 +194,7 @@ class Window1(QWidget):
                     item[1][0].setObjectName(item[0])
                     item[1][0].valueChanged.connect(self.updateLabel)
                     ### calculate the values back ###
-                    value = 0
+                    value = -1
                     if item[0] in ['vmax'] :
                         value = ( w.advanced_configs[item[0]] -1)* 10 +0.1
                     elif item[0] in ['max talking distance','max servicing radius'] :
@@ -204,9 +204,9 @@ class Window1(QWidget):
                     elif item[0] in ['requesting service probability'] :
                         value =   w.advanced_configs[item[0]]*500                  
                     elif item[0] in ['use danger zone'] :
-                        value =   w.advanced_configs[item[0]]
-                        item[1][0].setMinimum(0)
-                        item[1][0].setMaximum(1)
+                        value =   w.advanced_configs[item[0]] +1
+                        item[1][0].setMinimum(1)
+                        item[1][0].setMaximum(2)
                    
                     else :
                         value =   w.advanced_configs[item[0]] / 2
@@ -305,7 +305,6 @@ class Window1(QWidget):
 
                
         key = self.sender().objectName()
-
         if key in ['vmax'] :
             value = 1 +  value/ 10
         elif key in ['max talking distance','max servicing radius'] :
@@ -316,7 +315,7 @@ class Window1(QWidget):
         elif key in ['requesting service probability'] :
             value =   value/500 
         elif key in ['use danger zone'] :
-            value =   value== 1.0
+            value =   (value -1 )== 1.0
         else :
             value =   value * 2
 
