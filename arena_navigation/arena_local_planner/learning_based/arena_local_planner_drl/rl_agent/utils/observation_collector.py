@@ -442,6 +442,8 @@ class ObservationCollector():
         self._rs_deque.append(msg_robotstate)
 
     def callback_observation_received(self, *msg):
+        while  rospy.get_param("/_reseting_obstacles") == True or rospy.get_param("/_initiating_stage") == True : 
+            print('*******************waiting for _reseting or intiating _obstacles **********************')
         self._scan=self.process_scan_msg(msg[0])
         self._robot_pose,self._robot_vel=self.process_robot_state_msg(msg[1])
         self.callback_agent_state(msg[2:self.num_humans+2])
