@@ -45,7 +45,7 @@ def make_image(map): # create PNG file from occupancy map (1:occupied, 0:free) a
     imgrgb = img.convert('RGB')
     # map_name = "map_{}".format(now.strftime("%Y_%m_%d_%H_%M_%S")) # create mapname from current datetime
     map_name = "random_map"
-    dir_path = os.path.dirname(os.path.realpath(__file__))
+    dir_path = os.path.dirname(os.path.realpath(__file__)) # get path for current file, does not work if os.chdir() was used
     try:
         os.mkdir(dir_path+"/"+map_name) # create directory based on mapname
     except:
@@ -128,8 +128,7 @@ def create_indoor_map(height,width,corridor_radius,iterations):
         nearest_node = find_nearest_node(random_position,tree) # nearest node must be found before inserting the new node into the tree, else nearest node will be itself
         insert_new_node(random_position,tree,map)
         create_path(random_position,nearest_node,corridor_radius,map)
-    make_image(map)
-    # return map
+    return map
 
 def create_outdoor_map(height,width,obstacle_number,obstacle_extra_radius):
     map = initialize_map(height,width,type="outdoor")
@@ -137,23 +136,12 @@ def create_outdoor_map(height,width,obstacle_number,obstacle_extra_radius):
         random_position = sample(map,obstacle_extra_radius) 
         map[slice(random_position[0]-obstacle_extra_radius,random_position[0]+obstacle_extra_radius+1), # create 1 pixel obstacles with extra radius if specified
         slice(random_position[1]-obstacle_extra_radius,random_position[1]+obstacle_extra_radius+1)] = 1
-    make_image(map)
-    # return map
+    return map
 
-
-# if __name__ == "__main__":
-#     if np.random.random()>=0.5:
-#         map = create_indoor_map(
-#             height = 101,
-#             width = 101,
-#             corridor_radius = 3,
-#             iterations = 100
-#         )
-#     else:
-#         map = create_outdoor_map(
-#             height = 101,
-#             width = 101,
-#             obstacle_number = 20,
-#             obstacle_extra_radius = 2 # extra radius, obstacle_extra_radius=0 equals 1 pixel obstacles
-#         )
-#     make_image(map)
+def create_random_map(height,width,corridor_radius,iterations,obstacle_number,obstacle_extra_radius):
+    if np.random.random()>=0.5:
+        map =  create_indoor_map(height,width,corridor_radius,iterations)
+        return map
+    else:
+        map = create_outdoor_map(height,width,obstacle_number,obstacle_extra_radius)
+        return map
