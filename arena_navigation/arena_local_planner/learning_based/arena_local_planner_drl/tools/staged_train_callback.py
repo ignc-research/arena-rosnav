@@ -83,7 +83,7 @@ class InitiateNewTrainStage(BaseCallback):
         ), f"InitiateNewTrainStage must be called within EvalCallback"
 
         if self.activated:
-            if EvalObject.n_eval_episodes < 5:
+            if EvalObject.n_eval_episodes < 20:
                 warnings.warn("Only %d evaluation episodes considered for threshold monitoring," 
                     "results might not represent agent performance well" % EvalObject.n_eval_episodes)
 
