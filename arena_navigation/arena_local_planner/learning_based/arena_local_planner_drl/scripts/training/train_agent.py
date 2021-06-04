@@ -208,7 +208,7 @@ if __name__ == "__main__":
     trainstage_cb = InitiateNewTrainStage(
         n_envs=args.n_envs,
         treshhold_type="succ", 
-        upper_threshold=0.99, lower_threshold=0.3, 
+        upper_threshold=0.4, lower_threshold=0.3, 
         task_mode=params['task_mode'], verbose=1)
 
     # stop training on reward threshold callback
@@ -242,7 +242,7 @@ if __name__ == "__main__":
     # eval_freq: evaluate the agent every eval_freq train timesteps
     eval_cb = EvalCallback(
         eval_env=eval_env,          train_env=env,
-        n_eval_episodes=20,         eval_freq=2**13, 
+        n_eval_episodes=5,         eval_freq=2**10, 
         log_path=PATHS['eval'],     best_model_save_path=PATHS['model'], 
         deterministic=True,         callback_on_eval_end=trainstage_cb,
         callback_on_new_best=stoptraining_cb)

@@ -291,6 +291,7 @@ class RobotManager:
         goal.pose.orientation.y = quaternion[2]
         goal.pose.orientation.z = quaternion[3]
         self._goal_pub.publish(goal)
+        # print(goal)
         # self._validate_path()
 
     def _global_path_callback(self, global_path: Path):
