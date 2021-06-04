@@ -94,21 +94,29 @@ class ObservationCollector():
         self.last = 0
         self.last_r = 0
         #subscribtions
-        self._scan_sub = message_filters.Subscriber( f'{self.ns_prefix}scan', LaserScan)  #subscribe to robot scan 
-        self._robot_state_sub = message_filters.Subscriber(f'{self.ns_prefix}robot_state', RobotStateStamped) #subscribe to robot state 
+        self.sychronized_list = []
         self._subgoal_sub = rospy.Subscriber(f'{self.ns_prefix}subgoal', PoseStamped, self.callback_subgoal)#subscribe to subgoal
         self._globalplan_sub = rospy.Subscriber(f'{self.ns_prefix}globalPlan', Path, self.callback_global_plan) #subscribe to gloabalPlan
         self._sub_next = rospy.Subscriber(f"{self.ns_prefix}next_stage", Bool, self.subscribe_obstacles_topics)
         self._sub_prev = rospy.Subscriber(f"{self.ns_prefix}previous_stage", Bool, self.subscribe_obstacles_topics)
+
         self.subscribe_obstacles_topics(True)
- 
+        
 
     def subscribe_obstacles_topics(self,msg:Bool):
         
 
         while  rospy.get_param("/_reseting_obstacles") == True : 
             print('*******************waiting for _reseting_obstacles **********************')
+       
         self.curr_stage = rospy.get_param("/curr_stage", -1)
+        # kill old time sychronizer by unsubscribing from it's Massages
+        for sub in self.sychronized_list :
+            sub.sub.unregister()
+        self.sychronized_list = []
+        self._scan_sub = message_filters.Subscriber( f'{self.ns_prefix}scan', LaserScan)  #subscribe to robot scan 
+        self._robot_state_sub = message_filters.Subscriber(f'{self.ns_prefix}robot_state', RobotStateStamped) #subscribe to robot state 
+
         self.agent_state=[]
         self.robo_obstacle_state=[]
         #human state subscriper
@@ -442,25 +450,22 @@ class ObservationCollector():
         self._rs_deque.append(msg_robotstate)
 
     def callback_observation_received(self, *msg):
-        while  rospy.get_param("/_reseting_obstacles") == True or rospy.get_param("/_initiating_stage") == True : 
-            print('*******************waiting for _reseting or intiating _obstacles **********************')
+
         self._scan=self.process_scan_msg(msg[0])
         self._robot_pose,self._robot_vel=self.process_robot_state_msg(msg[1])
         self.callback_agent_state(msg[2:self.num_humans+2])
         self.callback_robo_obstacle_state(msg[self.num_humans+2:])
-        # print("calling back")
+
 
         self._flag_all_received=True
 
-    def callback_agent_state(self, msg):
+    def callback_agent_state(self, msg):    
         for i, m in enumerate(msg):
             self._human_type[i],self._human_position[i],self._human_vel[i], self._human_behavior[i]=self.process_agent_state(m)
-
+      
     def callback_robo_obstacle_state(self, msg):
-        # print("calling back massages ",msg)
         for i, m in enumerate(msg):
             self._robo_obstacle_type[i],self._robo_obstacle_position[i],self._robo_obstacle_vel[i]=self.process_robo_obstacle_state(m)
-        # print("recieved",self._robo_obstacle_type)
 
     def process_agent_state(self,msg):
         human_type=msg.type
