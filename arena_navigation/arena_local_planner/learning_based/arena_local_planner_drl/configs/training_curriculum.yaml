@@ -13,28 +13,28 @@
 4:
   dynamic_human: 5
   dynamic_robot: 2
-  static: 1
+  static: 0
 5:
   dynamic_human: 6
   dynamic_robot: 3
-  static: 1
+  static: 0
 6:
   dynamic_human: 6
   dynamic_robot: 3
-  static: 2
+  static: 0
 7:
   dynamic_human: 7
   dynamic_robot: 3
-  static: 3
+  static: 0
 8:
   dynamic_human: 8
   dynamic_robot: 4
-  static: 4
+  static: 0
 9:
   dynamic_human: 9
   dynamic_robot: 4
-  static: 5
+  static: 0
 10:
   dynamic_human: 10
   dynamic_robot: 4
-  static: 6
+  static: 0
