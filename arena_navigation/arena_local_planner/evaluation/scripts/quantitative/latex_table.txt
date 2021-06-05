@@ -1,64 +1,64 @@
 
 Table for: overall
-\begin{tabular}{llrrrrrrrr}
+\begin{tabular}{llrrrrrrrrrrrr}
 \toprule
-               &    &    time &   path &  collision &  success &    time &   path &  collision &  success \\
-wpgen & planner &         &        &            &          &         &        &            &          \\
+               &      &    time &   path &  collision &  success &    time &   path &  collision &  success &    time &   path &  collision &  success \\
+wpgen & planner &         &        &            &          &         &        &            &          &         &        &            &          \\
 \midrule
-classic & MPC &  172.85 &  46.79 &      36.00 &    75.00 &  185.00 &  41.28 &       6.00 &    66.67 \\
-               & TEB &  124.36 &  43.57 &       4.75 &   100.00 &  135.66 &  46.58 &      10.00 &    95.83 \\
-spatialhorizon & R2 &  169.59 &  49.16 &       4.50 &    97.92 &  205.49 &  59.14 &       1.25 &   100.00 \\
-               & R4 &  135.45 &  42.47 &       0.75 &   100.00 &  182.25 &  51.07 &       3.25 &   100.00 \\
-\bottomrule
-\end{tabular}
-
-Table for: map0
-\begin{tabular}{llrrrrrrrr}
-\toprule
-               &    &    time &    path &  collision &  success &    time &    path &  collision &  success \\
-wpgen & planner &         &         &            &          &         &         &            &          \\
-\midrule
-classic & MPC &  180.62 &  34.50 &       84.0 &    83.33 &   79.20 &  29.84 &       13.0 &    100.0 \\
-               & TEB &   94.25 &  32.97 &        2.0 &   100.00 &   88.27 &  32.38 &       17.0 &    100.0 \\
-spatialhorizon & R2 &  125.67 &  36.67 &       17.0 &    91.67 &  241.33 &  68.68 &        0.0 &    100.0 \\
-               & R4 &  110.37 &  33.05 &        0.0 &   100.00 &  194.87 &  46.30 &        6.0 &    100.0 \\
+classic & MPC &  127.18 &  31.68 &       9.00 &      inf &   99.68 &  29.63 &       3.00 &      inf &     NaN &    NaN &        NaN &      NaN \\
+               & TEB &  142.42 &  66.54 &       4.00 &   120.00 &  146.35 &  68.54 &       8.00 &   103.33 &     NaN &    NaN &        NaN &      NaN \\
+spatialhorizon & R0 &  168.95 &  70.57 &       1.00 &   120.00 &  164.96 &  69.49 &       2.00 &   119.39 &  144.48 &  42.62 &       3.00 &   123.81 \\
+               & R1 &  230.88 &  68.59 &       1.00 &   120.00 &  201.55 &  79.59 &       2.00 &   116.06 &  145.57 &  42.39 &       1.33 &   130.16 \\
+               & R2 &  216.25 &  65.28 &       1.00 &   119.55 &  236.17 &  98.78 &       2.75 &   117.05 &  161.50 &  47.46 &       0.00 &   141.27 \\
+               & R4 &  145.28 &  66.56 &       1.00 &   118.79 &  178.35 &  72.72 &       2.00 &   119.39 &  146.17 &  43.67 &       1.33 &   185.71 \\
+               & RLCA &  146.52 &  65.30 &       0.67 &   146.80 &  204.66 &  57.00 &      17.00 &    87.95 &  141.43 &  34.08 &       6.67 &   101.59 \\
 \bottomrule
 \end{tabular}
 
 Table for: empty
-\begin{tabular}{llrrrrrrrr}
+\begin{tabular}{llrrrrrrrrrrrr}
 \toprule
-               &    &    time &   path &  collision &  success &    time &   path &  collision &  success \\
-wpgen & planner &         &        &            &          &         &        &            &          \\
+               &      &    time &   path &  collision &  success &    time &   path &  collision &  success &    time &   path &  collision &  success \\
+wpgen & planner &         &        &            &          &         &        &            &          &         &        &            &          \\
 \midrule
-classic & MPC &  106.67 &  30.24 &       18.0 &    91.67 &   80.29 &  28.96 &        0.0 &    100.0 \\
-               & TEB &   93.79 &  32.09 &        8.0 &   100.00 &  109.46 &  34.68 &        8.0 &    100.0 \\
-spatialhorizon & R2 &  107.80 &  30.39 &        0.0 &   100.00 &  122.19 &  34.42 &        0.0 &    100.0 \\
-               & R4 &   49.64 &  28.11 &        0.0 &   100.00 &  119.00 &  35.06 &        0.0 &    100.0 \\
+classic & MPC &  110.55 &  30.31 &       18.0 &   110.00 &   80.80 &  29.08 &        0.0 &   120.00 &     NaN &    NaN &        NaN &      NaN \\
+               & TEB &  114.95 &  35.75 &        7.0 &   120.00 &   93.65 &  32.09 &        8.0 &   110.00 &     NaN &    NaN &        NaN &      NaN \\
+spatialhorizon & R0 &   94.75 &  28.16 &        0.0 &   120.00 &  104.59 &  31.16 &        0.0 &   118.18 &  138.43 &  40.69 &        0.0 &   128.57 \\
+               & R1 &   94.15 &  27.68 &        0.0 &   120.00 &  110.36 &  32.03 &        0.0 &   118.18 &  144.00 &  41.32 &        0.0 &   133.33 \\
+               & R2 &  107.05 &  30.50 &        0.0 &   118.18 &  120.00 &  34.68 &        0.0 &   118.18 &  158.21 &  45.88 &        0.0 &   128.57 \\
+               & R4 &   47.49 &  28.14 &        0.0 &   118.18 &  117.90 &  35.27 &        0.0 &   118.18 &  118.64 &  35.54 &        0.0 &   128.57 \\
+               & RLCA &   93.04 &  27.85 &        0.0 &   118.18 &  134.98 &  30.46 &       22.0 &    72.73 &  131.00 &  35.07 &        2.0 &   133.33 \\
 \bottomrule
 \end{tabular}
 
 Table for: open
-\begin{tabular}{llrrrrrrrr}
+\begin{tabular}{llrrrrrrrrrrrr}
 \toprule
-               &    &    time &   path &  collision &  success &    time &   path &  collision &  success \\
-wpgen & planner &         &        &            &          &         &        &            &          \\
+               &      &    time &   path &  collision &  success &    time &   path &  collision &  success &    time &   path &  collision &  success \\
+wpgen & planner &         &        &            &          &         &        &            &          &         &        &            &          \\
 \midrule
-classic & TEB &  100.12 &  38.02 &        4.0 &    100.0 &  123.00 &  45.78 &        9.0 &    83.33 \\
-spatialhorizon & R2 &  144.50 &  41.85 &        1.0 &    100.0 &  161.42 &  46.46 &        0.0 &   100.00 \\
-               & R4 &  146.17 &  39.42 &        3.0 &    100.0 &  120.21 &  35.77 &        0.0 &   100.00 \\
+classic & MPC &  143.80 &  33.05 &        9.0 &    120.0 &  118.55 &  30.19 &        9.0 &     90.0 &     NaN &    NaN &        NaN &      NaN \\
+               & TEB &  104.55 &  39.11 &        2.0 &    120.0 &  122.80 &  45.56 &        9.0 &    100.0 &     NaN &    NaN &        NaN &      NaN \\
+spatialhorizon & R0 &  169.89 &  49.92 &        0.0 &    120.0 &   99.65 &  29.64 &        0.0 &    120.0 &  100.22 &  29.07 &        9.0 &   114.29 \\
+               & R1 &  308.55 &  27.97 &        3.0 &    120.0 &  136.15 &  38.87 &        0.0 &    120.0 &   98.29 &  28.85 &        4.0 &   128.57 \\
+               & R2 &  227.85 &  42.59 &        2.0 &    120.0 &  162.85 &  46.83 &        0.0 &    120.0 &   96.00 &  28.53 &        0.0 &   166.67 \\
+               & R4 &  152.30 &  40.38 &        3.0 &    120.0 &  121.40 &  36.13 &        0.0 &    120.0 &   99.00 &  29.68 &        1.0 &   300.00 \\
+               & RLCA &  135.25 &  32.51 &        1.0 &    200.0 &  210.60 &  39.82 &       22.0 &     80.0 &  137.93 &  26.45 &       18.0 &    42.86 \\
 \bottomrule
 \end{tabular}
 
 Table for: map0
-\begin{tabular}{llrrrrrrrr}
+\begin{tabular}{llrrrrrrrrrrrr}
 \toprule
-               &    &    time &   path &  collision &  success &    time &   path &  collision &  success \\
-wpgen & planner &         &        &            &          &         &        &            &          \\
+               &      &    time &    path &  collision &  success &    time &    path &  collision &  success &    time &   path &  collision &  success \\
+wpgen & planner &         &         &            &          &         &         &            &          &         &        &            &          \\
 \midrule
-classic & MPC &  231.26 &  75.63 &        6.0 &     50.0 &  395.50 &  65.03 &        5.0 &      0.0 \\
-               & TEB &  209.29 &  71.19 &        5.0 &    100.0 &  221.92 &  73.47 &        6.0 &    100.0 \\
-spatialhorizon & R2 &  300.38 &  87.73 &        0.0 &    100.0 &  297.00 &  86.98 &        5.0 &    100.0 \\
-               & R4 &  235.61 &  69.29 &        0.0 &    100.0 &  294.92 &  87.16 &        7.0 &    100.0 \\
+classic & MPC &     NaN &     NaN &        0.0 &      inf &     NaN &     NaN &        0.0 &      inf &     NaN &    NaN &        NaN &      NaN \\
+               & TEB &  207.75 &  124.76 &        3.0 &   120.00 &  222.60 &  127.97 &        7.0 &   100.00 &     NaN &    NaN &        NaN &      NaN \\
+spatialhorizon & R0 &  242.20 &  133.61 &        3.0 &   120.00 &  290.65 &  147.67 &        6.0 &   120.00 &  194.79 &  58.11 &        0.0 &   128.57 \\
+               & R1 &  289.95 &  150.12 &        0.0 &   120.00 &  358.15 &  167.88 &        6.0 &   110.00 &  194.43 &  57.02 &        0.0 &   128.57 \\
+               & R2 &  302.25 &  145.45 &        0.0 &   120.00 &  330.92 &  156.81 &        5.5 &   115.00 &  230.29 &  67.98 &        0.0 &   128.57 \\
+               & R4 &  236.05 &  131.17 &        0.0 &   118.18 &  295.75 &  146.76 &        6.0 &   120.00 &  220.86 &  65.78 &        3.0 &   128.57 \\
+               & RLCA &  211.28 &  135.52 &        1.0 &   122.22 &  268.39 &  100.71 &        7.0 &   111.11 &  155.36 &  40.73 &        0.0 &   128.57 \\
 \bottomrule
 \end{tabular}

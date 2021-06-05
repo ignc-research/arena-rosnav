@@ -521,11 +521,11 @@ if __name__ == "__main__": # execute code
     ### this code block creates dataframes containing all evaluation file's summarized data ###
     # hyperparameters specifying the contents of files and the wanted structure for the datasets
     cols = ["time","path","collision","success"]    # define the quantities to measure
-    obs = ["obs10","obs20"] # define different obstacles numbers, names must match file names
+    obs = ["obs10","obs20", "obs30"] # define different obstacles numbers, names must match file names
     vel = ["vel03"] # define different velocities, names must match file names
-    maps = ["map1","empty","open", "map0"] # define the maps trained on, names must match file names
-    wpgen = ["spatialhorizon","classic"] # NOTE: classic MUST be in the back
-    planner = ["R2","R4","MPC","TEB"] # all planners, NOTE: classic planners MUST be in the back!!!
+    maps = ["empty","map0"] # define the maps trained on, names must match file names
+    wpgen = ["spatialhorizon", "classic"] # NOTE: classic MUST be in the back
+    planner = ["R0","R1","R2","R4","RLCA","MPC", "TEB"] # all planners, NOTE: classic planners MUST be in the back!!!
     classic = ["MPC","TEB"] # classic planners
 
     # different kinds of datasets for visualization and latex table formatting
@@ -562,10 +562,10 @@ if __name__ == "__main__": # execute code
         "drl3": "DRL3",
         "RLCA":"RLCA",
         "ego": "EGO",
-        "R0": "DRL1",
-        "R1": "DRL2",
-        "R2": "DRL3",
-        "R4": "DRL4",
+        "R0": "R0",
+        "R1": "R1",
+        "R2": "R2",
+        "R4": "R4",
         "ego": "EGO",
         "spatialhorizon": "STH-WP",
         "timespace": "TS-WP",

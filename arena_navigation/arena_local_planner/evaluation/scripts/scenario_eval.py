@@ -374,7 +374,7 @@ class newBag():
                 trajs.append(path_length)
                 if path_length > 0 and plt_cfg["plot_trj"]:
                     # print(lgnd)
-                    ax.plot(y, x, line_clr, linestyle = line_stl, alpha=0.5)
+                    ax.plot(y, x, line_clr, linestyle = line_stl, alpha=0.8)
                     ax.set_xlabel("x in [m]")
                     ax.set_ylabel("y in [m]")
 
@@ -848,7 +848,7 @@ def eval_cfg(cfg_file, filetype):
                         fancy_print("Evaluate bag: " + file, 1)
 
             
-            #map0: lower left, empty: upper left, open: lower left
+            #map0: lower left, empty: upper left, open: upper left
             ax.legend(handles=legend_elements, loc="lower left")
 
             ax.spines["right"].set_visible(True)
@@ -875,8 +875,8 @@ def getMap(msg):
     points_x = []
     points_y = []
     # print(msg.markers[0]) map0 -16.6 -6.65  ,  map1 empty: -6 -6  , open field: 0 0
-    orig_x = -6
-    orig_y = -6
+    orig_x = -16.6
+    orig_y = -6.65
     for p in msg.markers[0].points:
     #     if  2 < p.y < 25 :
         points_x.append( p.x + orig_x)
