@@ -66,7 +66,7 @@ class Publisher:
         marker.pose.orientation.w = 1.0
         marker.scale.x = 0.2
         marker.scale.y = 0.3
-        marker.scale.z = 0.0
+        marker.scale.z = 0.1
         marker.color.a = a
         marker.color.r = r * 255.0
         marker.color.g = g * 255.0
@@ -91,7 +91,6 @@ class Publisher:
                     start_point = Point(pos_x, pos_y, 0.0)
                     # desired force
                     desired_force = agent.forces.desired_force
-                    # print(desired_force)
                     end_point = Point(pos_x + desired_force.x, pos_y + desired_force.y, 0.0)
                     marker = self.create_arrow_marker(id+1, start_point, end_point, 0.0, 1.0, 0.0) # green
                     markers.markers.append(marker)
@@ -105,10 +104,15 @@ class Publisher:
                     end_point = Point(pos_x + social_force.x, pos_y + social_force.y, 0.0)
                     marker = self.create_arrow_marker(id+3, start_point, end_point, 0.0, 0.0, 1.0) # blue
                     markers.markers.append(marker)
+                    # keep distance force
+                    keep_distance_force = agent.forces.keep_distance_force
+                    end_point = Point(pos_x + keep_distance_force.x, pos_y + keep_distance_force.y, 0.0)
+                    marker = self.create_arrow_marker(id+4, start_point, end_point, 1.0, 0.0, 1.0)
+                    markers.markers.append(marker)
                     # destination
                     destination = agent.destination
                     end_point = Point(destination.x, destination.y, 0.0)
-                    marker = self.create_arrow_marker(id+4, start_point, end_point, 0.0, 0.0, 1.0, 0.3, Marker.LINE_STRIP) # blue
+                    marker = self.create_arrow_marker(id+5, start_point, end_point, 0.0, 0.0, 1.0, 0.3, Marker.LINE_STRIP) # blue
                     markers.markers.append(marker)
 
                 self.marker_pub.publish(markers)
