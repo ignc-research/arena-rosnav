@@ -38,3 +38,23 @@
   dynamic_human: 10
   dynamic_robot: 4
   static: 0
+11:
+  dynamic_human: 11
+  dynamic_robot: 5
+  static: 0
+12:
+  dynamic_human: 12
+  dynamic_robot: 5
+  static: 0
+13:
+  dynamic_human: 13
+  dynamic_robot: 5
+  static: 0
+14:
+  dynamic_human: 14
+  dynamic_robot: 6
+  static: 0
+15:
+  dynamic_human: 15
+  dynamic_robot: 6
+  static: 0
