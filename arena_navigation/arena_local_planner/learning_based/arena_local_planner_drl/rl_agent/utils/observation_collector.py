@@ -468,13 +468,17 @@ class ObservationCollector():
             self._robo_obstacle_type[i],self._robo_obstacle_position[i],self._robo_obstacle_vel[i]=self.process_robo_obstacle_state(m)
 
     def process_agent_state(self,msg):
-        if rospy.get_param("/_reseting_obstacles") == True  or  rospy.get_param("/_initiating_stage") == True  : 
-            print('*******************waiting for flags to be false  **********************')
-            return 
-        human_type=msg.type
-        human_pose=self.pose3D_to_pose2D(msg.pose)   
-        human_twist=msg.twist
-        human_behavior=msg.social_state.strip("\"")
+        try:
+            human_type=msg.type
+            human_pose=self.pose3D_to_pose2D(msg.pose)   
+            human_twist=msg.twist
+            human_behavior=msg.social_state.strip("\"")
+        except AttributeError:
+            print('len(self.sychronized_list)',len(self.sychronized_list))
+            print('len(msg)',len(msg))
+            print('self.num_humans',self.num_humans)
+            print('self.num_robo_obstacles',self.num_robo_obstacles)
+
  
         return human_type,human_pose, human_twist, human_behavior 
     
