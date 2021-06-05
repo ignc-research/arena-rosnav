@@ -1,4 +1,5 @@
 from PyQt5 import QtGui, QtCore, QtWidgets
+from FlatlandModel import FlatlandModel
 from FlatlandBodyEditor import FlatlandBodyEditor
 
 class FlatlandBodyWidget(QtWidgets.QWidget):
@@ -8,10 +9,12 @@ class FlatlandBodyWidget(QtWidgets.QWidget):
         - edit button
         - delete button
     '''
-    def __init__(self):
+    def __init__(self, id: int, model: FlatlandModel):
         super().__init__()
         self.setup_ui()
-        self.flatland_body_editor = FlatlandBodyEditor(parent=self, flags=QtCore.Qt.WindowType.Window)
+        self.id = id
+        self.model = model
+        self.flatland_body_editor = FlatlandBodyEditor(id, model, parent=self, flags=QtCore.Qt.WindowType.Window)
 
     def setup_ui(self):
         self.layout = QtWidgets.QHBoxLayout()
@@ -35,6 +38,7 @@ class FlatlandBodyWidget(QtWidgets.QWidget):
         self.flatland_body_editor.show()
 
     def on_delete_clicked(self):
+        self.model.bodies.pop(self.id)
         self.parent().layout().removeWidget(self)
         self.deleteLater()
 
@@ -43,6 +47,8 @@ class FlatlandModelEditor(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
         self.setup_ui()
+        self.model = FlatlandModel()
+        self.body_id = 0
 
     def setup_ui(self):
         self.setWindowTitle("Flatland Model Editor")
@@ -88,13 +94,12 @@ class FlatlandModelEditor(QtWidgets.QWidget):
         self.layout.addWidget(frame)
 
     def on_add_body_button_clicked(self):
-        self.bodies_list_frame.layout().addWidget(FlatlandBodyWidget())
+        self.bodies_list_frame.layout().addWidget(FlatlandBodyWidget(self.body_id, self.model))
+        self.body_id += 1
 
     def on_test_clicked(self):
-        for i in range(self.bodies_list_frame.layout().count()):
-            widget = self.bodies_list_frame.layout().itemAt(i)
-            print(widget.widget().flatland_body_editor.flatland_body.name, i)
-
+        for body in self.model.bodies.values():
+            print(body.name)
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication([])

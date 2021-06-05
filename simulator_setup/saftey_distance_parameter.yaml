@@ -24,6 +24,8 @@ safety distance factor:
   StateReceivingService: 0.6
   StateDrivingToInteraction: 1.4
   StateProvidingService: 0.6
+  StateRequestingGuide: 0.5
+  StateFollowingGuide: 0.5
 human obstacle safety distance radius:
   adult: 1.0
   child: 1.2

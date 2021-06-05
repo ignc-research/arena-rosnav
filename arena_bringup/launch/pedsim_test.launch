@@ -7,6 +7,7 @@
   <param name="train_mode"    value="$(arg train_mode)"/>
   <arg name="step_size" default="0.01"/>
   <param name="step_size" value="$(arg step_size)" /> 
+  <param name="use_wall_mode" value="false" /> 
   <arg name="show_pedsim_forces" default="true"/>
   <arg name="show_pedsim_labels" default="true"/>
   <arg name="show_pedsim_waypoints" default="true"/>
