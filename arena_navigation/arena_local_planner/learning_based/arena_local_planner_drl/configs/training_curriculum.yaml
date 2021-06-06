@@ -55,6 +55,26 @@
   dynamic_robot: 6
   static: 0
 15:
-  dynamic_human: 15
+  dynamic_human: 7
   dynamic_robot: 6
+  static: 0
+16:
+  dynamic_human: 7
+  dynamic_robot: 6
+  static: 0
+17:
+  dynamic_human: 9
+  dynamic_robot: 6
+  static: 0
+18:
+  dynamic_human: 5
+  dynamic_robot: 7
+  static: 0
+19:
+  dynamic_human: 12
+  dynamic_robot: 4
+  static: 0
+20:
+  dynamic_human: 5
+  dynamic_robot: 3
   static: 0

@@ -241,16 +241,16 @@ class Window1(QWidget):
                     self.new_widgets[0].clicked.connect(partial(self.on_button_stage_clicked,'Stage '+ str(i+1),i))
                     self.num_obstacles_widgets.append(self.new_widgets)
                     self.training_curriculum_widgets = self.training_curriculum_widgets +[self.new_widgets]
+                    self.new_widgets[1].setObjectName(str(i))
+                    self.new_widgets[1].valueChanged.connect(self.update_obstacles_spawning_parameters)
+                    self.new_widgets[2].setObjectName(str(i))
+                    self.new_widgets[2].valueChanged.connect(self.update_obstacles_spawning_parameters)
+                    self.new_widgets[3].setObjectName(str(i))
+                    self.new_widgets[3].valueChanged.connect(self.update_obstacles_spawning_parameters)
                     if i < len(stages_values)  and stages_values[i] is not None :
                         self.new_widgets[1].setValue(stages_values[i]['static'])
-                        self.new_widgets[1].setObjectName(str(i))
-                        self.new_widgets[1].textChanged.connect(self.update_obstacles_spawning_parameters)
                         self.new_widgets[2].setValue(stages_values[i]['dynamic_human'])
-                        self.new_widgets[2].setObjectName(str(i))
-                        self.new_widgets[2].textChanged.connect(self.update_obstacles_spawning_parameters)
                         self.new_widgets[3].setValue(stages_values[i]['dynamic_robot'])
-                        self.new_widgets[3].setObjectName(str(i))
-                        self.new_widgets[3].textChanged.connect(self.update_obstacles_spawning_parameters)
                         
                     for j in range(4):
                         grid.addWidget(self.new_widgets[j], i+2, j,Qt.AlignTop)
@@ -286,7 +286,7 @@ class Window1(QWidget):
         available_models_copy = copy.deepcopy(w.available_models)
         for x, available_models_copy_key in enumerate(list(available_models_copy.keys())) : 
                     obstacles_count = widgets[x+1].value()
-                    
+                 
                     ### check if ther no available models fro mthis type and divide th num obstacles in window on equally upon the duffrent available model of each type ###
                     if available_models_copy[available_models_copy_key] is not  None :
                         
@@ -297,6 +297,7 @@ class Window1(QWidget):
                             for item in  list(available_models_copy[available_models_copy_key].items()) :
                                 if  obstacles_count== 0 :
                                     break
+                                
                                 available_models_copy[available_models_copy_key][ item[0]][0]= item[1][0]+1                        
                                 obstacles_count = obstacles_count -1
                         
