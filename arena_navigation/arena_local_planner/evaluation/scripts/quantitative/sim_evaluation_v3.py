@@ -599,6 +599,8 @@ if __name__ == "__main__": # execute code
         }
 
     data = clear_missings(data,maps,wpgen,planner,param_list,quantity)
+
+    # plotting metrics
     if metrics != "none":
         if byplanner:
             plot_metrics(data,labels,colors_wp,wpgen,planner,maps,param_list,quantity,metrics,legendsoff,show,classic,withclassic,byplanner,nosubtitle)     
@@ -609,6 +611,7 @@ if __name__ == "__main__": # execute code
     #########
 
     # use for finding errors in the data/json files
+    # therefore command out the plotting metrics commands
     # pd.set_option('display.max_rows', None) # commands to print everything in panda DataFrame
     # pd.set_option('display.max_columns', None)
     # pd.set_option('display.width', None)
