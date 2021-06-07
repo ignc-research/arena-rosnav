@@ -192,17 +192,19 @@ class Window1(QWidget):
                     item[1][0].setMinimum(0)
                     item[1][0].setMaximum(10)
                     item[1][0].setObjectName(item[0])
+                    
                     item[1][0].valueChanged.connect(self.updateLabel)
                     ### calculate the values back ###
-                    value = -1
+
+                    item[1][0].setValue(1)
                     if item[0] in ['vmax'] :
                         value = ( w.advanced_configs[item[0]] -1)* 10 +0.1
                     elif item[0] in ['max talking distance','max servicing radius'] :
                         value =( w.advanced_configs[item[0]]-1)* 5                    
                     elif item[0] in ['requesting guide probability','chatting probability','tell story probability','group talking probability','talking and walking probability'] :
-                        value =   w.advanced_configs[item[0]]*10            
+                        value =   w.advanced_configs[item[0]]*10 
                     elif item[0] in ['requesting service probability'] :
-                        value =   w.advanced_configs[item[0]]*500                  
+                        value =   w.advanced_configs[item[0]]*500              
                     elif item[0] in ['use danger zone'] :
                         value =   w.advanced_configs[item[0]] +1
                         item[1][0].setMinimum(1)
@@ -310,17 +312,17 @@ class Window1(QWidget):
             value = 1 +  value/ 10
         elif key in ['max talking distance','max servicing radius'] :
             value = 1+ value/ 5
-        
         elif key in ['requesting guide probability','chatting probability','tell story probability','group talking probability','talking and walking probability'] :
-            value =   value/10
+            value =   value/10 
         elif key in ['requesting service probability'] :
-            value =   value/500 
+            value =   value/500 -1
         elif key in ['use danger zone'] :
             value =   (value -1 )== 1.0
         else :
             value =   value * 2
-
-         
+        
+        # if value == 0.0:
+        #     print(str(value))
         self.advanced_group_box_widgets[key][1].setText(str(value))    
    
 
