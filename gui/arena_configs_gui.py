@@ -315,7 +315,7 @@ class Window1(QWidget):
         elif key in ['requesting guide probability','chatting probability','tell story probability','group talking probability','talking and walking probability'] :
             value =   value/10 
         elif key in ['requesting service probability'] :
-            value =   value/500 -1
+            value =   value/500 
         elif key in ['use danger zone'] :
             value =   (value -1 )== 1.0
         else :

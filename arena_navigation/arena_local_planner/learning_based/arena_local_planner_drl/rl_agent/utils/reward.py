@@ -436,6 +436,7 @@ class RewardCalculator():
                     else:
                         w = -0.03
                     reward = round(w, 5)
+                    
                     self.curr_reward += reward
 
                 self.last_goal_dist = goal_in_robot_frame[0]
@@ -445,14 +446,17 @@ class RewardCalculator():
                     # higher negative weight when moving away from goal (to avoid driving unnecessary circles when train in contin. action space)
                     if (self.last_guiding_goal_dist - goal_in_robot_frame[0]) > 0 and goal_in_robot_frame[0] >= 2:
                         w = 0.018*np.exp(1-current_time_step)
-                    elif goal_in_robot_frame[0] <2:
+                    elif (self.last_guiding_goal_dist - goal_in_robot_frame[0] ) < 0 or  goal_in_robot_frame[0] <2:
                  
                         w = -0.05*np.exp(1)
-                    else:
+                    else :
                         w = -0.03
 
                     reward = round(w, 5)
                     self.curr_reward += reward
+                    print(reward)
+
+
 
                 self.last_guiding_goal_dist = goal_in_robot_frame[0]
 
