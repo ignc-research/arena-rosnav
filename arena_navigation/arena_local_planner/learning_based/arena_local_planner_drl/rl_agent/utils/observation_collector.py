@@ -108,7 +108,7 @@ class ObservationCollector():
 
         while  rospy.get_param("/_reseting_obstacles") == True : 
             print('*******************waiting for _reseting_obstacles **********************')
-       
+            time.sleep(1)
         self.curr_stage = rospy.get_param("/curr_stage", -1)
         # kill old time sychronizer by unsubscribing from it's Massages
         for sub in self.sychronized_list :
@@ -191,7 +191,16 @@ class ObservationCollector():
             scan = self._scan.ranges.astype(np.float32)
         else:
             scan = np.ones(self._laser_num_beams, dtype=float)*100
-            
+        
+        self.flag_requesting_guide = 0
+        if self._human_behavior.size > 0 and 'StateRequestingGuide' in self._human_behavior: 
+            index_agent_requesting_guide =numpy.where(self._human_behavior== 'StateRequestingGuide')
+            pos = self._human_position[index_agent_requesting_guide[0]][0]
+            self._subgoal.x = pos.x
+            self._subgoal.y = pos.y
+            self.flag_requesting_guide = 1
+
+
         #claculating diffrent robot infos 
         rho, theta = ObservationCollector._get_pose_in_robot_frame(self._subgoal, self._robot_pose)
         self.rot=np.arctan2(self._subgoal.y - self._robot_pose.y, self._subgoal.x - self._robot_pose.x)
@@ -199,11 +208,11 @@ class ObservationCollector():
         self.robot_vy=self._robot_vel.linear.y* np.cos(self.rot) - self._robot_vel.linear.x * np.sin(self.rot)
         self.robot_self_state=[self._robot_pose.x, self._robot_pose.y, self.robot_vx, self.robot_vy,
                                                      self._robot_pose.theta, self._robot_vel.angular.z, self._radius_robot, rho, theta]
-        merged_obs = np.hstack([np.array([self.time_step]), scan])
+        merged_obs = np.hstack([np.array([self.time_step]), self.flag_requesting_guide, scan])
         obs_dict = {}
         obs_dict["robot_velocity"]= math.sqrt(self._robot_vel.linear.x*self._robot_vel.linear.x+self._robot_vel.linear.y*self._robot_vel.linear.y)
         obs_dict["laser_scan"] = scan
-        obs_dict['goal_in_robot_frame'] = [rho,theta]
+        obs_dict['goal_in_robot_frame'] = [rho,theta,self.flag_requesting_guide]
         # initlaising array with dimensions an filling them up with coordinate of agents and rho(density)and theta (angle)
         count_observable_humans=0  
         obs_dict['human_coordinates_in_robot_frame']= []
@@ -538,7 +547,7 @@ class ObservationCollector():
         self.robo_obstacle_state_size=19 
         self.observation_space = ObservationCollector._stack_spaces((
             spaces.Box(low=-np.PINF, high=np.PINF, shape=(1,),dtype=np.float64), #time
-            spaces.Box(low=0.0, high=self.lidar_range, shape=(self.num_lidar_beams,),dtype=np.float64), #lidar
+            spaces.Box(low=0.0, high=self.lidar_range, shape=(self.num_lidar_beams+1,),dtype=np.float64), #lidar
             spaces.Box(low=-np.PINF, high=np.PINF, shape=(self.num_humans_observation_max*self.human_state_size,),dtype=np.float64), # human states
             spaces.Box(low=-np.PINF, high=np.PINF, shape=(self.num_robo_obstacles_observation_max*self.robo_obstacle_state_size,),dtype=np.float64) # human states
 

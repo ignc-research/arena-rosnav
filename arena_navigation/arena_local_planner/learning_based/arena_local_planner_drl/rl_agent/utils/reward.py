@@ -30,8 +30,6 @@ class RewardCalculator():
         self.info = {}
         self.robot_radius = robot_radius
         self.goal_radius = goal_radius
-        self.last_goal_dist = None
-        self.last_dist_to_path = None
         self.safe_dist = safe_dist
         #TODO: should be global setting
         self.safe_dists_human_type = self.read_saftey_distance_parameter_from_yaml()['human obstacle safety distance radius']
@@ -63,6 +61,8 @@ class RewardCalculator():
         self.kdtree = None
         
         self.last_goal_dist = None
+        self.last_guiding_goal_dist = None
+        self.last_dist_to_path = None
         self.last_dist_to_path = None
         self.last_adult_min= None
         self.last_child_min= None
@@ -85,6 +85,7 @@ class RewardCalculator():
         reset variables related to the episode
         """
         self.last_goal_dist = None
+        self.last_guiding_goal_dist = None
         self.last_dist_to_path = None
         for item in list(self.human_obstacles_last_min.items()):
            self.human_obstacles_last_min[item[0]] = None
@@ -231,13 +232,17 @@ class RewardCalculator():
         :param goal_in_robot_frame (Tuple[float,float]): position (rho, theta) of the goal in robot frame (Polar coordinate) 
         :param reward (float, optional): reward amount for reaching. defaults to 15
         """
-        if goal_in_robot_frame[0] < self.goal_radius:
-            self.curr_reward = reward
-            self.info['is_done'] = True
-            self.info['done_reason'] = 2
-            self.info['is_success'] = 1
-        else:
+        if goal_in_robot_frame[2] == 0 :
+            if goal_in_robot_frame[0] < self.goal_radius:
+                self.curr_reward = reward
+                self.info['is_done'] = True
+                self.info['done_reason'] = 2
+                self.info['is_success'] = 1
+            else:
+                self.info['is_done'] = False
+        else: 
             self.info['is_done'] = False
+
 
     def _reward_goal_approached(self, 
                                 goal_in_robot_frame = Tuple[float,float],
@@ -419,19 +424,38 @@ class RewardCalculator():
 
 
     def _reward_goal_approached3(self, goal_in_robot_frame, current_time_step):
-        if self.last_goal_dist is not None:
-            # higher negative weight when moving away from goal (to avoid driving unnecessary circles when train in contin. action space)
-            if (self.last_goal_dist - goal_in_robot_frame[0]) > 0:
-                w = 0.018*np.exp(1-current_time_step)
-            elif (self.last_goal_dist - goal_in_robot_frame[0]) < 0:
-                w = -0.05*np.exp(1)
+        
+            if goal_in_robot_frame[2] == 0 :
+                if self.last_goal_dist is not None:
+                    # print(self.last_goal_dist ,goal_in_robot_frame[0])
+                    # higher negative weight when moving away from goal (to avoid driving unnecessary circles when train in contin. action space)
+                    if (self.last_goal_dist - goal_in_robot_frame[0]) > 0:
+                        w = 0.018*np.exp(1-current_time_step)
+                    elif (self.last_goal_dist - goal_in_robot_frame[0]) < 0:
+                        w = -0.05*np.exp(1)
+                    else:
+                        w = -0.03
+                    reward = round(w, 5)
+                    self.curr_reward += reward
+
+                self.last_goal_dist = goal_in_robot_frame[0]
+
             else:
-                w = -0.03
-            reward = round(w, 5)
+                if self.last_guiding_goal_dist is not None:
+                    # higher negative weight when moving away from goal (to avoid driving unnecessary circles when train in contin. action space)
+                    if (self.last_guiding_goal_dist - goal_in_robot_frame[0]) > 0 and goal_in_robot_frame[0] >= 2:
+                        w = 0.018*np.exp(1-current_time_step)
+                    elif goal_in_robot_frame[0] <2:
+                 
+                        w = -0.05*np.exp(1)
+
+                    reward = round(w, 5)
+                    self.curr_reward += reward
+
+                self.last_guiding_goal_dist = goal_in_robot_frame[0]
+
 
             # print("reward_goal_approached:  {}".format(reward))
-            self.curr_reward += reward
-        self.last_goal_dist = goal_in_robot_frame[0]
 
     def _reward_adult_safety_dist3(self, adult_in_robot_frame, punishment = 80):
         if adult_in_robot_frame.shape[0] != 0:

@@ -133,7 +133,7 @@ class ObstaclesManager:
             self.__remove_all_robo_obstacles(num_obstacles)
             self.spawn_random_robo_obstacles_in_world(num_obstacles)
         elif type_obstacle == 'static':
-            self.__remove_all_interactive_static_obstacles()
+            # self.__remove_all_interactive_static_obstacles()
             self.spawn_random_interactive_static_obstacles_in_world(num_obstacles)
         else:
             count_same_type = sum(
@@ -727,6 +727,7 @@ class ObstaclesManager:
                     msg.group_talking_probability = advanced_configs['group talking probability']
                     msg.talking_and_walking_probability = advanced_configs['talking and walking probability']
                     msg.requesting_service_probability= advanced_configs['requesting service probability']
+                    msg.requesting_guide_probability = advanced_configs['requesting guide probability']
                     msg.max_talking_distance = advanced_configs['max talking distance']
                     msg.max_servicing_radius = advanced_configs['max servicing radius']
                     msg.talking_base_time = advanced_configs['talking base time']

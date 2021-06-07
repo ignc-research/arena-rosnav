@@ -170,7 +170,7 @@ class MLP_HUMAN(nn.Module):
 
         # Policy network
         self.policy_net = nn.Sequential(
-            nn.Linear(feature_dim+_RS+33, 128),
+            nn.Linear(feature_dim+_RS+1+33, 128),
             nn.ReLU(),
             nn.Linear(128, 64),
             nn.ReLU(),
@@ -180,7 +180,7 @@ class MLP_HUMAN(nn.Module):
 
         # Value network
         self.value_net = nn.Sequential(
-            nn.Linear(feature_dim+_RS+33, 64),
+            nn.Linear(feature_dim+_RS+1+33, 64),
             nn.ReLU(),
             nn.Linear(64, 32),
             nn.ReLU(),
@@ -195,12 +195,14 @@ class MLP_HUMAN(nn.Module):
         """
         size=features.shape
         time=features[:, 0].reshape(size[0], -1)
-        body_x = self.body_net_laser(features[:, 1:_L+1])
-        robot_state=features[:, _L+1:_L+1+_RS]
-        humans_state=features[:, _L+1:_L+1+num_humans*human_state_size] 
-        robo_obstacles_state=features[:, _L+1+max_num_humans*human_state_size :_L+1+max_num_humans*human_state_size+num_robo_obstacles*robo_obstacle_state_size]   
+        flag_requesting_guide= features[:, 1].reshape(size[0], -1)
+        body_x = self.body_net_laser(features[:, 2:_L+2])
+        robot_state=features[:, _L+2:_L+2+_RS]
+        humans_state=features[:, _L+2:_L+2+num_humans*human_state_size] 
+        robo_obstacles_state=features[:, _L+2+max_num_humans*human_state_size :_L+2+max_num_humans*human_state_size+num_robo_obstacles*robo_obstacle_state_size]   
         human_robo_hidden=self.body_net_human(th.cat((humans_state, robo_obstacles_state), 1))
-        features_1 = th.cat((time, body_x), 1)
+        features_1 = th.cat((time,flag_requesting_guide), 1)
+        features_1 = th.cat((features_1, body_x), 1)
         features_2=th.cat((features_1, human_robo_hidden), 1)
         features=th.cat((features_2, robot_state), 1)
         return self.policy_net(features), self.value_net(features)
