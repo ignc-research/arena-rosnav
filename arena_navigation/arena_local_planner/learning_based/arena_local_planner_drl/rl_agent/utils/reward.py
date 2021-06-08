@@ -455,7 +455,7 @@ class RewardCalculator():
                     reward = round(w, 5)
                     self.curr_reward += reward
                     
-                    print(reward)
+                    
 
                 self.last_goal_dist = None
 
