@@ -264,8 +264,8 @@ class RewardCalculator():
                 w = reward_factor
             else:
                 w = penalty_factor
-            reward = round(
-                w*(self.last_goal_dist - goal_in_robot_frame[0]), 3)
+            reward = w*(self.last_goal_dist - goal_in_robot_frame[0])
+
 
             # print("reward_goal_approached:  {}".format(reward))
             self.curr_reward += reward
@@ -418,8 +418,8 @@ class RewardCalculator():
                         self.curr_reward -= punishment*np.exp(1-dist[0]/safe_dist_) 
                         #+ robot_velocity * 0.2
 
-                
-   
+        print(self.curr_reward)     
+
 
 
 
