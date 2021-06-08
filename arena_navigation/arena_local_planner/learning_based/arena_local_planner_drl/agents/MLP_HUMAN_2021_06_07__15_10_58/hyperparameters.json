@@ -1,5 +1,5 @@
 {
-    "agent_name": "MLP_HUMAN_2021_06_03__11_21_49",
+    "agent_name": "MLP_HUMAN_2021_06_07__15_10_58",
     "robot": "myrobot",
     "batch_size": 40960,
     "gamma": 0.98,
@@ -19,5 +19,5 @@
     "discrete_action_space": false,
     "normalize": true,
     "task_mode": "staged",
-    "curr_stage": 12
+    "curr_stage": 3
 }
