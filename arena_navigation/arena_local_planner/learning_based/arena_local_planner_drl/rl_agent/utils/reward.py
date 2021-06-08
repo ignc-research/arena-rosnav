@@ -418,7 +418,6 @@ class RewardCalculator():
                         self.curr_reward -= punishment*np.exp(1-dist[0]/safe_dist_) 
                         #+ robot_velocity * 0.2
 
-        print(self.curr_reward)     
 
 
 
