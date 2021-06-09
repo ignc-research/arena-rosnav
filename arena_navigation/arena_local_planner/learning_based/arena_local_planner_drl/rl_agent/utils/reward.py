@@ -392,7 +392,7 @@ class RewardCalculator():
                     if dist[0]<safe_dist_:
                         self.curr_reward -= punishment*np.exp(1-dist[0]/safe_dist_) 
                         #+ robot_velocity * 0.2
-
+        # print( self.curr_reward)
             
     def  _reward_robot_obstacles_safety_dist_all(self, robot_obstacles_in_robot_frame, robot_velocity):
         ### split the array into multiple array depending on type 
@@ -472,7 +472,7 @@ class RewardCalculator():
                     else:
                         w = -0.03
                     if goal_in_robot_frame[3] >1.5 :
-                        w = w - 0.35
+                        w = w - 0.05 * goal_in_robot_frame[3]
                     reward = round(w, 5)
                     
                     self.curr_reward += reward
