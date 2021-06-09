@@ -191,19 +191,34 @@ class ObservationCollector():
             scan = self._scan.ranges.astype(np.float32)
         else:
             scan = np.ones(self._laser_num_beams, dtype=float)*100
-        
+      
+        self.currentgoal =  Pose2D()
+        self.currentgoal.x =  self._subgoal.x
+        self.currentgoal.y =  self._subgoal.y
+        self.currentgoal.theta =  self._subgoal.theta
+
+        self.rho_to_guide = 0
+        self.theta_to_guide= 0
+
         self.flag_requesting_guide = 0
         if self._human_behavior.size > 0 and 'StateRequestingGuide' in self._human_behavior: 
             index_agent_requesting_guide =numpy.where(self._human_behavior== 'StateRequestingGuide')
             pos = self._human_position[index_agent_requesting_guide[0]][0]
-            self._subgoal.x = pos.x
-            self._subgoal.y = pos.y
+            self.currentgoal.x = pos.x
+            self.currentgoal.y = pos.y
+            self.currentgoal.theta = pos.theta
             self.flag_requesting_guide = 1
+        if self._human_behavior.size > 0 and 'StateFollowingGuide' in self._human_behavior: 
+            index_agent_following_guide =numpy.where(self._human_behavior== 'StateFollowingGuide')
+            pos = self._human_position[index_agent_following_guide[0]][0]
+            self.rho_to_guide, self.theta_to_guide = ObservationCollector._get_pose_in_robot_frame(pos, self._robot_pose)
+            self.flag_requesting_guide = 2
+        
 
-
+       
         #claculating diffrent robot infos 
-        rho, theta = ObservationCollector._get_pose_in_robot_frame(self._subgoal, self._robot_pose)
-        self.rot=np.arctan2(self._subgoal.y - self._robot_pose.y, self._subgoal.x - self._robot_pose.x)
+        rho, theta = ObservationCollector._get_pose_in_robot_frame(self.currentgoal, self._robot_pose)
+        self.rot=np.arctan2(self.currentgoal.y - self._robot_pose.y, self.currentgoal.x - self._robot_pose.x)
         self.robot_vx = self._robot_vel.linear.x * np.cos(self.rot) + self._robot_vel.linear.y * np.sin(self.rot)
         self.robot_vy=self._robot_vel.linear.y* np.cos(self.rot) - self._robot_vel.linear.x * np.sin(self.rot)
         self.robot_self_state=[self._robot_pose.x, self._robot_pose.y, self.robot_vx, self.robot_vy,
@@ -212,7 +227,7 @@ class ObservationCollector():
         obs_dict = {}
         obs_dict["robot_velocity"]= math.sqrt(self._robot_vel.linear.x*self._robot_vel.linear.x+self._robot_vel.linear.y*self._robot_vel.linear.y)
         obs_dict["laser_scan"] = scan
-        obs_dict['goal_in_robot_frame'] = [rho,theta,self.flag_requesting_guide]
+        obs_dict['goal_in_robot_frame'] = [rho,theta,self.flag_requesting_guide,self.rho_to_guide,self.theta_to_guide]
         # initlaising array with dimensions an filling them up with coordinate of agents and rho(density)and theta (angle)
         count_observable_humans=0  
         obs_dict['human_coordinates_in_robot_frame']= []
