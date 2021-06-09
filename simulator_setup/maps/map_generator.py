@@ -69,8 +69,8 @@ def insert_root_node(map,tree): # create root node in center of map
     tree.append(root_node)
 
 def sample(map,corridor_radius): # sample position from map within boundary and leave tolerance for corridor width
-    random_x = np.random.choice(range(corridor_radius+1,map.shape[0]-corridor_radius,1))
-    random_y = np.random.choice(range(corridor_radius+1,map.shape[1]-corridor_radius,1))
+    random_x = np.random.choice(range(corridor_radius+2,map.shape[0]-corridor_radius-1,1))
+    random_y = np.random.choice(range(corridor_radius+2,map.shape[1]-corridor_radius-1,1))
     return [random_x,random_y]
 
 def find_nearest_node(random_position,tree): # find nearest node according to L1 norm
