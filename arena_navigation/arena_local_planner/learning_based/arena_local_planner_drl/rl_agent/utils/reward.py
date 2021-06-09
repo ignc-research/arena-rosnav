@@ -471,8 +471,8 @@ class RewardCalculator():
                         w = -0.05*np.exp(1)
                     else:
                         w = -0.03
-                    if goal_in_robot_frame[3] >2.8 :
-                        w = w - 0.15
+                    if goal_in_robot_frame[3] >1.5 :
+                        w = w - 0.35
                     reward = round(w, 5)
                     
                     self.curr_reward += reward
