@@ -196,12 +196,13 @@ class StagedRandomTask(RandomTask):
 
         if self._curr_stage > 1:
 
-            rospy.set_param("/_remove_obstacles_stage", self._curr_stage +1)
+
+
+            self._curr_stage = self._curr_stage - 1
             rospy.set_param("/_initiating_stage", True) 
             rospy.set_param("/_reseting_obstacles", True) 
             rospy.set_param("/last_stage_reached", False)
-
-            self._curr_stage = self._curr_stage - 1
+            rospy.set_param("/_remove_obstacles_stage", self._curr_stage +1)
             self._initiate_stage()
             rospy.set_param("/_reseting_obstacles", False) 
             if self.ns == "eval_sim":
