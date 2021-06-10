@@ -201,7 +201,10 @@ class ObservationCollector():
         self.robot_vy_to_guide = -1
  
         self.flag_requesting_guide = 0
-
+        self.currentgoal = Pose2D()
+        self.currentgoal.x = self._subgoal.x
+        self.currentgoal.y = self._subgoal.y
+        self.currentgoal.theta =self._subgoal.theta
         if self._human_behavior.size > 0 and 'StateRequestingGuide' in self._human_behavior: 
             index_agent_requesting_guide =numpy.where(self._human_behavior== 'StateRequestingGuide')
             pos = self._human_position[index_agent_requesting_guide[0]][0]
@@ -210,6 +213,9 @@ class ObservationCollector():
             self.robot_vx_to_guide = self._robot_vel.linear.x * np.cos(self.rot_to_guide) + self._robot_vel.linear.y * np.sin(self.rot_to_guide)
             self.robot_vy_to_guide = self._robot_vel.linear.y * np.cos(self.rot_to_guide) + self._robot_vel.linear.x * np.sin(self.rot_to_guide)
             self.flag_requesting_guide = 1
+            self.currentgoal.x = pos.x
+            self.currentgoal.y = pos.y
+            self.currentgoal.theta = pos.theta
 
         if self._human_behavior.size > 0 and 'StateFollowingGuide' in self._human_behavior: 
             index_agent_following_guide =numpy.where(self._human_behavior== 'StateFollowingGuide')
@@ -225,8 +231,8 @@ class ObservationCollector():
   
        
         #claculating diffrent robot infos 
-        rho, theta = ObservationCollector._get_pose_in_robot_frame(self._subgoal, self._robot_pose)
-        self.rot=np.arctan2(self._subgoal.y - self._robot_pose.y, self._subgoal.x - self._robot_pose.x)
+        rho, theta = ObservationCollector._get_pose_in_robot_frame(self.currentgoal, self._robot_pose)
+        self.rot=np.arctan2(self.currentgoal.y - self._robot_pose.y, self.currentgoal.x - self._robot_pose.x)
         self.robot_vx = self._robot_vel.linear.x * np.cos(self.rot) + self._robot_vel.linear.y * np.sin(self.rot)
         self.robot_vy=self._robot_vel.linear.y* np.cos(self.rot) - self._robot_vel.linear.x * np.sin(self.rot)
         self.robot_self_state=[self._robot_pose.x, self._robot_pose.y, self.robot_vx, self.robot_vy,
