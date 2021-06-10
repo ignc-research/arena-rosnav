@@ -188,7 +188,7 @@ class ObservationCollector():
         rho, theta = ObservationCollector._get_pose_in_robot_frame(self._subgoal, self._robot_pose)
         self.rot=np.arctan2(self._subgoal.y - self._robot_pose.y, self._subgoal.x - self._robot_pose.x)
         self.robot_vx = self._robot_vel.linear.x * np.cos(self.rot) + self._robot_vel.linear.y * np.sin(self.rot)
-        self.robot_vy=self._robot_vel.linear.y* np.cos(self.rot) - self._robot_vel.linear.x * np.sin(self.rot)
+        self.robot_vy = self._robot_vel.linear.y * np.cos(self.rot) - self._robot_vel.linear.x * np.sin(self.rot)
         self.robot_self_state=[self._robot_pose.x, self._robot_pose.y, self.robot_vx, self.robot_vy,
                                                      self._robot_pose.theta, self._robot_vel.angular.z, self._radius_robot, rho, theta]
         merged_obs = np.hstack([np.array([self.time_step]), scan])
@@ -202,11 +202,11 @@ class ObservationCollector():
 
         agent_massage_is_none = False
         for pos in self._human_position: 
-            if pos  is None  : 
-                print(self.ns_prefix,'´´´´´´´´´´ERORR got Agent Massage with None´´´´´´´´´')
+            if pos is None  : 
+                print(self.ns_prefix,'´´´´´´´´´´ERORR got Agent Message with None´´´´´´´´´')
                 agent_massage_is_none = True
-            elif math.isnan(pos.x )  == True  : 
-                print(self.ns_prefix,'´´´´´´´´´´ERORR got Agent Massage with Nan´´´´´´´´´')
+            elif math.isnan(pos.x ) == True  : 
+                print(self.ns_prefix,'´´´´´´´´´´ERORR got Agent Message with Nan´´´´´´´´´')
                 agent_massage_is_none = True
 
 
@@ -232,10 +232,6 @@ class ObservationCollector():
             obs_dict['human_coordinates_in_robot_frame']=coordinate_humans
             obs_dict['human_type']=self._human_type
             obs_dict['human_behavior']=self._human_behavior
-
-
-            
-            
             
             for i, ty in enumerate(self._human_type):
                 # filter the obstacles which are not in the visible range of the robot
@@ -256,15 +252,13 @@ class ObservationCollector():
                     obs=np.array(self.robot_self_state+[rho_humans[i], theta_humans[i]]+state+[safe_dist_ ,_radius,
                                                     _radius+safe_dist_+self._radius_robot,_human_behavior_token])
                     
-                    merged_obs = np.hstack([merged_obs,obs])
-        
-     
+                    merged_obs = np.hstack([merged_obs,obs])     
  
         if count_observable_humans==0:
             obs_empty=np.array(self.robot_self_state+[0]*10)
             merged_obs = np.hstack([merged_obs,obs_empty])
             count_observable_humans=count_observable_humans+1
-        while count_observable_humans < 5 and count_observable_humans >0:
+        while count_observable_humans < 6 and count_observable_humans >0:
             obs_copy=np.copy(merged_obs[-count_observable_humans*self.human_state_size:])
             merged_obs = np.hstack([merged_obs, obs_copy])
             count_observable_humans=count_observable_humans*2
@@ -358,9 +352,7 @@ class ObservationCollector():
     def _get_pose_in_robot_frame(agent_pos: Pose2D, robot_pos: Pose2D):
         y_relative = agent_pos.y - robot_pos.y
         x_relative = agent_pos.x - robot_pos.x
-        rho =  np.linalg.norm([y_relative, x_relative])
-        theta = 0
-     
+        rho =  np.linalg.norm([y_relative, x_relative])     
         theta = (np.arctan2(y_relative, x_relative) -
                 robot_pos.theta+5*np.pi) % (2*np.pi)-np.pi
     
@@ -370,9 +362,7 @@ class ObservationCollector():
     def _get_pose_in_robot_frame_for_humans(agent_pos: Pose2D, robot_pos: Pose2D):
         y_relative = agent_pos.y - robot_pos.y
         x_relative = agent_pos.x - robot_pos.x
-        rho =  np.linalg.norm([y_relative, x_relative])
-        theta = 0
-     
+        rho =  np.linalg.norm([y_relative, x_relative])     
         theta = (np.arctan2(y_relative, x_relative) -
                 robot_pos.theta+5*np.pi) % (2*np.pi)-np.pi
     
@@ -383,7 +373,6 @@ class ObservationCollector():
         y_relative = agent_pos.y - robot_pos.y
         x_relative = agent_pos.x - robot_pos.x
         rho =  np.linalg.norm([y_relative, x_relative])
-        theta = 0
      
         theta = (np.arctan2(y_relative, x_relative) -
                 robot_pos.theta+5*np.pi) % (2*np.pi)-np.pi
@@ -567,14 +556,14 @@ class ObservationCollector():
 
     def read_saftey_distance_parameter_from_yaml(self):
         
-        file_location = os.path.join(rospkg.RosPack().get_path('simulator_setup'), 'saftey_distance_parameter.yaml')
+        file_location = os.path.join(rospkg.RosPack().get_path('simulator_setup'), 'safety_distance_parameter.yaml')
         
         
         if os.path.isfile(file_location):
             with open(file_location, "r") as file:
                 saftey_distance_parameter = yaml.load(file, Loader=yaml.FullLoader)       
         assert isinstance(
-             saftey_distance_parameter, dict), "'saftey_distance_parameter.yaml' has wrong fromat! Has to encode dictionary!"
+             saftey_distance_parameter, dict), "'safety_distance_parameter.yaml' has wrong fromat! Has to encode dictionary!"
                 
         return saftey_distance_parameter
 
