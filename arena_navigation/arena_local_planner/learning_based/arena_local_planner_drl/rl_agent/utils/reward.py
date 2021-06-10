@@ -418,7 +418,7 @@ class RewardCalculator():
                         self.curr_reward -= punishment*np.exp(1-dist[0]/safe_dist_) 
                         #+ robot_velocity * 0.2
 
-
+        # print(self.curr_reward)
 
 
     def _reward_goal_approached3(self, goal_in_robot_frame, current_time_step):
@@ -442,9 +442,9 @@ class RewardCalculator():
             elif goal_in_robot_frame[2] == 1 :
                 if self.last_guiding_goal_dist is not None:
                     # higher negative weight when moving away from goal (to avoid driving unnecessary circles when train in contin. action space)
-                    if (self.last_guiding_goal_dist - goal_in_robot_frame[3]) > 0 and goal_in_robot_frame[3] >= 2:
+                    if (self.last_guiding_goal_dist - goal_in_robot_frame[3]) > 0 and goal_in_robot_frame[3] >= 3:
                         w = 0.018*np.exp(1-current_time_step)
-                    elif (self.last_guiding_goal_dist - goal_in_robot_frame[3] ) < 0 or  goal_in_robot_frame[3] <2:
+                    elif (self.last_guiding_goal_dist - goal_in_robot_frame[3] ) < 0 or  goal_in_robot_frame[3] <3:
                  
                         w = -0.05*np.exp(1)
                     else :
@@ -470,12 +470,11 @@ class RewardCalculator():
                         w = -0.05*np.exp(1)
                     else:
                         w = -0.03
-                    if goal_in_robot_frame[3] >1.5 :
+                    if goal_in_robot_frame[3] >3 :
                         w = w - 0.015 * goal_in_robot_frame[3]
                     reward = round(w, 5)
                     
                     self.curr_reward += reward
-
                 self.last_goal_dist = goal_in_robot_frame[0]
 
 
