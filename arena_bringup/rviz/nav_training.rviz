@@ -9,6 +9,7 @@ Panels:
         - /my_robot1/Namespaces1
         - /TF1/Frames1
         - /Walls1/MarkerArray1
+        - /polygons1
       Splitter Ratio: 0.6526610255241394
     Tree Height: 796
   - Class: rviz/Selection
@@ -578,7 +579,7 @@ Visualization Manager:
           Marker Topic: /sim_1/flatland_server/debug/model/person_19
           Name: MarkerArray
           Namespaces:
-            {}
+            "": true
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -594,7 +595,7 @@ Visualization Manager:
           Marker Topic: /sim_1/flatland_server/debug/model/person_20
           Name: MarkerArray
           Namespaces:
-            {}
+            "": true
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -602,7 +603,7 @@ Visualization Manager:
           Marker Topic: /sim_1/flatland_server/debug/model/person_21
           Name: MarkerArray
           Namespaces:
-            {}
+            "": true
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -744,6 +745,14 @@ Visualization Manager:
         - Class: rviz/MarkerArray
           Enabled: true
           Marker Topic: /sim_1/flatland_server/debug/model/polygon_6
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /sim_1/flatland_server/debug/model/polygon_7
           Name: MarkerArray
           Namespaces:
             "": true

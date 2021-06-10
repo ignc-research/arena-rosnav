@@ -8,9 +8,7 @@ Panels:
         - /Grid1
         - /my_robot1/Namespaces1
         - /TF1/Frames1
-        - /human1/MarkerArray1
-        - /human1/MarkerArray4
-        - /human1/MarkerArray7
+        - /human1
       Splitter Ratio: 0.6526610255241394
     Tree Height: 796
   - Class: rviz/Selection
@@ -569,10 +567,10 @@ Visualization Manager:
           Value: true
         - Class: rviz/MarkerArray
           Enabled: true
-          Marker Topic: /sim_1/flatland_server/debug/model/person_19
+          Marker Topic: /eval_sim/flatland_server/debug/model/person_19
           Name: MarkerArray
           Namespaces:
-            {}
+            "": true
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -585,18 +583,18 @@ Visualization Manager:
           Value: true
         - Class: rviz/MarkerArray
           Enabled: true
-          Marker Topic: /sim_1/flatland_server/debug/model/person_20
+          Marker Topic: /eval_sim/flatland_server/debug/model/person_20
           Name: MarkerArray
           Namespaces:
-            {}
+            "": true
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
           Enabled: true
-          Marker Topic: /sim_1/flatland_server/debug/model/person_21
+          Marker Topic: /eval_sim/flatland_server/debug/model/person_21
           Name: MarkerArray
           Namespaces:
-            {}
+            "": true
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -756,7 +754,7 @@ Visualization Manager:
           Marker Topic: /eval_sim/flatland_server/debug/model/polygon_8
           Name: MarkerArray
           Namespaces:
-            "": true
+            {}
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -764,7 +762,7 @@ Visualization Manager:
           Marker Topic: /eval_sim/flatland_server/debug/model/polygon_9
           Name: MarkerArray
           Namespaces:
-            "": true
+            {}
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -772,7 +770,7 @@ Visualization Manager:
           Marker Topic: /eval_sim/flatland_server/debug/model/polygon_10
           Name: MarkerArray
           Namespaces:
-            "": true
+            {}
           Queue Size: 100
           Value: true
       Enabled: true
