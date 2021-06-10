@@ -11,15 +11,15 @@ from stable_baselines3.common.policies import ActorCriticPolicy
 from stable_baselines3.common.torch_layers import BaseFeaturesExtractor
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.tools.policy_sarl_utils import SARL
 
-#########################################
+#############################################
 ###Hyperparameters for policies##############
-#########################################
-_RS = 9                                    # robot state size 9
-self_state_dim = 9               # alias for _RS
+#############################################
+_RS = 9                      # robot state size 9
+self_state_dim = 9           # alias for _RS
 num_humans =  6              # max considered human number
-human_state_size= 19      #size of human info 19
-_HS= 19*21                              # human state size
-HIDDEN_SHAPE_LSTM=32 # hidden size of lstm
+human_state_size= 25      #size of human info 19
+# _HS= 25*21                              # human state size
+HIDDEN_SHAPE_LSTM=32  # hidden size of lstm
 HIDDEN_SHAPE_GRU=32   # hidden size of gru
 
 
@@ -160,7 +160,7 @@ class MLP_HUMAN(nn.Module):
             nn.ReLU(),
             nn.Linear(128, feature_dim),
             nn.ReLU()
-        ).to('cuda')
+        ).to("cuda:0")
         self.body_net_human = nn.Sequential(
             nn.Linear(human_state_size*num_humans, 128),
             nn.ReLU(),
@@ -168,7 +168,7 @@ class MLP_HUMAN(nn.Module):
             nn.ReLU(),
             nn.Linear(96, 32),
             nn.ReLU()
-        ).to('cuda')
+        ).to("cuda:0")
 
         # Policy network
         self.policy_net = nn.Sequential(
@@ -178,7 +178,7 @@ class MLP_HUMAN(nn.Module):
             nn.ReLU(),
             nn.Linear(64, last_layer_dim_pi),
             nn.ReLU(),
-        ).to('cuda')
+        ).to("cuda:0")
 
         # Value network
         self.value_net = nn.Sequential(
@@ -188,7 +188,7 @@ class MLP_HUMAN(nn.Module):
             nn.ReLU(),
             nn.Linear(32, last_layer_dim_vf),
             nn.ReLU()
-        ).to('cuda')
+        ).to("cuda:0")
 
     def forward(self, features: th.Tensor) -> Tuple[th.Tensor, th.Tensor]:
         """
@@ -389,9 +389,9 @@ class MLP_LSTM(nn.Module):
             nn.ReLU(),
             nn.Linear(256, feature_dim),
             nn.ReLU()
-        ).to('cuda')
+        ).to("cuda:0")
 
-        self.body_net_lstm = nn.LSTM(input_size=human_state_size, hidden_size=HIDDEN_SHAPE_LSTM).to('cuda')
+        self.body_net_lstm = nn.LSTM(input_size=human_state_size, hidden_size=HIDDEN_SHAPE_LSTM).to("cuda:0")
 
         # Policy network
         self.policy_net = nn.Sequential(
@@ -401,7 +401,7 @@ class MLP_LSTM(nn.Module):
             nn.ReLU(),
             nn.Linear(64, last_layer_dim_pi),
             nn.ReLU()
-        ).to('cuda')
+        ).to("cuda:0")
 
         # Value network
         self.value_net = nn.Sequential(
@@ -411,7 +411,7 @@ class MLP_LSTM(nn.Module):
             nn.ReLU(),
             nn.Linear(64, last_layer_dim_vf),
             nn.ReLU()
-        ).to('cuda')
+        ).to("cuda:0")
 
     def forward(self, features: th.Tensor) -> Tuple[th.Tensor, th.Tensor]:
         """
@@ -490,9 +490,9 @@ class MLP_SARL(nn.Module):
             nn.ReLU(),
             nn.Linear(256, feature_dim),
             nn.ReLU()
-        ).to('cuda')
+        ).to("cuda:0")
 
-        # self.body_net_gru = nn.GRU(input_size=human_state_size, hidden_size=HIDDEN_SHAPE_GRU).to('cuda')
+        # self.body_net_gru = nn.GRU(input_size=human_state_size, hidden_size=HIDDEN_SHAPE_GRU).to("cuda:0")
 
         # # Policy network
         # self.policy_net = nn.Sequential(
@@ -502,11 +502,11 @@ class MLP_SARL(nn.Module):
         #     nn.ReLU(),
         #     nn.Linear(64, last_layer_dim_pi),
         #     nn.ReLU()
-        # ).to('cuda')
+        # ).to("cuda:0")
 
         sarl=SARL()
         sarl.build_net()
-        sarl.set_device('cuda')
+        sarl.set_device("cuda:0")
         self.body_net_human=sarl.model
         # Policy network
         self.policy_net = nn.Sequential(
@@ -516,7 +516,7 @@ class MLP_SARL(nn.Module):
             nn.ReLU(),
             nn.Linear(64, last_layer_dim_pi),
             nn.ReLU()
-        ).to('cuda')
+        ).to("cuda:0")
 
         # #Value network
         self.value_net = nn.Sequential(
@@ -526,7 +526,7 @@ class MLP_SARL(nn.Module):
             nn.ReLU(),
             nn.Linear(64, last_layer_dim_pi),
             nn.ReLU()
-        ).to('cuda')
+        ).to("cuda:0")
 
     def forward(self, features: th.Tensor)-> Tuple[th.Tensor, th.Tensor]:
         """
@@ -612,9 +612,9 @@ class MLP_GRU(nn.Module):
             nn.ReLU(),
             nn.Linear(256, feature_dim),
             nn.ReLU()
-        ).to('cuda')
+        ).to("cuda:0")
 
-        self.body_net_gru = nn.GRU(input_size=human_state_size, hidden_size=HIDDEN_SHAPE_GRU).to('cuda')
+        self.body_net_gru = nn.GRU(input_size=human_state_size, hidden_size=HIDDEN_SHAPE_GRU).to("cuda:0")
 
         # Policy network
         self.policy_net = nn.Sequential(
@@ -624,7 +624,7 @@ class MLP_GRU(nn.Module):
             nn.ReLU(),
             nn.Linear(64, last_layer_dim_pi),
             nn.ReLU()
-        ).to('cuda')
+        ).to("cuda:0")
 
         # Value network
         self.value_net = nn.Sequential(
@@ -634,7 +634,7 @@ class MLP_GRU(nn.Module):
             nn.ReLU(),
             nn.Linear(64, last_layer_dim_vf),
             nn.ReLU()
-        ).to('cuda')
+        ).to("cuda:0")
 
     def forward(self, features: th.Tensor) -> Tuple[th.Tensor, th.Tensor]:
         """
