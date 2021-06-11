@@ -65,8 +65,8 @@ class ObservationCollector():
         self._robot_pose = Pose2D()
         self._robot_vel = Twist()
         self._subgoal = Pose2D()
-        self._globalplan = np.array([])
         self._globalGoal = PoseStamped()
+        self._globalplan = np.array([])
 
         # train mode?
         self._is_train_mode = rospy.get_param("/train_mode")
@@ -210,7 +210,7 @@ class ObservationCollector():
 
         except rospy.ServiceException as e:
             rospy.logdebug("step Service call failed: %s" % e)
-
+   
     def callback_globalGoal(self,msg_Subgoal):
         self._globalGoal=self.process_subgoal_msg(msg_Subgoal)    
         return
@@ -255,7 +255,7 @@ class ObservationCollector():
     def process_robot_state_msg(self, msg_Odometry):
         pose3d = msg_Odometry.pose.pose
         twist = msg_Odometry.twist.twist
-        return self.pose3D_to_pose2D(pose3d), twist
+        return self.pose3D_to_pose2D(pose3d), twist 
 
     def process_pose_msg(self, msg_PoseWithCovarianceStamped):
         # remove Covariance

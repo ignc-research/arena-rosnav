@@ -116,21 +116,24 @@ class wp3Env(gym.Env):
             rule=reward_fnc, extended_eval=self._extended_eval)
         #subscriber to infer callback and out of sleep loop
         #sub robot position and sub global goal 
-        self._robot_state_sub = rospy.Subscriber('/odom', Odometry, self.cbRobotPosition)            # for robot orientation
-        self._ref_wp_sub = rospy.Subscriber('/plan_manager/subgoal', PoseStamped, self.cbRefWp)                   # for subgoal position (reference point for circle)
-        self._globalGoal = rospy.Subscriber('/goal', PoseStamped, self.cbGlobalGoal)                 # to set wp on global goal if circle touces it
-        self._globalPlan_sub = rospy.Subscriber('/plan_manager/globalPlan', nav_Path, self.cbglobalPlan)
-        self._twist_sub = rospy.Subscriber('/cmd_vel', Twist, self.cbTwist)                          # to calculate distance traveled 
+        self._robot_state_sub = rospy.Subscriber(f'{self.ns_prefix}odom', Odometry, self.cbRobotPosition)            # for robot orientation
+        self._ref_wp_sub = rospy.Subscriber(f'{self.ns_prefix}subgoal', PoseStamped, self.cbRefWp)                   # for subgoal position (reference point for circle)
+        self._globalGoal = rospy.Subscriber(f'{self.ns_prefix}goal', PoseStamped, self.cbGlobalGoal)                 # to set wp on global goal if circle touces it
+        self._globalPlan_sub = rospy.Subscriber(f'{self.ns_prefix}globalPlan', nav_Path, self.cbglobalPlan)
+        self._twist_sub = rospy.Subscriber(f'{self.ns_prefix}cmd_vel', Twist, self.cbTwist)                          # to calculate distance traveled 
         self._wp4train_reached =False
+
         # action agent publisher
         if self._is_train_mode:
-            self.agent_action_pub = rospy.Publisher(f'{self.ns_prefix}cmd_vel', PoseStamped, queue_size=1)
+            self.agent_action_pub = rospy.Publisher(f'{self.ns_prefix}wp4train', PoseStamped, queue_size=1)
         else:
-            self.agent_action_pub = rospy.Publisher(f'{self.ns_prefix}cmd_vel_pub', PoseStamped, queue_size=1)      # agent publishes a waypoint on a circle
-        self.circle_pub = rospy.Publisher('/zViz', nav_Path, queue_size=1)                               # create the circle on which the wp are placed for visualization
+            self.agent_action_pub = rospy.Publisher(f'{self.ns_prefix}wp4train_pub', PoseStamped, queue_size=1)
+  
+        # visualization publisher         
+        self.circle_pub = rospy.Publisher(f'{self.ns_prefix}zViz', nav_Path, queue_size=1)                               # create the circle on which the wp are placed for visualization
         
         # service clients
-        self._is_train_mode = rospy.get_param("train_mode")
+        self._is_train_mode = rospy.get_param("/train_mode")
         if self._is_train_mode:
             self._service_name_step = f'{self.ns_prefix}step_world'
             self._sim_step_client = rospy.ServiceProxy(
@@ -232,7 +235,6 @@ class wp3Env(gym.Env):
          return rho,theta
 
     def _pub_action(self, action):
-
         _, obs_dict = self.observation_collector.get_observations()
         dist_robot_goal = obs_dict['goal_in_robot_frame']
         dist_global_sub = obs_dict['global_in_subgoal_frame']
@@ -324,6 +326,12 @@ class wp3Env(gym.Env):
                 print(angle_grad)
                 
                 self._action_count += 1
+    def _translate_disc_action(self, action):
+        new_action = np.array([])
+        new_action = np.append(new_action, self._discrete_acitons[action]['linear'])
+        new_action = np.append(new_action, self._discrete_acitons[action]['angular'])    
+            
+        return new_action
 
     def step(self, action):
         """
@@ -331,6 +339,8 @@ class wp3Env(gym.Env):
                         1   -   collision with obstacle
                         2   -   goal reached
         """
+        if self._is_action_space_discrete:
+            action = self._translate_disc_action(action)
         self._pub_action(action)
         self._steps_curr_episode += 1
 
@@ -353,9 +363,10 @@ class wp3Env(gym.Env):
             robot_pose=obs_dict['robot_pose'], 
             global_plan=ObservationCollector.process_global_plan_msg(self._globalPlan), 
             action=new_action, 
-            goal_len=self.goal_len, 
-            action_count= self._action_count,
-            subgoal=self._action_msg.pose.position)
+            #goal_len=self.goal_len, 
+            #action_count= self._action_count,
+            #subgoal=self._action_msg.pose.position
+            )
 
         done = reward_info['is_done']
         print("reward:  {}".format(reward))
@@ -388,11 +399,11 @@ class wp3Env(gym.Env):
         return merged_obs, reward, done, info
 
     def reset(self):
-        self.clear_costmaps()
+        #self.clear_costmaps()
 
         # set task
         # regenerate start position end goal position of the robot and change the obstacles accordingly
-        self.agent_action_pub.publish(PoseStamped())
+        #self.agent_action_pub.publish(Twist())
         if self._is_train_mode:
             self._sim_step_client()
         self.task.reset()
@@ -400,14 +411,13 @@ class wp3Env(gym.Env):
         self._steps_curr_episode = 0
         self.firstTime = 0
         self._action_count = 0
-
         # extended eval info
         if self._extended_eval:
             self._last_robot_pose = None
             self._distance_travelled = 0
             self._safe_dist_counter = 0
             self._collisions = 0
-
+        self._is_train_mode = True
         obs, _ = self.observation_collector.get_observations()
         return obs  # reward, done, info can't be included
 
@@ -425,7 +435,7 @@ def _update_eval_statistics(self, obs_dict: dict, reward_info: dict):
         """
         # distance travelled
         if self._last_robot_pose is not None:
-            self._distance_travelled += FlatlandEnv.get_distance(
+            self._distance_travelled += wp3Env.get_distance(
                 self._last_robot_pose, obs_dict['robot_pose'])
 
         # collision detector
@@ -451,7 +461,7 @@ def get_distance(pose_1: Pose2D, pose_2: Pose2D):
 
 if __name__ == '__main__':
 
-    rospy.init_node('wp3_gym_env', anonymous=True)
+    rospy.init_node('wp3_gym_env', anonymous=True, disable_signals=False)
     print("start")
 
     wp3_env = wp3Env()

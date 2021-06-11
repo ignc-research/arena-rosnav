@@ -54,7 +54,7 @@ class NN_tb3():
         # publishers  
         self.pub_twist = rospy.Publisher('/cmd_vel',Twist,queue_size=1)
         self.sub_pose = rospy.Subscriber('/odom',Odometry,self.cbPose)
-        self.sub_subgoal = rospy.Subscriber('/subgoal',PoseStamped, self.cbSubGoal)
+        self.sub_subgoal = rospy.Subscriber('/wp4train',PoseStamped, self.cbSubGoal)
         self.laser_sub = rospy.Subscriber('/scan', LaserScan, self.laser_scan_callback)
 
         # control timer
