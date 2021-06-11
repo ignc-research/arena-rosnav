@@ -417,7 +417,6 @@ class wp3Env(gym.Env):
             self._distance_travelled = 0
             self._safe_dist_counter = 0
             self._collisions = 0
-        self._is_train_mode = True
         obs, _ = self.observation_collector.get_observations()
         return obs  # reward, done, info can't be included
 
