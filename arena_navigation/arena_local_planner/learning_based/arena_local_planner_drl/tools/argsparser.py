@@ -24,6 +24,7 @@ def training_args(parser):
 def run_agent_args(parser):
     parser.add_argument('--no-gpu', action='store_true', help='disables gpu for training')
     parser.add_argument('--load', type=str, metavar="[agent name]", help='agent to be loaded for training')
+    parser.add_argument('--log', action='store_true', help='store log file with episode information')
     parser.add_argument('-s', '--scenario', type=str, metavar="[scenario name]", default='scenario1', help='name of scenario file for deployment')
     parser.add_argument('-v', '--verbose', choices=['0', '1'], default='1')
 
