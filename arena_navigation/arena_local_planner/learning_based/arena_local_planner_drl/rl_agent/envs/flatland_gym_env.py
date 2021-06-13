@@ -137,13 +137,17 @@ class FlatlandEnv(gym.Env):
             self._sim_step_client = rospy.ServiceProxy(
             self._service_name_step, StepWorld)
         
+        self.useDangerZone = self.read_saftey_distance_parameter_from_yaml()['useDangerZone']['enable']
+        
 
 
         self._steps_curr_episode = 0
+        self._time_curr_episode = 0.0
         self._episode = 0
         self._max_steps_per_episode = max_steps_per_episode
         #store the obeservations from the last step for spawning the robot
         self.last_obs_dict=None
+        self.last_robot_pose=None
  
     def setup_by_configuration(self, robot_yaml_path: str, settings_yaml_path: str):
         """get the configuration from the yaml file, including robot radius, discrete action space and continuous action space.
@@ -212,28 +216,38 @@ class FlatlandEnv(gym.Env):
         done_reasons:   0   -   exceeded max steps
                         1   -   collision with obstacle
                         2   -   goal reached
-                        >3   -   too close to human
+                        >3  -   too close to human
         """
         if self._is_action_space_discrete:
             action = self._translate_disc_action(action)
         self._pub_action(action)
         #print(f"Linear: {action[0]}, Angular: {action[1]}")
-        self._steps_curr_episode += 1
-        s = time.time()
-        #tell the robot how long it has passed
-        self.observation_collector.set_timestep(self._steps_curr_episode/self._max_steps_per_episode)
         # wait for new observations
         while  rospy.get_param("/_initiating_stage") == True : 
             print('################ waiting for _initiating_stage #######################')
             time.sleep(1)
-        merged_obs, obs_dict = self.observation_collector.get_observations()
-
+        merged_obs, obs_dict, i_tt = self.observation_collector.get_observations()
+        self._steps_curr_episode += i_tt[0]
+        self._time_curr_episode +=i_tt[1]
+        
+        #tell the robot how long it has passed
+        self.observation_collector.set_timestep(self._steps_curr_episode/self._max_steps_per_episode)
+        if self.last_robot_pose !=None:
+            self.path_travelled += np.linalg.norm([self.last_robot_pose.x-obs_dict['robot_pose'].x,self.last_robot_pose.y-obs_dict['robot_pose'].y])
 
         # calculate reward
-        reward, reward_info = self.reward_calculator.get_reward(
+        if not self.useDangerZone:
+            reward, reward_info = self.reward_calculator.get_reward(
+                obs_dict['laser_scan'], obs_dict['goal_in_robot_frame'], 
+                human_obstacles_in_robot_frame=obs_dict['human_obstacles_in_robot_frame'], 
+                robot_obstacles_in_robot_frame=obs_dict['robot_obstacles_in_robot_frame'],
+                episode_time=self._steps_curr_episode/self._max_steps_per_episode
+            )
+        else:
+            reward, reward_info = self.reward_calculator.get_reward(
             obs_dict['laser_scan'], obs_dict['goal_in_robot_frame'], 
-            obs_dict['human_obstacles_in_robot_frame'], obs_dict['robot_obstacles_in_robot_frame'],self._steps_curr_episode/self._max_steps_per_episode
-        )
+            isInDangerZone=obs_dict['danger_zone'],  episode_time=self._steps_curr_episode/self._max_steps_per_episode ,
+            RF_and_Dc=obs_dict['RF_and_Dc']) 
         done = reward_info['is_done']
         # print("cum_reward:  {}".format(reward))
         
@@ -244,7 +258,7 @@ class FlatlandEnv(gym.Env):
             info['is_success'] = reward_info['is_success']
             self.reward_calculator.kdtree = None
             history_evaluation=self.reward_calculator.get_history_info()
-            history_evaluation=[self._episode]+history_evaluation+[info['done_reason']]
+            history_evaluation=[self._episode]+history_evaluation+[info['done_reason']]+[self._steps_curr_episode, self._time_curr_episode, self.path_travelled]
             self.csv_writer.addData(np.array(history_evaluation))
 
         if self._steps_curr_episode > self._max_steps_per_episode:
@@ -253,10 +267,11 @@ class FlatlandEnv(gym.Env):
             info['is_success'] = 0
             self.reward_calculator.kdtree = None
             history_evaluation=self.reward_calculator.get_history_info()
-            history_evaluation=[self._episode]+history_evaluation+[info['done_reason']]
+            history_evaluation=[self._episode]+history_evaluation+[info['done_reason']]+[self._steps_curr_episode, self._time_curr_episode, self.path_travelled]
             self.csv_writer.addData(np.array(history_evaluation))
 
         self.last_obs_dict=obs_dict
+        self.last_robot_pose = obs_dict['robot_pose']
 
         return merged_obs, reward, done, info
 
@@ -272,13 +287,29 @@ class FlatlandEnv(gym.Env):
         #reset 
         # self.task.obstacles_manager.__move_all_peds(self._episode)
         self.reward_calculator.reset()
-        self._steps_curr_episode = 0        
+        self._steps_curr_episode = 0
+        self._time_curr_episode = 0.0
+        self.path_travelled = 0.0
+        self.last_robot_pose = None
         self.observation_collector.set_timestep(0.0)
-        obs, _ = self.observation_collector.get_observations()
+        obs, _, _ = self.observation_collector.get_observations()
         return obs  # reward, done, info can't be included
 
     def close(self):
         pass
+
+    def read_saftey_distance_parameter_from_yaml(self):
+        
+        file_location = os.path.join(rospkg.RosPack().get_path('simulator_setup'), 'safety_distance_parameter.yaml')
+        
+        
+        if os.path.isfile(file_location):
+            with open(file_location, "r") as file:
+                saftey_distance_parameter = yaml.load(file, Loader=yaml.FullLoader)       
+        assert isinstance(
+             saftey_distance_parameter, dict), "'safety_distance_parameter.yaml' has wrong fromat! Has to encode dictionary!"
+                
+        return saftey_distance_parameter
 
 
 if __name__ == '__main__':
