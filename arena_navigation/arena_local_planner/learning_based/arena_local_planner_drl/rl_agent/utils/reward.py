@@ -36,14 +36,18 @@ class RewardCalculator():
         self.safe_dists_robot_type = self.read_saftey_distance_parameter_from_yaml()['robot obstacle safety distance radius']
         self.safe_dists_factor = self.read_saftey_distance_parameter_from_yaml()['safety distance factor']
         self.human_obstacles_last_min = copy.deepcopy(self.safe_dists_human_type)
+        self.human_obstacles_safety_dist = copy.deepcopy(self.safe_dists_human_type)
         for item in list(self.human_obstacles_last_min.items()):
             self.human_obstacles_last_min[item[0]] = None
+            self.human_obstacles_safety_dist[item[0]] = None
         self.human_types_as_reason= copy.deepcopy(self.safe_dists_human_type)
         for i,item in enumerate(list(self.human_types_as_reason.items())):
             self.human_types_as_reason[ item[0]] = i + 3
         self.robot_obstacles_last_min = copy.deepcopy(self.safe_dists_robot_type)
+        self.robot_obstacles_safety_dist = copy.deepcopy(self.safe_dists_robot_type)
         for item in list(self.robot_obstacles_last_min.items()):
             self.robot_obstacles_last_min[item[0]] = None
+            self.robot_obstacles_safety_dist[item[0]] = None
         self.robot_types_as_reason= copy.deepcopy(self.safe_dists_robot_type)
         for i,item in enumerate(list(self.robot_types_as_reason.items())):
             self.robot_types_as_reason[ item[0]] = i + 3 +len( self.human_types_as_reason)
@@ -89,8 +93,10 @@ class RewardCalculator():
         self.last_dist_to_path = None
         for item in list(self.human_obstacles_last_min.items()):
            self.human_obstacles_last_min[item[0]] = None
+           self.human_obstacles_safety_dist[item[0]] = None
         for item in list(self.robot_obstacles_last_min.items()):
            self.robot_obstacles_last_min[item[0]] = None
+           self.robot_obstacles_safety_dist[item[0]] = None
         self.cum_reward=0
   
 
@@ -103,7 +109,7 @@ class RewardCalculator():
 
     def get_history_info(self):
 
-        return list(self.human_obstacles_last_min.values())+ list(self.robot_obstacles_last_min.values())  + [self.cum_reward]
+        return list(self.human_obstacles_last_min.values())+ list(self.robot_obstacles_last_min.values())  + [self.cum_reward] +list(self.human_obstacles_safety_dist.values()) +list(self.robot_obstacles_safety_dist.values())
     
     def get_reward(self, 
     laser_scan:np.ndarray, 
@@ -383,9 +389,11 @@ class RewardCalculator():
                 min_human_obstacle_behavior=human_obstacles_by_type_in_robot_frame[0,1]
                 if self.human_obstacles_last_min[type] is None:
                     self.human_obstacles_last_min[type]=min_human_obstacle_dist
+                    self.human_obstacles_safety_dist[type]= self.safe_dists_human_type[type] * self.safe_dists_factor[behavior]
                 else:
                     if self.human_obstacles_last_min[type]>min_human_obstacle_dist:
                         self.human_obstacles_last_min[type]=min_human_obstacle_dist
+                        self.human_obstacles_safety_dist[type]= self.safe_dists_human_type[type] * self.safe_dists_factor[behavior]
                 for dist in human_obstacles_by_type_in_robot_frame:
                     safe_dist_=self.safe_dists_human_type[type] * self.safe_dists_factor[behavior]
                     punishment = 0.07 * safe_dist_
@@ -408,9 +416,11 @@ class RewardCalculator():
 
                 if self.robot_obstacles_last_min[type] is None:
                     self.robot_obstacles_last_min[type]=min_robot_obstacle_dist
+                    self.robot_obstacles_safety_dist[type]= self.safe_dists_robot_type[type]
                 else:
                     if self.robot_obstacles_last_min[type]>min_robot_obstacle_dist:
                         self.robot_obstacles_last_min[type]=min_robot_obstacle_dist
+                        self.robot_obstacles_safety_dist[type]= self.safe_dists_robot_type[type]
                 for dist in robot_obstacles_by_type_in_robot_frame:
                     safe_dist_=self.safe_dists_robot_type[type] 
                     punishment = 0.07* safe_dist_
