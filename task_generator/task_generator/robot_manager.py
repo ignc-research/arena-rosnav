@@ -42,10 +42,10 @@ class RobotManager:
         self.safe_dists_human_type = self.read_saftey_distance_parameter_from_yaml()['human obstacle safety distance radius']
         self.safe_dists_robot_type = self.read_saftey_distance_parameter_from_yaml()['robot obstacle safety distance radius']
         self.safe_dists_factor = self.read_saftey_distance_parameter_from_yaml()['safety distance factor']
-        self.safe_dist_adult=1.0
-        self.safe_dist_child=1.2
-        self.safe_dist_elder=1.5
-        self.safe_dist_forklift = 1.5
+        # self.safe_dist_adult=1.0
+        # self.safe_dist_child=1.2
+        # self.safe_dist_elder=1.5
+        # self.safe_dist_forklift = 1.5
 
         self.is_training_mode = rospy.get_param("/train_mode")
         self.step_size = rospy.get_param("step_size")
@@ -249,6 +249,7 @@ class RobotManager:
             try:
                 # publish the goal, if the gobal plath planner can't generate a path, a, exception will be raised.
                 self.publish_goal(goal_pos_.x, goal_pos_.y, goal_pos_.theta)
+                self.setGoalInfoToPedsim(goal_pos_)
                 # print("publish goal")
                 break
             except rospy.ServiceException:
@@ -326,14 +327,14 @@ class RobotManager:
 
     def read_saftey_distance_parameter_from_yaml(self):
         
-        file_location = os.path.join(rospkg.RosPack().get_path('simulator_setup'), 'saftey_distance_parameter.yaml')
+        file_location = os.path.join(rospkg.RosPack().get_path('simulator_setup'), 'safety_distance_parameter.yaml')
         
         
         if os.path.isfile(file_location):
             with open(file_location, "r") as file:
                 saftey_distance_parameter = yaml.load(file, Loader=yaml.FullLoader)       
         assert isinstance(
-             saftey_distance_parameter, dict), "'saftey_distance_parameter.yaml' has wrong fromat! Has to encode dictionary!"
+             saftey_distance_parameter, dict), "'safety_distance_parameter.yaml' has wrong fromat! Has to encode dictionary!"
                 
         return saftey_distance_parameter
         
