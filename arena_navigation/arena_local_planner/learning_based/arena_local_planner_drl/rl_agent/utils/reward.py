@@ -33,13 +33,16 @@ class RewardCalculator():
         self.last_goal_dist = None
         self.last_dist_to_path = None
         self.safe_dist = safe_dist
-        #TODO: should be global setting
+        #TODO: should be global setting(finished)
         self.safe_dists_human_type = self.read_saftey_distance_parameter_from_yaml()['human obstacle safety distance radius']
         self.safe_dists_robot_type = self.read_saftey_distance_parameter_from_yaml()['robot obstacle safety distance radius']
         self.safe_dists_factor = self.read_saftey_distance_parameter_from_yaml()['safety distance factor']
+        self.useDangerZone = self.read_saftey_distance_parameter_from_yaml()['useDangerZone']['enable']
         self.human_obstacles_last_min = copy.deepcopy(self.safe_dists_human_type)
+        self.human_obstacles_exceed_dist = copy.deepcopy(self.safe_dists_human_type)
         for item in list(self.human_obstacles_last_min.items()):
             self.human_obstacles_last_min[item[0]] = None
+            self.human_obstacles_exceed_dist[item[0]] = None
         self.human_types_as_reason= copy.deepcopy(self.safe_dists_human_type)
         for i,item in enumerate(list(self.human_types_as_reason.items())):
             self.human_types_as_reason[ item[0]] = i + 3
@@ -77,6 +80,7 @@ class RewardCalculator():
             'rule_04': RewardCalculator._cal_reward_rule_04,
             'rule_05': RewardCalculator._cal_reward_rule_05,
             'rule_06': RewardCalculator._cal_reward_rule_06,
+            'rule_07': RewardCalculator._cal_reward_rule_07,
             }
         self.cal_func = self._cal_funcs[rule]
 
@@ -88,9 +92,12 @@ class RewardCalculator():
         self.last_dist_to_path = None
         for item in list(self.human_obstacles_last_min.items()):
            self.human_obstacles_last_min[item[0]] = None
+        for item in list(self.human_obstacles_exceed_dist.items()):
+           self.human_obstacles_exceed_dist[item[0]] = 0
         for item in list(self.robot_obstacles_last_min.items()):
            self.robot_obstacles_last_min[item[0]] = None
         self.cum_reward=0
+        self.info = {}
   
 
     def _reset(self):
@@ -102,14 +109,14 @@ class RewardCalculator():
 
     def get_history_info(self):
 
-        return list(self.human_obstacles_last_min.values())+ list(self.robot_obstacles_last_min.values())  + [self.cum_reward]
+        return list(self.human_obstacles_last_min.values())+ list(self.robot_obstacles_last_min.values())  + list(self.human_obstacles_exceed_dist.values())+ [self.cum_reward]
     
     def get_reward(self, 
     laser_scan:np.ndarray, 
     goal_in_robot_frame: Tuple[float,float],  
-    human_obstacles_in_robot_frame:np.ndarray,
-    robot_obstacles_in_robot_frame,
-    current_time_step: float, 
+    # human_obstacles_in_robot_frame:np.ndarray,
+    # robot_obstacles_in_robot_frame,
+    # current_time_step: float, 
     *args, **kwargs):
         """
         Args:
@@ -118,7 +125,10 @@ class RewardCalculator():
             adult_in_robot_frame(np.ndarray)
         """
         self._reset()
-        self.cal_func(self, laser_scan, goal_in_robot_frame, human_obstacles_in_robot_frame, robot_obstacles_in_robot_frame, current_time_step,*args,**kwargs)
+        # if self.useDangerZone:
+        self.cal_func(self, laser_scan, goal_in_robot_frame,*args,**kwargs) #, kwargs['human_obstacles_in_robot_frame'], kwargs['robot_obstacles_in_robot_frame'], kwargs['episode_time']
+        # else:
+            # self.cal_func(self, laser_scan, goal_in_robot_frame, kwargs['isInDangerZone'], kwargs['episode_time'],*args,**kwargs)
         self.cum_reward+=self.curr_reward
         return self.curr_reward, self.info
 
@@ -169,14 +179,14 @@ class RewardCalculator():
         self._reward_goal_approached(
             goal_in_robot_frame, reward_factor=0.4, penalty_factor=0.5)
 
-    def _cal_reward_rule_03(self, laser_scan: np.ndarray, goal_in_robot_frame: Tuple[float,float], human_obstacles_in_robot_frame:np.ndarray, robot_obstacles_in_robot_frame:np.ndarray,   current_time_step:float, *args,**kwargs):
+    def _cal_reward_rule_03(self, laser_scan: np.ndarray, goal_in_robot_frame: Tuple[float,float], *args,**kwargs):
         
         self._reward_goal_reached(goal_in_robot_frame, reward=2)
         self._reward_safe_dist(laser_scan)
         self._reward_collision(laser_scan, punishment=4)
-        self._reward_goal_approached3(goal_in_robot_frame, current_time_step)
-        self._reward_human_obstacles_safety_dist_all(human_obstacles_in_robot_frame) #0.05 0.07
-        self._reward_robot_obstacles_safety_dist_all(robot_obstacles_in_robot_frame)
+        self._reward_goal_approached3(goal_in_robot_frame, kwargs['episode_time'])
+        self._reward_human_obstacles_safety_dist_all(kwargs['human_obstacles_in_robot_frame']) #0.05 0.07
+        # self._reward_robot_obstacles_safety_dist_all(kwargs['robot_obstacles_in_robot_frame'])
 
     def _cal_reward_rule_04(self, 
                             laser_scan: np.ndarray, 
@@ -211,14 +221,22 @@ class RewardCalculator():
         self._reward_child_safety_dist(child_in_robot_frame, punishment=4)
         self._reward_elder_safety_dist(elder_in_robot_frame, punishment=4)
 
-    def _cal_reward_rule_06(self, laser_scan: np.ndarray, goal_in_robot_frame: Tuple[float,float], human_obstacles_in_robot_frame:np.ndarray, robot_obstacles_in_robot_frame:np.ndarray,  current_time_step:float, *args,**kwargs):
+    def _cal_reward_rule_06(self, laser_scan: np.ndarray, goal_in_robot_frame: Tuple[float,float], *args,**kwargs):
         
         self._reward_goal_reached(goal_in_robot_frame, reward=2)
         self._reward_safe_dist(laser_scan)
         self._reward_collision(laser_scan, punishment=4)
-        self._reward_goal_approached3(goal_in_robot_frame,current_time_step)
-        self._reward_human_obstacles_safety_dist(human_obstacles_in_robot_frame) #0.05 0.07
-        self._reward_robot_obstacles_safety_dist(robot_obstacles_in_robot_frame) #0.05 0.07
+        self._reward_goal_approached3(goal_in_robot_frame,kwargs['episode_time'])
+        self._reward_human_obstacles_safety_dist(kwargs['human_obstacles_in_robot_frame']) #0.05 0.07
+        self._reward_robot_obstacles_safety_dist(kwargs['robot_obstacles_in_robot_frame']) #0.05 0.07
+
+    def _cal_reward_rule_07(self, laser_scan: np.ndarray, goal_in_robot_frame: Tuple[float,float], *args,**kwargs):
+        
+        self._reward_goal_reached(goal_in_robot_frame, reward=2)
+        self._reward_safe_dist(laser_scan)
+        self._reward_collision(laser_scan, punishment=4)
+        self._reward_goal_approached3(goal_in_robot_frame,kwargs['episode_time'])
+        self._reward_human_safety_dist(kwargs['isInDangerZone'], kwargs['RF_and_Dc'], punishment=0.15) #0.05 0.07
 
         
     def _reward_goal_reached(self,
@@ -310,102 +328,101 @@ class RewardCalculator():
                 self.info['is_success'] = 0
 
     def  _reward_human_obstacles_safety_dist(self, human_obstacles_in_robot_frame):
-        ### split the array into multiple array depending on type 
+        ### split the array into multiple array depending on type_human
 
         human_obstacles_in_robot_frame = [human_obstacles_in_robot_frame[human_obstacles_in_robot_frame[:,3]==k] for k in np.unique(human_obstacles_in_robot_frame[:,3])]
       
-        for human_obstacles_by_type_in_robot_frame in human_obstacles_in_robot_frame :
+        for human_obstacles_by_type_in_robot_frame in human_obstacles_in_robot_frame:
 
             if human_obstacles_by_type_in_robot_frame.shape[0]!=0:
-                type = human_obstacles_by_type_in_robot_frame[0,2]
+                type_human = human_obstacles_by_type_in_robot_frame[0,2]
                 behavior = human_obstacles_by_type_in_robot_frame[0,1]
                 
                 min_human_obstacle_dist=human_obstacles_by_type_in_robot_frame[0,0]
                 min_human_obstacle_behavior=human_obstacles_by_type_in_robot_frame[0,1]
-                if self.human_obstacles_last_min[type] is None:
-                    self.human_obstacles_last_min[type]=min_human_obstacle_dist
+                if self.human_obstacles_last_min[type_human] is None:
+                    self.human_obstacles_last_min[type_human]=min_human_obstacle_dist
                 else:
-                    if self.human_obstacles_last_min[type]>min_human_obstacle_dist:
-                        self.human_obstacles_last_min[type]=min_human_obstacle_dist
+                    if self.human_obstacles_last_min[type_human]>min_human_obstacle_dist:
+                        self.human_obstacles_last_min[type_human]=min_human_obstacle_dist
                
-                safe_dist_=self.safe_dists_human_type[type] * self.safe_dists_factor[behavior]
+                safe_dist_=self.safe_dists_human_type[type_human] * self.safe_dists_factor[behavior]
                 punishment = 0.07 * safe_dist_
-                if min_human_obstacle_dist<safe_dist_:
+                if min_human_obstacle_dist < safe_dist_:
                     self.curr_reward -= punishment
                     self.info['is_done'] = True
-                    self.info['done_reason'] = self.human_types_as_reason[type] #hit
+                    self.info['done_reason'] = self.human_types_as_reason[type_human] #hit
                     self.info['is_success'] = 0
     
     def  _reward_robot_obstacles_safety_dist(self, robot_obstacles_in_robot_frame):
-        ### split the array into multiple array depending on type 
+        ### split the array into multiple array depending on type_human 
 
         robot_obstacles_in_robot_frame = [robot_obstacles_in_robot_frame[robot_obstacles_in_robot_frame[:,2]==k] for k in np.unique(robot_obstacles_in_robot_frame[:,2])]
       
         for robot_obstacles_by_type_in_robot_frame in robot_obstacles_in_robot_frame :
 
             if robot_obstacles_by_type_in_robot_frame.shape[0]!=0:
-                type = robot_obstacles_by_type_in_robot_frame[0,1]
+                type_rob = robot_obstacles_by_type_in_robot_frame[0,1]
               
                 min_robot_obstacle_dist=robot_obstacles_by_type_in_robot_frame[0,0]
 
-                if self.robot_obstacles_last_min[type] is None:
-                    self.robot_obstacles_last_min[type]=min_robot_obstacle_dist
+                if self.robot_obstacles_last_min[type_rob] is None:
+                    self.robot_obstacles_last_min[type_rob]=min_robot_obstacle_dist
                 else:
-                    if self.robot_obstacles_last_min[type]>min_robot_obstacle_dist:
-                        self.robot_obstacles_last_min[type]=min_robot_obstacle_dist
+                    if self.robot_obstacles_last_min[type_rob]>min_robot_obstacle_dist:
+                        self.robot_obstacles_last_min[type_rob]=min_robot_obstacle_dist
                
-                safe_dist_=self.safe_dists_robot_type[type] 
+                safe_dist_=self.safe_dists_robot_type[type_rob] 
                 punishment = 0.07 * safe_dist_
                 if min_robot_obstacle_dist<safe_dist_:
                     self.curr_reward -= punishment
                     self.info['is_done'] = True
-                    self.info['done_reason'] = self.robot_types_as_reason[type] #hit
+                    self.info['done_reason'] = self.robot_types_as_reason[type_rob] #hit
                     self.info['is_success'] = 0
 
     def  _reward_human_obstacles_safety_dist_all(self, human_obstacles_in_robot_frame):
-        ### split the array into multiple array depending on type 
-
-        human_obstacles_in_robot_frame = [human_obstacles_in_robot_frame[human_obstacles_in_robot_frame[:,3]==k] for k in np.unique(human_obstacles_in_robot_frame[:,3])]
-      
+        ### split the array into multiple array depending on type_rob
+        human_obstacles_in_robot_frame = [human_obstacles_in_robot_frame[human_obstacles_in_robot_frame[:,3]==k] for k in np.unique(human_obstacles_in_robot_frame[:,3])]      
         for human_obstacles_by_type_in_robot_frame in human_obstacles_in_robot_frame :
 
             if human_obstacles_by_type_in_robot_frame.shape[0]!=0:
-                type = human_obstacles_by_type_in_robot_frame[0,2]
+                type_human = human_obstacles_by_type_in_robot_frame[0,2]
                 behavior = human_obstacles_by_type_in_robot_frame[0,1]
                 
                 min_human_obstacle_dist=human_obstacles_by_type_in_robot_frame[0,0]
                 min_human_obstacle_behavior=human_obstacles_by_type_in_robot_frame[0,1]
-                if self.human_obstacles_last_min[type] is None:
-                    self.human_obstacles_last_min[type]=min_human_obstacle_dist
+                if self.human_obstacles_last_min[type_human] is None:
+                    self.human_obstacles_last_min[type_human]=min_human_obstacle_dist
                 else:
-                    if self.human_obstacles_last_min[type]>min_human_obstacle_dist:
-                        self.human_obstacles_last_min[type]=min_human_obstacle_dist
+                    if self.human_obstacles_last_min[type_human]>min_human_obstacle_dist:
+                        self.human_obstacles_last_min[type_human]=min_human_obstacle_dist
                 for dist in human_obstacles_by_type_in_robot_frame:
-                    safe_dist_=self.safe_dists_human_type[type] * self.safe_dists_factor[behavior]
+                    safe_dist_=self.safe_dists_human_type[type_human] * self.safe_dists_factor[behavior]
                     punishment = 0.07 * safe_dist_
-                    if dist[0]<safe_dist_:
+                    if dist[0] < safe_dist_:
                         self.curr_reward -= punishment*np.exp(1-dist[0]/safe_dist_)
+                        self.human_obstacles_exceed_dist[type_human] = self.human_obstacles_exceed_dist[type_human] + 1
 
             
     def  _reward_robot_obstacles_safety_dist_all(self, robot_obstacles_in_robot_frame):
-        ### split the array into multiple array depending on type 
+        ### split the array into multiple array depending on type_human 
 
         robot_obstacles_in_robot_frame = [robot_obstacles_in_robot_frame[robot_obstacles_in_robot_frame[:,2]==k] for k in np.unique(robot_obstacles_in_robot_frame[:,2])]
       
         for robot_obstacles_by_type_in_robot_frame in robot_obstacles_in_robot_frame :
 
             if robot_obstacles_by_type_in_robot_frame.shape[0]!=0:
-                type = robot_obstacles_by_type_in_robot_frame[0,1]
+                type_rob = robot_obstacles_by_type_in_robot_frame[0,1]
               
                 min_robot_obstacle_dist=robot_obstacles_by_type_in_robot_frame[0,0]
 
-                if self.robot_obstacles_last_min[type] is None:
-                    self.robot_obstacles_last_min[type]=min_robot_obstacle_dist
+                if self.robot_obstacles_last_min[type_rob] is None:
+                    self.robot_obstacles_last_min[type_rob]=min_robot_obstacle_dist
                 else:
-                    if self.robot_obstacles_last_min[type]>min_robot_obstacle_dist:
-                        self.robot_obstacles_last_min[type]=min_robot_obstacle_dist
+                    if self.robot_obstacles_last_min[type_rob]>min_robot_obstacle_dist:
+                        self.robot_obstacles_last_min[type_rob]=min_robot_obstacle_dist
                 for dist in robot_obstacles_by_type_in_robot_frame:
-                    safe_dist_=self.safe_dists_robot_type[type] 
+                    safe_dist_=self.safe_dists_robot_type[type_rob] 
                     punishment = 0.07* safe_dist_
                     if dist[0]<safe_dist_:
                         self.curr_reward -= punishment*np.exp(1-dist[0]/safe_dist_)
@@ -494,6 +511,11 @@ class RewardCalculator():
         """
         if laser_scan.min() < self.safe_dist:
             self.curr_reward -= punishment
+
+    def _reward_human_safety_dist(self, isInDangerZone, RF_and_Dc, punishment = 80):
+            for i, danger in enumerate(isInDangerZone):
+                if danger:
+                    self.curr_reward -= (RF_and_Dc[i,1]*(-punishment)/RF_and_Dc[i,0]+punishment)
 
     def _reward_not_moving(self, 
                            action: np.ndarray=None, 
@@ -595,14 +617,14 @@ class RewardCalculator():
 
     def read_saftey_distance_parameter_from_yaml(self):
         
-        file_location = os.path.join(rospkg.RosPack().get_path('simulator_setup'), 'saftey_distance_parameter.yaml')
+        file_location = os.path.join(rospkg.RosPack().get_path('simulator_setup'), 'safety_distance_parameter.yaml')
         
         
         if os.path.isfile(file_location):
             with open(file_location, "r") as file:
                 saftey_distance_parameter = yaml.load(file, Loader=yaml.FullLoader)       
         assert isinstance(
-             saftey_distance_parameter, dict), "'saftey_distance_parameter.yaml' has wrong fromat! Has to encode dictionary!"
+             saftey_distance_parameter, dict), "'safety_distance_parameter.yaml' has wrong fromat! Has to encode dictionary!"
                 
         return saftey_distance_parameter
         
