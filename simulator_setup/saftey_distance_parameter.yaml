@@ -31,7 +31,7 @@ human obstacle safety distance radius:
   child: 1.2
   elder: 1.5
   forklift: 1.8
-  servicerobot: 1.0
+  servicerobot: 1.6
 robot obstacle safety distance radius:
   random_wanderer: 1.5
 obstacle radius:
