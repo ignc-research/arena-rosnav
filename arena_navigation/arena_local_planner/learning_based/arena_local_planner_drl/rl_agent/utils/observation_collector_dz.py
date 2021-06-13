@@ -32,9 +32,9 @@ from tf.transformations import *
 from gym import spaces
 import numpy as np
 
-#formula calculation
-from sympy import Symbol, nsolve
-import mpmath
+# #formula calculation
+# from sympy import Symbol, nsolve
+# import mpmath
 
 from std_msgs.msg import Bool
 
@@ -64,6 +64,7 @@ class ObservationCollector():
         self._radius_child= 0.25
         self._radius_elder= 0.3
         self._radius_robot= 0.3
+        self._radius_human_average=0.3
 
         # self._laser_num_beams = num_lidar_beams
         # for frequency controlling
@@ -215,6 +216,7 @@ class ObservationCollector():
         # rho_danger_adult = np.array([],dtype=object).reshape(0, 2)
         # rho_human = np.array([],dtype=np.float)
         isInDangerZone = np.array([],dtype=bool).reshape(0,1)
+        RF_And_Dc = np.array([],dtype=float).reshape(0,2)
         count_observable_humans=0
         for i, ty in enumerate(self._human_type):
             # filter the obstacles which are not in the visible range of the robot
@@ -226,15 +228,18 @@ class ObservationCollector():
                 angle=self._get_robot_pose_in_human_frame(self._dangerCenter[i], self._human_position[i])
                 state_human_in_robot_frame=ObservationCollector.rotate(self.robot_self_state[:2]+[self._human_position[i].x, self._human_position[i].y, self._human_vel[i].linear.x,self._human_vel[i].linear.y], self.rot)
                 rot_human=np.arctan2(self._subgoal.y - self._dangerCenter[i][1], self._subgoal.x - self._dangerCenter[i][0])
-                state_robot_in_human_frame=ObservationCollector.rotate([self._human_position[i].x, self._human_position[i].y,self._robot_pose.x, self._robot_pose.y, self._robot_vel.linear.x, self._robot_vel.linear.y], self.rot)
-                obs=np.array(self.robot_self_state+[rho_humans[i], theta_humans[i]]+state_human_in_robot_frame+state_robot_in_human_frame+[self._safe_dist[i],self._radius_elder,
-                                                self._radius_elder+self._safe_dist[i]+self._radius_robot, angle, -self._dangerAngle[i]/2, self._dangerAngle[i]/2])
+                state_robot_in_human_frame=ObservationCollector.rotate([self._human_position[i].x, self._human_position[i].y,self._robot_pose.x, self._robot_pose.y, self._robot_vel.linear.x, self._robot_vel.linear.y], rot_human)
+                obs=np.array(self.robot_self_state+[rho_humans[i], theta_humans[i]]+state_human_in_robot_frame+state_robot_in_human_frame+[self._safe_dist[i],self._radius_human_average,
+                                                self._radius_human_average+self._safe_dist[i]+self._radius_robot, angle, -self._dangerAngle[i]/2, self._dangerAngle[i]/2])
                 # print('single size', obs.shape[0])
                 merged_obs = np.hstack([merged_obs,obs])
                 isIn=self.isInDangerZone(rho_humans[i],self._safe_dist[i], angle, self._dangerAngle[i])
                 # print(i, 'isin danger', isIn)
                 isInDangerZone=np.vstack([isInDangerZone,isIn])
-        obs_dict['danger_zone']=isInDangerZone
+                RF_And_Dc_Row=np.array([self._safe_dist[i]-self._radius_human_average,rho_humans[i]-self._radius_human_average-self._radius_robot]).reshape(1,2)
+                RF_And_Dc=np.vstack([RF_And_Dc,RF_And_Dc_Row])
+        obs_dict['danger_zone'] = isInDangerZone
+        obs_dict['RF_and_Dc'] = RF_And_Dc
         #TODO more proper method is needed to supplement info blanks (finished)
         if count_observable_humans==0:
             obs_empty=np.array(self.robot_self_state+[0]*16)
@@ -357,7 +362,7 @@ class ObservationCollector():
 
     def callback_danger_zone(self, msg):
             for i, m in enumerate(msg):
-                self._safe_dist[i] = m.dangerZoneRadius+0.3 #radius of human
+                self._safe_dist[i] = m.dangerZoneRadius+self._radius_human_average #radius of human
                 self._dangerAngle[i]=m.dangerZoneAngle
                 self._dangerCenter[i]=m.dangerZoneCenter
 
@@ -429,7 +434,7 @@ class ObservationCollector():
 
     def isInDangerZone(self, distance, safeDistance, angle, angleRange):
         # angle=self._get_robot_pose_in_human_frame(center, human_pos)
-        if distance <safeDistance and (angle>=-angleRange/2 or angle<=angleRange/2):
+        if distance < safeDistance and (angle >= -angleRange/2 or angle <= angleRange/2):
             return True
         else:
             return False

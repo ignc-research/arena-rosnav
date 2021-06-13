@@ -83,7 +83,7 @@ class RewardCalculator():
     # child_in_robot_frame:np.ndarray, 
     # elder_in_robot_frame:np.ndarray, 
     isInDangerZone:np.ndarray, 
-    current_time_step: float, 
+    current_time_step: float,
     *args, **kwargs):
         """
         Args:
@@ -204,7 +204,7 @@ class RewardCalculator():
         self._reward_safe_dist(laser_scan)
         self._reward_collision(laser_scan, punishment=4)
         self._reward_goal_approached3(goal_in_robot_frame,current_time_step)
-        self._reward_human_safety_dist(isInDangerZone, punishment=0.08) #0.05 0.07
+        self._reward_human_safety_dist(isInDangerZone, kwargs['RF_and_Dc'], punishment=0.15) #0.05 0.07
 
         
     def _reward_goal_reached(self,
@@ -370,10 +370,10 @@ class RewardCalculator():
             self.curr_reward += reward
         self.last_goal_dist = goal_in_robot_frame[0]
 
-    def _reward_human_safety_dist(self, isInDangerZone, punishment = 80):
-            for danger in isInDangerZone:
+    def _reward_human_safety_dist(self, isInDangerZone, RF_and_Dc, punishment = 80):
+            for i, danger in enumerate(isInDangerZone):
                 if danger:
-                    self.curr_reward -= punishment
+                    self.curr_reward -= (RF_and_Dc[i,1]*(-punishment)/RF_and_Dc[i,0]+punishment)
 
     def _reward_adult_safety_dist3(self, adult_in_robot_frame, punishment = 80):
         if adult_in_robot_frame.shape[0] != 0:
