@@ -25,15 +25,15 @@ safety distance factor:
   StateDrivingToInteraction: 1.4
   StateProvidingService: 0.6
   StateRequestingGuide: 0.5
-  StateFollowingGuide: 0.5
+  StateFollowingGuide: 1.5
   StateRequestingFollower: 0.5
-  StateGuideToGoal: 0.5
+  StateGuideToGoal: 1.5
 human obstacle safety distance radius:
   adult: 1.0
   child: 1.2
   elder: 1.5
   forklift: 1.8
-  servicerobot: 1.0
+  servicerobot: 1.6
 robot obstacle safety distance radius:
   random_wanderer: 1.5
 obstacle radius:

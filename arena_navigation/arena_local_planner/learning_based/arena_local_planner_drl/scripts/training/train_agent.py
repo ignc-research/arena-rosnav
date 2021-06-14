@@ -208,7 +208,7 @@ if __name__ == "__main__":
     trainstage_cb = InitiateNewTrainStage(
         n_envs=args.n_envs,
         treshhold_type="succ", 
-        upper_threshold=0.95, lower_threshold=0.3, 
+        upper_threshold=0.90, lower_threshold=0.3, 
         task_mode=params['task_mode'], verbose=1)
 
     # stop training on reward threshold callback
