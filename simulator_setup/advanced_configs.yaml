@@ -4,9 +4,10 @@ tell story probability: 0.4
 group talking probability: 0.4
 talking and walking probability: 0.4
 requesting service probability: 0.014
-requesting guide probability: 0.99
+requesting guide probability: 0.0
+requesting follower probability: 0.8
 max talking distance: 3.0
-max servicing radius: 6.0
+max servicing radius: 7.0
 talking base time: 20.0
 tell story base time: 20.0
 group talking base time: 20.0
