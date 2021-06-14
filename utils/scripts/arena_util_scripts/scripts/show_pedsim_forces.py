@@ -65,8 +65,8 @@ class Publisher:
         marker.pose.orientation.z = 0.0
         marker.pose.orientation.w = 1.0
         marker.scale.x = 0.2
-        marker.scale.y = 0.3
-        marker.scale.z = 0.1
+        marker.scale.y = 0.5
+        marker.scale.z = 0.5
         marker.color.a = a
         marker.color.r = r * 255.0
         marker.color.g = g * 255.0
