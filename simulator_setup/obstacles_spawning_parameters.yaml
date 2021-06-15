@@ -296,7 +296,7 @@
     - dynamic_obstacles/servicerobot.model.yaml
   robot obstacles:
     random_wanderer:
-    - 5
+    - 2
     - dynamic_obstacles/random_wanderer.model.yaml
 13:
   static obstacles:
