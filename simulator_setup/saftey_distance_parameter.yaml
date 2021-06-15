@@ -25,7 +25,7 @@ safety distance factor:
   StateDrivingToInteraction: 1.4
   StateProvidingService: 0.6
   StateRequestingGuide: 0.5
-  StateFollowingGuide: 3.0
+  StateFollowingGuide: 2.0
   StateRequestingFollower: 3.0
   StateGuideToGoal: 3.0
 human obstacle safety distance radius:
