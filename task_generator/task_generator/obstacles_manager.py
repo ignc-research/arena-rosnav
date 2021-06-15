@@ -739,7 +739,7 @@ class ObstaclesManager:
                     msg.requesting_service_base_time = advanced_configs['receiving service base time']
                     msg.force_factor_desired = 1.0
                     msg.force_factor_obstacle = 1.0
-                    msg.force_factor_social = 2.0
+                    msg.force_factor_social = 7.0
                     msg.yaml_file = self.__ped_file
                     msg.waypoint_mode = 1
                     msg.waypoints = []
