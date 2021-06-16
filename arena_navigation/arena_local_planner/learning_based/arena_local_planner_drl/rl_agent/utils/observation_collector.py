@@ -225,6 +225,11 @@ class ObservationCollector():
             self.robot_vx_to_via = self._robot_vel.linear.x * np.cos(self.rot_to_via) + self._robot_vel.linear.y * np.sin(self.rot_to_via)
             self.robot_vy_to_via = self._robot_vel.linear.y * np.cos(self.rot_to_via) + self._robot_vel.linear.x * np.sin(self.rot_to_via)
             self.flag_requesting_via = 2
+            if self.rho_to_via > 4.0 : 
+                self.flag_requesting_via = 1
+                self.currentgoal.x = pos.x
+                self.currentgoal.y = pos.y
+                self.currentgoal.theta = pos.theta
        
         elif self._human_behavior.size > 0 and 'StateRequestingFollower' in self._human_behavior: 
             index_agent_requesting_via =numpy.where(self._human_behavior== 'StateRequestingFollower')
