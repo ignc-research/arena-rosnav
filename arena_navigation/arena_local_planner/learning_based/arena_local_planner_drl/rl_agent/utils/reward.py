@@ -525,7 +525,7 @@ class RewardCalculator():
                 self.last_following_goal_dist = goal_in_robot_frame[3]
 
 
-            print(self.curr_reward)
+            # print(self.curr_reward)
 
     def _reward_adult_safety_dist3(self, adult_in_robot_frame, punishment = 80):
         if adult_in_robot_frame.shape[0] != 0:
