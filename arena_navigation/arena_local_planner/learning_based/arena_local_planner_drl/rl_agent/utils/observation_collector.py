@@ -254,6 +254,11 @@ class ObservationCollector():
             self.currentgoal.x = pos.x
             self.currentgoal.y = pos.y
             self.currentgoal.theta = pos.theta
+            if self.rho_to_via <= 4.0 : 
+                # print('writing -1')
+                self.currentgoal.x = -1
+                self.currentgoal.y = -1
+                self.currentgoal.theta = -1
 
         self.robot_to_via_state=[self._robot_pose.x, self._robot_pose.y, self.robot_vx_to_via, self.robot_vy_to_via,
         self._robot_pose.theta, self._robot_vel.angular.z, self._radius_robot, self.rho_to_via, self.theta_to_via]
