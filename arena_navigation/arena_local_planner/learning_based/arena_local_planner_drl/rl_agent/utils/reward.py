@@ -239,7 +239,7 @@ class RewardCalculator():
         :param goal_in_robot_frame (Tuple[float,float]): position (rho, theta) of the goal in robot frame (Polar coordinate) 
         :param reward (float, optional): reward amount for reaching. defaults to 15
         """
-        if goal_in_robot_frame[2] in [0,2]   :
+        if goal_in_robot_frame[2] in [0,2,5]   :
             if goal_in_robot_frame[0] < self.goal_radius :
                 self.curr_reward = reward
                 self.info['is_done'] = True
@@ -434,7 +434,7 @@ class RewardCalculator():
 
     def _reward_goal_approached3(self, goal_in_robot_frame, current_time_step):
         
-            if goal_in_robot_frame[2] == 0 :
+            if goal_in_robot_frame[2] in [0,5] :
                 if self.last_goal_dist is not None:
                     # print(self.last_goal_dist ,goal_in_robot_frame[0])
                     # higher negative weight when moving away from goal (to avoid driving unnecessary circles when train in contin. action space)

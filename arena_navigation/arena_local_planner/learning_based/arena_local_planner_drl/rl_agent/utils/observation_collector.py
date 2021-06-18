@@ -259,6 +259,9 @@ class ObservationCollector():
                 self.currentgoal.x = -1
                 self.currentgoal.y = -1
                 self.currentgoal.theta = -1
+        elif self._human_behavior.size > 0 and 'StateClearingGoal' in self._human_behavior: 
+            self.flag_requesting_via = 5
+
 
         self.robot_to_via_state=[self._robot_pose.x, self._robot_pose.y, self.robot_vx_to_via, self.robot_vy_to_via,
         self._robot_pose.theta, self._robot_vel.angular.z, self._radius_robot, self.rho_to_via, self.theta_to_via]
