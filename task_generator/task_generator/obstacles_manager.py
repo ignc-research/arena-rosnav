@@ -728,6 +728,7 @@ class ObstaclesManager:
                     msg.talking_and_walking_probability = advanced_configs['talking and walking probability']
                     msg.requesting_service_probability= advanced_configs['requesting service probability']
                     msg.requesting_guide_probability = advanced_configs['requesting guide probability']
+                    msg.requesting_follower_probability = advanced_configs['requesting follower probability']
                     msg.max_talking_distance = advanced_configs['max talking distance']
                     msg.max_servicing_radius = advanced_configs['max servicing radius']
                     msg.talking_base_time = advanced_configs['talking base time']
@@ -738,7 +739,7 @@ class ObstaclesManager:
                     msg.requesting_service_base_time = advanced_configs['receiving service base time']
                     msg.force_factor_desired = 1.0
                     msg.force_factor_obstacle = 1.0
-                    msg.force_factor_social = 2.0
+                    msg.force_factor_social = 7.0
                     msg.yaml_file = self.__ped_file
                     msg.waypoint_mode = 1
                     msg.waypoints = []
