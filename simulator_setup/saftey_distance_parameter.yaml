@@ -28,6 +28,7 @@ safety distance factor:
   StateFollowingGuide: 1.5
   StateRequestingFollower: 0.5
   StateGuideToGoal: 1.5
+  StateClearingGoal: 2.0
 human obstacle safety distance radius:
   adult: 1.0
   child: 1.2
