@@ -254,7 +254,7 @@ class ObservationCollector():
             self.currentgoal.x = pos.x
             self.currentgoal.y = pos.y
             self.currentgoal.theta = pos.theta
-            if self.rho_to_via <= 2.5 : 
+            if self.rho_to_via <= 3.0 : 
                 # print('writing -1')
                 self.currentgoal.x = -1
                 self.currentgoal.y = -1
