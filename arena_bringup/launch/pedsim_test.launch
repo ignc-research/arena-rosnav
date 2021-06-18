@@ -121,4 +121,8 @@
     "
     />
 
+  <include file="$(find teleop_twist_joy)/launch/teleop.launch">
+    <arg name="config_filepath" value="/home/daniel/git/behaviormodels/xd3.config.yaml" />
+  </include>
+
 </launch>

@@ -59,11 +59,11 @@ def get_default_ped(id, ped_type, yaml_path, pos, waypoints):
     ped.requesting_service_base_time = 30.0
 
     ped.max_talking_distance = 2.0
-    ped.max_servicing_radius = 5.0
+    ped.max_servicing_radius = 10.0
 
     ped.force_factor_desired = 1.0
     ped.force_factor_obstacle = 1.0
-    ped.force_factor_social = 1.0
+    ped.force_factor_social = 5.0
 
     ped.waypoints = waypoints
     ped.waypoint_mode = 0
@@ -404,6 +404,7 @@ def obstacle_force_test():
             waypoints = [Point(4, 2, 0.1), Point(12, 2, 0.1)]
         )
     ped.requesting_guide_probability = 0
+    ped.requesting_follower_probability = 0
     ped.force_factor_obstacle = 2
 
     spawn_peds_client.call([ped])
@@ -425,6 +426,7 @@ def obstacle_force_test():
             waypoints = [Point(4, 10.2, 0.1), Point(12, 10.2, 0.1)]
         )
     ped.requesting_guide_probability = 0
+    ped.requesting_follower_probability = 0
     ped.force_factor_obstacle = 2
 
     spawn_peds_client.call([ped])
@@ -448,13 +450,14 @@ def follow_agent_test():
             id = 1,
             ped_type = "adult",
             yaml_path = get_yaml_path_from_type("adult"),
-            pos = Point(4, 2, 0.1),
+            pos = Point(2, 2, 0.1),
             waypoints = [Point(4, 2, 0.1), Point(12, 2, 0.1)]
         )
     ped.number_of_peds = 3
     ped.requesting_guide_probability = 0
     ped.requesting_service_probability = 0
     ped.requesting_follower_probability = 0.2
+    ped.force_factor_robot = 10.0
 
     spawn_peds_client.call([ped])
 
