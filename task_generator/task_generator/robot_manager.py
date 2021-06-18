@@ -167,15 +167,15 @@ class RobotManager:
             return math.sqrt((x1 - x2)**2 + (y1 - y2)**2)
 
         forbiddenZones=[]
-        if obs_dict is not None and len(obs_dict['human_coordinates_in_robot_frame']) > 0:
-            # print("calculate the forbidden zones")
+        # if obs_dict is not None and len(obs_dict['human_coordinates_in_robot_frame']) > 0:
+        #     # print("calculate the forbidden zones")
 
-            ## TODO read it from Yaml and static obstacles
-            coordinates=obs_dict['human_coordinates_in_robot_frame'].T
+        #     ## TODO read it from Yaml and static obstacles
+        #     coordinates=obs_dict['human_coordinates_in_robot_frame'].T
 
-            for i, coordinate in enumerate(coordinates):
+        #     for i, coordinate in enumerate(coordinates):
                 
-                forbiddenZones.append((coordinate[0],coordinate[1],self.safe_dists_human_type[obs_dict['human_type'][i]]*1.5 * self.safe_dists_factor[obs_dict['human_behavior'][i]]))
+        #         forbiddenZones.append((coordinate[0],coordinate[1],self.safe_dists_human_type[obs_dict['human_type'][i]]*1.5 * self.safe_dists_factor[obs_dict['human_behavior'][i]]))
 
 
         if forbiddenPoints is not None and len(obs_dict['human_coordinates_in_robot_frame']) > 0:
@@ -183,35 +183,35 @@ class RobotManager:
             # print(forbiddenPoints)
             for coordinate in forbiddenPoints: # use the safe_dist of elder becuase it is the largest among all types of humans
                 # print(coordinate)
-                forbiddenZones.append((coordinate[0],coordinate[1],1.5**1.5 ))
+                forbiddenZones.append((coordinate[0],coordinate[1],1.5*1.05 ))
 
-        if obs_dict is not None and len(obs_dict['robo_obstacle_coordinates_in_robot_frame']) > 0:
-            # print("calculate the forbidden zones")
+        # if obs_dict is not None and len(obs_dict['robo_obstacle_coordinates_in_robot_frame']) > 0:
+        #     # print("calculate the forbidden zones")
 
-            ## TODO read it from Yaml and static obstacles
-            coordinates=obs_dict['robo_obstacle_coordinates_in_robot_frame'].T
+        #     ## TODO read it from Yaml and static obstacles
+        #     coordinates=obs_dict['robo_obstacle_coordinates_in_robot_frame'].T
 
-            for i, coordinate in enumerate(coordinates):
+        #     for i, coordinate in enumerate(coordinates):
                 
-                forbiddenZones.append((coordinate[0],coordinate[1],self.safe_dists_robot_type[obs_dict['robo_obstacle_type'][i]]*1.5 ))
+        #         forbiddenZones.append((coordinate[0],coordinate[1],self.safe_dists_robot_type[obs_dict['robo_obstacle_type'][i]]*1.5 ))
 
 
-        if forbiddenPoints is not None and len(obs_dict['robo_obstacle_coordinates_in_robot_frame']) > 0:
-            # print("calculate the forbidden zones")
-            # print(forbiddenPoints)
-            for coordinate in forbiddenPoints: # use the safe_dist of elder becuase it is the largest among all types of humans
-                # print(coordinate)
-                forbiddenZones.append((coordinate[0],coordinate[1],1.5**1.5 ))
+        # if forbiddenPoints is not None and len(obs_dict['robo_obstacle_coordinates_in_robot_frame']) > 0:
+        #     # print("calculate the forbidden zones")
+        #     # print(forbiddenPoints)
+        #     for coordinate in forbiddenPoints: # use the safe_dist of elder becuase it is the largest among all types of humans
+        #         # print(coordinate)
+        #         forbiddenZones.append((coordinate[0],coordinate[1],1.5**1.5 ))
 
-        static_coordinates=  rospy.get_param(f'{self.ns_prefix}static_coordinates')
-        if obs_dict is not None and len(static_coordinates) > 0:
-            # print("calculate the forbidden zones")
+        # static_coordinates=  rospy.get_param(f'{self.ns_prefix}static_coordinates')
+        # if obs_dict is not None and len(static_coordinates) > 0:
+        #     # print("calculate the forbidden zones")
 
-            ## TODO read it from Yaml and static obstacles
-            # print( 'adding ',static_coordinates)
-            for i, coordinate in enumerate(static_coordinates):
+        #     ## TODO read it from Yaml and static obstacles
+        #     # print( 'adding ',static_coordinates)
+        #     for i, coordinate in enumerate(static_coordinates):
                 
-                forbiddenZones.append((coordinate[0],coordinate[1],2.5))
+        #         forbiddenZones.append((coordinate[0],coordinate[1],2.5))
 
 
         if start_pos is None or goal_pos is None:
@@ -228,16 +228,16 @@ class RobotManager:
             if start_pos is None:
                 start_pos_ = Pose2D()
                 start_pos_.x, start_pos_.y, start_pos_.theta = get_random_pos_on_map(
-                    self._free_space_indices, self.map, self.ROBOT_RADIUS * 2,forbiddenZones)
-                #start_pos_.x, start_pos_.y, start_pos_.theta= -4.5, 3.5, 0
+                    self._free_space_indices, self.map, self.ROBOT_RADIUS * 2,forbidden_zones=forbiddenZones)
+                # start_pos_.x, start_pos_.y, start_pos_.theta= -3.5, -3, 0
 
             else:
                 start_pos_ = start_pos
             if goal_pos is None:
                 goal_pos_ = Pose2D()
                 goal_pos_.x, goal_pos_.y, goal_pos_.theta = get_random_pos_on_map(
-                    self._free_space_indices, self.map, self.ROBOT_RADIUS * 4)
-                #goal_pos_.x, goal_pos_.y, goal_pos_.theta= 9.5 , -4 , 0
+                    self._free_space_indices, self.map, self.ROBOT_RADIUS * 4,forbidden_zones=forbiddenZones)
+                # goal_pos_.x, goal_pos_.y, goal_pos_.theta= 23.5 , 16 , 0
             else:
                 goal_pos_ = goal_pos
 
