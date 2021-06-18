@@ -109,10 +109,15 @@ class Publisher:
                     end_point = Point(pos_x + keep_distance_force.x, pos_y + keep_distance_force.y, 0.0)
                     marker = self.create_arrow_marker(id+4, start_point, end_point, 1.0, 0.0, 1.0)
                     markers.markers.append(marker)
+                    # robot force
+                    robot_force = agent.forces.robot_force
+                    end_point = Point(pos_x + robot_force.x, pos_y + robot_force.y, 0.0)
+                    marker = self.create_arrow_marker(id+5, start_point, end_point, 0, 0, 0)
+                    markers.markers.append(marker)
                     # destination
                     destination = agent.destination
                     end_point = Point(destination.x, destination.y, 0.0)
-                    marker = self.create_arrow_marker(id+5, start_point, end_point, 0.0, 0.0, 1.0, 0.3, Marker.LINE_STRIP) # blue
+                    marker = self.create_arrow_marker(id+6, start_point, end_point, 0.0, 0.0, 1.0, 0.3, Marker.LINE_STRIP) # blue
                     markers.markers.append(marker)
 
                 self.marker_pub.publish(markers)
