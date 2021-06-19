@@ -242,7 +242,7 @@ class ObservationCollector():
             self.currentgoal.x = pos.x
             self.currentgoal.y = pos.y
             self.currentgoal.theta = pos.theta
-            if self.rho_to_via <= 3.0 : 
+            if self.rho_to_via <= 4.0 : 
                 # print('writing -1')
                 self.currentgoal.x = -1
                 self.currentgoal.y = -1
@@ -259,21 +259,21 @@ class ObservationCollector():
             self.currentgoal.x = pos.x
             self.currentgoal.y = pos.y
             self.currentgoal.theta = pos.theta
-            if self.rho_to_via <= 3.0 : 
+            if self.rho_to_via <= 4.0 : 
                 # print('writing -1')
                 self.currentgoal.x = -1
                 self.currentgoal.y = -1
                 self.currentgoal.theta = -1
 
         elif self._human_behavior.size > 0 and 'StateClearingGoal' in self._human_behavior: 
-            index_agent_requesting_via =numpy.where(self._human_behavior== 'StateClearingGoal')
-            pos = self._human_position[index_agent_requesting_via[0]][0]
-            rho__, _ = ObservationCollector._get_pose_in_robot_frame(pos, self._robot_pose)
-            if rho__ <= 3.0 : 
-                # print('writing -1')
-                self.currentgoal.x = -1
-                self.currentgoal.y = -1
-                self.currentgoal.theta = -1
+            # index_agent_requesting_via =numpy.where(self._human_behavior== 'StateClearingGoal')
+            # pos = self._human_position[index_agent_requesting_via[0]][0]
+            # rho__, _ = ObservationCollector._get_pose_in_robot_frame(pos, self._robot_pose)
+            # if rho__ <= 2.5 : 
+            #     # print('writing -1')
+            #     self.currentgoal.x = -1
+            #     self.currentgoal.y = -1
+            #     self.currentgoal.theta = -1
             self.flag_requesting_via = 5
 
 

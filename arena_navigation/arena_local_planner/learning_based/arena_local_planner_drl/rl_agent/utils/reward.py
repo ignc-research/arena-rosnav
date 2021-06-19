@@ -493,27 +493,14 @@ class RewardCalculator():
                 if self.last_following_goal_dist is not None:
                     # higher negative weight when moving away from goal (to avoid driving unnecessary circles when train in contin. action space)
                     w = 0.0
-                    if (self.last_following_goal_dist - goal_in_robot_frame[3]) > 0 and goal_in_robot_frame[3] >= 3.0:
+                    if (self.last_following_goal_dist - goal_in_robot_frame[3]) > 0 and goal_in_robot_frame[3] >= 4.0:
                         w = 0.018*np.exp(1-current_time_step)
-                        # print(' safe  getting closer')
-                    elif (self.last_following_goal_dist - goal_in_robot_frame[3] ) < 0 and goal_in_robot_frame[3] >= 3.0 :
-                        # print(' safe  getting further')
+                    elif (self.last_following_goal_dist - goal_in_robot_frame[3] ) < 0 or goal_in_robot_frame[3] < 4.0 :
                         w = -0.05*np.exp(1)
-                    elif goal_in_robot_frame[3] >= 3.0 :
+                    else    :
                         w = -0.03
-                    elif (self.last_following_goal_dist - goal_in_robot_frame[3]) < 0 and goal_in_robot_frame[3] < 3.0:
-                        w = 0.018*np.exp(1-current_time_step)
-                        # print(' NOOOOO  getting furthr')
-
-                    elif (self.last_following_goal_dist - goal_in_robot_frame[3] ) > 0 and goal_in_robot_frame[3] < 3.0 :
-                        # print(' NOOOOO  getting closer')
                  
-                        w = -0.05*np.exp(1)
-                    elif goal_in_robot_frame[3] < 3.0 :
-                        w = -0.03
 
-                    
-                  
                     reward = round(w, 5)
                     self.curr_reward += reward
                     
