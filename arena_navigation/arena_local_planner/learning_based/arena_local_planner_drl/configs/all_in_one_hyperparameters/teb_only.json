@@ -1,0 +1,6 @@
+ {
+  "models": {
+    "teb": ["teb_static_obst.yaml"],
+    "teb_names": ["teb"]
+  }
+}

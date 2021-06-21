@@ -1,0 +1,37 @@
+# Robot
+max_vel_x: 0.3
+max_vel_x_backwards: 0.15
+max_vel_y: 0.0
+max_vel_theta: 2.7
+acc_lim_x: 5 # Robot is able to reach max_vel instantly
+acc_lim_theta: 35 # Robot is able to reach max_vel instantly
+min_turning_radius: 0.0 # diff-drive robot (can turn on place!) 
+
+# Obstacles
+min_obstacle_dist: 0.5 # TODO play with this parameter
+inflation_dist: 0.3
+include_costmap_obstacles: True
+include_dynamic_obstacles: False
+
+weight_kinematics_forward_drive: 1000 # Disable backward movements
+yaw_goal_tolerance: 10 # Rotation at goal is irrelevant
+
+local_costmap:
+ update_frequency: 10.0
+ publish_frequency: 1 # Publishing only relevant for visualization
+
+ obstacle_range: 3.0
+ raytrace_range: 3.5
+ robot_radius: 0.3
+ inflation_radius: 0.8
+ map_type: costmap
+
+ observation_sources: scan
+ scan: {data_type: LaserScan, marking: true, topic: scan, clearing: true}
+
+ rolling_window: true
+ width: 7 # 2x laser scan range
+ height: 7
+ resolution: 0.1
+ transform_tolerance: 0.5
+

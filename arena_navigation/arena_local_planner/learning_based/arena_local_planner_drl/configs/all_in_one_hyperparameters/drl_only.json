@@ -1,0 +1,6 @@
+{
+  "models": {
+    "drl": ["rule_04"],
+    "drl_names": ["drl_04"]
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "models": {
+    "rlca": true,
+    "drl": ["rule_04"],
+    "drl_names": ["drl_04"],
+    "teb": ["teb_static_obst.yaml"],
+    "teb_names": ["teb"],
+    "teb_move_base": false,
+    "teb_move_base_names": []
+  }
+}
