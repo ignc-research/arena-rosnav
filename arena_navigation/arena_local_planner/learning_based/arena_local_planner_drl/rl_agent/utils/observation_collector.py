@@ -15,6 +15,7 @@ from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Pose2D, PoseStamped, PoseWithCovarianceStamped
 from geometry_msgs.msg import Twist
 from pedsim_msgs.msg import AgentState
+from flatland_msgs.msg import DangerZone
 from arena_plan_msgs.msg import RobotState, RobotStateStamped
 from nav_msgs.msg import Path
 from rosgraph_msgs.msg import Clock
@@ -59,10 +60,14 @@ class ObservationCollector():
         self._radius_child= 0.25
         self._radius_elder= 0.3
         self._radius_robot= 0.3
+        self._radius_human_average=0.3
+
 
         # self._laser_num_beams = num_lidar_beams
         # for frequency controlling
-        self._action_frequency = 1/rospy.get_param("/robot_action_rate")
+        # self._action_frequency = 1/rospy.get_param("/robot_action_rate")
+        self.useDangerZone = rospy.get_param("/useDangerZone")
+
 
         self._clock = Clock()
         self._scan = LaserScan()
@@ -110,22 +115,36 @@ class ObservationCollector():
         self.last = 0
         self.last_r = 0
         self.agent_state=[]
+        self.dangerZone=[]
         #human state subscriber
         self.num_humans=num_humans
         for i in range(num_humans):
+            if self.useDangerZone:
+                self.dangerZone.append(f'{self.ns_prefix}pedsim_agent_{i+1}/danger_zone')
             self.agent_state.append(f'{self.ns_prefix}pedsim_agent_{i+1}/agent_state')
+        self._sub_danger_zone=[None]*self.num_humans
         self._sub_agent_state=[None]*num_humans
         self._human_type, self._human_position, self._human_vel= [None]*num_humans,[None]*num_humans,[None]*num_humans
-        self._human_behavior=[None]*num_humans
+        self._human_behavior, self._safe_dist, self._dangerAngle=[None]*self.num_humans,[None]*self.num_humans,[None]*self.num_humans
+        self._dangerCenter=[None]*self.num_humans
         self._human_type =np.array(self._human_type)
         self._human_position=np.array(self._human_position)
         self._human_vel=np.array(self._human_vel)
         self._human_behavior=np.array(self._human_behavior)
+        #declaration of danger zone infos
+        self._safe_dist=np.array(self._safe_dist)
+        self._dangerAngle=np.array(self._dangerAngle)
+        self._dangerCenter=np.array(self._dangerCenter)
         for i, topic in enumerate(self.agent_state):
+            if self.useDangerZone:
+                self._sub_danger_zone[i]=message_filters.Subscriber(self.dangerZone[i], DangerZone)
             self._sub_agent_state[i]=message_filters.Subscriber(topic, AgentState)
 
         # message_filters.TimeSynchronizer: call callback only when all sensor info are ready
-        self.sychronized_list=[self._scan_sub, self._robot_state_sub]+self._sub_agent_state #[self._scan_sub, self._robot_state_sub]+self._adult+self._child+self._elder
+        if self.useDangerZone:
+            self.sychronized_list=[self._scan_sub, self._robot_state_sub]+self._sub_agent_state + self._sub_danger_zone #[self._scan_sub, self._robot_state_sub]+self._adult+self._child+self._elder
+        else:
+            self.sychronized_list=[self._scan_sub, self._robot_state_sub]+self._sub_agent_state #[self._scan_sub, self._robot_state_sub]+self._adult+self._child+self._elder
         self.ts = message_filters.ApproximateTimeSynchronizer(self.sychronized_list, 10, slop=0.01) #,allow_headerless=True)
         self.ts.registerCallback(self.callback_observation_received)
 
@@ -135,14 +154,17 @@ class ObservationCollector():
     def get_observations(self):
         # apply action time horizon
         self._flag_all_received=False
-        if self._is_train_mode: 
-        # sim a step forward until all sensor msg uptodate
-            i=0
+        i_train = 0
+        i_time = 0.0
+        if self._is_train_mode:
+            # sim a step forward until all sensor msg uptodate            
             while(self._flag_all_received==False):
                 # self._action_frequency
+                # print('entered locking area')
                 self.call_service_takeSimStep(0.1)
-                i+=1
+                i_train +=  1
                 time.sleep(0.01)
+                i_time += 0.11
             # print(f"Current observation takes {i} steps for Synchronization")
         else:
             try:
@@ -213,6 +235,13 @@ class ObservationCollector():
         rho_behavior_child = np.array([],dtype=object).reshape(0, 2)
         rho_behavior_elder = np.array([],dtype=object).reshape(0, 2)
 
+        isInDangerZone_adult = np.array([],dtype=bool).reshape(0,1)
+        isInDangerZone_child = np.array([],dtype=bool).reshape(0,1)
+        isInDangerZone_elder = np.array([],dtype=bool).reshape(0,1)
+        RF_And_Dc_adult = np.array([],dtype=float).reshape(0,2)
+        RF_And_Dc_child = np.array([],dtype=float).reshape(0,2)
+        RF_And_Dc_elder = np.array([],dtype=float).reshape(0,2)
+
         count_observable_humans=0
         for i, ty in enumerate(self._human_type):
             # filter the obstacles which are not in the visible range of the robot
@@ -220,21 +249,39 @@ class ObservationCollector():
                 continue
             else:
                 count_observable_humans=count_observable_humans+1
+
+            rho_behavior=np.array([rho_humans[i],self._human_behavior[i]],dtype=object)
+            state_human_in_robot_frame=ObservationCollector.rotate(self.robot_self_state[:2]+[self._human_position[i].x, self._human_position[i].y, self._human_vel[i].linear.x,self._human_vel[i].linear.y], self.rot)
+
             if ty==0: # adult
-                rho_behavior=np.array([rho_humans[i],self._human_behavior[i]],dtype=object)
                 rho_behavior_adult=np.vstack([rho_behavior_adult, rho_behavior])
                 #determine the safe_dist for every human
                 if self._human_behavior[i] =='talking':
                     safe_dist_=self.safe_dist_talking
                 else:
                     safe_dist_=self.safe_dist_adult
+
                 #robot centric 
-                state=ObservationCollector.rotate(self.robot_self_state[:2]+[self._human_position[i].x, self._human_position[i].y, self._human_vel[i].linear.x,self._human_vel[i].linear.y], self.rot)
-                obs=np.array(self.robot_self_state+[rho_humans[i], theta_humans[i]]+state+[safe_dist_ ,self._radius_adult,
-                                                self._radius_adult+safe_dist_+self._radius_robot,self._human_behavior_token[i]])
-                merged_obs = np.hstack([merged_obs,obs])
+                if not self.useDangerZone:
+                    obs=np.array(self.robot_self_state+[rho_humans[i], theta_humans[i]]+state_human_in_robot_frame+[safe_dist_ ,self._radius_adult,
+                                                    self._radius_adult+safe_dist_+self._radius_robot,self._human_behavior_token[i]])
+                    merged_obs = np.hstack([merged_obs,obs])
+                else:
+                    angle=self._get_robot_pose_in_human_frame(self._dangerCenter[i], self._human_position[i])
+                    # state_human_in_robot_frame=ObservationCollector.rotate(self.robot_self_state[:2]+[self._human_position[i].x, self._human_position[i].y, self._human_vel[i].linear.x,self._human_vel[i].linear.y], self.rot)
+                    rot_human=np.arctan2(self._subgoal.y - self._dangerCenter[i][1], self._subgoal.x - self._dangerCenter[i][0])
+                    state_robot_in_human_frame=ObservationCollector.rotate([self._human_position[i].x, self._human_position[i].y,self._robot_pose.x, self._robot_pose.y, self._robot_vel.linear.x, self._robot_vel.linear.y], self.rot) #rot_human
+                    obs=np.array(self.robot_self_state+[rho_humans[i], theta_humans[i]]+state_human_in_robot_frame+state_robot_in_human_frame+[self._safe_dist[i],self._radius_human_average,
+                                                    self._radius_human_average+self._safe_dist[i]+self._radius_robot, angle, -self._dangerAngle[i]/2, self._dangerAngle[i]/2])
+                    # print('single size', obs.shape[0])
+                    merged_obs = np.hstack([merged_obs,obs])
+                    isIn=self.isInDangerZone(rho_humans[i],self._safe_dist[i], angle, self._dangerAngle[i])
+                    # print(i, 'isin danger', isIn)
+                    isInDangerZone_adult=np.vstack([isInDangerZone_adult,isIn])
+                    RF_And_Dc_Row=np.array([self._safe_dist[i]-self._radius_human_average,rho_humans[i]-self._radius_human_average-self._radius_robot]).reshape(1,2)
+                    RF_And_Dc_adult=np.vstack([RF_And_Dc_adult,RF_And_Dc_Row])
             elif ty==1: # child
-                rho_behavior=np.array([rho_humans[i],self._human_behavior[i]],dtype=object)
+                # rho_behavior=np.array([rho_humans[i],self._human_behavior[i]],dtype=object)
                 rho_behavior_child=np.vstack([rho_behavior_child, rho_behavior])
                 #determine the safe_dist for every human
                 if self._human_behavior[i] =='talking':
@@ -242,12 +289,25 @@ class ObservationCollector():
                 else:
                     safe_dist_=self.safe_dist_child
                 #robot centric 
-                state=ObservationCollector.rotate(self.robot_self_state[:2]+[self._human_position[i].x, self._human_position[i].y, self._human_vel[i].linear.x,self._human_vel[i].linear.y],self.rot)
-                obs=np.array(self.robot_self_state+[rho_humans[i], theta_humans[i]]+state+[safe_dist_,self._radius_child,
-                                                self._radius_child+safe_dist_+self._radius_robot,self._human_behavior_token[i]])
-                merged_obs = np.hstack([merged_obs,obs])
+                if not self.useDangerZone:
+                # state=ObservationCollector.rotate(self.robot_self_state[:2]+[self._human_position[i].x, self._human_position[i].y, self._human_vel[i].linear.x,self._human_vel[i].linear.y],self.rot)
+                    obs=np.array(self.robot_self_state+[rho_humans[i], theta_humans[i]]+state_human_in_robot_frame+[safe_dist_,self._radius_child,
+                                                    self._radius_child+safe_dist_+self._radius_robot,self._human_behavior_token[i]])
+                    merged_obs = np.hstack([merged_obs,obs])
+                else:
+                    angle=self._get_robot_pose_in_human_frame(self._dangerCenter[i], self._human_position[i])
+                    rot_human=np.arctan2(self._subgoal.y - self._dangerCenter[i][1], self._subgoal.x - self._dangerCenter[i][0])
+                    state_robot_in_human_frame=ObservationCollector.rotate([self._human_position[i].x, self._human_position[i].y,self._robot_pose.x, self._robot_pose.y, self._robot_vel.linear.x, self._robot_vel.linear.y], self.rot) #rot_human
+                    obs=np.array(self.robot_self_state+[rho_humans[i], theta_humans[i]]+state_human_in_robot_frame+state_robot_in_human_frame+[self._safe_dist[i],self._radius_human_average,
+                                                    self._radius_human_average+self._safe_dist[i]+self._radius_robot, angle, -self._dangerAngle[i]/2, self._dangerAngle[i]/2])
+                    merged_obs = np.hstack([merged_obs,obs])
+                    isIn=self.isInDangerZone(rho_humans[i],self._safe_dist[i], angle, self._dangerAngle[i])
+                    isInDangerZone_child=np.vstack([isInDangerZone_child,isIn])
+                    RF_And_Dc_Row=np.array([self._safe_dist[i]-self._radius_human_average,rho_humans[i]-self._radius_human_average-self._radius_robot]).reshape(1,2)
+                    RF_And_Dc_child=np.vstack([RF_And_Dc_child,RF_And_Dc_Row])
+
             elif ty==3: # elder
-                rho_behavior=np.array([rho_humans[i],self._human_behavior[i]],dtype=object)
+                # rho_behavior=np.array([rho_humans[i],self._human_behavior[i]],dtype=object)
                 rho_behavior_elder=np.vstack([rho_behavior_elder, rho_behavior])
                 #determine the safe_dist for every human
                 if self._human_behavior[i] =='talking':
@@ -255,13 +315,33 @@ class ObservationCollector():
                 else:
                     safe_dist_=self.safe_dist_elder
                 #robot centric 
-                state=ObservationCollector.rotate(self.robot_self_state[:2]+[self._human_position[i].x, self._human_position[i].y, self._human_vel[i].linear.x,self._human_vel[i].linear.y], self.rot)
-                obs=np.array(self.robot_self_state+[rho_humans[i], theta_humans[i]]+state+[safe_dist_,self._radius_elder,
-                                                self._radius_elder+safe_dist_+self._radius_robot, self._human_behavior_token[i]])
-                merged_obs = np.hstack([merged_obs,obs])
+                if not self.useDangerZone:
+                # state=ObservationCollector.rotate(self.robot_self_state[:2]+[self._human_position[i].x, self._human_position[i].y, self._human_vel[i].linear.x,self._human_vel[i].linear.y], self.rot)
+                    obs=np.array(self.robot_self_state+[rho_humans[i], theta_humans[i]]+state_human_in_robot_frame+[safe_dist_,self._radius_elder,
+                                                    self._radius_elder+safe_dist_+self._radius_robot, self._human_behavior_token[i]])
+                    merged_obs = np.hstack([merged_obs,obs])
+                else:
+                    angle=self._get_robot_pose_in_human_frame(self._dangerCenter[i], self._human_position[i])
+                    rot_human=np.arctan2(self._subgoal.y - self._dangerCenter[i][1], self._subgoal.x - self._dangerCenter[i][0])
+                    state_robot_in_human_frame=ObservationCollector.rotate([self._human_position[i].x, self._human_position[i].y,self._robot_pose.x, self._robot_pose.y, self._robot_vel.linear.x, self._robot_vel.linear.y], self.rot) #rot_human
+                    obs=np.array(self.robot_self_state+[rho_humans[i], theta_humans[i]]+state_human_in_robot_frame+state_robot_in_human_frame+[self._safe_dist[i],self._radius_human_average,
+                                                    self._radius_human_average+self._safe_dist[i]+self._radius_robot, angle, -self._dangerAngle[i]/2, self._dangerAngle[i]/2])
+                    merged_obs = np.hstack([merged_obs,obs])
+                    isIn=self.isInDangerZone(rho_humans[i],self._safe_dist[i], angle, self._dangerAngle[i])
+                    isInDangerZone_elder=np.vstack([isInDangerZone_elder,isIn])
+                    RF_And_Dc_Row=np.array([self._safe_dist[i]-self._radius_human_average,rho_humans[i]-self._radius_human_average-self._radius_robot]).reshape(1,2)
+                    RF_And_Dc_elder=np.vstack([RF_And_Dc_elder,RF_And_Dc_Row])
+                    
         obs_dict['adult_in_robot_frame'] = rho_behavior_adult
         obs_dict['child_in_robot_frame'] = rho_behavior_child
         obs_dict['elder_in_robot_frame'] = rho_behavior_elder
+        if self.useDangerZone:
+            obs_dict['danger_zone_adult'] = isInDangerZone_adult
+            obs_dict['danger_zone_child'] = isInDangerZone_child
+            obs_dict['danger_zone_elder'] = isInDangerZone_elder
+            obs_dict['RF_and_Dc_adult'] = RF_And_Dc_adult
+            obs_dict['RF_and_Dc_child'] = RF_And_Dc_child
+            obs_dict['RF_and_Dc_elder'] = RF_And_Dc_elder
         #TODO more proper method is needed to supplement info blanks (finished)
         if count_observable_humans==0:
             obs_empty=np.array(self.robot_self_state+[0]*10)
@@ -278,7 +358,7 @@ class ObservationCollector():
             merged_obs=np.hstack([merged_obs,np.ones([-observation_blank,])*1000])
         elif observation_blank>0:
             merged_obs=merged_obs[:-observation_blank]        
-        return merged_obs, obs_dict
+        return merged_obs, obs_dict, (i_train, i_time)
 
     @staticmethod
     def _get_pose_in_robot_frame(agent_pos: Pose2D, robot_pos: Pose2D):
@@ -364,8 +444,16 @@ class ObservationCollector():
     def callback_observation_received(self, *msg):
         self._scan=self.process_scan_msg(msg[0])
         self._robot_pose,self._robot_vel=self.process_robot_state_msg(msg[1])
-        self.callback_agent_state(msg[2:])
+        self.callback_agent_state(msg[2:self.num_humans+2])
+        if self.useDangerZone:
+            self.callback_danger_zone(msg[self.num_humans+2:])
         self._flag_all_received=True
+
+    def callback_danger_zone(self, msg):
+            for i, m in enumerate(msg):
+                self._safe_dist[i] = m.dangerZoneRadius+self._radius_human_average #radius of human
+                self._dangerAngle[i]=m.dangerZoneAngle
+                self._dangerCenter[i]=m.dangerZoneCenter
 
     def callback_agent_state(self, msg):
             for i, m in enumerate(msg):
@@ -424,7 +512,10 @@ class ObservationCollector():
     def setObservationSpace(self):
         # define observation_space
         self.num_humans_observation_max=21
-        self.human_state_size=19
+        if self.useDangerZone:
+            self.human_state_size=25
+        else:
+            self.human_state_size=19
         self.observation_space = ObservationCollector._stack_spaces((
             spaces.Box(low=-np.PINF, high=np.PINF, shape=(1,),dtype=np.float64), #time
             spaces.Box(low=0.0, high=self.lidar_range, shape=(self.num_lidar_beams,),dtype=np.float64), #lidar
@@ -432,24 +523,23 @@ class ObservationCollector():
         ))
 
     def isInViewRange(self, distance, angleRange, rho_human, theta_human):
-        if rho_human <= distance and theta_human <= angleRange[1] and theta_human >= angleRange[0]:
+        if rho_human<=distance and theta_human<=angleRange[1] and theta_human>=angleRange[0]:
             return True
         else:
             return False
 
-    def calculateDangerZone(self, vx, vy):
-        a = 0.55
-        r_static = 0.8
-        v = np.linalg.norm([vx, vy])
-        radius = a*v+ r_static
-        theta = 11*np.pi/6* np.exp(-1.4*v)+ np.pi/6
-        return radius, theta
+    def isInDangerZone(self, distance, safeDistance, angle, angleRange):
+        # angle=self._get_robot_pose_in_human_frame(center, human_pos)
+        if distance < safeDistance and (angle >= -angleRange/2 or angle <= angleRange/2):
+            return True
+        else:
+            return False
 
-    def _get_robot_pose_in_human_frame(robot_pos: Pose2D, human_pos: Pose2D):
-        y_relative = robot_pos.y - human_pos.y
-        x_relative = robot_pos.x - human_pos.x
+    def _get_robot_pose_in_human_frame(self, center, human_pos: Pose2D):
+        y_relative = self._robot_pose.y - center[1]
+        x_relative = self._robot_pose.x - center[0]
         theta = (np.arctan2(y_relative, x_relative) -
-                 robot_pos.theta+5*np.pi) % (2*np.pi)-np.pi
+                 human_pos.theta+5*np.pi) % (2*np.pi)-np.pi
         return theta
 
     @staticmethod
