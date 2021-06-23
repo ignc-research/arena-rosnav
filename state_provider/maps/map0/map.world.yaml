@@ -1,0 +1,34 @@
+properties: 
+  # optional, defaults to 10, number of velocity iterations for the Box2D
+  # physics solver
+  velocity_iterations: 10
+
+  # optional, defaults to 10, number of position iterations for the Box2D
+  # physics solver
+  position_iterations: 10
+layers: 
+  - name: "static"
+    map: "map.yaml"  # leading / denotes absolute file path, otherwise relative
+    color: [0, 1, 0, 1]  # List of floats [r,g,b,a] to color debug boundary
+    
+  - name: "3d"
+    map: "map3d.yaml"  # leading / denotes absolute file path, otherwise relative
+    color: [1.0, 0.0, 0.0, 0.5]  # List of floats [r,g,b,a] to color debug boundary
+
+
+# models:
+#   - name: cleaner1
+#     namespace: "aaaaaaaaaaaBBBBBB" 
+#     pose: [13, 0, 0]
+#     model: "/headless/project/ROS/ws_flatland/src/flatland_models/obstacles/cleaner.model.yaml"
+
+# plugins:
+#   - name: test1
+#     type: RandomWall
+#     layer: "static"
+#     num_of_walls: 100
+#     wall_wall_dist: 4
+#     double_wall: true
+#     robot_name: "cleaner1"
+
+    
