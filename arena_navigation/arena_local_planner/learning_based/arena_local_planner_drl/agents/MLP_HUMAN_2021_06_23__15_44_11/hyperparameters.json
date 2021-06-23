@@ -1,5 +1,5 @@
 {
-    "agent_name": "MLP_HUMAN_2021_06_09__23_16_51",
+    "agent_name": "MLP_HUMAN_2021_06_23__15_44_11",
     "robot": "myrobot",
     "batch_size": 40960,
     "gamma": 0.98,
@@ -12,12 +12,12 @@
     "m_batch_size": 8,
     "n_epochs": 3,
     "clip_range": 0.2,
-    "train_max_steps_per_episode": 1012,
-    "eval_max_steps_per_episode": 1012,
+    "train_max_steps_per_episode": 512,
+    "eval_max_steps_per_episode": 512,
     "goal_radius": 0.25,
     "reward_fnc": "rule_03",
     "discrete_action_space": false,
     "normalize": true,
     "task_mode": "staged",
-    "curr_stage": 14
+    "curr_stage": 1
 }
