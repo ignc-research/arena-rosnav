@@ -34,7 +34,7 @@ class FlatlandBody():
         self.color = QtGui.QColor("red")
         self.linear_damping = 0.0
         self.angular_damping = 0.0
-        self.footprints = []
+        self.footprints = []  # list of FlatlandFootprint objects
 
 
 class FlatlandModel(QtCore.QObject):
