@@ -26,7 +26,10 @@ def create_yaml_files(map_name,dir_path):
     with open(dir_path+"/{}/empty.yaml".format(map_name), 'w') as outfile:
         yaml.dump(empty_yaml, outfile, sort_keys=False,default_flow_style=None)
     world_yaml_properties = {"properties":{"velocity_iterations": 10,"position_iterations": 10}}
-    world_yaml_layers = {"layers":[{"name": "static","map": "empty.yaml","color": [0, 1, 0, 1]},{"name": "map","map": "map.yaml","color": [0, 0, 1, 1]}]}
+    world_yaml_layers = {"layers":[
+        {"name": "static","map": "empty.yaml","color": [0, 1, 0, 1]}#,
+        # {"name": "map","map": "map.yaml","color": [0, 0, 1, 1]}
+        ]}
     with open(dir_path+"/{}/map.world.yaml".format(map_name), 'w') as outfile:
         yaml.dump(world_yaml_properties, outfile, sort_keys=False,default_flow_style=False) # somehow the first part must be with default_flow_style=False
         yaml.dump(world_yaml_layers, outfile, sort_keys=False,default_flow_style=None) # 2nd part must be with default_flow_style=None

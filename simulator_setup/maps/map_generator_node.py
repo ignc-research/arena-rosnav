@@ -66,6 +66,7 @@ class MapGenerator():
             obstacle_number = self.obsnum,
             obstacle_extra_radius = self.obsrad
         )
+        make_image(map)
         map = (map*100).flatten() # map currently [0,1] 2D np array needs to be flattened for publishing OccupancyGrid.data
         return map
 
