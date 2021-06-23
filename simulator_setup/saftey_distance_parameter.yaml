@@ -43,5 +43,5 @@ obstacle radius:
   elder: 0.3
   forklift : 0.7
   servicerobot : 0.6
-  random_wanderer: 0.3
+  random_wanderer: 0.4
   

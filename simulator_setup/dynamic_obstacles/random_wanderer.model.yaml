@@ -28,7 +28,7 @@ plugins:
     linear_velocity: 0.3
     angular_velocity: 0.7
     safety_dist_body: safety_dist_circle
-    safety_dist: 1.2
+    safety_dist: 0.5
   
   - type: Laser
     name: laser_front
