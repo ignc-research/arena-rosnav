@@ -39,9 +39,9 @@ class newBag():
         # csv dir
         self.csv_dir         = bag_name.replace(".bag","")
         # bag topics
-        self.odom_topic      = "/sensorsim/police/odom"
-        self.collision_topic = "/sensorsim/police/collision"
-        self.subgoal_topic   = "/sensorsim/police/subgoal"
+        self.odom_topic      = "/eval_sim_odom"
+        self.collision_topic = "/police/collision"
+        self.subgoal_topic   = "/police/subgoal"
         self.gp_topic        = "/sensorsim/police/gplan"
         self.wpg_topic       = "/sensorsim/police/subgoal_wpg"
         # global apth
@@ -875,8 +875,8 @@ def getMap(msg):
     points_x = []
     points_y = []
     # print(msg.markers[0]) map0 -16.6 -6.65  ,  map1 empty: -6 -6  , open field: 0 0
-    orig_x = -16.6
-    orig_y = -6.65
+    orig_x = -6
+    orig_y = -6
     for p in msg.markers[0].points:
     #     if  2 < p.y < 25 :
         points_x.append( p.x + orig_x)
