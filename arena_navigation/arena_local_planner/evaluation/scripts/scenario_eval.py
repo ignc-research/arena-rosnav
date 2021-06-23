@@ -40,11 +40,11 @@ class newBag():
         # csv dir
         self.csv_dir         = bag_name.replace(".bag","")
         # bag topics
-        self.odom_topic      = "/sensorsim/police/odom"
-        self.collision_topic = "/sensorsim/police/collision"
-        self.subgoal_topic   = "/sensorsim/police/subgoal"
-        self.gp_topic        = "/sensorsim/police/gplan"
-        self.wpg_topic       = "/sensorsim/police/subgoal_wpg"
+        self.odom_topic      = "/police/odom"
+        self.collision_topic = "/police/collision"
+        self.subgoal_topic   = "/police/subgoal"
+        self.gp_topic        = "/police/gplan"
+        self.wpg_topic       = "/police/subgoal_wpg"
         # global apth
         self.plot_gp = True
 
@@ -190,11 +190,15 @@ class newBag():
 
                 # if current_time > reset-6 and n < len(t_reset)-1 and x < start_x:
                 # if current_time > reset and n < len(t_reset)-1:
-                if dist2_oldp > 1 and n < len(t_reset)-1:
+                res_tol = 5
+                if dist2_oldp > res_tol and n < len(t_reset)-1:
                     n += 1
                     # store the run
+                    # print("run_"+str(n))
+                    print(pose_x)
                     if n in select_run or len(select_run) == 0:
                         bags["run_"+str(n)] = [pose_x, pose_y, t, col_xy, subgoal_x, subgoal_y, wpg_x, wpg_y, vel_total]
+
 
                     # reset 
                     wpg_x     = []
@@ -213,13 +217,14 @@ class newBag():
                     old_x = None
                     old_y = None
 
-                if n+1 in select_run or len(select_run) == 0 and dist2_oldp < 1:
+                if n+1 in select_run or len(select_run) == 0 and dist2_oldp < res_tol:
 
                     # append pos if pose is empty
                     # if len(pose_x) == 0:
                     #     pose_x.append(x)
                     #     pose_y.append(y)
-                  
+                    # print("run_"+str(n))
+                   
                     pose_x.append(x)
                     pose_y.append(y)
                     vel_total.append(v_total)
@@ -263,8 +268,8 @@ class newBag():
 
 
             # remove first 
-            if "run_1" in bags:    
-                bags.pop("run_1")
+            #if "run_1" in bags:    
+                #bags.pop("run_1")
 
             df = pd.DataFrame(data=bags)
             run_csv = self.csv_dir + "/" + self.csv_dir.rsplit('/', 1)[-1] + ".csv"
@@ -380,9 +385,7 @@ class newBag():
 
 
         for run in bags:
-            if run == "run_5":
-                
-
+            if True:#run == "run_5":
                 pose_x = bags[run][0]
                 pose_y = bags[run][1]
                 sg_x   = bags[run][4]

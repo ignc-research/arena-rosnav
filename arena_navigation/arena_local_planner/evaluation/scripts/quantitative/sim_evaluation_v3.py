@@ -47,10 +47,10 @@ def parsing(): # define what flags user can/must give as terminal input
 
 def summary(df,cols,f): # summary of the json files and returning as single row as pandas df with file name as index
     l =[]
-    l.append(np.mean(df["time"][1:-1])) # calculate mean time
-    l.append(np.mean(df["path"][1:-1])) # calculate mean path length
-    l.append(np.float(np.sum(df["collision"][1:-1]))) # calculate total number of collisions
-    l.append(np.sum(df["collision"]<3)/len(df["collision"][1:-1])*100) # calculate fraction of successes
+    l.append(np.mean(df["time"])) # calculate mean time
+    l.append(np.mean(df["path"])) # calculate mean path length
+    l.append(np.float(np.sum(df["collision"]))) # calculate total number of collisions
+    l.append(np.sum(df["collision"]<3)/len(df["collision"])*100) # calculate fraction of successes
     index_name = [f.split("/")[-1].replace(".json","")] # get the file name with out .json ending
     return pd.DataFrame([l], columns=cols, index=index_name)
 
@@ -223,8 +223,8 @@ def plot_metrics(data,labels,colors,wpgen,planner,maps,param_list,quantity,metri
                     #captions
                     caption = ""
                     if metric == "path":
-                        caption = "avg. Path Lenght [m]"
-                        title = "Path Lenght"
+                        caption = "avg. Path Length [m]"
+                        title = "Path Length"
                     if metric == "time":
                         caption = "avg. Time t.g. [s]"
                         title = "Time t.g."
@@ -328,8 +328,8 @@ def plot_metrics(data,labels,colors,wpgen,planner,maps,param_list,quantity,metri
                   #captions
                     caption = ""
                     if metric == "path":
-                        caption = "avg. Path Lenght [m]"
-                        title = "Path Lenght"
+                        caption = "avg. Path Length [m]"
+                        title = "Path Length"
                     if metric == "time":
                         caption = "avg. Time t.g. [s]"
                         title = "Time t.g."
@@ -462,8 +462,8 @@ def get_all_plot(data,labels,colors,wpgen,planner,param_list,quantity,metrics,sh
                 # captions
                 caption = ""
                 if metric == "path":
-                    caption = "avg. Path Lenght [m]"
-                    title = "Path Lenght"
+                    caption = "avg. Path Length [m]"
+                    title = "Path Length"
                 if metric == "time":
                     caption = "avg. Time t.g. [s]"
                     title = "Time t.g."
@@ -521,11 +521,11 @@ if __name__ == "__main__": # execute code
     ### this code block creates dataframes containing all evaluation file's summarized data ###
     # hyperparameters specifying the contents of files and the wanted structure for the datasets
     cols = ["time","path","collision","success"]    # define the quantities to measure
-    obs = ["obs10","obs20"] # define different obstacles numbers, names must match file names
+    obs = ["obs10","obs20", "obs30"] # define different obstacles numbers, names must match file names
     vel = ["vel03"] # define different velocities, names must match file names
-    maps = ["map1","empty","open", "map0"] # define the maps trained on, names must match file names
-    wpgen = ["spatialhorizon","classic"] # NOTE: classic MUST be in the back
-    planner = ["R2","R4","MPC","TEB"] # all planners, NOTE: classic planners MUST be in the back!!!
+    maps = ["empty","map0","open"] # define the maps trained on, names must match file names
+    wpgen = ["spatialhorizon", "classic"] # NOTE: classic MUST be in the back
+    planner = ["R0","R1","R2","R4","RLCA","MPC", "TEB"] # all planners, NOTE: classic planners MUST be in the back!!!
     classic = ["MPC","TEB"] # classic planners
 
     # different kinds of datasets for visualization and latex table formatting
@@ -562,10 +562,10 @@ if __name__ == "__main__": # execute code
         "drl3": "DRL3",
         "RLCA":"RLCA",
         "ego": "EGO",
-        "R0": "DRL1",
-        "R1": "DRL2",
-        "R2": "DRL3",
-        "R4": "DRL4",
+        "R0": "R0",
+        "R1": "R1",
+        "R2": "R2",
+        "R4": "R4",
         "ego": "EGO",
         "spatialhorizon": "STH-WP",
         "timespace": "TS-WP",
@@ -599,6 +599,8 @@ if __name__ == "__main__": # execute code
         }
 
     data = clear_missings(data,maps,wpgen,planner,param_list,quantity)
+
+    # plotting metrics
     if metrics != "none":
         if byplanner:
             plot_metrics(data,labels,colors_wp,wpgen,planner,maps,param_list,quantity,metrics,legendsoff,show,classic,withclassic,byplanner,nosubtitle)     
@@ -606,4 +608,12 @@ if __name__ == "__main__": # execute code
             plot_metrics(data,labels,colors,wpgen,planner,maps,param_list,quantity,metrics,legendsoff,show,classic,withclassic,byplanner,nosubtitle)
         if allplot_quantity != "none":
             get_all_plot(data,labels,colors,wpgen,planner,param_list,allplot_quantity,metrics,show,classic)
-    ############
+    #########
+
+    # use for finding errors in the data/json files
+    # therefore command out the plotting metrics commands
+    # pd.set_option('display.max_rows', None) # commands to print everything in panda DataFrame
+    # pd.set_option('display.max_columns', None)
+    # pd.set_option('display.width', None)
+    # pd.set_option('display.max_colwidth', None)
+    # print(data)

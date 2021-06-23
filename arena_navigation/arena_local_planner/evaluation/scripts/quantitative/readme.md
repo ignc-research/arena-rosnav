@@ -72,9 +72,6 @@ When json files are missing, the script will substitute the missing files with z
 The flags --latex and --csv are sufficient to provide once.
 
 - Remark 4:
-When an KeyError occures its mostly involving the labels and/or color dictionary. Check your mappings whether they are complete.
-
-- Remark 5:
 The plots will be saved into the directory in which the script is run.
 
 - If you want to get every possible plots:
@@ -115,3 +112,30 @@ R1   tab:purple,
 R2   tab:orange,
 R4   tab:cyan
 ```
+
+# Error Handling
+## Multiple json files for one simulation setup
+The following error is caused by having multiple json with the same simulation specifications in the path directory. E.g. R2_map0_obs20_vel03_spatialhorizon_x.json and R2_map0_obs20_vel03_spatialhorizon.json.
+
+```
+Traceback (most recent call last):
+  File "/home/ducanor/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/sim_evaluation_v3.py", line 606, in <module>
+    plot_metrics(data,labels,colors,wpgen,planner,maps,param_list,quantity,metrics,legendsoff,show,classic,withclassic,byplanner,nosubtitle)
+  File "/home/ducanor/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/sim_evaluation_v3.py", line 325, in plot_metrics
+    ax.bar(r[plan], oq_data[metric], width=barwidth, label=labels[plan],  color=colors[plan], alpha=1-a/l)
+  File "/home/ducanor/python_env/rosnav/lib/python3.6/site-packages/matplotlib/__init__.py", line 1565, in inner
+    return func(ax, *map(sanitize_sequence, args), **kwargs)
+  File "/home/ducanor/python_env/rosnav/lib/python3.6/site-packages/matplotlib/axes/_axes.py", line 2341, in bar
+    np.atleast_1d(x), height, width, y, linewidth)
+  File "<__array_function__ internals>", line 6, in broadcast_arrays
+  File "/home/ducanor/python_env/rosnav/lib/python3.6/site-packages/numpy/lib/stride_tricks.py", line 258, in broadcast_arrays
+    shape = _broadcast_shape(*args)
+  File "/home/ducanor/python_env/rosnav/lib/python3.6/site-packages/numpy/lib/stride_tricks.py", line 189, in _broadcast_shape
+    b = np.broadcast(*args[:32])
+ValueError: shape mismatch: objects cannot be broadcast to a single shape
+```
+
+Please make sure that for every simulation specification only one json file is delivered. For this purpose we prepared commands at the end of the sim_evaluation.py script to print out the whole pandas dataframe. Simply command out the plotting commands and run the sim_evaluation.py script. Now check for multiple entries and delete spare jsons.
+
+## KeyError
+When an KeyError occures its mostly involving the labels and/or color dictionary. Check your mappings whether they are complete and consistently named.
