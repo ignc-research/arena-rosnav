@@ -30,6 +30,7 @@
   <arg name="map_path" default="$(find simulator_setup)/maps/$(arg map_file)/map.yaml" />
   <param name="world_path" value="$(find simulator_setup)/maps/$(arg map_file)/map.world.yaml" />
   <param name="map_layer_path" value="$(find simulator_setup)/maps/$(arg map_file)/map_layer.yaml" />
+  <param name="map_file" value="$(arg map_file)" />
 
   <!-- the velocity of randomly genelized obstacles  -->
   <arg name="obs_vel" default="0.3" />
