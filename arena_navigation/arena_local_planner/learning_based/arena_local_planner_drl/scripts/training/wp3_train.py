@@ -125,14 +125,18 @@ def make_envs(with_ns: bool,
 
         if train:
             # train env
-            env = wp3Env(
-                train_ns, 
-                params['reward_fnc'], params['discrete_action_space'], 
-                goal_radius=params['goal_radius'], 
-                max_steps_per_episode=params['train_max_steps_per_episode'],
-                debug=args.debug, 
-                task_mode=params['task_mode'], curr_stage=params['curr_stage'], 
-                PATHS=PATHS)
+            env = Monitor(
+                wp3Env(
+                    train_ns, 
+                    params['reward_fnc'], params['discrete_action_space'], 
+                    goal_radius=params['goal_radius'], 
+                    max_steps_per_episode=params['train_max_steps_per_episode'],
+                    debug=args.debug, 
+                    task_mode=params['task_mode'], curr_stage=params['curr_stage'], 
+                    PATHS=PATHS
+                    ),
+                    PATHS.get('eval'), info_keywords=("done_reason", "is_success", "gp_len"))
+
         else:
             # eval env
             env = Monitor(
@@ -258,7 +262,7 @@ if __name__ == "__main__":
     # eval_freq: evaluate the agent every eval_freq train timesteps
     eval_cb = EvalCallback(
         eval_env=eval_env,          train_env=env,
-        n_eval_episodes=40,         eval_freq=20000, 
+        n_eval_episodes=40,         eval_freq=1, 
         log_path=PATHS['eval'],     best_model_save_path=PATHS['model'], 
         deterministic=True,         callback_on_eval_end=trainstage_cb,
         callback_on_new_best=stoptraining_cb)

@@ -299,7 +299,7 @@ class wp3Env(gym.Env):
             
         #wait for robot to reach the waypoint first
         #if self._step_counter - self._previous_time > 30:
-        if dist_robot_wp[0] < 0.6:
+        if dist_robot_wp[0] < 1.8:
             self._previous_time = self._step_counter
             _, obs_dict = self.observation_collector.get_observations()
             dist_robot_goal = obs_dict['goal_in_robot_frame']
