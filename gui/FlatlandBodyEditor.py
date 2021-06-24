@@ -2,6 +2,123 @@ from PyQt5 import QtGui, QtCore, QtWidgets
 from FlatlandModel import FlatlandBody, B2BodyType, FlatlandModel
 import random
 
+class ArenaQGraphicsPolygonItem(QtWidgets.QGraphicsPolygonItem):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.setFlags(
+            QtWidgets.QGraphicsItem.GraphicsItemFlag.ItemIsMovable |
+            QtWidgets.QGraphicsItem.GraphicsItemFlag.ItemIsSelectable |
+            QtWidgets.QGraphicsItem.GraphicsItemFlag.ItemSendsGeometryChanges
+            )
+        self.setAcceptHoverEvents(True)
+        self.footprint_widget = None
+        # handles for resizing
+        self.handle_size = 4  # length of one side of a rectangular handle
+        self.handles = []
+        self.updateHandlesPos()
+        self.point_index = -1
+
+    def handleAt(self, point):
+        """
+        Returns the resize handle below the given point.
+        """
+        for i, item in enumerate(self.handles):
+            if item.contains(point):
+                return i
+        return -1
+
+    def mousePressEvent(self, mouse_event):
+        """
+        Executed when the mouse is pressed on the item.
+        """
+        self.footprint_widget.dragging_polygon = True
+        self.point_index = self.handleAt(mouse_event.pos())
+        if self.point_index != -1:
+            self.mouse_press_pos = mouse_event.pos()
+            self.mouse_press_polygon = self.polygon()
+        return super().mousePressEvent(mouse_event)
+
+    def mouseMoveEvent(self, mouse_event):
+        """
+        Executed when the mouse is being moved over the item while being pressed.
+        """
+        if self.point_index != -1:
+            self.interactiveResize(self.point_index, mouse_event.pos())
+        else:
+            return super().mouseMoveEvent(mouse_event)
+
+    def mouseReleaseEvent(self, mouse_event):
+        """
+        Executed when the mouse is released from the item.
+        """
+        self.footprint_widget.dragging_polygon = False
+        self.point_index = -1
+        self.mouse_press_pos = None
+        self.mouse_press_polygon = None
+        return super().mouseReleaseEvent(mouse_event)
+
+    def interactiveResize(self, point_index_, mouse_pos):
+        polygon = self.polygon()
+        diff = mouse_pos - self.mouse_press_pos
+        polygon[point_index_] = self.mouse_press_polygon[point_index_] + diff
+        self.setPolygon(polygon)
+        self.footprint_widget.update_spin_boxes()
+
+    def setPolygon(self, *args):
+        super().setPolygon(*args)
+        self.updateHandlesPos()
+
+    def updateHandlesPos(self):
+        d = self.handle_size
+        self.handles = []
+        for point in self.polygon():
+            rect = QtCore.QRectF(point.x() - d / 2.0, point.y() - d / 2.0, d, d)
+            self.handles.append(rect)
+
+    def itemChange(self, change, value):
+        if change == QtWidgets.QGraphicsItem.GraphicsItemChange.ItemPositionChange:
+            self.footprint_widget.update_spin_boxes()
+
+        return super().itemChange(change, value)
+
+    def hoverMoveEvent(self, move_event):
+        """
+        Executed when the mouse moves over the shape (NOT PRESSED).
+        """
+        handle = self.handleAt(move_event.pos())
+        if handle != -1:
+            self.setCursor(QtCore.Qt.SizeFDiagCursor)
+        else:
+            self.setCursor(QtCore.Qt.ArrowCursor)
+
+        return super().hoverMoveEvent(move_event)
+
+    # def shape(self):
+    #     """
+    #     Returns the shape of this item as a QPainterPath in local coordinates.
+    #     """
+    #     path = QtGui.QPainterPath()
+    #     path.addPolygon(self.polygon())
+    #     if self.isSelected():
+    #         for rect in self.handles:
+    #             path.addRect(rect)
+    #     return path
+
+    # def paint(self, painter, option, widget=None):
+    #     """
+    #     Paint the node in the graphic view.
+    #     """
+    #     # painter.drawPolygon(self.polygon())
+
+    #     if self.isSelected():
+    #         painter.setPen(QtGui.QPen(QtGui.QColor(0, 0, 0), 0.1, QtCore.Qt.SolidLine))
+    #         for rect in self.handles:
+    #             painter.drawRect(rect)
+
+    #     super().paint(painter, option, widget)
+
+
+
 class ArenaQGraphicsView(QtWidgets.QGraphicsView):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -48,14 +165,16 @@ class ArenaQGraphicsView(QtWidgets.QGraphicsView):
 class FootprintWidget(QtWidgets.QFrame):
     index = 0
 
-    def __init__(self, polygon: QtWidgets.QGraphicsPolygonItem, scene: QtWidgets.QGraphicsScene, view: QtWidgets.QGraphicsView, **kwargs):
+    def __init__(self, polygon: ArenaQGraphicsPolygonItem, scene: QtWidgets.QGraphicsScene, view: QtWidgets.QGraphicsView, **kwargs):
         super().__init__(**kwargs)
         self.index = FootprintWidget.index
         FootprintWidget.index += 1
-        self.points = [[point.x(), point.y()] for point in polygon.polygon()]  # 2D array
-        self.polygon = polygon
+        self.spin_boxes = []  # 2D array holding QDoubleSpinBox objects, self.spin_boxes[i][1] returns the y value spin box for the i-th point in the polygon, self.spin_boxes[i][0] returns the x value
+        self.polygon_item = polygon
+        self.polygon_item.footprint_widget = self
         self.gscene = scene
         self.gview = view
+        self.dragging_polygon = False
         self.setup_ui()
 
     def setup_ui(self):
@@ -73,14 +192,25 @@ class FootprintWidget(QtWidgets.QFrame):
         self.points_frame.setLayout(QtWidgets.QVBoxLayout())
         self.layout().addWidget(self.points_frame)
 
-        button = QtWidgets.QPushButton("print points")
-        button.clicked.connect(lambda x: print(self.points))
-        self.layout().addWidget(button)
+        # buttons for adjusting number of points in polygon
+        button_widget = QtWidgets.QWidget()
+        button_widget.setLayout(QtWidgets.QHBoxLayout())
+        ## +
+        button_plus = QtWidgets.QPushButton("+")
+        button_plus.clicked.connect(lambda x: self.add_point())
+        button_widget.layout().addWidget(button_plus)
+        ## -
+        button_minus = QtWidgets.QPushButton("-")
+        button_minus.clicked.connect(self.remove_point)
+        button_widget.layout().addWidget(button_minus)
+        self.layout().addWidget(button_widget)
 
-        for i, point in enumerate(self.points):
-            self.add_point(i, point)
+        for point in self.polygon_item.polygon():
+            self.add_point(point)
 
-    def add_point(self, id, point=None):
+    def add_point(self, point: QtCore.QPointF = None):
+        new_spin_boxes = []
+
         # widget
         widget = QtWidgets.QWidget()
         widget.setLayout(QtWidgets.QHBoxLayout())
@@ -94,12 +224,14 @@ class FootprintWidget(QtWidgets.QFrame):
         ## spinbox
         x_spinbox = QtWidgets.QDoubleSpinBox()
         if point != None:
-            x_spinbox.setValue(point[0])
+            x_spinbox.setValue(point.x())
         else:
             x_spinbox.setValue(0.0)
         x_spinbox.setMinimum(-100.0)
         x_spinbox.setSingleStep(0.1)
-        x_spinbox.valueChanged.connect(lambda value: self.update_point(value, id, 0))
+        # x_spinbox.valueChanged.connect(lambda value: self.update_point(value, id, 0))
+        x_spinbox.valueChanged.connect(self.update_polygon)
+        new_spin_boxes.append(x_spinbox)
         widget.layout().addWidget(x_spinbox)
 
         # y value
@@ -109,28 +241,42 @@ class FootprintWidget(QtWidgets.QFrame):
         ## spinbox
         y_spinbox = QtWidgets.QDoubleSpinBox()
         if point != None:
-            y_spinbox.setValue(point[1])
+            y_spinbox.setValue(point.y())
         else:
             y_spinbox.setValue(0.0)
         y_spinbox.setMinimum(-100.0)
         y_spinbox.setSingleStep(0.1)
-        y_spinbox.valueChanged.connect(lambda value: self.update_point(value, id, 1))
+        y_spinbox.valueChanged.connect(self.update_polygon)
+        new_spin_boxes.append(y_spinbox)
         widget.layout().addWidget(y_spinbox)
 
-        if point == None:
-            point = [0.0, 0.0]
-            self.points.append(point)
-
-    def update_point(self, value, point_id, point_index):
-        self.points[point_id][point_index] = value
+        self.spin_boxes.append(new_spin_boxes)
         self.update_polygon()
-        
+
+    def remove_point(self):
+        '''
+        Removes the point that was added last.
+        '''
+        layout_ = self.points_frame.layout()
+        count = layout_.count()
+        if count > 3:
+            item = layout_.itemAt(count - 1)
+            layout_.removeItem(item)
+            self.spin_boxes.pop()
+            self.update_polygon()
 
     def update_polygon(self):
-        new_points = [QtCore.QPointF(element[0], element[1]) for element in self.points]
-        new_polygon = QtGui.QPolygonF(new_points)
-        self.polygon.setPolygon(new_polygon)
+        if not self.dragging_polygon:
+            new_points = [QtCore.QPointF(point_boxes[0].value(), point_boxes[1].value()) for point_boxes in self.spin_boxes]
+            # new_points = [QtCore.QPointF(element[0], element[1]) for element in self.points]
+            new_polygon = QtGui.QPolygonF(new_points)
+            self.polygon_item.setPolygon(self.polygon_item.mapFromScene(new_polygon))
 
+    def update_spin_boxes(self):
+        mapped_polygon = self.polygon_item.mapToScene(self.polygon_item.polygon())
+        for i, point in enumerate(mapped_polygon):
+            self.spin_boxes[i][0].setValue(point.x())
+            self.spin_boxes[i][1].setValue(point.y())
 
 class FlatlandBodyEditor(QtWidgets.QWidget):
     def __init__(self, id, model, **kwargs):
@@ -263,11 +409,10 @@ class FlatlandBodyEditor(QtWidgets.QWidget):
         pen.setCapStyle(QtCore.Qt.PenCapStyle.RoundCap)
         pen.setJoinStyle(QtCore.Qt.PenJoinStyle.RoundJoin)
         # add polygon to scene
-        polygon_item = self.gscene.addPolygon(polygon, pen, brush)
-        polygon_item.setFlags(QtWidgets.QGraphicsItem.GraphicsItemFlag.ItemIsMovable | QtWidgets.QGraphicsItem.GraphicsItemFlag.ItemIsSelectable)
-        # fit to view
-        # rect = self.gscene.itemsBoundingRect() + QtCore.QMarginsF(-20, -20, 40, 40)
-        # self.gview.fitInView(rect, mode=QtCore.Qt.AspectRatioMode.KeepAspectRatio)
+        polygon_item = ArenaQGraphicsPolygonItem(polygon)
+        polygon_item.setPen(pen)
+        polygon_item.setBrush(brush)
+        self.gscene.addItem(polygon_item)
 
         # add FootprintWidget to list
         self.footprints_frame.layout().insertWidget(0, FootprintWidget(polygon_item, self.gscene, self.gview))

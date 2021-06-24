@@ -13,6 +13,7 @@
   <arg name="show_pedsim_waypoints" default="true"/>
   <arg name="show_pedsim_walls" default="true"/>
   <arg name="republish_flatland_markers" default="true"/>
+  <arg name="use_joystick" default="false"/>
 
   <!-- Map parameters -->
   <arg name="map_file"        default="map_empty"/>
@@ -121,7 +122,7 @@
     "
     />
 
-  <include file="$(find teleop_twist_joy)/launch/teleop.launch">
+  <include file="$(find teleop_twist_joy)/launch/teleop.launch" if="$(arg use_joystick)">
     <arg name="config_filepath" value="/home/daniel/git/behaviormodels/xd3.config.yaml" />
   </include>
 
