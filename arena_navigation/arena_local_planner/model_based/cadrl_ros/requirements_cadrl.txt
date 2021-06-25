@@ -84,7 +84,7 @@ rosmsg
 rosnode
 rosparam
 rospkg==1.2.9
-rospy==1.14.10
+rospy
 rosservice==1.14.10
 rostest==1.14.10
 rostopic==1.14.10
