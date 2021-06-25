@@ -32,7 +32,7 @@ geneus==2.2.6
 genlisp==0.4.16
 genmsg==0.5.16
 gennodejs==2.0.1
-genpy==0.6.14
+genpy
 google-auth==1.24.0
 google-auth-oauthlib==0.4.2
 google-pasta==0.2.0
