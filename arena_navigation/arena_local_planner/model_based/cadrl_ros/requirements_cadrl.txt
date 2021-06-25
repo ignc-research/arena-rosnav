@@ -50,7 +50,7 @@ kiwisolver==1.3.1
 laser-geometry
 Markdown==3.3.3
 matplotlib==3.3.3
-message-filters==1.14.10
+message-filters
 numpy==1.19.5
 oauthlib==3.1.0
 opt-einsum==3.3.0
