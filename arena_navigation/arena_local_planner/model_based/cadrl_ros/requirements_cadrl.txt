@@ -74,7 +74,7 @@ rosboost-cfg==1.14.9
 rosclean==1.14.9
 roscreate==1.14.9
 rosgraph
-roslaunch==1.14.10
+roslaunch
 roslib==1.14.9
 roslint==0.11.2
 roslz4==1.14.10
