@@ -81,7 +81,7 @@ roslz4
 rosmake==1.14.9
 rosmaster
 rosmsg
-rosnode==1.14.10
+rosnode
 rosparam==1.14.10
 rospkg==1.2.9
 rospy==1.14.10
