@@ -82,7 +82,7 @@ rosmake==1.14.9
 rosmaster
 rosmsg
 rosnode
-rosparam==1.14.10
+rosparam
 rospkg==1.2.9
 rospy==1.14.10
 rosservice==1.14.10
