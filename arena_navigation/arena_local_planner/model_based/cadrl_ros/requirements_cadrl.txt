@@ -147,5 +147,5 @@ urdfdom-py
 urllib3==1.26.2
 Werkzeug==1.0.1
 wrapt==1.12.1
-xacro==1.13.9
+xacro
 zipp==3.4.0
