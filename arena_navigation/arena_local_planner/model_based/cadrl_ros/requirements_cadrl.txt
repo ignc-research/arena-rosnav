@@ -69,7 +69,7 @@ qt-gui-py-common==0.4.2
 requests==2.25.1
 requests-oauthlib==1.3.0
 resource-retriever==1.12.6
-rosbag==1.14.10
+rosbag
 rosboost-cfg==1.14.9
 rosclean==1.14.9
 roscreate==1.14.9
