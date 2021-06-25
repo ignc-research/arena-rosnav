@@ -90,6 +90,8 @@ source /usr/local/bin/virtualenvwrapper.sh" >> ~/.zshrc
 ```
 
 * Create a new venv
+
+Note: You might need to restart your terminal at this point.
 ```
 mkvirtualenv --python=python3.6 rosnav
 workon rosnav
