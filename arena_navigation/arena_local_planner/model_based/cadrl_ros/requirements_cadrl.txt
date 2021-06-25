@@ -80,7 +80,7 @@ roslint==0.11.2
 roslz4
 rosmake==1.14.9
 rosmaster
-rosmsg==1.14.10
+rosmsg
 rosnode==1.14.10
 rosparam==1.14.10
 rospkg==1.2.9
