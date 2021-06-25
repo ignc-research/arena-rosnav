@@ -163,7 +163,7 @@ If you encounter errors, e.g. specific versions not found, please manually insta
 You only need this to run our cadrl node, if you dont plan to use it, skip this step.
 
 
-* Inside forks/stable_baselines3
+* Inside forks/stable-baselines3
 ```
 pip install -e .
 
