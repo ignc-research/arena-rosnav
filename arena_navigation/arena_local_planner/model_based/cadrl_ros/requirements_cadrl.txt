@@ -141,7 +141,7 @@ tf2-geometry-msgs==0.6.5
 tf2-kdl==0.6.5
 tf2-py==0.6.5
 tf2-ros==0.6.5
-topic-tools==1.14.10
+topic-tools
 typing-extensions==3.7.4.3
 urdfdom-py
 urllib3==1.26.2
