@@ -101,7 +101,7 @@ rqt-gui-py==0.5.2
 rqt-image-view==0.4.16
 rqt-launch==0.4.8
 rqt-logger-level==0.4.8
-rqt-moveit==0.5.7
+rqt-moveit
 rqt-msg==0.4.8
 rqt-nav-view==0.5.7
 rqt-plot==0.4.9
