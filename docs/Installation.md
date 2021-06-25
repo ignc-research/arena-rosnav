@@ -127,7 +127,8 @@ Note: if you use bash replace zsh with bash in the commands
 
 The official ros only support tf2 with python2. In order to make the *tf* work in python3, its necessary to compile it with python3. We provided a script to automately install this
 and do some additional configurations for the convenience . You can simply run it with 
-```bash
+```
+cd $HOME/catkin_ws/src/arena-rosnav
 ./geometry2_install.sh
 ```
 
