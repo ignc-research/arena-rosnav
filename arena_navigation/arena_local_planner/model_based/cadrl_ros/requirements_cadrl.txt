@@ -13,7 +13,7 @@ catkin-pkg==0.4.23
 certifi==2020.12.5
 chardet==4.0.0
 controller-manager
-controller-manager-msgs==0.18.3
+controller-manager-msgs
 cv-bridge==1.13.0
 cycler==0.10.0
 diagnostic-analysis==1.9.7
