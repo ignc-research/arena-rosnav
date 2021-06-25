@@ -85,11 +85,11 @@ rosnode
 rosparam
 rospkg==1.2.9
 rospy
-rosservice==1.14.10
-rostest==1.14.10
-rostopic==1.14.10
+rosservice
+rostest
+rostopic
 rosunit==1.14.9
-roswtf==1.14.10
+roswtf
 rqt-action==0.4.9
 rqt-bag
 rqt-bag-plugins
