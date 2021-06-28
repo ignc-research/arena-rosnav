@@ -5,7 +5,7 @@ group talking probability: 0.4
 talking and walking probability: 0.4
 requesting service probability: 0.014
 requesting guide probability: 0.0
-requesting follower probability: 0.9
+requesting follower probability: 0.0
 max talking distance: 3.0
 max servicing radius: 7.0
 talking base time: 20.0
