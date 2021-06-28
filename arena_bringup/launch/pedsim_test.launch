@@ -14,6 +14,7 @@
   <arg name="show_pedsim_walls" default="true"/>
   <arg name="republish_flatland_markers" default="true"/>
   <arg name="use_joystick" default="false"/>
+  <arg name="local_planner"   default="teb"/> 
 
   <!-- Map parameters -->
   <arg name="map_file"        default="map_empty"/>
@@ -86,10 +87,13 @@
   <include file="$(find arena_bringup)/launch/sublaunch/pedsim.launch">
   </include>
 
+  <include file="$(find arena_bringup)/launch/sublaunch/move_base/move_base_$(arg local_planner).launch">
+  </include>
+
   <node name="pedsim_test" pkg="arena_util_scripts" type="pedsim_test.py" output="screen">
   </node>
 
-  <node name="pub_goal" pkg="rostopic" type="rostopic"
+  <!-- <node name="pub_goal" pkg="rostopic" type="rostopic"
     args="pub /goal geometry_msgs/PoseStamped '
     {
       header:
@@ -120,7 +124,7 @@
       }
     }'
     "
-    />
+    /> -->
 
   <include file="$(find teleop_twist_joy)/launch/teleop.launch" if="$(arg use_joystick)">
     <arg name="config_filepath" value="/home/daniel/git/behaviormodels/xd3.config.yaml" />

@@ -462,7 +462,7 @@ def follow_agent_test():
     spawn_peds_client.call([ped])
 
 if __name__ == '__main__':
-    # shelves_test()
+    shelves_test()
     # service_robot_test()
     # social_force_test()
     # crowd_test()
@@ -470,4 +470,4 @@ if __name__ == '__main__':
     # example2()
     # respawn_shelves_test()
     # obstacle_force_test()
-    follow_agent_test()
+    # follow_agent_test()
