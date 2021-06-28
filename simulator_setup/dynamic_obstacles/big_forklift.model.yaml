@@ -26,7 +26,7 @@ bodies:
         center: [0.0, 0.0]
         density: 1
         layers: ["static"]
-        collision: false	
+        collision: false
 
 plugins:
   - type: VehicleMovement
