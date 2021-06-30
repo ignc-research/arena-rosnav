@@ -63,7 +63,7 @@ class ObservationCollector():
         self._radius_human_average=0.3
 
 
-        # self._laser_num_beams = num_lidar_beams
+        self._laser_num_beams = rospy.get_param("/laser_num_beams")
         # for frequency controlling
         # self._action_frequency = 1/rospy.get_param("/robot_action_rate")
         self.useDangerZone = rospy.get_param("/useDangerZone")
