@@ -18,7 +18,7 @@ from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl
 ### HYPERPARAMETERS ###
 AGENTS = ['AGENT_4_2021_04_02__01_07', 'AGENT_7_2021_04_01__07_53']
 max_steps_per_episode = 512
-eval_episodes = 500
+eval_episodes = 550
 
 def get_paths(args: dict, AGENT: str):
     dir = rospkg.RosPack().get_path('arena_local_planner_drl')
