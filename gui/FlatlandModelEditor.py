@@ -1,6 +1,7 @@
 from PyQt5 import QtGui, QtCore, QtWidgets
 import rospkg
 import os
+import copy
 from FlatlandModel import *
 from FlatlandBodyEditor import FlatlandBodyEditor
 
@@ -11,8 +12,8 @@ class FlatlandBodyWidget(QtWidgets.QWidget):
         - edit button
         - delete button
     '''
-    def __init__(self, id: int, flatland_model: FlatlandModel, create_new_flatland_body = True):
-        super().__init__()
+    def __init__(self, id: int, flatland_model: FlatlandModel, create_new_flatland_body = True, **kwargs):
+        super().__init__(**kwargs)
         self.setup_ui()
         self.id = id
         self.model = flatland_model
@@ -20,7 +21,7 @@ class FlatlandBodyWidget(QtWidgets.QWidget):
             flatland_body = FlatlandBody()
             self.model.bodies[id] = flatland_body
 
-        self.flatland_body_editor = FlatlandBodyEditor(id, self.model.bodies[id], parent=self, flags=QtCore.Qt.WindowType.Window)
+        self.flatland_body_editor = FlatlandBodyEditor(id, self.model.bodies[id], self, parent=self.parent(), flags=QtCore.Qt.WindowType.Window)
 
     def setup_ui(self):
         self.layout = QtWidgets.QHBoxLayout()
@@ -48,20 +49,28 @@ class FlatlandBodyWidget(QtWidgets.QWidget):
         self.parent().layout().removeWidget(self)
         self.deleteLater()
 
+
 class FlatlandModelEditor(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
         self.setup_ui()
-        self.model = FlatlandModel()
+        self.model = None
+        self.last_saved_model = None
         self.body_id = 0
+        self.create_new_model()
 
     def setup_ui(self):
         self.setWindowTitle("Flatland Model Editor")
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap('icon.png'), QtGui.QIcon.Selected, QtGui.QIcon.On)
+        self.setWindowIcon(icon)
+
         central_widget = QtWidgets.QWidget()
         central_widget.setLayout(QtWidgets.QVBoxLayout())
         self.setCentralWidget(central_widget)
         menubar = self.menuBar()
         file_menu = menubar.addMenu("File")
+        file_menu.addAction("New Model", self.on_new_model_clicked, "Ctrl+N")
         file_menu.addAction("Open", self.on_open_clicked, "Ctrl+O")
         file_menu.addAction("Save", self.on_save_clicked, "Ctrl+S")
         file_menu.addAction("Save As...", self.on_save_as_clicked, "Ctrl+Shift+S")
@@ -110,9 +119,32 @@ class FlatlandModelEditor(QtWidgets.QMainWindow):
         widgets = self.get_body_widgets()
         for widget in widgets:
             widget.on_delete_clicked()
+        self.body_id = 0
+
+    def on_new_model_clicked(self):
+        if self.last_saved_model != self.model and len(self.model.bodies) > 0:
+            # ask user if she wants to save changes
+            msg_box = QtWidgets.QMessageBox()
+            msg_box.setText("Do you want to save changes?")
+            msg_box.setStandardButtons(QtWidgets.QMessageBox.Save | QtWidgets.QMessageBox.Discard | QtWidgets.QMessageBox.Cancel)
+            msg_box.setDefaultButton(QtWidgets.QMessageBox.Save)
+            ret = msg_box.exec()
+            if ret == QtWidgets.QMessageBox.Save:
+                if not self.on_save_as_clicked():
+                    # save as dialog was cancelled
+                    return
+            elif ret == QtWidgets.QMessageBox.Discard:
+                pass
+            elif ret == QtWidgets.QMessageBox.Cancel:
+                return
+        self.create_new_model()
+
+    def create_new_model(self):
+        self.remove_all_bodies()
+        self.model = FlatlandModel()
 
     def on_add_body_button_clicked(self):
-        w = FlatlandBodyWidget(self.body_id, self.model)
+        w = FlatlandBodyWidget(self.body_id, self.model, parent=self)
         return self.add_flatland_body_widget(w)
 
     def add_flatland_body_widget(self, w: FlatlandBodyWidget):
@@ -120,31 +152,31 @@ class FlatlandModelEditor(QtWidgets.QMainWindow):
         self.body_id += 1
         return w
 
-    def on_open_clicked(self, path_in=""):
-        path = ""
-        if path_in == "":
-            rospack = rospkg.RosPack()
-            initial_folder = os.path.join(rospack.get_path("simulator_setup"), "obstacles")
-            res = QtWidgets.QFileDialog.getOpenFileName(parent=self, directory=initial_folder)
-            path = res[0]
-        else:
-            path = path_in
-        
+    def on_open_clicked(self):
+        rospack = rospkg.RosPack()
+        initial_folder = os.path.join(rospack.get_path("simulator_setup"), "obstacles")
+        res = QtWidgets.QFileDialog.getOpenFileName(parent=self, directory=initial_folder)
+        path = res[0]
         if path != "":
-            self.setWindowTitle(path.split("/")[-1])
-            self.remove_all_bodies()
-            self.model.load(path)
-            for body in self.model.bodies.values():
-                w = FlatlandBodyWidget(self.body_id, self.model, create_new_flatland_body=False)
-                self.add_flatland_body_widget(w)
+            self.load_model(path)
 
-                # w = self.on_add_body_button_clicked()
-                # w.flatland_body_editor.set_flatland_body(body)
+    def load_model(self, path):
+        self.setWindowTitle(path.split("/")[-1])
+        self.remove_all_bodies()
+        self.model.load(path)
+        for _ in self.model.bodies.values():
+            w = FlatlandBodyWidget(self.body_id, self.model, create_new_flatland_body=False, parent=self)
+            self.add_flatland_body_widget(w)
+
+        self.last_saved_model = copy.deepcopy(self.model)
 
     def on_save_clicked(self):
-        res = self.model.save()
-        if not res:
-            QtWidgets.QMessageBox.information(self, "Error", "No file path set for the current model. Can't save.")
+        if self.model.save():
+           self.last_saved_model = copy.deepcopy(self.model)
+        else:
+            # no path has been set yet. fall back to "save as"
+            if self.on_save_as_clicked():
+                self.last_saved_model = copy.deepcopy(self.model)
 
     def on_save_as_clicked(self):
         rospack = rospkg.RosPack()
@@ -154,6 +186,25 @@ class FlatlandModelEditor(QtWidgets.QMainWindow):
         path = res[0]
         if path != "":
             self.model.save(path)
+            self.last_saved_model = copy.deepcopy(self.model)
+            return True
+        else:
+            return False
+
+    def closeEvent(self, event: QtGui.QCloseEvent):
+        if self.last_saved_model != self.model and len(self.model.bodies) > 0:
+            # ask user if she wants to save changes
+            msg_box = QtWidgets.QMessageBox()
+            msg_box.setText("Do you want to save changes?")
+            msg_box.setStandardButtons(QtWidgets.QMessageBox.Save | QtWidgets.QMessageBox.Discard | QtWidgets.QMessageBox.Cancel)
+            msg_box.setDefaultButton(QtWidgets.QMessageBox.Save)
+            ret = msg_box.exec()
+            if ret == QtWidgets.QMessageBox.Save:
+                self.on_save_as_clicked()
+            elif ret == QtWidgets.QMessageBox.Discard:
+                pass
+            elif ret == QtWidgets.QMessageBox.Cancel:
+                event.ignore()
 
 def normal_execution():
     app = QtWidgets.QApplication([])
@@ -176,7 +227,7 @@ def test_open():
     app = QtWidgets.QApplication([])
 
     widget = FlatlandModelEditor()
-    widget.on_open_clicked(path_in="/home/daniel/catkin_ws/src/arena-rosnav/simulator_setup/obstacles/cleaner.model.yaml")
+    widget.load_model("/home/daniel/catkin_ws/src/arena-rosnav/simulator_setup/obstacles/cleaner.model.yaml")
     widget.show()
 
     app.exec()
