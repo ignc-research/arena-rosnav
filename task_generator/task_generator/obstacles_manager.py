@@ -99,8 +99,8 @@ class ObstaclesManager:
         if self.useMaze:
             self.build_maze()
         # human group pattern
-        self.circlePattern = False
-        self.mixRate = 0.3
+        self.circlePattern = True
+        self.mixRate = 1
 
     def update_map(self, new_map: OccupancyGrid):
         self.map = new_map
@@ -1031,9 +1031,9 @@ class ObstaclesManager:
             raise rospy.ServiceException(f"({self.ns}) failed to register walls")
         os.remove(model_path)
 
-################################
+####################################
 #####methods for static polygons####
-################################
+####################################
     def __spawn_polygons(self, polygons):
         """
         Spawning zero velocity agents in the simulation. The type of pedestrian is randomly decided here.
