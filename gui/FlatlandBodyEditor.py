@@ -1,6 +1,7 @@
 from PyQt5 import QtGui, QtCore, QtWidgets
 from FlatlandModel import *
 import random
+import numpy as np
 
 class ArenaQDoubleSpinBox(QtWidgets.QDoubleSpinBox):
     def __init__(self, *args, **kwargs):
@@ -38,18 +39,30 @@ class ArenaQGraphicsPolygonItem(QtWidgets.QGraphicsPolygonItem):
         self.footprint_widget = None
         # handles for resizing
         self.handle_size = 0.3  # length of one side of a rectangular handle
-        self.handles = []
+        self.handles = []  # list of QRectangle
         self.updateHandlesPos()
         self.point_index = -1
 
     def handleAt(self, point):
         """
-        Returns the resize handle below the given point.
+        Returns the index of the resize handle below the given point.
         """
-        for i, item in enumerate(self.handles):
-            if item.contains(point):
-                return i
-        return -1
+        valid_handles = []
+        for i, handle in enumerate(self.handles):
+            if handle.contains(point):
+                valid_handles.append(i)
+
+        # select handle which center is closest to *point*
+        min_diff = float("inf")
+        selected_handle_idx = -1
+        for handle_idx in valid_handles:
+            diff = point - self.handles[handle_idx].center()
+            diff_len = np.linalg.norm([diff.x(), diff.y()])
+            if diff_len < min_diff:
+                min_diff = diff_len
+                selected_handle_idx = handle_idx
+                
+        return selected_handle_idx
 
     def mousePressEvent(self, mouse_event):
         """
@@ -157,6 +170,7 @@ class ArenaQGraphicsView(QtWidgets.QGraphicsView):
         self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
         self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
         self.setSceneRect(-100, -100, 200, 200)
+        self.zoomFactor = 1.0
 
         # add coordinate system lines
         pen = QtGui.QPen()
@@ -180,10 +194,11 @@ class ArenaQGraphicsView(QtWidgets.QGraphicsView):
 
         # Zoom
         if event.angleDelta().y() > 0:
-            zoomFactor = zoomInFactor
+            zoomFactor_ = zoomInFactor
         else:
-            zoomFactor = zoomOutFactor
-        self.scale(zoomFactor, zoomFactor)
+            zoomFactor_ = zoomOutFactor
+        self.scale(zoomFactor_, zoomFactor_)
+        self.zoomFactor *= 1 / zoomFactor_
 
         # Get the new position
         newPos = self.mapToScene(event.pos())
