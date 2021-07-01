@@ -9,7 +9,7 @@
   <!-- train mode  -->
   <arg name="train_mode"       default="true"/>
   <!-- the folder name under the path simulator_setup/maps  -->
-  <arg name="map_folder_name" default="map_empty" />
+  <arg name="map_folder_name" default="map_empty_small" />
 
   <!-- the velocity of randomly genelized obstacles  -->
   <arg name="obs_vel" default="0.3" />
