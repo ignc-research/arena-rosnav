@@ -190,7 +190,7 @@ class newBag():
 
                 # if current_time > reset-6 and n < len(t_reset)-1 and x < start_x:
                 # if current_time > reset and n < len(t_reset)-1:
-                res_tol = 5
+                res_tol = 1
                 if dist2_oldp > res_tol and n < len(t_reset)-1:
                     n += 1
                     # store the run
