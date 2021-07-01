@@ -284,7 +284,7 @@ class newBag():
                 all_cols_y.append(col_xy[0])
 
                 if plt_cfg["plot_collisions"]:
-                    circle = plt.Circle((-col_xy[1], col_xy[0]), 0.3, color=clr, fill = True, alpha = 0.3)
+                    circle = plt.Circle((-col_xy[1], col_xy[0]), 0.3, color=clr, fill = True, alpha = 0.7)
                     ax.add_patch(circle)
                     
                 col_exists = True
