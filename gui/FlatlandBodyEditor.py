@@ -262,6 +262,10 @@ class FootprintWidget(QtWidgets.QFrame):
             self.add_point(point)
 
     def add_point(self, point: QtCore.QPointF = None):
+        if len(self.polygon_item.polygon()) > 7:
+            QtWidgets.QMessageBox.information(self, "Information", "Can't add more edges.\nFlatland only allows up to 8 edges for a single polygon.")
+            return
+
         new_spin_boxes = []
 
         # widget
@@ -321,7 +325,6 @@ class FootprintWidget(QtWidgets.QFrame):
     def update_polygon(self):
         if not self.dragging_polygon:
             new_points = [QtCore.QPointF(point_boxes[0].value(), point_boxes[1].value()) for point_boxes in self.spin_boxes]
-            # new_points = [QtCore.QPointF(element[0], element[1]) for element in self.points]
             new_polygon = QtGui.QPolygonF(new_points)
             self.polygon_item.setPolygon(self.polygon_item.mapFromScene(new_polygon))
 
@@ -338,16 +341,19 @@ class FootprintWidget(QtWidgets.QFrame):
 
 
 class FlatlandBodyEditor(QtWidgets.QWidget):
-    def __init__(self, id, flatland_body, **kwargs):
+    def __init__(self, id, flatland_body, flatland_body_widget, **kwargs):
         super().__init__(**kwargs)
         self.id = id
         self.polygons = []
+        self.flatland_body_widget = flatland_body_widget
         self.setup_ui()
+        self.flatland_body = None
         self.set_flatland_body(flatland_body)  # needs to be called after setup_ui
     
     def setup_ui(self):
         self.setWindowTitle("Flatland Body Editor")
         self.setLayout(QtWidgets.QGridLayout())
+        self.setWindowModality(QtCore.Qt.WindowModality.WindowModal)
         self.resize(1000, 600)
 
         # name
@@ -500,40 +506,61 @@ class FlatlandBodyEditor(QtWidgets.QWidget):
             self.set_color(color_selected)
 
     def on_save_clicked(self):
+        # save body
+        self.save()
+        # update name label in parent
+        self.flatland_body_widget.name_label.setText(self.flatland_body.name)
+        # hide window
+        self.hide()
+
+    def save(self):
+        self.update_body_from_widgets(self.flatland_body)
+
+    def get_body_from_widgets(self):
+        body = FlatlandBody()
+        self.update_body_from_widgets(body)
+        return body
+
+    def update_body_from_widgets(self, body: FlatlandBody):
         # name
-        self.flatland_body.name = self.name_edit.text()
+        body.name = self.name_edit.text()
         # type
-        self.flatland_body.type = B2BodyType(self.type_dropdown.currentIndex())
+        body.type = B2BodyType(self.type_dropdown.currentIndex())
         # color
-        self.flatland_body.color = self.color_dialog.currentColor()
+        body.color = self.color_dialog.currentColor()
         # linear damping
-        self.flatland_body.linear_damping = self.linear_damping_spin_box.value()
+        body.linear_damping = self.linear_damping_spin_box.value()
         # angular damping
-        self.flatland_body.angular_damping = self.angular_damping_spin_box.value()
+        body.angular_damping = self.angular_damping_spin_box.value()
         # footprints
-        self.flatland_body.footprints = []
+        body.footprints = []
         for w in self.get_footprint_widgets():
             polygon_item = w.polygon_item
             footprint = PolygonFlatlandFootprint()
             # remove all whitespace and split on ","
             footprint.layers = "".join(w.layers_line_edit.text().split()).split(",")
             footprint.points = [[point.x(), point.y()] for point in polygon_item.mapToScene(polygon_item.polygon())]
-            self.flatland_body.footprints.append(footprint)
-        # update name label in parent
-        self.parent().name_label.setText(self.flatland_body.name)
-        # hide window
-        self.hide()
+            body.footprints.append(footprint)
 
     def closeEvent(self, event):
-        # reset to values already saved
-        self.name_edit.setText(self.flatland_body.name)
-        self.type_dropdown.setCurrentIndex(self.flatland_body.type.value)
-        self.set_color(self.flatland_body.color)
-        self.linear_damping_spin_box.setValue(self.flatland_body.linear_damping)
-        self.angular_damping_spin_box.setValue(self.flatland_body.angular_damping)
+        # check if any changes have been made
+        current_body = self.get_body_from_widgets()
+        if self.flatland_body != current_body:
+            # ask user if she wants to save changes
+            msg_box = QtWidgets.QMessageBox()
+            msg_box.setText("Do you want to save changes to this body?")
+            msg_box.setStandardButtons(QtWidgets.QMessageBox.Save | QtWidgets.QMessageBox.Discard | QtWidgets.QMessageBox.Cancel)
+            msg_box.setDefaultButton(QtWidgets.QMessageBox.Save)
+            ret = msg_box.exec()
+            if ret == QtWidgets.QMessageBox.Save:
+                self.on_save_clicked()
+            elif ret == QtWidgets.QMessageBox.Discard:
+                # reset to values already saved
+                self.set_flatland_body(self.flatland_body)
+            elif ret == QtWidgets.QMessageBox.Cancel:
+                event.ignore()
 
     def set_color(self, color: QtGui.QColor):
-        # self.color = color
         # change button color
         self.color_button.setStyleSheet(f"background-color: {color.name()}")
         self.color_dialog.setCurrentColor(color)
@@ -559,6 +586,10 @@ class FlatlandBodyEditor(QtWidgets.QWidget):
         self.angular_damping_spin_box.setValue(body.angular_damping)
 
         # set footprints
+        # remove all widgets
+        for w in self.get_footprint_widgets():
+            w.on_delete_clicked()
+        # add new polygons and widgets
         for fp in self.flatland_body.footprints:
             if isinstance(fp, PolygonFlatlandFootprint):
                 polygon = QtGui.QPolygonF([QtCore.QPointF(point[0], point[1]) for point in fp.points])
@@ -566,13 +597,16 @@ class FlatlandBodyEditor(QtWidgets.QWidget):
             elif isinstance(fp, CircleFlatlandFootprint):
                 # TODO
                 pass
-        self.parent().name_label.setText(self.flatland_body.name)
+        if self.flatland_body_widget != None:
+            self.flatland_body_widget.name_label.setText(self.flatland_body.name)
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication([])
 
     model = FlatlandModel()
-    widget = FlatlandBodyEditor(0, model)
+    body = FlatlandBody()
+    model.bodies[0] = body
+    widget = FlatlandBodyEditor(0, model.bodies[0], None)
     widget.on_add_polygon_clicked()
     # widget.on_add_polygon_clicked()
     widget.show()

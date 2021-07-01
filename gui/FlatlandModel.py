@@ -1,7 +1,8 @@
-from os import path
+from os import path, truncate
 from PyQt5 import QtGui, QtCore, QtWidgets
 from enum import Enum
 import yaml
+import numpy as np
 
 class B2BodyType(Enum):
     DYNAMIC = 0
@@ -14,6 +15,14 @@ class FlatlandFootprint():
         self.layers = []
         self.collision = True
         self.density = 1.0
+
+    def __eq__(self, other):
+        if not isinstance(other, FlatlandFootprint):
+            return NotImplemented
+
+        return (self.layers == other.layers
+                and self.collision == other.collision
+                and np.allclose(self.density, other.density))
 
     @staticmethod
     def fromDict(d: dict):
@@ -49,6 +58,14 @@ class CircleFlatlandFootprint(FlatlandFootprint):
         self.center = [0.0, 0.0]
         self.radius = 0.5
 
+    def __eq__(self, other):
+        if not isinstance(other, CircleFlatlandFootprint):
+            return NotImplemented
+
+        return (super().__eq__(other)
+                and np.allclose(self.center, other.center)
+                and np.allclose(self.radius, other.radius))
+
     @staticmethod
     def fromDict(d: dict):
         fp = CircleFlatlandFootprint()
@@ -69,6 +86,13 @@ class PolygonFlatlandFootprint(FlatlandFootprint):
     def __init__(self):
         super().__init__()
         self.points = []
+
+    def __eq__(self, other):
+        if not isinstance(other, PolygonFlatlandFootprint):
+            return NotImplemented
+
+        return (super().__eq__(other)
+                and np.allclose(self.points, other.points))
 
     @staticmethod
     def fromDict(d: dict):
@@ -92,6 +116,18 @@ class FlatlandBody():
         self.angular_damping = 0.0
         self.footprints = []  # list of FlatlandFootprint objects
 
+    def __eq__(self, other):
+        if not isinstance(other, FlatlandBody):
+            return NotImplemented
+
+        # check everything else
+        return (self.name == other.name
+                and self.type == other.type
+                and self.color == other.color
+                and np.allclose(self.linear_damping, other.linear_damping)
+                and np.allclose(self.angular_damping, other.angular_damping)
+                and self.footprints == other.footprints)
+        
     @staticmethod
     def fromDict(d: dict):
         body = FlatlandBody()
@@ -124,12 +160,24 @@ class FlatlandBody():
         d["footprints"] = [footprint.toDict() for footprint in self.footprints]
         return d
 
-class FlatlandModel(QtCore.QObject):
+class FlatlandModel():
     def __init__(self):
         super().__init__()
         self.bodies = {}  # key: body id (int), value: body (FlatlandBody)
         self.path = ""  # path to file associated with this model
         self.bodies_index = 0
+
+    def __eq__(self, other):
+        if not isinstance(other, FlatlandModel):
+            return NotImplemented
+
+        if self.bodies.keys() == other.bodies.keys():
+            for body1, body2 in zip(self.bodies.values(), other.bodies.values()):
+                if body1 != body2:
+                    return False
+            return True
+
+        return False
 
     def toDict(self):
         d = {}
@@ -137,19 +185,16 @@ class FlatlandModel(QtCore.QObject):
         return d
 
     def save(self, path_in = ""):
-        path = ""
-        if path_in == "":
-            if self.path == "":
+        if path_in == "" and self.path == "":
                 return False
-            else:
-                path = self.path
-        else:
-            path = path_in
+        elif path_in != "":
+            self.path = path_in
 
-        with open(path, "w") as file:
+        with open(self.path, "w") as file:
             data = self.toDict()
             yaml.dump(data, file, default_flow_style=None)
-        
+
+        print("saved model to", self.path)
         return True
 
     def load(self, path):
@@ -162,3 +207,29 @@ class FlatlandModel(QtCore.QObject):
                 self.bodies_index += 1
         self.path = path
 
+
+# Tests
+def compare_test1():
+    m1 = FlatlandModel()
+    m1.bodies[0] = FlatlandBody()
+
+    m2 = FlatlandModel()
+    m2.bodies[0] = FlatlandBody()
+
+    assert m1 == m2
+    assert not m1 != m2
+    print("compare_test1 passed")
+
+def compare_test2():
+    m1 = FlatlandModel()
+    m1.bodies[0] = FlatlandBody()
+
+    m2 = FlatlandModel()
+    m2.bodies[1] = FlatlandBody()
+
+    assert m1 != m2
+    print("compare_test2 passed")
+
+if __name__ == "__main__":
+    compare_test1()
+    compare_test2()
