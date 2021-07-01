@@ -1,6 +1,6 @@
 import os
 from typing import Callable, Dict, List, Optional, Tuple, Type, Union
-
+import rospy
 import gym
 import rospkg
 import torch as th
@@ -36,7 +36,11 @@ with open(yaml_ROBOT_SETTING_PATH, 'r') as fd:
             laser_angle_increment = plugin['angle']['increment']
             _L = int(round((laser_angle_max - laser_angle_min) / laser_angle_increment) + 1)  # num of laser beams
             break
-
+useDangerZone= rospy.get_param("/useDangerZone")
+if useDangerZone:
+    human_state_size=25
+else:
+    human_state_size=19
 
 class MLP_ARENA2D(nn.Module):
     """
