@@ -184,7 +184,7 @@ tf2-py==0.6.5
 tf2-ros==0.6.5
 tf2-sensor-msgs
 threadpoolctl==2.1.0
-topic-tools==1.14.10
+topic-tools
 tornado==6.1
 tqdm==4.55.1
 traitlets==5.0.5
@@ -194,7 +194,7 @@ untokenize==0.1.1
 urdfdom-py==0.4.5
 urllib3==1.26.2
 wcwidth==0.2.5
-xacro==1.13.9
+xacro
 xlrd==2.0.1
 yapf==0.30.0
 ytsphinx==1.2.1.dev20200430
