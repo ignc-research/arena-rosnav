@@ -355,7 +355,7 @@ class newBag():
                 trajs.append(path_length)
                 if path_length > 0 and plt_cfg["plot_trj"]:
                     # print(lgnd)
-                    ax.plot(y, x, line_clr, linestyle = line_stl, alpha=0.2)
+                    ax.plot(y, x, line_clr, linestyle = line_stl, alpha=0.5)
                     ax.set_xlabel("x in [m]")
                     ax.set_ylabel("y in [m]")
 
@@ -363,10 +363,10 @@ class newBag():
                 if plt_cfg["plot_subgoals"]:
                     if len(wp_y) > 0 and len(wp_x) > 0:
                         pwp = False
-                        ax.plot(wp_y, wp_x, "s", color='g', alpha=0.1)
+                        ax.plot(wp_y, wp_x, "s", color='g', alpha=0.2)
                     elif len(sg_y) > 0 and len(sg_x) > 0:
                         pwp = False
-                        ax.plot(sg_y, sg_x, "^", color='k', alpha=0.1)
+                        ax.plot(sg_y, sg_x, "^", color='k', alpha=0.2)
                     
 
                 duration = t[len(t)-1] - t[0]
@@ -818,7 +818,7 @@ def eval_cfg(cfg_file, filetype):
             #box = ax.get_position()
             #ax.set_position([box.x0, box.y0, box.width * 0.7, box.height])
             #,bbox_to_anchor=(0.55, 0.3)
-            ax.legend(handles=legend_elements, loc="upper left")
+            ax.legend(handles=legend_elements, loc=1)
             plt.subplots_adjust(top = 1, bottom = 0, right = 1, left = 0, hspace = 0, wspace = 0)
             plt.savefig(plot_file, bbox_inches = 'tight', pad_inches = 0)
             # reset plot cfg to default
