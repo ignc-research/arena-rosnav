@@ -37,7 +37,7 @@ class MapGenerator():
         # initialize occupancy grid
         self.occupancy_grid = OccupancyGrid()
 
-        self.generate_initial_map() # initial random map generation (before first episode)
+        # self.generate_initial_map() # initial random map generation (before first episode)
         rospy.Subscriber('/map', OccupancyGrid, self.get_occupancy_grid)
         rospy.Subscriber('/goal', PoseStamped, self.new_episode_callback) # generate new random map for the next episode when entering new episode
         self.mappub = rospy.Publisher('/map', OccupancyGrid, queue_size=1)
