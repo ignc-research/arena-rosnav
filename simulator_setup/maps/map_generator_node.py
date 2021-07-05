@@ -4,6 +4,7 @@ import rospy
 from map_generator import *
 from nav_msgs.msg import OccupancyGrid
 from geometry_msgs.msg import PoseStamped
+from std_msgs.msg import String
 
 class MapGenerator():
     def __init__(self):
@@ -39,7 +40,7 @@ class MapGenerator():
 
         # self.generate_initial_map() # initial random map generation (before first episode)
         rospy.Subscriber('/map', OccupancyGrid, self.get_occupancy_grid)
-        rospy.Subscriber('/goal', PoseStamped, self.new_episode_callback) # generate new random map for the next episode when entering new episode
+        rospy.Subscriber('/chatter', String, self.new_episode_callback) # generate new random map for the next episode when entering new episode
         self.mappub = rospy.Publisher('/map', OccupancyGrid, queue_size=1)
 
     def get_occupancy_grid(self, occgrid_msg: OccupancyGrid): # a bit cheating: copy OccupancyGrid meta data from map_server of initial map
@@ -70,33 +71,21 @@ class MapGenerator():
         map = (map*100).flatten() # map currently [0,1] 2D np array needs to be flattened for publishing OccupancyGrid.data
         return map
 
-    def new_episode_callback(self,goal_msg: PoseStamped):
-        current_episode = goal_msg.header.seq
-        is_new_episode = self.nr != current_episode # self.nr starts with -1 so 0 will be the first new episode
-        if is_new_episode:
-            self.nr = current_episode
-            self.occupancy_grid.data = self.generate_mapdata()
-            rospy.loginfo("New random map generated for episode {}.".format(self.nr))
-            self.mappub.publish(self.occupancy_grid)
-            rospy.loginfo("New random map published.")
-
-    # def generate_map(self):
-    #     create_random_map(
-    #         height = self.height,
-    #         width = self.width,
-    #         corridor_radius = self.cr,
-    #         iterations = self.iterations,
-    #         obstacle_number = self.obsnum,
-    #         obstacle_extra_radius = self.obsrad
-    #     )
-    #     rospy.loginfo("New random map generated for episode {}.".format(self.nr+1))
-
     # def new_episode_callback(self,goal_msg: PoseStamped):
     #     current_episode = goal_msg.header.seq
     #     is_new_episode = self.nr != current_episode # self.nr starts with -1 so 0 will be the first new episode
     #     if is_new_episode:
     #         self.nr = current_episode
-    #         self.generate_map()
+    #         self.occupancy_grid.data = self.generate_mapdata()
+    #         rospy.loginfo("New random map generated for episode {}.".format(self.nr))
+    #         self.mappub.publish(self.occupancy_grid)
+    #         rospy.loginfo("New random map published.")
+    
+    def new_episode_callback(self, msg: String):
+        self.occupancy_grid.data = self.generate_mapdata()
+        rospy.loginfo("New random map generated for episode {}.".format(self.nr))
+        self.mappub.publish(self.occupancy_grid)
+        rospy.loginfo("New random map published.")
 
 
 
