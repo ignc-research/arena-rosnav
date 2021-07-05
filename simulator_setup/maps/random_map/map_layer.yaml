@@ -2,6 +2,6 @@ properties:
   velocity_iterations: 10
   position_iterations: 10
 layers:
-- name: map
+- name: static
   map: map.yaml
   color: [0, 0, 1, 1]
