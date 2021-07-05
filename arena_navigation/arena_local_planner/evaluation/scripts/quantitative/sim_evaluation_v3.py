@@ -1,5 +1,5 @@
 # example 
-# python sim_evaluation_v2.py $HOME/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/run_3 --quantity vel --base cadrl --metrics time path collision success
+# python sim_evaluation_v3.py $HOME/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/run_3 --quantity obs --metrics time path collision success
 
 
 import matplotlib.pyplot as plt
@@ -482,7 +482,7 @@ def get_all_plot(data,labels,colors,wpgen,planner,param_list,quantity,metrics,sh
                 axs[maps.index(map),param_list[quantity].index(q)].set_xticklabels([labels[wp] for wp in wpgen], fontsize=fontsize_ticks)
                 axs[maps.index(map),param_list[quantity].index(q)].set(ylabel="{0}".format(caption), fontsize=fontsize_axlabel)
                 if quantity == "vel":
-                    axs[maps.index(map),param_list[quantity].index(q)].set_title("Map: {0}, {1}: 0.{2}".format(labels[map],labels[quantity],int(q.replace(quantity,""))), fontsize=fontsize_title)
+                    axs[maps.index(map),param_list[quantity].index(q)].set_title("Map: {0}, {1}: {2}.{3}".format(labels[map],labels[quantity],q.replace(quantity,"")[0],q.replace(quantity,"")[1]), fontsize=fontsize_title)
                 else:
                     axs[maps.index(map),param_list[quantity].index(q)].set_title("Map: {0}, {1}: {2}".format(labels[map],labels[quantity],int(q.replace(quantity,""))), fontsize=fontsize_title)
                 axs[0,0].legend(loc="upper left")
@@ -521,11 +521,11 @@ if __name__ == "__main__": # execute code
     ### this code block creates dataframes containing all evaluation file's summarized data ###
     # hyperparameters specifying the contents of files and the wanted structure for the datasets
     cols = ["time","path","collision","success"]    # define the quantities to measure
-    obs = ["obs10","obs20", "obs30"] # define different obstacles numbers, names must match file names
-    vel = ["vel03"] # define different velocities, names must match file names
-    maps = ["empty","map0","open"] # define the maps trained on, names must match file names
-    wpgen = ["spatialhorizon", "classic"] # NOTE: classic MUST be in the back
-    planner = ["R0","R1","R2","R4","RLCA","MPC", "TEB"] # all planners, NOTE: classic planners MUST be in the back!!!
+    obs = ["obs10","obs20"] # define different obstacles numbers, names must match file names
+    vel = ["vel05"] # define different velocities, names must match file names
+    maps = ["map1"] # define the maps trained on, names must match file names
+    wpgen = ["subsampling","spatialhorizon","timespace", "classic"] # NOTE: classic MUST be in the back
+    planner = ["cadrl","MPC", "TEB"] # all planners, NOTE: classic planners MUST be in the back!!!
     classic = ["MPC","TEB"] # classic planners
 
     # different kinds of datasets for visualization and latex table formatting
@@ -534,20 +534,20 @@ if __name__ == "__main__": # execute code
     data = order_data(raw_data,param_list,wpgen,planner,maps,classic,quantity)
     ############
 
-    ### this code block creates a df in table format needed for latex and may also create csv files of the df ###
-    table = get_table(data,wpgen,planner,maps,param_list,cols)
-    if latex:
-        text_file = open("latex_table.txt", "w")
-        for t in table:
-            text_file.write("\nTable for: "+t+"\n")
-            text_file.write(table[t].to_latex())
-        text_file.close()
+    # ### this code block creates a df in table format needed for latex and may also create csv files of the df ###
+    # table = get_table(data,wpgen,planner,maps,param_list,cols)
+    # if latex:
+    #     text_file = open("latex_table.txt", "w")
+    #     for t in table:
+    #         text_file.write("\nTable for: "+t+"\n")
+    #         text_file.write(table[t].to_latex())
+    #     text_file.close()
 
-    if csv:
-        data.to_csv("evaluation_all_data.csv")
-        for t in table:
-            table[t].to_csv("evaluation_{}_table.csv".format(t))
-    ###########
+    # if csv:
+    #     data.to_csv("evaluation_all_data.csv")
+    #     for t in table:
+    #         table[t].to_csv("evaluation_{}_table.csv".format(t))
+    # ###########
 
 
     ### this code block plots graphs of the metrics provided by user over the provided quantity ###
@@ -567,8 +567,8 @@ if __name__ == "__main__": # execute code
         "R2": "R2",
         "R4": "R4",
         "ego": "EGO",
-        "spatialhorizon": "STH-WP",
-        "timespace": "TS-WP",
+        "spatialhorizon": "SH-WP",
+        "timespace": "ST-WP",
         "rlca": "COL-RL",
         "map1": "Map 1",
         "empty": "Empty Map",
@@ -589,13 +589,12 @@ if __name__ == "__main__": # execute code
         "R4": "tab:cyan"
         }
  
-    colors_wp = { # color scheme for waypoint generator plus classic planners
-        "subsampling":"tab:red",
-        "timespace": "tab:blue",
+    colors_wp = { # color scheme for waypoint generator plus classic planners if --byplanner used
+        "MPC":"tab:grey",
+        "TEB": "tab:pink",
         "spatialhorizon": "tab:green",
-        "teb": "tab:orange",
-        "mpc": "tab:cyan",
-        "ego": "tab:grey",
+        "subsampling": "tab:red",
+        "timespace": "tab:blue"
         }
 
     data = clear_missings(data,maps,wpgen,planner,param_list,quantity)

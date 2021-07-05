@@ -90,6 +90,8 @@ source /usr/local/bin/virtualenvwrapper.sh" >> ~/.zshrc
 ```
 
 * Create a new venv
+
+Note: You might need to restart your terminal at this point.
 ```
 mkvirtualenv --python=python3.6 rosnav
 workon rosnav
@@ -125,7 +127,8 @@ Note: if you use bash replace zsh with bash in the commands
 
 The official ros only support tf2 with python2. In order to make the *tf* work in python3, its necessary to compile it with python3. We provided a script to automately install this
 and do some additional configurations for the convenience . You can simply run it with 
-```bash
+```
+cd $HOME/catkin_ws/src/arena-rosnav
 ./geometry2_install.sh
 ```
 
@@ -160,7 +163,7 @@ If you encounter errors, e.g. specific versions not found, please manually insta
 You only need this to run our cadrl node, if you dont plan to use it, skip this step.
 
 
-* Inside forks/stable_baselines3
+* Inside forks/stable-baselines3
 ```
 pip install -e .
 

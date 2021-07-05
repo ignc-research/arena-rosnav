@@ -11,6 +11,7 @@ import yaml
 # for plots
 import matplotlib
 import matplotlib.pyplot as plt
+import matplotlib.pylab as pl
 from matplotlib.lines import Line2D
 from matplotlib.pyplot import figure
 from matplotlib.patches import Polygon
@@ -24,7 +25,7 @@ import rospy
 from visualization_msgs.msg import Marker, MarkerArray
 import pathlib
 import os
-from sklearn.cluster import AgglomerativeClustering
+# from sklearn.cluster import AgglomerativeClustering
 # gplan
 import gplan_analysis as gplan
 matplotlib.rcParams.update({'font.size': 15})
@@ -39,11 +40,11 @@ class newBag():
         # csv dir
         self.csv_dir         = bag_name.replace(".bag","")
         # bag topics
-        self.odom_topic      = "/sensorsim/police/odom"
-        self.collision_topic = "/sensorsim/police/collision"
-        self.subgoal_topic   = "/sensorsim/police/subgoal"
-        self.gp_topic        = "/sensorsim/police/gplan"
-        self.wpg_topic       = "/sensorsim/police/subgoal_wpg"
+        self.odom_topic      = "/police/odom"
+        self.collision_topic = "/police/collision"
+        self.subgoal_topic   = "/police/subgoal"
+        self.gp_topic        = "/police/gplan"
+        self.wpg_topic       = "/police/subgoal_wpg"
         # global apth
         self.plot_gp = True
 
@@ -145,6 +146,7 @@ class newBag():
 
             pose_x = []
             pose_y = []
+            vel_total = []
             t = []
 
             bags = {}
@@ -169,6 +171,13 @@ class newBag():
                 y = round(y,2)
                 reset = t_reset[n]
 
+                # vel
+                v_lin_x = round(df_odom.loc[i, "twist.twist.linear.x"],2)
+                v_lin_y = round(df_odom.loc[i, "twist.twist.linear.y"],2)
+                v_total = round(abs(v_lin_x**2+v_lin_y**2),2)
+                # v_ang_z = round(df_odom.loc[i, "twist.twist.angular.z"],2)
+
+                # print(vx, vy, vz)
                 # print(reset)
 
                 # check if respawned
@@ -181,11 +190,15 @@ class newBag():
 
                 # if current_time > reset-6 and n < len(t_reset)-1 and x < start_x:
                 # if current_time > reset and n < len(t_reset)-1:
-                if dist2_oldp > 1 and n < len(t_reset)-1:
+                res_tol = 1
+                if dist2_oldp > res_tol and n < len(t_reset)-1:
                     n += 1
                     # store the run
+                    # print("run_"+str(n))
+                    print(pose_x)
                     if n in select_run or len(select_run) == 0:
-                        bags["run_"+str(n)] = [pose_x, pose_y, t, col_xy, subgoal_x, subgoal_y, wpg_x, wpg_y]
+                        bags["run_"+str(n)] = [pose_x, pose_y, t, col_xy, subgoal_x, subgoal_y, wpg_x, wpg_y, vel_total]
+
 
                     # reset 
                     wpg_x     = []
@@ -196,6 +209,7 @@ class newBag():
 
                     pose_x    = []
                     pose_y    = []
+                    vel_total = []
                     t         = []
 
                     col_xy    = []
@@ -203,15 +217,17 @@ class newBag():
                     old_x = None
                     old_y = None
 
-                if n+1 in select_run or len(select_run) == 0 and dist2_oldp < 1:
+                if n+1 in select_run or len(select_run) == 0 and dist2_oldp < res_tol:
 
                     # append pos if pose is empty
-                    if len(pose_x) == 0:
-                        pose_x.append(x)
-                        pose_y.append(y)
-                  
+                    # if len(pose_x) == 0:
+                    #     pose_x.append(x)
+                    #     pose_y.append(y)
+                    # print("run_"+str(n))
+                   
                     pose_x.append(x)
                     pose_y.append(y)
+                    vel_total.append(v_total)
 
                     t.append(current_time)
                     # get trajectory
@@ -252,8 +268,8 @@ class newBag():
 
 
             # remove first 
-            if "run_1" in bags:    
-                bags.pop("run_1")
+            #if "run_1" in bags:    
+                #bags.pop("run_1")
 
             df = pd.DataFrame(data=bags)
             run_csv = self.csv_dir + "/" + self.csv_dir.rsplit('/', 1)[-1] + ".csv"
@@ -312,13 +328,46 @@ class newBag():
         if col_exists:
             self.make_grid([all_cols_x, all_cols_y], clr)
 
+    def fancy_plot(self, x, y, vels,skip, mode): 
+        if mode == True:
+            n = 50
+            colors  = plt.cm.jet(np.linspace(0,1,n))
+            vel_map = np.linspace(0,0.5,n)
+            
+            print(vels)
+
+            idx = 0
+            joined = 0
+            xi = []
+            yi = []
+            while idx < len(x):
+                mid     = min(range(len(vel_map)), key=lambda i: abs(vel_map[i]-vels[idx]))
+                if joined == skip or idx == len(x) - 1:
+                    plt.plot(xi, yi, "-",color=colors[mid]) 
+                    # plt.scatter(xi, yi, marker='+')
+                    # plt.scatter(xi, yi, marker='+')
+                    xi = []
+                    yi = []
+                    joined = 0
+                    if idx != len(x) - 1:
+                        idx -=1
+                xi.append(x[idx])
+                yi.append(y[idx])
+                # yi.append(1)
+
+                joined += 1
+                idx += 1
+        else:
+            return False
+
+
     def evalPath(self, planner, file_name, bags):
         col_xy = []
         global ax, axlim, plt_cfg, line_clr, line_stl
 
         durations = [] 
         trajs = []
-        vels  = []
+        av_vels = []
 
         # self.make_txt(file_name, "\n"+"Evaluation of "+planner+":") --txt
         axlim = {}
@@ -334,16 +383,16 @@ class newBag():
         json_data['velocity']  = []
         json_data['collision'] = []
 
-        for run in bags:
-            if run != "nrun_2/":
-                
 
+        for run in bags:
+            if True:#run == "run_5":
                 pose_x = bags[run][0]
                 pose_y = bags[run][1]
                 sg_x   = bags[run][4]
                 sg_y   = bags[run][5]
                 wp_x   = bags[run][6]
                 wp_y   = bags[run][7]
+                vels   = bags[run][8]
 
                 x    =  np.array(pose_x)
                 y    = -np.array(pose_y)
@@ -351,7 +400,8 @@ class newBag():
                 sg_y = -np.array(sg_y)
                 wp_x =  np.array(wp_x)
                 wp_y = -np.array(wp_y)
-
+                vels =  np.array(vels)
+                
                 # print(wp_x)
                 # print(wp_y)
 
@@ -374,7 +424,9 @@ class newBag():
                 trajs.append(path_length)
                 if path_length > 0 and plt_cfg["plot_trj"]:
                     # print(lgnd)
-                    ax.plot(y, x, line_clr, linestyle = line_stl, alpha=0.8)
+
+                    ax.plot(y, x, line_clr, linestyle = line_stl, alpha=0.5)
+
                     ax.set_xlabel("x in [m]")
                     ax.set_ylabel("y in [m]")
 
@@ -393,13 +445,14 @@ class newBag():
                 durations.append(duration)
                 av_vel = path_length/duration
                 # for av
-                vels.append(av_vel)
+                
 
                 n_col = len(bags[run][3])
 
                 duration    = round(duration,3)
                 path_length = round(path_length,3)
                 av_vel      = round(av_vel,3)
+                av_vels.append(av_vel)
 
                 cr = run+": "+str([duration, path_length, av_vel, n_col])
                 # plot global plan
@@ -426,13 +479,13 @@ class newBag():
         msg_planner = "\n----------------------   "    + planner                               + " summary: ----------------------"
         msg_at      = "\naverage time:        "        + str(round(self.average(durations),3)) + " s"
         msg_ap      = "\naverage path length: "        + str(round(self.average(trajs),3))     + " m"
-        msg_av      = "\naverage velocity:    "        + str(round(self.average(vels),3))      + "  m/s"
+        msg_av      = "\naverage velocity:    "        + str(round(self.average(av_vels),3))   + "  m/s"
         msg_col     = "\ntotal number of collisions: " + str(self.nc_total)+"\n"
 
         print("----------------------   "+planner+"   ----------------------")
         print("average time:        ", round(self.average(durations),3), "s")
         print("average path length: ", round(self.average(trajs),3), "m")
-        print("average velocity:    ", round(self.average(vels),3), " m/s")
+        print("average velocity:    ", round(self.average(av_vels),3), " m/s")
         print("total collisions:    ",   str(self.nc_total))
         
         # average to txt (summary)
@@ -848,7 +901,7 @@ def eval_cfg(cfg_file, filetype):
                         fancy_print("Evaluate bag: " + file, 1)
 
             
-            #map0: lower left, empty: upper left, open: upper left
+            #map0: lower left, empty: upper left, open: lower left
             ax.legend(handles=legend_elements, loc="lower left")
 
             ax.spines["right"].set_visible(True)
@@ -875,8 +928,8 @@ def getMap(msg):
     points_x = []
     points_y = []
     # print(msg.markers[0]) map0 -16.6 -6.65  ,  map1 empty: -6 -6  , open field: 0 0
-    orig_x = -16.6
-    orig_y = -6.65
+    orig_x = -6
+    orig_y = -6
     for p in msg.markers[0].points:
     #     if  2 < p.y < 25 :
         points_x.append( p.x + orig_x)
