@@ -48,6 +48,11 @@ class newBag():
         self.circle1=None
         self.l_1=None
 
+        self.color=np.array([1.0,0.4,0.7]).reshape(-1,3)
+        th = np.linspace(0, 1, 200).reshape(200,-1)[::-1]
+        self.color=th.dot(self.color)
+        # print(self.color)
+
         self.nc_total = 0
         # eval bags
         self.bag = bagreader(bag_name)
@@ -103,9 +108,9 @@ class newBag():
                 t_reset.append(df_reset.loc[i, "Time"])        
 
 
-            pose_x = []
-            pose_y = []
-            t = []
+            pose_x = [-2.5]
+            pose_y = [-2]
+            t = [0.0]
 
             bags = {}
             # run idx
@@ -120,7 +125,7 @@ class newBag():
 
 
             global start, select_run
-            select_run=[6] #die reihenfolge should be descend
+            select_run=[3] #die reihenfolge should be descend
 
             for i in range(len(df_odom)): 
                 current_time = df_odom.loc[i, "Time"]
@@ -147,9 +152,9 @@ class newBag():
                         select_run.pop()
                         bags["run_"+str(n)] = [pose_x, pose_y, t, col_xy] #, subgoal_x, subgoal_y, wpg_x, wpg_y
 
-                    pose_x    = []
-                    pose_y    = []
-                    t         = []
+                    pose_x    = [-2.5]
+                    pose_y    = [-2]
+                    t         = [0.0]
 
                     col_xy    = []
 
@@ -265,10 +270,17 @@ class newBag():
                 dist_array = (x[:-1]-x[1:])**2 + (y[:-1]-y[1:])**2
                 path_length = np.sum(np.sqrt(dist_array))
                 # for av
-                t_0=t[0]
-                t_rate=(t-t_0)/(t[-1]-t_0)
+                t_1=t[1]
+                t_rate_tail=1.0-(t[1:]-t_1)/(t[-1]-t_1)
+                t_rate=[1.0]
+                # print(len(t_rate_tail))
+                t_rate.extend(t_rate_tail)
                 trajs.append(path_length)
                 # print('pl',path_length)
+                # print(len(t_rate))
+                t[1:]=t[1:]-t_1+0.5
+                # t
+                # print(len(t))
                 if path_length > 0 and plt_cfg["plot_trj"]:
                     # print(lgnd)
                     # print('reached here')
@@ -276,8 +288,10 @@ class newBag():
                     # print(len(y))
                     self.l_1=ax.plot(x, y, self.color_traj, linestyle = self.line_stl, alpha=0.8)
                     for i,t_e in enumerate(t):
-                        circle = plt.Circle((x[i], y[i]), 0.3, color=self.color_circle, fill = True, alpha = t_rate[i])
-                        plt.text(x[i],y[i],f'{round(t_e-t_0,1)}',fontsize=3)
+                        circle_outer = plt.Circle((x[i], y[i]), 0.4, color=self.color_traj, fill = True, alpha = t_rate[i])
+                        circle = plt.Circle((x[i], y[i]), 0.4, color=self.color_traj, fill = False,alpha = 0.8)
+                        plt.text(x[i],y[i],f'{round(t_e,1)}',fontsize=6,alpha=1.0,color=self.color[i*8])
+                        ax.add_patch(circle_outer)
                         ax.add_patch(circle)
                     # if ~legend_traj:
                     #     plt.legend([l1[0],circle],['traj','robot'])
@@ -406,8 +420,8 @@ def eval_run(filetype):
     # file=['HUMAN_88888888888.bag','HUMAN_normal_zone.bag','HUMAN_danger_zone1.bag'] #scenario1
     #scenario files 
     #raw  nz  dz
-    file=['HUMAN_raw_Scenario5.bag','HUMAN_nz_Scenario5.bag','HUMAN_dz_Scenario5.bag'] #scenario2
-    color=['k','violet','purple']
+    file=['HUMAN_simple_raw.bag','HUMAN_simple_nz.bag','HUMAN_simple_dz.bag'] #scenario2
+    color=['darkorange','slategrey','red']
     line_style=['--','-.','-']
     circles_traj_legend=[]
     line_traj_legend=[]
@@ -418,12 +432,12 @@ def eval_run(filetype):
         line_traj_legend.append(nb.getLineLegend()[0])
 
     # file_human = 'HUMAN_2021-07-04-00-25-52.bag' #scenario1
-    file_human = 'HUMAN_Scenario5.bag'
+    file_human = 'HUMAN_simple.bag'
 
     bag_human = bagreader(file_human)
 
 
-    num_humans      = 15
+    num_humans      = 3
     ns_prefix='eval_sim/'
     human_odom_topic_list=[]
     for i in range(num_humans):
@@ -431,7 +445,7 @@ def eval_run(filetype):
     
     # human_odom_csv=[]
     df_human_odom=[]
-    delete_idx=[2,8,9]
+    delete_idx=[11]
     for i in range(num_humans):
         # if i in delete_idx:
         #     continue
@@ -446,6 +460,9 @@ def eval_run(filetype):
     y_h=[]
     t_rate_h=[]
     color=None
+    circle2=None
+    circle3=None
+    circle4=None
 
     for i in range(num_humans):
         if i in delete_idx:
@@ -485,22 +502,32 @@ def eval_run(filetype):
         #here I plot the trajectory of one spefic human
         for k,t_e in enumerate(t_h):
             t_rate=t_e/t_h[-1]
-            circle = plt.Circle((x_h[k], y_h[k]), 0.2, color=color1, alpha = t_rate) #,edgecolor=color1,ec=color1,
-            plt.text(x_h[k],y_h[k],f'{t_e}',fontsize=3)
+            circle = plt.Circle((x_h[k], y_h[k]), 0.2, color=color1, alpha = 1.0-t_rate) #,edgecolor=color1,ec=color1,
+            if k%3==0:
+                plt.text(x_h[k],y_h[k],f'{t_e}',fontsize=4)
             plt.gca().add_patch(circle)
-        if ty==0:
-            circle2=circle
-        elif ty==1:
-            circle3=circle
-        else:
-            circle4=circle
+            if ty==0:
+                if circle2==None:
+                    circle2=circle
+                else:
+                    continue
+            elif ty==1:
+                if circle3==None:
+                    circle3=circle
+                else:
+                    continue
+            else:
+                if circle4==None:
+                    circle4=circle
+                else:
+                    continue
         
         t_h=[]
         x_h=[]
         t_rate_h=[]
         y_h=[]
 
-    plt.legend(line_traj_legend + [circles_traj_legend[0]] + [circle2,circle3,circle4],['traj_raw','traj_nz','traj_dz','robot','adult','child','elder'],framealpha=0.4,fontsize=9)
+    plt.legend(line_traj_legend  + [circle2,circle3,circle4],['traj_raw','traj_nz','traj_dz','adult','child','elder'],framealpha=0.4,fontsize=9,loc='upper left')
 
     ax.spines["right"].set_visible(True)
     color_name = "grey"
