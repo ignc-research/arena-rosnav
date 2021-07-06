@@ -421,13 +421,13 @@ def eval_run(filetype):
     #scenario files 
     #raw  nz  dz
     file=['HUMAN_simple_raw.bag','HUMAN_simple_nz.bag','HUMAN_simple_dz.bag'] #scenario2
-    color=['darkorange','slategrey','red']
+    color=['darkorange','slategrey','tab:red']
     line_style=['--','-.','-']
     circles_traj_legend=[]
     line_traj_legend=[]
     for k,f in enumerate(file):
         # print(k)
-        nb=newBag(curr_figure, bag_path + "/" + f, 'red', color[k], line_style[k])
+        nb=newBag(curr_figure, bag_path + "/" + f, 'tab:red', color[k], line_style[k])
         circles_traj_legend.append(nb.getCircleLegend())
         line_traj_legend.append(nb.getLineLegend()[0])
 
@@ -491,11 +491,11 @@ def eval_run(filetype):
         # print(x_h)
         # ax.plot(y_h, x_h, line_clr, linestyle = line_stl, alpha=0.8)
         if ty==0:
-            color1='blue'
+            color1='tab:blue'
         elif ty==1:
-            color1='green'
+            color1='tab:green'
         else:
-            color1='yellow'
+            color1='gold'
         # print(i+1)
         if(t_h[0]<0):
             t_h+=-t_h[0]
