@@ -310,6 +310,7 @@ class ObservationCollector():
 
         if len(self._human_position) == self.num_humans and self.num_humans > 0  and agent_massage_is_none == False :
             rho_humans, theta_humans=np.empty([self.num_humans,]), np.empty([self.num_humans,])
+            theta_robot_in_human_frame= np.empty([self.num_humans,])
             coordinate_humans= np.empty([2,self.num_humans])
 
             for  i, position in enumerate(self._human_position):
@@ -318,7 +319,8 @@ class ObservationCollector():
                 coordinate_humans[0][i]=position.x
                 coordinate_humans[1][i]=position.y
                 rho_humans[i], theta_humans[i] = ObservationCollector._get_pose_in_robot_frame(position, self._robot_pose)
-
+                _,theta_robot_in_human_frame[i] = ObservationCollector._get_pose_in_robot_frame(self._robot_pose, position)
+                # print(theta_robot_in_human_frame[i])
             #sort the humans according to the relative position to robot
             human_pos_index=np.argsort(rho_humans)
             rho_humans, theta_humans=rho_humans[human_pos_index], theta_humans[human_pos_index]
@@ -343,7 +345,7 @@ class ObservationCollector():
                     count_observable_humans=count_observable_humans+1
                     
                     rho_behavior=np.array([rho_humans[i],self._human_behavior[i],self._human_type[i],self.human_type_ids[self._human_type[i]]],dtype=object)
-                    
+                    # print(theta_humans[i])
                     obs_dict['human_obstacles_in_robot_frame'] = np.vstack([obs_dict['human_obstacles_in_robot_frame'], rho_behavior])
                     #determine the safe_dist for every human
                     safe_dist_=self.safe_dists_human_type[ty] * self.safe_dists_factor[self._human_behavior[i]]
@@ -650,14 +652,14 @@ class ObservationCollector():
 
     def read_saftey_distance_parameter_from_yaml(self):
         
-        file_location = os.path.join(rospkg.RosPack().get_path('simulator_setup'), 'saftey_distance_parameter_none.yaml')
+        file_location = os.path.join(rospkg.RosPack().get_path('simulator_setup'), 'saftey_distance_parameter.yaml')
         
         
         if os.path.isfile(file_location):
             with open(file_location, "r") as file:
                 saftey_distance_parameter = yaml.load(file, Loader=yaml.FullLoader)       
         assert isinstance(
-             saftey_distance_parameter, dict), "'saftey_distance_parameter_none.yaml' has wrong fromat! Has to encode dictionary!"
+             saftey_distance_parameter, dict), "'saftey_distance_parameter.yaml' has wrong fromat! Has to encode dictionary!"
                 
         return saftey_distance_parameter
 

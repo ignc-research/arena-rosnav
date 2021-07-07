@@ -14,7 +14,7 @@
 
   <!-- Map parameters -->
 
-  <arg name="map_file"        default="map_empty_small"/>
+  <arg name="map_file"        default="map_empty"/>
   <arg name="map_path"        default="$(find simulator_setup)/maps/$(arg map_file)/map.yaml"/>
   <arg name="world_path"      default="$(find simulator_setup)/maps/$(arg map_file)/map.world.yaml"/>
 
