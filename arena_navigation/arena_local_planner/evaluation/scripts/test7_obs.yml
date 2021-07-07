@@ -44,7 +44,13 @@ map1_obs20_vel05:
         SUB-WP:
             model:     "cadrl"
             linestyle: "tab:red,-."
-            wpg:       "subsampling"           
+            wpg:       "subsampling"
+        TEB:
+            model:     "teb"
+            linestyle: "tab:pink,:"
+        MPC:
+            model:     "mpc"
+            linestyle: "tab:grey,-"   
 
 map1_obs10_vel05:            
     planner:                                
@@ -60,4 +66,10 @@ map1_obs10_vel05:
             model:     "cadrl"
             linestyle: "tab:red,-."
             wpg:       "subsampling"
+        TEB:
+            model:     "teb"
+            linestyle: "tab:pink,:"
+        MPC:
+            model:     "mpc"
+            linestyle: "tab:grey,-"           
 
