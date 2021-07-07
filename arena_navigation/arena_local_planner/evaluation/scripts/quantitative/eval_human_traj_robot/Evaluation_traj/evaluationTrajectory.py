@@ -12,7 +12,7 @@ import yaml
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
-from matplotlib.pyplot import figure
+from matplotlib.pyplot import figure, gray
 from matplotlib.patches import Polygon
 from matplotlib._png import read_png
 import matplotlib.cm as cm
@@ -108,8 +108,8 @@ class newBag():
                 t_reset.append(df_reset.loc[i, "Time"])        
 
 
-            pose_x = [-2.5]
-            pose_y = [-2]
+            pose_x = [-2]
+            pose_y = [8]
             t = [0.0]
 
             bags = {}
@@ -125,7 +125,7 @@ class newBag():
 
 
             global start, select_run
-            select_run=[3] #die reihenfolge should be descend
+            select_run=[10] #die reihenfolge should be descend
 
             for i in range(len(df_odom)): 
                 current_time = df_odom.loc[i, "Time"]
@@ -152,8 +152,8 @@ class newBag():
                         select_run.pop()
                         bags["run_"+str(n)] = [pose_x, pose_y, t, col_xy] #, subgoal_x, subgoal_y, wpg_x, wpg_y
 
-                    pose_x    = [-2.5]
-                    pose_y    = [-2]
+                    pose_x    = [-2]
+                    pose_y    = [8]
                     t         = [0.0]
 
                     col_xy    = []
@@ -287,17 +287,19 @@ class newBag():
                     # print(len(x))
                     # print(len(y))
                     self.l_1=ax.plot(x, y, self.color_traj, linestyle = self.line_stl, alpha=0.8)
+                    plt.grid()
                     for i,t_e in enumerate(t):
-                        circle_outer = plt.Circle((x[i], y[i]), 0.4, color=self.color_traj, fill = True, alpha = t_rate[i])
-                        circle = plt.Circle((x[i], y[i]), 0.4, color=self.color_traj, fill = False,alpha = 0.8)
-                        plt.text(x[i],y[i],f'{round(t_e,1)}',fontsize=6,alpha=1.0,color=self.color[i*8])
+                        circle_outer = plt.Circle((x[i], y[i]), 0.65, color=self.color_traj, fill = True, alpha = t_rate[i])
+                        circle = plt.Circle((x[i], y[i]), 0.65, color=self.color_traj, fill = False,alpha = 0.8)
+                        plt.text(x[i]-0.6,y[i],f'{round(t_e,1)}',fontsize=10, alpha = 0.6,fontweight= 10-t_rate[i], color="k")
                         ax.add_patch(circle_outer)
                         ax.add_patch(circle)
                     # if ~legend_traj:
                     #     plt.legend([l1[0],circle],['traj','robot'])
                     #     legend_traj=True
                     self.circle1=circle
-                        
+                    
+                    #ax.set_title("Comparison of Trajectories")
                     ax.set_xlabel("x in [m]")
                     ax.set_ylabel("y in [m]")
 
@@ -404,7 +406,7 @@ def eval_run(filetype):
 
     legend_elements = []
 
-    style   = "tab:blue,--"
+    style   = "tab:orange,--"
 
 
     # print(planner, dir, model, style, wpg)
@@ -420,24 +422,24 @@ def eval_run(filetype):
     # file=['HUMAN_88888888888.bag','HUMAN_normal_zone.bag','HUMAN_danger_zone1.bag'] #scenario1
     #scenario files 
     #raw  nz  dz
-    file=['HUMAN_simple_raw.bag','HUMAN_simple_nz.bag','HUMAN_simple_dz.bag'] #scenario2
-    color=['darkorange','slategrey','red']
+    file=['HUMAN_vh_raw.bag','HUMAN_vh_nz.bag','HUMAN_vh_dz.bag'] #scenario2
+    color=['tab:blue','tab:green','tab:red']
     line_style=['--','-.','-']
     circles_traj_legend=[]
     line_traj_legend=[]
     for k,f in enumerate(file):
         # print(k)
-        nb=newBag(curr_figure, bag_path + "/" + f, 'red', color[k], line_style[k])
+        nb=newBag(curr_figure, bag_path + "/" + f, 'tab:red', color[k], line_style[k])
         circles_traj_legend.append(nb.getCircleLegend())
         line_traj_legend.append(nb.getLineLegend()[0])
 
     # file_human = 'HUMAN_2021-07-04-00-25-52.bag' #scenario1
-    file_human = 'HUMAN_simple.bag'
+    file_human = 'HUMAN_vh.bag'
 
     bag_human = bagreader(file_human)
 
 
-    num_humans      = 3
+    num_humans      = 10
     ns_prefix='eval_sim/'
     human_odom_topic_list=[]
     for i in range(num_humans):
@@ -445,7 +447,7 @@ def eval_run(filetype):
     
     # human_odom_csv=[]
     df_human_odom=[]
-    delete_idx=[11]
+    delete_idx=[8]
     for i in range(num_humans):
         # if i in delete_idx:
         #     continue
@@ -491,20 +493,20 @@ def eval_run(filetype):
         # print(x_h)
         # ax.plot(y_h, x_h, line_clr, linestyle = line_stl, alpha=0.8)
         if ty==0:
-            color1='blue'
+            color1='tab:orange'
         elif ty==1:
-            color1='green'
+            color1='tab:purple'
         else:
-            color1='yellow'
+            color1='tab:pink'
         # print(i+1)
         if(t_h[0]<0):
             t_h+=-t_h[0]
         #here I plot the trajectory of one spefic human
         for k,t_e in enumerate(t_h):
             t_rate=t_e/t_h[-1]
-            circle = plt.Circle((x_h[k], y_h[k]), 0.2, color=color1, alpha = 1.0-t_rate) #,edgecolor=color1,ec=color1,
+            circle = plt.Rectangle((x_h[k], y_h[k]),0.42, 0.42, color=color1, alpha = 1.0-t_rate) #,edgecolor=color1,ec=color1,
             if k%3==0:
-                plt.text(x_h[k],y_h[k],f'{t_e}',fontsize=4)
+                plt.text(x_h[k]+0.6,y_h[k],f'{t_e}',fontsize=8, fontweight=1000, color=color1, alpha=1)
             plt.gca().add_patch(circle)
             if ty==0:
                 if circle2==None:
@@ -527,7 +529,7 @@ def eval_run(filetype):
         t_rate_h=[]
         y_h=[]
 
-    plt.legend(line_traj_legend  + [circle2,circle3,circle4],['traj_raw','traj_nz','traj_dz','adult','child','elder'],framealpha=0.4,fontsize=9,loc='upper left')
+    plt.legend(line_traj_legend  + [circle2,circle3,circle4],['Raw','Static Zone','Dyn. Zone','Adult','Child','Elder'],framealpha=0.4,fontsize=9,loc='upper left')
 
     ax.spines["right"].set_visible(True)
     color_name = "grey"
