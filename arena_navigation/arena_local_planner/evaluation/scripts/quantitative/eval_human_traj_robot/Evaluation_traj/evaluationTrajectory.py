@@ -529,7 +529,7 @@ def eval_run(filetype):
         t_rate_h=[]
         y_h=[]
 
-    plt.legend(line_traj_legend  + [circle2,circle3,circle4],['Raw','Static Zone','Dynamic Zone','Adult','Child','Elder'],framealpha=0.4,fontsize=9,loc='upper left')
+    plt.legend(line_traj_legend  + [circle2,circle3,circle4],['Raw','Static Zone','Dyn. Zone','Adult','Child','Elder'],framealpha=0.4,fontsize=9,loc='upper left')
 
     ax.spines["right"].set_visible(True)
     color_name = "grey"
