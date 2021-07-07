@@ -18,8 +18,8 @@ bodies:  # List of named bodies
     color: [0.66, 0.3, 0, 0.75]
     footprints:
       - type: circle
-        radius: 0.1
-        center: [0.0, 0.0]
+        radius: 0.2
+        center: [-0.3, 0.0]
         density: 1
         layers: ["static"]
         collision: false
@@ -30,8 +30,8 @@ bodies:  # List of named bodies
     color: [0.66, 0.3, 0, 0.75] 
     footprints:
       - type: circle
-        radius: 0.1
-        center: [0.0, 0.0]
+        radius: 0.2
+        center: [0.3, 0.0]
         density: 1
         layers: ["static"]
         collision: false

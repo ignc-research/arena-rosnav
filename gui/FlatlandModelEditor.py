@@ -154,7 +154,7 @@ class FlatlandModelEditor(QtWidgets.QMainWindow):
 
     def on_open_clicked(self):
         rospack = rospkg.RosPack()
-        initial_folder = os.path.join(rospack.get_path("simulator_setup"), "obstacles")
+        initial_folder = os.path.join(rospack.get_path("simulator_setup"), "dynamic_obstacles")
         res = QtWidgets.QFileDialog.getOpenFileName(parent=self, directory=initial_folder)
         path = res[0]
         if path != "":
@@ -180,7 +180,7 @@ class FlatlandModelEditor(QtWidgets.QMainWindow):
 
     def on_save_as_clicked(self):
         rospack = rospkg.RosPack()
-        initial_folder = os.path.join(rospack.get_path("simulator_setup"), "obstacles")
+        initial_folder = os.path.join(rospack.get_path("simulator_setup"), "dynamic_obstacles")
 
         res = QtWidgets.QFileDialog.getSaveFileName(parent=self, directory=initial_folder)
         path = res[0]

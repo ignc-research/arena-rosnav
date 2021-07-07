@@ -11,6 +11,7 @@ import yaml
 import numpy as np
 import copy
 from FlatlandModelEditor import FlatlandModelEditor
+from ArenaScenarioEditor import ArenaScenarioEditor
 
 
 def get_value_qspin_box(x) :
@@ -546,12 +547,11 @@ class main_window(QMainWindow):
         else:
             self.w.close()  # Close window.
             self.w = None  # Discard reference.
+
     def on_button4_clicked(self, checked):
         if self.w is None:
-            self.window4= SubWindow()
-            self.window4.setWindowTitle('New scenario Configs')
-
-            self.window4.show()
+            self.arena_scenario_editor_window = ArenaScenarioEditor()
+            self.arena_scenario_editor_window.show()
         else:
             self.w.close()  # Close window.
             self.w = None  # Discard reference.

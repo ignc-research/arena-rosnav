@@ -1,211 +1,7 @@
 from PyQt5 import QtGui, QtCore, QtWidgets
 from FlatlandModel import *
-import random
+from QtExtensions import *
 import numpy as np
-
-class ArenaQDoubleSpinBox(QtWidgets.QDoubleSpinBox):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.setSingleStep(0.1)
-
-    def wheelEvent(self, event):
-        angle = event.angleDelta().y()
-        if angle > 0:
-            self.stepUp()
-            event.accept()
-        elif angle < 0:
-            self.stepDown()
-            event.accept()
-        else:
-            event.ignore()
-
-    def stepUp(self):
-        new_value = round(self.value() + self.singleStep(), 1)
-        self.setValue(new_value)
-
-    def stepDown(self):
-        new_value = round(self.value() - self.singleStep(), 1)
-        self.setValue(new_value)
-
-class ArenaQGraphicsPolygonItem(QtWidgets.QGraphicsPolygonItem):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.setFlags(
-            QtWidgets.QGraphicsItem.GraphicsItemFlag.ItemIsMovable |
-            QtWidgets.QGraphicsItem.GraphicsItemFlag.ItemIsSelectable |
-            QtWidgets.QGraphicsItem.GraphicsItemFlag.ItemSendsGeometryChanges
-            )
-        self.setAcceptHoverEvents(True)
-        self.footprint_widget = None
-        # handles for resizing
-        self.handle_size = 0.3  # length of one side of a rectangular handle
-        self.handles = []  # list of QRectangle
-        self.updateHandlesPos()
-        self.point_index = -1
-
-    def handleAt(self, point):
-        """
-        Returns the index of the resize handle below the given point.
-        """
-        valid_handles = []
-        for i, handle in enumerate(self.handles):
-            if handle.contains(point):
-                valid_handles.append(i)
-
-        # select handle which center is closest to *point*
-        min_diff = float("inf")
-        selected_handle_idx = -1
-        for handle_idx in valid_handles:
-            diff = point - self.handles[handle_idx].center()
-            diff_len = np.linalg.norm([diff.x(), diff.y()])
-            if diff_len < min_diff:
-                min_diff = diff_len
-                selected_handle_idx = handle_idx
-                
-        return selected_handle_idx
-
-    def mousePressEvent(self, mouse_event):
-        """
-        Executed when the mouse is pressed on the item.
-        """
-        self.footprint_widget.dragging_polygon = True
-        self.point_index = self.handleAt(mouse_event.pos())
-        if self.point_index != -1:
-            self.mouse_press_pos = mouse_event.pos()
-            self.mouse_press_polygon = self.polygon()
-        return super().mousePressEvent(mouse_event)
-
-    def mouseMoveEvent(self, mouse_event):
-        """
-        Executed when the mouse is being moved over the item while being pressed.
-        """
-        if self.point_index != -1:
-            self.interactiveResize(self.point_index, mouse_event.pos())
-        else:
-            return super().mouseMoveEvent(mouse_event)
-
-    def mouseReleaseEvent(self, mouse_event):
-        """
-        Executed when the mouse is released from the item.
-        """
-        self.footprint_widget.dragging_polygon = False
-        self.point_index = -1
-        self.mouse_press_pos = None
-        self.mouse_press_polygon = None
-        return super().mouseReleaseEvent(mouse_event)
-
-    def interactiveResize(self, point_index_, mouse_pos):
-        polygon = self.polygon()
-        diff = mouse_pos - self.mouse_press_pos
-        polygon[point_index_] = self.mouse_press_polygon[point_index_] + diff
-        self.setPolygon(polygon)
-        self.footprint_widget.update_spin_boxes()
-
-    def setPolygon(self, *args):
-        super().setPolygon(*args)
-        self.updateHandlesPos()
-
-    def updateHandlesPos(self):
-        d = self.handle_size
-        self.handles = []
-        for point in self.polygon():
-            rect = QtCore.QRectF(point.x() - d / 2.0, point.y() - d / 2.0, d, d)
-            self.handles.append(rect)
-
-    def itemChange(self, change, value):
-        if change == QtWidgets.QGraphicsItem.GraphicsItemChange.ItemPositionChange:
-            self.footprint_widget.update_spin_boxes()
-
-        return super().itemChange(change, value)
-
-    def hoverMoveEvent(self, move_event):
-        """
-        Executed when the mouse moves over the shape (NOT PRESSED).
-        """
-        handle = self.handleAt(move_event.pos())
-        if handle != -1:
-            self.setCursor(QtCore.Qt.SizeFDiagCursor)
-        else:
-            self.setCursor(QtCore.Qt.ArrowCursor)
-
-        return super().hoverMoveEvent(move_event)
-
-    # def shape(self):
-    #     """
-    #     Returns the shape of this item as a QPainterPath in local coordinates.
-    #     """
-    #     path = QtGui.QPainterPath()
-    #     path.setFillRule(QtCore.Qt.FillRule.WindingFill)
-    #     path.addPolygon(self.polygon())
-    #     # path = super().shape()
-    #     # if self.isSelected():
-    #     #     for rect in self.handles:
-    #     #         path.addRect(rect)
-    #     for rect in self.handles:
-    #         path.addRect(rect)
-    #     p = path.toFillPolygon()
-    #     p_path = QtGui.QPainterPath()
-    #     p_path.addPolygon(p)
-    #     return p_path
-
-    # def paint(self, painter, option, widget=None):
-    #     """
-    #     Paint the node in the graphic view.
-    #     """
-    #     # painter.drawPolygon(self.polygon())
-
-    #     if self.isSelected():
-    #         painter.setPen(QtGui.QPen(QtGui.QColor(0, 0, 0), 0.1, QtCore.Qt.SolidLine))
-    #         for rect in self.handles:
-    #             painter.drawRect(rect)
-
-    #     super().paint(painter, option, widget)
-
-
-
-class ArenaQGraphicsView(QtWidgets.QGraphicsView):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.setDragMode(QtWidgets.QGraphicsView.DragMode.ScrollHandDrag)
-        self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
-        self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
-        self.setSceneRect(-100, -100, 200, 200)
-        self.zoomFactor = 1.0
-
-        # add coordinate system lines
-        pen = QtGui.QPen()
-        pen.setWidthF(0.01)
-        self.scene().addLine(0, -100, 0, 100, pen)
-        self.scene().addLine(-100, 0, 100, 0, pen)
-
-        # set initial view
-        rect = QtCore.QRectF(-1.5, -1.5, 3, 3)
-        self.fitInView(rect, mode=QtCore.Qt.AspectRatioMode.KeepAspectRatio)
-
-    def wheelEvent(self, event):
-        """
-        Zoom in or out of the view.
-        """
-        zoomInFactor = 1.25
-        zoomOutFactor = 1 / zoomInFactor
-
-        # Save the scene pos
-        oldPos = self.mapToScene(event.pos())
-
-        # Zoom
-        if event.angleDelta().y() > 0:
-            zoomFactor_ = zoomInFactor
-        else:
-            zoomFactor_ = zoomOutFactor
-        self.scale(zoomFactor_, zoomFactor_)
-        self.zoomFactor *= 1 / zoomFactor_
-
-        # Get the new position
-        newPos = self.mapToScene(event.pos())
-
-        # Move scene to old position
-        delta = newPos - oldPos
-        self.translate(delta.x(), delta.y())
 
 
 class FootprintWidget(QtWidgets.QFrame):
@@ -338,7 +134,7 @@ class FootprintWidget(QtWidgets.QFrame):
             self.update_polygon()
 
     def update_polygon(self):
-        if not self.dragging_polygon:
+        if not self.dragging_polygon:  # prevents recursive loop (spin box <-> moving item)
             new_points = [QtCore.QPointF(point_boxes[0].value(), point_boxes[1].value()) for point_boxes in self.spin_boxes]
             new_polygon = QtGui.QPolygonF(new_points)
             self.polygon_item.setPolygon(self.polygon_item.mapFromScene(new_polygon))
@@ -361,14 +157,14 @@ class FlatlandBodyEditor(QtWidgets.QWidget):
         self.id = id
         self.polygons = []
         self.flatland_body_widget = flatland_body_widget
-        self.setup_ui()
         self.flatland_body = None
+        self.setup_ui()
         self.set_flatland_body(flatland_body)  # needs to be called after setup_ui
     
     def setup_ui(self):
         self.setWindowTitle("Flatland Body Editor")
         self.setLayout(QtWidgets.QGridLayout())
-        self.setWindowModality(QtCore.Qt.WindowModality.WindowModal)
+        self.setWindowModality(QtCore.Qt.WindowModality.ApplicationModal)
         self.resize(1000, 600)
 
         # name

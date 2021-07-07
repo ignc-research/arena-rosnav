@@ -2,6 +2,7 @@ from os import path, truncate
 from PyQt5 import QtGui, QtCore, QtWidgets
 from enum import Enum
 import yaml
+import os
 import numpy as np
 
 class B2BodyType(Enum):
@@ -41,7 +42,7 @@ class FlatlandFootprint():
         if "collision" in d:
             fp.collision = d["collision"]
         if "density" in d:
-            fp.density = d["density"]
+            fp.density = float(d["density"])
 
         return fp
 
@@ -70,9 +71,9 @@ class CircleFlatlandFootprint(FlatlandFootprint):
     def fromDict(d: dict):
         fp = CircleFlatlandFootprint()
         if "center" in d:
-            fp.center = d["center"]
+            fp.center = [float(val) for val in d["center"]]
         if "radius" in d:
-            fp.radius = d["radius"]
+            fp.radius = float(d["radius"])
         return fp
 
     def toDict(self):
@@ -197,15 +198,16 @@ class FlatlandModel():
         print("saved model to", self.path)
         return True
 
-    def load(self, path):
-        self.bodies = {}
-        with open(path, "r") as file:
-            data = yaml.safe_load(file)
-            for body in data["bodies"]:
-                flatland_body = FlatlandBody.fromDict(body)
-                self.bodies[self.bodies_index] = flatland_body
-                self.bodies_index += 1
-        self.path = path
+    def load(self, path: str):
+        if os.path.exists(path):
+            self.bodies = {}
+            with open(path, "r") as file:
+                data = yaml.safe_load(file)
+                for body in data["bodies"]:
+                    flatland_body = FlatlandBody.fromDict(body)
+                    self.bodies[self.bodies_index] = flatland_body
+                    self.bodies_index += 1
+            self.path = path
 
 
 # Tests
