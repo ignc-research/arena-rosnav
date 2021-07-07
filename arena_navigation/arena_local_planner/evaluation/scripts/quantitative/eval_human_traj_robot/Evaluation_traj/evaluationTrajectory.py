@@ -108,8 +108,8 @@ class newBag():
                 t_reset.append(df_reset.loc[i, "Time"])        
 
 
-            pose_x = [-2.5]
-            pose_y = [-2]
+            pose_x = [-2]
+            pose_y = [8]
             t = [0.0]
 
             bags = {}
@@ -125,7 +125,7 @@ class newBag():
 
 
             global start, select_run
-            select_run=[3] #die reihenfolge should be descend
+            select_run=[10] #die reihenfolge should be descend
 
             for i in range(len(df_odom)): 
                 current_time = df_odom.loc[i, "Time"]
@@ -152,8 +152,8 @@ class newBag():
                         select_run.pop()
                         bags["run_"+str(n)] = [pose_x, pose_y, t, col_xy] #, subgoal_x, subgoal_y, wpg_x, wpg_y
 
-                    pose_x    = [-2.5]
-                    pose_y    = [-2]
+                    pose_x    = [-2]
+                    pose_y    = [8]
                     t         = [0.0]
 
                     col_xy    = []
@@ -422,7 +422,7 @@ def eval_run(filetype):
     # file=['HUMAN_88888888888.bag','HUMAN_normal_zone.bag','HUMAN_danger_zone1.bag'] #scenario1
     #scenario files 
     #raw  nz  dz
-    file=['HUMAN_simple_raw.bag','HUMAN_simple_nz.bag','HUMAN_simple_dz.bag'] #scenario2
+    file=['HUMAN_vh_raw.bag','HUMAN_vh_nz.bag','HUMAN_vh_dz.bag'] #scenario2
     color=['tab:blue','tab:green','tab:red']
     line_style=['--','-.','-']
     circles_traj_legend=[]
@@ -434,12 +434,12 @@ def eval_run(filetype):
         line_traj_legend.append(nb.getLineLegend()[0])
 
     # file_human = 'HUMAN_2021-07-04-00-25-52.bag' #scenario1
-    file_human = 'HUMAN_simple.bag'
+    file_human = 'HUMAN_vh.bag'
 
     bag_human = bagreader(file_human)
 
 
-    num_humans      = 3
+    num_humans      = 10
     ns_prefix='eval_sim/'
     human_odom_topic_list=[]
     for i in range(num_humans):
@@ -447,7 +447,7 @@ def eval_run(filetype):
     
     # human_odom_csv=[]
     df_human_odom=[]
-    delete_idx=[11]
+    delete_idx=[8]
     for i in range(num_humans):
         # if i in delete_idx:
         #     continue
