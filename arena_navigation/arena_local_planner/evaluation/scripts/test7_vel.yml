@@ -50,7 +50,7 @@ map1_obs20_vel03_teb_mpc:
             linestyle: "tab:pink,:"
         MPC:
             model:     "mpc"
-            linestyle: "tab:grey,-"
+            linestyle: "tab:orange,-"
             
 map1_obs20_vel03:            
     planner:                                
@@ -86,7 +86,7 @@ map1_obs20_vel05_teb_mpc:
             linestyle: "tab:pink,:"
         MPC:
             model:     "mpc"
-            linestyle: "tab:grey,-"
+            linestyle: "tab:orange,-"
             
 map1_obs20_vel05:            
     planner:                                
@@ -122,7 +122,7 @@ map1_obs20_vel10_teb_mpc:
             linestyle: "tab:pink,:"
         MPC:
             model:     "mpc"
-            linestyle: "tab:grey,-"
+            linestyle: "tab:orange,-"
             
 map1_obs20_vel10:            
     planner:                                
