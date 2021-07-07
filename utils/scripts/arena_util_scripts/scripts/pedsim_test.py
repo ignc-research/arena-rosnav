@@ -461,8 +461,33 @@ def follow_agent_test():
 
     spawn_peds_client.call([ped])
 
+def running_test():
+    # spawn ped service
+    spawn_peds_service_name = "pedsim_simulator/spawn_peds"
+    rospy.wait_for_service(spawn_peds_service_name, 6.0)
+    spawn_peds_client = rospy.ServiceProxy(spawn_peds_service_name, SpawnPeds)
+
+    ped = get_default_ped(
+            id = 1,
+            ped_type = "adult",
+            yaml_path = get_yaml_path_from_type("adult"),
+            pos = Point(2, 2, 0.1),
+            # waypoints = [Point(4, 2, 0.1), Point(12, 2, 0.1)]
+            waypoints = [Point(4, 2, 0.1), Point(12, 2, 0.1), Point(10, 7, 0.1)]
+        )
+    ped.number_of_peds = 1
+    ped.vmax = 3.0
+    ped.requesting_guide_probability = 0
+    ped.requesting_service_probability = 0
+    ped.requesting_follower_probability = 0
+    ped.chatting_probability = 0
+    ped.talking_and_walking_probability = 0
+    ped.force_factor_robot = 10.0
+
+    spawn_peds_client.call([ped])
+
 if __name__ == '__main__':
-    shelves_test()
+    # shelves_test()
     # service_robot_test()
     # social_force_test()
     # crowd_test()
@@ -471,3 +496,4 @@ if __name__ == '__main__':
     # respawn_shelves_test()
     # obstacle_force_test()
     # follow_agent_test()
+    running_test()
