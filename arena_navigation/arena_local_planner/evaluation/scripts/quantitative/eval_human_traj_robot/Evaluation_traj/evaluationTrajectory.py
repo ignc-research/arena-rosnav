@@ -12,7 +12,7 @@ import yaml
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
-from matplotlib.pyplot import figure
+from matplotlib.pyplot import figure, gray
 from matplotlib.patches import Polygon
 from matplotlib._png import read_png
 import matplotlib.cm as cm
@@ -287,17 +287,19 @@ class newBag():
                     # print(len(x))
                     # print(len(y))
                     self.l_1=ax.plot(x, y, self.color_traj, linestyle = self.line_stl, alpha=0.8)
+                    plt.grid()
                     for i,t_e in enumerate(t):
-                        circle_outer = plt.Circle((x[i], y[i]), 0.4, color=self.color_traj, fill = True, alpha = t_rate[i])
-                        circle = plt.Circle((x[i], y[i]), 0.4, color=self.color_traj, fill = False,alpha = 0.8)
-                        plt.text(x[i],y[i],f'{round(t_e,1)}',fontsize=6,alpha=1.0,color=self.color[i*8])
+                        circle_outer = plt.Circle((x[i], y[i]), 0.65, color=self.color_traj, fill = True, alpha = t_rate[i])
+                        circle = plt.Circle((x[i], y[i]), 0.65, color=self.color_traj, fill = False,alpha = 0.8)
+                        plt.text(x[i]-0.6,y[i],f'{round(t_e,1)}',fontsize=10, alpha = 0.6,fontweight= 10-t_rate[i], color="k")
                         ax.add_patch(circle_outer)
                         ax.add_patch(circle)
                     # if ~legend_traj:
                     #     plt.legend([l1[0],circle],['traj','robot'])
                     #     legend_traj=True
                     self.circle1=circle
-                        
+                    
+                    #ax.set_title("Comparison of Trajectories")
                     ax.set_xlabel("x in [m]")
                     ax.set_ylabel("y in [m]")
 
@@ -404,7 +406,7 @@ def eval_run(filetype):
 
     legend_elements = []
 
-    style   = "tab:blue,--"
+    style   = "tab:orange,--"
 
 
     # print(planner, dir, model, style, wpg)
@@ -421,7 +423,7 @@ def eval_run(filetype):
     #scenario files 
     #raw  nz  dz
     file=['HUMAN_simple_raw.bag','HUMAN_simple_nz.bag','HUMAN_simple_dz.bag'] #scenario2
-    color=['darkorange','slategrey','tab:red']
+    color=['tab:blue','tab:green','tab:red']
     line_style=['--','-.','-']
     circles_traj_legend=[]
     line_traj_legend=[]
@@ -491,20 +493,20 @@ def eval_run(filetype):
         # print(x_h)
         # ax.plot(y_h, x_h, line_clr, linestyle = line_stl, alpha=0.8)
         if ty==0:
-            color1='tab:blue'
+            color1='tab:orange'
         elif ty==1:
-            color1='tab:green'
+            color1='tab:purple'
         else:
-            color1='gold'
+            color1='tab:pink'
         # print(i+1)
         if(t_h[0]<0):
             t_h+=-t_h[0]
         #here I plot the trajectory of one spefic human
         for k,t_e in enumerate(t_h):
             t_rate=t_e/t_h[-1]
-            circle = plt.Circle((x_h[k], y_h[k]), 0.2, color=color1, alpha = 1.0-t_rate) #,edgecolor=color1,ec=color1,
+            circle = plt.Rectangle((x_h[k], y_h[k]),0.42, 0.42, color=color1, alpha = 1.0-t_rate) #,edgecolor=color1,ec=color1,
             if k%3==0:
-                plt.text(x_h[k],y_h[k],f'{t_e}',fontsize=4)
+                plt.text(x_h[k]+0.6,y_h[k],f'{t_e}',fontsize=8, fontweight=1000, color=color1, alpha=1)
             plt.gca().add_patch(circle)
             if ty==0:
                 if circle2==None:
@@ -527,7 +529,7 @@ def eval_run(filetype):
         t_rate_h=[]
         y_h=[]
 
-    plt.legend(line_traj_legend  + [circle2,circle3,circle4],['traj_raw','traj_nz','traj_dz','adult','child','elder'],framealpha=0.4,fontsize=9,loc='upper left')
+    plt.legend(line_traj_legend  + [circle2,circle3,circle4],['Raw','Static Zone','Dynamic Zone','Adult','Child','Elder'],framealpha=0.4,fontsize=9,loc='upper left')
 
     ax.spines["right"].set_visible(True)
     color_name = "grey"
