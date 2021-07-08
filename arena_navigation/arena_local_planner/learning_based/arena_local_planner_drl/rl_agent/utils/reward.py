@@ -40,6 +40,7 @@ class RewardCalculator():
             'rule_02': RewardCalculator._cal_reward_rule_02,
             'rule_03': RewardCalculator._cal_reward_rule_03,
             'rule_04': RewardCalculator._cal_reward_rule_04,
+            'rule_05': RewardCalculator._cal_reward_rule_05,
             }
         self.cal_func = self._cal_funcs[rule]
 
@@ -159,6 +160,32 @@ class RewardCalculator():
             laser_scan, punishment=10)
         self._reward_goal_approached(
             goal_in_robot_frame, reward_factor=0.3, penalty_factor=0.4)
+
+    def _cal_reward_rule_05(self, 
+                             laser_scan: np.ndarray, 
+                             goal_in_robot_frame: Tuple[float,float],
+                             *args,**kwargs):
+        self._reward_abrupt_direction_change(
+            kwargs['action'])
+        self._reward_following_global_plan(
+            kwargs['global_plan'], kwargs['robot_pose'], kwargs['action'])
+        if laser_scan.min() > self.safe_dist:
+            self._reward_distance_global_plan(
+                kwargs['global_plan'], kwargs['robot_pose'], reward_factor=0.2, penalty_factor=0.3)
+        else:
+            self.last_dist_to_path = None
+        self._reward_goal_reached(
+            goal_in_robot_frame, reward=15)
+        self._reward_safe_dist(
+            laser_scan, punishment=0.25)
+        self._reward_collision(
+            laser_scan, punishment=10)
+        self._reward_goal_approached(
+            goal_in_robot_frame, reward_factor=0.3, penalty_factor=0.4)
+        #self._test_reward()
+  
+    def _test_reward(self):
+        self.curr_reward +=100
         
     def _reward_goal_reached(self,
                              goal_in_robot_frame = Tuple[float,float], 

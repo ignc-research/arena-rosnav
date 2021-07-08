@@ -369,7 +369,7 @@ class wp3Env(gym.Env):
             )
 
         done = reward_info['is_done']
-        print("reward:  {}".format(reward))
+        #print("reward:  {}".format(reward))
                 # extended eval info
         if self._extended_eval:
             self._update_eval_statistics(obs_dict, reward_info)
