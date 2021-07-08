@@ -194,3 +194,9 @@ Subsequently, go to the forks/stable_baselines3 folder and do:
 ```
 pip install -e .
 ```
+
+# Training with GPU RTX 3090
+in order to train with an NVIDIA GPU RTX3090 you need the latest version of pytorch. Inside your venv, do:
+```
+pip3 install torch==1.9.0+cu111 torchvision==0.10.0+cu111 torchaudio==0.9.0 -f https://download.pytorch.org/whl/torch_stable.html
+```
