@@ -2,13 +2,18 @@
   <env name="ROSCONSOLE_FORMAT" value="[${severity} ${time} ${logger}]: ${message}" />
     
   <param name="use_sim_time" value="true"/>
-  <arg name="rviz_file"       default="pedsim_test"/>
+  <arg name="rviz_file"       default="pedsim_demo"/>
   <arg name="train_mode"      default="false"/>
   <param name="train_mode"    value="$(arg train_mode)"/>
   <arg name="step_size" default="0.01"/>
   <param name="step_size" value="$(arg step_size)" /> 
+  <param name="use_wall_mode" value="false" /> 
+  <arg name="show_pedsim_forces" default="true"/>
   <arg name="show_pedsim_labels" default="true"/>
+  <arg name="show_pedsim_waypoints" default="true"/>
+  <arg name="show_pedsim_walls" default="true"/>
   <arg name="republish_flatland_markers" default="true"/>
+  <arg name="local_planner"   default="teb"/> 
 
   <!-- Map parameters -->
   <arg name="map_file"        default="map_empty"/>
@@ -62,12 +67,30 @@
     <arg name="ns" value="/" />
   </include>
 
+  <!-- publish pedsim waypoints -->
+  <include file="$(find arena_bringup)/launch/sublaunch/show_pedsim_waypoints.launch" if="$(arg show_pedsim_waypoints)">
+    <arg name="ns" value="/" />
+  </include>
+
+  <!-- publish pedsim forces -->
+  <include file="$(find arena_bringup)/launch/sublaunch/show_pedsim_forces.launch" if="$(arg show_pedsim_forces)">
+    <arg name="ns" value="/" />
+  </include>
+
+  <!-- publish pedsim walls -->
+  <include file="$(find arena_bringup)/launch/sublaunch/show_pedsim_walls.launch" if="$(arg show_pedsim_walls)">
+    <arg name="ns" value="/" />
+  </include>
+
   <!-- pedsim -->
   <include file="$(find arena_bringup)/launch/sublaunch/pedsim.launch">
   </include>
 
+  <include file="$(find arena_bringup)/launch/sublaunch/move_base/move_base_$(arg local_planner).launch">
+  </include>
+
   <!-- pedsim demo -->
-  <node name="pedsim_test" pkg="arena_util_scripts" type="pedsim_demo.py">
+  <node name="pedsim_test" pkg="arena_util_scripts" type="pedsim_demo.py" output="screen">
   </node>
 
 </launch>

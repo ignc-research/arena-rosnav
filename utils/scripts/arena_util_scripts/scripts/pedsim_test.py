@@ -34,7 +34,7 @@ def get_yaml_path_from_type(ped_type):
         return os.path.join(rospack.get_path("simulator_setup"), "obstacles", "shelf.yaml")
     raise Exception("unknown ped type:", ped_type)
 
-def get_default_ped(id, ped_type, yaml_path, pos, waypoints):
+def get_default_ped(id, ped_type, yaml_path, pos, waypoints) -> Ped:
     ped = Ped()
     ped.id = id
     ped.pos = pos
@@ -64,10 +64,21 @@ def get_default_ped(id, ped_type, yaml_path, pos, waypoints):
     ped.force_factor_desired = 1.0
     ped.force_factor_obstacle = 1.0
     ped.force_factor_social = 5.0
+    ped.force_factor_robot = 0.0
 
     ped.waypoints = waypoints
     ped.waypoint_mode = 0
     return ped
+
+def get_shelf(name: str, position: Point) -> InteractiveObstacle:
+    obstacle = InteractiveObstacle()
+    obstacle.name = name
+    obstacle.type = "shelf"
+    obstacle.yaml_path = get_yaml_path_from_type("shelf")
+    obstacle.pose.orientation.w = 1
+    obstacle.pose.position = position
+    obstacle.interaction_radius = 5
+    return obstacle
 
 def get_random_shelf():
     msg = InteractiveObstacle()   
