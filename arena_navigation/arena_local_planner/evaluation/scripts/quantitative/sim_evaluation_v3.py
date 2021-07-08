@@ -261,7 +261,7 @@ def plot_metrics(data,labels,colors,wpgen,planner,maps,param_list,quantity,metri
                     if quantity == "vel":
                         # Add xticks on the middle of the group bars
                         plt.xlabel('Obstacle Velocity', fontsize=fontsize_axlabel)
-                        plt.xticks([r + ((len(iterate)-1)/2-0.5)*barwidth for r in range(xticks)], ["0.{0}".format(int(vel.replace("vel",""))) for vel in param_list["vel"]], fontsize=fontsize_ticks) # NOTE: hardcoded for vel quantity
+                        plt.xticks([r + ((len(iterate)-1)/2-0.5)*barwidth for r in range(xticks)], ["{0}.{1}".format(vel.replace("vel","")[0],vel.replace("vel","")[1]) for vel in param_list["vel"]], fontsize=fontsize_ticks) # NOTE: hardcoded for vel quantity
                         plt.yticks(fontsize=fontsize_ticks)
                         plt.ylabel('{}'.format(caption), fontsize=fontsize_axlabel)
                         plt.suptitle("{} over Obstacle Velocity".format(title), fontweight='bold', fontsize=fontsize_title)
@@ -379,7 +379,7 @@ def plot_metrics(data,labels,colors,wpgen,planner,maps,param_list,quantity,metri
                             planners_plotted = len(classic)
                         if wp != "classic" and not withclassic:
                             planners_plotted = len(planner)-len(classic)
-                        plt.xticks([r + (planners_plotted/2-0.5)*barwidth for r in range(xticks)], ["0.{0}".format(int(vel.replace("vel",""))) for vel in param_list["vel"]], fontsize=fontsize_ticks) # NOTE: hardcoded for vel quantity
+                        plt.xticks([r + (planners_plotted/2-0.5)*barwidth for r in range(xticks)], ["{0}.{1}".format(vel.replace("vel","")[0],vel.replace("vel","")[1]) for vel in param_list["vel"]], fontsize=fontsize_ticks) # NOTE: hardcoded for vel quantity
                         plt.yticks(fontsize=fontsize_ticks)
                         plt.ylabel('{}'.format(caption), fontsize=fontsize_axlabel)
                         plt.suptitle("{} over Obstacle Velocity".format(title), fontweight='bold', fontsize=fontsize_title)
@@ -521,8 +521,8 @@ if __name__ == "__main__": # execute code
     ### this code block creates dataframes containing all evaluation file's summarized data ###
     # hyperparameters specifying the contents of files and the wanted structure for the datasets
     cols = ["time","path","collision","success"]    # define the quantities to measure
-    obs = ["obs10","obs20"] # define different obstacles numbers, names must match file names
-    vel = ["vel05"] # define different velocities, names must match file names
+    obs = ["obs20"] # define different obstacles numbers, names must match file names
+    vel = ["vel03","vel05","vel10"] # define different velocities, names must match file names
     maps = ["map1"] # define the maps trained on, names must match file names
     wpgen = ["subsampling","spatialhorizon","timespace", "classic"] # NOTE: classic MUST be in the back
     planner = ["cadrl","MPC", "TEB"] # all planners, NOTE: classic planners MUST be in the back!!!
@@ -590,7 +590,7 @@ if __name__ == "__main__": # execute code
         }
  
     colors_wp = { # color scheme for waypoint generator plus classic planners if --byplanner used
-        "MPC":"tab:grey",
+        "MPC":"tab:orange",
         "TEB": "tab:pink",
         "spatialhorizon": "tab:green",
         "subsampling": "tab:red",
