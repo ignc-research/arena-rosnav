@@ -29,6 +29,8 @@ safety distance factor:
   StateRequestingFollower: 2.0
   StateGuideToGoal: 2.0
   StateClearingGoal: 2.0
+  StateWaitForTrigger: 0.5
+  StateWaitForTimer: 0.5
 human obstacle safety distance radius:
   adult: 1.0
   child: 1.2
