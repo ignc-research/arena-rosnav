@@ -291,7 +291,7 @@ class newBag():
                     for i,t_e in enumerate(t):
                         circle_outer = plt.Circle((x[i], y[i]), 0.65, color=self.color_traj, fill = True, alpha = t_rate[i])
                         circle = plt.Circle((x[i], y[i]), 0.65, color=self.color_traj, fill = False,alpha = 0.8)
-                        plt.text(x[i]-0.6,y[i],f'{round(t_e,1)}',fontsize=10, alpha = 0.6,fontweight= 10-t_rate[i], color="k")
+                        plt.text(x[i]-0.6,y[i],f'{round(t_e,1)}',fontsize=10, alpha = 1,fontweight= 1000, color="k")
                         ax.add_patch(circle_outer)
                         ax.add_patch(circle)
                     # if ~legend_traj:
@@ -506,7 +506,7 @@ def eval_run(filetype):
             t_rate=t_e/t_h[-1]
             circle = plt.Rectangle((x_h[k], y_h[k]),0.42, 0.42, color=color1, alpha = 1.0-t_rate) #,edgecolor=color1,ec=color1,
             if k%3==0:
-                plt.text(x_h[k]+0.6,y_h[k],f'{t_e}',fontsize=8, fontweight=1000, color=color1, alpha=1)
+                plt.text(x_h[k]+0.6,y_h[k],f'{t_e}',fontsize=10, fontweight=1000, color=color1, alpha=1)
             plt.gca().add_patch(circle)
             if ty==0:
                 if circle2==None:
@@ -529,7 +529,7 @@ def eval_run(filetype):
         t_rate_h=[]
         y_h=[]
 
-    plt.legend(line_traj_legend  + [circle2,circle3,circle4],['Raw','Static Zone','Dyn. Zone','Adult','Child','Elder'],framealpha=0.4,fontsize=9,loc='upper left')
+    plt.legend(line_traj_legend  + [circle2,circle3,circle4],['Raw','Static Zone','Dyn. Zone','Adult','Child','Elder'],framealpha=0.4,fontsize=15,loc='upper left')
 
     ax.spines["right"].set_visible(True)
     color_name = "grey"

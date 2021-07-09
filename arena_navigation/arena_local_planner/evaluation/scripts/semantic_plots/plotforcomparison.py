@@ -150,7 +150,8 @@ fig,ax = plt.subplots()
 
 for i in range(len(x_labels)):
     ax.bar(x+i*width,y_dist[i],width,alpha=0.7,color=class_color[i])
-
+    """[summary]
+    """
 plt.annotate('$SR_{raw} = %.2f$'%(success_rate[0]) + ' $CR_{raw} = %.2f$'%(collision_rate[0])+'\n$SR_{sz} = %.2f$'%(success_rate[1]) + ' $CR_{sz} = %.2f$'%(collision_rate[1])+'\n$SR_{dz} = %.2f$'%(success_rate[2]) + ' $CR_{dz} = %.2f$'%(collision_rate[2]), xy=(0.6, 0.05), xycoords='axes fraction',bbox=dict(boxstyle="round", fc="w",edgecolor='black'))
 # plt.annotate('$sr1 = %.2f$'%(success_rate1) + ' \n$cr1 = %.2f$'%(collision_rate1), xy=(0.3, 0.85), xycoords='axes fraction',bbox=dict(boxstyle="round", fc="w"))
 plt.legend(x_labels,framealpha=0.4)
@@ -183,8 +184,8 @@ for j in range(len_file):
         plt.figure(i+j+1)
         plt.hist(bins[:-1],bins=bins,weights=counts/total_number*100, align = 'right',edgecolor='black', linewidth=0.2, color=blue)
         plt.axvline(dic_safe[i], color='r', linestyle='dashed', linewidth=1.5)
-        plt.annotate('Safety distance = %.2f'%(dic_safe[i]) + '\n %.1f %% of all distances are smaller'%(num_smaller_than_safety_distance/total_number*100), xy=(0.35, 0.86), xycoords='axes fraction',color = 'red', bbox=dict(boxstyle="round", fc="w",edgecolor='red'))
-        plt.annotate('$\mu = %.2f$'%(mu) + ' \n$\sigma^2 = %.2f$'%(std), xy=(0.85, 0.85), xycoords='axes fraction', bbox=dict(boxstyle="round", fc="w",edgecolor='black'))
+        plt.annotate('Safety distance = %.2f'%(dic_safe[i]) + '\n %.1f %% of all distances are smaller'%(num_smaller_than_safety_distance/total_number*100), xy=(0.35, 0.86), xycoords='axes fraction',fontsize=14, color = 'red', bbox=dict(boxstyle="round", fc="w",edgecolor='red'))
+        plt.annotate('$\mu = %.2f$'%(mu) + ' \n$\sigma^2 = %.2f$'%(std), xy=(0.85, 0.85), xycoords='axes fraction',fontsize=14, bbox=dict(boxstyle="round", fc="w",edgecolor='black'))
         plt.title('Distances Of Closest '+ dic_h[i] +' To Robot - '+mode[j]+' Mode', fontsize=16, fontweight='bold')
         plt.xlabel('Distance [m]', fontsize=16)
         plt.ylabel('Relative Counts [%]', fontsize=16)
