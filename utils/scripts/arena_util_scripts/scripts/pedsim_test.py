@@ -6,6 +6,7 @@ import rospkg
 import sys
 import time
 import copy
+from typing import List
 from std_srvs.srv import Trigger
 from pedsim_srvs.srv import SpawnPeds
 from pedsim_srvs.srv import SpawnInteractiveObstacles
@@ -17,6 +18,42 @@ from pedsim_msgs.msg import LineObstacle
 from geometry_msgs.msg import Point
 from geometry_msgs.msg import Pose
 from geometry_msgs.msg import Quaternion
+
+class PedsimManager():
+    def __init__(self):
+        # spawn peds
+        spawn_peds_service_name = "pedsim_simulator/spawn_peds"
+        rospy.wait_for_service(spawn_peds_service_name, 6.0)
+        self.spawn_peds_client = rospy.ServiceProxy(spawn_peds_service_name, SpawnPeds)
+        # respawn peds
+        respawn_peds_service_name = "pedsim_simulator/respawn_peds"
+        rospy.wait_for_service(respawn_peds_service_name, 6.0)
+        self.respawn_peds_client = rospy.ServiceProxy(respawn_peds_service_name, SpawnPeds)
+        # spawn interactive obstacles
+        pawn_interactive_obstacles_service_name = "pedsim_simulator/spawn_interactive_obstacles"
+        rospy.wait_for_service(pawn_interactive_obstacles_service_name, 6.0)
+        self.spawn_interactive_obstacles_client = rospy.ServiceProxy(pawn_interactive_obstacles_service_name, SpawnInteractiveObstacles)
+        # respawn interactive obstacles
+        respawn_interactive_obstacles_service_name = "pedsim_simulator/respawn_interactive_obstacles"
+        rospy.wait_for_service(respawn_interactive_obstacles_service_name, 6.0)
+        self.respawn_interactive_obstacles_client = rospy.ServiceProxy(respawn_interactive_obstacles_service_name, SpawnInteractiveObstacles)
+
+    def spawnPeds(self, peds: List[Ped]):
+        res = self.spawn_peds_client.call(peds)
+        print(res)
+
+    def respawnPeds(self, peds: List[Ped]):
+        res = self.respawn_peds_client.call(peds)
+        print(res)
+
+    def spawnInteractiveObstacles(self, obstacles: List[InteractiveObstacle]):
+        res = self.spawn_interactive_obstacles_client.call(obstacles)
+        print(res)
+
+    def respawnInteractiveObstacles(self, obstacles: List[InteractiveObstacle]):
+        res = self.respawn_interactive_obstacles_client.call(obstacles)
+        print(res)
+
 
 def get_yaml_path_from_type(ped_type):
     rospack = rospkg.RosPack()
@@ -43,6 +80,10 @@ def get_default_ped(id, ped_type, yaml_path, pos, waypoints) -> Ped:
     ped.number_of_peds = 1
     ped.vmax = 1.0
 
+    ped.start_up_mode = "default"
+    ped.wait_time = 0
+    ped.trigger_zone_radius = 0
+
     ped.chatting_probability = 0.01
     ped.tell_story_probability = 0.01
     ped.group_talking_probability = 0.01
@@ -68,6 +109,17 @@ def get_default_ped(id, ped_type, yaml_path, pos, waypoints) -> Ped:
 
     ped.waypoints = waypoints
     ped.waypoint_mode = 0
+    return ped
+
+def get_only_moving_ped(id, ped_type, yaml_path, pos, waypoints) -> Ped:
+    ped = get_default_ped(id, ped_type, yaml_path, pos, waypoints)
+    ped.chatting_probability = 0
+    ped.tell_story_probability = 0
+    ped.group_talking_probability = 0
+    ped.talking_and_walking_probability = 0
+    ped.requesting_service_probability = 0
+    ped.requesting_guide_probability = 0
+    ped.requesting_follower_probability = 0
     return ped
 
 def get_shelf(name: str, position: Point) -> InteractiveObstacle:
@@ -497,6 +549,36 @@ def running_test():
 
     spawn_peds_client.call([ped])
 
+def wait_timer_test():
+    pmanager = PedsimManager()
+
+    ped = get_only_moving_ped(
+            id = 1,
+            ped_type = "adult",
+            yaml_path = get_yaml_path_from_type("adult"),
+            pos = Point(2, 2, 0.1),
+            waypoints = [Point(4, 2, 0.1), Point(12, 2, 0.1), Point(10, 7, 0.1)]
+        )
+    ped.start_up_mode = "wait_timer"
+    ped.wait_time = 10
+
+    pmanager.spawnPeds([ped])
+
+def trigger_zone_test():
+    pmanager = PedsimManager()
+
+    ped = get_only_moving_ped(
+            id = 1,
+            ped_type = "adult",
+            yaml_path = get_yaml_path_from_type("adult"),
+            pos = Point(2, 2, 0.1),
+            waypoints = [Point(4, 2, 0.1), Point(12, 2, 0.1), Point(10, 7, 0.1)]
+        )
+    ped.start_up_mode = "trigger_zone"
+    ped.trigger_zone_radius = 3
+
+    pmanager.spawnPeds([ped])
+
 if __name__ == '__main__':
     # shelves_test()
     # service_robot_test()
@@ -507,4 +589,6 @@ if __name__ == '__main__':
     # respawn_shelves_test()
     # obstacle_force_test()
     # follow_agent_test()
-    running_test()
+    # running_test()
+    wait_timer_test()
+    # trigger_zone_test()
