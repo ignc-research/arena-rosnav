@@ -226,6 +226,7 @@ class PedsimAgentWidget(QFrame):
             x = self.posXSpinBox.value()
             y = self.posYSpinBox.value()
             self.graphicsPathItem.setPosNoEvent(x, y)
+            self.graphicsPathItem.updateTextItemPos()
 
     def updateGraphicsPathItemFromPedsimAgent(self):
         painter_path = QPainterPath()
