@@ -189,6 +189,8 @@ for j in range(len_file):
         plt.title('Distances Of Closest '+ dic_h[i] +' To Robot - '+mode[j]+' Mode', fontsize=16, fontweight='bold')
         plt.xlabel('Distance [m]', fontsize=16)
         plt.ylabel('Relative Counts [%]', fontsize=16)
+        plt.xlim([0, 8])
+        plt.ylim([0, 20])
         plt.xticks(fontsize=14)
         plt.yticks(fontsize=14)
         plt.savefig(path+dic_h[i]+'_distance_hist_'+mode[j])

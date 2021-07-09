@@ -44,7 +44,7 @@ map1_obs20_vel05:
         SUB-WP:
             model:     "cadrl"
             linestyle: "tab:red,-."
-            wpg:       "subsampling"           
+            wpg:       "subsampling" 
 
 map1_obs10_vel05:            
     planner:                                
@@ -59,5 +59,46 @@ map1_obs10_vel05:
         SUB-WP:
             model:     "cadrl"
             linestyle: "tab:red,-."
-            wpg:       "subsampling"
+            wpg:       "subsampling"          
 
+map1_obs20_vel05_teb_mpc:            
+    planner:                                
+        SH-WP:                          # name of the planner (will be used in plot legend)
+            model:     "cadrl"             # folder name containing the bags for desired model
+            linestyle: "tab:green,-"         # linestyle and color for all plots related to this planner
+            wpg:       "spatialhorizon"    # waypoint generator
+        ST-WP:
+            model:     "cadrl"
+            linestyle: "tab:blue,--"
+            wpg:       "timespace"
+        SUB-WP:
+            model:     "cadrl"
+            linestyle: "tab:red,-."
+            wpg:       "subsampling"
+        TEB:
+            model:     "teb"
+            linestyle: "tab:pink,:"
+        MPC:
+            model:     "mpc"
+            linestyle: "tab:orange,-"   
+
+map1_obs10_vel05_teb_mpc:            
+    planner:                                
+        SH-WP:                          # name of the planner (will be used in plot legend)
+            model:     "cadrl"             # folder name containing the bags for desired model
+            linestyle: "tab:green,-"         # linestyle and color for all plots related to this planner
+            wpg:       "spatialhorizon"    # waypoint generator
+        ST-WP:
+            model:     "cadrl"
+            linestyle: "tab:blue,--"
+            wpg:       "timespace"
+        SUB-WP:
+            model:     "cadrl"
+            linestyle: "tab:red,-."
+            wpg:       "subsampling"
+        TEB:
+            model:     "teb"
+            linestyle: "tab:pink,:"
+        MPC:
+            model:     "mpc"
+            linestyle: "tab:orange,-"   

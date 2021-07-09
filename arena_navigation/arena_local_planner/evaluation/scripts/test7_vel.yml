@@ -50,7 +50,7 @@ map1_obs20_vel03_teb_mpc:
             linestyle: "tab:pink,:"
         MPC:
             model:     "mpc"
-            linestyle: "tab:grey,-"
+            linestyle: "tab:orange,-"
             
 map1_obs20_vel03:            
     planner:                                
@@ -67,6 +67,27 @@ map1_obs20_vel03:
             linestyle: "tab:red,-."
             wpg:       "subsampling"
 
+map1_obs20_vel05_teb_mpc:            
+    planner:                                
+        SH-WP:                          # name of the planner (will be used in plot legend)
+            model:     "cadrl"             # folder name containing the bags for desired model
+            linestyle: "tab:green,-"         # linestyle and color for all plots related to this planner
+            wpg:       "spatialhorizon"    # waypoint generator
+        ST-WP:
+            model:     "cadrl"
+            linestyle: "tab:blue,--"
+            wpg:       "timespace"
+        SUB-WP:
+            model:     "cadrl"
+            linestyle: "tab:red,-."
+            wpg:       "subsampling"
+        TEB:
+            model:     "teb"
+            linestyle: "tab:pink,:"
+        MPC:
+            model:     "mpc"
+            linestyle: "tab:orange,-"
+            
 map1_obs20_vel05:            
     planner:                                
         SH-WP:                          # name of the planner (will be used in plot legend)
@@ -82,7 +103,27 @@ map1_obs20_vel05:
             linestyle: "tab:red,-."
             wpg:       "subsampling"
 
-
+map1_obs20_vel10_teb_mpc:            
+    planner:                                
+        SH-WP:                          # name of the planner (will be used in plot legend)
+            model:     "cadrl"             # folder name containing the bags for desired model
+            linestyle: "tab:green,-"         # linestyle and color for all plots related to this planner
+            wpg:       "spatialhorizon"    # waypoint generator
+        ST-WP:
+            model:     "cadrl"
+            linestyle: "tab:blue,--"
+            wpg:       "timespace"
+        SUB-WP:
+            model:     "cadrl"
+            linestyle: "tab:red,-."
+            wpg:       "subsampling"
+        TEB:
+            model:     "teb"
+            linestyle: "tab:pink,:"
+        MPC:
+            model:     "mpc"
+            linestyle: "tab:orange,-"
+            
 map1_obs20_vel10:            
     planner:                                
         SH-WP:                          # name of the planner (will be used in plot legend)
