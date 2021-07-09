@@ -571,7 +571,7 @@ def trigger_zone_test():
             id = 1,
             ped_type = "adult",
             yaml_path = get_yaml_path_from_type("adult"),
-            pos = Point(2, 2, 0.1),
+            pos = Point(5, 4, 0.1),
             waypoints = [Point(4, 2, 0.1), Point(12, 2, 0.1), Point(10, 7, 0.1)]
         )
     ped.start_up_mode = "trigger_zone"
@@ -590,5 +590,5 @@ if __name__ == '__main__':
     # obstacle_force_test()
     # follow_agent_test()
     # running_test()
-    wait_timer_test()
-    # trigger_zone_test()
+    # wait_timer_test()
+    trigger_zone_test()
