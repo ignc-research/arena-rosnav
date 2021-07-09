@@ -92,6 +92,9 @@ class PolygonFlatlandFootprint(FlatlandFootprint):
         if not isinstance(other, PolygonFlatlandFootprint):
             return NotImplemented
 
+        if len(self.points) != len(other.points):
+            return False
+
         return (super().__eq__(other)
                 and np.allclose(self.points, other.points))
 
