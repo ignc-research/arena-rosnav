@@ -1,4 +1,5 @@
 import os, sys
+from rl_agent.envs.wp_env import WPEnv
 import rospy
 import time
 import rosnode
@@ -125,7 +126,7 @@ def make_envs(with_ns: bool,
 
         if train:
             # train env
-            env = FlatlandEnv(
+            env = WPEnv(
                 train_ns, 
                 params['reward_fnc'], params['discrete_action_space'], 
                 goal_radius=params['goal_radius'], 
@@ -136,7 +137,7 @@ def make_envs(with_ns: bool,
         else:
             # eval env
             env = Monitor(
-                FlatlandEnv(
+                WPEnv(
                     eval_ns,
                     params['reward_fnc'], params['discrete_action_space'], 
                     goal_radius=params['goal_radius'], 

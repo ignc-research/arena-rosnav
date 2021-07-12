@@ -14,8 +14,6 @@ void BsplineOptimizerAstar::setParam(ros::NodeHandle &nh)
     nh.param("optimization_astar/max_acc", max_acc_, 3.0);
 
     nh.param("optimization_astar/order", order_, 3);
-    nh.param("optimization_astar/max_rebound_times", max_rebound_times_, 20);
-    nh.param("optimization_astar/max_restart_times", max_restart_times_, 20);
 }
 
 void BsplineOptimizerAstar::setEnvironment(const GridMap::Ptr &env)
@@ -45,7 +43,7 @@ std::vector<std::vector<Eigen::Vector2d>> BsplineOptimizerAstar::initControlPoin
       cps_.resize(init_points.cols());
       cps_.points = init_points;
     }
-    //std::cout<<"[bspline opt]-------optimize init success"<<std::endl;
+
     /*** Segment the initial trajectory according to obstacles ***/
     constexpr int ENOUGH_INTERVAL = 2;
     double step_size = grid_map_->getResolution() / ((init_points.col(0) - init_points.rightCols(1)).norm() / (init_points.cols() - 1)) / 2;
@@ -54,9 +52,8 @@ std::vector<std::vector<Eigen::Vector2d>> BsplineOptimizerAstar::initControlPoin
     int same_occ_state_times = ENOUGH_INTERVAL + 1;
     bool occ, last_occ = false;
     bool flag_got_start = false, flag_got_end = false, flag_got_end_maybe = false;
-    int end_idx = cps_.size - order_;
-    int i_end = end_idx;//- ((int)init_points.cols() - 2 * order_) / 3; // only check closed 2/3 points.
-    //std::cout<<"[bspline opt]-------optimize init2 success"<<std::endl;
+    int i_end = (int)init_points.cols() - order_ - ((int)init_points.cols() - 2 * order_) / 3; // only check closed 2/3 points.
+    
     for (int i = order_; i <= i_end; ++i)
     {
       for (double a = 1.0; a >= 0.0; a -= step_size)
@@ -82,7 +79,7 @@ std::vector<std::vector<Eigen::Vector2d>> BsplineOptimizerAstar::initControlPoin
           flag_got_end_maybe = true;
           same_occ_state_times = 0;
         }
-        else if(occ && last_occ) // [fixed bug]
+        else
         {
           ++same_occ_state_times;
         }
@@ -103,7 +100,7 @@ std::vector<std::vector<Eigen::Vector2d>> BsplineOptimizerAstar::initControlPoin
         }
       }
     }
-    //std::cout<<"[bspline opt]-------optimize init3 success"<<std::endl;
+
     /*** a star search beween found segements ***/
     vector<vector<Eigen::Vector2d>> a_star_pathes;
     for (size_t i = 0; i < segment_ids.size(); ++i)
@@ -120,7 +117,7 @@ std::vector<std::vector<Eigen::Vector2d>> BsplineOptimizerAstar::initControlPoin
         return a_star_pathes;
       }
     }
-    //std::cout<<"[bspline opt]-------optimize init4 success"<<std::endl;
+
     /*** calculate bounds ***/
     int id_low_bound, id_up_bound;
     vector<std::pair<int, int>> bounds(segment_ids.size());
@@ -158,12 +155,12 @@ std::vector<std::vector<Eigen::Vector2d>> BsplineOptimizerAstar::initControlPoin
     // {
     //   cout << bounds[j].first << "  " << bounds[j].second << endl;
     // }
-    //std::cout<<"[bspline opt]-------optimize init5 success"<<std::endl;
+
     /*** Adjust segment length ***/
     vector<std::pair<int, int>> final_segment_ids(segment_ids.size());
     constexpr double MINIMUM_PERCENT = 0.0; // Each segment is guaranteed to have sufficient points to generate sufficient thrust
     int minimum_points = round(init_points.cols() * MINIMUM_PERCENT), num_points;
-    //std::cout<<"[bspline opt]-------optimize init6 success"<<std::endl;
+    
     for (size_t i = 0; i < segment_ids.size(); i++)
     {
       /*** Adjust segment length ***/
@@ -185,14 +182,14 @@ std::vector<std::vector<Eigen::Vector2d>> BsplineOptimizerAstar::initControlPoin
 
       //cout << "final:" << "i = " << i << " first = " << final_segment_ids[i].first << " second = " << final_segment_ids[i].second << endl;
     }
-    //std::cout<<"[bspline opt]-------optimize init7success"<<std::endl;
+
     /*** Assign data to each segment ***/
     for (size_t i = 0; i < segment_ids.size(); i++)
     {
       // step 1
       for (int j = final_segment_ids[i].first; j <= final_segment_ids[i].second; ++j)
         cps_.flag_temp[j] = false;
-      //std::cout<<"[bspline opt]-------optimize init71success"<<std::endl;
+
       // step 2
       int got_intersection_id = -1;
       for (int j = segment_ids[i].first + 1; j < segment_ids[i].second; ++j)
@@ -248,7 +245,7 @@ std::vector<std::vector<Eigen::Vector2d>> BsplineOptimizerAstar::initControlPoin
           }
         }
       }
-      //std::cout<<"[bspline opt]-------optimize init72success"<<std::endl;
+
       /* Corner case: the segment length is too short. Here the control points may outside the A* path, leading to opposite gradient direction. So I have to take special care of it */
       if (segment_ids[i].second - segment_ids[i].first == 1)
       {
@@ -287,49 +284,31 @@ std::vector<std::vector<Eigen::Vector2d>> BsplineOptimizerAstar::initControlPoin
           }
         }
       }
-      //std::cout<<"[bspline opt]-------optimize init73success"<<std::endl;
+
       //step 3
       if (got_intersection_id >= 0)
-      { 
-        //std::cout<<"[bspline opt]-------optimize init730success"<<std::endl;
+      {
         for (int j = got_intersection_id + 1; j <= final_segment_ids[i].second; ++j)
-        {
-          //std::cout<<"[bspline opt]-------optimize init7301success"<<std::endl;
-          //std::cout<<"flag_temp="<<cps_.flag_temp[j]<<std::endl;
           if (!cps_.flag_temp[j])
-          { 
-            //std::cout<<"[bspline opt]-------optimize init7302success"<<std::endl;
-            //std::cout<<"base point0: "<<j-1<<std::endl;
-            //std::cout<<"base point3: "<<cps_.base_point[j - 2].size()<<std::endl;
-            //std::cout<<"base point1: "<<cps_.base_point[j - 1].size()<<std::endl;
-            //std::cout<<"base point2: "<<cps_.base_point[j - 1].front()<<std::endl;
-            
-            //std::cout<<"base point4"<<cps_.base_point[j - 1].back()<<std::endl;
+          {
             cps_.base_point[j].push_back(cps_.base_point[j - 1].back());
-            //std::cout<<"[bspline opt]-------optimize init7303success"<<std::endl;
             cps_.direction[j].push_back(cps_.direction[j - 1].back());
-            //std::cout<<"[bspline opt]-------optimize init7304success"<<std::endl;
           }
-        }
-        //std::cout<<"[bspline opt]-------optimize init731success"<<std::endl;
-        for (int j = got_intersection_id - 1; j >= final_segment_ids[i].first; --j){
+
+        for (int j = got_intersection_id - 1; j >= final_segment_ids[i].first; --j)
           if (!cps_.flag_temp[j])
           {
             cps_.base_point[j].push_back(cps_.base_point[j + 1].back());
             cps_.direction[j].push_back(cps_.direction[j + 1].back());
           }
-        }
-          
-        //std::cout<<"[bspline opt]-------optimize init732success"<<std::endl;
       }
       else
       {
         // Just ignore, it does not matter ^_^.
         // ROS_ERROR("Failed to generate direction! segment_id=%d", i);
       }
-      //std::cout<<"[bspline opt]-------optimize init74success"<<std::endl;
     }
-    //std::cout<<"[bspline opt]-------optimize init8success"<<std::endl;
+
     return a_star_pathes;
   }
 
@@ -338,12 +317,12 @@ bool BsplineOptimizerAstar::check_collision_and_rebound(void)
 {
 
     int end_idx = cps_.size - order_;
-    //std::cout<<"[bspline opt]-------check collsion init1 success"<<std::endl;
+
     /*** Check and segment the initial trajectory according to obstacles ***/
     int in_id, out_id;
     vector<std::pair<int, int>> segment_ids;
     bool flag_new_obs_valid = false;
-    int i_end = end_idx;// (end_idx - order_) / 3;
+    int i_end = end_idx - (end_idx - order_) / 3;
     for (int i = order_ - 1; i <= i_end; ++i)
     {
 
@@ -406,7 +385,7 @@ bool BsplineOptimizerAstar::check_collision_and_rebound(void)
         segment_ids.push_back(std::pair<int, int>(in_id, out_id));
       }
     }
-    //std::cout<<"[bspline opt]-------check collsion init2 success"<<std::endl;
+
     if (flag_new_obs_valid)
     {
       vector<vector<Eigen::Vector2d>> a_star_pathes;
@@ -425,7 +404,6 @@ bool BsplineOptimizerAstar::check_collision_and_rebound(void)
           i--;
         }
       }
-      //std::cout<<"[bspline opt]-------check collsion init3 success"<<std::endl;
 
       /*** Assign parameters to each segment ***/
       for (size_t i = 0; i < segment_ids.size(); ++i)
@@ -514,7 +492,7 @@ bool BsplineOptimizerAstar::check_collision_and_rebound(void)
         else
           ROS_WARN("Failed to generate direction. It doesn't matter.");
       }
-      //std::cout<<"[bspline opt]-------check collsion init4 success"<<std::endl;
+
       force_stop_type_ = STOP_FOR_REBOUND;
       return true;
     }
@@ -547,6 +525,8 @@ bool BsplineOptimizerAstar::BsplineOptimizeTrajRefine(const Eigen::MatrixXd &ini
     return flag_success;
 }
 
+
+
 int BsplineOptimizerAstar::earlyExit(void *func_data, const double *x, const double *g, const double fx, const double xnorm, const double gnorm, const double step, int n, int k, int ls)
 {
     BsplineOptimizerAstar *opt = reinterpret_cast<BsplineOptimizerAstar *>(func_data);
@@ -556,8 +536,7 @@ int BsplineOptimizerAstar::earlyExit(void *func_data, const double *x, const dou
 }
 
 bool BsplineOptimizerAstar::rebound_optimize()
-{   
-    
+{
     iter_num_ = 0;
     int start_id = order_;
     int end_id = this->cps_.size - order_;
@@ -569,8 +548,7 @@ bool BsplineOptimizerAstar::rebound_optimize()
     ;
     bool flag_force_return, flag_occ, success;
     new_lambda2_ = lambda2_;
-    //constexpr int MAX_RESART_NUMS_SET = 50;
-    int MAX_RESART_NUMS_SET=max_restart_times_;
+    constexpr int MAX_RESART_NUMS_SET = 3;
     do
     {
       /* ---------- prepare ---------- */
@@ -609,7 +587,7 @@ bool BsplineOptimizerAstar::rebound_optimize()
         double tm, tmp;
         traj.getTimeSpan(tm, tmp);
         double t_step = (tmp - tm) / ((traj.evaluateDeBoorT(tmp) - traj.evaluateDeBoorT(tm)).norm() / grid_map_->getResolution());
-        for (double t = tm; t < tmp ; t += t_step) // t< tmp* 2 / 3 Only check the closest 2/3 partition of the whole trajectory.
+        for (double t = tm; t < tmp * 2 / 3; t += t_step) // Only check the closest 2/3 partition of the whole trajectory.
         {
           flag_occ = grid_map_->getFusedInflateOccupancy(traj.evaluateDeBoorT(t));
           if (flag_occ)
@@ -622,7 +600,7 @@ bool BsplineOptimizerAstar::rebound_optimize()
                    << cps_.points.col(2).transpose() << "\n"
                    << cps_.points.col(3).transpose() << "\n"
                    << cps_.points.col(4).transpose() << endl;
-              ROS_WARN_STREAM("[Optimization]First 3 control points in obstacles! return false, t=%f"<<t);
+              ROS_WARN("First 3 control points in obstacles! return false, t=%f", t);
               return false;
             }
 
@@ -641,35 +619,24 @@ bool BsplineOptimizerAstar::rebound_optimize()
           initControlPoints(cps_.points, false);
           new_lambda2_ *= 2;
 
-          printf("\033 Collision:[32miter(+1)=%d,time(ms)=%5.3f,keep optimizing\n\033[0m", iter_num_, time_ms);
-          if(restart_nums >= MAX_RESART_NUMS_SET){
-            ROS_WARN_STREAM("[Optimization] too much collision & too many restart: "<<restart_nums);
-          }
+          printf("\033[32miter(+1)=%d,time(ms)=%5.3f,keep optimizing\n\033[0m", iter_num_, time_ms);
         }
       }
       else if (result == lbfgs::LBFGSERR_CANCELED)
       {
         flag_force_return = true;
         rebound_times++;
-        cout <<"Optimization process canceled once" <<"iter=" << iter_num_ << ",time(ms)=" << time_ms << ",rebound." << endl;
-        if(rebound_times>max_rebound_times_){
-          ROS_WARN_STREAM("[Optimization] canceled too many and called too many rebound "<<rebound_times);
-        }
-        
+        cout << "iter=" << iter_num_ << ",time(ms)=" << time_ms << ",rebound." << endl;
       }
       else
       {
-        ROS_WARN("[Optimization]Solver error. Return = %d, %s. Skip this planning.", result, lbfgs::lbfgs_strerror(result));
+        ROS_WARN("Solver error. Return = %d, %s. Skip this planning.", result, lbfgs::lbfgs_strerror(result));
         // while (ros::ok());
       }
 
     } while ((flag_occ && restart_nums < MAX_RESART_NUMS_SET) ||
-             (flag_force_return && force_stop_type_ == STOP_FOR_REBOUND && rebound_times <= max_rebound_times_));
-      std::cout<<"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"<<std::endl;
-      std::cout<<"flag_force_return="<<flag_force_return<<std::endl;
-      std::cout<<"force_stop_type_="<<force_stop_type_<<std::endl;
-      std::cout<<"restart_nums="<<restart_nums<<std::endl;
-      std::cout<<"rebound_times="<<rebound_times<<std::endl;
+             (flag_force_return && force_stop_type_ == STOP_FOR_REBOUND && rebound_times <= 20));
+
     return success;
 }
 
@@ -742,6 +709,8 @@ bool BsplineOptimizerAstar::refine_optimize()
 
     return flag_safe;
 }
+
+
 
 /* cost functions */
 double BsplineOptimizerAstar::costFunctionRebound(void *func_data, const double *x, double *grad, const int n)

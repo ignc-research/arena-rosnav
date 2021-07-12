@@ -1,0 +1,26 @@
+<!-- -->
+<launch>
+  <!-- Arguments -->
+  <arg name="model" default="burger"/>
+  <arg name="cmd_vel_topic" default="/cmd_vel" />
+  <arg name="odom_topic" default="odom" />
+
+
+  <!-- move_base -->
+  <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+    <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS" />
+    <rosparam file="$(find conventional)/config/tb3/costmap_common_params_$(arg model).yaml" command="load" ns="global_costmap" />
+    <rosparam file="$(find conventional)/config/tb3/costmap_common_params_$(arg model).yaml" command="load" ns="local_costmap" />
+    <rosparam file="$(find conventional)/config/tb3/local_costmap_params.yaml" command="load" />
+    <rosparam file="$(find conventional)/config/tb3/global_costmap_params.yaml" command="load" />
+    <rosparam file="$(find conventional)/config/tb3/move_base_params.yaml" command="load" />
+ 
+
+    <remap from="cmd_vel" to="$(arg cmd_vel_topic)"/>
+    <remap from="odom" to="$(arg odom_topic)"/>
+    <param name="controller_frequency" value="5.0" />
+    <param name="controller_patience" value="15.0" />
+    <param name="planner_frequency" value="1.0" />
+
+  </node>
+</launch>

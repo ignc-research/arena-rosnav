@@ -94,7 +94,7 @@
   </include>
 
   <!-- makes sure that drl actions will be published according to sim time in eval mode-->
-  <group if="$(eval arg('train_mode') == false)">
+  <!-- <group if="$(eval arg('train_mode') == false)">
     <node name="action_publisher" pkg="arena_local_planner_drl" type="action_publisher.py"/>
-  </group>
+  </group> -->
 </launch>

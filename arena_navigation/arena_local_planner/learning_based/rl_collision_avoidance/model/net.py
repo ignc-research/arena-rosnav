@@ -3,7 +3,8 @@ import numpy as np
 import torch
 import torch.nn as nn
 from torch.nn import init
-from torch.nn import functional as F
+# from torch.nn import functional as F
+import torch as F
 
 from model.utils import log_normal_density
 

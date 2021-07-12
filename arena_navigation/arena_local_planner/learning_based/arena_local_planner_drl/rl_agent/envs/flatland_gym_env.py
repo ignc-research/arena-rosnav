@@ -20,7 +20,7 @@ import time
 import math
 
 from rl_agent.utils.debug import timeit
-from task_generator.task_generator.tasks import *
+from task_generator.tasks import *
 
 class FlatlandEnv(gym.Env):
     """Custom Environment that follows gym interface"""
@@ -186,7 +186,7 @@ class FlatlandEnv(gym.Env):
         """
         if self._is_action_space_discrete:
             action = self._translate_disc_action(action)
-        self._pub_action(action)
+        # self._pub_action(action)
         #print(f"Linear: {action[0]}, Angular: {action[1]}")
         self._steps_curr_episode += 1
 
@@ -230,7 +230,7 @@ class FlatlandEnv(gym.Env):
 
         # set task
         # regenerate start position end goal position of the robot and change the obstacles accordingly
-        self.agent_action_pub.publish(Twist())
+        # self.agent_action_pub.publish(Twist())
         if self._is_train_mode:
             self._sim_step_client()
         self.task.reset()

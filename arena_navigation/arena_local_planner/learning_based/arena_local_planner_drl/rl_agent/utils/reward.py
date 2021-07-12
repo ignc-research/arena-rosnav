@@ -1,3 +1,5 @@
+import enum
+from os import sendfile
 import numpy as np
 from numpy.lib.utils import safe_eval
 import rospy
@@ -5,6 +7,10 @@ from geometry_msgs.msg import Pose2D
 from typing import Tuple
 import scipy.spatial
 from rl_agent.utils.debug import timeit
+from rl_agent.utils.observation_collector import ObservationCollectorWP
+import weakref
+
+from rospy.rostime import is_rostime_initialized
 
 class RewardCalculator():
     def __init__(self, 
@@ -348,3 +354,127 @@ class RewardCalculator():
             vel_diff = abs(curr_ang_vel-last_ang_vel)
             self.curr_reward -= (vel_diff**4)/2500
         self.last_action = action
+
+
+class RewardCalculatorWP():
+    def __init__(self,
+                 observation_collector:ObservationCollectorWP,
+                 wp_env: "WPEnv",
+                 rule:str = 'rule_00',
+                 running_timeout_factor=1.1,
+                 collision_reward_factor = 0.1,
+                 traj_reward_factor = 0.1,
+                 traj_len_thresh = 0.3,
+                 traj_theta_std_thresh = 0.5
+                 ):
+        """
+        A class for calculating reward based various rules for waypoint generator.
+
+
+        :param safe_dist (float): The minimum distance to obstacles or wall that robot is in safe status.
+                                  if the robot get too close to them it will be punished. Unit[ m ]
+        :param goal_radius (float): The minimum distance to goal that goal position is considered to be reached. 
+        """
+        self.curr_reward = 0
+        self.oc = observation_collector
+        self.wp_env  = weakref.proxy(wp_env)
+
+
+        # factors
+        self.running_timeout_factor = running_timeout_factor
+        self.collision_reward_factor = collision_reward_factor
+        # this factor will be used for variable start with traj
+        self.traj_reward_factor = traj_reward_factor
+        self.traj_len_thresh = traj_len_thresh
+        # use this to check spin
+        self.traj_theta_std_thresh = traj_theta_std_thresh
+
+        self._cal_funcs = {
+            'rule_00': RewardCalculatorWP._cal_reward_rule_00,
+            }
+        self.cal_func = self._cal_funcs[rule]
+
+    def _reset(self):
+        """
+        reset variables related to current step
+        """
+        self.curr_reward = 0
+        self.info = {}
+
+    def cal_reward(self):
+        """
+        Returns reward and info to the gym environment.
+        """
+        self._reset()
+        self._set_curr_base_reward()
+        self.cal_func(self)
+        return self.curr_reward, self.info
+
+    def _cal_reward_rule_00(self):
+        if self._reward_timeout():
+            return
+        self._reward_collision()
+        self._reward_actual_traj()
+
+    def _set_curr_base_reward(self,default_base_reward=5):
+        """because the waypoint is set in or on the circle centered at the subgoal,if we don't adaptively change
+            the base reward, the network will always pefer to set a waypoint closed to the robot,which takes more steps 
+            and get more accumulative reward.
+        """
+        self.curr_base_reward = default_base_reward
+        subgoal = self.oc.get_subgoal_pos()
+        subgoal_x = subgoal.x
+        subgoal_y =  subgoal.y
+        waypoint_x = self.wp_env._waypoint_x
+        waypoint_y = self.wp_env._waypoint_y
+        init_robot_pos = self.oc._robot_states[0][0]
+        dist_waypoint_robot = ((init_robot_pos.x-waypoint_x)**2+(init_robot_pos.y-waypoint_y)**2)**0.5
+        dist_subgoal_robot = ((init_robot_pos.x-subgoal_x)**2+(init_robot_pos.y-subgoal_y)**2)**0.5
+        self.curr_base_reward *=  dist_waypoint_robot/dist_subgoal_robot
+
+    def _reward_collision(self,skip = 0):
+        """check collision
+        """
+        laser_scans = []
+        for i, scan in enumerate(self.oc._laser_scans):
+            if i%(skip+1) == 0:
+                laser_scans.append(scan)
+        laser_scans = np.array(laser_scans)
+        num_collisions  = np.any(laser_scans<self.wp_env._robot_obstacle_min_dist,axis=0).sum()
+        if num_collisions>0:
+            rospy.loginfo(f"REWARD collision {num_collisions} times found")
+        self.curr_reward -= self.curr_base_reward*self.collision_reward_factor*num_collisions/len(laser_scans)
+
+    def _reward_actual_traj(self):
+        """check spin or something happend
+        """
+        robot_xytheta = np.array(list(map(lambda robot_state: [robot_state[0].x,robot_state[0].y,robot_state[0].theta],self.oc._robot_states)))
+        dist_traj = np.linalg.norm(robot_xytheta[1:,:-1]-robot_xytheta[:-1,:-1],axis=1).sum()
+        waypoint_x = self.wp_env._waypoint_x
+        waypoint_y = self.wp_env._waypoint_y
+        init_robot_pos = self.oc._robot_states[0][0]
+        dist_waypoint_robot = ((init_robot_pos.x-waypoint_x)**2+(init_robot_pos.y-waypoint_y)**2)**0.5
+        if (dist_traj-dist_waypoint_robot)/dist_waypoint_robot>self.traj_len_thresh:
+            rospy.loginfo("REWARD traj_len triggered")
+            self.curr_reward -= self.curr_base_reward*self.traj_reward_factor
+        # check robot spin
+        thetas = robot_xytheta[:,2]
+        # use inita theta as reference 
+        thetas = robot_xytheta[:,2]-robot_xytheta[0,2]
+        std_theta = np.std(thetas)
+        if std_theta > self.traj_theta_std_thresh:
+            rospy.loginfo("REWARD theta_std_thresh triggered!")
+            self.curr_reward -= self.curr_reward*self.traj_reward_factor
+
+    def _reward_timeout(self)-> bool:
+        """set reward for timeout
+
+        Returns:
+            is_timeout(bool)
+        """
+        is_timeout = self.oc.important_event == ObservationCollectorWP.Event.TIMEOUT
+        if is_timeout:
+            self.curr_reward -= self.curr_base_reward
+        return is_timeout
+
+    
