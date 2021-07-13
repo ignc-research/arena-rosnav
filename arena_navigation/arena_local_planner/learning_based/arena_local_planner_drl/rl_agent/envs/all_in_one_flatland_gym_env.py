@@ -1,16 +1,19 @@
 import math
+import random
 import time
-import warnings
 from shutil import copyfile
 
+import geometry_msgs.msg
 import gym
+import rospy
 import rosservice
-from gym import spaces
-
+import std_msgs.msg
+import visualization_msgs.msg
 from flatland_msgs.srv import StepWorld
-from geometry_msgs.msg import Twist
+from geometry_msgs.msg import Twist, Pose2D
+from gym import spaces
 from rl_agent.envs.all_in_one_models.drl.drl_agent import DrlAgent, DrlAgentClient
-from rl_agent.envs.all_in_one_models.rlca_agent import RLCAAgent
+from rl_agent.envs.all_in_one_models.rlca.rlca_agent import RLCAAgent
 from rl_agent.envs.all_in_one_models.teb.teb_all_in_one_interface_agent import TebAllinOneInterfaceAgent
 from rl_agent.envs.all_in_one_models.teb.teb_move_base_agent import TebMoveBaseAgent
 from rl_agent.utils.all_in_one_observation_collector import ObservationCollectorAllInOne
@@ -18,6 +21,7 @@ from rl_agent.utils.reward import RewardCalculator
 from std_srvs.srv import Empty
 from task_generator.task_generator.tasks import *
 from task_generator.task_generator.tasks import RandomTask
+from visualization_msgs.msg import Marker
 
 
 class AllInOneEnv(gym.Env):
@@ -35,6 +39,8 @@ class AllInOneEnv(gym.Env):
                  paths: dict = None,
                  drl_server: str = None,
                  evaluation: bool = False,
+                 evaluation_episodes: int = 40,
+                 seed: int = 1,
                  extended_eval: bool = False):
 
         super(AllInOneEnv, self).__init__()
@@ -70,14 +76,6 @@ class AllInOneEnv(gym.Env):
         # set rosparam
         rospy.set_param("/laser_num_beams", self._laser_num_beams)
 
-        # observation collector
-        self.observation_collector = ObservationCollectorAllInOne(
-            self.ns, self._laser_num_beams, self._laser_max_range)
-
-        self.observation_space = self.observation_collector.get_observation_space()
-        self._last_obs_dict = dict()
-        self._last_merged_obs = np.zeros(shape=self.observation_space.shape)
-
         # reward calculator
         if safe_dist is None:
             safe_dist = 1.6 * self._robot_radius
@@ -99,9 +97,7 @@ class AllInOneEnv(gym.Env):
                 self._service_name_step, StepWorld)
 
         # instantiate task manager
-        # TODO read parameters from config file
-        # self.task = get_predefined_task(ns, mode='random', prob_dynamic_obst=0.75, numb_obst=25)
-        self.task = self._get_random_task(numb_obst=20, prob_dyn_obst=0.6)
+        self.task = self._get_random_task(paths)
 
         self._steps_curr_episode = 0
         self._max_steps_per_episode = max_steps_per_episode
@@ -113,6 +109,28 @@ class AllInOneEnv(gym.Env):
         self._safe_dist_counter = 0
         self._collisions = 0
         self._in_crash = False
+        self._seed = seed
+        self._episode_reward = 0
+
+        if self._evaluation:
+            self._current_eval_iteration = 0
+            self._evaluation_episodes = evaluation_episodes
+
+        # visualization
+        self.agent_visualization = rospy.Publisher(f'{self.ns_prefix}all_in_one_action_vis', Marker, queue_size=1)
+        if self._evaluation:
+            self.agent_visualization_trajectory = rospy.Publisher(f'{self.ns_prefix}all_in_one_action_trajectory_vis',
+                                                                  Marker,
+                                                                  queue_size=1)
+            self.collision_visualization = rospy.Publisher(f'{self.ns_prefix}collision_vis',
+                                                                  Marker,
+                                                                  queue_size=1)
+            self._setup_trajectory_marker()
+            self._collisions_markers = []
+
+        self.colors = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0], [1.0, 1.0, 0.0], [1.0, 0.0, 1.0],
+                       [0.0, 1.0, 1.0]]  # TODO This is not optimal as only 6 models can be visualized
+        # --> Do something like this https://stackoverflow.com/questions/1168260/algorithm-for-generating-unique-colors?
 
         # set up model parameters
         self._uses_move_base = False
@@ -125,7 +143,21 @@ class AllInOneEnv(gym.Env):
         for i in self._models:
             self._model_names.append(i.get_name())
 
-        self._last_actions = np.zeros(shape=(len(self._models, )))
+        # observation collector
+        self.observation_collector = ObservationCollectorAllInOne(
+            self.ns, self._laser_num_beams, self._laser_max_range, len(self._models),
+            self._run_all_agents_each_iteration)
+
+        self.observation_space = self.observation_collector.get_observation_space()
+        self._last_obs_dict = dict()
+        self._last_merged_obs = np.zeros(shape=self.observation_space.shape)
+
+        self._last_actions = np.zeros(shape=(len(self._models), 2))
+        self._required_observations = dict()
+        for model in self._models:
+            self._required_observations.update(model.get_observation_info())
+        if 'laser_3' in self._required_observations and self._required_observations['laser_3']:
+            self._last_three_laser_scans = np.zeros((self._laser_num_beams, 3))
 
         # wait till all agents are ready
         all_ready = False
@@ -134,20 +166,24 @@ class AllInOneEnv(gym.Env):
             for i in self._models:
                 all_ready = all_ready and i.wait_for_agent()
             if not all_ready:
-                self.reset()
                 self._sim_step_client()
-                print("Not all agents ready yet! Wait...")
-
+                rospy.loginfo("Not all agents ready yet! Wait...")
+            else:
+                self.reset()
+                evaluation_episodes = 0
+                rospy.loginfo("All agents are loaded - Gym environment is ready!")
 
     def step(self, action: int):
+
         # get action from chosen model
-        action_model = self._models[action].get_next_action(self._last_obs_dict)
-
-        # clip action
-        action_model[0] = np.clip(a=action_model[0], a_min=self._linear_low, a_max=self._linear_high)
-        action_model[1] = np.clip(a=action_model[1], a_min=self._angular_low, a_max=self._angular_high)
-
-        # print(action_model)
+        if self._run_all_agents_each_iteration:
+            action_model = self._last_actions[action, :]
+        else:
+            action_model = self._models[action].get_next_action(self._last_obs_dict)
+            # clip action
+            action_model[0] = np.clip(a=action_model[0], a_min=self._linear_low,
+                                      a_max=self._linear_high)
+            action_model[1] = np.clip(a=action_model[1], a_min=self._angular_low, a_max=self._angular_high)
 
         self._pub_action(action_model)
 
@@ -155,8 +191,30 @@ class AllInOneEnv(gym.Env):
 
         # wait for new observations
         merged_obs, obs_dict = self.observation_collector.get_observations()
+
+        # if necessary add last 3 laser scans to obs dict
+        if 'laser_3' in self._required_observations and self._required_observations['laser_3']:
+            self._last_three_laser_scans[:, 1:2] = self._last_three_laser_scans[:, 0:1]
+            self._last_three_laser_scans[:, 0] = self._last_obs_dict['laser_scan']
+            obs_dict['laser_3'] = self._last_three_laser_scans
+
         self._last_obs_dict = obs_dict
-        self._last_merged_obs = merged_obs
+
+        if self._run_all_agents_each_iteration:
+            self._last_merged_obs[:-2 * len(self._models)] = merged_obs
+        else:
+            self._last_merged_obs = merged_obs
+
+        if self._run_all_agents_each_iteration:
+            for i, agent in enumerate(self._models):
+                current_action = agent.get_next_action(self._last_obs_dict)
+                # clip action
+                current_action[0] = np.clip(a=current_action[0], a_min=self._linear_low, a_max=self._linear_high)
+                current_action[1] = np.clip(a=current_action[1], a_min=self._angular_low, a_max=self._angular_high)
+                self._last_actions[i, :] = current_action
+            # add last actions to observation
+            self._last_obs_dict['last_actions'] = self._last_actions
+            self._last_merged_obs[:2 * len(self._models)] = self._last_actions.flatten()
 
         # calculate reward
         reward, reward_info = self.reward_calculator.get_reward(
@@ -168,7 +226,7 @@ class AllInOneEnv(gym.Env):
 
         # extended eval info
         if self._extended_eval:
-            self._update_eval_statistics(obs_dict, reward_info, action)
+            self._update_eval_statistics(obs_dict, reward_info, reward, action)
 
         # info
         info = {}
@@ -183,8 +241,9 @@ class AllInOneEnv(gym.Env):
             info['is_success'] = 0
 
         if done and self._evaluation:
-            print("Done reason: " + str(info['done_reason']) + " --- Is success: " + str(
-                info['is_success']) + " --- Iterations: " + str(self._steps_curr_episode))
+            print("Done reason: " + str(info['done_reason']) + " - Is success: " + str(
+                info['is_success']) + " - Iterations: " + str(self._steps_curr_episode) + " - Collisions: " + str(
+                self._collisions) + " - Episode reward: " + str(self._episode_reward))
 
         # for logging
         if self._extended_eval:
@@ -193,9 +252,31 @@ class AllInOneEnv(gym.Env):
                 info['distance_travelled'] = round(self._distance_travelled, 2)
                 info['time_safe_dist'] = self._safe_dist_counter * self._action_frequency
                 info['time'] = self._steps_curr_episode * self._action_frequency
-                info['model_distribution'] = self._last_actions / np.sum(self._last_actions)
+                info['model_distribution'] = self._last_actions_switch / np.sum(self._last_actions_switch)
+                if np.sum(self._last_actions_switch_close_obst_dist) != 0:
+                    info['model_distribution_close_obst_dist'] = self._last_actions_switch_close_obst_dist / np.sum(
+                        self._last_actions_switch_close_obst_dist)
+                else:
+                    info['model_distribution_close_obst_dist'] = self._last_actions_switch_close_obst_dist
+                if np.sum(self._last_actions_switch_medium_obst_dist) != 0:
+                    info['model_distribution_medium_obst_dist'] = self._last_actions_switch_medium_obst_dist / np.sum(
+                        self._last_actions_switch_medium_obst_dist)
+                else:
+                    info['model_distribution_medium_obst_dist'] = self._last_actions_switch_medium_obst_dist
+                if np.sum(self._last_actions_switch_large_obst_dist) != 0:
+                    info['model_distribution_large_obst_dist'] = self._last_actions_switch_large_obst_dist / np.sum(
+                        self._last_actions_switch_large_obst_dist)
+                else:
+                    info['model_distribution_large_obst_dist'] = self._last_actions_switch_large_obst_dist
 
-        return np.float32(merged_obs), reward, done, info
+        # visualize
+        self._visualize_action(action)
+        if self._evaluation:
+            self._visualize_episode_actions_as_path(action)
+            if self._in_crash:
+                self._visualize_collision()
+
+        return np.float32(self._last_merged_obs), reward, done, info
 
     def reset(self):
         # set task
@@ -207,9 +288,15 @@ class AllInOneEnv(gym.Env):
             if f'{self.ns_prefix}move_base/clear_costmaps' in rosservice.get_service_list():
                 self._clear_costmaps_service()
             else:
-                warnings.warn("Couldn't access move base service. Can be fine in first episode.")
+                rospy.logwarn("Couldn't access move base service. Can be fine in first episode.")
         if not self._simulation_started:
             self._simulation_started = True
+
+        if self._evaluation:
+            random.seed((self._current_eval_iteration % self._evaluation_episodes) * self._seed)
+        else:
+            random.seed()
+
         self.task.reset()
 
         self.reward_calculator.reset()
@@ -221,15 +308,55 @@ class AllInOneEnv(gym.Env):
             self._distance_travelled = 0
             self._safe_dist_counter = 0
             self._collisions = 0
-            self._last_actions = np.zeros(shape=(len(self._models, )))
+            self._episode_reward = 0
+            self._last_actions_switch = np.zeros(shape=(len(self._models),))
+            self._last_actions_switch_close_obst_dist = np.zeros(shape=(len(self._models),))
+            self._last_actions_switch_medium_obst_dist = np.zeros(shape=(len(self._models),))
+            self._last_actions_switch_large_obst_dist = np.zeros(shape=(len(self._models),))
 
         merged_obs, obs_dict = self.observation_collector.get_observations()
         self._last_obs_dict = obs_dict
-        self._last_merged_obs = merged_obs
-        return np.float32(merged_obs)
+
+        if 'laser_3' in self._required_observations and self._required_observations['laser_3']:
+            self._last_three_laser_scans = np.array(
+                [self._last_obs_dict['laser_scan'], self._last_obs_dict['laser_scan'],
+                 self._last_obs_dict['laser_scan']]).transpose()
+            self._last_obs_dict['laser_3'] = self._last_three_laser_scans
+
+        if self._run_all_agents_each_iteration:
+            self._last_merged_obs[:-2 * len(self._models)] = merged_obs
+        else:
+            self._last_merged_obs = merged_obs
+
+        if self._run_all_agents_each_iteration:
+            for i, agent in enumerate(self._models):
+                current_action = agent.get_next_action(self._last_obs_dict)
+                # clip action
+                current_action[0] = np.clip(a=current_action[0], a_min=self._linear_low, a_max=self._linear_high)
+                current_action[1] = np.clip(a=current_action[1], a_min=self._angular_low, a_max=self._angular_high)
+                self._last_actions[i, :] = current_action
+            # add last actions to observation
+            self._last_obs_dict['last_actions'] = self._last_actions
+            self._last_merged_obs[:len(self._models) * 2] = self._last_actions.flatten()
+
+        for agent in self._models:
+            agent.reset()
+
+        # reset visualization
+        if self._evaluation:
+            self._action_trajectory_marker.points.clear()
+            self._action_trajectory_marker.colors.clear()
+            self.agent_visualization_trajectory.publish(self._action_trajectory_marker)
+
+            self._remove_collisions_markers()
+
+            self._current_eval_iteration += 1
+
+        return self._last_merged_obs
 
     def close(self):
-        pass
+        for m in self._models:
+            m.close()
 
     def render(self, mode='human'):
         pass
@@ -240,7 +367,106 @@ class AllInOneEnv(gym.Env):
     def get_model_names(self) -> [str]:
         return [model.get_name() for model in self._models]
 
-    def _get_random_task(self, numb_obst: int, prob_dyn_obst: float):
+    def _setup_trajectory_marker(self):
+        self._action_trajectory_marker = Marker()
+        self._action_trajectory_marker.header.frame_id = 'map'
+        self._action_trajectory_marker.id = 1001
+        self._action_trajectory_marker.action = visualization_msgs.msg.Marker.ADD
+        self._action_trajectory_marker.type = visualization_msgs.msg.Marker.LINE_STRIP
+        self._action_trajectory_marker.scale.z = 0
+        self._action_trajectory_marker.scale.x = 0.1
+        self._action_trajectory_marker.scale.y = 0
+
+    def _remove_collisions_markers(self):
+        for m in self._collisions_markers:
+            m.action = visualization_msgs.msg.Marker.DELETE
+            self.collision_visualization.publish(m)
+        self._collisions_markers = []
+
+    def _visualize_collision(self):
+        marker = Marker()
+        marker.header.frame_id = 'map'
+        marker.header.stamp = rospy.get_rostime()
+        marker.id = 1002 + self._collisions
+
+        marker.type = visualization_msgs.msg.Marker.TEXT_VIEW_FACING
+
+        marker.action = visualization_msgs.msg.Marker.ADD
+
+        # Make collision warning orange
+        marker.color.r = 1
+        marker.color.g = 1
+        marker.color.b = 0
+        marker.color.a = 1
+
+        marker.scale.z = 0.7
+
+        # Set position above robot
+        robot_pose: Pose2D = self._last_obs_dict['robot_pose']
+        marker.pose.position.x = robot_pose.x
+        marker.pose.position.y = robot_pose.y
+
+        marker.text = "Collision!"
+
+        self._collisions_markers.append(marker)
+
+        self.collision_visualization.publish(marker)
+
+    def _visualize_episode_actions_as_path(self, action: int):
+        marker = self._action_trajectory_marker
+
+        marker.header.stamp = rospy.get_rostime()
+
+        next_point = geometry_msgs.msg.Point()
+        robot_pose: Pose2D = self._last_obs_dict['robot_pose']
+        next_point.x = robot_pose.x
+        next_point.y = robot_pose.y
+        next_point.z = 0
+        marker.points.append(next_point)
+
+        next_color = std_msgs.msg.ColorRGBA(self.colors[action][0], self.colors[action][1], self.colors[action][2], 1)
+        marker.colors.append(next_color)
+
+        self._action_trajectory_marker = marker
+        self.agent_visualization_trajectory.publish(self._action_trajectory_marker)
+
+    def _visualize_action(self, action: int):
+        marker = Marker()
+        marker.header.stamp = rospy.get_rostime()
+        marker.header.frame_id = 'map'
+        marker.header.stamp = rospy.get_rostime()
+        marker.id = 1000
+
+        marker.type = visualization_msgs.msg.Marker.TEXT_VIEW_FACING
+        marker.action = visualization_msgs.msg.Marker.ADD
+
+        marker.color.r = self.colors[action][0]
+        marker.color.g = self.colors[action][1]
+        marker.color.b = self.colors[action][2]
+        marker.color.a = 1
+
+        marker.scale.z = 1
+
+        marker.text = self._model_names[action]
+
+        self.agent_visualization.publish(marker)
+
+    def _get_random_task(self, paths: dict):
+        config_path = paths['all_in_one_parameters']
+        with open(config_path, 'r') as params_json:
+            config_data = json.load(params_json)
+
+        assert config_data is not None, "Error: All in one parameter file cannot be found!"
+
+        if 'map' in config_data:
+            map_params = config_data['map']
+            numb_static_obst = map_params['numb_static_obstacles']
+            numb_dyn_obst = map_params['numb_dynamic_obstacles']
+        else:
+            rospy.logwarn("No map parameters found in config file. Use 18 dynamic and 6 static obstacles.")
+            numb_static_obst = 6
+            numb_dyn_obst = 18
+
         service_client_get_map = rospy.ServiceProxy('/static_map', GetMap)
         map_response = service_client_get_map()
         models_folder_path = rospkg.RosPack().get_path('simulator_setup')
@@ -248,6 +474,8 @@ class AllInOneEnv(gym.Env):
             models_folder_path, 'robot', "myrobot.model.yaml"))
         obstacles_manager = ObstaclesManager(self.ns, map_response.map)
         rospy.set_param("/task_mode", "random")
+        numb_obst = numb_static_obst + numb_dyn_obst
+        prob_dyn_obst = float(numb_dyn_obst) / numb_obst
         obstacles_manager.register_random_obstacles(numb_obst, prob_dyn_obst)
         return RandomTask(obstacles_manager, robot_manager)
 
@@ -302,6 +530,12 @@ class AllInOneEnv(gym.Env):
 
         self._models = models
 
+        # check if all agents should be run before model selection
+        if 'run_all_agents_each_iteration' in config_data and config_data['run_all_agents_each_iteration']:
+            self._run_all_agents_each_iteration = True
+        else:
+            self._run_all_agents_each_iteration = False
+
         # copy hyperparameter file and teb config files
         if self._is_train_mode and 'model' in paths:
             doc_location = os.path.join(paths['model'], "all_in_one_parameters.json")
@@ -352,7 +586,7 @@ class AllInOneEnv(gym.Env):
             self._linear_low = linear_range[0]
             self._linear_high = linear_range[1]
 
-    def _update_eval_statistics(self, obs_dict: dict, reward_info: dict, action: int):
+    def _update_eval_statistics(self, obs_dict: dict, reward_info: dict, reward: float, action: int):
         """
         Updates the metrics for extended eval mode
 
@@ -383,7 +617,16 @@ class AllInOneEnv(gym.Env):
 
         self._last_robot_pose = obs_dict['robot_pose']
 
-        self._last_actions[action] += 1
+        self._last_actions_switch[action] += 1
+        min_obst_dist = np.min(obs_dict['laser_scan'])
+        if min_obst_dist < 1.5:
+            self._last_actions_switch_close_obst_dist[action] += 1
+        elif min_obst_dist < 3:
+            self._last_actions_switch_medium_obst_dist[action] += 1
+        else:
+            self._last_actions_switch_large_obst_dist[action] += 1
+
+        self._episode_reward += reward * (0.99 ** self._steps_curr_episode)
 
     def _pub_action(self, action):
         action_msg = Twist()
