@@ -19,6 +19,7 @@ private:
     AllInOneInterface *teb_interface;
     LocalCostmapNode *local_costmap;
     ros::ServiceServer getVelSrv_;
+    ros::ServiceServer resetCostmapSrv_;
 };
 
 

@@ -14,14 +14,21 @@ AllInOneTebNode::AllInOneTebNode(ros::NodeHandle &nh, tf2_ros::Buffer &tfBuffer)
     // create and start local costmap
     ROS_INFO("Load costmap node...");
     std::string costmap_name = "local_costmap";
-    AllInOneTebNode::local_costmap = new LocalCostmapNode(tfBuffer, costmap_name);
+
+    AllInOneTebNode::local_costmap = new LocalCostmapNode();
+    local_costmap->initialize(tfBuffer, costmap_name);
 
     // create new teb planner object
-    AllInOneTebNode::teb_interface = new AllInOneInterface(&(AllInOneTebNode::cfg_), AllInOneTebNode::local_costmap);
+    AllInOneTebNode::teb_interface = new AllInOneInterface();
+    teb_interface->initialize(&(AllInOneTebNode::cfg_), AllInOneTebNode::local_costmap, nh);
 
     // create a service to call teb
     AllInOneTebNode::getVelSrv_ = nh.advertiseService("getCmdVel",
                                                      &AllInOneInterface::service_callback, teb_interface);
+    // create a service to reset costmap
+    AllInOneTebNode::resetCostmapSrv_ = nh.advertiseService("resetCostmap",
+                                                     &LocalCostmapNode::clearCostmap_service, local_costmap);
+
     ROS_INFO("Teb service is ready!");
 }
 

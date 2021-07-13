@@ -7,17 +7,26 @@
 
 #include <costmap_2d/costmap_2d_ros.h>
 #include <string>
+#include <all_in_one_teb_interface/ResetCostmap.h>
+#include <costmap_2d/costmap_layer.h>
 
 class LocalCostmapNode {
 public:
-    LocalCostmapNode(tf2_ros::Buffer &tf, std::string &name);
+    LocalCostmapNode();
 
-    costmap_2d::Costmap2DROS *getCostmapRos() const;
+    void initialize(tf2_ros::Buffer &tf, std::string &name);
 
-    void clearCostmap();
+    costmap_2d::Costmap2DROS *getCostmapRos();
+
+    void clearCostmap(bool force_map_update);
+
+    bool clearCostmap_service(all_in_one_teb_interface::ResetCostmap::Request &req,
+                              all_in_one_teb_interface::ResetCostmap::Response &rep);
 
 private:
-    costmap_2d::Costmap2DROS *costmap_ros_;
+    costmap_2d::Costmap2DROS* costmap_ros_;
+
+    void clearMap(const boost::shared_ptr<costmap_2d::CostmapLayer>& costmap, double robot_pose_x, double robot_pose_y);
 };
 
 

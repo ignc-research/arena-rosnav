@@ -7,3 +7,4 @@ geometry_msgs/Pose2D goal_pose
 # response fields
 geometry_msgs/Twist vel
 bool costmaps_resetted
+bool successful
