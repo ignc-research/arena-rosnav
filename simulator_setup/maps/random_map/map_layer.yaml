@@ -4,4 +4,4 @@ properties:
 layers:
 - name: static
   map: map.yaml
-  color: [0, 0, 1, 1]
+  color: [0, 1, 0, 1]
