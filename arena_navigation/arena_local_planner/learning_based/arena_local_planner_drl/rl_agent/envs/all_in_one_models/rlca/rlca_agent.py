@@ -42,7 +42,7 @@ class RLCAAgent(ModelBase):
         obs_sub_goal = np.asarray(observation_dict['goal_in_robot_frame_xy'], dtype='float64')
         obs_twist = observation_dict['robot_twist']
 
-        obs_stack = deque([obs_laser, obs_laser, obs_laser])
+        obs_stack = deque([obs_laser, obs_laser, obs_laser]) # TODO use old scan data ?!
         velocity = np.asarray([obs_twist.linear.x, obs_twist.angular.z], dtype='float64')
 
         obs_state_list = [[obs_stack, obs_sub_goal, velocity]]
@@ -56,6 +56,9 @@ class RLCAAgent(ModelBase):
 
     def wait_for_agent(self):
         return True
+
+    def reset(self):
+        pass
 
     def _transform_scan_data(self, scan):
         # Note: Taken from rl_collision_avoidance_tb3.py
