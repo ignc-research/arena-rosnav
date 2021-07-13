@@ -3,6 +3,7 @@ from PyQt5.QtGui import QIcon, QPainterPath, QPixmap, QColor, QPolygonF, QTransf
 from PyQt5.QtWidgets import QApplication, QGraphicsEllipseItem, QGraphicsItem, QGraphicsPixmapItem, QGraphicsTextItem, QLabel, QMainWindow, QMessageBox, QWidget, QGridLayout, QVBoxLayout, QFrame, QGraphicsScene, QGraphicsView, QScrollArea, QHBoxLayout, QPushButton, QSpacerItem, QSizePolicy, QGraphicsPathItem
 import rospkg
 import os
+from typing import Tuple
 from FlatlandBodyEditor import *
 from PedsimAgentEditor import PedsimAgentEditor
 from ArenaScenario import *
@@ -13,16 +14,19 @@ class RosMapData():
         self.image_path = ""
         self.resolution = 1.0
         self.origin = [0.0, 0.0, 0.0]
+        self.path = path
         if path != "":
             self.load(path)
 
     def load(self, path: str):
-        with open(path, "r") as file:
-            data = yaml.safe_load(file)
-            folder_path = os.path.dirname(path)
-            self.image_path = os.path.join(folder_path, data["image"])
-            self.resolution = float(data["resolution"])
-            self.origin = [float(value) for value in data["origin"]]
+        if os.path.exists(path):
+            self.path = path
+            with open(path, "r") as file:
+                data = yaml.safe_load(file)
+                folder_path = os.path.dirname(path)
+                self.image_path = os.path.join(folder_path, data["image"])
+                self.resolution = float(data["resolution"])
+                self.origin = [float(value) for value in data["origin"]]
 
 
 
@@ -79,6 +83,9 @@ class WaypointWidget(QWidget):
         # since spin boxes are connected to the ellipse item, the change will be propagated
         self.posXSpinBox.setValue(posIn.x())
         self.posYSpinBox.setValue(posIn.y())
+
+    def getPos(self) -> Tuple[float, float]:
+        return self.posXSpinBox.value(), self.posYSpinBox.value()
 
     def updateEllipseItemFromSpinBoxes(self):
         if not self.ellipseItem.isDragged:  # do this to prevent recursion between spin boxes and graphics item
@@ -138,7 +145,7 @@ class PedsimAgentWidget(QFrame):
         ## add to scene
         graphicsScene.addItem(self.waypointPathItem)
 
-        self.update()
+        self.updateEverythingFromPedsimAgent()
 
     def setup_ui(self):
         self.setLayout(QtWidgets.QGridLayout())
@@ -250,7 +257,22 @@ class PedsimAgentWidget(QFrame):
                     painter_path.addPolygon(polygon)
         self.graphicsPathItem.setPath(painter_path)
 
-    def update(self):
+    def setPedsimAgent(self, agent: PedsimAgent):
+        self.pedsimAgent = agent
+        self.updateEverythingFromPedsimAgent()
+
+    def updateEverythingFromPedsimAgent(self):
+        # position
+        self.posXSpinBox.setValue(self.pedsimAgent.pos.x)
+        self.posYSpinBox.setValue(self.pedsimAgent.pos.y)
+        # waypoints
+        ## remove all waypoint widgets
+        for w in self.getWaypointWidgets():
+            w.remove()
+        ## add new waypoints
+        for wp in self.pedsimAgent.waypoints:
+            pos = QPointF(wp.x, wp.y)
+            self.addWaypoint(pos)
         # update name label
         self.name_label.setText(self.pedsimAgent.name)
         # update name in scene
@@ -286,6 +308,19 @@ class PedsimAgentWidget(QFrame):
         else:
             self.activeModeWindow.hide()
 
+    def save(self):
+        # saves position and waypoints to the pedsim agent
+        # all other attributes should have already been saved by the PedsimAgentEditor
+        # position
+        pos_x = self.posXSpinBox.value()
+        pos_y = self.posYSpinBox.value()
+        self.pedsimAgent.pos = Point(pos_x, pos_y, 0)
+        # waypoints
+        self.pedsimAgent.waypoints = []
+        for w in self.getWaypointWidgets():
+            x, y = w.getPos()
+            self.pedsimAgent.waypoints.append(Point(x, y, 0))
+
     def remove(self):
         # remove waypoints
         for w in self.getWaypointWidgets():
@@ -319,6 +354,8 @@ class ArenaScenarioEditor(QMainWindow):
         self.arenaScenario = ArenaScenario()
         self.numObstacles = 0
         self.pixmap_item = None
+        self.mapData = None
+        self.currentSavePath = ""
 
     def setup_ui(self):
         self.setWindowTitle("Flatland Scenario Editor")
@@ -337,7 +374,7 @@ class ArenaScenarioEditor(QMainWindow):
         menubar = self.menuBar()
         file_menu = menubar.addMenu("File")
         file_menu.addAction("New Scenario", self.onNewScenarioClicked, "Ctrl+N")
-        file_menu.addAction("Open", self.onOpenClicked, "Ctrl+O")
+        file_menu.addAction("Open...", self.onOpenClicked, "Ctrl+O")
         file_menu.addAction("Save", self.onSaveClicked, "Ctrl+S")
         file_menu.addAction("Save As...", self.onSaveAsClicked, "Ctrl+Shift+S")
         add_menu = menubar.addMenu("Elements")
@@ -378,8 +415,8 @@ class ArenaScenarioEditor(QMainWindow):
             self.setMap(path)
 
     def setMap(self, path: str):
-        map_data = RosMapData(path)
-        pixmap = QPixmap(map_data.image_path)
+        self.mapData = RosMapData(path)
+        pixmap = QPixmap(self.mapData.image_path)
         transform = QTransform.fromScale(1.0, -1.0)  # flip y axis
         pixmap = pixmap.transformed(transform)
         if self.pixmap_item != None:
@@ -387,8 +424,8 @@ class ArenaScenarioEditor(QMainWindow):
             self.gscene.removeItem(self.pixmap_item)
         self.pixmap_item = QGraphicsPixmapItem(pixmap)
         self.pixmap_item.setZValue(-1.0)  # make sure map is always in the background
-        self.pixmap_item.setScale(map_data.resolution)
-        self.pixmap_item.setOffset(map_data.origin[0] / map_data.resolution, map_data.origin[1] / map_data.resolution)
+        self.pixmap_item.setScale(self.mapData.resolution)
+        self.pixmap_item.setOffset(self.mapData.origin[0] / self.mapData.resolution, self.mapData.origin[1] / self.mapData.resolution)
         self.gscene.addItem(self.pixmap_item)
 
     def getMapData(self, path: str) -> dict:
@@ -404,11 +441,25 @@ class ArenaScenarioEditor(QMainWindow):
 
     def onAddPedsimAgentClicked(self):
         rospack = rospkg.RosPack()
-        new_agent = PedsimAgent("Ped " + str(self.numObstacles), os.path.join(rospack.get_path("simulator_setup"), "dynamic_obstacles/person_two_legged.model.yaml"))
+        yaml_file = ""
+        try:
+            yaml_file = os.path.join(rospack.get_path("simulator_setup"), "dynamic_obstacles", "person_two_legged.model.yaml")
+        except:
+            pass
+
+        new_agent = PedsimAgent("Ped " + str(self.numObstacles), yaml_file)
         self.arenaScenario.pedsimAgents.append(new_agent)
-        w = PedsimAgentWidget(self.numObstacles, new_agent, self.gscene, self.gview, parent=self)
+        self.addPedsimAgentWidget(new_agent)
+
+    def addPedsimAgentWidget(self, agent: PedsimAgent) -> PedsimAgentWidget:
+        '''
+        Adds a new pedsim agent widget with the given agent.
+        Warning: self.arenaScenario is not updated. Management of self.arenaScenario happens outside of this function.
+        '''
+        w = PedsimAgentWidget(self.numObstacles, agent, self.gscene, self.gview, parent=self)
         self.obstacles_frame.layout().addWidget(w)
         self.numObstacles += 1
+        return w
 
     def getPedsimAgentWidgets(self):
         widgets = []
@@ -427,13 +478,83 @@ class ArenaScenarioEditor(QMainWindow):
         pass
 
     def onOpenClicked(self):
-        pass
+        rospack = rospkg.RosPack()
+        initial_folder = os.path.join(rospack.get_path("simulator_setup"), "scenarios")
+        res = QtWidgets.QFileDialog.getOpenFileName(parent=self, directory=initial_folder)
+        path = res[0]
+        if path != "":
+            self.loadArenaScenario(path)
 
     def onSaveClicked(self):
-        pass
+        if not self.save():
+            # no path has been set yet. fall back to "save as"
+            self.onSaveAsClicked()
 
-    def onSaveAsClicked(self):
-        pass
+    def onSaveAsClicked(self) -> bool:
+        rospack = rospkg.RosPack()
+        initial_folder = os.path.join(rospack.get_path("simulator_setup"), "scenarios")
+
+        res = QtWidgets.QFileDialog.getSaveFileName(parent=self, directory=initial_folder)
+        path = res[0]
+        if path != "":
+            return self.save(path)
+
+        return False
+
+    def loadArenaScenario(self, path: str):
+        self.currentSavePath = path
+        self.arenaScenario.loadFromFile(path)
+        self.updateWidgetsFromArenaScenario()
+
+    def save(self, path: str = "") -> bool:
+        if path != "":
+            self.currentSavePath = path
+
+        self.updateArenaScenarioFromWidgets()
+        return self.arenaScenario.saveToFile()
+
+    def updateWidgetsFromArenaScenario(self):
+        # pedsim agents
+        # remove all pedsim widgets
+        for w in self.getPedsimAgentWidgets():
+            w.remove()
+        # create new pedsim widgets
+        for agent in self.arenaScenario.pedsimAgents:
+            self.addPedsimAgentWidget(agent)
+
+        # interactive obstacles
+        # TODO
+        # robot position
+        # TODO
+        # robot goal
+        # TODO
+
+        # map
+        self.setMap(self.arenaScenario.mapPath)
+
+    def updateArenaScenarioFromWidgets(self):
+        '''
+        Save data from widgets into self.arenaScenario.
+        '''
+        # reset scenario
+        self.arenaScenario.__init__()
+
+        # save path
+        self.arenaScenario.path = self.currentSavePath
+
+        # save pedsim agents
+        for w in self.getPedsimAgentWidgets():
+            w.save()  # save all data from widget(s) into pedsim agent
+            self.arenaScenario.pedsimAgents.append(w.pedsimAgent)  # add pedsim agent
+
+        # save map path
+        if self.mapData != None:
+            self.arenaScenario.mapPath = self.mapData.path
+
+        # TODO
+        # robot position
+        # robot goal
+        # interactive obstacles
 
 
 
@@ -487,8 +608,19 @@ def edit_agent_test():
     widget.show()
     app.exec()
 
+def save_test():
+    app = QApplication([])
+    widget = ArenaScenarioEditor()
+    widget.onAddPedsimAgentClicked()
+    widget.onAddPedsimAgentClicked()
+    widget.setMap("/home/daniel/catkin_ws/src/arena-rosnav/simulator_setup/maps/map1/map.yaml")
+    widget.currentSavePath = "/home/daniel/catkin_ws/src/arena-rosnav/simulator_setup/scenarios/test_scenario.json"
+    # widget.arenaScenario.pedsimAgents.append(PedsimAgent())
+    widget.onSaveClicked()
+
 if __name__ == "__main__":
     normal_execution()
     # add_obstacle_test()
     # test1()
     # edit_agent_test()
+    # save_test()

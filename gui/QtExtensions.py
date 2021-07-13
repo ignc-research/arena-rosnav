@@ -309,9 +309,9 @@ class ArenaProbabilitySliderWidget(QtWidgets.QWidget):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.value = 0.0
-        self.values = [0.0, 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+        self.values = np.array([0.0, 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
         self.setup_ui()
-        self.valueChanged(self.slider.value())
+        self.updateValueFromSlider()
 
     def setup_ui(self):
         self.setLayout(QtWidgets.QHBoxLayout())
@@ -323,7 +323,7 @@ class ArenaProbabilitySliderWidget(QtWidgets.QWidget):
         self.slider.setMaximum(19)
         self.slider.setValue(9)
         self.slider.setTickPosition(QtWidgets.QSlider.TickPosition.TicksAbove)
-        self.slider.valueChanged.connect(self.valueChanged)
+        self.slider.valueChanged.connect(self.updateValueFromSlider)
         self.slider.setOrientation(QtCore.Qt.Orientation.Horizontal)
         self.layout().addWidget(self.slider)
 
@@ -339,13 +339,21 @@ class ArenaProbabilitySliderWidget(QtWidgets.QWidget):
         self.unitLabel.setMinimumWidth(30)
         self.layout().addWidget(self.unitLabel)
 
-    def valueChanged(self, value):
-        new_value = self.values[value]
-        self.setValue(new_value)
+    def updateValueFromSlider(self):
+        new_value = self.values[self.slider.value()]
+        self.value = new_value
+        self.label.setText("{:4.2f}".format(new_value * 100))
 
-    def setValue(self, value):
-        self.value = value
-        self.label.setText("{:4.2f}".format(value * 100))
+    def setValue(self, value: float):
+        # get absolute differences
+        values = np.abs(self.values - value)
+        min_idx = np.argmin(values)
+        # set slider position
+        # actual value and label will be updated by sliders valueChanged signal
+        self.slider.setValue(min_idx)
+
+    def getValue(self):
+        return self.value
 
 
 
@@ -363,7 +371,7 @@ class ArenaSliderWidget(QtWidgets.QWidget):
         self.unit = unit
         self.value = 0.0
         self.setup_ui()
-        self.valueChanged()
+        self.udpateValueFromSlider()
 
     def setup_ui(self):
         self.setLayout(QtWidgets.QHBoxLayout())
@@ -375,7 +383,7 @@ class ArenaSliderWidget(QtWidgets.QWidget):
         self.slider.setMaximum(self.minValue + self.numValues)
         self.slider.setValue(self.minValue + (self.numValues // 2))
         self.slider.setTickPosition(QtWidgets.QSlider.TickPosition.TicksAbove)
-        self.slider.valueChanged.connect(self.valueChanged)
+        self.slider.valueChanged.connect(self.udpateValueFromSlider)
         self.slider.setOrientation(QtCore.Qt.Orientation.Horizontal)
         self.layout().addWidget(self.slider)
 
@@ -391,13 +399,23 @@ class ArenaSliderWidget(QtWidgets.QWidget):
         self.unitLabel.setMinimumWidth(30)
         self.layout().addWidget(self.unitLabel)
 
-    def valueChanged(self):
+    def udpateValueFromSlider(self):
         new_value = self.slider.value() * self.stepValue
-        self.setValue(new_value)
+        self.value = new_value
+        self.label.setText("{:4.2f}".format(new_value))
 
-    def setValue(self, value):
-        self.value = value
-        self.label.setText("{:4.2f}".format(value))
+    def setValue(self, value: float):
+        # construct list of actual possible values for this slider
+        values = (np.arange(self.numValues + 1) * self.stepValue) + self.minValue
+        # get absolute differences
+        abs_diffs = np.abs(values - value)
+        min_idx = np.argmin(abs_diffs)
+        # set slider position
+        # actual value and label will be updated by sliders valueChanged signal
+        self.slider.setValue(min_idx)
+
+    def getValue(self):
+        return self.value
 
 
 
