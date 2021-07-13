@@ -17,6 +17,11 @@
   <arg name="map_file"        default="map_empty"/>
   <arg name="map_path"        default="$(find simulator_setup)/maps/$(arg map_file)/map.yaml"/>
   <arg name="world_path"      default="$(find simulator_setup)/maps/$(arg map_file)/map.world.yaml"/>
+  <param name="world_path"    value="$(arg world_path)" />
+
+  <arg name="step_size" default="0.05"/>
+  <param name="step_size" value="$(arg step_size)" /> 
+
 
   <arg name="global_frame_id"   value="map"/>
   <arg name="odom_frame_id"     value="odom"/>
