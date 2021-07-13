@@ -19,6 +19,13 @@ class ModelBase:
     def wait_for_agent(self) -> bool:
         pass
 
+    @abstractmethod
+    def reset(self):
+        pass
+
+    def close(self):
+        pass
+
     def get_observation_info(self) -> dict:
         return self._observation_info
 

@@ -39,6 +39,9 @@ class DrlAgent(ModelBase):
     def wait_for_agent(self):
         return True
 
+    def reset(self):
+        pass
+
 
 class DrlAgentServer:
 
@@ -91,6 +94,9 @@ class DrlAgentClient(ModelBase):
 
     def wait_for_agent(self):
         return True
+
+    def reset(self):
+        pass
 
 
 def load_drl_models_from_config(paths: dict) -> Dict[str, DrlAgent]:

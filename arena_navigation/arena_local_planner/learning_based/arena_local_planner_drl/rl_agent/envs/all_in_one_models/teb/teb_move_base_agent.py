@@ -24,5 +24,8 @@ class TebMoveBaseAgent(ModelBase):
     def wait_for_agent(self):
         return True
 
+    def reset(self):
+        pass
+
     def _callback_cmd_vel(self, msg_twist):
         self._last_cmd_vel = msg_twist
