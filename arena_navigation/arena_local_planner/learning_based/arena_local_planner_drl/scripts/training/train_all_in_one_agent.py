@@ -1,14 +1,16 @@
 import os
+import random
 import sys
 import time
 import warnings
+import json
 from multiprocessing import Process
 
 import rosnode
 import rospkg
 from rl_agent.envs.all_in_one_flatland_gym_env import AllInOneEnv
 from rl_agent.envs.all_in_one_models.drl.drl_agent import setup_and_start_drl_server
-from scripts.custom_policy import policy_kwargs_agent_10
+from scripts.custom_policy import policy_kwargs_agent_13
 from stable_baselines3 import PPO
 from stable_baselines3.common.callbacks import EvalCallback
 from stable_baselines3.common.monitor import Monitor
@@ -19,7 +21,7 @@ from tools.train_agent_utils import initialize_hyperparameters
 
 
 def make_all_in_one_envs(rank: int, paths: dict, params: dict, train: bool = True, seed: int = 0,
-                         drl_server_url: [str] = None, num_envs: int = 0):
+                         drl_server_url: [str] = None, num_envs: int = 0, eval_episodes: int = 0):
     def _init():
         if drl_server_url is not None:
             server_numb = rank // (num_envs // len(drl_server_url))
@@ -34,11 +36,13 @@ def make_all_in_one_envs(rank: int, paths: dict, params: dict, train: bool = Tru
                                          max_steps_per_episode=params['train_max_steps_per_episode'],
                                          drl_server=drl_server_url_ind)
         else:
+            seed = random.randint(1,1000)
             all_in_one_env = Monitor(
-                AllInOneEnv(f"sim_{rank + 1}", paths['robot_setting'], paths['robot_as'], params['reward_fnc'],
+                AllInOneEnv("eval_sim", paths['robot_setting'], paths['robot_as'], params['reward_fnc'],
                             goal_radius=params['goal_radius'],
                             paths=paths, train_mode=False, max_steps_per_episode=params['eval_max_steps_per_episode'],
-                            drl_server=drl_server_url_ind),
+                            drl_server=drl_server_url_ind, evaluation=True, seed=seed,
+                            evaluation_episodes=eval_episodes),
                 paths.get('eval'),
                 info_keywords=("done_reason", "is_success"))
         all_in_one_env.seed(seed + rank)
@@ -73,7 +77,7 @@ def wait_for_nodes(n_envs: int, timeout: int = 30, nodes_per_ns: int = 3):
             time.sleep(1)
 
 
-def get_paths(agent_version: str, args) -> dict:
+def get_paths(agent_version: str, args, all_in_one_config: str = "all_in_one_default.json") -> dict:
     """
     Function to generate agent specific paths
 
@@ -106,7 +110,7 @@ def get_paths(agent_version: str, args) -> dict:
             os.path.join(
                 dir, 'configs', 'training_curriculum_map1small.yaml'),
         'all_in_one_parameters':
-            os.path.join(dir, 'configs', 'all_in_one_hyperparameters', 'all_in_one_default.json'),
+            os.path.join(dir, 'configs', 'all_in_one_hyperparameters', all_in_one_config),
         'drl_agents':
             os.path.join(
                 dir, 'agents')
@@ -115,40 +119,63 @@ def get_paths(agent_version: str, args) -> dict:
     if not os.path.exists(paths['model']):
         os.makedirs(paths['model'])
 
-    # if args.tb:
-    #     if not os.path.exists(paths['tb']):
-    #         os.makedirs(paths['tb'])
-    # else:
-    #     paths['tb'] = None
+    if args.tb:
+        if not os.path.exists(paths['tb']):
+            os.makedirs(paths['tb'])
+    else:
+        paths['tb'] = None
     return paths
+
+
+def set_up_drl_server(all_in_one_config_path: str):
+    # setup drl server if required
+    config_path = paths['all_in_one_parameters']
+    models = []
+    with open(config_path, 'r') as model_json:
+        config_data = json.load(model_json)
+
+    assert config_data is not None, "Error: All in one parameter file cannot be found!"
+
+    config_model = config_data['models']
+
+    if 'drl' in config_model and 'use_drl_servers' in config_model:
+        socket_url_server_array = []
+        socket_url_client_array = []
+        server_base_url = "tcp://*:555"
+        client_base_url = "tcp://localhost:555"
+        count = 5
+        for i in range(config_model['config_model']):
+            socket_url_server_array.append(server_base_url + str(count))
+            socket_url_client_array.append(client_base_url + str(count))
+            count += 1
+        Process(target=setup_and_start_drl_server, args=(socket_url_server_array, paths)).start()
+        return socket_url_client_array
+    else:
+        return None
 
 
 if __name__ == '__main__':
 
     # make unique agent version description based on @version
-    version = "all_in_one_0.7"
+    version = "all_in_one_agents_teb_rlca_rule03_policy13"
+    all_in_one_config = "rlca_teb_only.json"
+    eval_episodes = 40
+
     add_version = 0
     main_dir = rospkg.RosPack().get_path('arena_local_planner_drl')
     while os.path.exists(os.path.join(main_dir, 'agents', version + str(add_version))):
         add_version += 1
-    version = version + str(add_version)
+    version = version + ".v" + str(add_version)
 
     args, _ = argsparser.parse_training_args()
-    paths = get_paths(version, args)
+    paths = get_paths(version, args, all_in_one_config=all_in_one_config)
+
+    socket_url_client_array = set_up_drl_server(paths['all_in_one_parameters'])
 
     # check if simulations are booted
     wait_for_nodes(n_envs=args.n_envs, timeout=5)
 
-    params = initialize_hyperparameters(paths, "", n_envs=args.n_envs, config_name='default')
-
-    # TODO make this an arg
-    socket_url_server = "tcp://*:5555"
-    socket_url_server_2 = "tcp://*:5556"
-    # socket_url_client_array = ["tcp://localhost:5555", "tcp://localhost:5556"]
-    socket_url_client_array = ["tcp://localhost:5555"]
-
-    Process(target=setup_and_start_drl_server, args=(socket_url_server, paths)).start()
-    # Process(target=setup_and_start_drl_server, args=(socket_url_server_2, paths)).start()
+    params = initialize_hyperparameters(paths, None, n_envs=args.n_envs, config_name='all_in_one_default')
 
     env = SubprocVecEnv(
         [make_all_in_one_envs(i, params=params, paths=paths, drl_server_url=socket_url_client_array,
@@ -156,35 +183,34 @@ if __name__ == '__main__':
 
     eval_env = DummyVecEnv(
         [make_all_in_one_envs(0, params=params, paths=paths, train=False, drl_server_url=socket_url_client_array,
-                              num_envs=args.n_envs)])
+                              num_envs=args.n_envs, eval_episodes=eval_episodes)])
 
-    # try to load most recent vec_normalize obj (contains statistics like moving avg)
-    if params['normalize']:
-        load_path = os.path.join(paths['model'], 'vec_normalize.pkl')
-        if os.path.isfile(load_path):
-            env = VecNormalize.load(
-                load_path=load_path, venv=env)
-            eval_env = VecNormalize.load(
-                load_path=load_path, venv=eval_env)
-            print("Succesfully loaded VecNormalize object from pickle file..")
-        else:
-            env = VecNormalize(
-                env, training=True,
-                norm_obs=True, norm_reward=False, clip_reward=15)
-            eval_env = VecNormalize(
-                eval_env, training=True,
-                norm_obs=True, norm_reward=False, clip_reward=15)
+
+    load_path = os.path.join(paths['model'], 'vec_normalize.pkl')
+    if os.path.isfile(load_path):
+        env = VecNormalize.load(
+            load_path=load_path, venv=env)
+        eval_env = VecNormalize.load(
+            load_path=load_path, venv=eval_env)
+        print("Succesfully loaded VecNormalize object from pickle file..")
+    else:
+        env = VecNormalize(
+            env, training=True,
+            norm_obs=True, norm_reward=False, clip_reward=15)
+        eval_env = VecNormalize(
+            eval_env, training=True,
+            norm_obs=True, norm_reward=False, clip_reward=15)
 
     eval_cb = EvalCallback(
         eval_env=eval_env, train_env=env,
-        n_eval_episodes=100, eval_freq=200000,
+        n_eval_episodes=eval_episodes, eval_freq=20000,
         log_path=paths['eval'], best_model_save_path=paths['model'], deterministic=True)
 
     # if args.agent == "AGENT_10": # TODO make it possible to set different architectures
-    policy_kwargs = policy_kwargs_agent_10
+    policy_kwargs = policy_kwargs_agent_13
 
     model = PPO(
-        "CnnPolicy", env,
+        "MlpPolicy", env,
         policy_kwargs=policy_kwargs,
         gamma=params['gamma'], n_steps=params['n_steps'],
         ent_coef=params['ent_coef'], learning_rate=params['learning_rate'],
@@ -197,7 +223,7 @@ if __name__ == '__main__':
     print("Start training...")
 
     if args.n is None:
-        n_timesteps = 40000000
+        n_timesteps = 10000000
     else:
         n_timesteps = args.n
 

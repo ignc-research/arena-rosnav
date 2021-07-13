@@ -10,11 +10,10 @@ from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 from tools.all_in_one_utils import evaluate_policy_manually
 from tools.train_agent_utils import check_hyperparam_format, print_hyperparameters
 
-base_Agent = 'all_in_one_0.6'
-# AGENTS = ['rlca_only', 'teb_only', 'drl_only', 'all_in_one_0.6', 'random']
-AGENTS = ['teb_only']
-eval_episodes = 100
-
+base_Agent = 'all_in_one_agents_teb_rlca_rule03_policy13.v0'
+AGENTS = [base_Agent, "random", "rlca_only", "teb_only", "drl_only"]
+eval_episodes = 40
+seed = random.randint(1,1000)
 
 def get_paths(AGENT: str, primitive_agent=False, is_random_agent=False):
     dir = rospkg.RosPack().get_path('arena_local_planner_drl')
@@ -26,7 +25,7 @@ def get_paths(AGENT: str, primitive_agent=False, is_random_agent=False):
                                      'default_settings.yaml'),
             'curriculum': os.path.join(dir, 'configs', 'training_curriculum_map1small.yaml'),
             'drl_agents': os.path.join(dir, 'agents'),
-            'hyperparams': os.path.join(dir, 'configs', 'hyperparameters', 'default.json')
+            'hyperparams': os.path.join(dir, 'configs', 'hyperparameters', 'all_in_one_default.json')
         }
     else:
         paths = {
@@ -66,10 +65,12 @@ def make_env(paths: dict,
     """
 
     def _init():
+
         return AllInOneEnv("eval_sim", paths['robot_setting'], paths['robot_as'], params['reward_fnc'],
                            goal_radius=params['goal_radius'], debug=True,
-                           paths=paths, train_mode=False, evaluation=True, max_steps_per_episode=params['eval_max_steps_per_episode'],
-                           extended_eval=True)
+                           paths=paths, train_mode=False, evaluation=True,
+                           max_steps_per_episode=params['eval_max_steps_per_episode'], seed=seed,
+                           extended_eval=True, evaluation_episodes=eval_episodes)
 
     return _init
 
@@ -111,7 +112,9 @@ if __name__ == "__main__":
             params = load_hyperparameters_json(paths)
             print_hyperparameters(params)
             env = DummyVecEnv([make_env(paths, params)])
-            def policy(_): return 0
+
+            def policy(_):
+                return 0
         else:
             paths = get_paths(AGENT)
             params = load_hyperparameters_json(paths)
@@ -119,17 +122,19 @@ if __name__ == "__main__":
             env = DummyVecEnv([make_env(paths, params)])
             assert os.path.isfile(
                 os.path.join(paths['model'], "best_model.zip")), "No model file found in %s" % paths['model']
-            assert os.path.isfile(paths['vecnorm']
-                                  ), f"Couldn't find VecNormalize pickle for {paths['model'].split('/')[-1]}, without it agent performance will be strongly altered"
+            # load vec norm
             env = VecNormalize.load(paths['vecnorm'], env)
             # load agent
             agent = PPO.load(os.path.join(paths['model'], "best_model.zip"), env)
 
-
             def policy(x):
                 return agent.predict(x, deterministic=True)[0]
 
-        evaluate_policy_manually(policy, env, eval_episodes, paths['log'], params['gamma'])
+        evaluate_policy_manually(policy, env, eval_episodes, paths['log'], params['gamma'],
+                                 paths['all_in_one_parameters'])
+
+        env.close()
+        print("Evaluation of agent " + AGENT + " completed!")
 
     time = round(time.time() - start)
     print(f"Time passed:    {time}s")

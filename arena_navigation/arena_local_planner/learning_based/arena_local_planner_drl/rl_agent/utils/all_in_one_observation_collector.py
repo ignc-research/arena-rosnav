@@ -4,24 +4,24 @@ from typing import Tuple
 
 import numpy as np
 import rospy
-from arena_plan_msgs.msg import RobotStateStamped
 # services
 from flatland_msgs.srv import StepWorld, StepWorldRequest
 from geometry_msgs.msg import Pose2D, PoseStamped
 from geometry_msgs.msg import Twist
 from gym import spaces
+from nav_msgs.msg import Odometry
 from nav_msgs.msg import Path
 from rosgraph_msgs.msg import Clock
 # observation msgs
 from sensor_msgs.msg import LaserScan
 from std_msgs.msg import Bool
-from nav_msgs.msg import Odometry
 # for transformations
 from tf.transformations import *
 
 
 class ObservationCollectorAllInOne:
-    def __init__(self, ns: str, num_lidar_beams: int, lidar_range: float):
+    def __init__(self, ns: str, num_lidar_beams: int, lidar_range: float, numb_models: int = 0,
+                 include_model_actions: bool = False):
 
         self.ns = ns
         if ns is None or ns == "":
@@ -34,12 +34,23 @@ class ObservationCollectorAllInOne:
         self._action_frequency = 1 / rospy.get_param("/robot_action_rate")
 
         # define observation_space
-        self.observation_space = ObservationCollectorAllInOne._stack_spaces((
-            spaces.Box(low=0, high=lidar_range, shape=(
-                num_lidar_beams,), dtype=np.float32),
-            spaces.Box(low=0, high=10, shape=(1,), dtype=np.float32),
-            spaces.Box(low=-np.pi, high=np.pi, shape=(1,), dtype=np.float32)
-        ))
+        if include_model_actions:
+            self.observation_space = ObservationCollectorAllInOne._stack_spaces((
+                spaces.Box(low=0, high=lidar_range, shape=(
+                    num_lidar_beams,), dtype=np.float32),
+                spaces.Box(low=0, high=10, shape=(1,), dtype=np.float32),
+                spaces.Box(low=-np.pi, high=np.pi, shape=(1,), dtype=np.float32),
+                spaces.Box(low=0, high=10, shape=(2,), dtype=np.float32),
+                spaces.Box(low=-2.7, high=2.7, shape=(2*numb_models,), dtype=np.float32)
+            ))
+        else:
+            self.observation_space = ObservationCollectorAllInOne._stack_spaces((
+                spaces.Box(low=0, high=lidar_range, shape=(
+                    num_lidar_beams,), dtype=np.float32),
+                spaces.Box(low=0, high=10, shape=(1,), dtype=np.float32),
+                spaces.Box(low=-np.pi, high=np.pi, shape=(1,), dtype=np.float32),
+                spaces.Box(low=0, high=10, shape=(2,), dtype=np.float32)
+            ))
 
         self._clock = Clock()
         self._scan = LaserScan()
@@ -75,6 +86,9 @@ class ObservationCollectorAllInOne:
 
         self._globalplan_sub = rospy.Subscriber(
             f'{self.ns_prefix}globalPlan', Path, self.callback_global_plan)
+
+        # Set publisher to publish filtered scan messages (relevant for costmap updates)
+        # self._filtered_scan_pub = rospy.Publisher(f'{self.ns_prefix}filtered_scan', LaserScan)
 
         # service clients
         if self._is_train_mode:
@@ -115,14 +129,21 @@ class ObservationCollectorAllInOne:
         local_goal_x, local_goal_y = ObservationCollectorAllInOne._get_local_goal_in_robot_frame_xy(
             self._subgoal, self._robot_pose)
 
-        merged_obs = np.hstack([scan, np.array([rho, theta])])
+        if len(self._globalplan) == 0:
+            global_goal = [0, 0]
+        else:
+            global_goal = self._globalplan[-1,:]
+
+        merged_obs = np.float32(np.hstack([scan, np.array([rho, theta]), global_goal]))
 
         obs_dict = {'laser_scan': scan,
+                    'goal_map_frame': self._subgoal,
                     'goal_in_robot_frame': [rho, theta],
                     'goal_in_robot_frame_xy': [local_goal_x, local_goal_y],
                     'global_plan': self._globalplan,
                     'robot_pose': self._robot_pose,
-                    'robot_twist': self._twist
+                    'robot_twist': self._twist,
+                    'global_goal': global_goal
                     }
 
         self._laser_deque.clear()
@@ -145,7 +166,6 @@ class ObservationCollectorAllInOne:
         theta = (np.arctan2(y_relative, x_relative) -
                  robot_pos.theta + 4 * np.pi) % (2 * np.pi) - np.pi
         return rho, theta
-
 
     def get_sync_obs(self):
         laser_scan = None
@@ -214,7 +234,14 @@ class ObservationCollectorAllInOne:
         self._globalplan = ObservationCollectorAllInOne.process_global_plan_msg(msg_global_plan)
         return
 
-    def callback_scan(self, msg_laserscan):
+    def callback_scan(self, msg_laserscan: LaserScan):
+        # republish filtered scan msg
+        # scan_np = np.array(msg_laserscan.ranges)
+        # scan_np[np.isnan(scan_np)] = 0 # msg_laserscan.range_max
+        # msg_laserscan.ranges = scan_np
+        # self._filtered_scan_pub.publish(msg_laserscan)
+
+        # save message
         if len(self._laser_deque) == self.max_deque_size:
             self._laser_deque.popleft()
         self._laser_deque.append(msg_laserscan)

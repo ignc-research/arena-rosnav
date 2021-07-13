@@ -1,17 +1,12 @@
 import csv
-import json
-import math
-import random
-from pathlib import Path
+from shutil import copyfile
 
 import numpy as np
-import rospy
-from nav_msgs.srv import GetMap
 from stable_baselines3.common.vec_env import VecNormalize
-from task_generator.task_generator.obstacles_manager import ObstaclesManager
 
 
-def evaluate_policy_manually(policy: callable, env: VecNormalize, episodes: int, log_folder: str, gamma: float):
+def evaluate_policy_manually(policy: callable, env: VecNormalize, episodes: int, log_folder: str, gamma: float,
+                             all_in_config_file: str):
     rewards = np.zeros((episodes,))
     collisions = np.zeros((episodes,))
     distance_travelled = np.zeros((episodes,))
@@ -19,8 +14,13 @@ def evaluate_policy_manually(policy: callable, env: VecNormalize, episodes: int,
     is_success = np.zeros((episodes,))
     model_distribution = np.zeros((episodes, env.env_method("get_number_models")[0]))
 
+    model_distribution_close_obst_dist = np.zeros((episodes, env.env_method("get_number_models")[0]))
+    model_distribution_medium_obst_dist = np.zeros((episodes, env.env_method("get_number_models")[0]))
+    model_distribution_large_obst_dist = np.zeros((episodes, env.env_method("get_number_models")[0]))
+
     # run evaluation
     for i in range(episodes):
+        print('Episode {:d} / {:d}'.format(i, episodes))
         obs = env.reset()[0]
         done = False
         current_reward = 0
@@ -32,7 +32,7 @@ def evaluate_policy_manually(policy: callable, env: VecNormalize, episodes: int,
             done = done[0]
             reward = reward[0]
             obs = obs[0]
-            current_reward += reward * (gamma ** current_iteration)
+            current_reward += reward
             current_iteration += 1
             if done:
                 rewards[i] = current_reward
@@ -41,6 +41,9 @@ def evaluate_policy_manually(policy: callable, env: VecNormalize, episodes: int,
                 time[i] = info['time']
                 is_success[i] = info['is_success']
                 model_distribution[i, :] = info['model_distribution']
+                model_distribution_close_obst_dist[i, :] = info['model_distribution_close_obst_dist']
+                model_distribution_medium_obst_dist[i, :] = info['model_distribution_medium_obst_dist']
+                model_distribution_large_obst_dist[i, :] = info['model_distribution_large_obst_dist']
 
     # omit first run as it is often falsy (for move-base based models)
     rewards = rewards[1:]
@@ -49,6 +52,14 @@ def evaluate_policy_manually(policy: callable, env: VecNormalize, episodes: int,
     time = time[1:]
     is_success = is_success[1:]
     model_distribution = model_distribution[1:, :]
+    model_distribution_close_obst_dist = model_distribution_close_obst_dist[1:, :]
+    model_distribution_medium_obst_dist = model_distribution_medium_obst_dist[1:, :]
+    model_distribution_large_obst_dist = model_distribution_large_obst_dist[1:, :]
+
+    # remove empty entries
+    model_distribution_close_obst_dist = [i for i in model_distribution_close_obst_dist if np.sum(i) != 0]
+    model_distribution_medium_obst_dist = [i for i in model_distribution_medium_obst_dist if np.sum(i) != 0]
+    model_distribution_large_obst_dist = [i for i in model_distribution_large_obst_dist if np.sum(i) != 0]
 
     # save results
     with open(log_folder + '/evaluation_full.csv', 'w', newline='') as file:
@@ -65,11 +76,18 @@ def evaluate_policy_manually(policy: callable, env: VecNormalize, episodes: int,
         file.write("Mean time: " + str(np.mean(time)) + "\n")
         file.write("Mean success rate: " + str(np.mean(is_success)) + "\n")
         file.write("Mean model distribution: " + str(np.mean(model_distribution, axis=0)) + "\n")
+        file.write("Mean model distribution close obstacle distance: " + str(np.mean(model_distribution_close_obst_dist, axis=0)) + "\n")
+        file.write("Mean model distribution medium obstacle distance: " + str(
+            np.mean(model_distribution_medium_obst_dist, axis=0)) + "\n")
+        file.write("Mean model distribution large obstacle distance: " + str(
+            np.mean(model_distribution_large_obst_dist, axis=0)) + "\n")
         file.write("With models: " + str(env.env_method("get_model_names")[0]))
 
+    # copy config file
+    copyfile(all_in_config_file, log_folder + '/all_in_one_parameters.json')
 
-# def generate_evaluation_scenario(ns, dst_json_path: str, length: int = 100, repeats: int = 2, numb_static_obst: int = 6,
-#                                  numb_dyn_obst: int = 15):
+# def generate_evaluation_scenario(ns, dst_json_path: str, length: int = 100, repeats: int = 1, numb_static_obst: int = 6,
+#                                  numb_dyn_obst: int = 15, map_size_x=10, map_size_y=10, safe_dist = 0.6):
 #     service_client_get_map = rospy.ServiceProxy('/static_map', GetMap)
 #     map_response = service_client_get_map()
 #
@@ -98,11 +116,10 @@ def evaluate_policy_manually(policy: callable, env: VecNormalize, episodes: int,
 #                                                           ) for _ in range(numb_dyn_obst)]
 #
 #         scene1 = {}
-#         scene2 = {}
-#         scene1['scene_name'] = 'scene_1'
-#         scene1['repeats'] = 2
-#         scene1_dynamic_obstacles = {}
-#         scene1_static_obstacles = {}
+#         scene1['scene_name'] = 'scene_' + str(i)
+#         scene1['repeats'] = repeats
+#         scene1_dynamic_obstacles = scenario_i_dyn_obst
+#         scene1_static_obstacles = scenario_i_static_obs
 #         scene1_robot = {'start_pos': [
 #             0.0, 0.0, 0.2], 'goal_pos': [4, 8, 0]}
 #         # trigger is optional, if it is not given, it will be trigged immediately
@@ -122,24 +139,6 @@ def evaluate_policy_manually(policy: callable, env: VecNormalize, episodes: int,
 #         scene1['robot'] = scene1_robot
 #         scene1['watchers'] = {'watcher_1': {
 #             'pos': [1, 1], 'range': 1}, 'watcher_2': {'pos': [5, 5], 'range': 2}}
-#
-#         scene2['scene_name'] = 'scene_2'
-#         scene2['repeats'] = 1
-#         scene2_dynamic_obstacles = {}
-#         scene2_static_obstacles = {}
-#         scene2_robot = {'start_pos': [
-#             0.0, 0.1, 0.2], 'goal_pos': [1.5, 1.5, 0]}
-#         scene2_dynamic_obstacles['dynamic_obs_0'] = {'obstacle_radius': 0.3, 'linear_velocity': 0.2, 'start_pos': [
-#             7, 7, 0], 'waypoints': [[-4, 0, 0], [-4, -4, 0]], 'is_waypoint_relative': True, 'mode': 'yoyo'}
-#         scene2_dynamic_obstacles['dynamic_obs_1'] = {'obstacle_radius': 0.3, 'linear_velocity': 0.2, 'start_pos': [
-#             10, 3, 0], 'waypoints': [[0, 4, 0], [-5, 0, 0]], 'is_waypoint_relative': True, 'mode': 'yoyo'}
-#         scene2_static_obstacles['static_obs_1'] = {'shape': 'polygon', 'vertices': [
-#             [1.2, 0.4], [1.2, 0.5], [0.75, 0.5], [0.75, 0.4]]}
-#         scene2['dynamic_obstacles'] = scene2_dynamic_obstacles
-#         scene2['static_obstacles'] = scene2_static_obstacles
-#         scene2['robot'] = scene2_robot
-#         scene2['watchers'] = {'watcher_1': {
-#             'pos': [1, 1], 'range': 4}, 'watcher_2': {'pos': [1, 1], 'range': 4}}
 #     json_data['scenerios'] = [scene1, scene2]
 #     json.dump(json_data, dst_json_path_.open('w'), indent=4)
 #
