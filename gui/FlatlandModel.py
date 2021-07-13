@@ -175,7 +175,7 @@ class FlatlandModel():
         if not isinstance(other, FlatlandModel):
             return NotImplemented
 
-        if self.bodies.keys() == other.bodies.keys():
+        if len(self.bodies.keys()) == len(other.bodies.keys()):
             for body1, body2 in zip(self.bodies.values(), other.bodies.values()):
                 if body1 != body2:
                     return False
