@@ -3,8 +3,8 @@ max_vel_x: 0.3
 max_vel_x_backwards: 0.15 # Backward movement is disabled through optimization parameters
 max_vel_y: 0
 max_vel_theta: 2.7
-acc_lim_x: 5 # Robot is able to reach max_vel instantly
-acc_lim_theta: 35 # Robot is able to reach max_vel instantly
+acc_lim_x: 5 # Robot is able to reach max_vel (alomst) instantly
+acc_lim_theta: 10 # Robot is able to reach max_vel (alomst) instantly
 min_turning_radius: 0.0 # diff-drive robot (can turn on place!)
 
 # Obstacles
@@ -24,7 +24,7 @@ no_outer_iterations: 3  # default 4 -> make calculation slightly faster
 # Costmap converter plugin
 costmap_converter_plugin: "costmap_converter::CostmapToPolygonsDBSMCCH"
 costmap_converter_spin_thread: True
-costmap_converter_rate: 20 # Twice the update rate of the all in one planner --> TEB always has new update for obstacles
+costmap_converter_rate: 20 # Twice the update rate of the all in one planner --> TEB should always haave the new update for obstacles
 
 local_costmap:
   update_frequency: 20.0
