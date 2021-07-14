@@ -1,9 +1,10 @@
+import argparse
+import json
 import os
 import random
 import sys
 import time
 import warnings
-import json
 from multiprocessing import Process
 
 import rosnode
@@ -16,8 +17,7 @@ from stable_baselines3.common.callbacks import EvalCallback
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.utils import set_random_seed
 from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv, VecNormalize
-from tools import argsparser
-from tools.train_agent_utils import initialize_hyperparameters
+from tools.train_agent_utils import initialize_hyperparameters, update_hyperparam_model
 
 
 def make_all_in_one_envs(rank: int, paths: dict, params: dict, train: bool = True, seed: int = 0,
@@ -36,7 +36,7 @@ def make_all_in_one_envs(rank: int, paths: dict, params: dict, train: bool = Tru
                                          max_steps_per_episode=params['train_max_steps_per_episode'],
                                          drl_server=drl_server_url_ind)
         else:
-            seed = random.randint(1,1000)
+            seed = random.randint(1, 1000)
             all_in_one_env = Monitor(
                 AllInOneEnv("eval_sim", paths['robot_setting'], paths['robot_as'], params['reward_fnc'],
                             goal_radius=params['goal_radius'],
@@ -45,7 +45,6 @@ def make_all_in_one_envs(rank: int, paths: dict, params: dict, train: bool = Tru
                             evaluation_episodes=eval_episodes),
                 paths.get('eval'),
                 info_keywords=("done_reason", "is_success"))
-        all_in_one_env.seed(seed + rank)
         return all_in_one_env
 
     set_random_seed(seed)
@@ -139,35 +138,56 @@ def set_up_drl_server(all_in_one_config_path: str):
     config_model = config_data['models']
 
     if 'drl' in config_model and 'use_drl_servers' in config_model:
-        socket_url_server_array = []
         socket_url_client_array = []
         server_base_url = "tcp://*:555"
         client_base_url = "tcp://localhost:555"
         count = 5
-        for i in range(config_model['config_model']):
-            socket_url_server_array.append(server_base_url + str(count))
+        for i in range(config_model['use_drl_servers']):
+            socket_url_server = server_base_url + str(count)
             socket_url_client_array.append(client_base_url + str(count))
             count += 1
-        Process(target=setup_and_start_drl_server, args=(socket_url_server_array, paths)).start()
+            Process(target=setup_and_start_drl_server, args=(socket_url_server, paths)).start()
         return socket_url_client_array
     else:
         return None
 
 
+def parse_all_in_one_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--agent_name', type=str, default="all_in_one_teb_rlca_drl4_rule03_policy13",
+                        help="name of the all in one agent. Can be used for loading agents.")
+    parser.add_argument('--all_in_one_config', type=str, default="all_in_one_default.json",
+                        help="Name of all in one config file.")
+    parser.add_argument('--n_envs', type=int, default=1, help='number of parallel environments')
+    parser.add_argument('--no-gpu', action='store_true', help='disables gpu for training')
+    parser.add_argument('--debug', action='store_true', help='disables multiprocessing in order to debug')
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument('--agent', type=str, default="AGENT_13",
+                       choices=['MLP_ARENA2D', 'AGENT_1', 'AGENT_2', 'AGENT_3', 'AGENT_4', 'AGENT_5', 'AGENT_6',
+                                'AGENT_7', 'AGENT_8', 'AGENT_9', 'AGENT_10', 'AGENT_11', 'AGENT_12', 'AGENT_13',
+                                'AGENT_14', 'AGENT_15', 'AGENT_16', 'AGENT_17', 'AGENT_18', 'AGENT_19', 'AGENT_20'],
+                       help='predefined agent to train')
+    group.add_argument('--custom-mlp', action='store_true', help='enables training with custom multilayer perceptron')
+    parser.add_argument('--config', type=str, metavar='[config name]', default='default',
+                        help='name of the json file containing'
+                             'the hyperparameters')
+    parser.add_argument('--n', type=int, help='timesteps in total to be generated for training')
+    parser.add_argument('-log', '--eval_log', action='store_true', help='enables storage of evaluation data')
+    parser.add_argument('--tb', action='store_true', help='enables tensorboard logging')
+    parser.add_argument('--load', action='store_true', help='Load an already trained agent')
+    return parser.parse_args()
+
+
 if __name__ == '__main__':
 
     # make unique agent version description based on @version
-    version = "all_in_one_agents_teb_rlca_rule03_policy13"
-    all_in_one_config = "rlca_teb_only.json"
     eval_episodes = 40
 
-    add_version = 0
-    main_dir = rospkg.RosPack().get_path('arena_local_planner_drl')
-    while os.path.exists(os.path.join(main_dir, 'agents', version + str(add_version))):
-        add_version += 1
-    version = version + ".v" + str(add_version)
+    args = parse_all_in_one_args()
 
-    args, _ = argsparser.parse_training_args()
+    version = args.agent_name
+    all_in_one_config = args.all_in_one_config
+
     paths = get_paths(version, args, all_in_one_config=all_in_one_config)
 
     socket_url_client_array = set_up_drl_server(paths['all_in_one_parameters'])
@@ -177,6 +197,12 @@ if __name__ == '__main__':
 
     params = initialize_hyperparameters(paths, None, n_envs=args.n_envs, config_name='all_in_one_default')
 
+    if args.load:
+        paths['all_in_one_parameters'] = os.path.join(paths['model'], 'all_in_one_parameters.json')
+        assert (os.path.isfile(
+            os.path.join(paths['model'], "best_model.zip")) and os.path.isfile(paths['all_in_one_parameters'])), \
+            "Loading agent not successful as agent " + args.agent_name + " was not found!"
+
     env = SubprocVecEnv(
         [make_all_in_one_envs(i, params=params, paths=paths, drl_server_url=socket_url_client_array,
                               num_envs=args.n_envs) for i in range(args.n_envs)], start_method='fork')
@@ -185,7 +211,109 @@ if __name__ == '__main__':
         [make_all_in_one_envs(0, params=params, paths=paths, train=False, drl_server_url=socket_url_client_array,
                               num_envs=args.n_envs, eval_episodes=eval_episodes)])
 
+    # determine mode
+    if args.load and os.path.isfile(os.path.join(paths['model'], "best_model.zip")):
+        print("Load model " + args.agent_name + " !")
+        # Load agent
+        model = PPO.load(
+            os.path.join(paths['model'], "best_model"), env)
+        update_hyperparam_model(model, paths, params, args.n_envs)
 
+    elif args.custom_mlp:
+        # custom mlp flag
+        model = PPO(
+            "MlpPolicy", env,
+            policy_kwargs=dict(
+                net_arch=args.net_arch, activation_fn=get_act_fn(args.act_fn)),
+            gamma=params['gamma'], n_steps=params['n_steps'],
+            ent_coef=params['ent_coef'], learning_rate=params['learning_rate'],
+            vf_coef=params['vf_coef'], max_grad_norm=params['max_grad_norm'],
+            gae_lambda=params['gae_lambda'], batch_size=params['m_batch_size'],
+            n_epochs=params['n_epochs'], clip_range=params['clip_range'],
+            tensorboard_log=paths['tb'], verbose=1
+        )
+    elif args.agent is not None:
+        # predefined agent flag
+        if args.agent == "MLP_ARENA2D":
+            model = PPO(
+                MLP_ARENA2D_POLICY, env,
+                gamma=params['gamma'], n_steps=params['n_steps'],
+                ent_coef=params['ent_coef'], learning_rate=params['learning_rate'],
+                vf_coef=params['vf_coef'], max_grad_norm=params['max_grad_norm'],
+                gae_lambda=params['gae_lambda'], batch_size=params['m_batch_size'],
+                n_epochs=params['n_epochs'], clip_range=params['clip_range'],
+                tensorboard_log=paths['tb'], verbose=1
+            )
+
+        elif args.agent in ['AGENT_1', 'AGENT_2', 'AGENT_3', 'AGENT_4', 'AGENT_9', 'AGENT_10', 'AGENT_11', 'AGENT_12',
+                            'AGENT_17', 'AGENT_18']:
+            if args.agent == 'AGENT_1':
+                policy_kwargs = policy_kwargs_agent_1
+            elif args.agent == 'AGENT_2':
+                policy_kwargs = policy_kwargs_agent_2
+            elif args.agent == 'AGENT_3':
+                policy_kwargs = policy_kwargs_agent_3
+            elif args.agent == 'AGENT_4':
+                policy_kwargs = policy_kwargs_agent_4
+            elif args.agent == 'AGENT_9':
+                policy_kwargs = policy_kwargs_agent_9
+            elif args.agent == 'AGENT_10':
+                policy_kwargs = policy_kwargs_agent_10
+            elif args.agent == 'AGENT_11':
+                policy_kwargs = policy_kwargs_agent_11
+            elif args.agent == 'AGENT_12':
+                policy_kwargs = policy_kwargs_agent_12
+            elif args.agent == 'AGENT_17':
+                policy_kwargs = policy_kwargs_agent_17
+            elif args.agent == 'AGENT_18':
+                policy_kwargs = policy_kwargs_agent_18
+
+            model = PPO(
+                "CnnPolicy", env,
+                policy_kwargs=policy_kwargs,
+                gamma=params['gamma'], n_steps=params['n_steps'],
+                ent_coef=params['ent_coef'], learning_rate=params['learning_rate'],
+                vf_coef=params['vf_coef'], max_grad_norm=params['max_grad_norm'],
+                gae_lambda=params['gae_lambda'], batch_size=params['m_batch_size'],
+                n_epochs=params['n_epochs'], clip_range=params['clip_range'],
+                tensorboard_log=paths.get('tb'), verbose=1
+            )
+
+        elif args.agent in ['AGENT_5', 'AGENT_6', 'AGENT_7', 'AGENT_8', 'AGENT_13', 'AGENT_14', 'AGENT_15', 'AGENT_16',
+                            'AGENT_19', 'AGENT_20']:
+            if args.agent == 'AGENT_5':
+                policy_kwargs = policy_kwargs_agent_5
+            elif args.agent == 'AGENT_6':
+                policy_kwargs = policy_kwargs_agent_6
+            elif args.agent == 'AGENT_7':
+                policy_kwargs = policy_kwargs_agent_7
+            elif args.agent == 'AGENT_8':
+                policy_kwargs = policy_kwargs_agent_8
+            elif args.agent == 'AGENT_13':
+                policy_kwargs = policy_kwargs_agent_13
+            elif args.agent == 'AGENT_14':
+                policy_kwargs = policy_kwargs_agent_14
+            elif args.agent == 'AGENT_15':
+                policy_kwargs = policy_kwargs_agent_15
+            elif args.agent == 'AGENT_16':
+                policy_kwargs = policy_kwargs_agent_16
+            elif args.agent == 'AGENT_19':
+                policy_kwargs = policy_kwargs_agent_19
+            elif args.agent == 'AGENT_20':
+                policy_kwargs = policy_kwargs_agent_19
+
+            model = PPO(
+                "MlpPolicy", env,
+                policy_kwargs=policy_kwargs,
+                gamma=params['gamma'], n_steps=params['n_steps'],
+                ent_coef=params['ent_coef'], learning_rate=params['learning_rate'],
+                vf_coef=params['vf_coef'], max_grad_norm=params['max_grad_norm'],
+                gae_lambda=params['gae_lambda'], batch_size=params['m_batch_size'],
+                n_epochs=params['n_epochs'], clip_range=params['clip_range'],
+                tensorboard_log=paths['tb'], verbose=1
+            )
+
+    # Use VecNormalize
     load_path = os.path.join(paths['model'], 'vec_normalize.pkl')
     if os.path.isfile(load_path):
         env = VecNormalize.load(
@@ -196,29 +324,15 @@ if __name__ == '__main__':
     else:
         env = VecNormalize(
             env, training=True,
-            norm_obs=True, norm_reward=False, clip_reward=15)
+            norm_obs=True, norm_reward=True, clip_reward=15)
         eval_env = VecNormalize(
             eval_env, training=True,
-            norm_obs=True, norm_reward=False, clip_reward=15)
+            norm_obs=True, norm_reward=True, clip_reward=15)
 
     eval_cb = EvalCallback(
         eval_env=eval_env, train_env=env,
         n_eval_episodes=eval_episodes, eval_freq=20000,
         log_path=paths['eval'], best_model_save_path=paths['model'], deterministic=True)
-
-    # if args.agent == "AGENT_10": # TODO make it possible to set different architectures
-    policy_kwargs = policy_kwargs_agent_13
-
-    model = PPO(
-        "MlpPolicy", env,
-        policy_kwargs=policy_kwargs,
-        gamma=params['gamma'], n_steps=params['n_steps'],
-        ent_coef=params['ent_coef'], learning_rate=params['learning_rate'],
-        vf_coef=params['vf_coef'], max_grad_norm=params['max_grad_norm'],
-        gae_lambda=params['gae_lambda'], batch_size=params['m_batch_size'],
-        n_epochs=params['n_epochs'], clip_range=params['clip_range'],
-        tensorboard_log=paths.get('tb'), verbose=1
-    )
 
     print("Start training...")
 

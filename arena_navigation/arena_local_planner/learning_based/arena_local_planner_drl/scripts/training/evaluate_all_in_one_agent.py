@@ -10,7 +10,7 @@ from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 from tools.all_in_one_utils import evaluate_policy_manually
 from tools.train_agent_utils import check_hyperparam_format, print_hyperparameters
 
-base_Agent = 'all_in_one_agents_teb_rlca_rule03_policy13.v0'
+base_Agent = 'all_in_one_agents_teb_rlca_rule03_policy13'
 AGENTS = [base_Agent, "random", "rlca_only", "teb_only", "drl_only"]
 eval_episodes = 40
 seed = random.randint(1,1000)
