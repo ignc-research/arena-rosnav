@@ -5,6 +5,7 @@ from torch.autograd import Variable
 from torch.nn import functional as F
 import numpy as np
 import socket
+import time 
 from torch.utils.data.sampler import BatchSampler, SubsetRandomSampler
 
 hostname = socket.gethostname()
@@ -92,19 +93,34 @@ def generate_action_no_sampling(env, state_list, policy, action_bound):
         s_list = np.asarray(s_list)
         goal_list = np.asarray(goal_list)
         speed_list = np.asarray(speed_list)
-
+        #DEBUG
+        time_start = time.time()
         s_list = Variable(torch.from_numpy(s_list)).float().cpu()    #changed original .cuda() 
         goal_list = Variable(torch.from_numpy(goal_list)).float().cpu()
         speed_list = Variable(torch.from_numpy(speed_list)).float().cpu()
-
         _, _, _, mean = policy(s_list, goal_list, speed_list)
         mean = mean.data.cpu().numpy()
         scaled_action = np.clip(mean, a_min=action_bound[0], a_max=action_bound[1])
+        time_end = time.time()
+        print(f"Inner Network inference time : {time_end-time_start}")
     else:
         mean = None
         scaled_action = None
 
     return mean, scaled_action
+
+
+
+def calculate_action_batch(lasers,goals,velocities,model,action_bound,device = 'cpu'):
+    lasers = torch.from_numpy(lasers).float()
+    goals = torch.from_numpy(goals).float()
+    velocities = torch.from_numpy(velocities).float()
+    with torch.no_grad():
+        _,_,_,mean = model(lasers.to(device),goals.to(device),velocities.to(device))
+        mean = mean.data.cpu().numpy()
+        clipped_action = np.clip(mean,a_min=action_bound[0], a_max=action_bound[1])
+        return clipped_action
+
 
 
 

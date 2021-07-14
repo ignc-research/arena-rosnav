@@ -443,6 +443,7 @@ class RewardCalculatorWP():
         num_collisions  = np.any(laser_scans<self.wp_env._robot_obstacle_min_dist,axis=0).sum()
         if num_collisions>0:
             rospy.loginfo(f"REWARD collision {num_collisions} times found")
+        #TODO change to STOP the episode 
         self.curr_reward -= self.curr_base_reward*self.collision_reward_factor*num_collisions/len(laser_scans)
 
     def _reward_actual_traj(self):

@@ -13,7 +13,6 @@ import numpy as np
 import rospy
 import torch
 import torch.nn as nn
-from mpi4py import MPI
 
 from torch.optim import Adam
 from collections import deque
@@ -26,6 +25,8 @@ from model.ppo import generate_action_no_sampling, transform_buffer
 from sensor_msgs.msg import LaserScan
 import tf
 import copy
+import time
+# from rl_agent.utils import timeit
 
 
 class NN_tb3():
@@ -168,25 +169,27 @@ class NN_tb3():
         scan = np.concatenate(
             (sub_array[3], sub_array[0], sub_array[1], sub_array[2]))
 
-        # scan[np.isnan(scan)] = 6.0
-        # scan[np.isinf(scan)] = 6.0
-        scan[np.isnan(scan)] = 3.5
-        scan[np.isinf(scan)] = 3.5
+        scan[np.isnan(scan)] = 6.0
+        scan[np.isinf(scan)] = 6.0
         raw_beam_num = len(scan)
         sparse_beam_num = self.beam_mum
         step = float(raw_beam_num) / sparse_beam_num
         sparse_scan_left = []
         index = 0.
-        for x in range(int(sparse_beam_num / 2)):
-            sparse_scan_left.append(scan[int(index)])
-            index += step
-        sparse_scan_right = []
-        index = raw_beam_num - 1.
-        for x in range(int(sparse_beam_num / 2)):
-            sparse_scan_right.append(scan[int(index)])
-            index -= step
-        scan_sparse = np.concatenate(
-            (sparse_scan_left, sparse_scan_right[::-1]), axis=0)
+        # for x in range(int(sparse_beam_num / 2)):
+        #     sparse_scan_left.append(scan[int(index)])
+        #     index += step
+        # sparse_scan_right = []
+        # index = raw_beam_num - 1.
+        # for x in range(int(sparse_beam_num / 2)):
+        #     sparse_scan_right.append(scan[int(index)])
+        #     index -= step
+        # scan_sparse = np.concatenate(
+        #     (sparse_scan_left, sparse_scan_right[::-1]), axis=0)
+
+        scan_sparse = np.interp(np.linspace(
+            0, 1, sparse_beam_num), np.linspace(0, 1, raw_beam_num), scan)
+
         return scan_sparse / 6.0 - 0.5
 
     def control_vel(self, action):
@@ -222,6 +225,7 @@ class NN_tb3():
         return [local_x, local_y]  # return subgoal position based on robot
 
     def cbComputeAction(self, event):
+        time_start_all = time.time()
         while self.scan is None or self.sub_goal.x is None:
             pass
         # ************************************ Inpsut ************************************
@@ -235,12 +239,15 @@ class NN_tb3():
 
         obs_state_list = [[obs_stack, self.goal, self.speed]]
         # self.control_pose(state)
-
+        time_start = time.time()
         # ************************************ Output ************************************
         _, scaled_action = generate_action_no_sampling(
             self.env, obs_state_list, self.policy, self.action_bound)
+        time_end = time.time()
+        print(f"Outer Network inference time : {time_end-time_start}")
         action = scaled_action[0]
         action[0] = 0.3*action[0]   # the maximum speed of cmd_vel 0.3
+
         self.control_vel(action)
 
     def visualize_pose(self, pos, orientation):

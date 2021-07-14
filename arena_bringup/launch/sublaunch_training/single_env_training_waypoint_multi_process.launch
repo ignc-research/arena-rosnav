@@ -1,7 +1,7 @@
 <launch>
     <!-- This launch file aims at providing a single environment for the training of DRL based intermediate planner -->
     <arg name="ns"/>
-    <arg name="local_planner" default="rlca" />
+    <!-- <arg name="local_planner" default="rlca" /> -->
     <!-- <arg name="local_planner" default="mpc" /> -->
 
     <!-- Don't change it if you don't know what does it mean! -->
@@ -38,9 +38,9 @@
 
     <!-- local planner get the waypoint by the topic "/move_base_simple/goal",
         -->
-    <include file="$(find arena_bringup)/launch/sublaunch_training/move_base/move_base_$(arg local_planner).launch">
+    <!-- <include file="$(find arena_bringup)/launch/sublaunch_training/move_base/move_base_$(arg local_planner).launch">
       <arg name="ns"                value="$(arg ns)"/>
-    </include>
+    </include> -->
     
     <!-- use simulator -->
     <include file="$(find arena_bringup)/launch/sublaunch_training/flatland_simulator.launch">

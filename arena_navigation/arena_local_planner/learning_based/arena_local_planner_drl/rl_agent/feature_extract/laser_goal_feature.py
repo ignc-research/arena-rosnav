@@ -141,13 +141,13 @@ class MLP_WP(BaseFeaturesExtractor):
     def __init__(self, observation_space: gym.spaces.Box,features_dim: int = 64):
         super().__init__(observation_space, features_dim)
         self.laser_net = nn.Sequential(
-            nn.Linear(_L, 64),
+            nn.Linear(_L, features_dim),
             nn.ReLU(),
-            nn.Linear(64, 64),
+            nn.Linear(features_dim, features_dim),
             nn.ReLU()
         )
         self.fc = nn.Sequential(
-            nn.Linear(64+_RSWP,features_dim)
+            nn.Linear(features_dim+_RSWP,features_dim)
         )
 
     def forward(self, observations: th.Tensor) -> th.Tensor:

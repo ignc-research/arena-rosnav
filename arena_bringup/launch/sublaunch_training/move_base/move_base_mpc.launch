@@ -19,6 +19,8 @@
     <rosparam file="$(find conventional)/config/base_local_planner_params.yaml" command="load" />
     <remap from="cmd_vel" to="/$(arg ns)/$(arg cmd_vel_topic)"/>
     <remap from="odom" to="/$(arg ns)/$(arg odom_topic)"/>
+    <remap from="move_base_simple/goal" to="/$(arg ns)/waypoint"/>
+    <remap from="/clock" to="/$(arg ns)/clock"/> 
     
 
     <!-- mpc -->
@@ -26,6 +28,7 @@
     <param name="controller_frequency" value="5.0" />
     <param name="controller_patience" value="15.0" />
     <param name="planner_frequency" value="1.0" />
+    <param name="global_costmap/robot_base_frame" value="$(arg ns)_base_footprint"/>
 
     
 

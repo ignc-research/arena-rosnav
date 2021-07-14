@@ -20,6 +20,7 @@
     <remap from="odom" to="$(arg odom_topic)"/>
 
 
+
     <!-- mpc -->
     <param name="base_local_planner" value="mpc_local_planner/MpcLocalPlannerROS" />
     <param name="controller_frequency" value="5.0" />
