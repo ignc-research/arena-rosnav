@@ -10,7 +10,7 @@ from sensor_msgs.msg import LaserScan
 from rosgraph_msgs.msg import Clock
 from std_srvs.srv import Empty
 from std_msgs.msg import Int8
-from model.utils import test_init_pose, test_goal_point
+from rl_collision_avoidance.model.utils import test_init_pose, test_goal_point
 
 
 class StageWorld():

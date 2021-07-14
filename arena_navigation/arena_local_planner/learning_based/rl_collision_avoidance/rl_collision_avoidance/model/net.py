@@ -5,7 +5,7 @@ import torch.nn as nn
 from torch.nn import init
 from torch.nn import functional as F
 
-from model.utils import log_normal_density
+from rl_collision_avoidance.model.utils import log_normal_density
 
 class Flatten(nn.Module):
     def forward(self, input):

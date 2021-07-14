@@ -8,9 +8,9 @@ from mpi4py import MPI
 from torch.optim import Adam
 from collections import deque
 
-from model.net import MLPPolicy, CNNPolicy
-from circle_world import StageWorld
-from model.ppo import generate_action_no_sampling, transform_buffer
+from rl_collision_avoidance.model.net import MLPPolicy, CNNPolicy
+from rl_collision_avoidance.circle_world import StageWorld
+from rl_collision_avoidance.model.ppo import generate_action_no_sampling, transform_buffer
 
 
 
