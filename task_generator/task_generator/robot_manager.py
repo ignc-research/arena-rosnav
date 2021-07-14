@@ -133,7 +133,7 @@ class RobotManager:
         self.move_robot(start_pos)
 
     def set_start_pos_goal_pos(self, start_pos: Union[Pose2D, None]
-                               = None, goal_pos: Union[Pose2D, None] = None, min_dist=1):
+                               = None, goal_pos: Union[Pose2D, None] = None, min_dist=3):
         """set up start position and the goal postion. Path validation checking will be conducted. If it failed, an
         exception will be raised.
 

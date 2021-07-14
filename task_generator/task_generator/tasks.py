@@ -60,7 +60,7 @@ class RandomTask(ABSTask):
         """[summary]
         """
         with self._map_lock:
-            max_fail_times = 3
+            max_fail_times = 10
             fail_times = 0
             while fail_times < max_fail_times:
                 try:
@@ -69,10 +69,10 @@ class RandomTask(ABSTask):
                         forbidden_zones=[
                             (start_pos.x,
                                 start_pos.y,
-                                self.robot_manager.ROBOT_RADIUS),
+                                self.robot_manager.ROBOT_RADIUS * 4),
                             (goal_pos.x,
                                 goal_pos.y,
-                                self.robot_manager.ROBOT_RADIUS)])
+                                self.robot_manager.ROBOT_RADIUS * 4)])
                     break
                 except rospy.ServiceException as e:
                     rospy.logwarn(repr(e))
