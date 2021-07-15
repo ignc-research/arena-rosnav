@@ -24,7 +24,8 @@ _C.TASK.NAME = 'StagedRandomTask'
 
 
 _C.ENV = CN()
-_C.ENV.NAME='WPEnv'
+_C.ENV.NAME='WPEnvMapFrame'
+# _C.ENV.NAME='WPEnv'
 # in case robot gets stuck and can get out
 # currently they are handled in env class
 
