@@ -24,16 +24,14 @@ python3 scripts/training/train_all_in_one_agent.py --agent AGENT_13 --n_envs $nu
 ```
 * --tb enables tensorboard logging (tensorboard needs to be installed)
 * --eval_log enables saving the evaluation episode results to a seperate file.
-* --agent needs to specify a neural network architecture for a new agent. You can select from the architectures defined in ~/arena-rosnav/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/scripts/custom_policy.py that is ['MLP_ARENA2D', 'AGENT_1', 'AGENT_2', 'AGENT_3', 'AGENT_4', 'AGENT_5', 'AGENT_6',
-                                'AGENT_7', 'AGENT_8', 'AGENT_9', 'AGENT_10', 'AGENT_11', 'AGENT_12', 'AGENT_13',
-                                'AGENT_14', 'AGENT_15', 'AGENT_16', 'AGENT_17', 'AGENT_18', 'AGENT_19', 'AGENT_20']
+* --agent needs to specify a neural network architecture for a new agent. You can select from the architectures defined in ~/arena-rosnav/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/scripts/custom_policy.py that is 'MLP_ARENA2D' or 'AGENT_x' with x in [1,20].
 * --load defines wether to load an already trained agent (and continue training) or to create a new one
 * --agent_name defines the name / version of an all_in_one_planner. If load is set this has to match an all-in-one agent in ~/arena-rosnav/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/agents
 * --all_in_one_config specifies the name of the config file placed in /arena-rosnav/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/configs/all_in_one_hyperparameters/. Here the local planners can be specified (currently rlca, drl agents, a move base planner (not recommended) and teb). If
 ```bash
 "run_all_agents_each_iteration": true
 ```
-all local planners are executed in each iteration and there velocity commands are part of the observation space. If it is set to false only the selected local planner will be executed in each iteration.
+all local planners are executed in each iteration and their velocity commands are part of the observation space. If it is set to false only the selected local planner will be executed in each iteration.
 
 3. To visualize the training execute
 ```bash
