@@ -26,14 +26,14 @@ def create_yaml_files(map_name,dir_path):
         yaml.dump(world_yaml_properties, outfile, sort_keys=False,default_flow_style=False) # somehow the first part must be with default_flow_style=False
         yaml.dump(world_yaml_layers, outfile, sort_keys=False,default_flow_style=None) # 2nd part must be with default_flow_style=None
 
-def make_image(map,maptype): # create PNG file from occupancy map (1:occupied, 0:free) and 
+def make_image(map,maptype): # create PNG file from occupancy map (1:occupied, 0:free) and the necessary yaml files
     now = datetime.datetime.now()
     img = Image.fromarray(((map-1)**2*255).astype('uint8')) # monochromatic image
     imgrgb = img.convert('RGB')
-    map_name = maptype
-    dir_path = os.path.dirname(os.path.realpath(__file__)) # get path for current file, does not work if os.chdir() was used
+    map_name = maptype # NOTE: change map_name if necessary
+    dir_path = os.path.dirname(os.path.realpath(__file__)) # get path for current file, does not work if os.chdir() was used, NOTE: change directory if needed
     try:
-        os.mkdir(dir_path+"/"+map_name) # create directory based on mapname
+        os.mkdir(dir_path+"/"+map_name) # create directory based on mapname where this script is located
     except:
         pass
     imgrgb.save(dir_path+"/{0}/{0}.png".format(map_name)) # save map in map directory
@@ -122,6 +122,7 @@ def create_outdoor_map(height,width,obstacle_number,obstacle_extra_radius):
         slice(random_position[1]-obstacle_extra_radius,random_position[1]+obstacle_extra_radius+1)] = 1
     return map
 
+# NOTE: if you only need the functions comment the main function
 if __name__ == '__main__':
 # define your map parameters
     # general parameters
