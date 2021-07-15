@@ -1,27 +1,32 @@
+import json
 import math
+import os
 import random
 import time
 from shutil import copyfile
 
-import geometry_msgs.msg
 import gym
+import numpy as np
+import rospkg
 import rospy
 import rosservice
-import std_msgs.msg
-import visualization_msgs.msg
+import yaml
 from flatland_msgs.srv import StepWorld
 from geometry_msgs.msg import Twist, Pose2D
 from gym import spaces
+from nav_msgs.srv import GetMap
+
 from rl_agent.envs.all_in_one_models.drl.drl_agent import DrlAgent, DrlAgentClient
 from rl_agent.envs.all_in_one_models.rlca.rlca_agent import RLCAAgent
 from rl_agent.envs.all_in_one_models.teb.teb_all_in_one_interface_agent import TebAllinOneInterfaceAgent
 from rl_agent.envs.all_in_one_models.teb.teb_move_base_agent import TebMoveBaseAgent
 from rl_agent.utils.all_in_one_observation_collector import ObservationCollectorAllInOne
+from rl_agent.utils.all_in_one_visualizer import AllInOneVisualizer
 from rl_agent.utils.reward import RewardCalculator
 from std_srvs.srv import Empty
-from task_generator.task_generator.tasks import *
-from task_generator.task_generator.tasks import RandomTask
-from visualization_msgs.msg import Marker
+from task_generator.robot_manager import RobotManager
+from task_generator.tasks import RandomTask
+from task_generator.obstacles_manager import ObstaclesManager
 
 
 class AllInOneEnv(gym.Env):
@@ -116,23 +121,7 @@ class AllInOneEnv(gym.Env):
             self._current_eval_iteration = 0
             self._evaluation_episodes = evaluation_episodes
 
-        # visualization
-        self.agent_visualization = rospy.Publisher(f'{self.ns_prefix}all_in_one_action_vis', Marker, queue_size=1)
-        if self._evaluation:
-            self.agent_visualization_trajectory = rospy.Publisher(f'{self.ns_prefix}all_in_one_action_trajectory_vis',
-                                                                  Marker,
-                                                                  queue_size=1)
-            self.collision_visualization = rospy.Publisher(f'{self.ns_prefix}collision_vis',
-                                                                  Marker,
-                                                                  queue_size=1)
-            self._setup_trajectory_marker()
-            self._collisions_markers = []
-
-        self.colors = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0], [1.0, 1.0, 0.0], [1.0, 0.0, 1.0],
-                       [0.0, 1.0, 1.0]]  # TODO This is not optimal as only 6 models can be visualized
-        # --> Do something like this https://stackoverflow.com/questions/1168260/algorithm-for-generating-unique-colors?
-
-        # set up model parameters
+            # set up model parameters
         self._uses_move_base = False
         self._clear_costmaps_service = None
         self._simulation_started = False
@@ -142,6 +131,9 @@ class AllInOneEnv(gym.Env):
         self._model_names = []
         for i in self._models:
             self._model_names.append(i.get_name())
+
+        # set up visualizer
+        self._visualizer = AllInOneVisualizer(self._evaluation, self._model_names, self.ns_prefix)
 
         # observation collector
         self.observation_collector = ObservationCollectorAllInOne(
@@ -269,12 +261,7 @@ class AllInOneEnv(gym.Env):
                 else:
                     info['model_distribution_large_obst_dist'] = self._last_actions_switch_large_obst_dist
 
-        # visualize
-        self._visualize_action(action)
-        if self._evaluation:
-            self._visualize_episode_actions_as_path(action)
-            if self._in_crash:
-                self._visualize_collision()
+        self._visualizer.visualize_step(action, self._in_crash, self._last_obs_dict['robot_pose'])
 
         return np.float32(self._last_merged_obs), reward, done, info
 
@@ -342,14 +329,9 @@ class AllInOneEnv(gym.Env):
         for agent in self._models:
             agent.reset()
 
-        # reset visualization
+        self._visualizer.reset_visualizer()
+
         if self._evaluation:
-            self._action_trajectory_marker.points.clear()
-            self._action_trajectory_marker.colors.clear()
-            self.agent_visualization_trajectory.publish(self._action_trajectory_marker)
-
-            self._remove_collisions_markers()
-
             self._current_eval_iteration += 1
 
         return self._last_merged_obs
@@ -366,90 +348,6 @@ class AllInOneEnv(gym.Env):
 
     def get_model_names(self) -> [str]:
         return [model.get_name() for model in self._models]
-
-    def _setup_trajectory_marker(self):
-        self._action_trajectory_marker = Marker()
-        self._action_trajectory_marker.header.frame_id = 'map'
-        self._action_trajectory_marker.id = 1001
-        self._action_trajectory_marker.action = visualization_msgs.msg.Marker.ADD
-        self._action_trajectory_marker.type = visualization_msgs.msg.Marker.LINE_STRIP
-        self._action_trajectory_marker.scale.z = 0
-        self._action_trajectory_marker.scale.x = 0.1
-        self._action_trajectory_marker.scale.y = 0
-
-    def _remove_collisions_markers(self):
-        for m in self._collisions_markers:
-            m.action = visualization_msgs.msg.Marker.DELETE
-            self.collision_visualization.publish(m)
-        self._collisions_markers = []
-
-    def _visualize_collision(self):
-        marker = Marker()
-        marker.header.frame_id = 'map'
-        marker.header.stamp = rospy.get_rostime()
-        marker.id = 1002 + self._collisions
-
-        marker.type = visualization_msgs.msg.Marker.TEXT_VIEW_FACING
-
-        marker.action = visualization_msgs.msg.Marker.ADD
-
-        # Make collision warning orange
-        marker.color.r = 1
-        marker.color.g = 1
-        marker.color.b = 0
-        marker.color.a = 1
-
-        marker.scale.z = 0.7
-
-        # Set position above robot
-        robot_pose: Pose2D = self._last_obs_dict['robot_pose']
-        marker.pose.position.x = robot_pose.x
-        marker.pose.position.y = robot_pose.y
-
-        marker.text = "Collision!"
-
-        self._collisions_markers.append(marker)
-
-        self.collision_visualization.publish(marker)
-
-    def _visualize_episode_actions_as_path(self, action: int):
-        marker = self._action_trajectory_marker
-
-        marker.header.stamp = rospy.get_rostime()
-
-        next_point = geometry_msgs.msg.Point()
-        robot_pose: Pose2D = self._last_obs_dict['robot_pose']
-        next_point.x = robot_pose.x
-        next_point.y = robot_pose.y
-        next_point.z = 0
-        marker.points.append(next_point)
-
-        next_color = std_msgs.msg.ColorRGBA(self.colors[action][0], self.colors[action][1], self.colors[action][2], 1)
-        marker.colors.append(next_color)
-
-        self._action_trajectory_marker = marker
-        self.agent_visualization_trajectory.publish(self._action_trajectory_marker)
-
-    def _visualize_action(self, action: int):
-        marker = Marker()
-        marker.header.stamp = rospy.get_rostime()
-        marker.header.frame_id = 'map'
-        marker.header.stamp = rospy.get_rostime()
-        marker.id = 1000
-
-        marker.type = visualization_msgs.msg.Marker.TEXT_VIEW_FACING
-        marker.action = visualization_msgs.msg.Marker.ADD
-
-        marker.color.r = self.colors[action][0]
-        marker.color.g = self.colors[action][1]
-        marker.color.b = self.colors[action][2]
-        marker.color.a = 1
-
-        marker.scale.z = 1
-
-        marker.text = self._model_names[action]
-
-        self.agent_visualization.publish(marker)
 
     def _get_random_task(self, paths: dict):
         config_path = paths['all_in_one_parameters']

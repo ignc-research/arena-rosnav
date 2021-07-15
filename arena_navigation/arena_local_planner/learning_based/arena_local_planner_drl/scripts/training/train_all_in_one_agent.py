@@ -11,12 +11,13 @@ import rosnode
 import rospkg
 from rl_agent.envs.all_in_one_flatland_gym_env import AllInOneEnv
 from rl_agent.envs.all_in_one_models.drl.drl_agent import setup_and_start_drl_server
-from scripts.custom_policy import policy_kwargs_agent_13
+from scripts.custom_policy import *
 from stable_baselines3 import PPO
 from stable_baselines3.common.callbacks import EvalCallback
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.utils import set_random_seed
 from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv, VecNormalize
+from tools.custom_mlp_utils import get_act_fn
 from tools.train_agent_utils import initialize_hyperparameters, update_hyperparam_model
 
 
@@ -218,7 +219,6 @@ if __name__ == '__main__':
         model = PPO.load(
             os.path.join(paths['model'], "best_model"), env)
         update_hyperparam_model(model, paths, params, args.n_envs)
-
     elif args.custom_mlp:
         # custom mlp flag
         model = PPO(
