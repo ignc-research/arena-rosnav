@@ -99,7 +99,7 @@ class WPEnv(gym.Env):
 
         # observation collector
         self.observation_collector = ObservationCollectorWP(
-            self.ns, self._laser_num_beams, self._laser_angle_increment, self._laser_max_range,robot_waypoint_min_dist, robot_obstacle_min_dist)
+            self.ns,self._is_train_mode ,self._laser_num_beams, self._laser_angle_increment, self._laser_max_range,robot_waypoint_min_dist, robot_obstacle_min_dist)
         self.observation_space = self.observation_collector.get_observation_space()
         self.reward_calculator = RewardCalculatorWP(self.observation_collector,
             self,
@@ -313,6 +313,8 @@ class WPEnv(gym.Env):
             elif self.observation_collector.important_event == self.observation_collector.Event.COLLISIONDETECTED:
                 info['event'] = 'Collision'
                 done = True
+            else:
+                done = False
             reward,_ = self.reward_calculator.cal_reward()
         rospy.loginfo(f"merged_obs shape {merged_obs.shape}")
         return merged_obs, reward, done, info

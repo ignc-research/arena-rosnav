@@ -102,7 +102,7 @@ def generate_action_no_sampling(env, state_list, policy, action_bound):
         mean = mean.data.cpu().numpy()
         scaled_action = np.clip(mean, a_min=action_bound[0], a_max=action_bound[1])
         time_end = time.time()
-        print(f"Inner Network inference time : {time_end-time_start}")
+        # print(f"Inner Network inference time : {time_end-time_start}")
     else:
         mean = None
         scaled_action = None

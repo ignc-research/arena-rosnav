@@ -59,7 +59,7 @@ class NN_tb3():
             'waypoint', PoseStamped, self.cbSubGoal)
         self.laser_sub = rospy.Subscriber(
             'scan', LaserScan, self.laser_scan_callback)
-
+        self.logger_counter = 0
         # control timer
         # self.control_timer = rospy.Timer(rospy.Duration(0.01),self.cbControl)
         self.nn_timer = rospy.Timer(rospy.Duration(0.1), self.cbComputeAction)
@@ -244,7 +244,10 @@ class NN_tb3():
         _, scaled_action = generate_action_no_sampling(
             self.env, obs_state_list, self.policy, self.action_bound)
         time_end = time.time()
-        print(f"Outer Network inference time : {time_end-time_start}")
+        self.logger_counter +=1
+        if self.logger_counter%300==0:
+            print(f"Outer Network inference time : {time_end-time_start}")
+            self.logger_counter = 0
         action = scaled_action[0]
         action[0] = 0.3*action[0]   # the maximum speed of cmd_vel 0.3
 
