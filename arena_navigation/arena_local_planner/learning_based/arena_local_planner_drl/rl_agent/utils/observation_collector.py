@@ -432,13 +432,42 @@ class ObservationCollectorWP():
             if convert_all_on_latest_robot_frame:
                 offset = int((theta-robot_pose_theta_latest) /
                              self._lidar_angle_increment)
-                laser_scan = np.roll(laser_scan, -offset)
+                laser_scan = np.roll(laser_scan, offset)
             laserscans.append(laser_scan)
 
         while len(laserscans) < num_laserscans:
             laserscans.append(laserscans[-1])
 
         return np.array(laserscans)
+
+    def get_laserscans_in_map_frame(self,num_laserscans:int)->np.ndarray:
+        laserscans = []
+        max_data_frame = min(len(self._laser_scans), len(self._robot_states))
+        assert max_data_frame > 0
+        robot_pose_theta_latest = None
+        # we assume the laser scan and the robot's state get published at the same rate
+        for i, (laser_scan, robot_state) in enumerate(zip(reversed(self._laser_scans), reversed(self._robot_states))):
+            if i >= max_data_frame or i >= num_laserscans:
+                break
+            theta = robot_state[0].theta
+            if i == 0:
+                offset = int(theta /self._lidar_angle_increment)
+                laser_scan = np.roll(laser_scan, offset)
+            laserscans.append(laser_scan)
+
+        while len(laserscans) < num_laserscans:
+            laserscans.append(laserscans[-1])
+
+        return np.array(laserscans)
+
+    def get_subgoal_in_map_frame(self,num_laserscans:int)->np.ndarray:
+        assert self._subgoal is not None
+        assert len(self._robot_states) > 0
+        y_relative = self._subgoal.y - self._robot_states[-1][0].y
+        x_relative = self._subgoal.x - self._robot_states[-1][0].x        
+        rho = (x_relative**2+y_relative**2)**0.5
+        theta = np.arctan2(y_relative, x_relative)
+        return rho, theta
 
     def get_subgoal_in_latest_robot_frame(self) -> Tuple[float, float]:
         assert self._subgoal is not None
@@ -449,6 +478,18 @@ class ObservationCollectorWP():
         theta = (np.arctan2(y_relative, x_relative) -
                  self._robot_states[-1][0].theta+4*np.pi) % (2*np.pi)-np.pi
         return rho, theta
+
+    def get_globalgoal_in_map_frame(self, globalgoal:Optional[Pose2D]= None) -> Tuple[float, float]:
+        assert len(self._robot_states) > 0
+        if globalgoal is not None:
+            self._globalgoal = globalgoal
+        assert self._globalgoal is not None
+        y_relative = self._globalgoal.y - self._robot_states[-1][0].y
+        x_relative = self._globalgoal.x - self._robot_states[-1][0].x
+        rho = (x_relative**2+y_relative**2)**0.5
+        theta = np.arctan2(y_relative, x_relative)
+        return rho, theta
+
 
     def get_globalgoal_in_latest_robot_frame(self, globalgoal:Optional[Pose2D]= None) -> Tuple[float, float]:
         assert len(self._robot_states) > 0
@@ -507,7 +548,7 @@ class ObservationCollectorWP():
         # and goal. The FSM still publish the old subgoal several
         # times. so we need this to comfirm the new subgoal is coming
 
-        self._old_subgoal: Optional[Pose2D] = self._subgoal
+        self._old_subgoal: Optional[Pose2D] = None
         self._subgoal: Optional[Pose2D] = None
 
         self._gloablplan = None

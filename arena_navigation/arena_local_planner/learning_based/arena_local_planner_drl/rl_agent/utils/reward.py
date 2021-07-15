@@ -362,9 +362,9 @@ class RewardCalculatorWP():
                  wp_env: "WPEnv",
                  rule:str = 'rule_00',
                  running_timeout_factor=1.1,
-                 collision_reward_factor = 0.1,
+                 collision_reward_factor = 5,
                  traj_reward_factor = 0.1,
-                 traj_len_thresh = 0.3,
+                 traj_len_thresh = 0.5,
                  traj_theta_std_thresh = 0.5
                  ):
         """
@@ -411,12 +411,15 @@ class RewardCalculatorWP():
         return self.curr_reward, self.info
 
     def _cal_reward_rule_00(self):
-        if self._reward_timeout():
-            return
-        self._reward_collision()
-        self._reward_actual_traj()
+        
+        if self.oc.important_event == ObservationCollectorWP.Event.TIMEOUT:
+            self._reward_timeout()
+        elif self.oc.important_event == ObservationCollectorWP.Event.COLLISIONDETECTED:
+            self._reward_collision()
+        else:
+            self._reward_actual_traj()
 
-    def _set_curr_base_reward(self,default_base_reward=5):
+    def _set_curr_base_reward(self,default_base_reward=1):
         """because the waypoint is set in or on the circle centered at the subgoal,if we don't adaptively change
             the base reward, the network will always pefer to set a waypoint closed to the robot,which takes more steps 
             and get more accumulative reward.
@@ -427,10 +430,17 @@ class RewardCalculatorWP():
         subgoal_y =  subgoal.y
         waypoint_x = self.wp_env._waypoint_x
         waypoint_y = self.wp_env._waypoint_y
-        init_robot_pos = self.oc._robot_states[0][0]
-        dist_waypoint_robot = ((init_robot_pos.x-waypoint_x)**2+(init_robot_pos.y-waypoint_y)**2)**0.5
-        dist_subgoal_robot = ((init_robot_pos.x-subgoal_x)**2+(init_robot_pos.y-subgoal_y)**2)**0.5
-        self.curr_base_reward *=  dist_waypoint_robot/dist_subgoal_robot
+        old_subgoal =self.oc._old_subgoal
+        if old_subgoal is None:
+            init_robot_pos = self.oc._robot_states[0][0]        
+            dist_waypoint_robot = ((init_robot_pos.x-waypoint_x)**2+(init_robot_pos.y-waypoint_y)**2)**0.5
+            dist_subgoal_robot = ((init_robot_pos.x-subgoal_x)**2+(init_robot_pos.y-subgoal_y)**2)**0.5
+            self.curr_base_reward *=  dist_waypoint_robot/dist_subgoal_robot
+        else:
+            dist_waypoint_old_subgoal = ((old_subgoal.x-waypoint_x)**2+(old_subgoal.y-waypoint_y)**2)**0.5
+            dist_subgoals = ((old_subgoal.x-subgoal_x)**2+(old_subgoal.y-subgoal_y)**2)**0.5
+            self.curr_base_reward *=  dist_waypoint_old_subgoal/dist_subgoals
+
 
     def _reward_collision(self,skip = 0):
         """check collision
