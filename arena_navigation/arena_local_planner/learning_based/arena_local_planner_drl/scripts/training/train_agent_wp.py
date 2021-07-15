@@ -19,8 +19,10 @@ from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env.subproc_vec_env import SubprocVecEnv
 from stable_baselines3.common.vec_env.vec_normalize import VecNormalize
 from stable_baselines3.common.callbacks import EvalCallback
+from stable_baselines3.common.evaluation import evaluate_policy
 
 from task_generator import build_task_wrapper
+from task_generator.tasks import StopReset
 from gym.utils import colorize
 
 def get_default_arg_parser():
@@ -34,6 +36,10 @@ def get_default_arg_parser():
         help='Is the script running at training mode or in deployment mode',
         action='store_true',
     ),
+    parser.add_argument(
+        "--load_best_model_for_deploy",
+        action='store_true'
+    )
     parser.add_argument(
         '--env_range',
         nargs=2,
@@ -163,8 +169,13 @@ which is logged in the tensorboard log. Make sure this parameter is synchronized
                                     norm_obs=True, norm_reward=False, clip_reward=15)
         else:
             dir_path  = os.path.split(args.conf_file)[0]
-            vec_normalize_file = os.path.join(
-                dir_path, 'vec_normalize.pkl')
+
+            if args.load_best_model_for_deploy:
+                vec_normalize_file = os.path.join(
+                    dir_path, 'vec_normalize.pkl')
+            else:
+                vec_normalize_file = os.path.join(
+                    dir_path, 'final_normalize.pkl') 
         
             assert os.path.isfile(
                 vec_normalize_file), f"{vec_normalize_file} does't exist"
@@ -210,8 +221,13 @@ def build_eval_callback(cfg, namespaces: List[str], eval_env, train_env):
 
 
 def load_model(cfg, args, env):
+    if args.load_best_model_for_deploy:     
+        saved_model_file_name = "best_model.zip"
+    else:
+        saved_model_file_name ="final_model.zip"
+
     dir_path  = os.path.split(args.conf_file)[0]
-    model_file = os.path.join(dir_path, 'best_model.zip')
+    model_file = os.path.join(dir_path, saved_model_file_name)
     if cfg.MODEL.NAME == 'PPO':
         from stable_baselines3 import PPO
         model = PPO.load(model_file, env)
@@ -220,49 +236,16 @@ def load_model(cfg, args, env):
     return model
 
 
-def deploy_run(cfg: CfgNode, args, model, env):
-    env.reset()
-    first_obs = True
-    # iterate through each scenario max_repeat times
-    while True:
-        if first_obs:
-            # send action 'stand still' in order to get first obs
-            if cfg.ROBOT.IS_ACTION_DISCRETE:
-                obs, rewards, dones, info = env.step([6])
-            else:
-                obs, rewards, dones, info = env.step([[0.0, 0.0]])
-            first_obs = False
-            cum_reward = 0.0
-
-        # timer = time.time()
-        action, _ = model.predict(obs, deterministic=True)
-        # print(f"Action predict time: {(time.time()-timer)*2.5} (sim time)")
-
-        # clip action
-        if not cfg.ROBOT.IS_ACTION_DISCRETE:
-            action = np.maximum(
-                np.minimum(model.action_space.high, action), model.action_space.low)
-
-        # apply action
-        obs, rewards, done, info = env.step(action)
-
-        cum_reward += rewards
-
-        if done:
-            if info[0]['done_reason'] == 0:
-                done_reason = "exceeded max steps"
-            elif info[0]['done_reason'] == 1:
-                done_reason = "collision"
-            else:
-                done_reason = "goal reached"
-                print("Episode finished with reward of %f (finish reason: %s)" % (
-                    cum_reward, done_reason))
-            env.reset()
-            first_obs = True
-        time.sleep(0.001)
-        if rospy.is_shutdown():
-            print('shutdown')
-            break
+def deploy_run(model, env):
+    try:
+        evaluate_policy(
+                model=model,
+                env=env,
+                n_eval_episodes=1000,
+                deterministic=True
+            )
+    except StopReset:
+        print("ALL scenrios haved be evaluated, program exit!")
 
 
 def main():
@@ -273,15 +256,22 @@ def main():
     training_env, eval_env = make_envs(cfg, args, namespaces)
 
     if not args.deploy:
-        model = build_model(cfg, training_env,
-                            tensorboard_log=cfg.OUTPUT_DIR, debug=args.debug)
-        eval_callback = build_eval_callback(
-            cfg, namespaces, eval_env=eval_env, train_env=training_env)
-        model.learn(
-            total_timesteps=cfg.TRAINING.N_TIMESTEPS, callback=eval_callback, reset_num_timesteps=True)
+        try:
+            model = build_model(cfg, training_env,
+                                tensorboard_log=cfg.OUTPUT_DIR, debug=args.debug)
+            eval_callback = build_eval_callback(
+                cfg, namespaces, eval_env=eval_env, train_env=training_env)
+            model.learn(
+                total_timesteps=cfg.TRAINING.N_TIMESTEPS, callback=eval_callback, reset_num_timesteps=True)
+        finally:
+            model.save(cfg.OUTPUT_DIR+"final_model.zip")
+            print(f"Successfully saved the model to {cfg.OUTPUT_DIR+'final_model.zip'}")
+            if cfg.INPUT.NORM:
+                training_env.save(cfg.OUTPUT_DIR+"final_vec_normalize.pkl")
+                print(f"Successfully saved the normalized environment to {cfg.OUTPUT_DIR+'final_model.pkl'}")
     else:
         model = load_model(cfg, args, eval_env)
-        deploy_run(cfg, args, model, eval_env)
+        deploy_run(model, eval_env)
 
 
 if __name__ == "__main__":

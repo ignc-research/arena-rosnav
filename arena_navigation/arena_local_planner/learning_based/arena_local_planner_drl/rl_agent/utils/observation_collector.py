@@ -5,6 +5,7 @@ from time import time
 from typing import List, Optional, Tuple, Union
 
 from enum import Enum, auto
+import threading
 from numpy.core.numeric import normalize_axis_tuple
 import rospy
 import random
@@ -22,6 +23,7 @@ from nav_msgs.msg import Path
 from rosgraph_msgs.msg import Clock
 from nav_msgs.msg import Odometry
 from std_msgs.msg import Empty
+
 
 # services
 from flatland_msgs.srv import StepWorld, StepWorldRequest
@@ -318,6 +320,7 @@ class ObservationCollectorWP():
         TIMEOUT = auto()
 
     def __init__(self, ns: str,
+                 is_train_mode:bool,
                  num_lidar_beams: int,
                  lidar_angle_increment: float,
                  lidar_range: float,
@@ -346,6 +349,7 @@ class ObservationCollectorWP():
             self.ns_prefix = ""
         else:
             self.ns_prefix = "/"+ns+"/"
+        self.is_train_mode= is_train_mode
 
         # define observation_space
         self.observation_space = ObservationCollectorWP._stack_spaces((
@@ -375,10 +379,14 @@ class ObservationCollectorWP():
             f'{self.ns_prefix}goal', PoseStamped, self._callback_globalgoal, tcp_nodelay=True)
         self._globalplan_sub = rospy.Subscriber(
             f'{self.ns_prefix}globalPlan', Path, self._callback_globalplan)
-        self._step_world_srv = rospy.ServiceProxy(
-            f'{self.ns_prefix}step_world', StepWorld)
-        self._stop_step_world_pub = rospy.Publisher(
-            f'{self.ns_prefix}stop_step_world', Empty, tcp_nodelay=True, queue_size=1)
+
+        if self.is_train_mode:
+            self._step_world_srv = rospy.ServiceProxy(
+                f'{self.ns_prefix}step_world', StepWorld)
+            self._stop_step_world_pub = rospy.Publisher(
+                f'{self.ns_prefix}stop_step_world', Empty, tcp_nodelay=True, queue_size=1)
+        else:
+            self.cv_important_event_deployment = threading.Condition()
         # define variables
         self._globalgoal: Optional[Pose2D] = None
         self._subgoal: Optional[Pose2D] = None
@@ -407,6 +415,17 @@ class ObservationCollectorWP():
         if not response.success:
             self.important_event = ObservationCollectorWP.Event.TIMEOUT
         return self.important_event
+
+    def wait_for_new_event(self,timeout:100):
+        """used in deployment mode, the timeout here is real time, take care!
+        """
+        with self.cv_important_event_deployment:
+            if not self.cv_important_event_deployment.wait(timeout):
+                # time out 
+                self.important_event = ObservationCollectorWP.Event.TIMEOUT
+            # else it coule be reach the goal
+        return self.important_event
+    
 
     def get_laserscans(self, num_laserscans: int, convert_all_on_latest_robot_frame: bool) -> np.ndarray:
         """get the laser scans and robot's states in the last step 
@@ -460,7 +479,7 @@ class ObservationCollectorWP():
 
         return np.array(laserscans)
 
-    def get_subgoal_in_map_frame(self,num_laserscans:int)->np.ndarray:
+    def get_subgoal_in_map_frame(self)->np.ndarray:
         assert self._subgoal is not None
         assert len(self._robot_states) > 0
         y_relative = self._subgoal.y - self._robot_states[-1][0].y
@@ -604,11 +623,19 @@ class ObservationCollectorWP():
 
         def on_collision_detected():
             self.important_event = ObservationCollectorWP.Event.COLLISIONDETECTED
-            self._suspend_step_world()
+            if self.is_train_mode:
+                self._suspend_step_world()
+            else:
+                #TODO maybe log this? for example collision_times?
+                pass
 
         def on_waypoint_arrival():
             self.important_event = ObservationCollectorWP.Event.WAYPOINTARRIVAL
-            self._suspend_step_world()
+            if self.is_train_mode:
+                self._suspend_step_world()
+            else:
+                self.cv_important_event_deployment.notify()
+        
 
         if event == ObservationCollectorWP.Event.NEWLASER:
             on_new_laserscan(*args, **kwargs)
