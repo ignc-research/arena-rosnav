@@ -49,7 +49,6 @@ class WPEnvMapFrame(gym.Env):
                  traj_theta_std_thresh:float,
                  reward_rule:str,
                  debug:bool,
-                 is_train_mode: bool,
                  is_action_space_discrete:bool):
         """Default env
         Flatland yaml node check the entries in the yaml file, therefore other robot related parameters cound only be saved in an other file.
