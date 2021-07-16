@@ -541,7 +541,7 @@ class ObservationCollectorWP():
         # but it seems like the intermediate planner takes quite a lot steps to make a subgoal.
         delta = 0.1
         request = StepWorldRequest(2/self._robot_action_rate)
-        try_times = 20
+        try_times = 80
 
         while len(self._laser_scans) == 0 or self._subgoal is None or self._old_subgoal is not None and \
                 abs(self._subgoal.x-self._old_subgoal.x) < delta and \
@@ -549,6 +549,10 @@ class ObservationCollectorWP():
             self._step_world_srv(request)
             try_times -= 1
             if try_times == 0:
+                if len(self._laser_scans) == 0:
+                    print("no laser scan")
+                if self._subgoal is None:
+                    print("no subgoal")
                 # DEBUG
                 print(
                     "Waypoint generator reset failed, request to generate a new pair of start pos and goal pos")

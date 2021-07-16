@@ -339,10 +339,10 @@ class WPEnvMapFrame(gym.Env):
             # if succeed
             if self.observation_collector.reset():
                 break
-        laserscans = self.observation_collector.get_laserscans(
-            num_laserscans=1, convert_all_on_latest_robot_frame=True)
-        subgoal_rho, subgoal_theta = self.observation_collector.get_subgoal_in_latest_robot_frame()
-        globalgoal_rho,globalgoal_theta = self.observation_collector.get_globalgoal_in_latest_robot_frame(robot_goal_pos)
+        laserscans = self.observation_collector.get_laserscans_in_map_frame(
+            num_laserscans=1)
+        subgoal_rho, subgoal_theta = self.observation_collector.get_subgoal_in_map_frame()
+        globalgoal_rho,globalgoal_theta = self.observation_collector.get_globalgoal_in_map_frame(robot_goal_pos)
         merged_obs = np.concatenate(
             [laserscans.flatten(), np.array([subgoal_rho, subgoal_theta,globalgoal_rho,globalgoal_theta])])
         # DEBUG

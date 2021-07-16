@@ -266,10 +266,10 @@ def main():
         except KeyboardInterrupt:
             print("User request to terminate the program...")
         finally:
-            model.save(cfg.OUTPUT_DIR+"final_model.zip")
+            model.save(cfg.OUTPUT_DIR+"/final_model.zip")
             print(f"Successfully saved the model to {cfg.OUTPUT_DIR+'/final_model.zip'}")
             if cfg.INPUT.NORM:
-                training_env.save(cfg.OUTPUT_DIR+"final_vec_normalize.pkl")
+                training_env.save(cfg.OUTPUT_DIR+"/final_vec_normalize.pkl")
                 print(f"Successfully saved the normalized environment to {cfg.OUTPUT_DIR+'/final_model.pkl'}")
     else:
         model = load_model(cfg, args, eval_env)
