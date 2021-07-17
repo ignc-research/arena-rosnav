@@ -91,6 +91,11 @@ _C.EVAL.CURRICULUM.STAGE_STATIC_OBSTACLE = [0,0,0,0,0,0,0]
 _C.EVAL.CURRICULUM.STAGE_DYNAMIC_OBSTACLE = [0,2,4,6,8,10,12]
 _C.EVAL.CURRICULUM.INIT_STAGE_IDX = 0
 
+
+_C.DEPLOY = CN()
+_C.DEPLOY.SCENERIOS_JSON_PATH = "/home/joe/ssd/projects/arena-rosnav-ws/src/arena-rosnav/simulator_setup/scenarios/eval/obstacle_map1_obs20.json"
+
+
 _C.MODEL = CN()
 _C.MODEL.NAME= 'PPO'
 _C.MODEL.LEARNING_RATE= 0.0003

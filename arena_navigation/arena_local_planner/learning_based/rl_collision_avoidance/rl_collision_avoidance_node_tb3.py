@@ -62,6 +62,7 @@ class NN_tb3():
         self.logger_counter = 0
         # control timer
         # self.control_timer = rospy.Timer(rospy.Duration(0.01),self.cbControl)
+        #<param name="robot_action_rate"     value="10"/>
         self.nn_timer = rospy.Timer(rospy.Duration(0.1), self.cbComputeAction)
 
     def cbGlobalGoal(self, msg):

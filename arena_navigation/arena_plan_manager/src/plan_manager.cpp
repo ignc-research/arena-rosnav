@@ -22,13 +22,12 @@ void PlanManager::init(ros::NodeHandle &nh)
   planner_collector_.reset(new PlanCollector);
   planner_collector_->initPlanModules(nh);
   visualization_.reset(new PlanningVisualization(nh));
-
   /* init variables */
   exec_state_ = FSM_EXEC_STATE::INIT;
   have_goal_ = false;
   have_odom_ = false;
   cur_state_.reset(new RobotState(Eigen::Vector2d::Zero(), 0.0, Eigen::Vector2d::Zero(), 0.0));
-
+  // DEBUG
   /* callback */
   exec_timer_ = nh.createTimer(ros::Duration(0.01), &PlanManager::execFSMCallback, this);
   //safety_timer_ = nh.createTimer(ros::Duration(0.05), &PlanManager::checkCollisionCallback, this);

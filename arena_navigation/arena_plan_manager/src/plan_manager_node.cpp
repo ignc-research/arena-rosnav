@@ -4,6 +4,7 @@
 
 
 int main(int argc, char** argv) {
+    // DEBUG
     ros::init(argc, argv, "plan_manager");
     std::string ns = ros::this_node::getNamespace();
     //ros::NodeHandle node_handle("~"); every topic will be with namespace

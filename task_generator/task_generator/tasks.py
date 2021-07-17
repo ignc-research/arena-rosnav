@@ -195,8 +195,9 @@ class StagedRandomTask(RandomTask):
              Spawning {static_obstacles} static and {dynamic_obstacles} dynamic obstacles!")
     def _remove_obstacles(self):
         self.obstacles_manager.remove_obstacles()
-
+@TASK_REGISTRY.register()
 class ScenerioTask(ABSTask):
+    @configurable
     def __init__(self, obstacles_manager: ObstaclesManager, robot_manager: RobotManager, scenerios_json_path: str):
         """ The scenerio_json_path only has the "Scenerios" section, which contains a list of scenerios
         Args:
@@ -216,6 +217,16 @@ class ScenerioTask(ABSTask):
         self._num_repeats_curr_scene = -1
         # The times of current scenerio need to be repeated
         self._max_repeats_curr_scene = 0
+    @classmethod
+    def from_config(cls,cfg:CfgNode,ns):
+        # TODO in future use cfg to build obstacles and robot's manager
+        obstacles_manager, robot_manager = _get_obs_robot_manager(ns)
+        scenerios_json_path = cfg.DEPLOY.SCENERIOS_JSON_PATH
+        return {
+            'obstacles_manager':obstacles_manager,
+            'robot_manager': robot_manager,
+            'scenerios_json_path': scenerios_json_path
+        }
 
     def reset(self):
         info = {}

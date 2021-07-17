@@ -260,8 +260,10 @@ class WPEnvMapFrame(gym.Env):
     def _pub_robot_pos_as_waypoint(self, robot_pos):
         """publish current robot's position as the waypoint to stop the robot to move (actually rlca can not!)
         """
-
-        robot_x, robot_y = robot_pos.x, robot_pos.y
+        if isinstance(robot_pos,Pose2D):
+            robot_x, robot_y = robot_pos.x, robot_pos.y
+        else:
+            robot_x,robot_y,_ = robot_pos
         action_msg =PoseStamped()
         action_msg.pose.position.x = robot_x
         action_msg.pose.position.y = robot_y

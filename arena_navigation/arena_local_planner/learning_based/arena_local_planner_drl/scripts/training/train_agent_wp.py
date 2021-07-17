@@ -22,6 +22,7 @@ from stable_baselines3.common.callbacks import EvalCallback
 from stable_baselines3.common.evaluation import evaluate_policy
 
 from task_generator import build_task_wrapper
+from task_generator.build import build_task
 from task_generator.tasks import StopReset
 from gym.utils import colorize
 
@@ -91,6 +92,9 @@ def setup_config(args):
         # it would be a good idea to make a snapshot of them and store them in the output folder
         with open(os.path.join(cfg.OUTPUT_DIR, "Hyperparams.yaml"), "w") as f:
             cfg.dump(stream=f)
+    else:
+        # force to load scenerio task to testing
+        cfg.TASK.NAME='ScenerioTask'
 
     cfg.freeze()
     return cfg
@@ -102,33 +106,30 @@ def get_namespaces(args):
         namespaces_list(list): a list of namespaces
     """
     # identical with the one in launch file
-    ns_prefix = "sim"
-    num_envs = rospy.get_param("num_envs")
-    if args.env_range is None:
-        idx_start,idx_end = 1,num_envs
-    else:
-        idx_start,idx_end = args.env_range
-        if idx_end == -1:
-            idx_end = num_envs
-        assert idx_start<idx_end and idx_end<=num_envs
-    
-    ns_list = [ns_prefix+'_'+str(i) for i in range(idx_start, idx_end+1)]
-
     if not args.deploy:
+        ns_prefix = "sim"
+        num_envs = rospy.get_param("num_envs")
         assert num_envs>1, "Make sure there are more that 2 simulation environments available since one of them will be used for evalutation"
+       
+        if args.env_range is None:
+            idx_start,idx_end = 1,num_envs
+        else:
+            idx_start,idx_end = args.env_range
+            if idx_end == -1:
+                idx_end = num_envs
+            assert idx_start<idx_end and idx_end<=num_envs
         print(colorize(f"Found {num_envs} ENV {ns_prefix}{idx_start} - {ns_prefix}{idx_end-1} will be used for training!",'green'))
-    elif num_envs > 1:
-        rospy.logwarn(
-            f"Found {num_envs} running at backend, but in deployment mode only one of them will be used!")
-        # return one namespace
-        ns_list = ns_list[:2]
+        
+        ns_list = [ns_prefix+'_'+str(i) for i in range(idx_start, idx_end+1)]
+    else:
+        ns_list = ['']
     return ns_list
 
 
 def make_envs(cfg, args: argparse.Namespace, namespaces: List[str]):
 
-    task_wraps = [build_task_wrapper(cfg, ns) for ns in namespaces]
     if not args.deploy:
+        task_wraps = [build_task_wrapper(cfg, ns) for ns in namespaces]
         train_env_wraps = [build_env_wrapper(
             cfg, task, ns, True, args.debug) for task, ns in zip(task_wraps[:-1], namespaces[:-1])]
         if args.debug:
@@ -136,6 +137,11 @@ def make_envs(cfg, args: argparse.Namespace, namespaces: List[str]):
         else:
             train_env = SubprocVecEnv(
                 train_env_wraps, start_method='fork')
+        eval_env = build_env(
+        cfg, task_wraps[-1], namespaces[-1], train_mode=False, debug=args.debug)
+        output_dir = cfg.OUTPUT_DIR
+        eval_env = DummyVecEnv([lambda:Monitor(
+            eval_env, output_dir, info_keywords=("done_reason", "is_success"))])
     else:
         if not args.deploy_task_mananer_node_off:
             # if there is a node running which is responsible for manageing the task. we put a None here,
@@ -143,23 +149,17 @@ def make_envs(cfg, args: argparse.Namespace, namespaces: List[str]):
             # because it's not callable
             task_wraps = [None]
         else:
-            if cfg.TASK.NAME == 'StagedRandomTask':
-                rospy.logwarn("Currently there is not mechanism to load the last stage used for evaluation during the training,\n\
-which is logged in the tensorboard log. Make sure this parameter is synchronized manually by changing \n\
-‘cfg.EVAL.CURRICULUM.INIT_STAGE_IDX’")
-
+#             if cfg.TASK.NAME == 'StagedRandomTask':
+#                 rospy.logwarn("Currently there is not mechanism to load the last stage used for evaluation during the training,\n\
+# which is logged in the tensorboard log. Make sure this parameter is synchronized manually by changing \n\
+# ‘cfg.EVAL.CURRICULUM.INIT_STAGE_IDX’")
+            
+            task = build_task(cfg,namespaces[-1])
         train_env = None
-
-    eval_env = build_env(
-        cfg, task_wraps[-1], namespaces[-1], train_mode=False, debug=args.debug)
-
-    if not args.deploy:
-        output_dir = cfg.OUTPUT_DIR
-        eval_env = DummyVecEnv([lambda:Monitor(
-            eval_env, output_dir, info_keywords=("done_reason", "is_success"))])
-    else:
+        eval_env = build_env(
+            cfg, task, namespaces[-1], train_mode=False, debug=args.debug)
         eval_env = DummyVecEnv([lambda:eval_env])
-
+        
     if cfg.INPUT.NORM:
         if not args.deploy:
             train_env = VecNormalize(
@@ -175,7 +175,7 @@ which is logged in the tensorboard log. Make sure this parameter is synchronized
                     dir_path, 'vec_normalize.pkl')
             else:
                 vec_normalize_file = os.path.join(
-                    dir_path, 'final_normalize.pkl') 
+                    dir_path, 'final_vec_normalize.pkl') 
         
             assert os.path.isfile(
                 vec_normalize_file), f"{vec_normalize_file} does't exist"
@@ -252,7 +252,10 @@ def main():
     parser = get_default_arg_parser()
     args = parser.parse_args()
     cfg = setup_config(args)
-    namespaces = get_namespaces(args)
+    if args.deploy:
+        namespaces = get_namespaces(args)
+    else:
+        namespaces=['']
     training_env, eval_env = make_envs(cfg, args, namespaces)
 
     if not args.deploy:

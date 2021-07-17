@@ -416,7 +416,7 @@ class ObservationCollectorWP():
             self.important_event = ObservationCollectorWP.Event.TIMEOUT
         return self.important_event
 
-    def wait_for_new_event(self,timeout:100):
+    def wait_for_new_event(self,timeout=100):
         """used in deployment mode, the timeout here is real time, take care!
         """
         with self.cv_important_event_deployment:
@@ -502,13 +502,19 @@ class ObservationCollectorWP():
                  self._robot_states[-1][0].theta+4*np.pi) % (2*np.pi)-np.pi
         return rho, theta
 
-    def get_globalgoal_in_map_frame(self, globalgoal:Optional[Pose2D]= None) -> Tuple[float, float]:
+    def get_globalgoal_in_map_frame(self, globalgoal:Union[Pose2D,List,None]= None) -> Tuple[float, float]:
         assert len(self._robot_states) > 0
         if globalgoal is not None:
-            self._globalgoal = globalgoal
-        assert self._globalgoal is not None
-        y_relative = self._globalgoal.y - self._robot_states[-1][0].y
-        x_relative = self._globalgoal.x - self._robot_states[-1][0].x
+            if isinstance(globalgoal,list):
+                globalgoal_x,globalgoal_y,_ = globalgoal
+            else:
+                globalgoal_x,globalgoal_y = globalgoal.x,globalgoal.y
+        else:
+            assert self._globalgoal is not None
+            globalgoal_x,globalgoal_y = self._globalgoal.x,self._globalgoal.y
+
+        y_relative = globalgoal_y - self._robot_states[-1][0].y
+        x_relative = globalgoal_x - self._robot_states[-1][0].x
         rho = (x_relative**2+y_relative**2)**0.5
         theta = np.arctan2(y_relative, x_relative)
         return rho, theta
@@ -550,7 +556,10 @@ class ObservationCollectorWP():
         while len(self._laser_scans) == 0 or len(self._robot_states)==0 or self._subgoal is None or self._old_subgoal is not None and \
                 abs(self._subgoal.x-self._old_subgoal.x) < delta and \
                 abs(self._subgoal.y-self._old_subgoal.y) < delta:
-            self._step_world_srv(request)
+            if self.is_train_mode:
+                self._step_world_srv(request)
+            else:
+                time.sleep(1)
             try_times -= 1
             if try_times == 0:
                 if len(self._laser_scans) == 0:
@@ -642,7 +651,8 @@ class ObservationCollectorWP():
             if self.is_train_mode:
                 self._suspend_step_world()
             else:
-                self.cv_important_event_deployment.notify()
+                with self.cv_important_event_deployment:
+                    self.cv_important_event_deployment.notify()
         
 
         if event == ObservationCollectorWP.Event.NEWLASER:
