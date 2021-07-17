@@ -50,7 +50,7 @@ void PlanManager::goalCallback(const geometry_msgs::PoseStampedPtr &msg)
   if (msg->pose.position.z != 0)
     return;
 
-  cout << " Task Triggered!" << endl;
+  cout <<ros::this_node::getNamespace()<<" Task Triggered!" << endl;
 
   // set end_state
   end_state_.reset(new RobotState(msg->pose));
@@ -75,10 +75,10 @@ void PlanManager::goalCallback(const geometry_msgs::PoseStampedPtr &msg)
   }
 
   // set have_goal
-  cout << "Goal set!" << endl;
+  cout <<ros::this_node::getNamespace() <<"Goal set!" << endl;
   have_goal_ = true;
   visualization_->drawGoal(end_state_->to_PoseStampted(), 0.5, Eigen::Vector4d(1, 1, 1, 1.0));
-  cout << "Goal drawed!" << endl;
+  cout << ros::this_node::getNamespace()<<"Goal drawed!" << endl;
   // init start_time for this task
   start_time_ = ros::Time::now();
 }
@@ -210,7 +210,7 @@ void PlanManager::execFSMCallback(const ros::TimerEvent &e)
     if (dist_to_goal < tolerance_approach_)
     {
       have_goal_ = false;
-      ROS_INFO_STREAM("reached to goal success");
+      ROS_INFO_STREAM(ros::this_node::getNamespace()<<"reached to goal success");
       changeFSMExecState(WAIT_GOAL, "FSM");
       return;
     }
@@ -219,7 +219,7 @@ void PlanManager::execFSMCallback(const ros::TimerEvent &e)
     if (time_cost_goal > timeout_goal_)
     {
       have_goal_ = false;
-      ROS_INFO_STREAM("failed to goal");
+      ROS_INFO_STREAM(ros::this_node::getNamespace()<<"failed to goal");
       changeFSMExecState(WAIT_GOAL, "FSM");
       return;
     }
@@ -228,8 +228,8 @@ void PlanManager::execFSMCallback(const ros::TimerEvent &e)
     // check if subgoal timeout
     if (time_cost_subgoal > timeout_subgoal_)
     {
-      ROS_DEBUG_STREAM("subgoal has been published for" << time_cost_subgoal << "sec");
-      ROS_DEBUG("subgoal timeout");
+      ROS_DEBUG_STREAM(ros::this_node::getNamespace()<<"subgoal has been published for" << time_cost_subgoal << "sec");
+      ROS_DEBUG_STREAM(ros::this_node::getNamespace()<<"subgoal timeout");
       changeFSMExecState(REPLAN_MID, "FSM");
       return;
     }
@@ -268,7 +268,7 @@ void PlanManager::execFSMCallback(const ros::TimerEvent &e)
     {
       
       subgoal_pub_.publish(end_state_->to_PoseStampted());
-      ROS_DEBUG_STREAM("subgoal= "<<end_state_->to_PoseStampted());
+      ROS_DEBUG_STREAM(ros::this_node::getNamespace()<<"subgoal= "<<end_state_->to_PoseStampted());
       //visualization_->drawSubgoal(end_state_->to_PoseStampted(), 0.3, Eigen::Vector4d(0, 0, 0, 1.0));
       ROS_DEBUG("MID_REPLAN Success");
       changeFSMExecState(EXEC_LOCAL, "FSM");
@@ -289,7 +289,7 @@ void PlanManager::execFSMCallback(const ros::TimerEvent &e)
       visualization_->drawSubgoal(planner_collector_->subgoal_, 0.3, Eigen::Vector4d(0, 0, 0, 1.0));
       // reset subgoal start time(be used for timeout criterion)
       subgoal_start_time_ = ros::Time::now();
-      ROS_DEBUG_STREAM("MID_REPLAN Success");
+      ROS_DEBUG_STREAM(ros::this_node::getNamespace()<<"MID_REPLAN Success");
 
       changeFSMExecState(EXEC_LOCAL, "FSM");
     }
@@ -309,11 +309,11 @@ void PlanManager::changeFSMExecState(FSM_EXEC_STATE new_state, std::string pos_c
   string state_str[5] = {"INIT", "WAIT_GOAL", "GEN_NEW_GLOBAL", "REPLAN_MID", "EXEC_LOCAL"};
   int pre_s = int(exec_state_);
   exec_state_ = new_state;
-  ROS_DEBUG_STREAM("[" + pos_call + "]: from " + state_str[pre_s] + " to " + state_str[int(new_state)]);
+  ROS_DEBUG_STREAM(ros::this_node::getNamespace()<<"[" + pos_call + "]: from " + state_str[pre_s] + " to " + state_str[int(new_state)]);
 }
 
 void PlanManager::printFSMExecState()
 {
   string state_str[5] = {"INIT", "WAIT_GOAL", "GEN_NEW_GLOBAL", "REPLAN_MID", "EXEC_LOCAL"};
-  ROS_DEBUG_STREAM("[FSM]: state: " + state_str[int(exec_state_)]);
+  ROS_DEBUG_STREAM(ros::this_node::getNamespace()<<"[FSM]: state: " + state_str[int(exec_state_)]);
 }

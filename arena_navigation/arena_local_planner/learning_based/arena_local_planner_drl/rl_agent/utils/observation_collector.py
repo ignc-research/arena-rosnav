@@ -438,6 +438,8 @@ class ObservationCollectorWP():
             np.ndarray: [description]
         """
         laserscans = []
+        assert len(self._laser_scans)>0
+        assert len(self._robot_states)>0
         max_data_frame = min(len(self._laser_scans), len(self._robot_states))
         assert max_data_frame > 0
         robot_pose_theta_latest = None
@@ -461,6 +463,8 @@ class ObservationCollectorWP():
 
     def get_laserscans_in_map_frame(self,num_laserscans:int)->np.ndarray:
         laserscans = []
+        assert len(self._laser_scans)>0
+        assert len(self._robot_states)>0
         max_data_frame = min(len(self._laser_scans), len(self._robot_states))
         assert max_data_frame > 0
         robot_pose_theta_latest = None
@@ -543,7 +547,7 @@ class ObservationCollectorWP():
         request = StepWorldRequest(2/self._robot_action_rate)
         try_times = 80
 
-        while len(self._laser_scans) == 0 or self._subgoal is None or self._old_subgoal is not None and \
+        while len(self._laser_scans) == 0 or len(self._robot_states)==0 or self._subgoal is None or self._old_subgoal is not None and \
                 abs(self._subgoal.x-self._old_subgoal.x) < delta and \
                 abs(self._subgoal.y-self._old_subgoal.y) < delta:
             self._step_world_srv(request)

@@ -321,7 +321,7 @@ class WPEnvMapFrame(gym.Env):
             rospy.loginfo(
                 f"{self.ns}: {self.observation_collector.important_event}")
         if self._is_train_mode:
-            remaining_try_times = 10
+            remaining_try_times = 5
         else:
             remaining_try_times = 1
 
@@ -339,6 +339,7 @@ class WPEnvMapFrame(gym.Env):
             # if succeed
             if self.observation_collector.reset():
                 break
+            print(f"{self.ns} reset remaining try times {remaining_try_times},curr robot: {[robot_start_pos.x,robot_start_pos.y]} goal: {[robot_goal_pos.x,robot_goal_pos.y]}")
         laserscans = self.observation_collector.get_laserscans_in_map_frame(
             num_laserscans=1)
         subgoal_rho, subgoal_theta = self.observation_collector.get_subgoal_in_map_frame()
