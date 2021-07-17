@@ -241,6 +241,7 @@ class WPEnvMapFrame(gym.Env):
             else:
                 rho,theta = action
 
+        
         # DEBUG
         self._waypoint_x = curr_sub_goal.x + rho*np.cos(theta)
         self._waypoint_y = curr_sub_goal.y + rho*np.sin(theta)
@@ -303,7 +304,7 @@ class WPEnvMapFrame(gym.Env):
         # the predicted action will do nothing, so we need to set the reward to 0
         if self.is_waypoint_set_to_global_goal:
             done = True
-            reward = 1
+            reward = 16
             info['event'] = 'Reached global goal'
         else:
             if self.observation_collector.important_event == self.observation_collector.Event.TIMEOUT:

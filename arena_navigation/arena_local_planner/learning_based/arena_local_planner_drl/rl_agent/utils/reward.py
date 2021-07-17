@@ -362,9 +362,9 @@ class RewardCalculatorWP():
                  wp_env: "WPEnv",
                  rule:str = 'rule_00',
                  running_timeout_factor=1.1,
-                 collision_reward_factor = 5,
-                 traj_reward_factor = 0.1,
-                 traj_len_thresh = 0.5,
+                 collision_reward_factor = 1.1,
+                 traj_reward_factor = 0.3,
+                 traj_len_thresh = 0.6,
                  traj_theta_std_thresh = 0.5
                  ):
         """
@@ -391,6 +391,7 @@ class RewardCalculatorWP():
 
         self._cal_funcs = {
             'rule_00': RewardCalculatorWP._cal_reward_rule_00,
+            'rule_01': RewardCalculatorWP._cal_reward_rule_01
             }
         self.cal_func = self._cal_funcs[rule]
 
@@ -406,12 +407,22 @@ class RewardCalculatorWP():
         Returns reward and info to the gym environment.
         """
         self._reset()
-        self._set_curr_base_reward()
+        
         self.cal_func(self)
         return self.curr_reward, self.info
 
+    def _cal_reward_rule_01(self):
+        # base reward is fixed.
+        self.curr_base_reward = 1
+        if self.oc.important_event == ObservationCollectorWP.Event.TIMEOUT:
+            self._reward_timeout()
+        elif self.oc.important_event == ObservationCollectorWP.Event.COLLISIONDETECTED:
+            self._reward_collision()
+        else:
+            self._reward_actual_traj()
+
     def _cal_reward_rule_00(self):
-        
+        self._set_curr_base_reward()
         if self.oc.important_event == ObservationCollectorWP.Event.TIMEOUT:
             self._reward_timeout()
         elif self.oc.important_event == ObservationCollectorWP.Event.COLLISIONDETECTED:
@@ -451,10 +462,11 @@ class RewardCalculatorWP():
                 laser_scans.append(scan)
         laser_scans = np.array(laser_scans)
         num_collisions  = np.any(laser_scans<self.wp_env._robot_obstacle_min_dist,axis=0).sum()
+        self.info['num_collisions'] = num_collisions 
         if num_collisions>0:
             rospy.loginfo(f"REWARD collision {num_collisions} times found")
         #TODO change to STOP the episode 
-        self.curr_reward -= self.curr_base_reward*self.collision_reward_factor*num_collisions/len(laser_scans)
+            self.curr_reward -= self.curr_base_reward*self.collision_reward_factor*(self.collision_reward_factor+num_collisions/len(laser_scans)*0.2)
 
     def _reward_actual_traj(self):
         """check spin or something happend
@@ -465,17 +477,25 @@ class RewardCalculatorWP():
         waypoint_y = self.wp_env._waypoint_y
         init_robot_pos = self.oc._robot_states[0][0]
         dist_waypoint_robot = ((init_robot_pos.x-waypoint_x)**2+(init_robot_pos.y-waypoint_y)**2)**0.5
-        if (dist_traj-dist_waypoint_robot)/dist_waypoint_robot>self.traj_len_thresh:
+        dist_traj_ratio = (dist_traj-dist_waypoint_robot)/dist_waypoint_robot
+        self.info['dist_traj_ratio'] = dist_traj_ratio
+        if dist_traj_ratio>self.traj_len_thresh:
             rospy.loginfo("REWARD traj_len triggered")
             self.curr_reward -= self.curr_base_reward*self.traj_reward_factor
+        else:
+            self.curr_reward += self.curr_base_reward*self.traj_reward_factor
+
         # check robot spin
         thetas = robot_xytheta[:,2]
         # use inita theta as reference 
         thetas = robot_xytheta[:,2]-robot_xytheta[0,2]
         std_theta = np.std(thetas)
+        self.info['std_theta_traj'] = std_theta
         if std_theta > self.traj_theta_std_thresh:
             rospy.loginfo("REWARD theta_std_thresh triggered!")
             self.curr_reward -= self.curr_reward*self.traj_reward_factor
+        else:
+            self.curr_reward += self.curr_reward*self.traj_reward_factor
 
     def _reward_timeout(self)-> bool:
         """set reward for timeout
@@ -484,8 +504,9 @@ class RewardCalculatorWP():
             is_timeout(bool)
         """
         is_timeout = self.oc.important_event == ObservationCollectorWP.Event.TIMEOUT
+        self.info['is_timeout'] = is_timeout
         if is_timeout:
-            self.curr_reward -= self.curr_base_reward
+            self.curr_reward -= self.curr_base_reward*self.running_timeout_factor
         return is_timeout
 
     

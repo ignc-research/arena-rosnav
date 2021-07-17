@@ -694,6 +694,9 @@ class ObservationCollectorWP():
         global_plan_np = np.array(
             list(map(lambda p2d: [p2d.x, p2d.y], global_plan_2d)))
         self._gloablplan = global_plan_np
+    
+    def set_old_subgoal(self,pos):
+        pass
 
     def get_observation_space(self):
         return self.observation_space

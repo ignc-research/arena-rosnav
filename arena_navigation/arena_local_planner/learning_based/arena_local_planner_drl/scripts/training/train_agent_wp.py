@@ -252,10 +252,7 @@ def main():
     parser = get_default_arg_parser()
     args = parser.parse_args()
     cfg = setup_config(args)
-    if args.deploy:
-        namespaces = get_namespaces(args)
-    else:
-        namespaces=['']
+    namespaces = get_namespaces(args)
     training_env, eval_env = make_envs(cfg, args, namespaces)
 
     if not args.deploy:
