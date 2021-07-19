@@ -377,8 +377,9 @@ class ObservationCollectorWP():
             f'{self.ns_prefix}subgoal', PoseStamped, self._callback_subgoal, tcp_nodelay=True)
         self._global_goal_sub = rospy.Subscriber(
             f'{self.ns_prefix}goal', PoseStamped, self._callback_globalgoal, tcp_nodelay=True)
-        self._globalplan_sub = rospy.Subscriber(
-            f'{self.ns_prefix}globalPlan', Path, self._callback_globalplan)
+        # deprecated, reasoned in the function "get_globalgoal_in_map_frame" 
+        # self._globalplan_sub = rospy.Subscriber(
+        #     f'{self.ns_prefix}globalPlan', Path, self._callback_globalplan)
 
         if self.is_train_mode:
             self._step_world_srv = rospy.ServiceProxy(
@@ -507,8 +508,15 @@ class ObservationCollectorWP():
         if globalgoal is not None:
             if isinstance(globalgoal,list):
                 globalgoal_x,globalgoal_y,_ = globalgoal
+                # we need to set the global goal here, because, it's found that the global_goal subcriber is not stable, the training may crashed in the step function of the env class
+                # since globalgoal is not recevied. Therefore we consider save it directly
+                self._globalgoal = Pose2D()
+                self._globalgoal.x = globalgoal_x
+                self._globalgoal.y = globalgoal_y
+
             else:
                 globalgoal_x,globalgoal_y = globalgoal.x,globalgoal.y
+                self._globalgoal = globalgoal
         else:
             assert self._globalgoal is not None
             globalgoal_x,globalgoal_y = self._globalgoal.x,self._globalgoal.y
