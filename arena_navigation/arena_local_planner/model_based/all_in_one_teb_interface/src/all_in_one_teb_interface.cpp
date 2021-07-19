@@ -114,7 +114,7 @@ AllInOneInterface::calculateNewPlan(const teb_local_planner::PoseSE2 &goal,
     // ROS_INFO("Teb planning done!");
     planner->visualize();
     visualizer->publishObstacles(obst_vector);
-    
+
     if (vx < 0.1 && successful) {
         local_costmap_node_->clearCostmap(true);
         rep.costmaps_resetted = true;
@@ -206,5 +206,4 @@ void AllInOneInterface::updateObstacleContainerWithCostmapConverter() {
             obst_vector.back()->setCentroidVelocity(i.velocities,
                                                     i.orientation);
     }
-}
 }
