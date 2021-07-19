@@ -147,7 +147,7 @@ def make_envs(cfg, args: argparse.Namespace, namespaces: List[str]):
             # if there is a node running which is responsible for manageing the task. we put a None here,
             # so that during the initialization of the environment,nothing will be done for the task wrap,
             # because it's not callable
-            task_wraps = [None]
+            task = [None]
         else:
 #             if cfg.TASK.NAME == 'StagedRandomTask':
 #                 rospy.logwarn("Currently there is not mechanism to load the last stage used for evaluation during the training,\n\
