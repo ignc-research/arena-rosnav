@@ -39,7 +39,7 @@ _C.ENV.NAME='WPEnvMapFrame'
 
 
 _C.REWARD = CN()       
-_C.REWARD.RULE_NAME = "rule_01" 
+_C.REWARD.RULE_NAME = "rule_00" 
 # if none it will be set automatically 
 _C.REWARD.SAFE_DIST = None
 _C.REWARD.ROBOT_OBSTACLE_MIN_DIST = 0.1

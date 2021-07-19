@@ -4,7 +4,7 @@ waypoint_generator:
       # arena_bringup/launch/sublaunch_training/single_env_training_waypoint.launch to change look ahead distance
       linear: 0.7
       # start stop num like the params in np.linspace
-      angular: [-3.141592653589793/180*90, 3.141592653589793/180*90, 5]
+      angular: [-3.141592653589793/180*90, 3.141592653589793/180*90, 2]
     - name: Center
       linear: 0
       angular: 0
