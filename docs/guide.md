@@ -56,6 +56,43 @@ Look for VcXsrv and change the settings to both private and public checked.
 ### 3. Installation of Visual Studio Code and WSL-Extension
 We recommend you use Visual Studio Code as your programming environment. Please follow the instructions in this [VS Code with WSL tutorial](https://docs.microsoft.com/en-us/windows/wsl/tutorials/wsl-vscode).
 
+### 4. Setup ohmyzsh (optional but strongly recommended!)
+We recommend using ohmyzsh. You can set up ohmyzsh with the following steps.
+- Install zsh
+```
+sudo apt install zsh
+```
+- Install curl
+```
+sudo apt install curl
+```
+- Install ohmyzsh
+```
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+```
+- Confirm with Y
+- Git clone autosuggestions
+```
+git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
+```
+- Open your .zshrc with editor
+```
+nano ~/.zshrc
+```
+- Scroll down to ```plugins```
+- Insert ```zsh-autosuggestions``` into ```plugins=()```.
+Your plugins might look like this:
+```
+plugins=(git zsh-autosuggestions)
+```
+- Exit with Crtl+X
+- Confirm with Y
+- Confirm with Enter
+- Source your .zshrc
+```
+source $HOME/.zshrc
+```
+
 ## Installation of Arena-Rosnav
 Please install Arena-Rosnav according to the step-by-step instruction in [Installation.md](https://github.com/ignc-research/arena-rosnav/blob/local_planner_subgoalmode/docs/Installation.md).
 

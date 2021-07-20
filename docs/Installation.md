@@ -1,6 +1,6 @@
 ## 1. Installation
 
-#### Installation on Ubuntu 20 using the installation script
+#### Installation on Ubuntu 20 and ROS Noetic using the installation script
 
 ##### Prerequisites
 
@@ -17,10 +17,10 @@ curl -sSL https://raw.githubusercontent.com/wittenator/arena-rosnav/local_planne
 
 If you have troubles with the installation we recommend to follow the manual installation procedure below and replacing `melodic` by `noetic` in the respective places. Pay attention to changing the ROS dependency branches in the `.rosinstall` as well.
 
-#### Manual Installation
+#### Manual Installation (Melodic or Noetic)
 
 ##### 1.1. Standard ROS setup
-(Code has been tested with ROS-melodic on Ubuntu 18.04 and Python 3.6)
+(Code has been tested with ROS-melodic on Ubuntu 18.04 and Python 3.6, and ROS-Noetic on Ubuntu 20.04)
 
 * Configure your Ubuntu repositories
 ```
@@ -89,7 +89,6 @@ cd arena-rosnav
 ````
 To be able to use python3 with ROS, you need an virtual environment. We recommend using poetry. 
 
-* Install the virtual environment and libraries by navigating to the root of the repository.
 ```
 poetry install
 ```
@@ -115,7 +114,8 @@ Note: if you use bash replace zsh with bash in the commands
 
 The official ros only support tf2 with python2. In order to make the *tf* work in python3, its necessary to compile it with python3. We provided a script to automately install this
 and do some additional configurations for the convenience . You can simply run it with 
-```bash
+```
+cd $HOME/catkin_ws/src/arena-rosnav
 ./geometry2_install.sh
 ```
 
@@ -150,7 +150,7 @@ If you encounter errors, e.g. specific versions not found, please manually insta
 You only need this to run our cadrl node, if you dont plan to use it, skip this step.
 
 
-* Inside forks/stable_baselines3
+* Inside forks/stable-baselines3
 ```
 pip install -e .
 
@@ -180,4 +180,10 @@ rosws update
 Subsequently, go to the forks/stable_baselines3 folder and do:
 ```
 pip install -e .
+```
+
+# Training with GPU RTX 3090
+in order to train with an NVIDIA GPU RTX3090 you need the latest version of pytorch. Inside your venv, do:
+```
+pip3 install torch==1.9.0+cu111 torchvision==0.10.0+cu111 torchaudio==0.9.0 -f https://download.pytorch.org/whl/torch_stable.html
 ```
