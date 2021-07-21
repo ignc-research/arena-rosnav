@@ -131,7 +131,9 @@ train_agent.py --custom-mlp --body 256-128 --pi 256 --vf 16 --act_fn relu
 
 
 #### Multiprocessed Training
-We provide for either testing and training purposes seperate launch scripts. ```start_arena_flatland.launch``` encapsulates the simulation environment featuring the different intermediate planners in a single process. ```start_training.launch``` depicts the slimer simulation version as we target a higher troughput here in order to be able to gather training data as fast as possible. The crucial feature of this launch file is that it is able to spawn an arbitrary number of environments to collect the rollouts with and thus allows for significant speedup through asynchronicity.
+We provide for either testing and training purposes seperate launch scripts. 
+- [start_arena_flatland.launch](/arena-rosnav/arena_bringup/launch/start_arena_flatland.launch) encapsulates the simulation environment featuring the different intermediate planners in a single process. Training is also possible within this simulation.
+- [start_training.launch](../arena_bringup/launch/start_training.launch) depicts the slimer simulation version as we target a higher troughput here in order to be able to gather training data as fast as possible. The crucial feature of this launch file is that it is able to spawn an arbitrary number of environments to collect the rollouts with and thus allows for significant speedup through asynchronicity.
 
 **First terminal: Simulation**
 The first terminal is needed to run arena.
