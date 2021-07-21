@@ -1,8 +1,8 @@
-## DRL Agent Training
+# DRL Agent Training
 
 As a fundament for our Deep Reinforcement Learning approaches [StableBaselines3](https://stable-baselines3.readthedocs.io/en/master/index.html) was used. 
 
-##### Features included so far
+**Features included so far:**
 * Simple handling of the training script through program parameters
 * Choose a predefined Deep Neural Network
 * Create your own custom Multilayer Perceptron via program parameters
@@ -11,8 +11,22 @@ As a fundament for our Deep Reinforcement Learning approaches [StableBaselines3]
 * Optionally log training and evaluation data
 * Enable and modify training curriculuu
 
+**Table of Contents**
+- [DRL Agent Training](#drl-agent-training)
+    - [Quick Start](#quick-start)
+    - [Training Script](#training-script)
+      - [Examples](#examples)
+        - [Training with a predefined DNN](#training-with-a-predefined-dnn)
+        - [Load a DNN for training](#load-a-dnn-for-training)
+        - [Training with a custom MLP](#training-with-a-custom-mlp)
+      - [Multiprocessed Training](#multiprocessed-training)
+    - [Hyperparameters](#hyperparameters)
+    - [Reward Functions](#reward-functions)
+    - [Training Curriculum](#training-curriculum)
+    - [Run the trained agent](#run-the-trained-agent)
+    - [Important Directories](#important-directories)
 
-##### Quick Start
+### Quick Start
 
 * In one terminnal, start simulation
 
@@ -28,7 +42,7 @@ python scripts/training/train_agent.py --agent MLP_ARENA2D
 ```
 
 
-#### Program Arguments
+### Training Script
 
 **Generic program call**:
 ```
@@ -40,6 +54,7 @@ train_agent.py [agent flag] [agent_name | unique_agent_name | custom mlp params]
 | ``` train_agent.py```|```--agent```                     | *agent_name* ([see below](#training-with-a-predefined-dnn))   | initializes a predefined network from scratch
 |                      |```--load ```                     | *unique_agent_name* ([see below](#load-a-dnn-for-training))   | loads agent to the given name
 |                      |```--custom-mlp```                | _custom_mlp_params_ ([see below](#training-with-a-custom-mlp))| initializes custom MLP according to given arguments 
+|                      |```--num_envs```            | *integer* | number of environments to collect experiences from for training (for more information on multiprocessed training, refer to [Multiprocessed Training](#multiprocessed-training))
 
 _Custom Multilayer Perceptron_ parameters will only be considered when ```--custom-mlp``` was set!
 |  Custom Mlp Flags | Syntax                | Description                                   |
@@ -114,7 +129,45 @@ program must be invoked as follows:
 train_agent.py --custom-mlp --body 256-128 --pi 256 --vf 16 --act_fn relu
 ```
 
-#### Hyperparameters
+
+#### Multiprocessed Training
+We provide for either testing and training purposes seperate launch scripts. ```start_arena_flatland.launch``` encapsulates the simulation environment featuring the different intermediate planners in a single process. ```start_training.launch``` depicts the slimer simulation version as we target a higher troughput here in order to be able to gather training data as fast as possible. The crucial feature of this launch file is that it is able to spawn an arbitrary number of environments to collect the rollouts with and thus allows for significant speedup through asynchronicity.
+
+**First terminal: Simulation**
+The first terminal is needed to run arena.
+
+Run these four commands:
+```                      
+workon rosnav
+roslaunch arena_bringup start_training.launch train_mode:=true use_viz:=false task_mode:=random map_file:=map_small num_envs:=24
+```
+
+**Second terminal: Training script**
+A second terminal is needed to run the training script.
+
+- Run these four commands:
+```                 
+workon rosnav
+roscd arena_local_planner_drl
+```
+
+- Now, run one of the two commands below to start a training session:
+```
+python scripts/training/train_agent.py --load pretrained_ppo_mpc --n_envs 24 --eval_log 
+python scripts/training/train_agent.py --load pretrained_ppo_baseline --n_envs 24 --eval_log
+```
+
+**Note**: Please inform yourself how many cores are provided by your processor in order to fully leverage local computing capabilities.
+
+**Ending a training session**
+
+When the training script is done, it will print the following information and then exit:
+```
+Time passed: {time in seconds}s
+Training script will be terminated
+```
+
+### Hyperparameters
 
 You can modify the hyperparameters in the upper section of the training script which is located at:
 ```
@@ -144,7 +197,7 @@ Following hyperparameters can be adapted:
 
 **Note**: For now further parameters like _max_steps_per_episode_ or _goal_radius_ have to be changed inline (where FlatlandEnv gets instantiated). _n_eval_episodes_ which will take place after _eval_freq_ timesteps can be changed also (where EvalCallback gets instantiated).
 
-#### Reward Functions
+### Reward Functions
 
 The reward functions are defined in
 ```
@@ -192,7 +245,7 @@ At present one can chose between two reward functions which can be set at the hy
 </tr>
 </table>
 
-#### Training Curriculum
+### Training Curriculum
 
 For the purpose of speeding up the training an exemplary training currucilum was implemented. But what exactly is a training curriculum you may ask. We basically divide the training process in difficulty levels, here the so called _stages_, in which the agent will meet an arbitrary number of obstacles depending on its learning progress. Different metrics can be taken into consideration to measure an agents performance.
 
@@ -208,27 +261,17 @@ Exemplary training curriculum:
 | 5               |  10              | 10                 |
 | 6               |  13              | 13                 |
 
-#### Run the trained agent
 
-Now that you've trained your agent you surely want to deploy and evaluate it. For that purpose we've implemented a specific task mode in which you can specify your scenarios in a .json file. The agent will then be challenged according to the scenarios defined in the file. (*TODO: link zum scenario mode readme*).  
+### Run the trained agent
+
+Now that you've trained your agent you surely want to deploy and evaluate it. For that purpose we've implemented a specific task mode in which you can specify your scenarios in a .json file. The agent will then be challenged according to the scenarios defined in the file. Please refer to https://github.com/ignc-research/arena-scenario-gui/ in order to read about the process of creating custom scenarios.
 
 - Firstly, you need to start the *simulation environment*:
 ```
 roslaunch arena_bringup start_arena_flatland.launch map_file:="map1"  disable_scenario:="false" scenario_file:="eval/obstacle_map1_obs20.json"
 ```
 
-- Then, start the *time-space plan manager*:
-```
-roslaunch arena_bringup timed_space_planner_fsm.launch
-```
-
-- Afterwards, start the *action publisher*:
-```
-roscd arena_local_planner_drl/scripts/deployment/
-python action_publisher.py
-```
-
-- Then run the ```run_agent.py``` script.
+- Then, run the ```run_agent.py``` script with the desired scenario file:
 ```python run_agent.py --load DRL_LOCAL_PLANNER_2021_03_22__19_33 --scenario obstacle_map1_obs20```
 
 **Generic program call**:
@@ -251,12 +294,12 @@ run_agent.py --load [agent_name] -s [scenario_name] -v [number] [optional flag]
 python run_agent.py --load DRL_LOCAL_PLANNER_2021_03_22__19_33 -s obstacle_map1_obs20
 ```
 **Notes**: 
-- Make sure that drl mode is activated in *Parameter.yaml* (*../arena-rosnav/arena_bringup/launch*)
-- Make sure that the simulation speed doesn't overlap the agent's calculation time for an action (an obvious indicator: same action gets published multiple times successively)
-- If your agent was trained with normalized observations it's necessary to provide the vec_normalize.pkl 
+- Make sure that drl mode is activated in ```plan_fsm_param.yaml``` (*../arena-rosnav/arena_bringup/launch/plan_fsm_param.yaml*)
+- Make sure that the simulation speed doesn't overlap the agent's calculation time for an action (an obvious indicator: same action gets published multiple times successively and thus the agent moves unreasonably)
+- If your agent was trained with normalized observations, it's necessary to provide the *vec_normalize.pkl* 
 
 
-#### Important Directories
+### Important Directories
 
 |Path|Description|
 |-----|-----|
@@ -265,22 +308,3 @@ python run_agent.py --load DRL_LOCAL_PLANNER_2021_03_22__19_33 -s obstacle_map1_
 |```../arena_local_planner_drl/training_logs```| tensorboard logs and evaluation logs
 |```../arena_local_planner_drl/scripts```| python file containing the predefined DNN architectures and the training script
 
-
-#### Evaluation
-Firstly, you need to start the *simulation environment*:
-```
-roslaunch arena_bringup start_arena_flatland.launch map_file:="map1"  disable_scenario:="false"
-```
-
-Then, start the *time-space plan manager*:
-```
-roslaunch arena_bringup timed_space_planner_fsm.launch
-```
-
-Afterwards start the *action publisher*:
-```
-roscd arena_local_planner_drl/scripts/deployment/
-python action_publisher.py
-```
-
-Now 
