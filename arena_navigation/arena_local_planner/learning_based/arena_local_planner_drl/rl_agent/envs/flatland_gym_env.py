@@ -62,12 +62,10 @@ class FlatlandEnv(gym.Env):
             time.sleep(ns_int*2)
         except Exception:
             rospy.logwarn(f"Can't not determinate the number of the environment, training script may crash!")
-            pass
-
-
+        
         # process specific namespace in ros system
         self.ns_prefix = '' if (ns == '' or ns is None) else '/'+ns+'/'
-        
+
         if not debug:
             if train_mode:
                 rospy.init_node(f'train_env_{self.ns}', disable_signals=False)
@@ -77,12 +75,12 @@ class FlatlandEnv(gym.Env):
         self._extended_eval = extended_eval
         self._is_train_mode = rospy.get_param("/train_mode")
         self._is_action_space_discrete = is_action_space_discrete
-        
+
         self.setup_by_configuration(PATHS['robot_setting'], PATHS['robot_as'])
 
         # set rosparam
         rospy.set_param("/laser_num_beams", self._laser_num_beams)
-        
+
         # observation collector
         self.observation_collector = ObservationCollector(
             self.ns, self._laser_num_beams, self._laser_max_range)
@@ -107,7 +105,7 @@ class FlatlandEnv(gym.Env):
             self._service_name_step = f'{self.ns_prefix}step_world'
             self._sim_step_client = rospy.ServiceProxy(
             self._service_name_step, StepWorld)
-        
+
         # instantiate task manager
         self.task = get_predefined_task(
             ns, mode=task_mode, start_stage=kwargs['curr_stage'], PATHS=PATHS)
@@ -275,9 +273,8 @@ class FlatlandEnv(gym.Env):
             self._in_crash = False
 
         # safe dist detector
-        if 'safe_dist' in reward_info:
-            if reward_info['safe_dist']:
-                self._safe_dist_counter += 1
+        if 'safe_dist' in reward_info and reward_info['safe_dist']:
+            self._safe_dist_counter += 1
 
         self._last_robot_pose = obs_dict['robot_pose']
 
@@ -298,7 +295,7 @@ if __name__ == '__main__':
 
     # run model
     n_steps = 200
-    for step in range(n_steps):
+    for _ in range(n_steps):
         # action, _states = model.predict(obs)
         action = flatland_env.action_space.sample()
 
