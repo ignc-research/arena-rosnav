@@ -9,7 +9,8 @@ As a fundament for our Deep Reinforcement Learning approaches [StableBaselines3]
 * Networks will get trained, evaluated and saved
 * Load your trained agent to continue training
 * Optionally log training and evaluation data
-* Enable and modify training curriculuu
+* Enable and modify a custom training curriculum
+* Multiprocessed rollout collection for training
 
 **Table of Contents**
 - [DRL Agent Training](#drl-agent-training)
@@ -274,7 +275,9 @@ roslaunch arena_bringup start_arena_flatland.launch map_file:="map1"  disable_sc
 ```
 
 - Then, run the ```run_agent.py``` script with the desired scenario file:
-```python run_agent.py --load DRL_LOCAL_PLANNER_2021_03_22__19_33 --scenario obstacle_map1_obs20```
+```
+python run_agent.py --load DRL_LOCAL_PLANNER_2021_03_22__19_33 --scenario obstacle_map1_obs20
+```
 
 **Generic program call**:
 ```
