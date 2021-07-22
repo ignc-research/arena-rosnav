@@ -9,7 +9,8 @@ As a fundament for our Deep Reinforcement Learning approaches [StableBaselines3]
 * Networks will get trained, evaluated and saved
 * Load your trained agent to continue training
 * Optionally log training and evaluation data
-* Enable and modify training curriculuu
+* Enable and modify a custom training curriculum
+* Multiprocessed rollout collection for training
 
 **Table of Contents**
 - [DRL Agent Training](#drl-agent-training)
