@@ -45,5 +45,7 @@ echo "export PYTHONPATH=${PWD}:\$PYTHONPATH" >> ~/.profile
 source ~/.profile
 poetry run catkin_make -C ../.. -DCMAKE_BUILD_TYPE=Release
 
+echo "source ~/.profile" >> ~/.$(echo $0)rc
+
 echo "source $(readlink -f ${PWD}/../../devel/setup.sh)" >> ~/.profile
 source ~/.profile
