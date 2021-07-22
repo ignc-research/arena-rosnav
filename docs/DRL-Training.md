@@ -31,12 +31,12 @@ As a fundament for our Deep Reinforcement Learning approaches [StableBaselines3]
 
 ### Quick Start
 
-* In one terminnal, start simulation
+* In one terminnal, start the arena simulation:
 
 ```bash
 roslaunch arena_bringup start_arena_flatland.launch  train_mode:=true 	use_viz:=true  task_mode:=random
 ```
-* In another terminal
+* In a second terminal, run the train script:
 
 ```bash
 workon rosnav
@@ -334,7 +334,8 @@ For an explicit example, [click here](/arena-rosnav/arena_navigation/arena_local
 
 ### Run the trained Agent
 
-Now that you've trained your agent you surely want to deploy and evaluate it. For that purpose we've implemented a specific task mode in which you can specify your scenarios in a .json file. The agent will then be challenged according to the scenarios defined in the file. Please refer to https://github.com/ignc-research/arena-scenario-gui/ in order to read about the process of creating custom scenarios.
+Now that you've trained your agent you surely want to deploy and evaluate it. For that purpose we've implemented a specific task mode in which you can specify your scenarios in a .json file. The agent will then be challenged according to the scenarios defined in the file. Please refer to https://github.com/ignc-research/arena-scenario-gui/ in order to read about the process of creating custom scenarios. 
+Moreover, you can test your agent on custom maps in randomly generated scenarios with a predefined number of dynamic obstacles.
 
 As with the training script, one can start the testing simulation environment with either one of two launch scripts:
 - [start_arena_flatland.launch](/arena-rosnav/arena_bringup/launch/start_arena_flatland.launch): 
@@ -391,7 +392,7 @@ python run_agent.py --load DRL_LOCAL_PLANNER_2021_03_22__19_33 -s obstacle_map1_
 - If your agent was trained with normalized observations, it's necessary to provide the *vec_normalize.pkl* 
 
 #### Sequential Evaluation of multiple Agents
-For the automatic testing of several agents in a single call, one can specify a list containing an arbitrary number of agent names in [run_script.py](/arena-rosnav/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/scripts/deployment/run_agent.py). 
+For automatic testing of several agents in a sequence, one can specify a list containing an arbitrary number of agent names in [run_script.py](/arena-rosnav/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/scripts/deployment/run_agent.py). 
 
 **Note**: 
 - Guaranteed execution of each agent is currently only provided with the *start_training.launch* as simulation launcher 

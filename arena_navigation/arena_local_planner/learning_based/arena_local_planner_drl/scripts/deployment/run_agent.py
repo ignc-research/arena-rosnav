@@ -21,7 +21,7 @@ from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl
 )
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.tools.train_agent_utils import *
 
-### HYPERPARAMETERS ###
+### AGENT LIST ###
 AGENTS = [
     "AGENT_1_2021_04_02__22_03",
     "AGENT_2_2021_03_30__23_10",
