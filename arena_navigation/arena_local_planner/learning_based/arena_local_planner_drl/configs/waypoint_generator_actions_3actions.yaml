@@ -2,7 +2,7 @@ waypoint_generator:
   discrete_actions:
     - name: Outermost ring
       # arena_bringup/launch/sublaunch_training/single_env_training_waypoint.launch to change look ahead distance
-      linear: 0.7
+      linear: 1.2
       # start stop num like the params in np.linspace
       angular: [-3.141592653589793/180*90, 3.141592653589793/180*90, 2]
     - name: Center

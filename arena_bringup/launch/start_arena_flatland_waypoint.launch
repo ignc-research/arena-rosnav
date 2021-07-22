@@ -67,7 +67,7 @@
     <arg name="look_ahead_distance"     default="2"/>   <!-- meter, double-->
     <arg name="tolerance_approach"      default="0.6"/>   <!-- meter, double-->
     <arg name="timeout_goal"            default="330."/>  <!-- sec, double-->
-    <arg name="timeout_subgoal"         default="30."/>   <!-- sec, double-->
+    <arg name="timeout_subgoal"         default="0.01"/>   <!-- sec, double-->
   </include>
 
   

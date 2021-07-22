@@ -58,9 +58,15 @@ class RandomTask(ABSTask):
     def __init__(self, obstacles_manager: ObstaclesManager, robot_manager: RobotManager):
         super().__init__(obstacles_manager, robot_manager)
 
-    def reset(self, min_dist_start_pos_goal_pos = 1):
+    def reset(self, **kwargs):
         """[summary]
         """
+        if 'min_dist_start_pos_goal_pos' in kwargs.keys():
+            min_dist_start_pos_goal_pos  = kwargs['min_dist_start_pos_goal_pos']
+        else:
+            min_dist_start_pos_goal_pos = 10
+
+        min_dist_start_pos_goal_pos
         with self._map_lock:
             max_fail_times = 3
             fail_times = 0
@@ -228,7 +234,7 @@ class ScenerioTask(ABSTask):
             'scenerios_json_path': scenerios_json_path
         }
 
-    def reset(self):
+    def reset(self, **kwargs):
         info = {}
         with self._map_lock:
             if self._idx_curr_scene == -1 or self._num_repeats_curr_scene == self._max_repeats_curr_scene:

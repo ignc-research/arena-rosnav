@@ -417,7 +417,7 @@ class ObservationCollectorWP():
             self.important_event = ObservationCollectorWP.Event.TIMEOUT
         return self.important_event
 
-    def wait_for_new_event(self,timeout=100):
+    def wait_for_new_event(self,timeout=20):
         """used in deployment mode, the timeout here is real time, take care!
         """
         with self.cv_important_event_deployment:
@@ -526,6 +526,9 @@ class ObservationCollectorWP():
         rho = (x_relative**2+y_relative**2)**0.5
         theta = np.arctan2(y_relative, x_relative)
         return rho, theta
+    
+    def get_robot_pos_in_map_frame(self)->Pose2D:
+        return self._robot_states[-1][0]
 
 
     def get_globalgoal_in_latest_robot_frame(self, globalgoal:Optional[Pose2D]= None) -> Tuple[float, float]:
@@ -556,10 +559,17 @@ class ObservationCollectorWP():
         rospy.loginfo("Waypoint generator start reset run step world ")
         # normally making the simulator running for 1/self._robot_action_rate will make sure
         # the new states will be updated.
-        # but it seems like the intermediate planner takes quite a lot steps to make a subgoal.
+        # but sometimes it seems like the intermediate planner takes quite a lot steps to make a subgoal.
         delta = 0.1
-        request = StepWorldRequest(2/self._robot_action_rate)
+        request = StepWorldRequest(1/self._robot_action_rate)
         try_times = 80
+        #at least call the service once. Even we set subgoal to None when we call clear_on_episode_start,
+        # but it's possible the a callback function is waiting there to set the subgoal to the old one.
+        if self.is_train_mode:
+            # this dirty code is write to handle the bug in planmanager.
+            self._step_world_srv(request)
+            # time.sleep(0.5)
+            # self._step_world_srv(request)
 
         while len(self._laser_scans) == 0 or len(self._robot_states)==0 or self._subgoal is None or self._old_subgoal is not None and \
                 abs(self._subgoal.x-self._old_subgoal.x) < delta and \

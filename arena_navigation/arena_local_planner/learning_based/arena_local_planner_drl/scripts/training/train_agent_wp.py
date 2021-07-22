@@ -4,6 +4,8 @@ import argparse
 import time
 from argparse import ArgumentParser
 from typing import List
+
+from numpy.lib.utils import info
 import rospy
 import numpy as np
 
@@ -12,6 +14,8 @@ from rl_agent.envs import build_env, build_env_wrapper  # SubprocVecEnv
 from rl_agent.model import build_model
 from rl_agent.utils.callbacks import TrainStageCallbackWP, StopTrainingOnRewardThreshold
 from rl_agent.utils.debug import timeit
+from rl_agent.envs import ENV_REGISTRY
+from rl_agent.utils.reward import REWARD_REGISTRY
 from stable_baselines3.common.vec_env import vec_normalize
 
 from stable_baselines3.common.vec_env.dummy_vec_env import DummyVecEnv
@@ -50,7 +54,8 @@ def get_default_arg_parser():
     parser.add_argument(
         '--deploy_task_mananer_node_off',
         help='In the deployment mode, whether a independent task node is running, if not a task wrapper will be created',
-        action='store_true'
+        type = bool,
+        default= True
     )
     parser.add_argument('--debug',
                         help='set the logger level to debug',
@@ -140,8 +145,9 @@ def make_envs(cfg, args: argparse.Namespace, namespaces: List[str]):
         eval_env = build_env(
         cfg, task_wraps[-1], namespaces[-1], train_mode=False, debug=args.debug)
         output_dir = cfg.OUTPUT_DIR
+        info_keywords = ENV_REGISTRY.get(cfg.ENV.NAME).INFO_KEYS + REWARD_REGISTRY.get(cfg.REWARD.RULE_NAME).INFO_KEYS
         eval_env = DummyVecEnv([lambda:Monitor(
-            eval_env, output_dir, info_keywords=("done_reason", "is_success"))])
+            eval_env, output_dir, info_keywords=info_keywords)])
     else:
         if not args.deploy_task_mananer_node_off:
             # if there is a node running which is responsible for manageing the task. we put a None here,
@@ -283,4 +289,4 @@ if __name__ == "__main__":
 # TO run in deployment mode
 # 1. roslaunch arena_bringup start_training.launch num_envs:=1 train_mode:=false map_folder_name:=map1
 # 2. python deplpyment/action_publisher.py
-# 3. run this scripy with python run_agent_v2.py  --conf_file=${PATHTOHyperparams.yaml} --deploy --deploy_task_mananer_node_off  
+# 3. run this scripy with python run_agent_v2.py  --conf_file=${PATHTOHyperparams.yaml} --deploy  

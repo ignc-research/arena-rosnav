@@ -10,7 +10,7 @@ from rospy.core import rospywarn
 from stable_baselines3.common.env_checker import check_env
 import yaml
 from rl_agent.utils.observation_collector import ObservationCollectorWP
-from rl_agent.utils.reward import RewardCalculatorWP
+from rl_agent.utils.reward import RewardCalculatorWP_RULE00
 from rl_agent.utils.debug import timeit
 from task_generator.tasks import ABSTask
 import numpy as np
@@ -28,8 +28,8 @@ from arena_plan_msgs.msg import RobotState, RobotStateStamped
 
 from ..config import configurable
 from .build import CfgNode,ENV_REGISTRY
-
-@ENV_REGISTRY.register()
+# deprecated
+# @ENV_REGISTRY.register()
 class WPEnv(gym.Env):
     """A Environment whose action is waypoint"""
     @configurable

@@ -59,18 +59,19 @@ class TrainStageCallbackWP(BaseCallback):
         ), f"InitiateNewTrainStage must be called within EvalCallback"
         
         if self.activated:
-            if EvalObject.n_eval_episodes < 20:
+
+            if EvalObject.n_eval_episodes < 10:
                 warnings.warn("Only %d evaluation episodes considered for threshold monitoring," 
                     "results might not represent agent performance well" % EvalObject.n_eval_episodes)
                 return
             
-            if EvalObject.best_mean_reward <= self.lower_threshold:
+            if EvalObject.last_success_rate <= self.lower_threshold:
                 for i,pub in enumerate(self._publishers_previous):
                     pub.publish(self._trigger)
                     if i==0:
                        self.log_curr_stage(EvalObject.logger)
 
-            if EvalObject.best_mean_reward >= self.upper_threshold:
+            elif EvalObject.last_success_rate >= self.upper_threshold:
                 for i, pub in enumerate(self._publishers_next):
                     pub.publish(self._trigger)
                     if i==0:
@@ -83,7 +84,7 @@ class TrainStageCallbackWP(BaseCallback):
     def log_curr_stage(self,logger):
         time.sleep(1)
         curr_stage = rospy.get_param("/curr_stage",-1)
-        logger.record("train_stage/stage_idx",curr_stage) 
+        logger.record("stage_idx",curr_stage) 
 
 
 
