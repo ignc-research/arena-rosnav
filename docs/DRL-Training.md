@@ -16,6 +16,7 @@ As a fundament for our Deep Reinforcement Learning approaches [StableBaselines3]
 - [DRL Agent Training](#drl-agent-training)
     - [Quick Start](#quick-start)
     - [Training Script](#training-script)
+      - [Usage](#usage)
       - [Examples](#examples)
         - [Training with a predefined DNN](#training-with-a-predefined-dnn)
         - [Load a DNN for training](#load-a-dnn-for-training)
@@ -45,7 +46,7 @@ python scripts/training/train_agent.py --agent MLP_ARENA2D
 
 
 ### Training Script
-
+#### Usage
 **Generic program call**:
 ```
 train_agent.py [agent flag] [agent_name | unique_agent_name | custom mlp params] [optional flag] [optional flag] ...
@@ -213,49 +214,98 @@ Following hyperparameters can be adapted:
 
 ### Reward Functions
 
-The reward functions are defined in
+The reward functions are defined in: (alternatively, [click here](../arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/rl_agent/utils/reward.py))
 ```
 ../arena_local_planner_drl/rl_agent/utils/reward.py
 ```
-At present one can chose between two reward functions which can be set at the hyperparameter section of the training script:
+At present, one can chose between two reward functions which can be set at the hyperparameter section of the training script:
 
   
 <table>
 <tr>
-   <th>rule_00</th> <th>rule_01</th>
+   <th>rule_00</th> <th>rule_01</th> <th>rule_02</th> <th>rule_03</th> <th>rule_04</th>
 </tr>
 <tr>
-   <td>
+
+  <td>
 
    | Reward Function at timestep t                                     |  
    | ----------------------------------------------------------------- |   
-   | <img src="https://latex.codecogs.com/gif.latex?r^t&space;=&space;r_{s}^t&space;&plus;&space;r_{c}^t&space;&plus;&space;r_{d}^t&space;&plus;&space;r_{p}^t&space;&plus;&space;r_{m}^t" title="r^t = r_{s}^t + r_{c}^t + r_{d}^t + r_{p}^t + r_{m}^t" /> |
+   | <img src="https://bit.ly/3BzqgIm" align="center" border="0" alt="r_{00}^{t} = r_{s}^{t} + r_{c}^{t} + r_{d}^{t} + r_{p}^{t}" width="171" height="28" /> |
    
    | reward    | description | value |
    | --------- | ----------- | ----- |
-   | <img src="https://latex.codecogs.com/gif.latex?r_{s}^t" title="r_{s}^t" /> | success reward | <img src="https://latex.codecogs.com/gif.latex?r_{s}^t&space;=\begin{cases}15&space;&&space;goal\:reached\\0&space;&&space;otherwise\end{cases}" title="r_{s}^t =\begin{cases}15 & goal\:reached\\0 & otherwise\end{cases}" />
-   | <img src="https://latex.codecogs.com/png.latex?r_{c}^t" title="r_{c}^t"/> | collision reward | <img src="https://latex.codecogs.com/png.latex?r_{c}^t&space;=\begin{cases}0&space;&&space;otherwise\\-10&space;&&space;agent\:collides\end{cases}" title="r_{c}^t =\begin{cases}0 & otherwise\\-10 & agent\:collides\end{cases}" />
-   | <img src="https://latex.codecogs.com/png.latex?r_{d}^t" title="r_{d}^t" />| danger reward | <img src="https://latex.codecogs.com/png.latex?r_{d}^t&space;=\begin{cases}0&space;&&space;otherwise\\-0.15&space;&&space;agent\:oversteps\:safe\:dist\end{cases}" title="r_{d}^t =\begin{cases}0 & otherwise\\-0.15 & agent\:oversteps\:safe\:dist\end{cases}" />
-   |<img src="https://latex.codecogs.com/png.latex?r_{p}^t" title="r_{p}^t" />| progress reward | <img src="https://latex.codecogs.com/png.latex?r_{d}^t&space;=&space;w*d^t,&space;\quad&space;d^t=d_{ag}^{t-1}-d_{ag}^{t}\\&space;w&space;=&space;0.25&space;\quad&space;d_{ag}:agent\:goal&space;\:&space;distance" title="r_{d}^t = w*d^t, \quad d^t=d_{ag}^{t-1}-d_{ag}^{t}\\ w = 0.25 \quad d_{ag}:agent\:goal \: distance" />
-   | <img src="https://latex.codecogs.com/png.latex?r_{m}^t" title="r_{m}^t" /> | move reward | <img src="https://latex.codecogs.com/png.latex?r_{d}^t&space;=\begin{cases}0&space;&&space;otherwise\\-0.01&space;&&space;agent\:stands\:still\end{cases}" title="r_{d}^t =\begin{cases}0 & otherwise\\-0.01 & agent\:stands\:still\end{cases}" />
+   | <img src="https://bit.ly/3eMPAB8" align="center" border="0" alt="$r_{s}^{t}$ " width="18" height="26" /> | success reward | <img src="https://bit.ly/3zq3hO7" align="center" border="0" alt="    r_{s}^{t} = \begin{cases}        15 & \text{ if goal reached} \\         0 & \text{ otherwise }     \end{cases}" width="218" height="51" />
+   | <img src="https://bit.ly/3Bxbi5N" align="center" border="0" alt="r_{c}^{t}" width="18" height="26" /> | collision reward | <img src="https://bit.ly/36X2rfA" align="center" border="0" alt="r_{c}^{t} = \begin{cases}        -10 & \text{ if robot collides} \\         0 & \text{ otherwise }     \end{cases}" width="235" height="50" />
+   | <img src="https://bit.ly/3zu8nJ9" align="center" border="0" alt="r_{d}^{t}" width="21" height="26" />| danger reward | <img src="https://bit.ly/3wWHVXe" align="center" border="0" alt="r_{d}^{t} = \begin{cases}        -0.25 & \text{ if } \exists{o \in O} : d(p_{robot}^t, p_{obs}^t) < D_{s}\\         0 & \text{ otherwise }     \end{cases}" width="369" height="50" />
+   |<img src="https://bit.ly/3y1brMz" align="center" border="0" alt="r_{p}^{t}" width="19" height="28" />| progress reward | <img src="https://bit.ly/3xUhnqN" align="center" border="0" alt="\text{diff}_{robot,x}^t = d(p_{robot}^{t-1}, p_{x}^{t-1}) - d(p_{robot}^t, p_{x}^t)" width="336" height="29" /> <img src="https://bit.ly/3BvFwGe" align="center" border="0" alt="r_{p}^{t} = \begin{cases}        0.3 * \text{diff}_{robot,goal}^t & \text{ if } \text{diff}_{robot,goal}^t > 0\\         0.4 * \text{diff}_{robot,goal}^t & \text{ otherwise }     \end{cases}" width="362" height="56" />
 
-   </td>
-   <td>
+  </td>
+
+  <td>
 
    | Reward Function at timestep t                                     |  
    | ----------------------------------------------------------------- |   
-   | <img src="https://latex.codecogs.com/png.latex?r^t&space;=&space;r_{s}^t&space;&plus;&space;r_{c}^t&space;&plus;&space;r_{d}^t&space;&plus;&space;r_{p}^t&space;&plus;&space;r_{m}^t" title="r^t = r_{s}^t + r_{c}^t + r_{d}^t + r_{p}^t + r_{m}^t" />|
+   | <img src="https://bit.ly/2UvFKgb" align="center" border="0" alt="r_{01}^{t} = r_{s}^{t} + r_{c}^{t} + r_{d}^{t} + r_{p}^{t} + r_{dt}^{t}" width="212" height="28" />|
    
    | reward    | description | value |
    | --------- | ----------- | ----- |
-   | <img src="https://latex.codecogs.com/gif.latex?r_{s}^t" title="r_{s}^t" /> | success reward | <img src="https://latex.codecogs.com/gif.latex?r_{s}^t&space;=\begin{cases}15&space;&&space;goal\:reached\\0&space;&&space;otherwise\end{cases}" title="r_{s}^t =\begin{cases}15 & goal\:reached\\0 & otherwise\end{cases}" />
-   | <img src="https://latex.codecogs.com/png.latex?r_{c}^t" title="r_{c}^t" /> | collision reward |<img src="https://latex.codecogs.com/png.latex?r_{c}^t&space;=\begin{cases}0&space;&&space;otherwise\\-10&space;&&space;agent\:collides\end{cases}" title="r_{c}^t =\begin{cases}0 & otherwise\\-10 & agent\:collides\end{cases}" />
-   | <img src="https://latex.codecogs.com/png.latex?r_{d}^t" title="r_{d}^t" /> | danger reward | <img src="https://latex.codecogs.com/png.latex?r_{d}^t&space;=\begin{cases}0&space;&&space;otherwise\\-0.15&space;&&space;agent\:oversteps\:safe\:dist\end{cases}" title="r_{d}^t =\begin{cases}0 & otherwise\\-0.15 & agent\:oversteps\:safe\:dist\end{cases}" />
-   | <img src="https://latex.codecogs.com/png.latex?r_{p}^t" title="r_{p}^t" />| progress reward | <img src="https://latex.codecogs.com/png.latex?r_{d}^t&space;=\begin{cases}w_{p}*d^t&space;&&space;d^t>=0,\;d^t=d_{ag}^{t-1}-d_{ag}^{t}\\w_{n}*d^t&space;&&space;else\end{cases}\\&space;w_{p}&space;=&space;0.25&space;\quad&space;w_{n}&space;=&space;0.4&space;\quad&space;d_{ag}:agent\:goal&space;\:&space;distance" title="r_{d}^t =\begin{cases}w_{p}*d^t & d^t>=0,\;d^t=d_{ag}^{t-1}-d_{ag}^{t}\\w_{n}*d^t & else\end{cases}\\ w_{p} = 0.25 \quad w_{n} = 0.4 \quad d_{ag}:agent\:goal \: distance" />(*)
-   | <img src="https://latex.codecogs.com/png.latex?r_{m}^t" title="r_{m}^t" />| move reward | <img src="https://latex.codecogs.com/png.latex?r_{d}^t&space;=\begin{cases}0&space;&&space;otherwise\\-0.01&space;&&space;agent\:stands\:still\end{cases}" title="r_{d}^t =\begin{cases}0 & otherwise\\-0.01 & agent\:stands\:still\end{cases}" />
-
-   *_higher weight applied if robot drives away from goal (to avoid driving unneccessary circles)_
+   | <img src="https://bit.ly/3eMPAB8" align="center" border="0" alt="$r_{s}^{t}$ " width="18" height="26" /> | success reward | <img src="https://bit.ly/3zq3hO7" align="center" border="0" alt="    r_{s}^{t} = \begin{cases}        15 & \text{ if goal reached} \\         0 & \text{ otherwise }     \end{cases}" width="218" height="51" />
+   | <img src="https://bit.ly/3Bxbi5N" align="center" border="0" alt="r_{c}^{t}" width="18" height="26" /> | collision reward | <img src="https://bit.ly/36X2rfA" align="center" border="0" alt="r_{c}^{t} = \begin{cases}        -10 & \text{ if robot collides} \\         0 & \text{ otherwise }     \end{cases}" width="235" height="50" />
+   | <img src="https://bit.ly/3zu8nJ9" align="center" border="0" alt="r_{d}^{t}" width="21" height="26" />| danger reward | <img src="https://bit.ly/3wWHVXe" align="center" border="0" alt="r_{d}^{t} = \begin{cases}        -0.25 & \text{ if } \exists{o \in O} : d(p_{robot}^t, p_{obs}^t) < D_{s}\\         0 & \text{ otherwise }     \end{cases}" width="369" height="50" />
+   |<img src="https://bit.ly/3y1brMz" align="center" border="0" alt="r_{p}^{t}" width="19" height="28" />| progress reward | <img src="https://bit.ly/3xUhnqN" align="center" border="0" alt="\text{diff}_{robot,x}^t = d(p_{robot}^{t-1}, p_{x}^{t-1}) - d(p_{robot}^t, p_{x}^t)" width="336" height="29" /> <img src="https://bit.ly/3BvFwGe" align="center" border="0" alt="r_{p}^{t} = \begin{cases}        0.3 * \text{diff}_{robot,goal}^t & \text{ if } \text{diff}_{robot,goal}^t > 0\\         0.4 * \text{diff}_{robot,goal}^t & \text{ otherwise }     \end{cases}" width="362" height="56" />
+   | <img src="https://bit.ly/3ycHxFz" align="center" border="0" alt="r_{dt}^{t}" width="25" height="26" />| distance travelled reward |<img src="https://bit.ly/3kLqIgN" align="center" border="0" alt="r_{dt}^{t} = (vel_{linear}^{t} + (vel_{angular}^{t}*0.001))*-0.0075" width="406" height="28" /> |
    </td>
+
+  <td>
+
+  | Reward Function at timestep t                                     |  
+  | ----------------------------------------------------------------- |   
+  | <img src="https://bit.ly/3eOotWq" align="center" border="0" alt="r_{02}^{t} = r_{s}^{t} + r_{c}^{t} + r_{d}^{t} + r_{p}^{t} + r_{dt}^{t} + r_{fg}^{t}" width="254" height="28" />|
+  
+  | reward    | description | value |
+  | --------- | ----------- | ----- |
+  | <img src="https://bit.ly/3eMPAB8" align="center" border="0" alt="$r_{s}^{t}$ " width="18" height="26" /> | success reward | <img src="https://bit.ly/3zq3hO7" align="center" border="0" alt="    r_{s}^{t} = \begin{cases}        15 & \text{ if goal reached} \\         0 & \text{ otherwise }     \end{cases}" width="218" height="51" />
+  | <img src="https://bit.ly/3Bxbi5N" align="center" border="0" alt="r_{c}^{t}" width="18" height="26" /> | collision reward | <img src="https://bit.ly/36X2rfA" align="center" border="0" alt="r_{c}^{t} = \begin{cases}        -10 & \text{ if robot collides} \\         0 & \text{ otherwise }     \end{cases}" width="235" height="50" />
+  | <img src="https://bit.ly/3zu8nJ9" align="center" border="0" alt="r_{d}^{t}" width="21" height="26" />| danger reward | <img src="https://bit.ly/3wWHVXe" align="center" border="0" alt="r_{d}^{t} = \begin{cases}        -0.25 & \text{ if } \exists{o \in O} : d(p_{robot}^t, p_{obs}^t) < D_{s}\\         0 & \text{ otherwise }     \end{cases}" width="369" height="50" />
+  |<img src="https://bit.ly/3y1brMz" align="center" border="0" alt="r_{p}^{t}" width="19" height="28" />| progress reward | <img src="https://bit.ly/3xUhnqN" align="center" border="0" alt="\text{diff}_{robot,x}^t = d(p_{robot}^{t-1}, p_{x}^{t-1}) - d(p_{robot}^t, p_{x}^t)" width="336" height="29" /> <img src="https://bit.ly/3BvFwGe" align="center" border="0" alt="r_{p}^{t} = \begin{cases}        0.3 * \text{diff}_{robot,goal}^t & \text{ if } \text{diff}_{robot,goal}^t > 0\\         0.4 * \text{diff}_{robot,goal}^t & \text{ otherwise }     \end{cases}" width="362" height="56" />
+  | <img src="https://bit.ly/3ycHxFz" align="center" border="0" alt="r_{dt}^{t}" width="25" height="26" />| distance travelled reward |<img src="https://bit.ly/3kLqIgN" align="center" border="0" alt="r_{dt}^{t} = (vel_{linear}^{t} + (vel_{angular}^{t}*0.001))*-0.0075" width="406" height="28" /> |
+  | <img src="https://bit.ly/3eLvCqy" align="center" border="0" alt="r_{fg}^{t}" width="26" height="28" />| following global plan reward | <img src="https://bit.ly/2UvGcen" align="center" border="0" alt="r_{fg}^{t} = \begin{cases}        \begin{aligned}             0.1 * vel_{linear}^{t} & \text{ if } \min_{wp \in G}d(p_{wp}^t, p_{r}^t) < 0.5 \text{m} \\            0 & \text{ otherwise }         \end{aligned}    \end{cases}" width="387" height="57" />|
+  </td>
+
+  <td>
+
+  | Reward Function at timestep t                                     |  
+  | ----------------------------------------------------------------- |   
+  | <img src="https://bit.ly/3hYfrI9" align="center" border="0" alt=" r_{03}^{t} = r_{s}^{t} + r_{c}^{t} + r_{d}^{t} + r_{p}^{t} + r_{fg}^{t} + r_{dg}^{t}" width="257" height="28" />|
+  
+  | reward    | description | value |
+  | --------- | ----------- | ----- |
+  | <img src="https://bit.ly/3eMPAB8" align="center" border="0" alt="$r_{s}^{t}$ " width="18" height="26" /> | success reward | <img src="https://bit.ly/3zq3hO7" align="center" border="0" alt="    r_{s}^{t} = \begin{cases}        15 & \text{ if goal reached} \\         0 & \text{ otherwise }     \end{cases}" width="218" height="51" />
+  | <img src="https://bit.ly/3Bxbi5N" align="center" border="0" alt="r_{c}^{t}" width="18" height="26" /> | collision reward | <img src="https://bit.ly/36X2rfA" align="center" border="0" alt="r_{c}^{t} = \begin{cases}        -10 & \text{ if robot collides} \\         0 & \text{ otherwise }     \end{cases}" width="235" height="50" />
+  | <img src="https://bit.ly/3zu8nJ9" align="center" border="0" alt="r_{d}^{t}" width="21" height="26" />| danger reward | <img src="https://bit.ly/3wWHVXe" align="center" border="0" alt="r_{d}^{t} = \begin{cases}        -0.25 & \text{ if } \exists{o \in O} : d(p_{robot}^t, p_{obs}^t) < D_{s}\\         0 & \text{ otherwise }     \end{cases}" width="369" height="50" />
+  |<img src="https://bit.ly/3y1brMz" align="center" border="0" alt="r_{p}^{t}" width="19" height="28" />| progress reward | <img src="https://bit.ly/3xUhnqN" align="center" border="0" alt="\text{diff}_{robot,x}^t = d(p_{robot}^{t-1}, p_{x}^{t-1}) - d(p_{robot}^t, p_{x}^t)" width="336" height="29" /> <img src="https://bit.ly/3BvFwGe" align="center" border="0" alt="r_{p}^{t} = \begin{cases}        0.3 * \text{diff}_{robot,goal}^t & \text{ if } \text{diff}_{robot,goal}^t > 0\\         0.4 * \text{diff}_{robot,goal}^t & \text{ otherwise }     \end{cases}" width="362" height="56" />
+  | <img src="https://bit.ly/3eLvCqy" align="center" border="0" alt="r_{fg}^{t}" width="26" height="28" />| following global plan reward | <img src="https://bit.ly/2UvGcen" align="center" border="0" alt="r_{fg}^{t} = \begin{cases}        \begin{aligned}             0.1 * vel_{linear}^{t} & \text{ if } \min_{wp \in G}d(p_{wp}^t, p_{r}^t) < 0.5 \text{m} \\            0 & \text{ otherwise }         \end{aligned}    \end{cases}" width="387" height="57" />|
+  | <img src="https://bit.ly/3wTnUkl" align="center" border="0" alt="r_{dg}" width="28" height="18" /> | distance to globalplan reward | <img src="https://bit.ly/3xYKJ7t" align="center" border="0" alt="r_{dg} = \begin{cases}        \begin{aligned}         0.2* \text{diff}_{robot, wp}^{t} & \text{ if }\min_{wp \in G}d(p_{r}^t, p_{wp}^t): \text{diff}_{robot, wp}^{t} > 0 \\         0.3* \text{diff}_{robot, wp}^{t} & \text{ if } \min_{wp \in G}d(p_{r}^t, p_{wp}^t): \text{diff}_{robot, wp}^{t} <= 0 \\        0 & \text{ if } \min_{o \in O}d(p_{r}^t, p_{o}^t) < D_s        \end{aligned}    \end{cases}" width="494" height="101" />|
+  </td>
+
+  <td>
+
+  | Reward Function at timestep t                                     |  
+  | ----------------------------------------------------------------- |   
+  | <img src="https://bit.ly/3BvmPTg" align="center" border="0" alt="r_{04}^{t} = r_{s}^{t} + r_{c}^{t} + r_{d}^{t} + r_{p}^{t} + r_{fg}^{t} + r_{dg}^{t} + r_{dc}^{t}" width="301" height="28" />|
+  
+  | reward    | description | value |
+  | --------- | ----------- | ----- |
+  | <img src="https://bit.ly/3eMPAB8" align="center" border="0" alt="$r_{s}^{t}$ " width="18" height="26" /> | success reward | <img src="https://bit.ly/3zq3hO7" align="center" border="0" alt="    r_{s}^{t} = \begin{cases}        15 & \text{ if goal reached} \\         0 & \text{ otherwise }     \end{cases}" width="218" height="51" />
+  | <img src="https://bit.ly/3Bxbi5N" align="center" border="0" alt="r_{c}^{t}" width="18" height="26" /> | collision reward | <img src="https://bit.ly/36X2rfA" align="center" border="0" alt="r_{c}^{t} = \begin{cases}        -10 & \text{ if robot collides} \\         0 & \text{ otherwise }     \end{cases}" width="235" height="50" />
+  | <img src="https://bit.ly/3zu8nJ9" align="center" border="0" alt="r_{d}^{t}" width="21" height="26" />| danger reward | <img src="https://bit.ly/3wWHVXe" align="center" border="0" alt="r_{d}^{t} = \begin{cases}        -0.25 & \text{ if } \exists{o \in O} : d(p_{robot}^t, p_{obs}^t) < D_{s}\\         0 & \text{ otherwise }     \end{cases}" width="369" height="50" />
+  |<img src="https://bit.ly/3y1brMz" align="center" border="0" alt="r_{p}^{t}" width="19" height="28" />| progress reward | <img src="https://bit.ly/3xUhnqN" align="center" border="0" alt="\text{diff}_{robot,x}^t = d(p_{robot}^{t-1}, p_{x}^{t-1}) - d(p_{robot}^t, p_{x}^t)" width="336" height="29" /> <img src="https://bit.ly/3BvFwGe" align="center" border="0" alt="r_{p}^{t} = \begin{cases}        0.3 * \text{diff}_{robot,goal}^t & \text{ if } \text{diff}_{robot,goal}^t > 0\\         0.4 * \text{diff}_{robot,goal}^t & \text{ otherwise }     \end{cases}" width="362" height="56" />
+  | <img src="https://bit.ly/3eLvCqy" align="center" border="0" alt="r_{fg}^{t}" width="26" height="28" />| following global plan reward | <img src="https://bit.ly/2UvGcen" align="center" border="0" alt="r_{fg}^{t} = \begin{cases}        \begin{aligned}             0.1 * vel_{linear}^{t} & \text{ if } \min_{wp \in G}d(p_{wp}^t, p_{r}^t) < 0.5 \text{m} \\            0 & \text{ otherwise }         \end{aligned}    \end{cases}" width="387" height="57" />|
+  | <img src="https://bit.ly/3wTnUkl" align="center" border="0" alt="r_{dg}" width="28" height="18" /> | distance to globalplan reward | <img src="https://bit.ly/3xYKJ7t" align="center" border="0" alt="r_{dg} = \begin{cases}        \begin{aligned}         0.2* \text{diff}_{robot, wp}^{t} & \text{ if }\min_{wp \in G}d(p_{r}^t, p_{wp}^t): \text{diff}_{robot, wp}^{t} > 0 \\         0.3* \text{diff}_{robot, wp}^{t} & \text{ if } \min_{wp \in G}d(p_{r}^t, p_{wp}^t): \text{diff}_{robot, wp}^{t} <= 0 \\        0 & \text{ if } \min_{o \in O}d(p_{r}^t, p_{o}^t) < D_s        \end{aligned}    \end{cases}" width="494" height="101" />|
+  | <img src="https://bit.ly/2W2xMv8" align="center" border="0" alt="r_{dc}^t" width="26" height="26" /> | direction change reward | <img src="https://bit.ly/2V2xeFa" align="center" border="0" alt="r_{dc}^t = - \frac{\left | vel_{angular}^{t-1} - vel_{angular}^{t} \right |^{4}}{2500}" width="260" height="60" />|
+  </td>
+
 </tr>
 </table>
 
