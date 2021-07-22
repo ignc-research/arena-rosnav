@@ -17,8 +17,8 @@ sudo apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31
 sudo aptitude update
 sudo aptitude -y install ros-noetic-desktop-full
 
-echo "source /opt/ros/noetic/setup.bash" >> ~/.profile
-source ~/.profile
+echo "source /opt/ros/noetic/setup.bash" >> ~/.$(echo $0)rc
+source ~/.$(echo $0)rc
 
 sudo aptitude -y install python3-rosdep python3-rosinstall python3-rosinstall-generator python3-wstool build-essential
 sudo rosdep init
@@ -40,12 +40,12 @@ poetry install
 
 rosws update
 
-echo "export PYTHONPATH=${PWD}:\$PYTHONPATH" >> ~/.profile
+echo "export PYTHONPATH=${PWD}:\$PYTHONPATH" >> ~/.$(echo $0)rc
 
-source ~/.profile
+source ~/.$(echo $0)rc
 poetry run catkin_make -C ../.. -DCMAKE_BUILD_TYPE=Release
 
 echo "source ~/.profile" >> ~/.$(echo $0)rc
 
-echo "source $(readlink -f ${PWD}/../../devel/setup.sh)" >> ~/.profile
-source ~/.profile
+echo "source $(readlink -f ${PWD}/../../devel/setup.sh)" >> ~/.$(echo $0)rc
+source ~/.$(echo $0)rc
