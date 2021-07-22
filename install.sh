@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 mkdir -p catkin_ws/src && cd catkin_ws/src
 git clone --depth 1 https://github.com/wittenator/arena-rosnav.git
@@ -17,8 +17,8 @@ sudo apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31
 sudo aptitude update
 sudo aptitude -y install ros-noetic-desktop-full
 
-echo "source /opt/ros/noetic/setup.bash" >> ~/.bashrc
-source ~/.bashrc
+echo "source /opt/ros/noetic/setup.bash" >> ~/.profile
+source ~/.profile
 
 sudo aptitude -y install python3-rosdep python3-rosinstall python3-rosinstall-generator python3-wstool build-essential
 sudo rosdep init
@@ -40,7 +40,7 @@ poetry install
 
 rosws update
 
-source ~/.bashrc
+source ~/.profile
 poetry run catkin_make -C ../.. -DCMAKE_BUILD_TYPE=Release
 
 source ../../devel/setup.sh
