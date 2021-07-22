@@ -12,17 +12,21 @@ from stable_baselines3.common.torch_layers import BaseFeaturesExtractor
 
 _RS = 2  # robot state size
 
-ROBOT_SETTING_PATH = rospkg.RosPack().get_path('simulator_setup')
-yaml_ROBOT_SETTING_PATH = os.path.join(ROBOT_SETTING_PATH, 'robot', 'myrobot.model.yaml')
+ROBOT_SETTING_PATH = rospkg.RosPack().get_path("simulator_setup")
+yaml_ROBOT_SETTING_PATH = os.path.join(
+    ROBOT_SETTING_PATH, "robot", "myrobot.model.yaml"
+)
 
-with open(yaml_ROBOT_SETTING_PATH, 'r') as fd:
+with open(yaml_ROBOT_SETTING_PATH, "r") as fd:
     robot_data = yaml.safe_load(fd)
-    for plugin in robot_data['plugins']:
-        if plugin['type'] == 'Laser':
-            laser_angle_min = plugin['angle']['min']
-            laser_angle_max = plugin['angle']['max']
-            laser_angle_increment = plugin['angle']['increment']
-            _L = int(round((laser_angle_max - laser_angle_min) / laser_angle_increment) + 1)  # num of laser beams
+    for plugin in robot_data["plugins"]:
+        if plugin["type"] == "Laser":
+            laser_angle_min = plugin["angle"]["min"]
+            laser_angle_max = plugin["angle"]["max"]
+            laser_angle_increment = plugin["angle"]["increment"]
+            _L = int(
+                round((laser_angle_max - laser_angle_min) / laser_angle_increment) + 1
+            )  # num of laser beams
             break
 
 
@@ -37,10 +41,10 @@ class MLP_ARENA2D(nn.Module):
     """
 
     def __init__(
-            self,
-            feature_dim: int,
-            last_layer_dim_pi: int = 32,
-            last_layer_dim_vf: int = 32,
+        self,
+        feature_dim: int,
+        last_layer_dim_pi: int = 32,
+        last_layer_dim_vf: int = 32,
     ):
         super(MLP_ARENA2D, self).__init__()
 
@@ -50,22 +54,17 @@ class MLP_ARENA2D(nn.Module):
 
         # Body network
         self.body_net = nn.Sequential(
-            nn.Linear(_L+_RS, 64),
-            nn.ReLU(),
-            nn.Linear(64, feature_dim),
-            nn.ReLU()
+            nn.Linear(_L + _RS, 64), nn.ReLU(), nn.Linear(64, feature_dim), nn.ReLU()
         )
 
         # Policy network
         self.policy_net = nn.Sequential(
-            nn.Linear(feature_dim, last_layer_dim_pi),
-            nn.ReLU()
+            nn.Linear(feature_dim, last_layer_dim_pi), nn.ReLU()
         )
 
         # Value network
         self.value_net = nn.Sequential(
-            nn.Linear(feature_dim, last_layer_dim_vf),
-            nn.ReLU()
+            nn.Linear(feature_dim, last_layer_dim_vf), nn.ReLU()
         )
 
     def forward(self, features: th.Tensor) -> Tuple[th.Tensor, th.Tensor]:
@@ -83,14 +82,14 @@ class MLP_ARENA2D_POLICY(ActorCriticPolicy):
     """
 
     def __init__(
-            self,
-            observation_space: gym.spaces.Space,
-            action_space: gym.spaces.Space,
-            lr_schedule: Callable[[float], float],
-            net_arch: Optional[List[Union[int, Dict[str, List[int]]]]] = None,
-            activation_fn: Type[nn.Module] = nn.ReLU,
-            *args,
-            **kwargs,
+        self,
+        observation_space: gym.spaces.Space,
+        action_space: gym.spaces.Space,
+        lr_schedule: Callable[[float], float],
+        net_arch: Optional[List[Union[int, Dict[str, List[int]]]]] = None,
+        activation_fn: Type[nn.Module] = nn.ReLU,
+        *args,
+        **kwargs,
     ):
         super(MLP_ARENA2D_POLICY, self).__init__(
             observation_space,
@@ -107,6 +106,7 @@ class MLP_ARENA2D_POLICY(ActorCriticPolicy):
     def _build_mlp_extractor(self) -> None:
         self.mlp_extractor = MLP_ARENA2D(64)
 
+
 class AGENT_1(BaseFeaturesExtractor):
     """
     Custom Convolutional Neural Network to serve as feature extractor ahead of the policy and value network.
@@ -118,7 +118,7 @@ class AGENT_1(BaseFeaturesExtractor):
     """
 
     def __init__(self, observation_space: gym.spaces.Box, features_dim: int = 128):
-        super(AGENT_1, self).__init__(observation_space, features_dim+_RS)
+        super(AGENT_1, self).__init__(observation_space, features_dim + _RS)
 
         self.cnn = nn.Sequential(
             nn.Conv1d(1, 32, 5, 2),
@@ -137,7 +137,6 @@ class AGENT_1(BaseFeaturesExtractor):
             nn.ReLU(),
         )
 
-
     def forward(self, observations: th.Tensor) -> th.Tensor:
         """
         :return: (th.Tensor),
@@ -147,9 +146,7 @@ class AGENT_1(BaseFeaturesExtractor):
         robot_state = observations[:, -_RS:]
 
         extracted_features = self.fc_1(self.cnn(laser_scan))
-        features = th.cat((extracted_features, robot_state), 1)
-
-        return features
+        return th.cat((extracted_features, robot_state), 1)
 
 
 """
@@ -158,10 +155,13 @@ and value network.
 
 :constant policy_drl_local_planner: (dict)
 """
-policy_kwargs_agent_1 = dict(features_extractor_class=AGENT_1,
-                             features_extractor_kwargs=dict(features_dim=256),
-                             net_arch=[dict(vf=[64], pi=[64])], 
-                             activation_fn=th.nn.ReLU)
+policy_kwargs_agent_1 = dict(
+    features_extractor_class=AGENT_1,
+    features_extractor_kwargs=dict(features_dim=256),
+    net_arch=[dict(vf=[64], pi=[64])],
+    activation_fn=th.nn.ReLU,
+)
+
 
 class AGENT_2(BaseFeaturesExtractor):
     """
@@ -175,7 +175,7 @@ class AGENT_2(BaseFeaturesExtractor):
     """
 
     def __init__(self, observation_space: gym.spaces.Box, features_dim: int = 128):
-        super(AGENT_2, self).__init__(observation_space, features_dim+_RS)
+        super(AGENT_2, self).__init__(observation_space, features_dim + _RS)
 
         self.cnn = nn.Sequential(
             nn.Conv1d(1, 32, 5, 2),
@@ -205,9 +205,8 @@ class AGENT_2(BaseFeaturesExtractor):
         robot_state = observations[:, -_RS:]
 
         extracted_features = self.fc_1(self.cnn(laser_scan))
-        features = th.cat((extracted_features, robot_state), 1)
+        return th.cat((extracted_features, robot_state), 1)
 
-        return features
 
 """
 Global constant to be passed as an argument to the PPO of Stable-Baselines3 in order to build both the policy
@@ -215,10 +214,13 @@ and value network.
 
 :constant policy_drl_local_planner: (dict)
 """
-policy_kwargs_agent_2 = dict(features_extractor_class=AGENT_2,
-                             features_extractor_kwargs=dict(features_dim=256),
-                             net_arch=[dict(vf=[128], pi=[128])], 
-                             activation_fn=th.nn.ReLU)
+policy_kwargs_agent_2 = dict(
+    features_extractor_class=AGENT_2,
+    features_extractor_kwargs=dict(features_dim=256),
+    net_arch=[dict(vf=[128], pi=[128])],
+    activation_fn=th.nn.ReLU,
+)
+
 
 class AGENT_3(BaseFeaturesExtractor):
     """
@@ -230,7 +232,7 @@ class AGENT_3(BaseFeaturesExtractor):
     """
 
     def __init__(self, observation_space: gym.spaces.Box, features_dim: int = 128):
-        super(AGENT_3, self).__init__(observation_space, features_dim+_RS)
+        super(AGENT_3, self).__init__(observation_space, features_dim + _RS)
 
         self.cnn = nn.Sequential(
             nn.Conv1d(1, 32, 5, 2),
@@ -251,10 +253,7 @@ class AGENT_3(BaseFeaturesExtractor):
             nn.ReLU(),
         )
 
-        self.fc_2 = nn.Sequential(
-            nn.Linear(256, features_dim),
-            nn.ReLU()
-        )
+        self.fc_2 = nn.Sequential(nn.Linear(256, features_dim), nn.ReLU())
 
     def forward(self, observations: th.Tensor) -> th.Tensor:
         """
@@ -265,10 +264,8 @@ class AGENT_3(BaseFeaturesExtractor):
         robot_state = observations[:, -_RS:]
 
         extracted_features = self.fc_2(self.fc_1(self.cnn(laser_scan)))
-        features = th.cat((extracted_features, robot_state), 1)
-
         # return self.fc_2(features)
-        return features
+        return th.cat((extracted_features, robot_state), 1)
 
 
 """
@@ -277,10 +274,13 @@ and value network.
 
 :constant policy_drl_local_planner: (dict)
 """
-policy_kwargs_agent_3 = dict(features_extractor_class=AGENT_3,
-                             features_extractor_kwargs=dict(features_dim=(128)),
-                             net_arch=[dict(vf=[64, 64], pi=[64, 64])], 
-                             activation_fn=th.nn.ReLU)
+policy_kwargs_agent_3 = dict(
+    features_extractor_class=AGENT_3,
+    features_extractor_kwargs=dict(features_dim=(128)),
+    net_arch=[dict(vf=[64, 64], pi=[64, 64])],
+    activation_fn=th.nn.ReLU,
+)
+
 
 class AGENT_4(BaseFeaturesExtractor):
     """
@@ -328,9 +328,7 @@ class AGENT_4(BaseFeaturesExtractor):
         robot_state = observations[:, -_RS:]
 
         extracted_features = self.fc(self.cnn(laser_scan))
-        features = th.cat((extracted_features, robot_state), 1)
-
-        return features
+        return th.cat((extracted_features, robot_state), 1)
 
 
 """
@@ -339,10 +337,12 @@ and value network.
 
 :constant policy_kwargs_navrep: (dict)
 """
-policy_kwargs_agent_4 = dict(features_extractor_class=AGENT_4,
-                             features_extractor_kwargs=dict(features_dim=32),
-                             net_arch=[dict(vf=[64, 64], pi=[64, 64])], 
-                             activation_fn=th.nn.ReLU)
+policy_kwargs_agent_4 = dict(
+    features_extractor_class=AGENT_4,
+    features_extractor_kwargs=dict(features_dim=32),
+    net_arch=[dict(vf=[64, 64], pi=[64, 64])],
+    activation_fn=th.nn.ReLU,
+)
 
 
 """
@@ -351,8 +351,9 @@ and value network.
 
 :constant policy_kwargs_navrep: (dict)
 """
-policy_kwargs_agent_5 = dict(net_arch=[128, dict(pi=[64], vf=[64])], 
-                            activation_fn=th.nn.ReLU)
+policy_kwargs_agent_5 = dict(
+    net_arch=[128, dict(pi=[64], vf=[64])], activation_fn=th.nn.ReLU
+)
 
 """
 Global constant to be passed as an argument to the PPO of Stable-Baselines3 in order to build both the policy
@@ -360,8 +361,9 @@ and value network.
 
 :constant policy_kwargs_navrep: (dict)
 """
-policy_kwargs_agent_6 = dict(net_arch=[128, 64, dict(pi=[64, 64], vf=[64, 64])], 
-                             activation_fn=th.nn.ReLU)
+policy_kwargs_agent_6 = dict(
+    net_arch=[128, 64, dict(pi=[64, 64], vf=[64, 64])], activation_fn=th.nn.ReLU
+)
 
 """
 Global constant to be passed as an argument to the PPO of Stable-Baselines3 in order to build both the policy
@@ -369,8 +371,9 @@ and value network.
 
 :constant policy_kwargs_navrep: (dict)
 """
-policy_kwargs_agent_7 = dict(net_arch=[128, 64, 64, dict(pi=[64, 64], vf=[64, 64])], 
-                             activation_fn=th.nn.ReLU)
+policy_kwargs_agent_7 = dict(
+    net_arch=[128, 64, 64, dict(pi=[64, 64], vf=[64, 64])], activation_fn=th.nn.ReLU
+)
 
 """
 Global constant to be passed as an argument to the PPO of Stable-Baselines3 in order to build both the policy
@@ -378,8 +381,9 @@ and value network.
 
 :constant policy_kwargs_navrep: (dict)
 """
-policy_kwargs_agent_8 = dict(net_arch=[64, 64, 64, dict(pi=[64, 64], vf=[64, 64])], 
-                             activation_fn=th.nn.ReLU)
+policy_kwargs_agent_8 = dict(
+    net_arch=[64, 64, 64, dict(pi=[64, 64], vf=[64, 64])], activation_fn=th.nn.ReLU
+)
 
 """
 Global constant to be passed as an argument to the PPO of Stable-Baselines3 in order to build both the policy
@@ -387,10 +391,13 @@ and value network.
 
 :constant policy_drl_local_planner: (dict)
 """
-policy_kwargs_agent_9 = dict(features_extractor_class=AGENT_1,
-                             features_extractor_kwargs=dict(features_dim=256),
-                             net_arch=[dict(vf=[64, 64], pi=[64, 64])], 
-                             activation_fn=th.nn.ReLU)
+policy_kwargs_agent_9 = dict(
+    features_extractor_class=AGENT_1,
+    features_extractor_kwargs=dict(features_dim=256),
+    net_arch=[dict(vf=[64, 64], pi=[64, 64])],
+    activation_fn=th.nn.ReLU,
+)
+
 
 class AGENT_10(BaseFeaturesExtractor):
     """
@@ -434,20 +441,8 @@ class AGENT_10(BaseFeaturesExtractor):
         robot_state = observations[:, -_RS:]
 
         extracted_features = self.fc(self.cnn(laser_scan))
-        features = th.cat((extracted_features, robot_state), 1)
+        return th.cat((extracted_features, robot_state), 1)
 
-        return features
-
-"""
-Global constant to be passed as an argument to the PPO of Stable-Baselines3 in order to build both the policy
-and value network.
-
-:constant policy_kwargs_navrep: (dict)
-"""
-policy_kwargs_agent_10 = dict(features_extractor_class=AGENT_10,
-                              features_extractor_kwargs=dict(features_dim=512),
-                              net_arch=[dict(vf=[128], pi=[128])], 
-                              activation_fn=th.nn.ReLU)
 
 """
 Global constant to be passed as an argument to the PPO of Stable-Baselines3 in order to build both the policy
@@ -455,10 +450,12 @@ and value network.
 
 :constant policy_kwargs_navrep: (dict)
 """
-policy_kwargs_agent_11 = dict(features_extractor_class=AGENT_10,
-                              features_extractor_kwargs=dict(features_dim=512),
-                              net_arch=[dict(vf=[64, 64], pi=[64, 64])], 
-                              activation_fn=th.nn.ReLU)
+policy_kwargs_agent_10 = dict(
+    features_extractor_class=AGENT_10,
+    features_extractor_kwargs=dict(features_dim=512),
+    net_arch=[dict(vf=[128], pi=[128])],
+    activation_fn=th.nn.ReLU,
+)
 
 """
 Global constant to be passed as an argument to the PPO of Stable-Baselines3 in order to build both the policy
@@ -466,10 +463,12 @@ and value network.
 
 :constant policy_kwargs_navrep: (dict)
 """
-policy_kwargs_agent_12 = dict(features_extractor_class=AGENT_10,
-                              features_extractor_kwargs=dict(features_dim=64),
-                              net_arch=[dict(vf=[64, 64], pi=[64, 64])], 
-                              activation_fn=th.nn.ReLU)
+policy_kwargs_agent_11 = dict(
+    features_extractor_class=AGENT_10,
+    features_extractor_kwargs=dict(features_dim=512),
+    net_arch=[dict(vf=[64, 64], pi=[64, 64])],
+    activation_fn=th.nn.ReLU,
+)
 
 """
 Global constant to be passed as an argument to the PPO of Stable-Baselines3 in order to build both the policy
@@ -477,8 +476,12 @@ and value network.
 
 :constant policy_kwargs_navrep: (dict)
 """
-policy_kwargs_agent_13 = dict(net_arch=[64, 64, dict(pi=[64, 32], vf=[64, 32])], 
-                              activation_fn=th.nn.ReLU)
+policy_kwargs_agent_12 = dict(
+    features_extractor_class=AGENT_10,
+    features_extractor_kwargs=dict(features_dim=64),
+    net_arch=[dict(vf=[64, 64], pi=[64, 64])],
+    activation_fn=th.nn.ReLU,
+)
 
 """
 Global constant to be passed as an argument to the PPO of Stable-Baselines3 in order to build both the policy
@@ -486,8 +489,9 @@ and value network.
 
 :constant policy_kwargs_navrep: (dict)
 """
-policy_kwargs_agent_14 = dict(net_arch=[64, 64, dict(pi=[64], vf=[64])], 
-                              activation_fn=th.nn.ReLU)
+policy_kwargs_agent_13 = dict(
+    net_arch=[64, 64, dict(pi=[64, 32], vf=[64, 32])], activation_fn=th.nn.ReLU
+)
 
 """
 Global constant to be passed as an argument to the PPO of Stable-Baselines3 in order to build both the policy
@@ -495,8 +499,9 @@ and value network.
 
 :constant policy_kwargs_navrep: (dict)
 """
-policy_kwargs_agent_15 = dict(net_arch=[64, 64, 64, 64, dict(pi=[64, 64], vf=[64, 64])], 
-                              activation_fn=th.nn.ReLU)
+policy_kwargs_agent_14 = dict(
+    net_arch=[64, 64, dict(pi=[64], vf=[64])], activation_fn=th.nn.ReLU
+)
 
 """
 Global constant to be passed as an argument to the PPO of Stable-Baselines3 in order to build both the policy
@@ -504,8 +509,9 @@ and value network.
 
 :constant policy_kwargs_navrep: (dict)
 """
-policy_kwargs_agent_16 = dict(net_arch=[64, 64, 64, 64, dict(pi=[64, 64, 64], vf=[64, 64, 64])], 
-                              activation_fn=th.nn.ReLU)
+policy_kwargs_agent_15 = dict(
+    net_arch=[64, 64, 64, 64, dict(pi=[64, 64], vf=[64, 64])], activation_fn=th.nn.ReLU
+)
 
 """
 Global constant to be passed as an argument to the PPO of Stable-Baselines3 in order to build both the policy
@@ -513,10 +519,10 @@ and value network.
 
 :constant policy_kwargs_navrep: (dict)
 """
-policy_kwargs_agent_17 = dict(features_extractor_class=AGENT_10,
-                              features_extractor_kwargs=dict(features_dim=64),
-                              net_arch=[dict(vf=[64, 64, 64], pi=[64, 64, 64])], 
-                              activation_fn=th.nn.ReLU)
+policy_kwargs_agent_16 = dict(
+    net_arch=[64, 64, 64, 64, dict(pi=[64, 64, 64], vf=[64, 64, 64])],
+    activation_fn=th.nn.ReLU,
+)
 
 """
 Global constant to be passed as an argument to the PPO of Stable-Baselines3 in order to build both the policy
@@ -524,10 +530,12 @@ and value network.
 
 :constant policy_kwargs_navrep: (dict)
 """
-policy_kwargs_agent_18 = dict(features_extractor_class=AGENT_4,
-                              features_extractor_kwargs=dict(features_dim=64),
-                              net_arch=[dict(vf=[64, 64, 64], pi=[64, 64, 64])], 
-                              activation_fn=th.nn.ReLU)
+policy_kwargs_agent_17 = dict(
+    features_extractor_class=AGENT_10,
+    features_extractor_kwargs=dict(features_dim=64),
+    net_arch=[dict(vf=[64, 64, 64], pi=[64, 64, 64])],
+    activation_fn=th.nn.ReLU,
+)
 
 """
 Global constant to be passed as an argument to the PPO of Stable-Baselines3 in order to build both the policy
@@ -535,8 +543,12 @@ and value network.
 
 :constant policy_kwargs_navrep: (dict)
 """
-policy_kwargs_agent_19 = dict(net_arch=[128, 128, 128, dict(pi=[64, 64], vf=[64, 64])], 
-                              activation_fn=th.nn.ReLU)
+policy_kwargs_agent_18 = dict(
+    features_extractor_class=AGENT_4,
+    features_extractor_kwargs=dict(features_dim=64),
+    net_arch=[dict(vf=[64, 64, 64], pi=[64, 64, 64])],
+    activation_fn=th.nn.ReLU,
+)
 
 """
 Global constant to be passed as an argument to the PPO of Stable-Baselines3 in order to build both the policy
@@ -544,5 +556,17 @@ and value network.
 
 :constant policy_kwargs_navrep: (dict)
 """
-policy_kwargs_agent_20 = dict(net_arch=[128, 128, 128, 128, dict(pi=[64, 64, 64], vf=[64, 64, 64])], 
-                              activation_fn=th.nn.ReLU)
+policy_kwargs_agent_19 = dict(
+    net_arch=[128, 128, 128, dict(pi=[64, 64], vf=[64, 64])], activation_fn=th.nn.ReLU
+)
+
+"""
+Global constant to be passed as an argument to the PPO of Stable-Baselines3 in order to build both the policy
+and value network.
+
+:constant policy_kwargs_navrep: (dict)
+"""
+policy_kwargs_agent_20 = dict(
+    net_arch=[128, 128, 128, 128, dict(pi=[64, 64, 64], vf=[64, 64, 64])],
+    activation_fn=th.nn.ReLU,
+)

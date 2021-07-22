@@ -128,7 +128,7 @@ class StagedRandomTask(RandomTask):
         self.ns_prefix = "" if ns == '' else "/"+ns+"/"
 
         self._curr_stage = start_stage
-        self._stages = dict()
+        self._stages = {}
         self._PATHS = PATHS
         self._read_stages_from_yaml()
 
