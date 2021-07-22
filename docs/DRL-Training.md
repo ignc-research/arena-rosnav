@@ -57,7 +57,7 @@ train_agent.py [agent flag] [agent_name | unique_agent_name | custom mlp params]
 | ``` train_agent.py```|```--agent```                     | *agent_name* ([see below](#training-with-a-predefined-dnn))   | initializes a predefined network from scratch
 |                      |```--load ```                     | *unique_agent_name* ([see below](#load-a-dnn-for-training))   | loads agent to the given name
 |                      |```--custom-mlp```                | _custom_mlp_params_ ([see below](#training-with-a-custom-mlp))| initializes custom MLP according to given arguments 
-|                      |```--num_envs```            | *integer* | number of environments to collect experiences from for training (for more information on multiprocessed training, refer to [Multiprocessed Training](#multiprocessed-training))
+
 
 _Custom Multilayer Perceptron_ parameters will only be considered when ```--custom-mlp``` was set!
 |  Custom Mlp Flags | Syntax                | Description                                   |
@@ -67,18 +67,21 @@ _Custom Multilayer Perceptron_ parameters will only be considered when ```--cust
 |  ```--vf```       | ```{num}-{num}-...``` |architecture of the latent value network       |
 |  ```--act_fn ```  | ```{relu, sigmoid or tanh}```|activation function to be applied after each hidden layer |
 
+
 |  Optional Flags        | Description                                    |
 | ---------------------- | -----------------------------------------------|
-|  ```--n    {num}```    | timesteps in total to be generated for training|
+| ```--config {string}```, defaults to *"default"*|Looks for the given config file name in [../arena_local_planner_drl/configs/hyperparameters](/arena-rosnav/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/configs/hyperparameters) to load the configurations from |
+|  ```--n {integer}```    | timesteps in total to be generated for training|
 |  ```--tb```            | enables tensorboard logging                    |
 |  ```-log```, ```--eval_log```| enables logging of evaluation episodes   |
 |  ```--no-gpu```        | disables training with GPU                     |
+|```--num_envs {integer}``` | number of environments to collect experiences from for training (for more information refer to [Multiprocessed Training](#multiprocessed-training))
 
 #### Examples
 
 ##### Training with a predefined DNN
 
-Currently you can choose between 3 different Deep Neural Networks each of which have been object of research projects:
+Currently you can choose between several different Deep Neural Networks each of which have been object of research projects, for example:
 
 | Agent name    | Inspired by   | 
 | ------------- | ------------- | 
@@ -90,6 +93,8 @@ e.g. training with the MLP architecture from arena2D:
 ```
 train_agent.py --agent MLP_ARENA2D
 ```
+
+You can find the most recently implemented neural network architectures in: [custom_policy.py](/arena-rosnav/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/scripts/custom_policy.py)
 
 ##### Load a DNN for training
 
@@ -218,7 +223,7 @@ The reward functions are defined in: (alternatively, [click here](../arena_navig
 ```
 ../arena_local_planner_drl/rl_agent/utils/reward.py
 ```
-At present, one can chose between two reward functions which can be set at the hyperparameter section of the training script:
+At present, one can chose between five reward functions which can be set in the :
 
   
 <table>
