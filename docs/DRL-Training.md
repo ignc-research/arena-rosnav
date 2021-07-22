@@ -372,7 +372,7 @@ run_agent.py --load [agent_name] -s [scenario_name] -v [number] [optional flag]
 |                      |(optional)```-v``` or ```--verbose```| *0 or 1*                              | verbose level
 |                      |(optional) ```--no-gpu```           | *None*                                | disables the gpu for the evaluation
 | |(optional) ```--num_eps``` | *Integer*, defaults to 100 | number of episodes the agent/s get/s challenged |
-| | (optional) ```--max_steps```| *Integer*, defaults to np.inf | max amount of actions per episode, before the simulation is resetted automatically |
+| | (optional) ```--max_steps```| *Integer*, defaults to np.inf | max amount of actions per episode, before the episode is resetted automatically |
 
 
 - Example call:
