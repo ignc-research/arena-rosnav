@@ -40,7 +40,7 @@ poetry install
 
 rosws update
 
-echo "export PYTHONPATH=${PWD}:$PYTHONPATH" >> ~/.profile
+echo "export PYTHONPATH=${PWD}:\$PYTHONPATH" >> ~/.profile
 
 source ~/.profile
 poetry run catkin_make -C ../.. -DCMAKE_BUILD_TYPE=Release
