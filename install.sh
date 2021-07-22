@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 mkdir -p catkin_ws/src && cd catkin_ws/src
 git clone --depth 1 https://github.com/wittenator/arena-rosnav.git
@@ -43,4 +43,5 @@ rosws update
 source ~/.profile
 poetry run catkin_make -C ../.. -DCMAKE_BUILD_TYPE=Release
 
-source ../../devel/setup.sh
+echo "source ${PWD}/../../devel/setup.sh" >> ~/.profile
+source ~/.profile
