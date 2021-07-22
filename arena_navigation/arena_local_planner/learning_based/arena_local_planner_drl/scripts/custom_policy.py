@@ -10,6 +10,10 @@ from torch import nn
 from stable_baselines3.common.policies import ActorCriticPolicy
 from stable_baselines3.common.torch_layers import BaseFeaturesExtractor
 
+""" 
+_RS: Robot state size - placeholder for robot related inputs to the NN
+_L: Number of laser beams - placeholder for the laser beam data 
+"""
 _RS = 2  # robot state size
 
 ROBOT_SETTING_PATH = rospkg.RosPack().get_path("simulator_setup")

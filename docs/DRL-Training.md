@@ -23,7 +23,8 @@ As a fundament for our Deep Reinforcement Learning approaches [StableBaselines3]
     - [Hyperparameters](#hyperparameters)
     - [Reward Functions](#reward-functions)
     - [Training Curriculum](#training-curriculum)
-    - [Run the trained agent](#run-the-trained-agent)
+    - [Run the trained Agent](#run-the-trained-agent)
+      - [Sequential Evaluation of multiple Agents](#sequential-evaluation-of-multiple-agents)
     - [Important Directories](#important-directories)
 
 ### Quick Start
@@ -131,35 +132,45 @@ train_agent.py --custom-mlp --body 256-128 --pi 256 --vf 16 --act_fn relu
 
 
 #### Multiprocessed Training
-We provide for either testing and training purposes seperate launch scripts. 
+We provide for either testing and training purposes seperate launch scripts: 
 - [start_arena_flatland.launch](/arena-rosnav/arena_bringup/launch/start_arena_flatland.launch) encapsulates the simulation environment featuring the different intermediate planners in a single process. Training is also possible within this simulation.
 - [start_training.launch](../arena_bringup/launch/start_training.launch) depicts the slimer simulation version as we target a higher troughput here in order to be able to gather training data as fast as possible. The crucial feature of this launch file is that it is able to spawn an arbitrary number of environments to collect the rollouts with and thus allows for significant speedup through asynchronicity.
 
 **First terminal: Simulation**
 The first terminal is needed to run arena.
 
-Run these four commands:
-```                      
+Run these commands:
+```shell                      
 workon rosnav
-roslaunch arena_bringup start_training.launch train_mode:=true use_viz:=false task_mode:=random map_file:=map_small num_envs:=24
+roslaunch arena_bringup start_training.launch train_mode:=true use_viz:=false task_mode:=random map_file:=map_small num_envs:=4
 ```
 
 **Second terminal: Training script**
 A second terminal is needed to run the training script.
 
 - Run these four commands:
-```                 
+```shell                 
 workon rosnav
 roscd arena_local_planner_drl
 ```
 
 - Now, run one of the two commands below to start a training session:
-```
-python scripts/training/train_agent.py --load pretrained_ppo_mpc --n_envs 24 --eval_log 
-python scripts/training/train_agent.py --load pretrained_ppo_baseline --n_envs 24 --eval_log
+```shell
+python scripts/training/train_agent.py --load pretrained_ppo_mpc --n_envs 4 --eval_log 
+python scripts/training/train_agent.py --load pretrained_ppo_baseline --n_envs 4 --eval_log
 ```
 
 **Note**: Please inform yourself how many cores are provided by your processor in order to fully leverage local computing capabilities.
+
+**Third terminal: Visualization**
+A third terminal is needed in order to start rviz for visualization.
+
+- Run this command:
+```shell
+roslaunch arena_bringup visualization_training.launch ns:=*ENV NAME*
+```
+
+**Note**: The training environments start with prefix *sim_* and end with the index. For example: *sim_1*, *sim_2* and so on. The evaluation environment which is used during the periodical benchmarking in training can be shown with ```ns:=eval_sim```.
 
 **Ending a training session**
 
@@ -263,18 +274,39 @@ Exemplary training curriculum:
 | 5               |  10              | 10                 |
 | 6               |  13              | 13                 |
 
+For an explicit example, [click here](/arena-rosnav/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/configs/training_curriculum_map1small.yaml).
 
-### Run the trained agent
+### Run the trained Agent
 
 Now that you've trained your agent you surely want to deploy and evaluate it. For that purpose we've implemented a specific task mode in which you can specify your scenarios in a .json file. The agent will then be challenged according to the scenarios defined in the file. Please refer to https://github.com/ignc-research/arena-scenario-gui/ in order to read about the process of creating custom scenarios.
 
-- Firstly, you need to start the *simulation environment*:
-```
-roslaunch arena_bringup start_arena_flatland.launch map_file:="map1"  disable_scenario:="false" scenario_file:="eval/obstacle_map1_obs20.json"
-```
+As with the training script, one can start the testing simulation environment with either one of two launch scripts:
+- [start_arena_flatland.launch](/arena-rosnav/arena_bringup/launch/start_arena_flatland.launch): 
+  - Allows for evaluation in continuous simulation time (emulates real time) as well as in controlled time stepping with four different subgoal modes, consisting of 3 intermediate planner approaches (*spatial horizon, timed A-star, simple sample*) with the DRL agent acting as the local planner.
+  - Episode information can be logged via *rosbag* (refer to [document](/arena-rosnav/docs/eval_25042021.md))
+- [start_training.launch](../arena_bringup/launch/start_training.launch):
+  - Starts an evaluation environment in continuous simulation time (emulates real time) as well as in controlled time stepping with either the spatial horizon intermediate planner or the end goal being the only subgoal.
+  - One can test multiple agents sequentially with *run_script.py*. This feature is only realized with this launch file, as *start_arena_flatland.launch* starts an own plan manager which interfers with the plan manager of the run script. Both plan managers have their own goal radius and thus might detect an end of episode differently. This can mess up the logged statistics.
+  - Episode information can optionally be logged in a csv file by setting the ```--log``` flag for the run script dedicated plan manager to control the episodes.
+  
+</br>
 
-- Then, run the ```run_agent.py``` script with the desired scenario file:
-```python run_agent.py --load DRL_LOCAL_PLANNER_2021_03_22__19_33 --scenario obstacle_map1_obs20```
+Firstly, you need to start the *simulation environment*:
+```shell
+# Start the simulation with one of the launch files
+roslaunch arena_bringup start_arena_flatland.launch map_file:="map1"  disable_scenario:="false" scenario_file:="eval/obstacle_map1_obs20.json"
+
+roslaunch arena_bringup start_training.launch num_envs:=1 map_folder_name:=map1 train_mode:=false
+```
+**Note**:
+- The ```train_mode``` parameter determines if the simulation will run in emulated real time (where ```step_size``` and ```update_rate``` determine the simulation speed) or in the manipulating time stepping modus (via */step_world* rostopic).
+
+</br>
+
+Then, run the ```run_agent.py``` script with the desired scenario file:
+```shell
+python run_agent.py --load DRL_LOCAL_PLANNER_2021_03_22__19_33 --scenario obstacle_map1_obs20
+```
 
 **Generic program call**:
 ```
@@ -288,7 +320,8 @@ run_agent.py --load [agent_name] -s [scenario_name] -v [number] [optional flag]
 |                      |```-s``` or ```--scenario```      | *scenario_name* (as in *../scenario/eval/*)                       | loads the scenarios to the given .json file name
 |                      |(optional)```-v``` or ```--verbose```| *0 or 1*                              | verbose level
 |                      |(optional) ```--no-gpu```           | *None*                                | disables the gpu for the evaluation
-
+| |(optional) ```--num_eps``` | *Integer*, defaults to 100 | number of episodes the agent/s get/s challenged |
+| | (optional) ```--max_steps```| *Integer*, defaults to np.inf | max amount of actions per episode, before the simulation is resetted automatically |
 
 
 - Example call:
@@ -296,10 +329,17 @@ run_agent.py --load [agent_name] -s [scenario_name] -v [number] [optional flag]
 python run_agent.py --load DRL_LOCAL_PLANNER_2021_03_22__19_33 -s obstacle_map1_obs20
 ```
 **Notes**: 
-- Make sure that drl mode is activated in ```plan_fsm_param.yaml``` (*../arena-rosnav/arena_bringup/launch/plan_fsm_param.yaml*)
-- Make sure that the simulation speed doesn't overlap the agent's calculation time for an action (an obvious indicator: same action gets published multiple times successively and thus the agent moves unreasonably)
+- The ```--log``` flag should only be set with *start_training.launch* as simulation launcher as it requires the dedicated plan manager to control the episodes in order to log correct statistics.
+- *When running start_arena_flatland.launch*: Make sure that ```drl_mode``` is activated in [plan_fsm_param.yaml](../arena_bringup/launch/plan_fsm_param.yaml)
+- Make sure that the simulation speed doesn't overlap the agent's action calculation time (an obvious indicator: same action gets published multiple times successively and thus the agent moves unreasonably)
 - If your agent was trained with normalized observations, it's necessary to provide the *vec_normalize.pkl* 
 
+#### Sequential Evaluation of multiple Agents
+For the automatic testing of several agents in a single call, one can specify a list containing an arbitrary number of agent names in [run_script.py](/arena-rosnav/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/scripts/deployment/run_agent.py). 
+
+**Note**: 
+- Guaranteed execution of each agent is currently only provided with the *start_training.launch* as simulation launcher 
+- ```--load``` flag has to be set *None*, otherwise the script will only consider the agent provided with the flag.
 
 ### Important Directories
 

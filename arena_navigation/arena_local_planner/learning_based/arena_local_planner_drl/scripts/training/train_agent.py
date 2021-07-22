@@ -86,8 +86,8 @@ def get_paths(agent_name: str, args) -> dict:
     if args.load is None:
         os.makedirs(PATHS["model"])
     elif not os.path.isfile(
-            os.path.join(PATHS["model"], AGENT_NAME + ".zip")
-        ) and not os.path.isfile(os.path.join(PATHS["model"], "best_model.zip")):
+        os.path.join(PATHS["model"], AGENT_NAME + ".zip")
+    ) and not os.path.isfile(os.path.join(PATHS["model"], "best_model.zip")):
         raise FileNotFoundError(
             "Couldn't find model named %s.zip' or 'best_model.zip' in '%s'"
             % (AGENT_NAME, PATHS["model"])

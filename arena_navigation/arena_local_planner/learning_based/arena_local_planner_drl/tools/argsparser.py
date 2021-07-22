@@ -1,5 +1,6 @@
 import argparse
 import os
+import numpy as np
 
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.tools.custom_mlp_utils import (
     get_net_arch,
@@ -99,6 +100,20 @@ def run_agent_args(parser):
         default="scenario1",
         help="name of scenario file for deployment",
     )
+    parser.add_argument(
+        "--num_eps",
+        type=int,
+        metavar="[num episodes]",
+        default=100,
+        help="number of episodes the agent/s get/s challenged",
+    )
+    parser.add_argument(
+        "--max_steps",
+        type=int,
+        metavar="[max steps per episode]",
+        default=np.inf,
+        help="max amount of actions per episode before the simulation is resetted",
+    )
     parser.add_argument("-v", "--verbose", choices=["0", "1"], default="1")
 
 
@@ -163,8 +178,6 @@ def process_training_args(parsed_args):
 def process_run_agent_args(parsed_args):
     if parsed_args.no_gpu:
         os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
-    if parsed_args.load is None:
-        raise Exception("No agent name was given!")
 
 
 def parse_training_args(args=None, ignore_unknown=False):
