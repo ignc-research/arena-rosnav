@@ -156,14 +156,16 @@ void PlanManager::execFSMCallback(const ros::TimerEvent &e)
     }
     //set robot start state
     start_state_.reset(new RobotState(cur_state_->pose2d, cur_state_->theta, cur_state_->vel2d, cur_state_->w));
-    
+    // DEBUG
     // execute global planning
     bool global_plan_success = planner_collector_->generate_global_plan(*start_state_, *end_state_);
-
+    
     if (global_plan_success)
     {
       // success:go to REPLAN_MID state, going to do mid horizon replan(subgoal)
-      visualization_->drawGlobalPath(planner_collector_->global_path_, 0.03, Eigen::Vector4d(0.5, 0.5, 0.5, 0.6));
+      std::thread t(&PlanningVisualization::drawGlobalPath,visualization_ ,planner_collector_->global_path_, 0.03, Eigen::Vector4d(0.5, 0.5, 0.5, 0.6),0);
+      // visualization_->drawGlobalPath(planner_collector_->global_path_, 0.03, Eigen::Vector4d(0.5, 0.5, 0.5, 0.6));
+      t.detach();
       changeFSMExecState(REPLAN_MID, "FSM");
     }
     else

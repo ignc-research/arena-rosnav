@@ -20,6 +20,7 @@
 #include <arena_plan_manager/robot_state.h>
 #include <arena_plan_manager/plan_collector.h>
 #include <plan_visualization/planning_visualization.h>
+#include <thread>
 
 
 
