@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CURSHELL=$(basename $(echo $0))
+CURSHELL=$(basename $0)
 
 mkdir -p catkin_ws/src && cd catkin_ws/src
 git clone --depth 1 https://github.com/wittenator/arena-rosnav.git
@@ -19,8 +19,8 @@ sudo apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31
 sudo aptitude update
 sudo aptitude -y install ros-noetic-desktop-full
 
-echo "source /opt/ros/noetic/setup.bash" >> ~/.$(echo $CURSHELL)rc
-source ~/.$(echo $CURSHELL)rc
+echo "source /opt/ros/noetic/setup.bash" >> ~/.${CURSHELL}rc
+source ~/.${CURSHELL}rc
 
 sudo aptitude -y install python3-rosdep python3-rosinstall python3-rosinstall-generator python3-wstool build-essential
 sudo rosdep init
@@ -42,10 +42,10 @@ poetry install
 
 rosws update
 
-echo "export PYTHONPATH=${PWD}:\$PYTHONPATH" >> ~/.$(echo $CURSHELL)rc
+echo "export PYTHONPATH=${PWD}:\$PYTHONPATH" >> ~/.${CURSHELL}rc
 
-source ~/.$(echo $CURSHELL)rc
+source ~/.${CURSHELL}rc
 poetry run catkin_make -C ../.. -DCMAKE_BUILD_TYPE=Release
 
-echo "source $(readlink -f ${PWD}/../../devel/setup.sh)" >> ~/.$(echo $CURSHELL)rc
-source ~/.$(echo $CURSHELL)rc
+echo "source $(readlink -f ${PWD}/../../devel/setup.sh)" >> ~/.${CURSHELL}rc
+source ~/.${CURSHELL}rc
