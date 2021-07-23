@@ -19,7 +19,7 @@ sudo apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31
 sudo aptitude update
 sudo aptitude -y install ros-noetic-desktop-full
 
-echo "source /opt/ros/noetic/setup.bash" >> ~/.${CURSHELL}rc
+echo "source /opt/ros/noetic/setup.${CURSHELL}" >> ~/.${CURSHELL}rc
 source ~/.${CURSHELL}rc
 
 sudo aptitude -y install python3-rosdep python3-rosinstall python3-rosinstall-generator python3-wstool build-essential
