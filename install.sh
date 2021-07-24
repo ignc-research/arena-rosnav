@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CURSHELL=$(basename $0)
+CURSHELL=$(ps -p $$ -oargs=)
 
 echo $CURSHELL
 
