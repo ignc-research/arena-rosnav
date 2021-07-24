@@ -54,7 +54,7 @@ rosws update
 echo "export PYTHONPATH=${PWD}:\$PYTHONPATH" >> ~/.${CURSHELL}rc
 
 source ~/.${CURSHELL}rc
-poetry run catkin_make -C ../.. -DCMAKE_BUILD_TYPE=Release
+poetry run catkin_make -C ../.. -DCMAKE_BUILD_TYPE=Debug
 
 echo "source $(readlink -f ${PWD}/../../devel/setup.sh)" >> ~/.${CURSHELL}rc
 source ~/.${CURSHELL}rc
