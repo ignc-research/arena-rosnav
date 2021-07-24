@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CURSHELL=$(ps -p $$ -oargs=)
+CURSHELL=$(basename $(readlink /proc/$$/exe))
 
 echo $CURSHELL
 
