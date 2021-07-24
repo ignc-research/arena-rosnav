@@ -2,6 +2,8 @@
 
 CURSHELL=$(basename $0)
 
+echo $CURSHELL
+
 mkdir -p catkin_ws/src && cd catkin_ws/src
 git clone --depth 1 https://github.com/wittenator/arena-rosnav.git
 cd arena-rosnav
