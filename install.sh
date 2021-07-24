@@ -4,14 +4,9 @@ if test -n "$ZSH_VERSION"; then
   CURSHELL=zsh
 elif test -n "$BASH_VERSION"; then
   CURSHELL=bash
-elif test -n "$KSH_VERSION"; then
-  CURSHELL=ksh
-elif test -n "$FCEDIT"; then
-  CURSHELL=ksh
-elif test -n "$PS3"; then
-  CURSHELL=unknown
 else
-  CURSHELL=sh
+  echo "Currently only Bash and ZSH are supported for an automatic install. Please refer to the manual installation if you use any other shell."
+  exit 1
 fi
 
 echo $CURSHELL
