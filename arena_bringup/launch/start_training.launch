@@ -1,11 +1,9 @@
 <launch>
 <!-- map folder -->
   <!-- <arg name="ns_prefix"       value="sim" />
-
   <arg name="train_mode"      default="true" />
   <arg name="num_envs"        default="1" />
   <arg name="map_folder_name" default="map_empty" />
-
   <rosparam file="$(find arena_bringup)/launch/start_flatland.yaml" command="load" />
   <arg name="map_path" default="$(find simulator_setup)/maps/$(arg map_folder_name)/map.yaml" />
   <param name="world_path" value="$(find simulator_setup)/maps/$(arg map_folder_name)/map.world.yaml" /> -->
@@ -45,8 +43,8 @@
   <param name="world_path" value="$(find simulator_setup)/maps/$(arg map_folder_name)/map.world.yaml" />
   <param name="show_viz" value="$(arg show_viz)"/>
   <param name="viz_pub_rate" value="$(arg viz_pub_rate)"/>
-  <param name="robot_action_rate"     value="10"/>
-  <param name="laser_update_rate"     value="10"/>
+  <param name="robot_action_rate"     value="1"/>
+  <param name="laser_update_rate"     value="1"/>
 
 
   <!-- map server-->
