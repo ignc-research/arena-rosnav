@@ -1,125 +1,108 @@
 <launch>
-    <arg name="ns"              />
-    <arg name="max_vel"         value="3.0" />
-    <arg name="max_acc"         value="2.0" />
-    <arg name="max_jerk"        value="4.0" />
-    <arg name="lambda_heu"      value="0.1" />
-    
-    <arg name="plan_horizon"    value=""/>
-    
+  <param name="use_sim_time" value="true"/>
 
-    <!-- arena_plan_manager -->
-    <node pkg="arena_intermediate_planner" ns="$(arg ns)" name="inter_planner" type="arena_intermediate_planner" output="screen">
-        <!-- <param name="$(arg plan_horizon)/train_mode" value="$(arg train_mode)"/> -->
-         <!-- Global plan: flags -->
-        <param name="$(arg plan_horizon)/global_planner/use_astar"              value="true"/>
-        <param name="$(arg plan_horizon)/global_planner/use_kino_astar"         value="true" />
-        <param name="$(arg plan_horizon)/global_planner/use_oneshot"            value="true" />
-        <param name="$(arg plan_horizon)/global_planner/use_optimization_esdf"  value="true" />
-        <param name="$(arg plan_horizon)/global_planner/use_optimization_astar" value="true" />
-        
+  <arg name="train_mode"       default="false"/>
+  <param name="train_mode" value="$(arg train_mode)" />
+  
+  <arg name="local_planner"   default="teb"/> 
+  <arg name="rviz_file"       default="nav_LP"/>
+  <arg name="disable_scenario"    default="true"/>
+  <arg name="scenario_file"   default="empty_map.json"/>
+  <arg name="reset"   default="true"/>
 
-        <!-- Global plan: Landmark -->
-        <param name="$(arg plan_horizon)/global_planner/rou_thresh"             value="15.0" />
-        <param name="$(arg plan_horizon)/global_planner/dist_tolerance"         value="1.0" />
-        <param name="$(arg plan_horizon)/global_planner/dist_next_wp"           value="3.0" />
-       
-        
-        <!-- b-spline -->
-        <param name="$(arg plan_horizon)/b_spline/max_vel"                      value="$(arg max_vel)"/>
-        <param name="$(arg plan_horizon)/b_spline/max_acc"                      value="$(arg max_acc)"/>
-        <param name="$(arg plan_horizon)/b_spline/max_jerk"                     value="$(arg max_jerk)"/>
-        <param name="$(arg plan_horizon)/b_spline/control_points_distance"      value="0.5"             type="double"/>
-        <param name="$(arg plan_horizon)/b_spline/feasibility_tolerance"        value="0.05"             type="double"/>
-        <param name="$(arg plan_horizon)/b_spline/planning_horizon"             value="7.5"             type="double"/>
+  <!-- To make the training more efficient make sure this step_size*laser_update_rate == 1  -->
+  <arg name="step_size" default="0.01"/>
+  <arg name="update_rate" default="250"/>
+  <arg name="show_viz"  default="true"/>
+  <arg name="viz_pub_rate" default="30" />
+  <arg name="use_rviz" default="true"/>
+  
+  <param name="update_rate" value="$(arg update_rate)" />
+  <param name="step_size" value="$(arg step_size)" /> 
+  <param name="show_viz" value="$(arg show_viz)"/>
+  <param name="viz_pub_rate" value="$(arg viz_pub_rate)"/>
+  <param name="use_rviz"       value="$(arg use_rviz)"/>
+  <param name="single_env"       value="true"/>
 
+  <!-- the folder name under the path simulator_setup/maps  -->
+  <arg name="map_file"        default="map_empty"/>
+  <!-- <arg name="map_folder_name" default="map_empty" /> -->
+  <arg name="map_path" default="$(find simulator_setup)/maps/$(arg map_file)/map.yaml" />
+  <param name="world_path" value="$(find simulator_setup)/maps/$(arg map_file)/map.world.yaml" />
+  <param name="map_layer_path" value="$(find simulator_setup)/maps/$(arg map_file)/map_layer.yaml" />
+  <param name="map_file" value="$(arg map_file)" />
 
-         <!-- trajectory optimization: bspline Astar -->
-        <param name="$(arg plan_horizon)/optimization_astar/lambda_smooth"            value="1.0" type="double"/>
-        <param name="$(arg plan_horizon)/optimization_astar/lambda_collision"         value="0.5" type="double"/>
-        <param name="$(arg plan_horizon)/optimization_astar/lambda_feasibility"       value="0.1" type="double"/>
-        <param name="$(arg plan_horizon)/optimization_astar/lambda_fitness"           value="1.0" type="double"/>
-        
-        <param name="$(arg plan_horizon)/optimization_astar/dist0"                    value="0.5" type="double"/>
-        <param name="$(arg plan_horizon)/optimization_astar/max_vel"                  value="$(arg max_vel)" type="double"/>
-        <param name="$(arg plan_horizon)/optimization_astar/max_acc"                  value="$(arg max_acc)" type="double"/>
-        <param name="$(arg plan_horizon)/optimization_astar/order"                    value="3" type="int"/>
-        
+  <!-- the velocity of randomly genelized obstacles  -->
+  <arg name="obs_vel" default="0.3" />
+  <param name="obs_vel" value="$(arg obs_vel)" /> 
+ 
 
-        <!-- trajectory optimization: bspline ESDF -->
-        <param name="$(arg plan_horizon)/optimization_ESDF/lambda1"                  value="10.0" type="double"/>
-        <param name="$(arg plan_horizon)/optimization_ESDF/lambda2"                  value="5.0" type="double"/>
-        <param name="$(arg plan_horizon)/optimization_ESDF/lambda3"                  value="0.00001" type="double"/>
-        <param name="$(arg plan_horizon)/optimization_ESDF/lambda4"                  value="0.01" type="double"/>
-        <param name="$(arg plan_horizon)/optimization_ESDF/lambda5"                  value="1.5" type="double"/>
-        <param name="$(arg plan_horizon)/optimization_ESDF/lambda6"                  value="10.0" type="double"/>
-        <param name="$(arg plan_horizon)/optimization_ESDF/lambda7"                  value="100.0" type="double"/>
-        <param name="$(arg plan_horizon)/optimization_ESDF/dist0"                    value="0.4" type="double"/>
-        <param name="$(arg plan_horizon)/optimization_ESDF/max_vel"                  value="$(arg max_vel)" type="double"/>
-        <param name="$(arg plan_horizon)/optimization_ESDF/max_acc"                  value="$(arg max_acc)" type="double"/>
-
-        <param name="$(arg plan_horizon)/optimization_ESDF/algorithm1"               value="15" type="int"/>
-        <param name="$(arg plan_horizon)/optimization_ESDF/algorithm2"               value="11" type="int"/>
-
-        <param name="$(arg plan_horizon)/optimization_ESDF/max_iteration_num1"       value="2" type="int"/>
-        <param name="$(arg plan_horizon)/optimization_ESDF/max_iteration_num2"       value="300" type="int"/>
-        <param name="$(arg plan_horizon)/optimization_ESDF/max_iteration_num3"       value="200" type="int"/>
-        <param name="$(arg plan_horizon)/optimization_ESDF/max_iteration_num4"       value="200" type="int"/>
-
-        <param name="$(arg plan_horizon)/optimization_ESDF/max_iteration_time1"      value="0.0001" type="double"/>
-        <param name="$(arg plan_horizon)/optimization_ESDF/max_iteration_time2"      value="0.005" type="double"/>
-        <param name="$(arg plan_horizon)/optimization_ESDF/max_iteration_time3"      value="0.003" type="double"/>
-        <param name="$(arg plan_horizon)/optimization_ESDF/max_iteration_time4"      value="0.003" type="double"/>
-
-        <param name="$(arg plan_horizon)/optimization_ESDF/order"                    value="3" type="int"/>
+  <!--  PARAMS DON'T CHANGE THEM  -->
+  <param name="robot_action_rate"     value="10"/>
+  <param name="laser_update_rate"     value="10"/>
 
 
-        <!-- astar -->
-        <param name="$(arg plan_horizon)/astar/resolution_astar"                value="0.1"/>
-        <param name="$(arg plan_horizon)/astar/time_resolution"                 value="0.8" />
-        <param name="$(arg plan_horizon)/astar/lambda_heu"                      value="$(arg lambda_heu)"/>
-        <param name="$(arg plan_horizon)/astar/allocate_num"                    value="100000" />
+  <!-- DRL action frequency -->
+  <arg name="action_frequency" default="10"/>
+  <param name="action_frequency" value="$(arg action_frequency)"/>
 
-        <!-- kino astar -->
-        <param name="$(arg plan_horizon)/kino_astar/max_tau"                    value="0.6"/>
-        <param name="$(arg plan_horizon)/kino_astar/init_max_tau"               value="0.8"/>
-        <param name="$(arg plan_horizon)/kino_astar/max_vel"                    value="$(arg max_vel)"/>
-        <param name="$(arg plan_horizon)/kino_astar/max_acc"                    value="$(arg max_acc)"/>
-        <param name="$(arg plan_horizon)/kino_astar/w_time"                     value="10.0"/>
-        
-        <param name="$(arg plan_horizon)/kino_astar/horizon"                    value="30" />
-        <param name="$(arg plan_horizon)/kino_astar/resolution_astar"           value="0.10"/>
-        <param name="$(arg plan_horizon)/kino_astar/time_resolution"            value="0.8" />
-        <param name="$(arg plan_horizon)/kino_astar/lambda_heu"                 value="$(arg lambda_heu)" />
-        <param name="$(arg plan_horizon)/kino_astar/allocate_num"               value="100000"/>
-        <param name="$(arg plan_horizon)/kino_astar/check_num"                  value="5"/>         
-        
+  <!-- Map parameters -->
+  <arg name="global_frame_id"   value="map"/>
+  <arg name="odom_frame_id"     value="odom"/>
+  <arg name="base_frame_id"     value="base_footprint"/>
+  <arg name="odom_ground_truth" default="/odometry/ground_truth"/>
 
-        <!-- map size -->
-        <param name="$(arg plan_horizon)/sdf_map/use_occ_esdf"                  value="true"/>
-        <param name="$(arg plan_horizon)/sdf_map/frame_id"                      value="map"/>
-        <param name="$(arg plan_horizon)/sdf_map/resolution"                    value="0.05" />   <!-- provide by map_server: static_map -->
-        
-        <param name="$(arg plan_horizon)/sdf_map/local_update_range_x"          value="10.0" />    <!-- update range -->
-        <param name="$(arg plan_horizon)/sdf_map/local_update_range_y"          value="10.0" />    <!-- update range -->
-        <param name="$(arg plan_horizon)/sdf_map/local_map_margin"              value="50.0"/>     <!-- Keep in history range -->
 
-        <param name="$(arg plan_horizon)/sdf_map/obstacles_inflation"           value="0.3" /> 
-        <param name="$(arg plan_horizon)/sdf_map/local_bound_inflate"           value="0.0"/>
-        
-        <!-- local fusion -->
-        <param name="$(arg plan_horizon)/sdf_map/p_hit"                         value="0.55"/>     <!-- 0.65   0.55    -->
-        <param name="$(arg plan_horizon)/sdf_map/p_miss"                        value="0.2"/>      <!-- 0.35   0.20    -->
-        <param name="$(arg plan_horizon)/sdf_map/p_min"                         value="0.12"/>     <!-- 0.12   0.12    -->
-        <param name="$(arg plan_horizon)/sdf_map/p_max"                         value="0.80"/>     <!-- 0.90   0.80    -->
-        <param name="$(arg plan_horizon)/sdf_map/p_occ"                         value="0.70"/>     <!-- 0.80   0.70    -->
-        <param name="$(arg plan_horizon)/sdf_map/min_ray_length"                value="0.5"/>
-        <param name="$(arg plan_horizon)/sdf_map/max_ray_length"                value="10.0"/>
+ <!-- use simulator-->
+  <include file="$(find arena_bringup)/launch/sublaunch_testing/flatland_simulator.launch">
+    <arg name="show_viz"  value="$(arg show_viz)"/>
+    <arg name="use_rviz"  value="$(arg use_rviz)"/>
+    <arg name="rviz_file" value="$(arg rviz_file)"/>
+  </include>
 
-        <param name="$(arg plan_horizon)/sdf_map/show_occ_time"                 value="false"/>
-        <param name="$(arg plan_horizon)/sdf_map/show_esdf_time"                value="false"/>
-        
-        <!-- remapping for namespace -->
-        <remap from="/clock" to="/$(arg ns)/clock"/>
-    </node>
+  <!-- map server-->
+  <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_path)">
+   <param name="frame_id" value="$(arg global_frame_id)"/>
+
+  </node>
+  
+  <!-- use fake localization-->
+  <include file="$(find arena_bringup)/launch/sublaunch_testing/fake_localization.launch">
+
+    <arg name="global_frame_id"   value="$(arg global_frame_id)"/>
+    <arg name="odom_frame_id"     value="$(arg odom_frame_id)"/>
+  </include>
+
+  <!-- start task_generator node -->
+  <arg name="timeout"        default="3.0"/>
+  <include file="$(find arena_bringup)/launch/sublaunch_testing/task_generator.launch" unless="$(eval arg('disable_scenario') or arg('train_mode'))">
+   <arg name="scenarios_json_path"  value="$(find simulator_setup)/scenarios/$(arg scenario_file)"/>
+   <arg name="auto_reset"           value="$(arg reset)"/>
+   <arg name="timeout"              value="$(arg timeout)"/>
+  </include>
+
+  <include file="$(find arena_bringup)/launch/sublaunch_testing/sensor_sim.launch" unless="$(eval arg('disable_scenario') or arg('train_mode'))">
+  </include>
+
+  
+
+  <!-- move_base plan manager: which provide basic global planner and cost map -->
+  <include file="$(find arena_bringup)/launch/sublaunch_testing/move_base/move_base_$(arg local_planner).launch">
+  </include>
+
+
+  <!-- start time space plan fsm-->
+  <include file="$(find arena_bringup)/launch/sublaunch_testing/timed_space_planner_fsm.launch">
+  </include>
+
+  <!-- makes sure that drl actions will be published according to sim time in eval mode-->
+  <!-- <group if="$(eval arg('train_mode') == false)">
+    <node name="action_publisher" pkg="arena_local_planner_drl" type="action_publisher.py"/>
+  </group> -->
+
+  <!-- launch map generator if training with random map-->
+  <group if="$(eval arg('map_file') == 'random_map')">
+    <include file="$(find arena_bringup)/launch/random_map_training/map_generator.launch">
+    </include>
+  </group>  
 </launch>
