@@ -85,8 +85,10 @@ class ManualTask(ABSTask):
     """randomly spawn obstacles and user can mannually set the goal postion of the robot
     """
 
-    def __init__(self,obstacles_manager: ObstaclesManager, robot_manager: RobotManager):
+    def __init__(self, ns: str, obstacles_manager: ObstaclesManager, robot_manager: RobotManager):
         super().__init__(obstacles_manager, robot_manager)
+        self.ns = ns
+        self.ns_prefix = "" if ns == '' else "/"+ns+"/"
         # subscribe
         rospy.Subscriber(f'{self.ns}manual_goal', Pose2D, self._set_goal_callback)
         self._goal = Pose2D()
@@ -421,7 +423,7 @@ def get_predefined_task(ns: str, mode="random", start_stage: int = 1, PATHS: dic
     if mode == "manual":
         rospy.set_param("/task_mode", "manual")
         obstacles_manager.register_random_obstacles(20, 0.4)
-        task = ManualTask(obstacles_manager, robot_manager)
+        task = ManualTask(ns, obstacles_manager, robot_manager)
         print("manual tasks requested")
     if mode == "staged":
         rospy.set_param("/task_mode", "staged")
