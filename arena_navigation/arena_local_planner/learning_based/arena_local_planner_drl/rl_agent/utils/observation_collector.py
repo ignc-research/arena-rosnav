@@ -474,9 +474,8 @@ class ObservationCollectorWP():
             if i >= max_data_frame or i >= num_laserscans:
                 break
             theta = robot_state[0].theta
-            if i == 0:
-                offset = int(theta /self._lidar_angle_increment)
-                laser_scan = np.roll(laser_scan, offset)
+            offset = int(theta /self._lidar_angle_increment)
+            laser_scan = np.roll(laser_scan, offset)
             laserscans.append(laser_scan)
 
         while len(laserscans) < num_laserscans:

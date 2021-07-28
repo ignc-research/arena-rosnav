@@ -3,7 +3,7 @@
   <param name="use_sim_time" value="true"/>
   
   <arg name="local_planner"   default="rlca"/>
-  <arg name="rviz_file"       default="nav"/>
+  <arg name="rviz_file"       default="vtwg_deploy"/>
   <arg name="train_mode"      default="false"/>
   <param name="train_mode"    value="$(arg train_mode)"/>
 

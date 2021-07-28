@@ -27,7 +27,7 @@
   <arg name="viz_pub_rate" default="30" />
 
   <!-- the folder name under the path simulator_setup/maps  -->
-  <arg name="map_folder_name" default="map_1" />
+  <arg name="map_folder_name" default="map1" />
 
   <!-- the velocity of randomly genelized obstacles  -->
   <arg name="obs_vel" default="0.3" />
