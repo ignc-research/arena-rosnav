@@ -147,7 +147,7 @@ class StagedRandomTask(RandomTask):
         # hyperparamters.json location
         self.json_file = os.path.join(
             self._PATHS.get('model'), "hyperparameters.json")
-        assert os.path.isfile(self.json_file), "Found no 'hyperparameters.json' at %s" % json_file
+        assert os.path.isfile(self.json_file), "Found no 'hyperparameters.json' at %s" % self.json_file
         self._lock_json = FileLock(self.json_file + ".lock")
 
         # subs for triggers
@@ -217,9 +217,9 @@ class StagedRandomTask(RandomTask):
             hyperparams = json.load(file)
         try:
             hyperparams['curr_stage'] = self._curr_stage
-        except Exception:
+        except Exception as e:
             raise Warning(
-                "Parameter 'curr_stage' not found in 'hyperparameters.json'!")
+                f" {e} \n Parameter 'curr_stage' not found in 'hyperparameters.json'!")
         else:
             with open(self.json_file, "w", encoding='utf-8') as target:
                 json.dump(hyperparams, target,
