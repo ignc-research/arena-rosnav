@@ -85,8 +85,10 @@ class ManualTask(ABSTask):
     """randomly spawn obstacles and user can mannually set the goal postion of the robot
     """
 
-    def __init__(self,obstacles_manager: ObstaclesManager, robot_manager: RobotManager):
+    def __init__(self, ns: str, obstacles_manager: ObstaclesManager, robot_manager: RobotManager):
         super().__init__(obstacles_manager, robot_manager)
+        self.ns = ns
+        self.ns_prefix = "" if ns == '' else "/"+ns+"/"
         # subscribe
         rospy.Subscriber(f'{self.ns}manual_goal', Pose2D, self._set_goal_callback)
         self._goal = Pose2D()
@@ -128,7 +130,7 @@ class StagedRandomTask(RandomTask):
         self.ns_prefix = "" if ns == '' else "/"+ns+"/"
 
         self._curr_stage = start_stage
-        self._stages = dict()
+        self._stages = {}
         self._PATHS = PATHS
         self._read_stages_from_yaml()
 
@@ -145,7 +147,7 @@ class StagedRandomTask(RandomTask):
         # hyperparamters.json location
         self.json_file = os.path.join(
             self._PATHS.get('model'), "hyperparameters.json")
-        assert os.path.isfile(self.json_file), "Found no 'hyperparameters.json' at %s" % json_file
+        assert os.path.isfile(self.json_file), "Found no 'hyperparameters.json' at %s" % self.json_file
         self._lock_json = FileLock(self.json_file + ".lock")
 
         # subs for triggers
@@ -215,9 +217,9 @@ class StagedRandomTask(RandomTask):
             hyperparams = json.load(file)
         try:
             hyperparams['curr_stage'] = self._curr_stage
-        except Exception:
+        except Exception as e:
             raise Warning(
-                "Parameter 'curr_stage' not found in 'hyperparameters.json'!")
+                f" {e} \n Parameter 'curr_stage' not found in 'hyperparameters.json'!")
         else:
             with open(self.json_file, "w", encoding='utf-8') as target:
                 json.dump(hyperparams, target,
@@ -421,7 +423,7 @@ def get_predefined_task(ns: str, mode="random", start_stage: int = 1, PATHS: dic
     if mode == "manual":
         rospy.set_param("/task_mode", "manual")
         obstacles_manager.register_random_obstacles(20, 0.4)
-        task = ManualTask(obstacles_manager, robot_manager)
+        task = ManualTask(ns, obstacles_manager, robot_manager)
         print("manual tasks requested")
     if mode == "staged":
         rospy.set_param("/task_mode", "staged")

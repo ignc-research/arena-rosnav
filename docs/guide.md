@@ -56,7 +56,7 @@ Look for VcXsrv and change the settings to both private and public checked.
 ### 3. Installation of Visual Studio Code and WSL-Extension
 We recommend you use Visual Studio Code as your programming environment. Please follow the instructions in this [VS Code with WSL tutorial](https://docs.microsoft.com/en-us/windows/wsl/tutorials/wsl-vscode).
 
-### 4. Setup ohmyzsh (optional)
+### 4. Setup ohmyzsh (optional but strongly recommended!)
 We recommend using ohmyzsh. You can set up ohmyzsh with the following steps.
 - Install zsh
 ```

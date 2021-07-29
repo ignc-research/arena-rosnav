@@ -819,6 +819,11 @@ def eval_cfg(cfg_file, filetype):
             #ax.set_position([box.x0, box.y0, box.width * 0.7, box.height])
             #,bbox_to_anchor=(0.55, 0.3)
             ax.legend(handles=legend_elements, loc=1)
+
+            # plot goal as star and with label
+            ax.scatter(-15.6, 23.6, s=500, marker='*', color='gold', zorder=3)
+            ax.text(-15, 23.2, "Goal", fontsize=20) 
+
             plt.subplots_adjust(top = 1, bottom = 0, right = 1, left = 0, hspace = 0, wspace = 0)
             plt.savefig(plot_file, bbox_inches = 'tight', pad_inches = 0)
             # reset plot cfg to default
