@@ -5,8 +5,6 @@
 
 # Based on Ubuntu 18.04 + ROS-Melodic-Desktop-Full Version
 
-# Author: Yi Sun
-
 #################################################################
 
 # This image includes additional meta-packages such for desktop installations than offical image
