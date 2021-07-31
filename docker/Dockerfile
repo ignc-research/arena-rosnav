@@ -51,7 +51,7 @@ RUN pip3 install --upgrade pip \
 export WORKON_HOME=/root/.python_env \n\
 export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python3 \n\
 export VIRTUALENVWRAPPER_VIRTUALENV=/usr/local/bin/virtualenv \n\
-eport PYTHONPATH=/root/catkin_ws/src/arena-rosnav:${PYTHONPATH} \n\
+export PYTHONPATH=/root/catkin_ws/src/arena-rosnav:${PYTHONPATH} \n\
 source /usr/local/bin/virtualenvwrapper.sh' >> /root/.bashrc
 
 ENV WORKON_HOME=/root/.python_env \
