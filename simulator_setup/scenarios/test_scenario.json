@@ -103,7 +103,7 @@
                 11.88,
                 14.05
             ],
-            "angle": 3.141592653589793
+            "angle": 6.283185307179586
         },
         {
             "name": "obstacle 1",
@@ -112,7 +112,7 @@
                 20.86,
                 16.87
             ],
-            "angle": 3.113822016996372
+            "angle": 6.255414670586165
         },
         {
             "name": "obstacle 2",
@@ -121,7 +121,7 @@
                 21.73,
                 15.15
             ],
-            "angle": 4.161406492711053
+            "angle": 7.302999146300847
         },
         {
             "name": "obstacle 3",
@@ -130,7 +130,7 @@
                 14.13,
                 14.04
             ],
-            "angle": 3.141592653589793
+            "angle": 6.283185307179586
         }
     ],
     "robot_position": [
@@ -141,5 +141,6 @@
         22.35,
         16.46
     ],
-    "map_path": "/home/daniel/catkin_ws/src/arena-rosnav/simulator_setup/maps/map3/map.yaml"
+    "map_path": "/home/daniel/catkin_ws/src/arena-rosnav/simulator_setup/maps/map3/map.yaml",
+    "format": "arena-tools"
 }
