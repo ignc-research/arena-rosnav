@@ -6,6 +6,7 @@ Panels:
       Expanded:
         - /Map1
         - /Sensors1
+        - /Sensors1/LaserScan1
         - /obstacles1/dynamic1
         - /Plan Manager1
       Splitter Ratio: 0.4374079406261444
@@ -329,7 +330,7 @@ Visualization Manager:
           Position Transformer: XYZ
           Queue Size: 10
           Selectable: true
-          Size (Pixels): 8
+          Size (Pixels): 2
           Size (m): 0.009999999776482582
           Style: Points
           Topic: /scan
@@ -928,7 +929,7 @@ Visualization Manager:
           Buffer Length: 1
           Class: rviz/Path
           Color: 85; 170; 255
-          Enabled: true
+          Enabled: false
           Head Diameter: 0.30000001192092896
           Head Length: 0.20000000298023224
           Length: 0.30000001192092896
@@ -946,7 +947,7 @@ Visualization Manager:
           Shaft Length: 0.10000000149011612
           Topic: /vis_path_timed_astar
           Unreliable: false
-          Value: true
+          Value: false
         - Class: rviz/Marker
           Enabled: true
           Marker Topic: /vis_goal
@@ -972,13 +973,13 @@ Visualization Manager:
           Queue Size: 100
           Value: true
         - Class: rviz/Marker
-          Enabled: true
+          Enabled: false
           Marker Topic: /vis_triangle
           Name: triangulation_map
           Namespaces:
             lines: true
           Queue Size: 100
-          Value: true
+          Value: false
         - Alpha: 1
           Autocompute Intensity Bounds: true
           Autocompute Value Bounds:
