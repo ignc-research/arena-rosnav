@@ -4,8 +4,8 @@
             "name": "20",
             "id": 0,
             "pos": [
-                2.33,
-                15.31
+                21.02,
+                16.89
             ],
             "type": "adult",
             "yaml_file": "/home/daniel/catkin_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
@@ -35,24 +35,24 @@
             "force_factor_robot": 0.0,
             "waypoints": [
                 [
-                    -0.27,
-                    13.45
+                    18.42,
+                    15.03
                 ],
                 [
-                    -0.27,
-                    6.41
+                    18.42,
+                    7.99
                 ],
                 [
-                    -7.11,
-                    2.49
+                    0.8,
+                    10.4
                 ],
                 [
-                    -6.4,
-                    -4.23
+                    1.51,
+                    3.68
                 ],
                 [
-                    7.29,
-                    -4.63
+                    7.09,
+                    -3.0
                 ],
                 [
                     10.53,
@@ -69,8 +69,8 @@
             "name": "23",
             "id": 0,
             "pos": [
-                -6.47,
-                0.7
+                1.44,
+                8.61
             ],
             "type": "adult",
             "yaml_file": "/home/daniel/catkin_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
@@ -105,8 +105,8 @@
             "name": "24",
             "id": 0,
             "pos": [
-                -7.58,
-                -1.13
+                0.33,
+                6.78
             ],
             "type": "adult",
             "yaml_file": "/home/daniel/catkin_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
@@ -141,8 +141,8 @@
             "name": "25",
             "id": 0,
             "pos": [
-                -0.54,
-                9.94
+                18.15,
+                11.52
             ],
             "type": "adult",
             "yaml_file": "/home/daniel/catkin_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
@@ -177,8 +177,8 @@
             "name": "26",
             "id": 0,
             "pos": [
-                -1.69,
-                8.32
+                17.0,
+                9.9
             ],
             "type": "adult",
             "yaml_file": "/home/daniel/catkin_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
@@ -287,119 +287,119 @@
             "name": "3",
             "model_path": "/home/daniel/catkin_ws/src/arena-rosnav/simulator_setup/obstacles/shelf.yaml",
             "pos": [
-                -2.68,
-                8.44
+                16.01,
+                10.02
             ],
-            "angle": 3.142
+            "angle": 0.0
         },
         {
             "name": "4",
             "model_path": "/home/daniel/catkin_ws/src/arena-rosnav/simulator_setup/obstacles/shelf.yaml",
             "pos": [
-                1.79,
-                8.59
+                20.48,
+                10.17
             ],
-            "angle": 3.142
+            "angle": 0.0
         },
         {
             "name": "5",
             "model_path": "/home/daniel/catkin_ws/src/arena-rosnav/simulator_setup/obstacles/shelf.yaml",
             "pos": [
-                -2.6,
-                10.57
+                16.09,
+                12.15
             ],
-            "angle": 3.142
+            "angle": 0.0
         },
         {
             "name": "6",
             "model_path": "/home/daniel/catkin_ws/src/arena-rosnav/simulator_setup/obstacles/shelf.yaml",
             "pos": [
-                1.87,
-                10.73
+                20.56,
+                12.31
             ],
-            "angle": 3.142
+            "angle": 0.0
         },
         {
             "name": "11",
             "model_path": "/home/daniel/catkin_ws/src/arena-rosnav/simulator_setup/obstacles/shelf.yaml",
             "pos": [
-                8.12,
-                -0.38
+                8.81,
+                0.61
             ],
-            "angle": 3.142
+            "angle": 0.0
         },
         {
             "name": "12",
             "model_path": "/home/daniel/catkin_ws/src/arena-rosnav/simulator_setup/obstacles/shelf.yaml",
             "pos": [
-                12.59,
-                -0.23
+                13.13,
+                0.36
             ],
-            "angle": 3.142
+            "angle": 0.0
         },
         {
             "name": "13",
             "model_path": "/home/daniel/catkin_ws/src/arena-rosnav/simulator_setup/obstacles/shelf.yaml",
             "pos": [
-                8.99,
-                2.46
+                8.84,
+                2.56
             ],
-            "angle": 3.142
+            "angle": 0.0
         },
         {
             "name": "14",
             "model_path": "/home/daniel/catkin_ws/src/arena-rosnav/simulator_setup/obstacles/shelf.yaml",
             "pos": [
-                13.46,
-                2.62
+                13.21,
+                2.22
             ],
-            "angle": 3.142
+            "angle": 0.0
         },
         {
             "name": "15",
             "model_path": "/home/daniel/catkin_ws/src/arena-rosnav/simulator_setup/obstacles/shelf.yaml",
             "pos": [
-                -4.96,
-                -1.13
+                3.0,
+                6.93
             ],
-            "angle": 0.0
+            "angle": 3.142
         },
         {
             "name": "16",
             "model_path": "/home/daniel/catkin_ws/src/arena-rosnav/simulator_setup/obstacles/shelf.yaml",
             "pos": [
-                -9.43,
-                -1.28
+                -1.42,
+                6.73
             ],
-            "angle": 0.0
+            "angle": 3.142
         },
         {
             "name": "17",
             "model_path": "/home/daniel/catkin_ws/src/arena-rosnav/simulator_setup/obstacles/shelf.yaml",
             "pos": [
-                -4.88,
-                1.01
+                3.03,
+                8.92
             ],
-            "angle": 0.0
+            "angle": 3.142
         },
         {
             "name": "18",
             "model_path": "/home/daniel/catkin_ws/src/arena-rosnav/simulator_setup/obstacles/shelf.yaml",
             "pos": [
-                -9.35,
-                0.85
+                -1.44,
+                8.76
             ],
-            "angle": 0.0
+            "angle": 3.142
         }
     ],
     "robot_position": [
-        0.05,
-        15.54
+        18.74,
+        17.12
     ],
     "robot_goal": [
-        12.85,
-        5.94
+        22.05,
+        -1.72
     ],
-    "map_path": "",
+    "map_path": "/home/daniel/catkin_ws/src/arena-rosnav/simulator_setup/maps/map_empty/map.yaml",
     "format": "arena-tools"
 }
