@@ -1,0 +1,42 @@
+bodies:
+  - name: base
+    color: [1, 0.8, 0, 0.8]
+
+    footprints:
+      - type: polygon
+        points: [[-0.75, 0.45], [0.75, 0.45], [0.75, -0.45], [-0.75, -0.45]]
+        density: 1
+        layers: ["static"]
+      - type: polygon
+        points: [[0.75, 0.45], [1.4, 0.45], [1.4, 0.2], [0.75, 0.2]]
+        density: 1
+        layers: ["static"]
+      - type: polygon
+        points: [[0.75, -0.2], [1.4, -0.2], [1.4, -0.45], [0.75, -0.45]]
+        density: 1
+        layers: ["static"]
+
+  - name: safety_dist_circle
+    pose: [3, 0, 0]
+    type: dynamic
+    color: [0.26, 0.3, 0, 0.3]
+    footprints:
+      - type: circle
+        radius: 1.8
+        center: [0.0, 0.0]
+        density: 1
+        layers: ["static"]
+        collision: false
+
+plugins:
+  - type: VehicleMovement
+    name: vehicle_movement
+    agent_topic: /pedsim_simulator/simulated_agents
+    base_body: base
+    update_rate: 10
+    step_time: 0.3 #(in sec)
+    var_step_time: 0.1
+    agent_topic: /pedsim_simulator/simulated_agents
+    base_body: base
+    safety_dist_body: safety_dist_circle
+    safety_dist: 1.8
