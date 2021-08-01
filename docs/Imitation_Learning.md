@@ -4,7 +4,7 @@ This section outlines the steps and commands that need to be executed to train a
 
 #### 0. Running long training jobs using Screen (OPTIONAL)
 
-The training jobs will run up to 12 hours, so it can be a good idea to run them using Screen. This way you can create a virtual session which will keep running on the server, even if the SSH connection is interrupted.
+The training jobs can run up to several days, so it can be a good idea to run them using Screen. This way you can create a virtual session which will keep running on the server, even if the SSH connection is interrupted.
 
 Alternatively, you can also use ```tmux```.
 
@@ -35,7 +35,7 @@ Run these four commands:
 source $HOME/.zshrc                         
 source $HOME/catkin_ws/devel/setup.zsh    
 workon rosnav
-roslaunch arena_bringup start_training.launch train_mode:=true use_viz:=false task_mode:=random map_file:=map_small num_envs:=24
+roslaunch arena_bringup start_training.launch train_mode:=true use_viz:=false task_mode:=random map_file:=map4 num_envs:=24
 ```
 
 #### 1.2 Second terminal 
@@ -49,8 +49,12 @@ roscd arena_local_planner_drl
 ```
 
 Now, run one of the two commands below to start a training session:
-```python scripts/training/train_agent.py --load pretrained_ppo_mpc --n_envs 24 --eval_log --tb```
-```python scripts/training/train_agent.py --load pretrained_ppo_baseline --n_envs 24 --eval_log --tb```
+```
+python scripts/training/train_agent.py --load pretrained_ppo_human --n_envs 24 --eval_log --tb
+```
+```
+python scripts/training/train_agent.py --load baseline_ppo_human --n_envs 24 --eval_log --tb
+```
 
 Setting ```--tb``` could throw a tensorboard error during training if there is a dependency mismatch and terminate the process. Remove ```--tb``` flag if this happens.
 
