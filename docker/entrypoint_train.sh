@@ -16,7 +16,7 @@ sleep 10
 
 # python scripts/training/train_agent.py --agent MLP_ARENA2D
 
-while read trainmode agent 
+while read trainmode agent body pi vf act_fn config n tb eval_log no_gpu num_envs 
 do
        
     if [ "$init" = false ] ;
@@ -32,7 +32,7 @@ do
       
     
          #bash ./py_train.sh $trainmode $agent
-         screen -dmS python_training bash -c "source ./py_train.sh $trainmode $agent"
+         screen -dmS python_training bash -c "source ./py_train.sh $trainmode $agent $body $pi $vf $act_fn $config $n $tb $eval_log $no_gpu $num_envs"
          screen -S python_training -X logfile screenlog_python_train.log
          screen -S python_training -X log
          sleep 4
