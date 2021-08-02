@@ -35,7 +35,7 @@ Run these four commands:
 source $HOME/.zshrc                         
 source $HOME/catkin_ws/devel/setup.zsh    
 workon rosnav
-roslaunch arena_bringup start_training.launch train_mode:=true use_viz:=false task_mode:=random map_file:=map4 num_envs:=24
+roslaunch arena_bringup start_training.launch train_mode:=true use_viz:=false task_mode:=staged map_file:=map4 num_envs:=24
 ```
 
 #### 1.2 Second terminal 
