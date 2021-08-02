@@ -19,7 +19,7 @@ bodies:  # List of named bodies
     footprints:
       - type: circle
         radius: 0.2
-        center: [-0.3, 0.0]
+        center: [0.0, 0]
         density: 1
         layers: ["static"]
         collision: false
@@ -31,7 +31,7 @@ bodies:  # List of named bodies
     footprints:
       - type: circle
         radius: 0.2
-        center: [0.3, 0.0]
+        center: [0.0, 0.0]
         density: 1
         layers: ["static"]
         collision: false
@@ -57,13 +57,14 @@ plugins:
     right_leg_body: right_leg
     safety_dist_body: safety_dist_circle
     update_rate: 10
-    toggle_leg_movement: true 
-    leg_offset: 0.38
+    toggle_leg_movement: false
+    leg_offset: 0.0
     var_leg_offset: 0.0
     step_time: 0.6 #(in sec)
     var_step_time: 0.00
-    leg_radius: 0.13
+    leg_radius: 0.3
     var_leg_radius: 0.00
+    enabled: true
     safety_dist: 0.7
 
   - type: PosePub 
