@@ -64,8 +64,8 @@ RUN . /usr/local/bin/virtualenvwrapper.sh \
 && workon rosnav \
 && pip3 install --extra-index-url https://rospypi.github.io/simple/ rospy rosbag tf tf2_ros --ignore-installed \
 && pip3 install pyyaml catkin_pkg netifaces pathlib \
-&& pip3 install filelock \
-&& pip3 --no-cache-dir install stable-baselines3
+&& pip3 install filelock
+#&& pip3 --no-cache-dir install stable-baselines3
 
 # 4. Install Arena-Rosnav repo and compile
 RUN git clone https://github.com/ignc-research/arena-rosnav /root/catkin_ws/src/arena-rosnav
@@ -95,11 +95,11 @@ RUN . /usr/local/bin/virtualenvwrapper.sh \
 && pip install gym \
 && pip install PyQt5 \
 && cd /root/catkin_ws/src/arena-rosnav \
-&& rosws update 
-
-RUN cd /root/catkin_ws/src/forks/stable-baselines3 \
+&& git checkout local_planner_subgoalmode \
+&& rosws update \
+&& cd /root/catkin_ws/src/forks/stable-baselines3 \
 && git pull \
-&& pip install -e .
+&& pip install -e .   
 
 #RUN apt-get -y update && apt-get install -y libvtk7.1-qt
 RUN . /opt/ros/melodic/setup.sh \
@@ -116,6 +116,16 @@ RUN . /root/.bashrc \
 # 6. start workon rosnav
 RUN echo $'source /root/.python_env/rosnav/bin/activate' >> /root/.bashrc
 
+#stable baselines
+#RUN cd /root/catkin_ws/src/arena-rosnav \	
+#&& git checkout local_planner_subgoalmode \ 
+#&& cd /root/catkin_ws/src/arena-rosnav \
+#&& rosws update \
+#&& cd /root/catkin_ws/src/forks/stable-baselines3 \
+#&& git pull \
+#&& pip install -e . \
+#&& cd /root/catkin_ws \
+#&& catkin_make -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=/usr/bin/python3
 #WORKDIR /root/catkin_ws/src/arena-rosnav/docker/
 # 7. Entrypoint
 RUN ["chmod", "+x", "/root/catkin_ws/src/arena-rosnav/docker/entrypoint_train.sh"]
