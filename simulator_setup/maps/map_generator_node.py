@@ -5,6 +5,7 @@ from map_generator import *
 from nav_msgs.msg import OccupancyGrid
 from geometry_msgs.msg import PoseStamped
 from std_msgs.msg import String
+import numpy as np
 
 class MapGenerator():
     def __init__(self):
@@ -40,7 +41,7 @@ class MapGenerator():
 
         # self.generate_initial_map() # initial random map generation (before first episode)
         rospy.Subscriber('/map', OccupancyGrid, self.get_occupancy_grid)
-        rospy.Subscriber('/chatter', String, self.new_episode_callback) # generate new random map for the next episode when entering new episode
+        rospy.Subscriber('/demand', String, self.new_episode_callback) # generate new random map for the next episode when entering new episode
         self.mappub = rospy.Publisher('/map', OccupancyGrid, queue_size=1)
 
     def get_occupancy_grid(self, occgrid_msg: OccupancyGrid): # a bit cheating: copy OccupancyGrid meta data from map_server of initial map
@@ -68,6 +69,7 @@ class MapGenerator():
             obstacle_extra_radius = self.obsrad
         )
         make_image(map)
+        map = np.flip(map,axis=0)
         map = (map*100).flatten() # map currently [0,1] 2D np array needs to be flattened for publishing OccupancyGrid.data
         return map
 
@@ -83,7 +85,7 @@ class MapGenerator():
     
     def new_episode_callback(self, msg: String):
         self.occupancy_grid.data = self.generate_mapdata()
-        rospy.loginfo("New random map generated for episode {}.".format(self.nr))
+        # rospy.loginfo("New random map generated for episode {}.".format(self.nr))
         self.mappub.publish(self.occupancy_grid)
         rospy.loginfo("New random map published.")
 
