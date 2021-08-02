@@ -17,22 +17,22 @@ eval_log_mode=${10}
 no_gpu_mode=${11}
 num_envs=${12}
 
-if [ $agent_mode = "custom-mlp" ]
+if [ "$agent_mode" = "custom-mlp" ]
   then
     argument="--custom-mlp"
-  if ! [ $body_mode = "" ]
+  if ! [ "$body_mode" = "" ]
   then argument="$argument --body \"$body_mode\""
   fi
   
-  if ! [ $pi_mode = "" ]
+  if ! [ "$pi_mode" = "" ]
   then argument="$argument --pi \"$pi_mode\""
   fi
 
-  if ! [ $vf_mode = "" ]
+  if ! [ "$vf_mode" = "" ]
   then argument="$argument --vf \"$vf_mode\""
   fi
   
-  if ! [ $act_fn_mode = "" ]
+  if ! [ "$act_fn_mode" = "" ]
   then argument="$argument --act_fn \"$act_fn_mode\""
   fi  
 #roscd arena_local_planner_drl
