@@ -9,14 +9,14 @@ import yaml
 def create_yaml_files(map_name,dir_path):
     empty_yaml = {
         "image": "{0}.png".format("empty_map"),
-        "resolution": 0.5,
+        "resolution": 0.1,
         "origin": [0.0,0.0,0.0], # [-x,-y,0.0]
         "negate": 0,
         "occupied_thresh": 0.65,
         "free_thresh": 0.196}
     map_yaml = {
         "image": "{0}.png".format(map_name),
-        "resolution": 0.5,
+        "resolution": 0.1,
         "origin": [0.0,0.0,0.0], # [-x,-y,0.0]
         "negate": 0,
         "occupied_thresh": 0.65,
