@@ -18,7 +18,7 @@ bodies:  # List of named bodies
     color: [0.66, 0.3, 0, 0.75]
     footprints:
       - type: circle
-        radius: 0.2
+        radius: 0.3
         center: [0.0, 0]
         density: 1
         layers: ["static"]
@@ -30,7 +30,7 @@ bodies:  # List of named bodies
     color: [0.66, 0.3, 0, 0.75]
     footprints:
       - type: circle
-        radius: 0.2
+        radius: 0.3
         center: [0.0, 0.0]
         density: 1
         layers: ["static"]
