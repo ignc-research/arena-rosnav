@@ -1,0 +1,50 @@
+<launch>
+    <!-- This launch file aims at providing a single environment for the training of DRL based intermediate planner -->
+    <arg name="ns"/>
+    <!-- <arg name="local_planner" default="rlca" /> -->
+    <!-- <arg name="local_planner" default="mpc" /> -->
+
+    <!-- Don't change it if you don't know what does it mean! -->
+    <arg name="global_frame_id"   value="map"/>
+    <arg name="odom_frame_id"     value="$(arg ns)_odom"/>
+    <arg name="base_frame_id"     value="$(arg ns)_footprint"/>
+
+    <!-- use fake localization-->
+    <include file="$(find arena_bringup)/launch/sublaunch_training/fake_localization.launch">
+      <arg name="ns"                value="$(arg ns)"/>
+      <arg name="global_frame_id"   value="$(arg global_frame_id)"/>
+      <arg name="odom_frame_id"     value="$(arg odom_frame_id)"/>
+    </include>
+    <!-- start plan manager-->
+  <include file="$(find arena_bringup)/launch/sublaunch_training/plan_manager.launch">
+    <!-- only train_mode is false, otherwise subgoal is identical with global goal
+          which is not wanted for training the waypoint generator.
+    -->
+    <arg name="ns" value="$(arg ns)"  />
+    <arg name="train_mode"        value="false"/>
+    <arg name="global_frame_id"   value="$(arg global_frame_id)"/>
+    <arg name="odom_frame_id"     value="$(arg odom_frame_id)"/>
+    <arg name="base_frame_id"     value="$(arg base_frame_id)"/>
+    <arg name="look_ahead_distance"     default="2.5"/>   <!-- meter, double-->
+    <arg name="tolerance_approach"      default="0.6"/>   <!-- meter, double-->
+    <arg name="timeout_goal"            default="330."/>  <!-- sec, double-->
+    <arg name="timeout_subgoal"         default="30."/>   <!-- sec, double-->
+  </include>
+  <include file="$(find arena_bringup)/launch/sublaunch_training/intermediate_planner.launch">
+    <arg name="ns" value="$(arg ns)"/>
+
+  </include>
+
+
+    <!-- local planner get the waypoint by the topic "/move_base_simple/goal",
+        -->
+    <!-- <include file="$(find arena_bringup)/launch/sublaunch_training/move_base/move_base_$(arg local_planner).launch">
+      <arg name="ns"                value="$(arg ns)"/>
+    </include> -->
+    
+    <!-- use simulator -->
+    <include file="$(find arena_bringup)/launch/sublaunch_training/flatland_simulator.launch">
+        <arg name="ns" value="$(arg ns)"/>
+    </include>
+
+  </launch>

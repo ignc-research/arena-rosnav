@@ -18,9 +18,10 @@
   <!-- Map parameters -->
 
   <arg name="map_file"        default="map_empty"/>
-  <arg name="map_path"        default="$(find simulator_setup)/maps/$(arg map_file)/map.yaml"/>
-  <arg name="world_path"      default="$(find simulator_setup)/maps/$(arg map_file)/map.world.yaml"/>
-  <param name="world_path"  value="$(arg world_path)" />
+  <arg name="map_path" default="$(find simulator_setup)/maps/$(arg map_file)/map.yaml" />
+  <param name="world_path" value="$(find simulator_setup)/maps/$(arg map_file)/map.world.yaml" />
+  <param name="map_layer_path" value="$(find simulator_setup)/maps/$(arg map_file)/map_layer.yaml" />
+  <param name="map_file" value="$(arg map_file)" />
   <arg name="global_frame_id"   value="map"/>
   <arg name="odom_frame_id"     value="odom"/>
   <arg name="base_frame_id"     value="base_footprint"/>
@@ -70,6 +71,10 @@
     <arg name="timeout_subgoal"         default="0.01"/>   <!-- sec, double-->
   </include>
 
-  
+  <!-- launch map generator if training with random map-->
+  <group if="$(eval arg('map_file') == 'random_map')">
+    <include file="$(find arena_bringup)/launch/random_map_training/map_generator.launch">
+    </include>
+  </group>  
     
 </launch>

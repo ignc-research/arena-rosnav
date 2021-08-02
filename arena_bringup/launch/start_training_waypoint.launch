@@ -25,7 +25,12 @@
   <arg name="viz_pub_rate" default="30" />
 
   <!-- the folder name under the path simulator_setup/maps  -->
-  <arg name="map_folder_name" default="map_1" />
+  <arg name="map_file"        default="map_empty"/>
+  <!-- <arg name="map_folder_name" default="map_empty" /> -->
+  <arg name="map_path" default="$(find simulator_setup)/maps/$(arg map_file)/map.yaml" />
+  <param name="world_path" value="$(find simulator_setup)/maps/$(arg map_file)/map.world.yaml" />
+  <param name="map_layer_path" value="$(find simulator_setup)/maps/$(arg map_file)/map_layer.yaml" />
+  <param name="map_file" value="$(arg map_file)" />
 
   <!-- the velocity of randomly genelized obstacles  -->
   <arg name="obs_vel" default="0.3" />
@@ -39,8 +44,7 @@
   <param name="num_envs" value="$(arg num_envs)" />
   <param name="step_size" value="$(arg step_size)" /> 
   <param name="obs_vel" value="$(arg obs_vel)" /> 
-  <arg name="map_path" default="$(find simulator_setup)/maps/$(arg map_folder_name)/map.yaml" />
-  <param name="world_path" value="$(find simulator_setup)/maps/$(arg map_folder_name)/map.world.yaml" />
+
   <param name="show_viz" value="$(arg show_viz)"/>
   <param name="viz_pub_rate" value="$(arg viz_pub_rate)"/>
   <!-- make sure the following two params are identical with the ones defined in the robot's config file -->
@@ -163,4 +167,10 @@
   <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training_waypoint.launch" if="$(eval num_envs>=32)">
     <arg name="ns" value="$(arg ns_prefix)_32" />
   </include>
+
+  <!-- launch map generator if training with random map-->
+  <group if="$(eval arg('map_file') == 'random_map')">
+    <include file="$(find arena_bringup)/launch/random_map_training/map_generator.launch">
+    </include>
+  </group>
 </launch>
