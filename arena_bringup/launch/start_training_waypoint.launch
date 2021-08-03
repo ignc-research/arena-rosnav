@@ -165,4 +165,10 @@
   <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training_waypoint.launch" if="$(eval num_envs>=32)">
     <arg name="ns" value="$(arg ns_prefix)_32" />
   </include>
+
+  <!-- launch map generator if training with random map-->
+  <group if="$(eval arg('map_file') == 'random_map')">
+    <include file="$(find arena_bringup)/launch/random_map_training/map_generator.launch">
+    </include>
+  </group>  
 </launch>

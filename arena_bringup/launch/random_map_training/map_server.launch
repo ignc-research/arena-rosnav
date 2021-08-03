@@ -1,0 +1,8 @@
+<launch>
+  <arg name="map_path" default="$(find simulator_setup)/maps/random_map/map.yaml" />
+  <!-- map server-->
+  <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_path)">
+   <param name="frame_id" value="$(arg global_frame_id)"/>
+
+  </node>
+</launch>

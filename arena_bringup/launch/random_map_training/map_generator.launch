@@ -1,0 +1,4 @@
+<launch>
+    <!--  map_generator  -->
+    <node pkg="simulator_setup" name="map_generator_node" type="map_generator_node.py" />
+</launch>
