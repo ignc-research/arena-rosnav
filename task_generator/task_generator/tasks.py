@@ -195,8 +195,8 @@ class StagedRandomTask(RandomTask):
         dynamic_obstacles = self._stage_dynamic[self._curr_stage]
 
         self.obstacles_manager.register_random_static_obstacles(static_obstacles)
-        self.obstacles_manager.register_random_dynamic_obstacles(dynamic_obstacles)
-
+        # here set pub_groundtruth_pos to true to enable richer observation's information.
+        self.obstacles_manager.register_random_dynamic_obstacles(dynamic_obstacles,pub_groundtruth_pos=True)
         rospy.loginfo(f"ENV {self.ns} is set to stage {self._curr_stage}:\n\t \
              Spawning {static_obstacles} static and {dynamic_obstacles} dynamic obstacles!")
     def _remove_obstacles(self):
@@ -300,7 +300,7 @@ class ScenerioTask(ABSTask):
                                 trigger_zones.append(
                                     watchers_dict[trigger]['pos']+[watchers_dict[trigger]['range']])
                         self.obstacles_manager.register_dynamic_obstacle_circle_tween2(
-                            obstacle_name, obstacle_radius, linear_velocity, start_pos, waypoints, is_waypoint_relative, mode, trigger_zones)
+                            obstacle_name, obstacle_radius, linear_velocity, start_pos, waypoints, is_waypoint_relative, mode, trigger_zones,pub_groundtruth_pos=True)
                     # self.robot_
                     robot_data = scenerio_data["robot"]
                     robot_start_pos = robot_data["start_pos"]
