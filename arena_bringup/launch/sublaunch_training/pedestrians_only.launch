@@ -14,7 +14,7 @@
   <arg name="pose_initial_y" default="7.0"/>
   <arg name="pose_initial_theta" default="0.0"/>
   <arg name="simulation_factor" default="0.5"/>
-  <arg name="update_rate" default="150.0"/>
+  <arg name="update_rate" default="50.0"/>
   <arg name="spawn_period" default="5.0"/>
 
    <!-- main simulator node -->
@@ -25,7 +25,7 @@
     <param name="robot_mode" value="$(arg robot_mode)" type="int"/>
     <param name="enable_groups" value="$(arg enable_groups)" type="bool"/>
     <param name="simulation_factor" value="$(arg simulation_factor)" type="double"/>
-    <param name="update_rate" value="$(arg update_rate)" type="double"/>
+    <param name="pedsim_update_rate" value="$(arg update_rate)" type="double"/>
     <param name="spawn_period" value="$(arg spawn_period)" type="double"/>
     <remap from="/tf" to="/$(arg ns)/tf"/>
 		<remap from="/clock" to="/$(arg ns)/clock"/>
