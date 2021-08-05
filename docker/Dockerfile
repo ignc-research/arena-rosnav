@@ -129,10 +129,6 @@ RUN echo $'source /root/.python_env/rosnav/bin/activate' >> /root/.bashrc
 #WORKDIR /root/catkin_ws/src/arena-rosnav/docker/
 # 7. Entrypoint
 RUN ["chmod", "+x", "/root/catkin_ws/src/arena-rosnav/docker/entrypoint_train.sh"]
-WORKDIR /root/catkin_ws/src/arena-rosnav/docker/
-#ENTRYPOINT ["./entrypoint_train.sh"]
-#COPY ./entrypoint_train.sh /
-#ENTRYPOINT ["/entrypoint_train.sh"]
-#WORKDIR /root/catkin_ws/src/arena-rosnav/
-#ENTRYPOINT ["/bin/bash"]
-#CMD ["testann2"]
+WORKDIR /root/catkin_ws/src/arena-rosnav/
+ENTRYPOINT ["docker/entrypoint_train.sh"]
+CMD ["$TRAINING_NAME", "$TASK_MODE", "$MAPFILE", "$NUM_ENVS"]]
