@@ -1,7 +1,10 @@
 #! /bin/bash
 # roslaunch arena_bringup start_arena_flatland.launch  train_mode:=true 	use_viz:=true  task_mode:=random
 
-train_id=$1
+train_name_in_the_csv=$1
+taskmode = $2
+map_file=$3
+numenvs=$4
 
 INPUT=train_params.csv
 OLDIFS=$IFS
@@ -9,7 +12,7 @@ IFS=,
 [ ! -f $INPUT ] && { echo "$INPUT file not found"; }
 init=false
 
-screen -dmS roslaunch bash -c "source ./ros.sh"
+screen -dmS roslaunch bash -c "source ./ros.sh $taskmode $map_file $numenvs"
 screen -S roslaunch -X logfile screenlog_roslaunch.log
 screen -S roslaunch -X log
 sleep 10
@@ -25,7 +28,7 @@ do
         continue;
     fi
     
-    if [ "$trainmode" = "$train_id" ]; 
+    if [ "$trainmode" = "$train_name_in_the_csv" ]; 
     then
 
 	 echo "$trainmode"
