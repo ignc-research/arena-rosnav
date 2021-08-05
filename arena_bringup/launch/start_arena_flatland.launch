@@ -97,4 +97,10 @@
   <!-- <group if="$(eval arg('train_mode') == false)">
     <node name="action_publisher" pkg="arena_local_planner_drl" type="action_publisher.py"/>
   </group> -->
+
+  <!-- launch map generator if training with random map-->
+  <group if="$(eval arg('map_file') == 'random_map')">
+    <include file="$(find arena_bringup)/launch/random_map_training/map_generator.launch">
+    </include>
+  </group> 
 </launch>
