@@ -1,10 +1,6 @@
 #! /bin/sh
-$trainmode = true
-$useviz = true
-$taskmode = random
+trainmode = $1
+map=$2
+n_envs = $3
 
-echo "$trainmode"
-echo "$useviz"
-echo "$taskmode"
-
-roslaunch arena_bringup start_arena_flatland.launch  train_mode:=$trainmode use_viz:=$useviz  task_mode:=random
+roslaunch arena_bringup start_arena_flatland.launch train_mode:=true use_viz:=false task_mode:=$trainmode map_file:=$map num_envs:=$n_envs
