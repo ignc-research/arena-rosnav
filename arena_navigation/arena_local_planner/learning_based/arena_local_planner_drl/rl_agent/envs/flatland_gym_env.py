@@ -122,6 +122,9 @@ class FlatlandEnv(gym.Env):
         self._safe_dist_counter = 0
         self._collisions = 0
         self._in_crash = False
+
+        # publisher for random map training
+        self.demand_map_pub = rospy.Publisher("/demand", String, queue_size=1)
  
     def setup_by_configuration(self, robot_yaml_path: str, settings_yaml_path: str):
         """get the configuration from the yaml file, including robot radius, discrete action space and continuous action space.
