@@ -1,5 +1,5 @@
 ```
-sudo git clone -b docker_new --depth 1 https://github.com/Ann-Rachel/arena-rosnav /root/catkin_ws/src/arena-rosnav
+sudo git clone -b docker_new --depth 1 https://github.com/Ann-Rachel/arena-rosnav /the/folder/you/want
 cd docker
 sudo docker build -t arena_rosnav . -f Dockerfile
 default:
