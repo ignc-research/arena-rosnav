@@ -130,12 +130,8 @@ RUN echo $'source /root/.python_env/rosnav/bin/activate' >> /root/.bashrc
 # 7. Entrypoint
 RUN ["chmod", "+x", "/root/catkin_ws/src/arena-rosnav/docker/entrypoint_train.sh"]
 WORKDIR /root/catkin_ws/src/arena-rosnav/
-ARG TASK_MODE=random
-ARG MAP_FILE=map_small
-ARG NUM_ENVS=4
-ARG TRAINING_NAME=testann2
-ENV taskmode=$TASK_MODE
-ENV mapfile=$MAP_FILE
-ENV numenvs=$NUM_ENVS
-ENV trainingname=$TRAINING_NAME
-ENTRYPOINT /docker/entrypoint_train.sh $taskmode $mapfile $numenvs $trainingsname
+ARG ROS_START=train_mode:=true use_viz:=false task_mode:=random map_file:=map_small num_envs:=4
+ARG PYTHON_START=--custom-mlp --body 256-128 --pi 256 --vf 16 --act_fn relu
+ENV roslaunchParams=$ROS_START
+ENV pythonParams=$PYTHON_START
+ENTRYPOINT /docker/entrypoint_train.sh $roslaunchParams $pythonParams
