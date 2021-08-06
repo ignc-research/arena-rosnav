@@ -1,8 +1,8 @@
 #! /bin/bash
 # roslaunch arena_bringup start_arena_flatland.launch  train_mode:=true 	use_viz:=true  task_mode:=random
 
-roslaunch = $1
-python_train = $2
+roslaunch=$1
+python_train=$2
 
 screen -dmS roslaunch bash -c "source ./ros.sh $roslaunch"
 screen -S roslaunch -X logfile screenlog_roslaunch.log
