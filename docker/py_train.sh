@@ -6,6 +6,7 @@
 
 train_mode=$1
 agent_mode=$2
+agent_name=$3
 body_mode=$3
 pi_mode=$4
 vf_mode=$5
@@ -17,7 +18,16 @@ eval_log_mode=${10}
 no_gpu_mode=${11}
 num_envs=${12}
 
-if [ "$agent_mode" = "custom-mlp" ]
+if [ "$agent_mode" = "agent" ]   
+  then
+    argument="--agent"
+  if ! [ "$agent_name" = "" ]
+  then argument="$argument \"$agent_name\""
+  fi
+    echo ${argument}|xargs python /root/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/scripts/training/train_agent.py
+elif [ "$agent_mode" = "load" ]
+  then echo "Hallo"
+elif [ "$agent_mode" = "custom-mlp" ]
   then
     argument="--custom-mlp"
   if ! [ "$body_mode" = "" ]
