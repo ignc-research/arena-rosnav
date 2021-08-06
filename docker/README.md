@@ -1,6 +1,6 @@
 ```
 sudo git clone -b docker_new --depth 1 https://github.com/Ann-Rachel/arena-rosnav /the/folder/you/want
-cd docker
+cd arena-rosnav/docker
 sudo docker build -t arena_rosnav . -f Dockerfile
 default:
 roslaunch arena_bringup start_arena_flatland.launch train_mode:=true use_viz:=false task_mode:=random map_file:=map_small num_envs:=4
