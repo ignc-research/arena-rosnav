@@ -1,10 +1,10 @@
 #! /bin/bash
 # roslaunch arena_bringup start_arena_flatland.launch  train_mode:=true 	use_viz:=true  task_mode:=random
 
-train_name_in_the_csv=$1
-taskmode = $2
-map_file=$3
-numenvs=$4
+taskmode = $1
+map_file=$2
+numenvs=$3
+train_name_in_the_csv=$4
 
 INPUT=train_params.csv
 OLDIFS=$IFS
@@ -19,7 +19,7 @@ sleep 10
 
 # python scripts/training/train_agent.py --agent MLP_ARENA2D
 
-while read trainmode agent body pi vf act_fn config n tb eval_log no_gpu num_envs 
+while read trainname agent body pi vf act_fn config n tb eval_log no_gpu num_envs 
 do
        
     if [ "$init" = false ] ;
@@ -28,10 +28,10 @@ do
         continue;
     fi
     
-    if [ "$trainmode" = "$train_name_in_the_csv" ]; 
+    if [ "$trainname" = "$train_name_in_the_csv" ]; 
     then
 
-	 echo "$trainmode"
+	 echo "$trainname"
          echo "$agent" 
          echo "$body"
 	 echo "$pi"
