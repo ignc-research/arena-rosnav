@@ -6,11 +6,6 @@ python_train="$2"
 echo "$roslaunch"
 echo "$python_train"
 
-screen -dmS test "python /root/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/scripts/training/train_agent.py "$python_train""
-screen -S test -X logfile screenlog_test.log
-screen -S test -X log
-sleep 10
-
 screen -dmS roslaunch bash -c "source ./ros.sh "$roslaunch""
 screen -S roslaunch -X logfile screenlog_roslaunch.log
 screen -S roslaunch -X log
