@@ -6,11 +6,15 @@ python_train="$2"
 echo "$roslaunch"
 echo "$python_train"
 
-activate () {
-  /root/.python_env/rosnav/bin/activate
-}
+source /opt/ros/melodic/setup.sh
 
-activate
+export WORKON_HOME=/root/.python_env
+export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python3
+export VIRTUALENVWRAPPER_VIRTUALENV=/usr/local/bin/virtualenv
+export PYTHONPATH=/root/catkin_ws/src/arena-rosnav:${PYTHONPATH}
+source /usr/local/bin/virtualenvwrapper.sh
+source /root/catkin_ws/devel/setup.bash
+export PYTHONPATH=//geometry2_ws/devel/lib/python3/dist-packages:${PYTHONPATH}
 
 screen -dmS roslaunch bash -c "source ./ros.sh "$roslaunch""
 screen -S roslaunch -X logfile screenlog_roslaunch.log
