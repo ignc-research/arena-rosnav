@@ -1,0 +1,146 @@
+{
+    "pedsim_agents": [
+        {
+            "name": "Forklift",
+            "id": 0,
+            "pos": [
+                8.36,
+                6.91
+            ],
+            "type": "forklift",
+            "yaml_file": "/home/daniel/catkin_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/big_forklift.model.yaml",
+            "number_of_peds": 1,
+            "vmax": 1.0,
+            "start_up_mode": "default",
+            "wait_time": 0.0,
+            "trigger_zone_radius": 0.0,
+            "chatting_probability": 0.01,
+            "tell_story_probability": 0,
+            "group_talking_probability": 0.01,
+            "talking_and_walking_probability": 0.01,
+            "requesting_service_probability": 0.01,
+            "requesting_guide_probability": 0.01,
+            "requesting_follower_probability": 0.01,
+            "max_talking_distance": 5,
+            "max_servicing_radius": 5,
+            "talking_base_time": 10,
+            "tell_story_base_time": 0,
+            "group_talking_base_time": 10,
+            "talking_and_walking_base_time": 6,
+            "receiving_service_base_time": 20,
+            "requesting_service_base_time": 30,
+            "force_factor_desired": 1,
+            "force_factor_obstacle": 1,
+            "force_factor_social": 5,
+            "force_factor_robot": 0,
+            "waypoints": [
+                [
+                    6.69,
+                    2.58
+                ],
+                [
+                    2.96,
+                    1.6
+                ]
+            ],
+            "waypoint_mode": 0
+        },
+        {
+            "name": "Pedestrian",
+            "id": 0,
+            "pos": [
+                10.54,
+                1.77
+            ],
+            "type": "adult",
+            "yaml_file": "/home/daniel/catkin_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
+            "number_of_peds": 1,
+            "vmax": 1.0,
+            "start_up_mode": "default",
+            "wait_time": 0.0,
+            "trigger_zone_radius": 0.0,
+            "chatting_probability": 0.01,
+            "tell_story_probability": 0,
+            "group_talking_probability": 0.01,
+            "talking_and_walking_probability": 0.01,
+            "requesting_service_probability": 0.01,
+            "requesting_guide_probability": 0.01,
+            "requesting_follower_probability": 0.01,
+            "max_talking_distance": 5,
+            "max_servicing_radius": 5,
+            "talking_base_time": 10,
+            "tell_story_base_time": 0,
+            "group_talking_base_time": 10,
+            "talking_and_walking_base_time": 6,
+            "receiving_service_base_time": 20,
+            "requesting_service_base_time": 30,
+            "force_factor_desired": 1,
+            "force_factor_obstacle": 1,
+            "force_factor_social": 5,
+            "force_factor_robot": 0,
+            "waypoints": [
+                [
+                    12.45,
+                    5.9
+                ],
+                [
+                    17.36,
+                    8.09
+                ],
+                [
+                    15.93,
+                    11.7
+                ]
+            ],
+            "waypoint_mode": 0
+        }
+    ],
+    "static_obstacles": [
+        {
+            "name": "obstacle_0",
+            "model_path": "/home/daniel/catkin_ws/src/arena-rosnav/simulator_setup/obstacles/shelf.yaml",
+            "pos": [
+                11.88,
+                14.05
+            ],
+            "angle": 6.283185307179586
+        },
+        {
+            "name": "obstacle_1",
+            "model_path": "/home/daniel/catkin_ws/src/arena-rosnav/simulator_setup/obstacles/shelf.yaml",
+            "pos": [
+                20.86,
+                16.87
+            ],
+            "angle": 6.255414670586165
+        },
+        {
+            "name": "obstacle_2",
+            "model_path": "/home/daniel/catkin_ws/src/arena-rosnav/simulator_setup/obstacles/shelf.yaml",
+            "pos": [
+                21.73,
+                15.15
+            ],
+            "angle": 7.302999146300847
+        },
+        {
+            "name": "obstacle_3",
+            "model_path": "/home/daniel/catkin_ws/src/arena-rosnav/simulator_setup/obstacles/shelf.yaml",
+            "pos": [
+                14.13,
+                14.04
+            ],
+            "angle": 6.283185307179586
+        }
+    ],
+    "robot_position": [
+        -1.27,
+        -1.34
+    ],
+    "robot_goal": [
+        22.35,
+        16.46
+    ],
+    "map_path": "/home/daniel/catkin_ws/src/arena-rosnav/simulator_setup/maps/map3/map.yaml",
+    "format": "arena-tools"
+}
