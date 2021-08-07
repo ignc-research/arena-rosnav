@@ -18,4 +18,6 @@ screen -dmS python_training bash -c "source ./py_train.sh "$python_train""
 screen -S python_training -X logfile screenlog_python_train.log
 screen -S python_training -X log
 sleep 4
+
+screen -ls
 # bash
