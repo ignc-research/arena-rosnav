@@ -6,6 +6,12 @@ python_train="$2"
 echo "$roslaunch"
 echo "$python_train"
 
+activate () {
+  /root/.python_env/rosnav/bin/activate
+}
+
+activate
+
 screen -dmS roslaunch bash -c "source ./ros.sh "$roslaunch""
 screen -S roslaunch -X logfile screenlog_roslaunch.log
 screen -S roslaunch -X log
