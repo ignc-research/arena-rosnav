@@ -72,4 +72,8 @@ docker-compose start \
 ```
 docker exec -it arena-rosnav bash
 ```
-8. open http://localhost:8080/vnc.html you will see the rviz window in browser
+8. quickstart
+```
+roslaunch arena_bringup start_arena_flatland.launch  train_mode:=true 	use_viz:=true  task_mode:=random
+```
+9. open http://localhost:8080/vnc.html you will see the rviz window in browser
