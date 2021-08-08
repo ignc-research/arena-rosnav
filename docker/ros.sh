@@ -10,5 +10,6 @@ export PYTHONPATH=/root/catkin_ws/src/arena-rosnav:${PYTHONPATH}
 source /usr/local/bin/virtualenvwrapper.sh
 source /root/catkin_ws/devel/setup.bash
 export PYTHONPATH=//geometry2_ws/devel/lib/python3/dist-packages:${PYTHONPATH}
+source /root/.python_env/rosnav/bin/activate
 
 roslaunch arena_bringup start_arena_flatland.launch $params
