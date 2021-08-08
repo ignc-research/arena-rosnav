@@ -1,3 +1,4 @@
+# Start training with docker
 clone this repro
 ```
 sudo git clone -b docker_new --depth 1 https://github.com/Ann-Rachel/arena-rosnav /the/folder/you/want
@@ -34,3 +35,4 @@ sudo docker run \
  -v "$HOME/your/folder:$HOME/folder/in/docker" \
  -it --rm --net=host arena_rosnav
 ```
+# woking with docker
