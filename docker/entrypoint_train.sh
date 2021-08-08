@@ -15,6 +15,7 @@ export PYTHONPATH=/root/catkin_ws/src/arena-rosnav:${PYTHONPATH}
 source /usr/local/bin/virtualenvwrapper.sh
 source /root/catkin_ws/devel/setup.bash
 export PYTHONPATH=//geometry2_ws/devel/lib/python3/dist-packages:${PYTHONPATH}
+source /root/.python_env/rosnav/bin/activate
 
 screen -dmS roslaunch bash -c "source ./ros.sh "$roslaunch""
 screen -S roslaunch -X logfile screenlog_roslaunch.log
