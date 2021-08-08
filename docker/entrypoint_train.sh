@@ -30,5 +30,11 @@ screen -S python_training -X logfile screenlog_python_train.log
 screen -S python_training -X log
 sleep 4
 
+screen -dmS python_test echo ${python_train}|xargs python /root/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/scripts/training/train_agent.py
+screen -S python_test -X logfile screenlog_python_test.log
+screen -S python_test -X log
+sleep 4
+
+
 screen -ls
 # bash
