@@ -121,4 +121,4 @@ ARG ROS_START="train_mode:=true use_viz:=false task_mode:=random map_file:=map_s
 ARG PYTHON_START="--custom-mlp --body 256-128 --pi 256 --vf 16 --act_fn relu"
 ENV roslaunchParams="$ROS_START"
 ENV pythonParams="$PYTHON_START"
-ENTRYPOINT /docker/entrypoint_train.sh "$roslaunchParams" "$pythonParams"
+ENTRYPOINT docker/entrypoint_train.sh "$roslaunchParams" "$pythonParams"
