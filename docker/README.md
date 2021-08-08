@@ -35,6 +35,10 @@ sudo docker run \
  -v "$HOME/your/folder:$HOME/folder/in/docker" \
  -it --rm --net=host arena_rosnav
 ```
+for example
+```
+sudo docker run -v "../arena-rosnav/docker:/root/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/agents" -it --rm arena_rosnav
+```
 # woking with docker
 1.clone this repro
 ```
