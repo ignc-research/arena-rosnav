@@ -54,11 +54,11 @@ cd arena-rosnav/docker
 ```
 sudo docker build --no-cache -t arena_rosnav . -f Dockerfile_w
 ```
-4.start docker
+4.start docker without rviz
 ```
 sudo docker run -it --rm --net=host arena_rosnav
 ```
-5. go back to ../arena-rosnav
+5. with rviz go back to ../arena-rosnav
 ```
 cd ..
 ```
