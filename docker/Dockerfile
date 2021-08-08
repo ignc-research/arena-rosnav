@@ -87,8 +87,6 @@ RUN cp entrypoint_train.sh /root/catkin_ws/src/arena-rosnav/docker \
 && cp roslaunch.env /root/catkin_ws/src/arena-rosnav/docker \
 && cp train_params.csv /root/catkin_ws/src/arena-rosnav/docker
 
-#RUN git clone -b docker_new --depth 1 https://github.com/ignc-research/arena-rosnav /root/catkin_ws/src/arena-rosnav
-#RUN git clone -b docker_new --depth 1 https://github.com/Ann-Rachel/arena-rosnav /root/catkin_ws/src/arena-rosnav
 RUN . /usr/local/bin/virtualenvwrapper.sh \
 && . /opt/ros/melodic/setup.sh \
 && workon rosnav \
@@ -116,17 +114,6 @@ RUN . /root/.bashrc \
 # 6. start workon rosnav
 RUN echo $'source /root/.python_env/rosnav/bin/activate' >> /root/.bashrc
 
-#stable baselines
-#RUN cd /root/catkin_ws/src/arena-rosnav \	
-#&& git checkout local_planner_subgoalmode \ 
-#&& cd /root/catkin_ws/src/arena-rosnav \
-#&& rosws update \
-#&& cd /root/catkin_ws/src/forks/stable-baselines3 \
-#&& git pull \
-#&& pip install -e . \
-#&& cd /root/catkin_ws \
-#&& catkin_make -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=/usr/bin/python3
-#WORKDIR /root/catkin_ws/src/arena-rosnav/docker/
 # 7. Entrypoint
 RUN ["chmod", "+x", "/root/catkin_ws/src/arena-rosnav/docker/entrypoint_train.sh"]
 WORKDIR /root/catkin_ws/src/arena-rosnav/
