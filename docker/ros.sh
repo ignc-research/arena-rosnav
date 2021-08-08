@@ -12,4 +12,5 @@ source /root/catkin_ws/devel/setup.bash
 export PYTHONPATH=//geometry2_ws/devel/lib/python3/dist-packages:${PYTHONPATH}
 source /root/.python_env/rosnav/bin/activate
 
+workon rosnav
 roslaunch arena_bringup start_arena_flatland.launch $params
