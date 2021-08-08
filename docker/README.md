@@ -1,13 +1,13 @@
 # Start training with docker
-clone this repro
+1. clone this repro
 ```
 sudo git clone -b docker_new --depth 1 https://github.com/Ann-Rachel/arena-rosnav /the/folder/you/want
 ```
-go to the docker folder
+2. go to the docker folder ../arena-rosnav/docker
 ```
 cd arena-rosnav/docker
 ```
-build the docker
+3. build the docker
 ```
 sudo docker build --no-cache -t arena_rosnav . -f Dockerfile
 ```
@@ -29,10 +29,41 @@ sudo docker build \
 --build-arg PYTHON_START="--custom-mlp --body 256-128 --pi 256 --vf 16 --act_fn tanh" \
 -t arena_rosnav . -f Dockerfile
 ```
-run docker
+4. run docker
 ```
 sudo docker run \
  -v "$HOME/your/folder:$HOME/folder/in/docker" \
  -it --rm --net=host arena_rosnav
 ```
 # woking with docker
+1.clone this repro
+```
+sudo git clone -b docker_new --depth 1 https://github.com/Ann-Rachel/arena-rosnav /the/folder/you/want
+```
+2.go to the right folder ../arena-rosnav/docker
+```
+cd arena-rosnav/docker
+```
+3.build the docker
+```
+sudo docker build --no-cache -t arena_rosnav . -f Dockerfile_w
+```
+4.start docker
+```
+sudo docker run -it --rm --net=host arena_rosnav
+```
+5. go back to ../arena-rosnav
+```
+cd ..
+```
+6. start docker-compose
+
+```
+docker-compose up -d \
+docker-compose start \
+```
+7. enter the contaier
+```
+docker exec -it arena-rosnav bash
+```
+8. open http://localhost:8080/vnc.html you will see the rviz window in browser
