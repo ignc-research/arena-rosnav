@@ -7,7 +7,7 @@ sudo git clone -b docker_new --depth 1 https://github.com/Ann-Rachel/arena-rosna
 ```
 cd arena-rosnav/docker
 ```
-3. build the docker
+3. build the docker images 
 ```
 sudo docker build --no-cache -t arena_rosnav . -f Dockerfile
 ```
@@ -50,15 +50,15 @@ sudo git clone -b docker_new --depth 1 https://github.com/Ann-Rachel/arena-rosna
 ```
 cd arena-rosnav/docker
 ```
-3.build the docker
+3.build the docker images 
 ```
 sudo docker build --no-cache -t arena_rosnav . -f Dockerfile_w
 ```
-4.start docker without rviz
+4.start without rviz
 ```
 sudo docker run -it --rm --net=host arena_rosnav
 ```
-5. with rviz go back to ../arena-rosnav
+5. with rviz: close container and go back to ../arena-rosnav in host machine
 ```
 cd ..
 ```
