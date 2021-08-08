@@ -16,6 +16,7 @@ roslaunch arena_bringup start_arena_flatland.launch train_mode:=true use_viz:=fa
 .../train_agent.py --custom-mlp --body 256-128 --pi 256 --vf 16 --act_fn relu
 
 set environment variables
+[https://github.com/ignc-research/arena-rosnav/blob/local_planner_subgoalmode/docs/DRL-Training.md](DRL-Training.md)
 ```
 sudo docker build \
 --build-arg ROS_START="see [https://github.com/ignc-research/arena-rosnav/blob/local_planner_subgoalmode/docs/DRL-Training.md](DRL-Training.md)" \
@@ -37,7 +38,7 @@ sudo docker run \
 ```
 for example
 ```
-sudo docker run -v "../arena-rosnav/docker:/root/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/agents" -it --rm arena_rosnav
+sudo docker run -v "/yourhome/arena-rosnav/docker:/root/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/agents"  -it --rm arena_rosnav
 ```
 # woking with docker
 1.clone this repro
