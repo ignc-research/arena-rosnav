@@ -503,23 +503,21 @@ def obstacle_force_test():
 
     add_obstacles_client.call(obstacles)
 
-def follow_agent_test():
+def guide_to_goal_test():
     # spawn ped service
     spawn_peds_service_name = "pedsim_simulator/spawn_peds"
     rospy.wait_for_service(spawn_peds_service_name, 6.0)
     spawn_peds_client = rospy.ServiceProxy(spawn_peds_service_name, SpawnPeds)
 
-    ped = get_default_ped(
+    ped = get_only_moving_ped(
             id = 1,
             ped_type = "adult",
             yaml_path = get_yaml_path_from_type("adult"),
             pos = Point(2, 2, 0.1),
             waypoints = [Point(4, 2, 0.1), Point(12, 2, 0.1)]
         )
-    ped.number_of_peds = 3
-    ped.requesting_guide_probability = 0
-    ped.requesting_service_probability = 0
-    ped.requesting_follower_probability = 0.2
+    ped.number_of_peds = 1
+    ped.requesting_follower_probability = 0.9
     ped.force_factor_robot = 10.0
 
     spawn_peds_client.call([ped])
@@ -588,7 +586,7 @@ if __name__ == '__main__':
     # example2()
     # respawn_shelves_test()
     # obstacle_force_test()
-    # follow_agent_test()
+    guide_to_goal_test()
     # running_test()
     # wait_timer_test()
-    trigger_zone_test()
+    # trigger_zone_test()

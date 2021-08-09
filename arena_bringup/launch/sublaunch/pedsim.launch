@@ -5,7 +5,7 @@
 
   <node name="pedsim_simulator" pkg="pedsim_simulator" type="pedsim_simulator" output="screen">
     <param name="simulation_factor" value="$(arg simulation_factor)" type="double"/>
-    <param name="update_rate" value="$(arg update_rate)" type="double"/>
+    <param name="pedsim_update_rate" value="$(arg update_rate)" type="double"/>
     <param name="scene_file" value="$(arg scene_file)" type="string"/>
   </node>
 </launch>
