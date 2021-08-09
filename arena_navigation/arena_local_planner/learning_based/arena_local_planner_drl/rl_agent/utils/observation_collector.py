@@ -211,7 +211,7 @@ class ObservationCollector():
             self.rho_to_via, self.theta_to_via = ObservationCollector._get_pose_in_robot_frame(pos, self._robot_pose)
             self.rot_to_via=np.arctan2(pos.y - self._robot_pose.y, pos.x - self._robot_pose.x)
             self.robot_vx_to_via = self._robot_vel.linear.x * np.cos(self.rot_to_via) + self._robot_vel.linear.y * np.sin(self.rot_to_via)
-            self.robot_vy_to_via = self._robot_vel.linear.y * np.cos(self.rot_to_via) + self._robot_vel.linear.x * np.sin(self.rot_to_via)
+            self.robot_vy_to_via = self._robot_vel.linear.y * np.cos(self.rot_to_via) - self._robot_vel.linear.x * np.sin(self.rot_to_via)
             self.flag_requesting_via = 1
             self.currentgoal.x = pos.x
             self.currentgoal.y = pos.y
@@ -223,7 +223,7 @@ class ObservationCollector():
             self.rho_to_via, self.theta_to_via = ObservationCollector._get_pose_in_robot_frame(pos, self._robot_pose)
             self.rot_to_via=np.arctan2(pos.y - self._robot_pose.y, pos.x - self._robot_pose.x)
             self.robot_vx_to_via = self._robot_vel.linear.x * np.cos(self.rot_to_via) + self._robot_vel.linear.y * np.sin(self.rot_to_via)
-            self.robot_vy_to_via = self._robot_vel.linear.y * np.cos(self.rot_to_via) + self._robot_vel.linear.x * np.sin(self.rot_to_via)
+            self.robot_vy_to_via = self._robot_vel.linear.y * np.cos(self.rot_to_via) - self._robot_vel.linear.x * np.sin(self.rot_to_via)
             self.flag_requesting_via = 2
             if self.rho_to_via > 4.0 : 
                 self.flag_requesting_via = 1
@@ -237,7 +237,7 @@ class ObservationCollector():
             self.rho_to_via, self.theta_to_via = ObservationCollector._get_pose_in_robot_frame(pos, self._robot_pose)
             self.rot_to_via=np.arctan2(pos.y - self._robot_pose.y, pos.x - self._robot_pose.x)
             self.robot_vx_to_via = self._robot_vel.linear.x * np.cos(self.rot_to_via) + self._robot_vel.linear.y * np.sin(self.rot_to_via)
-            self.robot_vy_to_via = self._robot_vel.linear.y * np.cos(self.rot_to_via) + self._robot_vel.linear.x * np.sin(self.rot_to_via)
+            self.robot_vy_to_via = self._robot_vel.linear.y * np.cos(self.rot_to_via) - self._robot_vel.linear.x * np.sin(self.rot_to_via)
             self.flag_requesting_via = 3
             self.currentgoal.x = pos.x
             self.currentgoal.y = pos.y
@@ -254,7 +254,7 @@ class ObservationCollector():
             self.rho_to_via, self.theta_to_via = ObservationCollector._get_pose_in_robot_frame(pos, self._robot_pose)
             self.rot_to_via=np.arctan2(pos.y - self._robot_pose.y, pos.x - self._robot_pose.x)
             self.robot_vx_to_via = self._robot_vel.linear.x * np.cos(self.rot_to_via) + self._robot_vel.linear.y * np.sin(self.rot_to_via)
-            self.robot_vy_to_via = self._robot_vel.linear.y * np.cos(self.rot_to_via) + self._robot_vel.linear.x * np.sin(self.rot_to_via)
+            self.robot_vy_to_via = self._robot_vel.linear.y * np.cos(self.rot_to_via) - self._robot_vel.linear.x * np.sin(self.rot_to_via)
             self.flag_requesting_via = 4
             self.currentgoal.x = pos.x
             self.currentgoal.y = pos.y
@@ -266,17 +266,11 @@ class ObservationCollector():
                 self.currentgoal.theta = -1
 
         elif self._human_behavior.size > 0 and 'StateClearingGoal' in self._human_behavior: 
-            # index_agent_requesting_via =numpy.where(self._human_behavior== 'StateClearingGoal')
-            # pos = self._human_position[index_agent_requesting_via[0]][0]
-            # rho__, _ = ObservationCollector._get_pose_in_robot_frame(pos, self._robot_pose)
-            # if rho__ <= 2.5 : 
-            #     # print('writing -1')
-            #     self.currentgoal.x = -1
-            #     self.currentgoal.y = -1
-            #     self.currentgoal.theta = -1
             self.flag_requesting_via = 5
+            
+            
 
-
+    
         self.robot_to_via_state=[self._robot_pose.x, self._robot_pose.y, self.robot_vx_to_via, self.robot_vy_to_via,
         self._robot_pose.theta, self._robot_vel.angular.z, self._radius_robot, self.rho_to_via, self.theta_to_via]
   
@@ -284,7 +278,7 @@ class ObservationCollector():
         #claculating diffrent robot infos 
         rho, theta = ObservationCollector._get_pose_in_robot_frame(self.currentgoal, self._robot_pose)
         self.rot=np.arctan2(self.currentgoal.y - self._robot_pose.y, self.currentgoal.x - self._robot_pose.x)
-        self.robot_vx = self._robot_vel.linear.x * np.cos(self.rot) + self._robot_vel.linear.y * np.sin(self.rot)
+        self.robot_vx = self._robot_vel.linear.x * np.cos(self.rot) + self._robot_vel.linear.y * np.sin(self.rot) # how fast the agent is moving toward the point
         self.robot_vy=self._robot_vel.linear.y* np.cos(self.rot) - self._robot_vel.linear.x * np.sin(self.rot)
         self.robot_self_state=[self._robot_pose.x, self._robot_pose.y, self.robot_vx, self.robot_vy,
                                                      self._robot_pose.theta, self._robot_vel.angular.z, self._radius_robot, rho, theta]
@@ -320,7 +314,7 @@ class ObservationCollector():
                 coordinate_humans[1][i]=position.y
                 rho_humans[i], theta_humans[i] = ObservationCollector._get_pose_in_robot_frame(position, self._robot_pose)
                 _,theta_robot_in_human_frame[i] = ObservationCollector._get_pose_in_robot_frame(self._robot_pose, position)
-                # print(theta_robot_in_human_frame[i])
+             
             #sort the humans according to the relative position to robot
             human_pos_index=np.argsort(rho_humans)
             rho_humans, theta_humans=rho_humans[human_pos_index], theta_humans[human_pos_index]
@@ -459,7 +453,7 @@ class ObservationCollector():
         y_relative = agent_pos.y - robot_pos.y
         x_relative = agent_pos.x - robot_pos.x
         rho =  np.linalg.norm([y_relative, x_relative])
-        theta = 0
+        # theta = 0
      
         theta = (np.arctan2(y_relative, x_relative) -
                 robot_pos.theta+5*np.pi) % (2*np.pi)-np.pi
@@ -718,7 +712,6 @@ class ObservationCollector():
         vx1 = state[4] * np.cos(rot) + state[5] * np.sin(rot)
         vy1 = state[5] * np.cos(rot) - state[4] * np.sin(rot)
         px1 = (state[2] - state[0]) * np.cos(rot) + (state[3] - state[1]) * np.sin(rot)
-
         py1 = (state[3] - state[1]) * np.cos(rot) - (state[2] - state[0]) * np.sin(rot)
 
         new_state = [px1,py1,vx1,vy1]
