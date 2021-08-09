@@ -1,0 +1,6 @@
+# request fields
+---
+# response fields
+geometry_msgs/Twist vel
+bool costmaps_resetted
+bool successful

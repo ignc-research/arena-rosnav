@@ -1,0 +1,8 @@
+# request fields
+# global path
+nav_msgs/Path global_plan
+---
+# response fields
+geometry_msgs/Twist vel
+bool costmaps_resetted
+bool successful

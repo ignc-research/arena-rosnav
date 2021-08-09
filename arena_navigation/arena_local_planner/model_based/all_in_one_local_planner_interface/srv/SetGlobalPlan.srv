@@ -1,0 +1,6 @@
+# request fields
+# global path
+nav_msgs/Path global_plan
+---
+# response fields
+bool successful
