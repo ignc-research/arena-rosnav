@@ -1,9 +1,7 @@
 import subprocess
 import time
-import warnings
 
 import all_in_one_teb_interface.srv
-import geometry_msgs.msg
 import numpy as np
 import rospy
 import rosservice

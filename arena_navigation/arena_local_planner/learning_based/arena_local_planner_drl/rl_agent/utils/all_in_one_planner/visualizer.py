@@ -8,7 +8,8 @@ from visualization_msgs.msg import Marker
 
 class AllInOneVisualizer:
 
-    def __init__(self, evaluation: bool, model_names: [str], ns_prefix: str):
+    def __init__(self, evaluation: bool, model_names: [str], ns_prefix: str, visualize_every_x_iterations: int = 1,
+                 visualize_crash: bool = False):
         self._evaluation = evaluation
 
         self.agent_visualization = rospy.Publisher(f'{ns_prefix}all_in_one_action_vis', Marker, queue_size=1)
@@ -30,14 +31,21 @@ class AllInOneVisualizer:
 
         self._collisions = 0
 
+        self._visualize_every_x_iterations = visualize_every_x_iterations
+        self._current_iteration = 0
+
+        self._visualize_crash = visualize_crash
+
     def visualize_step(self, action: int, is_in_crash: bool, robot_pose: Pose2D):
         # visualize
-        self._visualize_action(action)
-        if self._evaluation:
-            self._visualize_episode_actions_as_path(action, robot_pose)
-            if is_in_crash:
-                self._visualize_collision(robot_pose)
-                self._collisions += 1
+        if self._current_iteration % self._visualize_every_x_iterations == 0:
+            self._visualize_action(action)
+            if self._evaluation:
+                self._visualize_episode_actions_as_path(action, robot_pose)
+                if self._visualize_crash and is_in_crash:
+                    self._visualize_collision(robot_pose)
+                    self._collisions += 1
+        self._current_iteration += 1
 
     def reset_visualizer(self):
         if self._evaluation:
@@ -48,6 +56,7 @@ class AllInOneVisualizer:
             self._remove_collisions_markers()
 
             self._collisions = 0
+            self._current_iteration = 0
 
     def _setup_trajectory_marker(self):
         self._action_trajectory_marker = Marker()
@@ -61,7 +70,7 @@ class AllInOneVisualizer:
 
     def _remove_collisions_markers(self):
         for m in self._collisions_markers:
-            m.action = visualization_msgs.msg.Marker.DELETE
+            m.action = visualization_msgs.msg.Marker.DELETEALL
             self.collision_visualization.publish(m)
         self._collisions_markers = []
 
