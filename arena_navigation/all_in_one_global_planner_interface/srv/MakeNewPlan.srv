@@ -1,0 +1,5 @@
+# request fields
+geometry_msgs/PoseStamped goal
+---
+# response fields
+nav_msgs/Path global_plan
