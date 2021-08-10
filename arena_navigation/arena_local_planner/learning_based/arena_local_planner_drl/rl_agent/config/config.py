@@ -62,7 +62,7 @@ def get_cfg(is_cfg_for_waypoint:Optional[bool] = False )-> CfgNode:
         a CfgNode instance.
     """
     if is_cfg_for_waypoint:
-        from .defaultsWP import _C
+        from .defaultsWP2 import _C
     else:
         from .defaults import _C
     return _C.clone()

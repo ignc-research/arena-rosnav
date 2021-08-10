@@ -1,14 +1,17 @@
 import enum
 from os import sendfile
+from pickle import TRUE
+from re import S
 import numpy as np
 from numpy.lib.utils import safe_eval
+from torch._C import set_flush_denormal
 from rl_agent.config.config import configurable
 import rospy
 from geometry_msgs.msg import Pose2D
 from typing import Tuple,Optional, overload
 import scipy.spatial
 from rl_agent.utils.debug import timeit
-from rl_agent.utils.observation_collector import ObservationCollectorWP
+from rl_agent.utils.observation_collector import ObservationCollectorWP2,ObservationCollectorWP
 import weakref
 
 from rospy.rostime import is_rostime_initialized
@@ -617,3 +620,100 @@ class RewardCalculatorWP_TUAHN00():
                  traj_theta_std_thresh = traj_theta_std_thresh,
                  global_goal_reached_reward = global_goal_reached_reward,
                  step_base_reward = step_base_reward) 
+                 
+
+
+@REWARD_REGISTRY.register
+class RewardCalculatorWP2_RULE00():
+    """ only use sparse reward
+    """
+    INFO_KEYS = (
+        "times_timeout",
+        )
+    @configurable
+    def __init__(self,
+                 observation_collector:ObservationCollectorWP2,
+                 wp_env: "WPEnv",
+                 reward_on_collision:float = -10,
+                 reward_on_goal_reached:float = 3,
+                 reward_on_time_cost:float = -0.01,
+                 reward_on_timeout: float = -0.3,
+                 reward_on_progress_base:float = 0.01,
+                 no_progress_reward:bool = True,
+                 no_timeout_reward:bool = True,
+                 ):
+        """
+        A class for calculating reward based various rules for waypoint generator.
+
+
+        :param safe_dist (float): The minimum distance to obstacles or wall that robot is in safe status.
+                                  if the robot get too close to them it will be punished. Unit[ m ]
+        :param goal_radius (float): The minimum distance to goal that goal position is considered to be reached. 
+        """
+        self.curr_reward = 0
+        self.oc = observation_collector
+        self.wp_env  = weakref.proxy(wp_env)
+
+
+        self.reward_on_collision:float = reward_on_collision
+        self.reward_on_goal_reached = reward_on_goal_reached
+        self.reward_on_time_cost = reward_on_time_cost
+        self.reward_on_timeout_cost = reward_on_timeout
+
+        self.reward_on_progress_base = reward_on_progress_base
+        self.no_progress_reward = no_progress_reward
+        self.no_timeout_reward =no_timeout_reward
+
+
+    @classmethod
+    def from_config(cls,cfg:CfgNode,observation_collector,wp_env):
+        return dict(
+            observation_collector=observation_collector,
+            wp_env = wp_env,
+            reward_on_collision = cfg.REWARD.REWARD_ON_COLLISION,
+            reward_on_goal_reached = cfg.REWARD.REWARD_ON_GOAL_REACHED,
+            reward_on_time_cost = cfg.REWARD.REWARD_ON_TIME_COST,
+            reward_on_timeout = cfg.REWARD.REWARD_ON_TIMEOUT,
+            reward_on_progress_base =cfg.REWARD.REWARD_ON_PROGRESS_BASE,
+            no_progress_reward = cfg.REWARD.NO_PROGRESS_REWARD,
+            no_timeout_reward = cfg.REWARD.NO_TIMEOUT_REWARD
+        )
+
+
+    def _reset(self):
+        """
+        reset variables related to current step
+        """
+        self.curr_reward = 0
+
+    def reset_on_episode_start(self):
+        self.times_timeout = 0
+        self.info = {
+            'times_timeout': 0
+        }
+    def get_reward_info(self):
+        return self.info
+
+    def save_info_on_episode_end(self):
+        if self.times_timeout == 0 and self.no_timeout_reward:
+            self.times_timeout = -1 
+        self.info['times_timeout']= self.times_timeout
+
+    def get_reward_goal_reached(self):
+        self._reset()
+        return self.reward_on_goal_reached
+
+    def cal_reward(self):
+        """
+        Returns reward and info to the gym environment.
+        """
+        self._reset()
+        if self.oc.important_event == ObservationCollectorWP2.Event.COLLISIONDETECTED:
+            self.curr_reward += self.reward_on_collision
+        else:
+            if not self.no_timeout_reward  and self.oc.important_event == ObservationCollectorWP2.Event.TIMEOUT:
+                self.times_timeout +=1
+                self.curr_reward += self.reward_on_timeout_cost
+            elif not self.no_progress_reward and self.oc.last_dist_subgoal_robot is not None:
+                self.curr_reward += self.reward_on_progress_base*(self.oc.last_dist_subgoal_robot-self.oc.dist_subgoal_robot)
+        return self.curr_reward       

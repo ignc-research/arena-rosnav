@@ -6,7 +6,9 @@ from typing import List, Optional, Tuple, Union
 
 from enum import Enum, auto
 import threading
+from gym.spaces import space
 from numpy.core.numeric import normalize_axis_tuple
+from torch._C import set_flush_denormal
 import rospy
 import random
 import numpy as np
@@ -325,7 +327,8 @@ class ObservationCollectorWP():
                  lidar_angle_increment: float,
                  lidar_range: float,
                  robot_waypoint_min_dist: float,
-                 robot_obstacle_min_dist: float
+                 robot_obstacle_min_dist: float,
+                 collect_dynamic_obstacles_pos:bool = False
                  ):
         """ 
         A Observation collector made for way point generator.
@@ -349,7 +352,10 @@ class ObservationCollectorWP():
             self.ns_prefix = ""
         else:
             self.ns_prefix = "/"+ns+"/"
+
         self.is_train_mode= is_train_mode
+
+    
 
         # define observation_space
         self.observation_space = ObservationCollectorWP._stack_spaces((
@@ -358,7 +364,7 @@ class ObservationCollectorWP():
             spaces.Box(low=0, high=10, shape=(1,), dtype=np.float32),
             spaces.Box(low=-np.pi, high=np.pi, shape=(1,), dtype=np.float32),
             spaces.Box(low=0, high=10, shape=(1,), dtype=np.float32),
-            spaces.Box(low=-np.pi, high=np.pi, shape=(1,), dtype=np.float32)
+            spaces.Box(low=-np.pi, high=np.pi, shape=(1,), dtype=np.float32),
         ))
         self._num_lidar_beams = num_lidar_beams
         self._lidar_angle_increment = lidar_angle_increment
@@ -757,6 +763,390 @@ class ObservationCollectorWP():
         return spaces.Box(np.array(low).flatten(), np.array(high).flatten())
 
 
+class ObservationCollectorWP2():
+    class Event(Enum):
+        NEWLASER = auto()
+        NEWROBOTSTATE = auto()
+        COLLISIONDETECTED = auto()
+        WAYPOINTARRIVAL = auto()
+        TIMEOUT = auto()
+
+    def __init__(self, ns: str,
+                 is_train_mode:bool,
+                 num_lidar_beams: int,
+                 lidar_angle_increment: float,
+                 lidar_range: float,
+                 robot_waypoint_min_dist: float,
+                 robot_obstacle_min_dist: float,
+                 nums_dynamic_obstalces:List[int],
+                 radiuses_dynamic_obstalces:Union[List[int],int],
+                 radius_robot:int,
+                 num_dynamic_obstacles_feature_extractor:int,
+                 ):
+        """ 
+        A Observation collector made for way point generator.
+        it supplies follwing functionalities
+            1. laser scan, robot state , subgoal collection,
+            2. enable the simulater flatland running simutaniously with a timeout.
+            3. register rules to early stopping the simulator, e.g. the crash happened or
+                the position of robot close to the set subgoal
+
+        Args:
+            ns(str): namespace of the training environment
+            num_lidar_beams (int): [description]
+            lidar_range (float): maximum length of the laser beam
+            robot_waypoint_min_dist (float): the minimum distance between the robot and the waypoint,
+                if actual distance is under this value, a stop-running signal will be send the simulator
+            robot_obstacle_min_dist (float): the minimum distance between the robot and the surrunding obstacle
+                if actual distance is under this value, a collision event will be registered.
+        """
+        self.ns = ns
+        if ns is None or ns == "":
+            self.ns_prefix = ""
+        else:
+            self.ns_prefix = "/"+ns+"/"
+        self._nums_dynamic_obstacles = nums_dynamic_obstalces
+        self._radius_robot = radius_robot
+
+        if not hasattr(radiuses_dynamic_obstalces,'__getitem__'):
+            self._radiuses_dynamic_obstalces = [radiuses_dynamic_obstalces]*int(max(nums_dynamic_obstalces))
+        else:
+            self._radiuses_dynamic_obstalces = radiuses_dynamic_obstalces
+        self._num_dynamic_obstacles_feature_extractor = num_dynamic_obstacles_feature_extractor
+
+        self.is_train_mode= is_train_mode
+
+    
+
+        # define observation_space
+        self.observation_space = ObservationCollectorWP._stack_spaces((
+            spaces.Box(low=0, high=lidar_range, shape=(
+                num_lidar_beams,), dtype=np.float32),
+            spaces.Box(low=0, high = 10*2**0.5,shape = (1,) ,dtype = np.float32), # distance
+            spaces.Box(low=-10, high=10, shape=(2,), dtype=np.float32), # goal_to_robot_x,goal_to robot_y
+            spaces.Box(low=-2, high=2, shape=(2,), dtype=np.float32),#robot_vx,robot_vy
+            spaces.Box(low=0, high=1, shape=(1,), dtype=np.float32), # robot radius
+            spaces.Box(low=-10,high = 10,shape = (2*num_dynamic_obstacles_feature_extractor,), dtype=np.float32), #dyn_ob_to_robot_x/y
+            spaces.Box(low=-2,high = 2,shape = (2*num_dynamic_obstacles_feature_extractor,), dtype=np.float32), #dyn_ob_to_robot_vx/vy
+            spaces.Box(low=0,high = 2,shape = (num_dynamic_obstacles_feature_extractor,), dtype=np.float32), # min dist
+            spaces.Box(low=0,high = 10*2**0.5,shape = (num_dynamic_obstacles_feature_extractor,), dtype=np.float32) # distance
+
+        ))
+        self._num_lidar_beams = num_lidar_beams
+        self._lidar_angle_increment = lidar_angle_increment
+        self.robot_waypoint_min_dist = robot_waypoint_min_dist
+        self._robot_obstacle_min_dist = robot_obstacle_min_dist
+
+
+
+        # subscriptions
+        # for update the laserscan after the reset of environment.
+        self._robot_action_rate = rospy.get_param("/robot_action_rate")
+
+        self._laserscan_sub = message_filters.Subscriber(
+            f'{self.ns_prefix}scan', LaserScan)
+        self._robot_state_sub = message_filters.Subscriber(
+            f'{self.ns_prefix}odom', Odometry)
+        
+        if self.is_train_mode:
+            self.subgoal_topic_name = f'{self.ns_prefix}goal'
+        else:
+            self.subgoal_topic_name = f'{self.ns_prefix}subgoal'
+        self._subgoal_sub = rospy.Subscriber(
+            self.subgoal_topic_name, PoseStamped, self._callback_subgoal, tcp_nodelay=True)
+
+        self._stage_sub_1 = rospy.Subscriber(
+            f'{self.ns_prefix}previous_stage',Bool,self._callback_stage_changed,tcp_nodelay=True)
+        self._stage_sub_2 = rospy.Subscriber(
+            f'{self.ns_prefix}next_stage',Bool,self._callback_stage_changed,tcp_nodelay=True)
+        # will be defined later
+        self.dynamic_obstacle_pose_subs = []
+
+        if self.is_train_mode:
+            self._step_world_srv = rospy.ServiceProxy(
+                f'{self.ns_prefix}step_world', StepWorld)
+            self._stop_step_world_pub = rospy.Publisher(
+                f'{self.ns_prefix}stop_step_world', Empty, tcp_nodelay=True, queue_size=1)
+        else:
+            self.cv_important_event_deployment = threading.Condition()
+        self.data_lock = threading.Lock()
+        # define variables
+        self._subgoal: Optional[Pose2D] = None
+        self.last_dist_subgoal_robot:Optional[float] = None
+        self.dist_subgoal_robot:Optional[float] = None 
+        self._curr_waypoint: Optional[Pose2D] = None
+        self.robot_pose2d:Optional[Pose2D] = None  
+        self._observation: Optional[np.ndarray] = None 
+        self.important_event: Optional[ObservationCollectorWP.Event] = None
+        self.setup_dynamic_topics_listening()
+
+    def clear_on_episode_start(self):
+        """call it only when the episode is finished.
+        """
+        with self.data_lock:
+            self._subgoal: Optional[Pose2D] = None
+            self.last_dist_subgoal_robot:Optional[float] = None
+            self.dist_subgoal_robot:Optional[float] = None 
+            self._curr_waypoint: Optional[Pose2D] = None
+            self.robot_pose2d:Optional[Pose2D] = None
+            self._observation: Optional[np.ndarray] = None 
+            self.important_event: Optional[ObservationCollectorWP.Event] = None
+            rospy.loginfo("episode start subgoal None")
+
+
+    def setup_dynamic_topics_listening(self):
+        """In Curriculum Learning the number of  dynamic obstacles is dynamically changing.
+        """
+        # this prefix is hardcoded in the class ObstaclesManager's member function _generate_dynamic_obstacle_yaml_tween2 and _generate_random_obstacle_yaml
+        robot_groundtruth_pos_name_prefix = 'dynamic_obstalce_groundtruth_pose_'
+        curr_stage = rospy.get_param("/curr_stage")
+        assert curr_stage>=0 and curr_stage < len(self._nums_dynamic_obstacles), "please check the stage configuration"
+        self.curr_num_dynamic_obstacles = self._nums_dynamic_obstacles[curr_stage]
+        # unregister the old topics
+        for sub in self.dynamic_obstacle_pose_subs+[self._laserscan_sub,self._robot_state_sub]:
+            sub.sub.unregister()
+        self.dynamic_obstacle_pose_subs = []
+        for idx in range(self.curr_num_dynamic_obstacles):
+            self.dynamic_obstacle_pose_subs.append(
+                message_filters.Subscriber(self.ns_prefix+robot_groundtruth_pos_name_prefix+str(idx+1),Odometry)
+            )
+        self._laserscan_sub = message_filters.Subscriber(
+            f'{self.ns_prefix}scan', LaserScan)
+        self._robot_state_sub = message_filters.Subscriber(
+            f'{self.ns_prefix}odom', Odometry)
+
+        self.ts = message_filters.ApproximateTimeSynchronizer([self._laserscan_sub,self._robot_state_sub]+self.dynamic_obstacle_pose_subs,1,0.1)
+        self.ts.registerCallback(self._callback_all_observations)
+
+    def wait_for_step_end(self, timeout: float = 1000000) -> 'ObservationCollectorWP.Event':
+        """[summary]
+
+        Args:
+            timeout (float): maximum simulation time allow the local planner to execute.
+        """
+
+        request = StepWorldRequest(timeout)
+        # run the simulator, collect observation and do the check.
+        response = self._step_world_srv(request)
+        rospy.logdebug("step service=", response)
+        # two result
+        #    1. timeout (fail)
+        #    2.  collision or arrived at the set waypoint (success)
+        # TODO log it save to rosbag ?
+        if not response.success:
+            self.important_event = ObservationCollectorWP2.Event.TIMEOUT
+        return self.important_event
+    def get_observation(self):
+        return self._observation
+
+    def wait_for_new_event(self,timeout=20):
+        """used in deployment mode, the timeout here is real time, take care!
+        """
+        with self.cv_important_event_deployment:
+            if not self.cv_important_event_deployment.wait(timeout):
+                # time out 
+                self.important_event = ObservationCollectorWP2.Event.TIMEOUT
+            # else it coule be reach the goal
+        return self.important_event
+
+    def reset(self) -> bool:
+        """reset the simulator and intermediate planner to get new subgoal by send some step world request         
+
+        Returns:
+            bool: if failed, return False
+        """
+        # DEBUG
+        rospy.loginfo("Waypoint generator start reset run step world ")
+        # normally making the simulator running for 1/self._robot_action_rate will make sure
+        # the new states will be updated.
+        # but sometimes it seems like the intermediate planner takes quite a lot steps to make a subgoal.
+        delta = 0.1
+        request = StepWorldRequest(1/self._robot_action_rate)
+        try_times = 10
+        #at least call the service once. Even we set subgoal to None when we call clear_on_episode_start,
+        # but it's possible the a callback function is waiting there to set the subgoal to the old one.
+        if self.is_train_mode:
+            # this dirty code is write to handle the bug in planmanager.
+            self._step_world_srv(request)
+            # time.sleep(0.5)
+            # self._step_world_srv(request)
+
+        while self._observation is None or self._subgoal is None: 
+            if self.is_train_mode:
+                self._step_world_srv(request)
+            else:
+                time.sleep(1)
+            try_times -= 1
+            if try_times == 0:
+                # DEBUG
+                print(
+                    "Waypoint generator reset failed, request to generate a new pair of start pos and goal pos")
+                return False
+        rospy.loginfo("Waypoint generator done step world")
+        return True
+
+    def clear_subgoal(self):
+        self._subgoal = None
+
+    def set_waypoint(self, x, y):
+        """set current waypoint, observation collector will use this to check whether the robot is close to this point and trigger the stop of the simulation/
+        """
+        self._curr_waypoint = Pose2D()
+        self._curr_waypoint.x = x
+        self._curr_waypoint.y = y
+        rospy.loginfo("set waypoint.")
+
+    def _suspend_step_world(self):
+        """ flatland provided a step world service, which running the simulator in given second.
+        The observation colletor keeps checking the events, if a event such as collision happend,
+        the simulator maybe required to suspend instantly.
+        """
+        self._stop_step_world_pub.publish(Empty())
+
+    def _check_event(self, event: 'ObservationCollectorWP2.Event', *args, **kwargs):
+        def on_new_laserscan(scan: np.array):
+            if scan.min() < self._robot_obstacle_min_dist:
+                self._check_event(
+                    ObservationCollectorWP2.Event.COLLISIONDETECTED)
+
+        def on_new_robot_state(robot_pos_x,robot_pos_y):
+            if self._curr_waypoint is not None and (robot_pos_x-self._curr_waypoint.x)**2 +\
+                    (robot_pos_y-self._curr_waypoint.y)**2 < self.robot_waypoint_min_dist**2:
+                self._check_event(ObservationCollectorWP2.Event.WAYPOINTARRIVAL)
+            # DEBUG
+            if self._curr_waypoint is not None:
+                rospy.loginfo(
+                    f"Distance to waypoint: {((robot_pos_x-self._curr_waypoint.x)**2 + (robot_pos_y-self._curr_waypoint.y)**2)**0.5}")
+
+        def on_collision_detected():
+            self.important_event = ObservationCollectorWP2.Event.COLLISIONDETECTED
+            if self.is_train_mode:
+                self._suspend_step_world()
+            else:
+                #TODO maybe log this? for example collision_times?
+                pass
+
+        def on_waypoint_arrival():
+            self.important_event = ObservationCollectorWP2.Event.WAYPOINTARRIVAL
+            if self.is_train_mode:
+                self._suspend_step_world()
+            else:
+                with self.cv_important_event_deployment:
+                    self.cv_important_event_deployment.notify()
+        
+
+        if event == ObservationCollectorWP2.Event.NEWLASER:
+            on_new_laserscan(*args, **kwargs)
+        elif event == ObservationCollectorWP2.Event.NEWROBOTSTATE:
+            on_new_robot_state(*args, **kwargs)
+        elif event == ObservationCollectorWP2.Event.COLLISIONDETECTED:
+            on_collision_detected()
+        elif event == ObservationCollectorWP2.Event.WAYPOINTARRIVAL:
+            on_waypoint_arrival()
+        else:
+            raise NotImplementedError()
+
+    def is_goal_reached(self):
+        return self.important_event == ObservationCollectorWP2.Event.GOALARRIVAL
+
+    def _callback_all_observations(self,*msgs):
+        with self.data_lock:
+            if self._subgoal is None:
+                return 
+            laserscan_msg = msgs[0]
+            robot_state_msg = msgs[1]
+            dynamic_obstalce_state_msgs = msgs[2:]
+            # process robot state
+            robot_pose2d = ObservationCollectorWP2.pose3D_to_pose2D(robot_state_msg.pose.pose)
+            self.robot_pose2d = robot_pose2d
+            robot_twist = robot_state_msg.twist.twist
+            self._check_event(ObservationCollectorWP2.Event.NEWROBOTSTATE,robot_pose2d.x,robot_pose2d.y)
+            # get relative goal pose
+            assert self._subgoal is not None
+            assert self.robot_pose2d is not None 
+            subgoal_relative_x,subgoal_relative_y = self._subgoal.x-robot_pose2d.x,self._subgoal.y-robot_pose2d.y
+            dist_subgoal_robot = (subgoal_relative_x**2+subgoal_relative_y**2)**0.5
+            self.last_dist_subgoal_robot = self.dist_subgoal_robot
+            self.dist_subgoal_robot = dist_subgoal_robot
+            robot_feature = np.array([dist_subgoal_robot,subgoal_relative_x,subgoal_relative_y,
+                robot_twist.linear.x,robot_twist.linear.y,
+                self._radius_robot
+            ])
+
+
+            # process laser scan data 
+            scan = np.array(laserscan_msg.ranges)
+            self._check_event(ObservationCollectorWP2.Event.NEWLASER,scan)
+            scan[np.isnan(scan)] = laserscan_msg.range_max
+            # decouple scan and robot's orientation
+            theta = robot_pose2d.theta
+            offset = int(theta /self._lidar_angle_increment)
+            scan_feature = np.roll(scan, offset)
+
+            # process dynamic obstalces' data 
+            dynamic_obstacles_states = []
+            for idx,dynamic_obstalce_state_msg in enumerate(dynamic_obstalce_state_msgs):
+                dynamic_obstacle_pose2d = ObservationCollectorWP2.pose3D_to_pose2D(dynamic_obstalce_state_msg.pose.pose)
+                dynamic_obstalce_twist = dynamic_obstalce_state_msg.twist.twist
+                dynamic_obstalce_twist_x,dynamic_obstalce_twist_y = dynamic_obstalce_twist.linear.x,dynamic_obstalce_twist.linear.y
+                dyn_obs_relative_x,dyn_obs_relative_y = dynamic_obstacle_pose2d.x-robot_pose2d.x,dynamic_obstacle_pose2d.y-robot_pose2d.y
+                dist_dyn_obs = (dyn_obs_relative_x**2+dyn_obs_relative_y**2)**0.5
+                min_dist_obstacle_robot = self._radiuses_dynamic_obstalces[idx]+self._radius_robot
+                dynamic_obstacles_states.append([dyn_obs_relative_x,dyn_obs_relative_y,
+                    dynamic_obstalce_twist_x,dynamic_obstalce_twist_y,
+                    min_dist_obstacle_robot,
+                    dist_dyn_obs
+                ])
+            # append virtual obstacles to get fixed feature length
+            if self.curr_num_dynamic_obstacles<self._num_dynamic_obstacles_feature_extractor:
+                for _ in range(self._num_dynamic_obstacles_feature_extractor-len(dynamic_obstacles_states)):
+                    dynamic_obstacles_states.append([30,0,0,0,self._radiuses_dynamic_obstalces[-1]+self._radius_robot,30])
+            dynamic_obstacles_states = np.array(dynamic_obstacles_states)
+            #sort the obstacles' data by the distance in ascending order
+            dynamic_obstacles_states = dynamic_obstacles_states[np.argsort(dynamic_obstacles_states[:,-1])]
+            # in case more than 
+            if self.curr_num_dynamic_obstacles>self._num_dynamic_obstacles_feature_extractor:
+                dynamic_obstacles_states = dynamic_obstacles_states[:self._num_dynamic_obstacles_feature_extractor,:]            
+            dynamic_obstacles_feature = dynamic_obstacles_states.flatten(order = 'F')
+
+            self._observation  = np.hstack([scan_feature,robot_feature,dynamic_obstacles_feature])
+
+            #it's no need to put the check in the end but for simplification. later we can optimize it.
+            
+    def _callback_subgoal(self, subgoal_msg):
+        with self.data_lock:
+            self._subgoal = self.pose3D_to_pose2D(subgoal_msg.pose)
+    def _callback_stage_changed(self,useless_msg):
+        self.setup_dynamic_topics_listening()
+    def get_observation_space(self):
+        return self.observation_space
+
+    @staticmethod
+    def pose3D_to_pose2D(pose3d):
+        pose2d = Pose2D()
+        pose2d.x = pose3d.position.x
+        pose2d.y = pose3d.position.y
+        quaternion = (pose3d.orientation.x, pose3d.orientation.y,
+                      pose3d.orientation.z, pose3d.orientation.w)
+        euler = euler_from_quaternion(quaternion)
+        yaw = euler[2]
+        pose2d.theta = yaw
+        return pose2d
+
+    @staticmethod
+    def _stack_spaces(ss: Tuple[spaces.Box]):
+        low = []
+        high = []
+        for space in ss:
+            low.extend(space.low.tolist())
+            high.extend(space.high.tolist())
+        return spaces.Box(np.array(low).flatten(), np.array(high).flatten())
+
+
 if __name__ == '__main__':
 
     state_collector = ObservationCollectorWP("sim1/", 360, 10)
+
+
+
+

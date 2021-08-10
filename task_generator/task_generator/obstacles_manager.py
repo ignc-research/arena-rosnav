@@ -275,6 +275,7 @@ class ObstaclesManager:
             is_waypoint_relative,
             mode,
             trigger_zones,
+            pub_groundtruth_pos
         )
         self._move_all_obstacles_start_pos_pubs.append(move_to_start_pub)
         self.register_obstacles(1, model_path, start_pos)
