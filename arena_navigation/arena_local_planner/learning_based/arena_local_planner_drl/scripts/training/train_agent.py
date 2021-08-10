@@ -1,4 +1,4 @@
-from typing import Type
+from typing import Type, Union
 
 import os, sys, rospy, time
 
@@ -138,7 +138,9 @@ def main():
             verbose=1,
         )
     elif args.agent is not None:
-        agent: Type[BaseAgent] = AgentFactory.instantiate(args.agent)
+        agent: Union[Type[BaseAgent], Type[BasePolicy]] = AgentFactory.instantiate(
+            args.agent
+        )
         if isinstance(agent, BaseAgent):
             model = PPO(
                 agent.type.value,
