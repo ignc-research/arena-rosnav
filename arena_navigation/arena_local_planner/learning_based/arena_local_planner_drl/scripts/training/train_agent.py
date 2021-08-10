@@ -472,9 +472,9 @@ if __name__ == "__main__":
         )
     except KeyboardInterrupt:
         print("KeyboardInterrupt..")
-    finally:
+    #finally:
         # update the timesteps the model has trained in total
-        update_total_timesteps_json(n_timesteps, PATHS)
+        #update_total_timesteps_json(n_timesteps, PATHS)
 
     model.env.close()
     print(f"Time passed: {time.time()-start}s")

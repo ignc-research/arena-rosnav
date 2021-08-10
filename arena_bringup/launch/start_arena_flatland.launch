@@ -101,12 +101,12 @@
 
   <!-- Pedsim -->
   <arg name="simulation_factor" default="1"/>
-  <!-- <arg name="update_rate" default="25.0"/> -->
+  <arg name="pedsim_update_rate" default="30.0"/>
   <arg name="scene_file" default="$(find simulator_setup)/scenarios/empty.xml"/>
 
   <node name="pedsim_simulator" pkg="pedsim_simulator" type="pedsim_simulator" output="screen" if="$(arg enable_pedsim)">
       <param name="simulation_factor" value="$(arg simulation_factor)" type="double"/>
-      <param name="update_rate" value="$(arg update_rate)" type="double"/>
+      <param name="pedsim_update_rate" value="$(arg pedsim_update_rate)" type="double"/>
       <param name="scene_file" value="$(arg scene_file)" type="string"/>
   </node>
 
