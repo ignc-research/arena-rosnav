@@ -13,6 +13,7 @@ from geometry_msgs.msg import Pose2D, PoseWithCovarianceStamped, PoseStamped
 from nav_msgs.msg import OccupancyGrid, Path
 
 from .utils import generate_freespace_indices, get_random_pos_on_map
+import subprocess
 
 
 class RobotManager:
@@ -101,6 +102,8 @@ class RobotManager:
         self.map = new_map
         # a tuple stores the indices of the non-occupied spaces. format ((y,....),(x,...)
         self._free_space_indices = generate_freespace_indices(self.map)
+        bashCommand = "rosservice call /move_base/clear_costmaps"
+        subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
 
     def move_robot(self, pose: Pose2D):
         """move the robot to a given position
