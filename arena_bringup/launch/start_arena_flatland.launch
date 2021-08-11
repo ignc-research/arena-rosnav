@@ -94,7 +94,7 @@
     <!-- only train_mode is false, otherwise subgoal is identical with global goal
           which is not wanted for training the waypoint generator.
     -->
-    <arg name="train_mode"        value="false"/>
+    <arg name="train_mode"        value="$(arg train_mode)"/>
     <arg name="global_frame_id"   value="$(arg global_frame_id)"/>
     <arg name="odom_frame_id"     value="$(arg odom_frame_id)"/>
     <arg name="base_frame_id"     value="$(arg base_frame_id)"/>
