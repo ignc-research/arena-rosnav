@@ -1,0 +1,56 @@
+<launch>
+  <arg name="rviz_file"       default="nav_LP"/>
+  <arg name="use_rviz" 	      default="true"/>
+  <arg name="map_folder"      default="Wohnzimmer1"/>
+  <arg name="local_planner"   default="teb"/>
+
+  <arg name="train_mode"       default="false"/>
+  <param name="train_mode" value="$(arg train_mode)" />
+
+  <!--  PARAMS DON'T CHANGE THEM  -->
+  <param name="robot_action_rate"     value="10"/>
+  <param name="laser_update_rate"     value="10"/>
+
+  <!-- To make the training more efficient make sure this step_size*laser_update_rate == 1  -->
+  <arg name="step_size" default="0.01"/>
+  <arg name="update_rate" default="250"/>
+  <param name="update_rate" value="$(arg update_rate)" />
+  <param name="step_size" value="$(arg step_size)" /> 
+
+  <!-- DRL action frequency -->
+  <arg name="action_frequency" default="10"/>
+  <param name="action_frequency" value="$(arg action_frequency)"/>
+  <param name="bool_goal_reached" value="true" />
+
+  <!-- Arguments -->
+  <arg name="model" default="$(env TURTLEBOT3_MODEL)" doc="model type [burger, waffle, waffle_pi]"/>
+  <arg name="map_file" default="$(find simulator_setup)/maps/$(arg map_folder)/map.yaml"/>
+  <arg name="open_rviz" default="true"/>
+  <arg name="move_forward_only" default="false"/>
+
+  <!-- Turtlebot3 -->
+  <include file="$(find turtlebot3_bringup)/launch/turtlebot3_remote.launch">
+    <arg name="model" value="$(arg model)" />
+  </include>
+
+  <!-- Map server -->
+  <node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)"/>
+
+  <!-- AMCL -->
+  <include file="$(find arena_bringup)/launch/amcl.launch"/>
+
+  <!-- move_base -->
+  <include file="$(find arena_bringup)/launch/sublaunch_testing/move_base/move_base_$(arg local_planner).launch">
+  </include>
+
+  <!-- start time space plan fsm-->
+  <!-- include file="$(find arena_bringup)/launch/sublaunch_testing/timed_space_planner_fsm.launch" unless="$(eval arg('local_planner') != 'rlca')" -->
+  <!-- /include -->
+  
+  <!-- rviz -->
+  <group if="$(arg use_rviz)"> 
+    <node pkg="rviz" type="rviz" name="rviz" required="true" output="screen"
+          args="-d $(find arena_bringup)/rviz/$(arg rviz_file).rviz"/>
+  </group>
+</launch>
+

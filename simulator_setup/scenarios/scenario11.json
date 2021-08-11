@@ -1,0 +1,12 @@
+{
+    "scenarios": [
+        {
+		"scene_name": "Wohnzimmer1",
+		"repeats": 5,
+		"static_obstacles": {
+
+            	}
+        }
+    ]
+
+}

@@ -1,0 +1,20 @@
+<launch>
+
+  <!-- Arguments -->
+  <arg name="model" default="burger"/>
+  <arg name="cmd_vel_topic" default="/cmd_vel" />
+  <arg name="odom_topic" default="odom" />
+  <arg name="load_rule" default="rule_03" />
+  <param name="load_rule" value="$(arg load_rule)" />
+
+  <!-- run_agent -->
+  <!-- <node pkg = "arena_local_planner_drl" type="run_agent_node" name="run_agent_node" output="screen"> -->
+    <!-- <param name="load_rule" value="$(arg load_rule)" /> -->
+  <!-- </node> -->
+  <!-- <node pkg = "arena_local_planner_drl" type="run_agent2" name="run_agent2" output="screen" /> -->
+
+  <!-- action_publisher -->
+  <!-- makes sure that drl actions will be published according to sim time in eval mode-->
+  <!-- <node name="action_publisher" pkg="arena_local_planner_drl" type="action_publisher.py"/> -->
+
+</launch>

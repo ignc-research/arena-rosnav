@@ -1,0 +1,38 @@
+TebLocalPlannerROS:
+
+# Robot Configuration Parameters
+  max_vel_x: 0.22
+  min_vel_x: -0.22
+  max_vel_x_backwards: 0.2
+
+  max_vel_y: 0.0
+  min_vel_y: 0.0
+
+  wheelbase: 0.16
+
+# The velocity when robot is moving in a straight line
+  max_vel_trans:  0.22
+  min_vel_trans:  0.11
+
+  max_vel_theta: 2.75
+  min_vel_theta: 1.37
+
+  acc_lim_x: 2.5
+  acc_lim_y: 0.0
+  acc_lim_theta: 3.2 
+
+# Goal Tolerance Parametes
+  xy_goal_tolerance: 0.05
+  yaw_goal_tolerance: 0.17
+  latch_xy_goal_tolerance: false
+
+# Obstacle Parameters
+  min_obstacle_dist: 0.120
+  inlfation_dist: 0.0
+
+# Optimization Parameters
+  weight_optimaltime: 10
+
+# Debugging
+  publish_traj_pc : true
+  publish_cost_grid_pc: true
