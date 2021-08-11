@@ -160,13 +160,13 @@ void GridMap::initMap(ros::NodeHandle& nh){
     ros::NodeHandle public_nh("");
     // sensor sub: syn message filter
     scan_sub_.reset(new message_filters::Subscriber<sensor_msgs::LaserScan>(public_nh, "scan", 50));
-    odom_sub_.reset(new message_filters::Subscriber<nav_msgs::Odometry>(public_nh, "odometry/ground_truth", 100));
+    odom_sub_.reset(new message_filters::Subscriber<nav_msgs::Odometry>(public_nh, "odom", 100));
     sync_scan_odom_.reset(new message_filters::Synchronizer<SyncPolicyScanOdom>(SyncPolicyScanOdom(100), *scan_sub_, *odom_sub_));
     sync_scan_odom_->registerCallback(boost::bind(&GridMap::scanOdomCallback, this, _1, _2));
 
     // sensor sub
     indep_scan_sub_ =public_nh.subscribe<sensor_msgs::LaserScan>("scan", 10, &GridMap::scanCallback, this);
-    indep_odom_sub_ =public_nh.subscribe<nav_msgs::Odometry>("odometry/ground_truth", 10, &GridMap::odomCallback, this);
+    indep_odom_sub_ =public_nh.subscribe<nav_msgs::Odometry>("odom", 10, &GridMap::odomCallback, this);
 
     // timer callbacks
     occ_timer_ = public_nh.createTimer(ros::Duration(0.05),   &GridMap::updateOccupancyCallback, this); // raycasting & setCacheOccupancy is the key
@@ -596,7 +596,7 @@ void GridMap::updateOccupancyCallback(const ros::TimerEvent& /*event*/) {
 
   projectDepthCloud();
   raycastProcess();
-  
+
   // raycast is done, local_updated_ will be setted true
   if (md_.local_updated_) clearAndInflateLocalMap();
   

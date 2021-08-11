@@ -32,7 +32,7 @@ class FlatlandEnv(gym.Env):
                  safe_dist: float = None, 
                  goal_radius: float = 0.1, 
                  max_steps_per_episode=100, 
-                 train_mode: bool = True, 
+                 train_mode: bool = False, 
                  debug: bool = False,
                  task_mode: str = "staged",
                  PATHS: dict = dict(),

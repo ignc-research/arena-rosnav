@@ -138,7 +138,7 @@ include_directories(
 
 add_executable(time_space_planner_node
     src/dynamic_plan_manager.cpp 
-    src/dynamic_plan_fsm.cpp 
+    src/dynamic_plan_fsm.cpp
   )
 
 target_link_libraries(time_space_planner_node

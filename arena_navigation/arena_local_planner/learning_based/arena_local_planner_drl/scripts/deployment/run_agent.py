@@ -89,7 +89,7 @@ if __name__ == "__main__":
         assert os.path.isfile(
             os.path.join(PATHS['model'], "best_model.zip")), "No model file found in %s" % PATHS['model']
         assert os.path.isfile(
-            PATHS['scenario']), "No scenario file named %s" % PATHS['scenario']
+	    PATHS['scenario']), "No scenario file named %s" % PATHS['scenario']
 
         PARAMS = load_hyperparameters_json(PATHS)
         print_hyperparameters(PARAMS)

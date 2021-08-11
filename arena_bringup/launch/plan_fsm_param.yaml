@@ -6,24 +6,28 @@ subgoal_mode: &subgoal_mode 0                       # 0: spacial_horizon 1:timed
 # ------------------------------------------------------------------------------------------------------
 # other main parameters (not relevant for this evaluation)
 subgoal_pub_period: &subgoal_pub_period 0.5             # sec
-goal_tolerance: &goal_tolerance 0.5
-subgoal_tolerance: &subgoal_tolerance 1.0
+goal_tolerance: &goal_tolerance 0.2
+subgoal_tolerance: &subgoal_tolerance 0.2
 
 planning_time_horizon: &planning_time_horizon 3.0       # sec look ahead time
 planning_horizen: &planning_horizen 3.0                 # m   look ahead distance
 sensor_range: &sensor_range 3.5                         # m   laser sensor range
 
-max_vel: &max_vel 2.0                                 # m/s   robot max vel
+#max_vel: &max_vel 2.0                                 # m/s   robot max vel
+max_vel: &max_vel 0.22                                 # m/s   robot max vel
 max_acc: &max_acc 3.0                                   # m/s^2 srobot max acc
 max_jerk: &max_jerk 4.0                                 # m/s^3 robot max jerk
 
-avg_vel: &avg_vel 1.2                                   # m/s for timed_astar action set 
-min_vel: &min_vel 0.3                                 # m/s for timed_astar action set 
+avg_vel: &avg_vel 0.15                                   # m/s for timed_astar action set 
+#min_vel: &min_vel 0.3                                 # m/s for timed_astar action set 
+min_vel: &min_vel 0.08                                 # m/s for timed_astar action set
 
 
-robot_radius: &robot_radius 0.3                         # m
-obstacle_radius: &obstacle_radius 0.4                   # m
-obstacles_inflation: &obstacles_inflation 0.3           # m
+#robot_radius: &robot_radius 0.3                         # m
+robot_radius: &robot_radius 0.105                         # m
+#obstacle_radius: &obstacle_radius 0.4                   # m
+obstacle_radius: &obstacle_radius 0.150                   # m
+obstacles_inflation: &obstacles_inflation 0.05           # m
 obstacle_name: &obstacle_name obstacle_dynamic_with_traj
 use_drl: &use_drl true                                  # true:  cmd_vel is published by drl or others; 
                                                         # false: cmd_vel is published by traj tracker in plan_fsm

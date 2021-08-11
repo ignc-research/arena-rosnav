@@ -43,6 +43,7 @@
   <!-- DRL action frequency -->
   <arg name="action_frequency" default="10"/>
   <param name="action_frequency" value="$(arg action_frequency)"/>
+  <!-- <param name="/global_goal_reached" value='1' /> -->
 
   <!-- Map parameters -->
   <arg name="global_frame_id"   value="map"/>
@@ -81,20 +82,18 @@
 
   <include file="$(find arena_bringup)/launch/sublaunch_testing/sensor_sim.launch" unless="$(eval arg('disable_scenario') or arg('train_mode'))">
   </include>
-
   
-
   <!-- move_base plan manager: which provide basic global planner and cost map -->
   <include file="$(find arena_bringup)/launch/sublaunch_testing/move_base/move_base_$(arg local_planner).launch">
   </include>
 
 
   <!-- start time space plan fsm-->
-  <include file="$(find arena_bringup)/launch/sublaunch_testing/timed_space_planner_fsm.launch">
-  </include>
+  <!-- <include file="$(find arena_bringup)/launch/sublaunch_testing/timed_space_planner_fsm.launch" unless="$(eval arg('local_planner') != 'rlca')">
+  </include> -->
 
   <!-- makes sure that drl actions will be published according to sim time in eval mode-->
-  <group if="$(eval arg('train_mode') == false)">
-    <node name="action_publisher" pkg="arena_local_planner_drl" type="action_publisher.py"/>
-  </group>
+  <!-- <group if="$(eval arg('train_mode') == false)">
+    <node name="action_publisher" pkg="arena_local_planner_drl" type="action_publisher.py" />
+  </group> -->
 </launch>

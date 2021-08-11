@@ -12,7 +12,7 @@ class ActionPublisher():
             raise Exception("This node should be used solely in eval mode!")
 
         rospy.init_node('action_publisher', anonymous = True)
-
+        # print("[action_publisher]: Entering action publisher")
         self._step_size = rospy.get_param("step_size")
         self._update_rate = rospy.get_param("update_rate")
         # real time second in sim time
@@ -22,13 +22,16 @@ class ActionPublisher():
         # apply rate in sim time
         rate = (1/self._action_publish_rate)/self._real_second_in_sim
 
-        ns_prefix = "" if '/single_env' in rospy.get_param_names() else "/eval_sim/"
+        # ns_prefix = "" if '/single_env' in rospy.get_param_names() else "/eval_sim/"
+        ns_prefix = ""
         self._pub_cmd_vel = rospy.Publisher(
             f"{ns_prefix}cmd_vel", Twist, queue_size=1)
         self._pub_cycle_trigger = rospy.Publisher(
             f"{ns_prefix}next_cycle", Bool, queue_size=1)
         self._sub = rospy.Subscriber(
             f"{ns_prefix}cmd_vel_pub", Twist, self.callback_receive_cmd_vel, queue_size=1)
+
+        # print("[action_publisher]: Set publishers")
 
         # to measure sim time
         # self._clock_sub = rospy.Subscriber(
@@ -66,6 +69,7 @@ class ActionPublisher():
         
 if __name__ == '__main__':
     try:
+        # print("[action_publisher]: Start ActionPublisher")
         ActionPublisher()
     except rospy.ROSInterruptException:
         pass

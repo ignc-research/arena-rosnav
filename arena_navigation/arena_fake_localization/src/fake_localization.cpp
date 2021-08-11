@@ -38,7 +38,7 @@ FakeLocalization::FakeLocalization(const ros::NodeHandle node){
       ros::NodeHandle nh;
       
       // create subscriber and filter
-      stuff_sub_ = nh.subscribe(base_pose_ground_truth_, 100, &FakeLocalization::stuffFilter, this);
+      stuff_sub_ = nh.subscribe("base_pose_ground_truth_", 100, &FakeLocalization::stuffFilter, this);
       filter_sub_ = new message_filters::Subscriber<nav_msgs::Odometry>(nh, "", 100); // this is a dummy message filter subscriber, the subscribed msg will be added manuelly
       filter_ = new tf2_ros::MessageFilter<nav_msgs::Odometry>(*filter_sub_, *m_tfBuffer, base_frame_id_, 100, nh);
       filter_->registerCallback(boost::bind(&FakeLocalization::update, this, _1));
