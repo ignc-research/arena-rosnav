@@ -13,13 +13,16 @@ Panels:
         - /Marker2
         - /Marker3
         - /Marker4
-        - /human1
+        - /human1/MarkerArray16
+        - /human1/MarkerArray17
+        - /human1/MarkerArray18
         - /human1/MarkerArray19
         - /human1/MarkerArray20
         - /human1/MarkerArray21
         - /robots1/MarkerArray1
         - /robots1/MarkerArray2
         - /static_obstacle1
+        - /static_obstacle1/MarkerArray1
       Splitter Ratio: 0.6526610255241394
     Tree Height: 796
   - Class: rviz/Selection
@@ -187,12 +190,12 @@ Visualization Manager:
       Class: rviz/Map
       Color Scheme: map
       Draw Behind: true
-      Enabled: false
+      Enabled: true
       Name: Map
       Topic: /map
       Unreliable: false
       Use Timestamp: false
-      Value: false
+      Value: true
     - Alpha: 0.699999988079071
       Class: rviz/Map
       Color Scheme: map
@@ -345,15 +348,35 @@ Visualization Manager:
           Value: true
         map:
           Value: true
-        random_wanderer_base:
-          Value: true
-        sim_1/laser_link7:
-          Value: true
-        sim_1/laser_mount1:
-          Value: true
         sim_1_base_footprint:
           Value: true
+        sim_1_laser_mount:
+          Value: true
         sim_1_odom:
+          Value: true
+        sim_2_base_footprint:
+          Value: true
+        sim_2_laser_mount:
+          Value: true
+        sim_2_odom:
+          Value: true
+        sim_3_base_footprint:
+          Value: true
+        sim_3_laser_mount:
+          Value: true
+        sim_3_odom:
+          Value: true
+        sim_4_base_footprint:
+          Value: true
+        sim_4_laser_mount:
+          Value: true
+        sim_4_odom:
+          Value: true
+        sim_5_base_footprint:
+          Value: true
+        sim_5_laser_mount:
+          Value: true
+        sim_5_odom:
           Value: true
       Marker Scale: 1
       Name: TF
@@ -364,11 +387,26 @@ Visualization Manager:
         map:
           eval_sim_odom:
             {}
-          sim_1_base_footprint:
-            sim_1/laser_mount1:
-              {}
           sim_1_odom:
-            {}
+            sim_1_base_footprint:
+              sim_1_laser_mount:
+                {}
+          sim_2_odom:
+            sim_2_base_footprint:
+              sim_2_laser_mount:
+                {}
+          sim_3_odom:
+            sim_3_base_footprint:
+              sim_3_laser_mount:
+                {}
+          sim_4_odom:
+            sim_4_base_footprint:
+              sim_4_laser_mount:
+                {}
+          sim_5_odom:
+            sim_5_base_footprint:
+              sim_5_laser_mount:
+                {}
       Update Interval: 0
       Value: true
     - Class: rviz/MarkerArray
@@ -489,7 +527,7 @@ Visualization Manager:
           Marker Topic: /sim_1/flatland_server/debug/model/person_3
           Name: MarkerArray
           Namespaces:
-            "": true
+            {}
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -497,7 +535,7 @@ Visualization Manager:
           Marker Topic: /sim_1/flatland_server/debug/model/person_4
           Name: MarkerArray
           Namespaces:
-            "": true
+            {}
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -505,7 +543,7 @@ Visualization Manager:
           Marker Topic: /sim_1/flatland_server/debug/model/person_5
           Name: MarkerArray
           Namespaces:
-            "": true
+            {}
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -633,7 +671,7 @@ Visualization Manager:
           Marker Topic: /sim_1/pedsim_labels
           Name: MarkerArray
           Namespaces:
-            marker: true
+            {}
           Queue Size: 100
           Value: true
       Enabled: true
@@ -645,7 +683,7 @@ Visualization Manager:
           Marker Topic: /sim_1/flatland_server/debug/model/robo_obstacle_01
           Name: MarkerArray
           Namespaces:
-            "": true
+            {}
           Queue Size: 100
           Value: true
         - Class: rviz/MarkerArray
@@ -656,19 +694,19 @@ Visualization Manager:
             {}
           Queue Size: 100
           Value: true
+      Enabled: true
+      Name: robots
+    - Class: rviz/Group
+      Displays:
         - Class: rviz/MarkerArray
           Enabled: true
           Marker Topic: /sim_1/flatland_markers
           Name: MarkerArray
           Namespaces:
-            "": true
+            {}
           Queue Size: 100
           Value: true
       Enabled: true
-      Name: robots
-    - Class: rviz/Group
-      Displays: ~
-      Enabled: false
       Name: static_obstacle
   Enabled: true
   Global Options:
@@ -696,7 +734,7 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Angle: -6.285006523132324
+      Angle: -7.870006561279297
       Class: rviz/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
@@ -706,7 +744,7 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 30.928050994873047
+      Scale: 27.290512084960938
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
       X: 10.499874114990234

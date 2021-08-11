@@ -5,7 +5,7 @@
     - obstacles/shelf.yaml
   human obstacles:
     adult:
-    - 0
+    - 1
     - dynamic_obstacles/person_two_legged.model.yaml
     child:
     - 0
@@ -96,7 +96,7 @@
     - dynamic_obstacles/servicerobot.model.yaml
   robot obstacles:
     random_wanderer:
-    - 1
+    - 2
     - dynamic_obstacles/random_wanderer.model.yaml
 5:
   static obstacles:
