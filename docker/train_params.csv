@@ -1,0 +1,4 @@
+trainname,agent,agent_name,body,pi,vf,act_fn,config,n,tb,eval_log,no-gpu,num_envs
+testann,agent,MLP_ARENA2D,,,,,,,,,,
+testann1,load,pretrained_ppo_mpc,,,,,,,,,,4
+testann2,custom-mlp,256-128,256,16,relu,,,,,,,
