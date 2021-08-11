@@ -127,17 +127,26 @@ int KinodynamicAstar::search(Eigen::Vector2d start_pt, Eigen::Vector2d start_v, 
 
   Eigen::VectorXd end_state(4);
   Eigen::Vector2i end_index;
+  double time_to_goal;
+
   end_state.head(2) = end_pt;
   end_state.tail(2) = end_v;
   end_index = posToIndex(end_pt);
-
-  double time_to_goal;
   cur_node->f_score = lambda_heu_ * estimateHeuristic(cur_node->state, end_state, time_to_goal);
   cur_node->node_state = IN_OPEN_SET;
-  
   open_set_.push(cur_node);
   use_node_num_ += 1;
-  expanded_nodes_.insert(cur_node->index, cur_node);
+
+  if (dynamic)
+  {
+    time_origin_ = time_start;
+    cur_node->time = time_start;
+    cur_node->time_idx = timeToIndex(time_start);
+    expanded_nodes_.insert(cur_node->index, cur_node->time_idx, cur_node);
+    // cout << "time start: " << time_start << endl;
+  }
+  else
+    expanded_nodes_.insert(cur_node->index, cur_node);
 
   //PathNodePtr neighbor = NULL;
   PathNodePtr terminate_node = NULL;
@@ -165,7 +174,7 @@ int KinodynamicAstar::search(Eigen::Vector2d start_pt, Eigen::Vector2d start_v, 
         estimateHeuristic(cur_node->state, end_state, time_to_goal);
         computeShotTraj(cur_node->state, end_state, time_to_goal);
         if (init_search)
-          ROS_ERROR("Shot in first search loop, start_pt & end_pt in same cell!");
+          ROS_ERROR("Shot in first search loop!");
       }
     }
     if (reach_horizon)
@@ -212,7 +221,6 @@ int KinodynamicAstar::search(Eigen::Vector2d start_pt, Eigen::Vector2d start_v, 
     double pro_t;
     std::vector<Eigen::Vector2d> inputs;
     std::vector<double> durations;
-    // prepare motion primitives
     if (init_search)
     {
       inputs.push_back(start_acc_);
@@ -390,8 +398,7 @@ int KinodynamicAstar::search(Eigen::Vector2d start_pt, Eigen::Vector2d start_v, 
 
 std::vector<Eigen::Vector2d> KinodynamicAstar::getKinoTraj(double delta_t)
 {
-  std::vector<Eigen::Vector2d> state_list;  // only get pos
-  //std::vector<Eigen::VectorXd> state_list;    // get pos, vel, acc
+  std::vector<Eigen::Vector2d> state_list;
 
   /* ---------- get traj of searching ---------- */
   PathNodePtr node = path_nodes_.back();
