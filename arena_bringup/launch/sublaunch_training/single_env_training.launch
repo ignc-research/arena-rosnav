@@ -19,9 +19,9 @@
     </include> -->
 
     <!-- start time space plan fsm-->
-    <include file="$(find arena_bringup)/launch/sublaunch_training/timed_space_planner_fsm.launch">
+    <!-- <include file="$(find arena_bringup)/launch/sublaunch_training/timed_space_planner_fsm.launch">
       <arg name="ns"                value="$(arg ns)"/>
-    </include>
+    </include> -->
 
 
     <include file="$(find arena_bringup)/launch/sublaunch_training/plan_manager.launch">
