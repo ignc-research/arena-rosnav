@@ -73,8 +73,8 @@ class ObservationCollector():
         # synchronization parameters
         self._first_sync_obs = True     # whether to return first sync'd obs or most recent
         self.max_deque_size = 10
-        # self._sync_slop = 0.05
-        self._sync_slop = 1.0           # with real robot, there are sync issues
+        self._sync_slop = 0.05
+        # self._sync_slop = 1.0           # with real robot, there are sync issues
 
         self._laser_deque = deque()
         self._rs_deque = deque()
@@ -86,11 +86,13 @@ class ObservationCollector():
         # self._robot_state_sub = rospy.Subscriber(
         #     f'{self.ns_prefix}odom', Odometry, self.callback_robot_state, tcp_nodelay=True)
 
-        self._scan_sub = rospy.Subscriber(f'{self.ns_prefix}scan', LaserScan)
-        self._robot_state_sub = rospy.Subscriber(f'{self.ns_prefix}odom', Odometry)
+        self._scan_sub = message_filters.Subscriber(f'{self.ns_prefix}scan', LaserScan)
+        self._robot_state_sub = message_filters.Subscriber(f'{self.ns_prefix}odom', Odometry)
 
-        self.ts = message_filters.TimeSynchronizer([self._scan_sub, self._robot_state_sub], 10)
-        ts.registerCallback(self.odom_scan_callback)
+        self.ts = message_filters.ApproximateTimeSynchronizer([self._scan_sub, self._robot_state_sub], 10, slop=self._sync_slop)
+        # self.ts = message_filters.TimeSynchronizer([self._scan_sub, self._robot_state_sub], 10)
+
+        self.ts.registerCallback(self.odom_scan_callback)
         # self.ts.registerCallback(self.callback_scan, self.callback_robot_state)
         
         
@@ -110,15 +112,8 @@ class ObservationCollector():
                 self._service_name_step, StepWorld)
 
     def odom_scan_callback(self, scan, odom):
-        print("[Observation_collector]: scan received")
-        if len(self._laser_deque) == self.max_deque_size:
-            self._laser_deque.popleft()
-        self._laser_deque.append(scan)
-
-        print("[Observation_collector]: odom received")
-        if len(self._rs_deque) == self.max_deque_size:
-            self._rs_deque.popleft()
-        self._rs_deque.append(odom)
+        self._scan = self.process_scan_msg(scan)
+        self._robot_pose, self._robot_vel = self.process_robot_state_msg(odom)
 
     def get_observation_space(self):
         return self.observation_space
@@ -137,13 +132,13 @@ class ObservationCollector():
                 pass
         # print("[Observation_collector]: Ready to get laser_scan and robot_pose")
         # try to retrieve sync'ed obs
-        laser_scan, robot_pose = self.get_sync_obs()
-        if laser_scan is not None and robot_pose is not None:
-            print("Synced successfully")
-            self._scan = laser_scan
-            self._robot_pose = robot_pose
-        else:
-            print("Not synced")
+        # laser_scan, robot_pose = self.get_sync_obs()
+        # if laser_scan is not None and robot_pose is not None:
+        #     print("Synced successfully")
+        #     self._scan = laser_scan
+        #     self._robot_pose = robot_pose
+        # else:
+        #     print("Not synced")
 
         # print("[Observation_collector]: Get observation without checking scan and odom to be synced")
         # self._scan = laser_scan
@@ -152,7 +147,8 @@ class ObservationCollector():
         if len(self._scan.ranges) > 0:
             scan = self._scan.ranges.astype(np.float32)
         else:
-            scan = np.zeros(self._laser_num_beams, dtype=float)
+            # scan = np.zeros(self._laser_num_beams, dtype=float)
+            scan = np.ones(self._laser_num_beams, dtype=float)*100 # But why- Bassel?
             
         rho, theta = ObservationCollector._get_goal_pose_in_robot_frame(
             self._subgoal, self._robot_pose)

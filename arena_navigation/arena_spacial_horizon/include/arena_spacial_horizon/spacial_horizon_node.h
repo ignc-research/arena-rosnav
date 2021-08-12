@@ -10,6 +10,7 @@
 
 #include <nav_msgs/Odometry.h>
 #include <geometry_msgs/PoseStamped.h>
+#include "geometry_msgs/PoseWithCovarianceStamped.h"
 #include <nav_msgs/Path.h>
 #include <nav_msgs/GetPlan.h>
 #include <visualization_msgs/MarkerArray.h>
@@ -29,7 +30,7 @@ private:
 
     geometry_msgs::PoseStamped ps_odom;
 
-    Eigen::Vector2d odom_pos_, odom_vel_; 
+    Eigen::Vector2d odom_pos_, odom_vel_, initial_pose_; 
     Eigen::Quaterniond odom_orient_;
     double odom_dir_;
 
@@ -37,7 +38,7 @@ private:
     Eigen::Vector2d end_pos_, end_vel_;
 
     // subscriber
-    ros::Subscriber goal_sub_, odom_sub_;
+    ros::Subscriber goal_sub_, odom_sub_, initialPose_sub_;
 
     // publisher
     ros::Publisher subgoal_DRL_pub_;
@@ -64,6 +65,7 @@ private:
     /* ros related callback*/
     void odomCallback(const nav_msgs::OdometryConstPtr& msg);
     void goalCallback(const geometry_msgs::PoseStampedPtr& msg);
+    void handle_initial_pose(const geometry_msgs::PoseWithCovarianceStampedPtr& msg);
 
     bool getSubgoalSpacialHorizon(Eigen::Vector2d &subgoal);
     void updateSubgoalDRLCallback(const ros::TimerEvent &e);
