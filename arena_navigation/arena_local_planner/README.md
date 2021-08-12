@@ -16,6 +16,7 @@ In ROS, robot navigation is realized by the global and local planner. The idea o
 
 ## 2. Usage
 
+### 2.1 Sim
 ````
 How to start:
    start flatland with default map and planner
@@ -82,3 +83,45 @@ contains rviz_plugins & planning visulizations needed to be showed in rviz.
   <img width="400" height="300" src="img/local_planner.png">
   <img width="400" height="300" src="img/synchronization.png">
 </p>
+````
+
+### 2.2 Real
+````
+- Terminal 1:
+   # Connect to turtlebot3
+   1. ssh ubuntu@192.168.117.84 
+   # password: turtlebot
+
+- Terminal 2:
+   2. roscore
+
+- Terminal 1 (ssh with turtlebot):
+   # Start the nodes on Tutrlebot that publish necessary data (scan, odom, etc.)
+   3. roslaunch turtlebot3_bringup turtlebot3_robot.launch
+ 
+------------------------------------------------------
+# If using classical planner or rlca do the following:
+------------------------------------------------------
+ 
+- Terminal 3:
+   # Start arena_rosnav chosing a local planner and a map
+   4. roslaunch arena_bringup start_arena_turtlebot3.launch local_planner:="dwa_ROBOTIS" map_folder:="robo_lab"
+   # Note: if using rlca, you have to be in rosnav env (workon rosnav)
+
+--------------------------------------
+# If using drl agent do the following:
+--------------------------------------
+
+- Terminal 3
+   # activate rosnav env
+   4. workon rosnav
+   # Start arena_rosnav chosing a local planner and a map
+   5. roslaunch arena_bringup start_arena_turtlebot3.launch local_planner:="drl1" map_folder:="robo_lab"
+   
+- Terminal 4:
+   # activate rosnav env
+   6. workon rosnav
+   # enter directory with run_agent_real script
+   7. roscd arena_local_planner_drl/scripts/deployment/
+   # Start selected drl agent (e.g. --load rule_04)
+   8. python run_agent_real.py [--load xxx]
