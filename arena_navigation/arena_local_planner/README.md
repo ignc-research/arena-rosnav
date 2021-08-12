@@ -16,6 +16,7 @@ In ROS, robot navigation is realized by the global and local planner. The idea o
 
 ## 2. Usage
 
+### 2.1 Sim
 ````
 How to start:
    start flatland with default map and planner
@@ -82,3 +83,6 @@ contains rviz_plugins & planning visulizations needed to be showed in rviz.
   <img width="400" height="300" src="img/local_planner.png">
   <img width="400" height="300" src="img/synchronization.png">
 </p>
+````
+
+### 2.2
