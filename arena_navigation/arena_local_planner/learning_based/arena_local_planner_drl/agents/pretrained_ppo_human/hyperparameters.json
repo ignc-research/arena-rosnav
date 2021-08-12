@@ -19,9 +19,5 @@
     "discrete_action_space": false,
     "normalize": false,
     "task_mode": "staged",
-<<<<<<< HEAD
-    "curr_stage": 2
-=======
     "curr_stage": 5
->>>>>>> local_planner_subgoalmode
 }
