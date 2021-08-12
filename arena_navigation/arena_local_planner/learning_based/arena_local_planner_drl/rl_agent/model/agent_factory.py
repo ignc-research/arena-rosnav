@@ -1,4 +1,4 @@
-from typing import Callable, Type
+from typing import Callable, Type, Union
 
 from stable_baselines3.common.policies import BasePolicy
 
@@ -44,7 +44,7 @@ class AgentFactory:
     # end register()
 
     @classmethod
-    def instantiate(cls, name: str, **kwargs) -> Type[BaseAgent]:
+    def instantiate(cls, name: str, **kwargs) -> Union[Type[BaseAgent], Type[BasePolicy]]:
         """Factory command to create the agent.
         This method gets the appropriate agent class from the registry
         and creates an instance of it, while passing in the parameters
@@ -58,4 +58,8 @@ class AgentFactory:
         """
         assert name in cls.registry, f"Agent '{name}' is not registered!"
         agent_class = cls.registry[name]
-        return agent_class(**kwargs)
+        
+        if issubclass(agent_class, BaseAgent):
+            return agent_class(**kwargs)
+        else:
+            return agent_class
