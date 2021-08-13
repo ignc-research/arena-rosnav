@@ -5,6 +5,9 @@ import numpy as np
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.tools.custom_mlp_utils import (
     get_net_arch,
 )
+from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.rl_agent.model.agent_factory import (
+    AgentFactory,
+)
 
 
 def training_args(parser):
@@ -24,29 +27,7 @@ def training_args(parser):
     group.add_argument(
         "--agent",
         type=str,
-        choices=[
-            "MLP_ARENA2D",
-            "AGENT_1",
-            "AGENT_2",
-            "AGENT_3",
-            "AGENT_4",
-            "AGENT_5",
-            "AGENT_6",
-            "AGENT_7",
-            "AGENT_8",
-            "AGENT_9",
-            "AGENT_10",
-            "AGENT_11",
-            "AGENT_12",
-            "AGENT_13",
-            "AGENT_14",
-            "AGENT_15",
-            "AGENT_16",
-            "AGENT_17",
-            "AGENT_18",
-            "AGENT_19",
-            "AGENT_20",
-        ],
+        choices=AgentFactory.registry.keys(),
         help="predefined agent to train",
     )
     group.add_argument(

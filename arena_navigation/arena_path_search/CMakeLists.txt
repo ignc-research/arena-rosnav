@@ -3,8 +3,6 @@ project(arena_path_search)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 #add_compile_options(-std=c++11)
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS} -O3 -Wall") # -Wextra -Werror
 
 
@@ -20,7 +18,6 @@ find_package(catkin REQUIRED COMPONENTS
 
 find_package(Eigen3 REQUIRED)
 find_package(PCL REQUIRED)
-
 
 # this is important to find eigen path
 set(Eigen3_INCLUDE_DIRS ${EIGEN3_INCLUDE_DIR})
@@ -42,11 +39,9 @@ include_directories(
 
 ## Declare a C++ library
 add_library(arena_path_search
-  #src/astar.cpp
+  src/astar.cpp
   src/kinodynamic_astar.cpp
   src/dyn_astar.cpp
-  src/jps.cpp
-  src/jps_utils.cpp
 )
 
 target_link_libraries(arena_path_search
@@ -55,13 +50,5 @@ target_link_libraries(arena_path_search
 )
 
 
-# add_executable(triangle 
-#               src/delaunator_triangle.cpp
-# )
-
-# target_link_libraries(triangle
-#   ${catkin_LIBRARIES}
-#   ${PCL_LIBRARIES}
-# )
 
 

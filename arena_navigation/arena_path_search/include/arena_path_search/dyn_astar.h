@@ -7,32 +7,31 @@
 #include <Eigen/Eigen>
 #include <queue>
 #include "arena_mapping/mapping.h"
-#include "arena_path_search/grid_node.h"
 
 //constexpr double inf = 1 >> 30;
 #define inf 1 >> 30
-// struct GridNode;
-// typedef GridNode *GridNodePtr;
+struct GridNode;
+typedef GridNode *GridNodePtr;
 
-// struct GridNode
-// {
-// 	enum enum_state
-// 	{
-// 		OPENSET = 1,
-// 		CLOSEDSET = 2,
-// 		UNDEFINED = 3
-// 	};
+struct GridNode
+{
+	enum enum_state
+	{
+		OPENSET = 1,
+		CLOSEDSET = 2,
+		UNDEFINED = 3
+	};
 
-// 	int rounds{0}; // Distinguish every call
-// 	enum enum_state state
-// 	{
-// 		UNDEFINED
-// 	};
-// 	Eigen::Vector2i index;
+	int rounds{0}; // Distinguish every call
+	enum enum_state state
+	{
+		UNDEFINED
+	};
+	Eigen::Vector2i index;
 
-// 	double gScore{inf}, fScore{inf};
-// 	GridNodePtr cameFrom{NULL};
-// };
+	double gScore{inf}, fScore{inf};
+	GridNodePtr cameFrom{NULL};
+};
 
 class NodeComparator1
 {
