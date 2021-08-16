@@ -18,7 +18,6 @@ import rospy
 import rospkg
 import shutil
 from .utils import generate_freespace_indices, get_random_pos_on_map
-import subprocess
 
 
 class ObstaclesManager:
@@ -61,8 +60,6 @@ class ObstaclesManager:
         self.map = new_map
         # a tuple stores the indices of the non-occupied spaces. format ((y,....),(x,...)
         self._free_space_indices = generate_freespace_indices(self.map)
-        bashCommand = "rosservice call /move_base/clear_costmaps"
-        subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
 
     def register_obstacles(self, num_obstacles: int, model_yaml_file_path: str, start_pos: list = []):
         """register the obstacles defined by a yaml file and request flatland to respawn the them.

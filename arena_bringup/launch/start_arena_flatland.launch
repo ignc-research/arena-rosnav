@@ -5,7 +5,7 @@
   <param name="train_mode" value="$(arg train_mode)" />
   
   <arg name="local_planner"   default="teb"/> 
-  <arg name="rviz_file"       default="nav_LP"/>
+  <arg name="rviz_file"       default="nav"/>
   <arg name="disable_scenario"    default="true"/>
   <arg name="scenario_file"   default="empty_map.json"/>
   <arg name="reset"   default="true"/>

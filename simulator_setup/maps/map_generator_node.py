@@ -6,6 +6,7 @@ from nav_msgs.msg import OccupancyGrid
 from geometry_msgs.msg import PoseStamped
 from std_msgs.msg import String
 import numpy as np
+import subprocess
 
 class MapGenerator():
     def __init__(self):
@@ -87,7 +88,9 @@ class MapGenerator():
         self.occupancy_grid.data = self.generate_mapdata()
         # rospy.loginfo("New random map generated for episode {}.".format(self.nr))
         self.mappub.publish(self.occupancy_grid)
-        rospy.loginfo("New random map published.")
+        bashCommand = "rosservice call /move_base/clear_costmaps"
+        subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
+        rospy.loginfo("New random map published and costmap cleared.")
 
 
 

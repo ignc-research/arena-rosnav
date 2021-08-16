@@ -10,13 +10,11 @@ void PlanCollector::initPlanModules(ros::NodeHandle &nh){
 
     goal_=geometry_msgs::PoseStamped();
     
-    // std::string global_plan_service_name = "/move_base/NavfnROS/make_plan";  
-    // global_plan_client_= nh.serviceClient<nav_msgs::GetPlan>(global_plan_service_name);
-    std::string global_plan_service_name = "global_kino_make_plan";///move_base/NavfnROS/make_plan";
+    std::string global_plan_service_name = "/move_base/NavfnROS/make_plan";
     std::string ns = ros::this_node::getNamespace();
     std::string fullName = ns + "/"+global_plan_service_name;
     ros::service::waitForService(fullName);   
-    global_plan_client_= nh.serviceClient<arena_plan_msgs::MakeGlobalPlan>(global_plan_service_name);  
+    global_plan_client_= nh.serviceClient<nav_msgs::GetPlan>(global_plan_service_name);
 
     // get plan parameter
     nh.param("/look_ahead_distance", look_ahead_distance_, 1.5);
