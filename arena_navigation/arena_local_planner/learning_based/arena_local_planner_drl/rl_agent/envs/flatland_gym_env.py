@@ -246,14 +246,13 @@ class FlatlandEnv(gym.Env):
             info["is_success"] = 0
 
         # for logging
-        if self._extended_eval:
-            if done:
-                info["collisions"] = self._collisions
-                info["distance_travelled"] = round(self._distance_travelled, 2)
-                info["time_safe_dist"] = (
-                    self._safe_dist_counter * self._action_frequency
-                )
-                info["time"] = self._steps_curr_episode * self._action_frequency
+        if self._extended_eval and done:
+            info["collisions"] = self._collisions
+            info["distance_travelled"] = round(self._distance_travelled, 2)
+            info["time_safe_dist"] = (
+                self._safe_dist_counter * self._action_frequency
+            )
+            info["time"] = self._steps_curr_episode * self._action_frequency
         return merged_obs, reward, done, info
 
     def reset(self):

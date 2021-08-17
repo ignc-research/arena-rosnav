@@ -9,9 +9,8 @@ import yaml
 from torch import nn
 from stable_baselines3.common.policies import ActorCriticPolicy
 
-from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.rl_agent.model.agent_factory import (
-    AgentFactory,
-)
+from rl_agent.model.agent_factory import AgentFactory
+
 
 """ 
 _RS: Robot state size - placeholder for robot related inputs to the NN

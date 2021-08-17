@@ -1,14 +1,9 @@
 """Custom policies built by SB3 during runtime through parsing 'policy_kwargs'"""
 from torch import nn
 
-from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.rl_agent.model.base_agent import (
-    BaseAgent,
-    PolicyType,
-)
-from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.rl_agent.model.agent_factory import (
-    AgentFactory,
-)
-from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.rl_agent.model.feature_extractors import *
+from rl_agent.model.agent_factory import AgentFactory
+from rl_agent.model.base_agent import BaseAgent, PolicyType
+from rl_agent.model.feature_extractors import *
 
 
 @AgentFactory.register("AGENT_6")

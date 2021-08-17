@@ -3,10 +3,7 @@ from typing import Type
 from stable_baselines3.common.torch_layers import BaseFeaturesExtractor
 from torch.nn.modules.module import Module
 
-from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.rl_agent.model.base_agent import (
-    BaseAgent,
-    PolicyType,
-)
+from rl_agent.model.base_agent import BaseAgent, PolicyType
 
 
 def check_format(cls: Type[BaseAgent]):

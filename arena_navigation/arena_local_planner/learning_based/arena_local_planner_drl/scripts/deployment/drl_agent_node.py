@@ -13,23 +13,22 @@ from stable_baselines3 import PPO
 # observation msgs
 from geometry_msgs.msg import Twist
 
-from rl_agent.utils.observation_collector import ObservationCollector 
+from rl_agent.utils.observation_collector import ObservationCollector
 
 NS_PREFIX = ""
 MODELS_DIR = os.path.join(
-    rospkg.RosPack().get_path("arena_local_planner_drl"), 
-    "agents"
+    rospkg.RosPack().get_path("arena_local_planner_drl"), "agents"
 )
 ACTIONS_SETTINGS_PATH = os.path.join(
-    rospkg.RosPack().get_path("arena_local_planner_drl"), 
+    rospkg.RosPack().get_path("arena_local_planner_drl"),
     "config",
-    "default_settings.yaml"
+    "default_settings.yaml",
 )
 LASER_NUM_BEAMS, LASER_MAX_RANGE = 360, 3.5
 
 
 class DRLAgent:
-    def __init__(self, name: str, ns: str=None) -> None:
+    def __init__(self, name: str, ns: str = None) -> None:
         """Initialization procedure for the DRL agent node.
 
         Args:
@@ -39,7 +38,7 @@ class DRLAgent:
         rospy.init_node(f"DRL_local_planner_{name}", anonymous=True)
 
         self.name = name
-        self._ns = "" if ns is None or ns == "" else "/" + ns + "/" 
+        self._ns = "" if ns is None or ns == "" else "/" + ns + "/"
 
         self.setup_agent()
 
@@ -55,27 +54,27 @@ class DRLAgent:
                 f"{self._ns}cmd_vel", Twist, queue_size=1
             )
         else:
-            # w/ action publisher node 
+            # w/ action publisher node
             # (controls action rate being published on '../cmd_vel')
             self._action_pub = rospy.Publisher(
                 f"{self._ns}cmd_vel_pub", Twist, queue_size=1
             )
 
     def setup_agent(self) -> None:
-        """Loads the trained policy and when required the VecNormalize object"""        
+        """Loads the trained policy and when required the VecNormalize object"""
         model_file = os.path.join(MODELS_DIR, self.name, "best_model.zip")
         vecnorm_file = os.path.join(MODELS_DIR, self.name, "vec_normalize.pkl")
         model_params_file = os.path.join(MODELS_DIR, self.name, "hyperparameters.json")
 
-        assert os.path.isfile(model_file), (
-            f"Compressed model cannot be found at {model_file}!"
-        )
-        assert os.path.isfile(vecnorm_file), (
-            f"VecNormalize file cannot be found at {vecnorm_file}!"
-        )
-        assert os.path.isfile(model_params_file), (
-            f"VecNormalize file cannot be found at {vecnorm_file}!"
-        )
+        assert os.path.isfile(
+            model_file
+        ), f"Compressed model cannot be found at {model_file}!"
+        assert os.path.isfile(
+            vecnorm_file
+        ), f"VecNormalize file cannot be found at {vecnorm_file}!"
+        assert os.path.isfile(
+            model_params_file
+        ), f"VecNormalize file cannot be found at {vecnorm_file}!"
 
         with open(vecnorm_file, "rb") as file_handler:
             vec_normalize = pickle.load(file_handler)
@@ -86,20 +85,20 @@ class DRLAgent:
         self._obs_norm_func = vec_normalize.normalize_obs
         self._agent_params = hyperparams
 
-        if self._agent_params['discrete_action_space']:
+        if self._agent_params["discrete_action_space"]:
             with open(ACTIONS_SETTINGS_PATH, "r") as fd:
                 setting_data = yaml.safe_load(fd)
                 self._discrete_actions = setting_data["robot"]["discrete_actions"]
 
     def get_observations(self) -> Tuple[np.ndarray, dict]:
         obs = self.observation_collector.get_observations()[0]
-        if self._agent_params['normalize']:
+        if self._agent_params["normalize"]:
             obs = self._obs_norm_func(obs)
         return obs
 
     def get_action(self, obs: np.ndarray) -> np.ndarray:
         action = self._agent.predict(obs, deterministic=True)[0]
-        if self._agent_params['discrete_action_space']:
+        if self._agent_params["discrete_action_space"]:
             action = self._get_disc_action(action)
         return action
 
@@ -114,12 +113,15 @@ class DRLAgent:
             obs = self.get_observations()
             action = self.get_action(obs)
             self.publish_action(action)
-    
+
     def _get_disc_action(self, action: int):
-        return np.array([
-            self._discrete_actions[action]["linear"], 
-            self._discrete_actions[action]["angular"]
-        ])
+        return np.array(
+            [
+                self._discrete_actions[action]["linear"],
+                self._discrete_actions[action]["angular"],
+            ]
+        )
+
 
 if __name__ == "__main__":
     AGENT_NAME = "rule_04"
@@ -129,4 +131,3 @@ if __name__ == "__main__":
         AGENT.run()
     except rospy.ROSInterruptException:
         pass
-    

@@ -10,22 +10,13 @@ from stable_baselines3.common.callbacks import (
 )
 from stable_baselines3.common.policies import BasePolicy
 
-from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.rl_agent.model.base_agent import (
-    BaseAgent,
-)
-from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.rl_agent.model.agent_factory import (
-    AgentFactory,
-)
-from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.rl_agent.model.custom_sb3_policy import *
-from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.rl_agent.model.custom_policy import *
-from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.tools.train_agent_utils import *
-from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.tools.custom_mlp_utils import *
-from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.tools.staged_train_callback import (
-    InitiateNewTrainStage,
-)
-from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.tools.argsparser import (
-    parse_training_args,
-)
+from rl_agent.model.agent_factory import AgentFactory
+from rl_agent.model.base_agent import BaseAgent
+from rl_agent.model.custom_sb3_policy import *
+from tools.argsparser import parse_training_args
+from tools.custom_mlp_utils import *
+from tools.train_agent_utils import *
+from tools.staged_train_callback import InitiateNewTrainStage
 
 
 def main():

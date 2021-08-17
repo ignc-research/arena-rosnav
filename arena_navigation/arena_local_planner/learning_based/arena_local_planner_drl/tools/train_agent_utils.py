@@ -82,7 +82,7 @@ hyperparams = {
 
 def initialize_hyperparameters(
     PATHS: dict, load_target: str, config_name: str = "default", n_envs: int = 1
-):
+) -> dict:
     """
     Write hyperparameters to json file in case agent is new otherwise load existing hyperparameters
 
@@ -109,7 +109,7 @@ def initialize_hyperparameters(
     return hyperparams
 
 
-def write_hyperparameters_json(hyperparams: dict, PATHS: dict):
+def write_hyperparameters_json(hyperparams: dict, PATHS: dict) -> None:
     """
     Write hyperparameters.json to agent directory
 
@@ -124,7 +124,7 @@ def write_hyperparameters_json(hyperparams: dict, PATHS: dict):
 
 def load_hyperparameters_json(
     PATHS: dict, from_scratch: bool = False, config_name: str = "default"
-):
+) -> dict:
     """
     Load hyperparameters from model directory when loading - when training from scratch
     load from ../configs/hyperparameters
@@ -154,7 +154,7 @@ def load_hyperparameters_json(
             )
 
 
-def update_total_timesteps_json(timesteps: int, PATHS: dict):
+def update_total_timesteps_json(timesteps: int, PATHS: dict) -> None:
     """
     Update total number of timesteps in json file
 
@@ -176,7 +176,7 @@ def update_total_timesteps_json(timesteps: int, PATHS: dict):
             json.dump(hyperparams, target, ensure_ascii=False, indent=4)
 
 
-def print_hyperparameters(hyperparams: dict):
+def print_hyperparameters(hyperparams: dict) -> None:
     print("\n--------------------------------")
     print("         HYPERPARAMETERS         \n")
     for param, param_val in hyperparams.items():
@@ -184,7 +184,7 @@ def print_hyperparameters(hyperparams: dict):
     print("--------------------------------\n\n")
 
 
-def check_hyperparam_format(loaded_hyperparams: dict, PATHS: dict):
+def check_hyperparam_format(loaded_hyperparams: dict, PATHS: dict) -> None:
     if set(hyperparams.keys()) != set(loaded_hyperparams.keys()):
         missing_keys = set(hyperparams.keys()).difference(
             set(loaded_hyperparams.keys())
@@ -202,7 +202,7 @@ def check_hyperparam_format(loaded_hyperparams: dict, PATHS: dict):
         raise TypeError("Parameter 'task_mode' has unknown value")
 
 
-def update_hyperparam_model(model: PPO, PATHS: dict, params: dict, n_envs: int = 1):
+def update_hyperparam_model(model: PPO, PATHS: dict, params: dict, n_envs: int = 1) -> None:
     """
     Updates parameter of loaded PPO agent when it was manually changed in the configs yaml.
 
@@ -241,7 +241,7 @@ def update_hyperparam_model(model: PPO, PATHS: dict, params: dict, n_envs: int =
         model.tensorboard_log = PATHS["tb"]
 
 
-def check_batch_size(n_envs: int, batch_size: int, mn_batch_size: int):
+def check_batch_size(n_envs: int, batch_size: int, mn_batch_size: int) -> None:
     assert (
         batch_size > mn_batch_size
     ), f"Mini batch size {mn_batch_size} is bigger than batch size {batch_size}"
@@ -404,7 +404,7 @@ def make_envs(
 
 def wait_for_nodes(
     with_ns: bool, n_envs: int, timeout: int = 30, nodes_per_ns: int = 3
-):
+) -> None:
     """
     Checks for timeout seconds if all nodes to corresponding namespace are online.
 

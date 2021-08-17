@@ -12,14 +12,10 @@ from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv, VecNorm
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.evaluation import evaluate_policy
 
+from rl_agent.envs.flatland_gym_env import FlatlandEnv
 from task_generator.task_generator.tasks import StopReset
-from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.rl_agent.envs.flatland_gym_env import (
-    FlatlandEnv,
-)
-from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.tools.argsparser import (
-    parse_run_agent_args,
-)
-from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.tools.train_agent_utils import *
+from tools.argsparser import parse_run_agent_args
+from tools.train_agent_utils import load_hyperparameters_json, print_hyperparameters
 
 ### AGENT LIST ###
 AGENTS = [
