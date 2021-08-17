@@ -8,9 +8,11 @@ workon rosnav
 pip install pyzmq
 ```
 
+Also stable-baselines needs to be updated.
 # Training an agent
 1. In the first terminal execute
 ```bash
+workon rosnav
 roslaunch arena_bringup start_training.launch num_envs:=$num_envs
 ```
 2. In a second terminal execute
@@ -41,6 +43,7 @@ roslaunch arena_bringup visualization_training.launch use_rviz:=true rviz_file:=
 # Evaluate agents
 1. Start ros
 ```bash
+workon rosnav
 roslaunch arena_bringup start_training.launch num_envs:=1
 ```
 2. Start all in one planner.
