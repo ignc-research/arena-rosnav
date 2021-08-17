@@ -32,9 +32,9 @@ class ABSTask(ABC):
     def __init__(self, obstacles_manager: ObstaclesManager, robot_manager: RobotManager):
         self.obstacles_manager = obstacles_manager
         self.robot_manager = robot_manager
-        self._service_client_get_map = rospy.ServiceProxy('/static_map', GetMap)
+        self._service_client_get_map = rospy.ServiceProxy("/" + obstacles_manager.ns + '/static_map', GetMap)
         self._map_lock = Lock()
-        rospy.Subscriber('/map', OccupancyGrid, self._update_map)
+        rospy.Subscriber("/" + obstacles_manager.ns + '/map', OccupancyGrid, self._update_map)
         # a mutex keep the map is not unchanged during reset task.
 
     @abstractmethod

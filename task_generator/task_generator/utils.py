@@ -4,7 +4,7 @@ from nav_msgs.msg import OccupancyGrid
 import random
 
 
-def generate_freespace_indices(map_: OccupancyGrid) -> tuple:
+def generate_freespace_indices(map_: OccupancyGrid):
     """generate the indices(represented in a tuple) of the freesapce based on the map
 
     Returns:
@@ -13,8 +13,12 @@ def generate_freespace_indices(map_: OccupancyGrid) -> tuple:
     """
     width_in_cell, height_in_cell = map_.info.width, map_.info.height
     map_2d = np.reshape(map_.data, (height_in_cell, width_in_cell))
-    map_2d[-40:, -40:] = 1 # Reduce map size so that goal doesn't spawn close to edge
-    map_2d[:40, :40] = 1
+    inflation_layer = np.zeros(shape=map_2d.shape)
+    ir = 5  # inflation radius
+    for (x, y), element in np.ndenumerate(map_2d):
+        if element > 0:
+            inflation_layer[x-ir:x+ir, y-ir:y+ir] = 1
+    map_2d = map_2d + inflation_layer
     indices_y_x = np.where(map_2d == 0)
     return indices_y_x
 
