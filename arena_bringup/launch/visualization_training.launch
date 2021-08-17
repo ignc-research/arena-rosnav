@@ -15,11 +15,10 @@
 
 
 
-    
+
   <!--  ************** rviz  ***************  -->
   <group if="$(arg use_rviz)">
     <node name="flatland_rviz" pkg="rviz" type="rviz" output="screen" ns="$(arg ns)" args="-d $(find arena_bringup)/rviz/$(arg rviz_file).rviz">
-
     </node>
-  </group>    
+  </group>
 </launch>

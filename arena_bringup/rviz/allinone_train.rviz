@@ -4,6 +4,7 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded:
+        - /robot1
         - /robot1/my_robot1
         - /Local plan1/teb1
         - /Sensors1
@@ -78,13 +79,79 @@ Visualization Manager:
           Frame Timeout: 15
           Frames:
             All Enabled: false
+            eval_sim_odom:
+              Value: true
+            map:
+              Value: true
+            sim_1_base_footprint:
+              Value: true
+            sim_1_laser_link:
+              Value: true
+            sim_1_odom:
+              Value: true
+            sim_2_base_footprint:
+              Value: true
+            sim_2_laser_link:
+              Value: true
+            sim_2_odom:
+              Value: true
+            sim_3_base_footprint:
+              Value: true
+            sim_3_laser_link:
+              Value: true
+            sim_3_odom:
+              Value: true
+            sim_4_base_footprint:
+              Value: true
+            sim_4_laser_link:
+              Value: true
+            sim_4_odom:
+              Value: true
+            sim_5_base_footprint:
+              Value: true
+            sim_5_laser_link:
+              Value: true
+            sim_5_odom:
+              Value: true
+            sim_6_base_footprint:
+              Value: true
+            sim_6_laser_link:
+              Value: true
+            sim_6_odom:
+              Value: true
           Marker Scale: 1
           Name: TF
           Show Arrows: true
           Show Axes: true
           Show Names: true
           Tree:
-            {}
+            map:
+              eval_sim_odom:
+                {}
+              sim_1_odom:
+                sim_1_base_footprint:
+                  sim_1_laser_link:
+                    {}
+              sim_2_odom:
+                sim_2_base_footprint:
+                  sim_2_laser_link:
+                    {}
+              sim_3_odom:
+                sim_3_base_footprint:
+                  sim_3_laser_link:
+                    {}
+              sim_4_odom:
+                sim_4_base_footprint:
+                  sim_4_laser_link:
+                    {}
+              sim_5_odom:
+                sim_5_base_footprint:
+                  sim_5_laser_link:
+                    {}
+              sim_6_odom:
+                sim_6_base_footprint:
+                  sim_6_laser_link:
+                    {}
           Update Interval: 0
           Value: true
         - Class: rviz/MarkerArray
@@ -92,7 +159,7 @@ Visualization Manager:
           Marker Topic: /sim_1/flatland_server/debug/model/myrobot
           Name: my_robot
           Namespaces:
-            {}
+            "": true
           Queue Size: 100
           Value: true
         - Alpha: 1
@@ -110,7 +177,7 @@ Visualization Manager:
           Topic: /move_base_simple/goal
           Unreliable: false
           Value: false
-      Enabled: false
+      Enabled: true
       Name: robot
     - Class: rviz/Group
       Displays:
@@ -1174,11 +1241,7 @@ Visualization Manager:
       Marker Topic: /sim_1/teb/teb_markers
       Name: Marker
       Namespaces:
-        LineObstacles: true
-        PointObstacles: true
-        PolyObstacles: true
-        RobotFootprintModel: true
-        TebContainer: true
+        {}
       Queue Size: 100
       Value: true
     - Alpha: 1

@@ -26,6 +26,13 @@
     <param name="controller_patience" value="15.0" />
     <param name="planner_frequency" value="1.0" />
 
+	<param name ="MpcLocalPlannerROS/robot/unicycle/max_vel_x" value="0.3" />
+    <param name ="MpcLocalPlannerROS/robot/unicycle/max_vel_x_backwards" value="0" />
+    <param name ="MpcLocalPlannerROS/robot/unicycle/max_vel_theta" value="1" />
+
+    <param name ="MpcLocalPlannerROS/robot/unicycle/acc_lim_x" value="0" />
+    <param name ="MpcLocalPlannerROS/robot/unicycle/dec_lim_x" value="0" />
+    <param name ="MpcLocalPlannerROS/robot/unicycle/acc_lim_theta" value="0" />
     
 
   </node>
