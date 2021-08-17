@@ -1,8 +1,7 @@
 <launch>
     <!-- This launch file aims at providing a single environment for the training of DRL based intermediate planner -->
     <arg name="ns"/>
-    <!-- <arg name="local_planner" default="rlca" /> -->
-    <!-- <arg name="local_planner" default="mpc" /> -->
+    <!-- rlca teb drl -->
     <arg name="local_planner" default="teb" />
 
     <!-- Don't change it if you don't know what does it mean! -->
@@ -51,8 +50,8 @@
     <include file="$(find arena_bringup)/launch/sublaunch_training/flatland_simulator.launch">
         <arg name="ns" value="$(arg ns)"/>
     </include>
-
-    <!-- <node pkg="arena_local_planner_drl" type="local_planner_deploy.py" name="local_planner_deploy" output="screen" ns="$(arg ns)">
+<!-- 
+    <node pkg="arena_local_planner_drl" type="local_planner_deploy.py" name="local_planner_deploy" output="screen" ns="$(arg ns)">
       <remap from="/clock" to="/$(arg ns)/clock"/>
     </node> -->
 

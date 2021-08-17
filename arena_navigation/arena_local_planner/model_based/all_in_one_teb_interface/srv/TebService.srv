@@ -1,0 +1,10 @@
+# request fields
+# start robot velocity
+geometry_msgs/Twist robot_velocity
+# Goal pose
+geometry_msgs/Pose2D goal_pose
+---
+# response fields
+geometry_msgs/Twist vel
+bool costmaps_resetted
+bool successful

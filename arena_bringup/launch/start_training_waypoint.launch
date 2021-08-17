@@ -16,7 +16,7 @@
   <!-- Here are the argument that may be frequently changed -->
   <arg name="ns_prefix" default="sim" />
   <arg name="num_envs" default="6" />
-  
+  <arg name="local_planner" default="drl"/>  
   <!-- train mode  -->
   <arg name="train_mode"       default="true"/>
 
@@ -27,7 +27,7 @@
   <arg name="viz_pub_rate" default="30" />
 
   <!-- the folder name under the path simulator_setup/maps  -->
-  <arg name="map_folder_name" default="map0" />
+  <arg name="map_folder_name" default="map1" />
 
   <!-- the velocity of randomly genelized obstacles  -->
   <arg name="obs_vel" default="0.3" />
@@ -48,11 +48,12 @@
   <!-- make sure the following two params are identical with the ones defined in the robot's config file -->
   <param name="robot_action_rate"     value="10"/>
   <param name="laser_update_rate"     value="10"/>
+  <param name="/deploy/local_planner_name" value = "$(arg local_planner)"/>
 
   <!-- use the "rostopic hz /sim_1/cmd_vel /clock:=/sim_1/clock" to check the local planner can catch running of the simulator or not
     if the publish rate is lower than the  1/duration   in rl_collision_avoidance_node_tb3.py 
   -->
-  <param name="sleep_time_ms_step_world" value="4"/>
+  <param name="sleep_time_ms_step_world" value="10"/>
 
 
   <!-- map server-->

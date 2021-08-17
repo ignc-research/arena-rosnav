@@ -1,0 +1,8 @@
+<launch>
+
+<arg name="ns" />
+<node pkg="arena_local_planner_drl" type="local_planner_deploy.py" name="local_planner_deploy" output="screen" ns="$(arg ns)">
+	<remap from="/clock" to="/$(arg ns)/clock" />
+</node>
+
+</launch>

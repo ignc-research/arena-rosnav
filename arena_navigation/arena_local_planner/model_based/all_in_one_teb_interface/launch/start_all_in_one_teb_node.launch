@@ -1,0 +1,29 @@
+<launch>
+    <!-- Arguments -->
+    <arg name="ns"/>
+    <arg name="config_path"/>
+
+    <arg name="node_name" default="teb_static_obst" />
+    <arg name="global_frame" default="map"/>
+    <arg name="robot_frame" default="$(arg ns)_odom"/>
+    <arg name="base_footprint" default="$(arg ns)_base_footprint"/>
+    <arg name="scan_frame" default="$(arg ns)_laser_link"/>
+
+    <node pkg="all_in_one_teb_interface" type="teb_all_in_one_node" respawn="false" name="$(arg node_name)" output="screen" ns="$(arg ns)">
+
+        <!-- local costmap params -->
+        <rosparam file="$(arg config_path)" command="load"/>
+
+        <!-- Set namespace specific parameters -->
+        <!-- local costmap params -->
+        <param name="local_costmap/scan/sensor_frame" value="$(arg scan_frame)"/>
+        <param name="local_costmap/global_frame" value="$(arg robot_frame)"/>
+        <param name="local_costmap/robot_base_frame" value="$(arg base_footprint)"/>
+
+        <param name="map_frame" value="$(arg robot_frame)" />
+
+        <!-- remaps due to namespace -->
+        <remap from="/clock" to="/$(arg ns)/clock"/>
+        <remap from="map" to="/map"/>
+    </node>
+</launch>
