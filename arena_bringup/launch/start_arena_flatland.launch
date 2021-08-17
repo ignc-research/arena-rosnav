@@ -5,7 +5,7 @@
   <param name="train_mode" value="$(arg train_mode)" />
   
   <arg name="local_planner"   default="teb"/> 
-  <arg name="rviz_file"       default="nav_LP"/>
+  <arg name="rviz_file"       default="nav"/>
   <arg name="disable_scenario"    default="true"/>
   <arg name="scenario_file"   default="empty_map.json"/>
   <arg name="reset"   default="true"/>
@@ -30,6 +30,8 @@
   <!-- <arg name="map_folder_name" default="map_empty" /> -->
   <arg name="map_path" default="$(find simulator_setup)/maps/$(arg map_file)/map.yaml" />
   <param name="world_path" value="$(find simulator_setup)/maps/$(arg map_file)/map.world.yaml" />
+  <param name="map_layer_path" value="$(find simulator_setup)/maps/$(arg map_file)/map_layer.yaml" />
+  <param name="map_file" value="$(arg map_file)" />  
 
   <!-- the velocity of randomly genelized obstacles  -->
   <arg name="obs_vel" default="0.3" />
@@ -128,4 +130,8 @@
       <param name="scene_file" value="$(arg scene_file)" type="string"/>
   </node>
 
+  <!-- launch map generator if training with random map-->
+  <group if="$(eval arg('map_file') == 'random_map')">
+    <node pkg="simulator_setup" name="map_generator_node" type="map_generator_node.py" />
+  </group>
 </launch>

@@ -6,23 +6,8 @@ Panels:
       Expanded:
         - /Global Options1
         - /my_robot1/Namespaces1
-        - /MarkerArray1
-        - /MarkerArray2
-        - /MarkerArray3
-        - /MarkerArray4
-        - /MarkerArray5/Namespaces1
-        - /MarkerArray18
-        - /MarkerArray19
-        - /MarkerArray20
-        - /MarkerArray21
-        - /MarkerArray22
-        - /Path1
-        - /PoseArray1
-        - /Marker2
-        - /Marker3
-        - /Marker4
       Splitter Ratio: 0.6526610255241394
-    Tree Height: 1145
+    Tree Height: 718
   - Class: rviz/Selection
     Name: Selection
   - Class: rviz/Tool Properties
@@ -168,32 +153,16 @@ Visualization Manager:
       Topic: /odom
       Unreliable: false
       Value: false
-    - Alpha: 1
-      Class: rviz/RobotModel
-      Collision Enabled: false
-      Enabled: false
-      Links:
-        All Links Enabled: true
-        Expand Joint Details: false
-        Expand Link Details: false
-        Expand Tree: false
-        Link Tree Style: Links in Alphabetic Order
-      Name: RobotModel
-      Robot Description: robot_description
-      TF Prefix: ""
-      Update Interval: 0
-      Value: false
-      Visual Enabled: true
     - Alpha: 0.699999988079071
       Class: rviz/Map
       Color Scheme: map
       Draw Behind: true
-      Enabled: false
+      Enabled: true
       Name: Map
       Topic: /map
       Unreliable: false
       Use Timestamp: false
-      Value: false
+      Value: true
     - Alpha: 0.699999988079071
       Class: rviz/Map
       Color Scheme: map
@@ -203,52 +172,6 @@ Visualization Manager:
       Topic: /move_base/global_costmap/costmap
       Unreliable: false
       Use Timestamp: false
-      Value: true
-    - Alpha: 1
-      Buffer Length: 1
-      Class: rviz/Path
-      Color: 255; 0; 0
-      Enabled: true
-      Head Diameter: 0.30000001192092896
-      Head Length: 0.20000000298023224
-      Length: 0.30000001192092896
-      Line Style: Lines
-      Line Width: 0.029999999329447746
-      Name: Local Plan
-      Offset:
-        X: 0
-        Y: 0
-        Z: 0
-      Pose Color: 255; 85; 255
-      Pose Style: None
-      Radius: 0.029999999329447746
-      Shaft Diameter: 0.10000000149011612
-      Shaft Length: 0.10000000149011612
-      Topic: /move_base/TrajectoryPlannerROS/local_plan
-      Unreliable: false
-      Value: true
-    - Alpha: 1
-      Buffer Length: 1
-      Class: rviz/Path
-      Color: 0; 213; 0
-      Enabled: true
-      Head Diameter: 0.30000001192092896
-      Head Length: 0.20000000298023224
-      Length: 0.30000001192092896
-      Line Style: Lines
-      Line Width: 0.029999999329447746
-      Name: Global Plan
-      Offset:
-        X: 0
-        Y: 0
-        Z: 0
-      Pose Color: 255; 85; 255
-      Pose Style: None
-      Radius: 0.029999999329447746
-      Shaft Diameter: 0.10000000149011612
-      Shaft Length: 0.10000000149011612
-      Topic: /move_base/NavfnROS/plan
-      Unreliable: false
       Value: true
     - Alpha: 1
       Arrow Length: 0.30000001192092896
@@ -295,21 +218,6 @@ Visualization Manager:
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
-      Value: true
-    - Alpha: 1
-      Axes Length: 1
-      Axes Radius: 0.10000000149011612
-      Class: rviz/Pose
-      Color: 0; 255; 0
-      Enabled: true
-      Head Length: 0.10000000149011612
-      Head Radius: 0.15000000596046448
-      Name: Goal Pose
-      Shaft Length: 0.5
-      Shaft Radius: 0.029999999329447746
-      Shape: Arrow
-      Topic: /move_base_simple/goal
-      Unreliable: false
       Value: true
     - Alpha: 0.699999988079071
       Class: rviz/Map
@@ -395,193 +303,17 @@ Visualization Manager:
         {}
       Queue Size: 100
       Value: true
-    - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /flatland_server/debug/model/obstacles_static_random_00
-      Name: MarkerArray
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: true
-    - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /flatland_server/debug/model/obstacles_static_random_01
-      Name: MarkerArray
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: true
-    - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /flatland_server/debug/model/obstacles_static_random_02
-      Name: MarkerArray
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: true
-    - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /flatland_server/debug/model/stat_obj_3
-      Name: MarkerArray
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: true
-    - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /flatland_server/debug/model/stat_obj_4
-      Name: MarkerArray
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: true
-    - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /flatland_server/debug/model/stat_obj_5
-      Name: MarkerArray
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: true
-    - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /flatland_server/debug/model/stat_obj_6
-      Name: MarkerArray
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: true
-    - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /flatland_server/debug/model/stat_obj_7
-      Name: MarkerArray
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: true
-    - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /flatland_server/debug/model/stat_obj_8
-      Name: MarkerArray
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: true
-    - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /flatland_server/debug/model/stat_obj_9
-      Name: MarkerArray
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: true
-    - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /flatland_server/debug/model/stat_obj_0
-      Name: MarkerArray
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: true
-    - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /flatland_server/debug/model/stat_obj_10
-      Name: MarkerArray
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: true
-    - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /flatland_server/debug/model/stat_obj_11
-      Name: MarkerArray
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: true
-    - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /flatland_server/debug/model/stat_obj_12
-      Name: MarkerArray
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: true
-    - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /flatland_server/debug/model/stat_obj_13
-      Name: MarkerArray
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: true
-    - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /flatland_server/debug/model/stat_obj_14
-      Name: MarkerArray
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: true
-    - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /flatland_server/debug/model/stat_obj_15
-      Name: MarkerArray
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: true
-    - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /flatland_server/debug/model/obstacles_static_random_01
-      Name: MarkerArray
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: true
-    - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /flatland_server/debug/model/obstacles_static_random_00
-      Name: MarkerArray
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: true
-    - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /flatland_server/debug/model/obstacles_dynamic_random_02
-      Name: MarkerArray
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: true
-    - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /flatland_server/debug/model/obstacles_dynamic_random_01
-      Name: MarkerArray
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: true
-    - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: /flatland_server/debug/model/obstacles_dynamic_random_00
-      Name: MarkerArray
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: true
     - Alpha: 1
-      Buffer Length: 3
+      Buffer Length: 1
       Class: rviz/Path
-      Color: 164; 0; 0
-      Enabled: true
+      Color: 255; 0; 0
+      Enabled: false
       Head Diameter: 0.30000001192092896
       Head Length: 0.20000000298023224
       Length: 0.30000001192092896
       Line Style: Lines
       Line Width: 0.029999999329447746
-      Name: Path
+      Name: Move_base GlobalPlan
       Offset:
         X: 0
         Y: 0
@@ -591,47 +323,68 @@ Visualization Manager:
       Radius: 0.029999999329447746
       Shaft Diameter: 0.10000000149011612
       Shaft Length: 0.10000000149011612
-      Topic: /move_base/DWAPlannerROS/local_plan
+      Topic: /move_base/NavfnROS/plan
+      Unreliable: false
+      Value: false
+    - Alpha: 1
+      Axes Length: 1
+      Axes Radius: 0.10000000149011612
+      Class: rviz/Pose
+      Color: 0; 255; 0
+      Enabled: false
+      Head Length: 0.10000000149011612
+      Head Radius: 0.15000000596046448
+      Name: Move_base Goal
+      Shaft Length: 0.5
+      Shaft Radius: 0.029999999329447746
+      Shape: Arrow
+      Topic: /move_base_simple/goal
+      Unreliable: false
+      Value: false
+    - Alpha: 1
+      Buffer Length: 1
+      Class: rviz/Path
+      Color: 25; 255; 0
+      Enabled: true
+      Head Diameter: 0.30000001192092896
+      Head Length: 0.20000000298023224
+      Length: 0.30000001192092896
+      Line Style: Lines
+      Line Width: 0.029999999329447746
+      Name: GlobalPlan
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Pose Color: 255; 85; 255
+      Pose Style: None
+      Radius: 0.029999999329447746
+      Shaft Diameter: 0.10000000149011612
+      Shaft Length: 0.10000000149011612
+      Topic: /globalPlan
       Unreliable: false
       Value: true
     - Alpha: 1
-      Arrow Length: 0.5
-      Axes Length: 0.30000001192092896
-      Axes Radius: 0.009999999776482582
-      Class: rviz/PoseArray
+      Axes Length: 1
+      Axes Radius: 0.10000000149011612
+      Class: rviz/Pose
       Color: 255; 25; 0
       Enabled: true
-      Head Length: 0.07000000029802322
-      Head Radius: 0.029999999329447746
-      Name: PoseArray
-      Shaft Length: 0.23000000417232513
-      Shaft Radius: 0.009999999776482582
-      Shape: Arrow (Flat)
-      Topic: /subgoal_vis
+      Head Length: 0.30000001192092896
+      Head Radius: 0.10000000149011612
+      Name: Subgoal
+      Shaft Length: 1
+      Shaft Radius: 0.05000000074505806
+      Shape: Arrow
+      Topic: /subgoal
       Unreliable: false
       Value: true
     - Class: rviz/Marker
       Enabled: true
       Marker Topic: /planning_vis/goal
-      Name: Marker
+      Name: Goal
       Namespaces:
-        {}
-      Queue Size: 100
-      Value: true
-    - Class: rviz/Marker
-      Enabled: true
-      Marker Topic: /planning_vis/subgoal
-      Name: Marker
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: true
-    - Class: rviz/Marker
-      Enabled: true
-      Marker Topic: /planning_vis/global_path
-      Name: Marker
-      Namespaces:
-        {}
+        "": true
       Queue Size: 100
       Value: true
   Enabled: true
@@ -670,19 +423,19 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 26.125743865966797
+      Scale: 31.8350887298584
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
-      X: 9.19975471496582
-      Y: 6.586180686950684
+      X: 10.217350959777832
+      Y: 9.532427787780762
     Saved: ~
 Window Geometry:
   Displays:
     collapsed: false
-  Height: 1368
+  Height: 941
   Hide Left Dock: false
   Hide Right Dock: false
-  QMainWindow State: 000000ff00000000fd00000004000000000000019500000502fc0200000005fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000198000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000003b00000502000000c700ffffff000000010000010f00000270fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000002800000270000000a000fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004a00000003efc0100000002fb0000000800540069006d00650000000000000004a00000024400fffffffb0000000800540069006d00650100000000000004500000000000000000000002f20000050200000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd00000004000000000000019500000357fc0200000005fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000198000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000003b00000357000000c700ffffff000000010000010f00000270fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000002800000270000000a000fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004a00000003efc0100000002fb0000000800540069006d00650000000000000004a00000042700fffffffb0000000800540069006d00650100000000000004500000000000000000000002f20000035700000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Time:
@@ -692,5 +445,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1165
-  X: 1
-  Y: 31
+  X: 74
+  Y: 49
