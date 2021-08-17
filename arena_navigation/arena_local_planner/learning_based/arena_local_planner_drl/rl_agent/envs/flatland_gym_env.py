@@ -84,9 +84,6 @@ class FlatlandEnv(gym.Env):
 
         self.setup_by_configuration(PATHS["robot_setting"], PATHS["robot_as"])
 
-        # set rosparam
-        rospy.set_param("/laser_num_beams", self._laser_num_beams)
-
         # observation collector
         self.observation_collector = ObservationCollector(
             self.ns, self._laser_num_beams, self._laser_max_range

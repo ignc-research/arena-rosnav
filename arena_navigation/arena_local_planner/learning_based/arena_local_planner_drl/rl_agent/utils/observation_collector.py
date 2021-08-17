@@ -61,7 +61,7 @@ class ObservationCollector:
             )
         )
 
-        self._laser_num_beams = rospy.get_param("/laser_num_beams")
+        self._laser_num_beams = num_lidar_beams
         # for frequency controlling
         self._action_frequency = 1 / rospy.get_param("/robot_action_rate")
 
