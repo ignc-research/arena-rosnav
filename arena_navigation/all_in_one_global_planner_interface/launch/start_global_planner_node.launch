@@ -23,7 +23,7 @@
 
         <!-- remaps due to namespace -->
         <remap from="/clock" to="/$(arg ns)/clock"/>
-        <remap from="map" to="/map"/>
+        <remap from="map" to="/$(arg ns)/map"/>
 
     </node>
 </launch>
