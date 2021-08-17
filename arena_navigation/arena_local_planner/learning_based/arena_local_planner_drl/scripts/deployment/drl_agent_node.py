@@ -10,11 +10,12 @@ import yaml
 
 from stable_baselines3 import PPO
 
-# observation msgs
 from geometry_msgs.msg import Twist
 
 from rl_agent.utils.observation_collector import ObservationCollector
 
+
+""" TEMPORARY GLOBAL CONSTANTS """
 NS_PREFIX = ""
 MODELS_DIR = os.path.join(
     rospkg.RosPack().get_path("arena_local_planner_drl"), "agents"
@@ -35,7 +36,7 @@ class DRLAgent:
             name (str): Agent name (directory has to be of the same name)
             ns (str): Agent-specific ROS namespace
         """
-        rospy.init_node(f"DRL_local_planner_{name}", anonymous=True)
+        rospy.init_node(f"DRL_local_planner", anonymous=True)
 
         self.name = name
         self._ns = "" if ns is None or ns == "" else "/" + ns + "/"
@@ -74,7 +75,7 @@ class DRLAgent:
         ), f"VecNormalize file cannot be found at {vecnorm_file}!"
         assert os.path.isfile(
             model_params_file
-        ), f"VecNormalize file cannot be found at {vecnorm_file}!"
+        ), f"Hyperparameter file cannot be found at {vecnorm_file}!"
 
         with open(vecnorm_file, "rb") as file_handler:
             vec_normalize = pickle.load(file_handler)
