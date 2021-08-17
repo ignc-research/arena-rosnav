@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from typing import Tuple
 
 import json
@@ -6,6 +7,7 @@ import os
 import pickle
 import rospy
 import rospkg
+import sys
 import yaml
 
 from stable_baselines3 import PPO
@@ -125,9 +127,9 @@ class DRLAgent:
 
 
 if __name__ == "__main__":
-    AGENT_NAME = "rule_04"
-
+    AGENT_NAME = sys.argv[1]
     AGENT = DRLAgent(AGENT_NAME, NS_PREFIX)
+
     try:
         AGENT.run()
     except rospy.ROSInterruptException:
