@@ -198,8 +198,11 @@ class ObservationCollectorAllInOne:
 
         # if necessary add last 3 laser scans to obs dict
         if self._needs_last_three_laser:
-            self._last_three_laser_scans[:, 1:2] = self._last_three_laser_scans[:, 0:1]
+            # self._last_three_laser_scans[:, 1:2] = self._last_three_laser_scans[:, 0:1]
+            # self._last_three_laser_scans[:, 0] = scan
             self._last_three_laser_scans[:, 0] = scan
+            self._last_three_laser_scans[:, 1] = scan
+            self._last_three_laser_scans[:, 2] = scan
             obs_dict['laser_3'] = self._last_three_laser_scans
 
         self._laser_deque.clear()
@@ -362,7 +365,13 @@ class ObservationCollectorAllInOne:
         arg3 = "config_path:=" + config_path
 
         # Use subprocess to execute .launch file
-        self._global_planner_process = subprocess.Popen(["roslaunch", package, launch_file, arg1, arg2, arg3])
+        if self._is_train_mode:
+            self._global_planner_process = subprocess.Popen(["roslaunch", package, launch_file, arg1, arg2, arg3],
+                                                            stdout=subprocess.DEVNULL,
+                                                            stderr=subprocess.STDOUT)
+        else:
+            self._global_planner_process = subprocess.Popen(["roslaunch", package, launch_file, arg1, arg2, arg3],
+                                                            stdout=subprocess.DEVNULL)
 
         self._global_plan_service = None
         self._reset_global_costmap_service = None

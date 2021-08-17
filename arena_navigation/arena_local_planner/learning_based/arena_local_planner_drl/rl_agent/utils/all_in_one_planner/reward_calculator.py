@@ -30,10 +30,15 @@ class RewardCalculator:
         self.last_dist_to_path = None
         self.last_action = None
         self.safe_dist = safe_dist
-        self._extended_eval = extended_eval
+        self.extended_eval = extended_eval
 
         self._global_planner_frequency = global_planner_frequency
         self.kdtree = None
+
+        if self.extended_eval:
+            self._collision_reward = 0
+            self._goal_reached_reward = 0
+            self.global_plan_reward = 0
 
         self._cal_funcs = {
             'rule_00': RewardCalculator._cal_reward_rule_00,
@@ -53,6 +58,11 @@ class RewardCalculator:
         self.last_dist_to_path = None
         self.last_action = None
         self.kdtree = None
+
+        if self.extended_eval:
+            self._collision_reward = 0
+            self._goal_reached_reward = 0
+            self.global_plan_reward = 0
 
     def _reset(self):
         """
@@ -172,20 +182,21 @@ class RewardCalculator:
                             ):
         self._reward_following_global_plan_relativ(kwargs['action'], kwargs['dist_to_global_plan'],
                                                    kwargs['initial_distance_to_global_plan'],
-                                                   kwargs['iterations_global_plan_exists'], reward_factor=0.1,
-                                                   penalty_factor=0.15)
+                                                   kwargs['iterations_global_plan_exists'], laser_scan,
+                                                   reward_factor=0.04, penalty_factor=0.06)
         self._reward_goal_reached(
-            goal_in_robot_frame, reward=20)
+            goal_in_robot_frame, reward=25)
         self._reward_safe_dist(
             laser_scan, punishment=0.25)
         self._reward_collision(
-            laser_scan, punishment=15)
+            laser_scan, punishment=30)
 
     def _reward_following_global_plan_relativ(self,
                                               action: np.array,
                                               dist_to_path: float,
                                               initial_distance_to_global_plan: float,
                                               iterations_global_plan_exists: int,
+                                              scan: np.ndarray,
                                               reward_factor=0.1,
                                               penalty_factor=0.2):
         dist_to_path = dist_to_path - initial_distance_to_global_plan
@@ -193,8 +204,9 @@ class RewardCalculator:
         if iterations_global_plan_exists == 0:
             iterations_global_plan_exists = self._global_planner_frequency
 
-        allowed_distance = iterations_global_plan_exists * 0.003
-        punished_distance = iterations_global_plan_exists * 0.006
+        allowed_distance = iterations_global_plan_exists * 0.002
+        punished_distance = iterations_global_plan_exists * 0.004
+
         if allowed_distance > dist_to_path:
             reward_gp = reward_factor
         elif punished_distance > dist_to_path:
@@ -202,15 +214,23 @@ class RewardCalculator:
         else:
             reward_gp = -penalty_factor
 
+        # if robot is barely moving give zero reward --> Don't count standing still as global path following.
         if action[0] < 0.05:
             reward_gp = 0
 
-        # in the case that distance is falsy (e.g. after reset)
+        # in the case that the distance is falsy (e.g. after reset)
         if dist_to_path > iterations_global_plan_exists * 0.03:
             reward_gp = 0
 
-        print(
-            'r ' + str(reward_gp) + " - dist: " + str(dist_to_path) + " - iter: " + str(iterations_global_plan_exists))
+        # in the case that obstacles are close by -> global path not reliable
+        if np.min(scan) < 0.7:
+            reward_gp = 0
+
+        # print(
+        #     'r ' + str(reward_gp) + " - dist: " + str(dist_to_path) + " - iter: " + str(iterations_global_plan_exists))
+
+        if self.extended_eval:
+            self.global_plan_reward += reward_gp
 
         self.curr_reward += reward_gp
 
@@ -224,10 +244,15 @@ class RewardCalculator:
         :param reward (float, optional): reward amount for reaching. defaults to 15
         """
         if goal_in_robot_frame[0] < self.goal_radius:
+            if self.extended_eval:
+                self._goal_reached_reward = reward
+                self.info['global_path_reward'] = self.global_plan_reward
+
             self.curr_reward = reward
             self.info['is_done'] = True
             self.info['done_reason'] = 2
             self.info['is_success'] = 1
+
         else:
             self.info['is_done'] = False
 
@@ -269,12 +294,14 @@ class RewardCalculator:
         if laser_scan.min() <= self.robot_radius:
             self.curr_reward -= punishment
 
-            if not self._extended_eval:
-                self.info['is_done'] = True
-                self.info['done_reason'] = 1
-                self.info['is_success'] = 0
-            else:
-                self.info['crash'] = True
+            # if not self.extended_eval:
+            self.info['is_done'] = True
+            self.info['done_reason'] = 1
+            self.info['is_success'] = 0
+            if self.extended_eval:
+                self.info['global_path_reward'] = self.global_plan_reward
+            # else:
+            self.info['crash'] = True
 
     def _reward_safe_dist(self,
                           laser_scan: np.ndarray,
@@ -288,7 +315,7 @@ class RewardCalculator:
         if laser_scan.min() < self.safe_dist:
             self.curr_reward -= punishment
 
-            if self._extended_eval:
+            if self.extended_eval:
                 self.info['safe_dist'] = True
 
     def _reward_not_moving(self,

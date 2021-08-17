@@ -40,7 +40,7 @@ class LocalPlannerManager:
                 all_ready = all_ready and i.wait_for_agent()
             if not all_ready:
                 sim_step()
-                rospy.loginfo("Not all agents ready yet! Wait...")
+                rospy.loginfo("Environment " + self._ns + ": Not all agents ready yet! Wait...")
 
     def execute_local_planner(self, model_numb: int, obs_dict: dict, clip: [int]) -> np.array:
         action_model = np.array(self._models[model_numb].get_next_action(obs_dict))

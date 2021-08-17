@@ -1,24 +1,18 @@
-import json
-import os
 import random
 
 import gym
 import numpy as np
-import rospkg
 import rospy
 import yaml
 from flatland_msgs.srv import StepWorld
 from gym import spaces
-from nav_msgs.srv import GetMap
 from rl_agent.utils.all_in_one_planner.local_planner_manager import LocalPlannerManager
 from rl_agent.utils.all_in_one_planner.logger import Logger
 from rl_agent.utils.all_in_one_planner.observation_collector import ObservationCollectorAllInOne
 from rl_agent.utils.all_in_one_planner.reward_calculator import RewardCalculator
 from rl_agent.utils.all_in_one_planner.step_processor import StepProcessor
+from rl_agent.utils.all_in_one_planner.task_manager import TaskManager
 from rl_agent.utils.all_in_one_planner.visualizer import AllInOneVisualizer
-from task_generator.obstacles_manager import ObstaclesManager
-from task_generator.robot_manager import RobotManager
-from task_generator.tasks import RandomTask
 
 
 class AllInOneEnv(gym.Env):
@@ -79,7 +73,7 @@ class AllInOneEnv(gym.Env):
                 self._service_name_step, StepWorld)
 
         # instantiate task manager
-        self.task = self._get_random_task(paths)
+        self.task_manager = TaskManager(self.ns, 1, paths)  # TODO make reset interval parameter
         self._seed = seed
 
         if self._evaluation:
@@ -98,6 +92,7 @@ class AllInOneEnv(gym.Env):
                                               self.ns_prefix)
 
         self._step_processor = StepProcessor(self._is_train_mode, self.ns_prefix, paths['all_in_one_parameters'],
+                                             self._max_steps_per_episode,
                                              self._local_planner_manager, self.reward_calculator, self._action_bounds)
 
         self._run_all_agents_each_iteration, self._all_in_one_planner_frequency, self._global_planner_frequency = \
@@ -122,16 +117,13 @@ class AllInOneEnv(gym.Env):
 
         self._local_planner_manager.wait_for_agents(self._sim_step_client)
         self.reset()
-        rospy.loginfo("All agents are loaded - Gym environment is ready!")
+        rospy.loginfo("Environment " + self.ns + ": All agents are loaded - Gym environment is ready!")
 
     def step(self, action: int):
         action_model, self._last_obs_dict, self._last_merged_obs, reward, reward_info = \
             self._step_processor.process_step(action)
 
         done = reward_info['is_done']
-
-        if self._steps_curr_episode > self._max_steps_per_episode:
-            done = True
 
         # info
         info, in_crash = self._logger.get_step_info(done, reward_info, self._last_obs_dict, reward, action,
@@ -155,7 +147,7 @@ class AllInOneEnv(gym.Env):
             random.seed((self._current_eval_iteration % self._evaluation_episodes) * self._seed)
         else:
             random.seed()
-        self.task.reset()
+        self.task_manager.reset()
 
         self.reward_calculator.reset()
         self._logger.reset()
@@ -181,33 +173,8 @@ class AllInOneEnv(gym.Env):
     def get_model_names(self) -> [str]:
         return self._local_planner_manager.get_model_names()
 
-    def _get_random_task(self, paths: dict):
-        config_path = paths['all_in_one_parameters']
-        with open(config_path, 'r') as params_json:
-            config_data = json.load(params_json)
-
-        assert config_data is not None, "Error: All in one parameter file cannot be found!"
-
-        if 'map' in config_data:
-            map_params = config_data['map']
-            numb_static_obst = map_params['numb_static_obstacles']
-            numb_dyn_obst = map_params['numb_dynamic_obstacles']
-        else:
-            rospy.logwarn("No map parameters found in config file. Use 18 dynamic and 6 static obstacles.")
-            numb_static_obst = 6
-            numb_dyn_obst = 18
-
-        service_client_get_map = rospy.ServiceProxy('/static_map', GetMap)
-        map_response = service_client_get_map()
-        models_folder_path = rospkg.RosPack().get_path('simulator_setup')
-        robot_manager = RobotManager(self.ns, map_response.map, os.path.join(
-            models_folder_path, 'robot', "myrobot.model.yaml"))
-        obstacles_manager = ObstaclesManager(self.ns, map_response.map)
-        rospy.set_param("/task_mode", "random")
-        numb_obst = numb_static_obst + numb_dyn_obst
-        prob_dyn_obst = float(numb_dyn_obst) / numb_obst
-        obstacles_manager.register_random_obstacles(numb_obst, prob_dyn_obst)
-        return RandomTask(obstacles_manager, robot_manager)
+    def get_all_in_one_planner_frequency(self):
+        return self._all_in_one_planner_frequency
 
     def _setup_robot_configuration(self, robot_yaml_path: str, settings_yaml_path: str):
         """get the configuration from the yaml file, including robot radius.

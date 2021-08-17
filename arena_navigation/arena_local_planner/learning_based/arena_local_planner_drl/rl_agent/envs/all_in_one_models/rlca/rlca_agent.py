@@ -23,7 +23,9 @@ class RLCAAgent(ModelBase):
         laser_hist = 3
         self._beam_num = 512
         obs_size = self._beam_num  # number of leaser beam
-        self._action_bound = [[0, -2.7], [1, 2.7]]  # the limitation of velocity
+
+        # TODO make this a parameter
+        self._action_bound = [[0, -1], [1, 1]]  # the limitation of velocity
 
         # Set env and agent policy
         self._env = StageWorld(obs_size, index=0, num_env=1)  # index 0 means first agent (for multiprocessing)
@@ -40,8 +42,9 @@ class RLCAAgent(ModelBase):
         # extract and transform input
 
         obs_laser_3 = observation_dict['laser_3']
-        obs_laser_3_transformed = [self._transform_scan_data(obs_laser_3[:,2]), self._transform_scan_data(obs_laser_3[:,1]),
-                                   self._transform_scan_data(obs_laser_3[:,0])]
+        obs_laser_3_transformed = [self._transform_scan_data(obs_laser_3[:, 2]),
+                                   self._transform_scan_data(obs_laser_3[:, 1]),
+                                   self._transform_scan_data(obs_laser_3[:, 0])]
 
         obs_sub_goal = np.asarray(observation_dict['goal_in_robot_frame_xy'], dtype='float64')
         obs_twist = observation_dict['robot_twist']
@@ -54,7 +57,7 @@ class RLCAAgent(ModelBase):
         # get output
         _, scaled_action = generate_action_no_sampling(self._env, obs_state_list, self._policy, self._action_bound)
         action = scaled_action[0]
-        # the maximum speed of cmd_vel 0.3 TODO: Load this dynamically. Should angular velocity be normalized as well?
+        # the maximum speed of cmd_vel 0.3
         action[0] = 0.3 * action[0]
         return np.asarray([action[0], action[1]])
 

@@ -10,7 +10,7 @@ from rl_agent.utils.all_in_one_planner.reward_calculator import RewardCalculator
 
 class StepProcessor:
 
-    def __init__(self, is_train_mode: bool, ns_prefix: str, all_in_one_params_path: str,
+    def __init__(self, is_train_mode: bool, ns_prefix: str, all_in_one_params_path: str, max_iterations: int,
                  local_planner_manager: LocalPlannerManager, reward_calculator: RewardCalculator, action_bounds: [int]):
 
         self._is_train_mode = is_train_mode
@@ -19,6 +19,7 @@ class StepProcessor:
         self._observation_collector = None
         self._reward_calculator = reward_calculator
         self._action_bounds = action_bounds
+        self._max_iterations = max_iterations
 
         # action agent publisher
         if self._is_train_mode:
@@ -32,7 +33,8 @@ class StepProcessor:
         self._last_actions = np.zeros(shape=(self._local_planner_manager.get_numb_models(), 2))
         self._last_obs_dict = dict()
         self._last_merged_obs = np.array([])
-        self._current_iteration = 0
+        self._current_iteration = 0  # dependant on controller frequency
+        self._current_gym_step = 0  # dependant on all in one planner frequency
 
     def set_observation_collector(self, observation_collector: ObservationCollectorAllInOne):
         self._observation_collector = observation_collector
@@ -100,6 +102,15 @@ class StepProcessor:
             self._last_obs_dict['last_actions'] = self._last_actions
             self._last_merged_obs[:2 * self._local_planner_manager.get_numb_models()] = self._last_actions.flatten()
 
+        if self._current_gym_step > self._max_iterations:
+            reward_info['is_done'] = True
+            reward_info['is_success'] = 0
+            reward_info['done_reason'] = 0
+            if self._reward_calculator.extended_eval:
+                reward_info['global_path_reward'] = self._reward_calculator.global_plan_reward
+
+        self._current_gym_step += 1
+
         return action_model, self._last_obs_dict, self._last_merged_obs, reward_sum, reward_info
 
     def reset(self):
@@ -121,6 +132,7 @@ class StepProcessor:
             self._last_merged_obs[:self._local_planner_manager.get_numb_models() * 2] = self._last_actions.flatten()
 
         self._current_iteration = 0
+        self._current_gym_step = 0
 
     def _get_new_obs(self):
         if self._current_iteration % self._update_global_plan_frequency == 0:
@@ -157,11 +169,11 @@ class StepProcessor:
         else:
             rospy.logwarn(
                 "Parameter \"update_global_plan_frequency\" not found in config file. Use default value of 5!")
-            self._update_global_plan_frequency = 5
+            self._update_global_plan_frequency = 4
         # extract frequency of all in one planner
         if 'all_in_one_planner_frequency' in config_data:
             self._all_in_one_planner_frequency = config_data['all_in_one_planner_frequency']
         else:
             rospy.logwarn(
                 'Parameter \"all_in_one_planner_frequency\" not found in config file. Us edefault value of 5!')
-            self._all_in_one_planner_frequency = 5
+            self._all_in_one_planner_frequency = 4

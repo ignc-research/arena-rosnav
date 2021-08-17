@@ -5,7 +5,7 @@ import pandas as pd
 import rospkg
 from matplotlib import pyplot as plt
 
-agent_name = 'all_in_one_agents_teb_rlca_rule03_policy13.v0'
+agent_name = 'all_in_one_agents_teb_rlca_rule03_policy13'
 base_dir = rospkg.RosPack().get_path('arena_local_planner_drl')
 
 # dir_npz = os.path.join(base_dir, 'training_logs', 'train_eval_log', agent_name, 'evaluations.npz')

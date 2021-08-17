@@ -194,7 +194,7 @@ if __name__ == '__main__':
     socket_url_client_array = set_up_drl_server(paths['all_in_one_parameters'])
 
     # check if simulations are booted
-    wait_for_nodes(n_envs=args.n_envs, timeout=5)
+    # wait_for_nodes(n_envs=args.n_envs, timeout=10)
 
     params = initialize_hyperparameters(paths, None, n_envs=args.n_envs, config_name='all_in_one_default')
 
@@ -322,22 +322,18 @@ if __name__ == '__main__':
             load_path=load_path, venv=eval_env)
         print("Succesfully loaded VecNormalize object from pickle file..")
     else:
-        env = VecNormalize(
-            env, training=True,
-            norm_obs=True, norm_reward=True, clip_reward=15)
-        eval_env = VecNormalize(
-            eval_env, training=True,
-            norm_obs=True, norm_reward=True, clip_reward=15)
+        env = VecNormalize(env, training=True, norm_obs=True, norm_reward=True)
+        eval_env = VecNormalize(eval_env, training=True, norm_obs=True, norm_reward=True)
 
     eval_cb = EvalCallback(
-        eval_env=eval_env, train_env=env,
+        eval_env=eval_env,
         n_eval_episodes=eval_episodes, eval_freq=20000,
         log_path=paths['eval'], best_model_save_path=paths['model'], deterministic=True)
 
     print("Start training...")
 
     if args.n is None:
-        n_timesteps = 10000000
+        n_timesteps = 15000000
     else:
         n_timesteps = args.n
 

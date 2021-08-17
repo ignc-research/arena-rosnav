@@ -53,6 +53,7 @@ class Logger:
         # for logging
         if self._extended_eval:
             if done:
+                info['global_path_reward'] = reward_info['global_path_reward']
                 info['collisions'] = self._collisions
                 info['distance_travelled'] = round(self._distance_travelled, 2)
                 info['time_safe_dist'] = self._safe_dist_counter * self._action_frequency

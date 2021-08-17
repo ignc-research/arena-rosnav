@@ -16,6 +16,7 @@ class BaseLocalPlannerAgent(ModelBase):
                                    'new_global_plan': True}
         super().__init__(observation_information, name)
         self._ns = ns
+        self._is_train_mode = rospy.get_param("/train_mode")
 
         # Generate local planner node
         package = 'all_in_one_local_planner_interface'
@@ -25,7 +26,12 @@ class BaseLocalPlannerAgent(ModelBase):
         arg3 = "config_path:=" + config_path
 
         # Use subprocess to execute .launch file
-        self._local_planner_process = subprocess.Popen(["roslaunch", package, launch_file, arg1, arg2, arg3])
+        if self._is_train_mode:
+            self._local_planner_process = subprocess.Popen(["roslaunch", package, launch_file, arg1, arg2, arg3],
+                                                           stdout=subprocess.DEVNULL,
+                                                           stderr=subprocess.STDOUT)
+        else:
+            self._local_planner_process = subprocess.Popen(["roslaunch", package, launch_file, arg1, arg2, arg3])
 
         self._getVelServiceGlobalPlan = None
         self._getVelService = None
