@@ -1,0 +1,35 @@
+reset_costmap_automatically: True
+reset_costmap_interval: 3
+global_planner_type: navfn/NavfnROS
+
+NavfnROS:
+  lethal_cost: 100
+
+global_costmap:
+  update_frequency: 6.0
+  publish_frequency: 1.0
+  transform_tolerance: 0.3
+
+  resolution: 0.3
+
+  obstacle_layer:
+    obstacle_range: 3.5
+    # Raytrace range has to be larger than laser range + 1 in order to correctly track dynamic obstacles with the filtered
+    # scan messages.
+    raytrace_range: 5
+    robot_radius: 0.3
+    inflation_radius: 0.2 # Use low inflation radius as goals might spawn close to obstacles
+    map_type: costmap
+
+    combination_method: 1
+
+    observation_sources: scan
+    scan: { data_type: LaserScan, marking: true, topic: scan, clearing: true }
+
+  inflation_layer:
+    inflation_radius: 0.8
+
+  plugins:
+    - { name: static_layer,        type: "costmap_2d::StaticLayer"}
+    - { name: obstacle_layer,      type: "costmap_2d::ObstacleLayer" }
+    - { name: inflation_layer,     type: "costmap_2d::InflationLayer" }

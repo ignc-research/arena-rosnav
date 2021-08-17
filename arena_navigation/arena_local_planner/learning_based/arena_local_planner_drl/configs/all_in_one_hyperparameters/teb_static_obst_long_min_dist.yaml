@@ -19,7 +19,7 @@ teb_local_planner:
     radius: 0.3
 
   # Obstacles
-  min_obstacle_dist: 0.4
+  min_obstacle_dist: 1
   inflation_dist: 0.3
   include_costmap_obstacles: False
   include_dynamic_obstacles: False

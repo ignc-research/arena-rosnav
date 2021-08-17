@@ -1,0 +1,37 @@
+local_planner_type: "base_local_planner/TrajectoryPlannerROS"
+local_planner_name: "global_path_following"
+min_tolerated_x_vel: 0.0 # If linear velocity is below this threshold costmap will be resetted as it assumed that the robot is stuck
+max_time_between_resets: 1 # Max time in s between two costmap resets.
+reset_costmap_automatically: False
+reset_costmap_interval: 5  # Time between automatic costmap resets in seconds
+
+global_path_following:
+  controller_frequency: 20
+  acc_lim_x: 30
+  acc_lim_theta: 30
+  max_vel_x: 0.3
+  yaw_goal_tolerance: 3
+  xy_goal_tolerance: 0.2
+
+# Local Costmap not needed
+local_costmap:
+  update_frequency: 10.0
+  publish_frequency: 1 # Publishing only relevant for visualization
+
+  rolling_window: true
+  width: 3
+  height: 3
+  resolution: 0.1
+  transform_tolerance: 0.3 # allowed delay for the tf data
+
+  obstacle_layer:
+    obstacle_range: 3.5
+    # Raytrace range has to be larger than laser range + 1 in order to correctly track dynamic obstacles with the filtered
+    # scan messages.
+    raytrace_range: 5
+    robot_radius: 0.3
+    inflation_radius: 0.3 # Use low inflation radius as goals might spawn close to obstacles
+    map_type: costmap
+
+  plugins:
+    - { name: obstacle_layer,      type: "costmap_2d::ObstacleLayer" }

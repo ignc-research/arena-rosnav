@@ -1,4 +1,4 @@
-### Costmap converter for dynamic obstacles is ot working well, don't use it! ###
+### Costmap converter for dynamic obstacles is not working well, don't use it! ###
 
 # Robot
 max_vel_x: 0.3

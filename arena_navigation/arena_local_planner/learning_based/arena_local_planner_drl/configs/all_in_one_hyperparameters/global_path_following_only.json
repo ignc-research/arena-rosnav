@@ -1,0 +1,10 @@
+ {
+  "models": {
+    "model_based": ["global_path_following_dwa.yaml"],
+    "model_based_names": ["global_path_following_dwa"]
+  },
+  "map": {
+    "numb_dynamic_obstacles": 20,
+    "numb_static_obstacles": 6
+  }
+}

@@ -1,0 +1,10 @@
+ {
+  "models": {
+    "model_based": ["teb_static_obst_long_min_dist.yaml"],
+    "model_based_names": ["teb_large_min_dist"]
+  },
+  "map": {
+    "numb_dynamic_obstacles": 20,
+    "numb_static_obstacles": 6
+  }
+}
