@@ -63,7 +63,7 @@ class ObservationCollectorAllInOne:
         self._required_obs = required_obs
 
         # TODO make this a parameter
-        self._planning_horizon = 3.5
+        self._planning_horizon = 3
 
         self._clock = Clock()
         self._scan = LaserScan()

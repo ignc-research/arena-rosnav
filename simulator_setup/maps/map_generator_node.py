@@ -1,9 +1,10 @@
 #!/usr/bin/env python
-
+import nav_msgs.srv
 import rospy
 import std_srvs.srv
 from map_generator import *
 from nav_msgs.msg import OccupancyGrid
+from nav_msgs.srv import GetMap
 
 
 class MapGenerator:
@@ -42,7 +43,7 @@ class MapGenerator:
         # self.generate_initial_map() # initial random map generation (before first episode)
         rospy.Subscriber("/" + self.ns + '/map', OccupancyGrid, self.get_occupancy_grid)
         # generate new random map for the next episode when entering new episode
-        rospy.Service("/" + self.ns + '/new_map', std_srvs.srv.SetBool, self.new_episode_callback)
+        rospy.Service("/" + self.ns + '/new_map', GetMap, self.new_episode_callback)
 
         self.mappub = rospy.Publisher("/" + self.ns + '/map', OccupancyGrid, queue_size=1)
 
@@ -90,8 +91,8 @@ class MapGenerator:
     def new_episode_callback(self, _):
         self.occupancy_grid.data = self.generate_mapdata()
         self.mappub.publish(self.occupancy_grid)
-        srv_response = std_srvs.srv.SetBoolResponse()
-        srv_response.success = True
+        srv_response = nav_msgs.srv.GetMapResponse()
+        srv_response.map = self.occupancy_grid
         return srv_response
 
 

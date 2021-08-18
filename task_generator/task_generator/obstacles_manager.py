@@ -50,16 +50,24 @@ class ObstaclesManager:
         self._srv_spawn_model = rospy.ServiceProxy(
             f'{self.ns_prefix}spawn_model', SpawnModel, persistent=True)
 
+        self.map = None
         self.update_map(map_)
         self.obstacle_name_list = []
         self._obstacle_name_prefix = 'obstacle'
         # remove all existing obstacles generated before create an instance of this class
         self.remove_obstacles()
 
-    def update_map(self, new_map: OccupancyGrid):
+    def update_map(self, new_map: OccupancyGrid) -> bool:
+        if self.map is None:
+            is_new_map = True
+        else:
+            is_new_map = new_map.data != self.map.data
+
         self.map = new_map
         # a tuple stores the indices of the non-occupied spaces. format ((y,....),(x,...)
         self._free_space_indices = generate_freespace_indices(self.map)
+
+        return is_new_map
 
     def register_obstacles(self, num_obstacles: int, model_yaml_file_path: str, start_pos: list = []):
         """register the obstacles defined by a yaml file and request flatland to respawn the them.
