@@ -6,6 +6,8 @@ Panels:
       Expanded:
         - /robot1
         - /robot1/my_robot1
+        - /Map1
+        - /Map1/Map1
         - /Local plan1/teb1
         - /Sensors1
         - /Sensors1/LaserScan1
@@ -195,7 +197,7 @@ Visualization Manager:
           Draw Behind: false
           Enabled: true
           Name: Map
-          Topic: /map
+          Topic: /sim_1/map
           Unreliable: false
           Use Timestamp: false
           Value: true
@@ -438,7 +440,7 @@ Visualization Manager:
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_static_00
               Name: 0
               Namespaces:
-                "": true
+                {}
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -446,7 +448,7 @@ Visualization Manager:
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_static_01
               Name: 1
               Namespaces:
-                "": true
+                {}
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -454,7 +456,7 @@ Visualization Manager:
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_static_02
               Name: 2
               Namespaces:
-                "": true
+                {}
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -462,7 +464,7 @@ Visualization Manager:
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_static_03
               Name: 3
               Namespaces:
-                "": true
+                {}
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -470,7 +472,7 @@ Visualization Manager:
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_static_04
               Name: 4
               Namespaces:
-                "": true
+                {}
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -478,7 +480,7 @@ Visualization Manager:
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_static_05
               Name: 5
               Namespaces:
-                "": true
+                {}
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
