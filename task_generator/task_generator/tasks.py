@@ -15,6 +15,7 @@ from geometry_msgs.msg import Pose2D
 from rospy.exceptions import ROSException
 
 from std_msgs.msg import Bool
+from tf.transformations import scale_from_matrix
 
 from .obstacles_manager import ObstaclesManager
 from .robot_manager import RobotManager
@@ -223,11 +224,23 @@ class ScenerioTask(ABSTask):
         self._num_repeats_curr_scene = -1
         # The times of current scenerio need to be repeated
         self._max_repeats_curr_scene = 0
+        self._scene_pub = rospy.Publisher(
+            '/next_scene',Bool,tcp_nodelay=True)
     @classmethod
     def from_config(cls,cfg:CfgNode,ns):
         # TODO in future use cfg to build obstacles and robot's manager
         obstacles_manager, robot_manager = _get_obs_robot_manager(ns)
         scenerios_json_path = cfg.DEPLOY.SCENERIOS_JSON_PATH
+        # set the path properly
+        key_str = 'arena-rosnav/simulator_setup' 
+        idx_key_str = scenerios_json_path.find(key_str)
+        if idx_key_str!=-1:
+            local_path_simulator_setup = rospkg.RosPack().get_path('simulator_setup')
+            # local path is different
+            if local_path_simulator_setup not in scenerios_json_path:
+                scenerios_json_path = os.path.join(local_path_simulator_setup,scenerios_json_path[idx_key_str+len(key_str)+1:])
+                assert os.path.isfile(scenerios_json_path)
+            
         return {
             'obstacles_manager':obstacles_manager,
             'robot_manager': robot_manager,
@@ -239,6 +252,9 @@ class ScenerioTask(ABSTask):
         with self._map_lock:
             if self._idx_curr_scene == -1 or self._num_repeats_curr_scene == self._max_repeats_curr_scene:
                 self._set_new_scenerio()
+                # let observation collector know the exact number of dynamic obstacles in the map to setup it's feature space correctly
+                self._scene_pub.publish(True)
+                rospy.set_param('/curr_num_dynamic_obstacles',len(self._scenerios_data['dynamic_obstacles']))
                 info["new_scenerio_loaded"] = True
             else:
                 info["new_scenerio_loaded"] = False
@@ -265,7 +281,7 @@ class ScenerioTask(ABSTask):
                 print(f"======================================================")
                 print(f"Scenario '{scenerio_name}' loaded")
                 print(f"======================================================")
-                # use can set "repeats" to a non-positive value to disable the scenerio
+                # user can set "repeats" to a non-positive value to disable the scenerio
                 if scenerio_data["repeats"] > 0:
                     # set obstacles
                     self.obstacles_manager.remove_obstacles()
@@ -281,7 +297,7 @@ class ScenerioTask(ABSTask):
                                 obstacle_vertices)
                         else:
                             raise ValueError(f"Shape {obstacle_data['shape']} is not supported, supported shape 'circle' OR 'polygon'")
-
+                    # 
                     for obstacle_name, obstacle_data in scenerio_data["dynamic_obstacles"].items():
                         # currently dynamic obstacle only has circle shape
                         obstacle_radius = obstacle_data["obstacle_radius"]

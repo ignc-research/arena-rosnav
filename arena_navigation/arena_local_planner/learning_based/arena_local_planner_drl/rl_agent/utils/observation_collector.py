@@ -802,7 +802,7 @@ class ObservationCollectorWP2():
         """
         self.ns = ns
         if ns is None or ns == "":
-            self.ns_prefix = ""
+            self.ns_prefix = "/"
         else:
             self.ns_prefix = "/"+ns+"/"
         self._nums_dynamic_obstacles = nums_dynamic_obstalces
@@ -859,6 +859,8 @@ class ObservationCollectorWP2():
             f'{self.ns_prefix}previous_stage',Bool,self._callback_stage_changed,tcp_nodelay=True)
         self._stage_sub_2 = rospy.Subscriber(
             f'{self.ns_prefix}next_stage',Bool,self._callback_stage_changed,tcp_nodelay=True)
+        self._stage_sub_3 = rospy.Subscriber(
+            f'{self.ns_prefix}next_scene',Bool,self._callback_stage_changed,tcp_nodelay=True)
         # will be defined later
         self.dynamic_obstacle_pose_subs = []
 
@@ -899,9 +901,13 @@ class ObservationCollectorWP2():
         """
         # this prefix is hardcoded in the class ObstaclesManager's member function _generate_dynamic_obstacle_yaml_tween2 and _generate_random_obstacle_yaml
         robot_groundtruth_pos_name_prefix = 'dynamic_obstalce_groundtruth_pose_'
-        curr_stage = rospy.get_param("/curr_stage")
-        assert curr_stage>=0 and curr_stage < len(self._nums_dynamic_obstacles), "please check the stage configuration"
-        self.curr_num_dynamic_obstacles = self._nums_dynamic_obstacles[curr_stage]
+        curr_stage = rospy.get_param("/curr_stage",-1)
+        if curr_stage !=-1:
+            assert curr_stage < len(self._nums_dynamic_obstacles), "please check the stage configuration"
+            self.curr_num_dynamic_obstacles = self._nums_dynamic_obstacles[curr_stage]
+        else:
+            # in scenerio_task this will be set to the param server.
+            curr_num_dynamic_obstacles = rospy.get_param('/curr_num_dynamic_obstacles',-1)
         # unregister the old topics
         for sub in self.dynamic_obstacle_pose_subs+[self._laserscan_sub,self._robot_state_sub]:
             sub.sub.unregister()
