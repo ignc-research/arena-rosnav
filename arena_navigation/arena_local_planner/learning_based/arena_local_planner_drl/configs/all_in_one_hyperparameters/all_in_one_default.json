@@ -1,14 +1,14 @@
 {
   "models": {
     "rlca": true,
-    "drl": [],
-    "drl_names": [],
+    "drl": ["rule_04"],
+    "drl_names": ["drl_4"],
     "use_drl_servers": 1,
     "model_based": [
-      "teb_static_obst.yaml", "teb_static_obst_long_min_dist.yaml"
+      "teb_static_obst.yaml"
     ],
     "model_based_names": [
-      "teb", "teb_large_min_dist"
+      "teb"
     ]
   },
   "map": {

@@ -10,7 +10,7 @@ global_costmap:
   publish_frequency: 1.0
   transform_tolerance: 0.3
 
-  resolution: 0.3
+  resolution: 0.2
 
   obstacle_layer:
     obstacle_range: 3.5
@@ -27,7 +27,7 @@ global_costmap:
     scan: { data_type: LaserScan, marking: true, topic: scan, clearing: true }
 
   inflation_layer:
-    inflation_radius: 0.8
+    inflation_radius: 0.85
 
   plugins:
     - { name: static_layer,        type: "costmap_2d::StaticLayer"}
