@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import nav_msgs.srv
 import rospy
-import std_srvs.srv
 from map_generator import *
 from nav_msgs.msg import OccupancyGrid
 from nav_msgs.srv import GetMap
@@ -60,7 +59,7 @@ class MapGenerator:
             obstacle_number=self.obsnum,
             obstacle_extra_radius=self.obsrad
         )
-        make_image(map)
+        make_image(map, self.ns)
         rospy.loginfo("Initial random map generated.")
 
     def generate_mapdata(self):  # generate random map data array for occupancy grid
@@ -72,7 +71,7 @@ class MapGenerator:
             obstacle_number=self.obsnum,
             obstacle_extra_radius=self.obsrad
         )
-        make_image(map)
+        make_image(map, self.ns)
         map = np.flip(map, axis=0)
         # map currently [0,1] 2D np array needs to be flattened for publishing OccupancyGrid.data
         map = (map * 100).flatten()

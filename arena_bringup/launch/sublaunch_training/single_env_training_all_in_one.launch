@@ -1,10 +1,12 @@
 <launch>
     <arg name="ns" />
 
-    <arg name="map_path" value="$(find simulator_setup)/maps/random_map/map.yaml"/>
     <arg name="global_frame_id"   value="map"/>
     <arg name="odom_frame_id"     value="$(arg ns)_odom"/>
     <arg name="base_frame_id"     value="$(arg ns)_footprint"/>
+
+    <arg name="map_file"        default="random_map"/>
+    <arg name="map_path" default="$(find simulator_setup)/maps/$(arg map_file)/$(arg ns)_map.yaml"/>
 
     <!-- use fake localization-->
     <include file="$(find arena_bringup)/launch/sublaunch_training/fake_localization.launch">
@@ -30,5 +32,9 @@
       <remap from="/clock" to="/$(arg ns)/clock"/>
     </node>
 
+    <!-- set map parameters -->
+    <param name="/$(arg ns)/flatland_server/world_path" value="$(find simulator_setup)/maps/$(arg map_file)/$(arg ns)_map.world.yaml"/>
+    <param name="/$(arg ns)/flatland_server/map_layer_path" value="$(find simulator_setup)/maps/$(arg map_file)/$(arg ns)_map_layer.yaml"/>
+    <param name="/$(arg ns)/flatland_server/map_file" value="$(arg map_file)" />
 
   </launch>

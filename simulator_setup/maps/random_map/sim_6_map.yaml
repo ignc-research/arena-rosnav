@@ -1,0 +1,6 @@
+image: sim_6_random_map.png
+resolution: 0.2
+origin: [0.0, 0.0, 0.0]
+negate: 0
+occupied_thresh: 0.65
+free_thresh: 0.196
