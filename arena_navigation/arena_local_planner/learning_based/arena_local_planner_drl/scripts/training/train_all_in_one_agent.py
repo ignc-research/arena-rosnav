@@ -182,7 +182,7 @@ def parse_all_in_one_args():
 if __name__ == '__main__':
 
     # make unique agent version description based on @version
-    eval_episodes = 40
+    eval_episodes = 50
 
     args = parse_all_in_one_args()
 
@@ -326,14 +326,14 @@ if __name__ == '__main__':
         eval_env = VecNormalize(eval_env, training=True, norm_obs=True, norm_reward=True)
 
     eval_cb = EvalCallback(
-        eval_env=eval_env,
+        eval_env=eval_env, train_env=env,
         n_eval_episodes=eval_episodes, eval_freq=20000,
         log_path=paths['eval'], best_model_save_path=paths['model'], deterministic=True)
 
     print("Start training...")
 
     if args.n is None:
-        n_timesteps = 15000000
+        n_timesteps = 10000000
     else:
         n_timesteps = args.n
 

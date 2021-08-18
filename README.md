@@ -32,8 +32,6 @@ if (!node_handle.getParam("world_path", world_path)) {
   node_handle.getParam("map_file", map_file);
 ```
 
-Also stable-baselines needs to be updated (only for training).
-
 # Training an agent
 1. In the first terminal execute
 ```bash
@@ -45,7 +43,7 @@ roslaunch arena_bringup start_training.launch num_envs:=$num_envs
 workon rosnav
 roscd arena_local_planner_drl/
 ```
-
+and then
 ```bash
 python3 scripts/training/train_all_in_one_agent.py --agent AGENT_13 --n_envs $num_envs --tb --eval_log --agent_name all_in_one_teb_rlca_drl4_rule03_policy13 --all_in_one_config all_in_one_default.json
 ```
