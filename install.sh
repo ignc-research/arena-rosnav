@@ -1,5 +1,16 @@
 #!/bin/bash
 
+if test -n "$ZSH_VERSION"; then
+  CURSHELL=zsh
+elif test -n "$BASH_VERSION"; then
+  CURSHELL=bash
+else
+  echo "Currently only Bash and ZSH are supported for an automatic install. Please refer to the manual installation if you use any other shell."
+  exit 1
+fi
+
+echo $CURSHELL
+
 mkdir -p catkin_ws/src && cd catkin_ws/src
 git clone --depth 1 https://github.com/wittenator/arena-rosnav.git
 cd arena-rosnav
@@ -17,8 +28,8 @@ sudo apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31
 sudo aptitude update
 sudo aptitude -y install ros-noetic-desktop-full
 
-echo "source /opt/ros/noetic/setup.bash" >> ~/.$(echo $0)rc
-source ~/.$(echo $0)rc
+echo "source /opt/ros/noetic/setup.${CURSHELL}" >> ~/.${CURSHELL}rc
+source ~/.${CURSHELL}rc
 
 sudo aptitude -y install python3-rosdep python3-rosinstall python3-rosinstall-generator python3-wstool build-essential
 sudo rosdep init
@@ -40,10 +51,10 @@ poetry install
 
 rosws update
 
-echo "export PYTHONPATH=${PWD}:\$PYTHONPATH" >> ~/.$(echo $0)rc
+echo "export PYTHONPATH=${PWD}:\$PYTHONPATH" >> ~/.${CURSHELL}rc
 
-source ~/.$(echo $0)rc
-poetry run catkin_make -C ../.. -DCMAKE_BUILD_TYPE=Release
+source ~/.${CURSHELL}rc
+poetry run catkin_make -C ../.. -DCMAKE_BUILD_TYPE=Debug
 
-echo "source $(readlink -f ${PWD}/../../devel/setup.sh)" >> ~/.$(echo $0)rc
-source ~/.$(echo $0)rc
+echo "source $(readlink -f ${PWD}/../../devel/setup.sh)" >> ~/.${CURSHELL}rc
+source ~/.${CURSHELL}rc
