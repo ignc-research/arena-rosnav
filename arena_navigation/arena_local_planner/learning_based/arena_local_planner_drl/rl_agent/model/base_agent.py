@@ -47,9 +47,14 @@ class BaseAgent(ABC):
         pass
 
     def get_kwargs(self):
-        return {
+        kwargs = {
             "features_extractor_class": self.features_extractor_class,
             "features_extractor_kwargs": self.features_extractor_kwargs,
             "net_arch": self.net_arch,
             "activation_fn": self.activation_fn,
         }
+        if not kwargs['features_extractor_class']:
+            del kwargs['features_extractor_class']
+        if not kwargs['features_extractor_kwargs']:
+            del kwargs['features_extractor_kwargs']
+        return kwargs

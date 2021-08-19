@@ -13,6 +13,7 @@ from stable_baselines3.common.policies import BasePolicy
 
 from rl_agent.model.agent_factory import AgentFactory
 from rl_agent.model.base_agent import BaseAgent
+from rl_agent.model.custom_policy import *
 from rl_agent.model.custom_sb3_policy import *
 from tools.argsparser import parse_training_args
 from tools.custom_mlp_utils import *
@@ -127,7 +128,7 @@ def main():
             verbose=1,
         )
     elif args.agent is not None:
-        agent: Union[Type[BaseAgent], Type[BasePolicy]] = AgentFactory.instantiate(
+        agent: Union[Type[BaseAgent], Type[ActorCriticPolicy]] = AgentFactory.instantiate(
             args.agent
         )
         if isinstance(agent, BaseAgent):
@@ -148,7 +149,7 @@ def main():
                 tensorboard_log=PATHS.get("tb"),
                 verbose=1,
             )
-        elif isinstance(agent, BasePolicy):
+        elif issubclass(agent, ActorCriticPolicy):
             model = PPO(
                 agent,
                 env,
@@ -168,7 +169,7 @@ def main():
         else:
             raise TypeError(
                 f"Registered agent class {args.agent} is neither of type"
-                "'BaseAgent' or 'BasePolicy'!"
+                "'BaseAgent' or 'ActorCriticPolicy'!"
             )
     else:
         # load flag
