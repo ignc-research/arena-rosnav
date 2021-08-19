@@ -131,7 +131,7 @@ def main():
             verbose=1,
         )
     elif args.agent is not None:
-        agent: Union[Type[BaseAgent], Type[BasePolicy]] = AgentFactory.instantiate(
+        agent: Union[Type[BaseAgent], Type[ActorCriticPolicy]] = AgentFactory.instantiate(
             args.agent
         )
         if isinstance(agent, BaseAgent):
