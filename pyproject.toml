@@ -23,6 +23,7 @@ stable-baselines3 = "^1.0"
 empy = "^3.3.4"
 setuptools = "^56.2.0"
 filelock = "^3.0.12"
+PyQt5 = "^5.15.4"
 
 [tool.poetry.dev-dependencies]
 
