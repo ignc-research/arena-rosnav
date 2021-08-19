@@ -4,9 +4,9 @@
 #include <ros/ros.h>
 #include <Eigen/Eigen>
 #include <arena_path_search/dyn_astar.h>
-#include "arena_traj_planner/bspline/uniform_bspline.h"
+#include <arena_traj_planner/uniform_bspline.h>
 #include <arena_mapping/mapping.h>
-#include <arena_traj_planner/bspline_opt/lbfgs.hpp>
+#include "arena_traj_planner/lbfgs.hpp"
 
 
 //#include <traj_utils/plan_container.hpp>
@@ -109,9 +109,6 @@ private:
     int iter_num_;                  // iteration of the solver
     Eigen::VectorXd best_variable_; //
     double min_cost_;               //
-
-    int max_rebound_times_;         // optimization rebound times
-    int max_restart_times_;         // optimization restart times
 
    
     /* cost function */

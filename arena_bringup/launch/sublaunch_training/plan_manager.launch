@@ -1,0 +1,28 @@
+
+<launch>
+    <arg name="train_mode"/>
+    <arg name="global_frame_id"   />
+    <arg name="odom_frame_id"     />
+    <arg name="base_frame_id"    />
+    <arg name="look_ahead_distance" />
+    <arg name="tolerance_approach" />
+    <arg name="timeout_goal" />
+    <arg name="timeout_subgoal" />
+    <arg name="ns" />
+    
+    
+
+    
+    <!-- arena_plan_manager -->
+    <node pkg="arena_plan_manager" name="plan_manager" type="plan_manager_node" output="screen" ns="$(arg ns)">
+        <param name="train_mode"            value="$(arg train_mode)"/>
+        <param name="look_ahead_distance"   value="$(arg look_ahead_distance)"/>
+        <param name="tolerance_approach"    value="$(arg tolerance_approach)"/>
+        <param name="timeout_goal"          value="$(arg timeout_goal)"/>
+        <param name="timeout_subgoal"       value="$(arg timeout_subgoal)"/>
+        <remap from="/clock" to="/$(arg ns)/clock" />
+    </node>
+
+
+    <!-- arena_local_planners -->
+</launch>

@@ -1,0 +1,76 @@
+# Person
+bodies:  # List of named bodies
+  - name: base
+    pose: [0, 0, 0]
+    type: dynamic
+    color: [1.0, 1.0, 1.0, 0.75]
+    footprints:
+      - type: circle
+        radius: 0.01
+        center: [0, 0]
+        density: 0
+        layers: ["static"]
+        collision: false
+
+  - name: left_leg
+    pose: [0, 0, 0]
+    type: dynamic  
+    color: [0.66, 0.3, 0, 0.75]
+    footprints:
+      - type: circle
+        radius: 0.2
+        center: [-0.3, 0.0]
+        density: 1
+        layers: ["static"]
+        collision: false
+
+  - name: right_leg
+    pose: [0, 0, 0] 
+    type: dynamic  
+    color: [0.66, 0.3, 0, 0.75]
+    footprints:
+      - type: circle
+        radius: 0.2
+        center: [0.3, 0.0]
+        density: 1
+        layers: ["static"]
+        collision: false
+
+  - name: safety_dist_circle
+    pose: [0, 0, 0]
+    type: dynamic
+    color: [0.26, 0.3, 0, 0.3]
+    footprints:
+      - type: circle
+        radius: 0.7
+        center: [0.0, 0.0]
+        density: 1
+        layers: ["static"]
+        collision: false
+
+plugins:
+  - type: PedsimMovement
+    name: pedsim_movement
+    agent_topic: /pedsim_simulator/simulated_agents
+    base_body: base
+    left_leg_body: left_leg
+    right_leg_body: right_leg
+    safety_dist_body: safety_dist_circle
+    update_rate: 10
+    toggle_leg_movement: true 
+    leg_offset: 0.38
+    var_leg_offset: 0.0
+    step_time: 0.6 #(in sec)
+    var_step_time: 0.00
+    leg_radius: 0.13
+    var_leg_radius: 0.00
+    safety_dist: 0.7
+
+  - type: PosePub 
+    name: publish_human_pose
+    body: base
+    odom_frame_id: odom
+    odom_pub: odom  # topic odom is published on
+    ground_truth_pub: dynamic_human
+    pub_rate: 10
+

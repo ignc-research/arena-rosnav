@@ -10,6 +10,10 @@ from torch import nn
 from stable_baselines3.common.policies import ActorCriticPolicy
 from stable_baselines3.common.torch_layers import BaseFeaturesExtractor
 
+""" 
+_RS: Robot state size - placeholder for robot related inputs to the NN
+_L: Number of laser beams - placeholder for the laser beam data 
+"""
 _RS = 2  # robot state size
 
 ROBOT_SETTING_PATH = rospkg.RosPack().get_path("simulator_setup")
@@ -34,7 +38,6 @@ class MLP_ARENA2D(nn.Module):
     """
     Custom Multilayer Perceptron for policy and value function.
     Architecture was taken as reference from: https://github.com/ignc-research/arena2D/tree/master/arena2d-agents.
-
     :param feature_dim: dimension of the features extracted with the features_extractor (e.g. features from a CNN)
     :param last_layer_dim_pi: (int) number of units for the last layer of the policy network
     :param last_layer_dim_vf: (int) number of units for the last layer of the value network
@@ -111,7 +114,6 @@ class AGENT_1(BaseFeaturesExtractor):
     """
     Custom Convolutional Neural Network to serve as feature extractor ahead of the policy and value network.
     Architecture was taken as reference from: https://arxiv.org/abs/1808.03841
-
     :param observation_space: (gym.Space)
     :param features_dim: (int) Number of features extracted.
         This corresponds to the number of unit for the last layer.
@@ -152,7 +154,6 @@ class AGENT_1(BaseFeaturesExtractor):
 """
 Global constant to be passed as an argument to the PPO of Stable-Baselines3 in order to build both the policy
 and value network.
-
 :constant policy_drl_local_planner: (dict)
 """
 policy_kwargs_agent_1 = dict(
@@ -168,7 +169,6 @@ class AGENT_2(BaseFeaturesExtractor):
     Custom Convolutional Neural Network to serve as feature extractor ahead of the policy and value network.
     Architecture was taken as reference from: https://arxiv.org/abs/1808.03841
     (DRL_LOCAL_PLANNER)
-
     :param observation_space: (gym.Space)
     :param features_dim: (int) Number of features extracted.
         This corresponds to the number of unit for the last layer.
@@ -211,7 +211,6 @@ class AGENT_2(BaseFeaturesExtractor):
 """
 Global constant to be passed as an argument to the PPO of Stable-Baselines3 in order to build both the policy
 and value network.
-
 :constant policy_drl_local_planner: (dict)
 """
 policy_kwargs_agent_2 = dict(
@@ -225,7 +224,6 @@ policy_kwargs_agent_2 = dict(
 class AGENT_3(BaseFeaturesExtractor):
     """
     Custom Convolutional Neural Network to serve as feature extractor ahead of the policy and value network.
-
     :param observation_space: (gym.Space)
     :param features_dim: (int) Number of features extracted.
         This corresponds to the number of unit for the last layer.
@@ -271,7 +269,6 @@ class AGENT_3(BaseFeaturesExtractor):
 """
 Global constant to be passed as an argument to the PPO of Stable-Baselines3 in order to build both the policy
 and value network.
-
 :constant policy_drl_local_planner: (dict)
 """
 policy_kwargs_agent_3 = dict(
@@ -287,7 +284,6 @@ class AGENT_4(BaseFeaturesExtractor):
     Custom Convolutional Neural Network (Nature CNN) to serve as feature extractor ahead of the policy and value head.
     Architecture was taken as reference from: https://github.com/ethz-asl/navrep
     (CNN_NAVREP)
-
     :param observation_space: (gym.Space)
     :param features_dim: (int) Number of features extracted.
         This corresponds to the number of unit for the last layer.
@@ -334,7 +330,6 @@ class AGENT_4(BaseFeaturesExtractor):
 """
 Global constant to be passed as an argument to the PPO of Stable-Baselines3 in order to build both the policy
 and value network.
-
 :constant policy_kwargs_navrep: (dict)
 """
 policy_kwargs_agent_4 = dict(
@@ -348,7 +343,6 @@ policy_kwargs_agent_4 = dict(
 """
 Global constant to be passed as an argument to the PPO of Stable-Baselines3 in order to build both the policy
 and value network.
-
 :constant policy_kwargs_navrep: (dict)
 """
 policy_kwargs_agent_5 = dict(
@@ -358,7 +352,6 @@ policy_kwargs_agent_5 = dict(
 """
 Global constant to be passed as an argument to the PPO of Stable-Baselines3 in order to build both the policy
 and value network.
-
 :constant policy_kwargs_navrep: (dict)
 """
 policy_kwargs_agent_6 = dict(
@@ -368,7 +361,6 @@ policy_kwargs_agent_6 = dict(
 """
 Global constant to be passed as an argument to the PPO of Stable-Baselines3 in order to build both the policy
 and value network.
-
 :constant policy_kwargs_navrep: (dict)
 """
 policy_kwargs_agent_7 = dict(
@@ -378,7 +370,6 @@ policy_kwargs_agent_7 = dict(
 """
 Global constant to be passed as an argument to the PPO of Stable-Baselines3 in order to build both the policy
 and value network.
-
 :constant policy_kwargs_navrep: (dict)
 """
 policy_kwargs_agent_8 = dict(
@@ -388,7 +379,6 @@ policy_kwargs_agent_8 = dict(
 """
 Global constant to be passed as an argument to the PPO of Stable-Baselines3 in order to build both the policy
 and value network.
-
 :constant policy_drl_local_planner: (dict)
 """
 policy_kwargs_agent_9 = dict(
@@ -402,7 +392,6 @@ policy_kwargs_agent_9 = dict(
 class AGENT_10(BaseFeaturesExtractor):
     """
     Custom Convolutional Neural Network (Nature CNN) to serve as feature extractor ahead of the policy and value head.
-
     :param observation_space: (gym.Space)
     :param features_dim: (int) Number of features extracted.
         This corresponds to the number of unit for the last layer.
@@ -447,7 +436,6 @@ class AGENT_10(BaseFeaturesExtractor):
 """
 Global constant to be passed as an argument to the PPO of Stable-Baselines3 in order to build both the policy
 and value network.
-
 :constant policy_kwargs_navrep: (dict)
 """
 policy_kwargs_agent_10 = dict(
@@ -460,7 +448,6 @@ policy_kwargs_agent_10 = dict(
 """
 Global constant to be passed as an argument to the PPO of Stable-Baselines3 in order to build both the policy
 and value network.
-
 :constant policy_kwargs_navrep: (dict)
 """
 policy_kwargs_agent_11 = dict(
@@ -473,7 +460,6 @@ policy_kwargs_agent_11 = dict(
 """
 Global constant to be passed as an argument to the PPO of Stable-Baselines3 in order to build both the policy
 and value network.
-
 :constant policy_kwargs_navrep: (dict)
 """
 policy_kwargs_agent_12 = dict(
@@ -486,7 +472,6 @@ policy_kwargs_agent_12 = dict(
 """
 Global constant to be passed as an argument to the PPO of Stable-Baselines3 in order to build both the policy
 and value network.
-
 :constant policy_kwargs_navrep: (dict)
 """
 policy_kwargs_agent_13 = dict(
@@ -496,7 +481,6 @@ policy_kwargs_agent_13 = dict(
 """
 Global constant to be passed as an argument to the PPO of Stable-Baselines3 in order to build both the policy
 and value network.
-
 :constant policy_kwargs_navrep: (dict)
 """
 policy_kwargs_agent_14 = dict(
@@ -506,7 +490,6 @@ policy_kwargs_agent_14 = dict(
 """
 Global constant to be passed as an argument to the PPO of Stable-Baselines3 in order to build both the policy
 and value network.
-
 :constant policy_kwargs_navrep: (dict)
 """
 policy_kwargs_agent_15 = dict(
@@ -516,7 +499,6 @@ policy_kwargs_agent_15 = dict(
 """
 Global constant to be passed as an argument to the PPO of Stable-Baselines3 in order to build both the policy
 and value network.
-
 :constant policy_kwargs_navrep: (dict)
 """
 policy_kwargs_agent_16 = dict(
@@ -527,7 +509,6 @@ policy_kwargs_agent_16 = dict(
 """
 Global constant to be passed as an argument to the PPO of Stable-Baselines3 in order to build both the policy
 and value network.
-
 :constant policy_kwargs_navrep: (dict)
 """
 policy_kwargs_agent_17 = dict(
@@ -540,7 +521,6 @@ policy_kwargs_agent_17 = dict(
 """
 Global constant to be passed as an argument to the PPO of Stable-Baselines3 in order to build both the policy
 and value network.
-
 :constant policy_kwargs_navrep: (dict)
 """
 policy_kwargs_agent_18 = dict(
@@ -553,7 +533,6 @@ policy_kwargs_agent_18 = dict(
 """
 Global constant to be passed as an argument to the PPO of Stable-Baselines3 in order to build both the policy
 and value network.
-
 :constant policy_kwargs_navrep: (dict)
 """
 policy_kwargs_agent_19 = dict(
@@ -563,7 +542,6 @@ policy_kwargs_agent_19 = dict(
 """
 Global constant to be passed as an argument to the PPO of Stable-Baselines3 in order to build both the policy
 and value network.
-
 :constant policy_kwargs_navrep: (dict)
 """
 policy_kwargs_agent_20 = dict(

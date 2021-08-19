@@ -35,9 +35,10 @@ class InitiateNewTrainStage(BaseCallback):
         self.n_envs = n_envs
         self.threshhold_type = treshhold_type
 
-        assert (
-            self.threshhold_type == "rew" or self.threshhold_type == "succ"
-        ), "given theshhold type neither 'rew' or 'succ'"
+        assert self.threshhold_type in {
+            "rew",
+            "succ",
+        }, "given theshhold type neither 'rew' or 'succ'"
 
         # default values
         if self.threshhold_type == "rew" and upper_threshold == 0:

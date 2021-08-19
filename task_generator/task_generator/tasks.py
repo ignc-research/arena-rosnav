@@ -20,6 +20,22 @@ from .robot_manager import RobotManager
 from pathlib import Path
 
 
+from typing import List
+from std_srvs.srv import Trigger
+from pedsim_srvs.srv import SpawnPeds
+from pedsim_srvs.srv import SpawnInteractiveObstacles
+from pedsim_srvs.srv import SpawnObstacle
+from pedsim_msgs.msg import Ped
+from pedsim_msgs.msg import InteractiveObstacle
+from pedsim_msgs.msg import LineObstacles
+from pedsim_msgs.msg import LineObstacle
+
+import sys
+arena_tools_path = Path(__file__).parent / ".." / ".." / ".." / "forks" / "arena-tools"
+sys.path.append(str(arena_tools_path))
+from ArenaScenario import *
+
+
 class StopReset(Exception):
     """Raised when The Task can not be reset anymore """
 
@@ -85,8 +101,10 @@ class ManualTask(ABSTask):
     """randomly spawn obstacles and user can mannually set the goal postion of the robot
     """
 
-    def __init__(self,obstacles_manager: ObstaclesManager, robot_manager: RobotManager):
+    def __init__(self, ns: str, obstacles_manager: ObstaclesManager, robot_manager: RobotManager):
         super().__init__(obstacles_manager, robot_manager)
+        self.ns = ns
+        self.ns_prefix = "" if ns == '' else "/"+ns+"/"
         # subscribe
         rospy.Subscriber(f'{self.ns}manual_goal', Pose2D, self._set_goal_callback)
         self._goal = Pose2D()
@@ -145,7 +163,7 @@ class StagedRandomTask(RandomTask):
         # hyperparamters.json location
         self.json_file = os.path.join(
             self._PATHS.get('model'), "hyperparameters.json")
-        assert os.path.isfile(self.json_file), "Found no 'hyperparameters.json' at %s" % json_file
+        assert os.path.isfile(self.json_file), "Found no 'hyperparameters.json' at %s" % self.json_file
         self._lock_json = FileLock(self.json_file + ".lock")
 
         # subs for triggers
@@ -215,9 +233,9 @@ class StagedRandomTask(RandomTask):
             hyperparams = json.load(file)
         try:
             hyperparams['curr_stage'] = self._curr_stage
-        except Exception:
+        except Exception as e:
             raise Warning(
-                "Parameter 'curr_stage' not found in 'hyperparameters.json'!")
+                f" {e} \n Parameter 'curr_stage' not found in 'hyperparameters.json'!")
         else:
             with open(self.json_file, "w", encoding='utf-8') as target:
                 json.dump(hyperparams, target,
@@ -380,6 +398,110 @@ class ScenerioTask(ABSTask):
         json.dump(json_data, dst_json_path_.open('w'), indent=4)
 
 
+class PedsimManager():
+    def __init__(self):
+        # spawn peds
+        spawn_peds_service_name = "pedsim_simulator/spawn_peds"
+        rospy.wait_for_service(spawn_peds_service_name, 6.0)
+        self.spawn_peds_client = rospy.ServiceProxy(spawn_peds_service_name, SpawnPeds)
+        # respawn peds
+        respawn_peds_service_name = "pedsim_simulator/respawn_peds"
+        rospy.wait_for_service(respawn_peds_service_name, 6.0)
+        self.respawn_peds_client = rospy.ServiceProxy(respawn_peds_service_name, SpawnPeds)
+        # spawn interactive obstacles
+        pawn_interactive_obstacles_service_name = "pedsim_simulator/spawn_interactive_obstacles"
+        rospy.wait_for_service(pawn_interactive_obstacles_service_name, 6.0)
+        self.spawn_interactive_obstacles_client = rospy.ServiceProxy(pawn_interactive_obstacles_service_name, SpawnInteractiveObstacles)
+        # respawn interactive obstacles
+        respawn_interactive_obstacles_service_name = "pedsim_simulator/respawn_interactive_obstacles"
+        rospy.wait_for_service(respawn_interactive_obstacles_service_name, 6.0)
+        self.respawn_interactive_obstacles_client = rospy.ServiceProxy(respawn_interactive_obstacles_service_name, SpawnInteractiveObstacles)
+        # respawn interactive obstacles
+        reset_all_peds_service_name = "pedsim_simulator/reset_all_peds"
+        rospy.wait_for_service(reset_all_peds_service_name, 6.0)
+        self.reset_all_peds_client = rospy.ServiceProxy(reset_all_peds_service_name, Trigger)
+
+    def spawnPeds(self, peds: List[Ped]):
+        res = self.spawn_peds_client.call(peds)
+        print(res)
+
+    def respawnPeds(self, peds: List[Ped]):
+        res = self.respawn_peds_client.call(peds)
+        print(res)
+
+    def spawnInteractiveObstacles(self, obstacles: List[InteractiveObstacle]):
+        res = self.spawn_interactive_obstacles_client.call(obstacles)
+        print(res)
+
+    def respawnInteractiveObstacles(self, obstacles: List[InteractiveObstacle]):
+        res = self.respawn_interactive_obstacles_client.call(obstacles)
+        print(res)
+
+    def resetAllPeds(self):
+        res = self.reset_all_peds_client.call()
+        print(res)
+
+
+class ScenarioTask(ABSTask):
+    def __init__(self, obstacles_manager: ObstaclesManager, robot_manager: RobotManager, scenario_path: str):
+        super().__init__(obstacles_manager, robot_manager)
+
+        # load scenario from file
+        self.scenario = ArenaScenario()
+        self.scenario.loadFromFile(scenario_path)
+
+        # setup pedsim agents
+        self.pedsim_manager = None
+        if len(self.scenario.pedsimAgents) > 0:
+            self.pedsim_manager = PedsimManager()
+            peds = [agent.getPedMsg() for agent in self.scenario.pedsimAgents]
+            self.pedsim_manager.spawnPeds(peds)
+
+        # setup static flatland obstacles
+        for obstacle in self.scenario.staticObstacles:
+            self.obstacles_manager._srv_spawn_model.call(
+                obstacle.flatlandModel.path,
+                obstacle.name,
+                "static_obstacles",
+                Pose2D(obstacle.pos[0], obstacle.pos[1], obstacle.angle)
+            )
+
+        self.reset_count = 0
+
+    def reset(self):
+        self.reset_count += 1
+        info = {}
+        with self._map_lock:
+            # reset pedsim agents
+            if self.pedsim_manager != None:
+                self.pedsim_manager.resetAllPeds()
+
+            # reset robot
+            self.robot_manager.set_start_pos_goal_pos(
+                Pose2D(self.scenario.robotPosition[0], self.scenario.robotPosition[1], 0),
+                Pose2D(self.scenario.robotGoal[0], self.scenario.robotGoal[1], 0)
+            )
+
+            # fill info dict
+            if self.reset_count == 1:
+                info["new_scenerio_loaded"] = True
+            else:
+                info["new_scenerio_loaded"] = False
+            info["robot_goal_pos"] = self.scenario.robotGoal
+            info['num_repeats_curr_scene'] = self.reset_count
+            info['max_repeats_curr_scene'] = 1000  # todo: implement max number of repeats for scenario
+        return info
+
+def get_scenario_file_format(path: str):
+    path_ = Path(path)
+    assert path_.is_file()
+    data = json.load(path_.open())
+    if "format" in data:
+        if data["format"] == "arena-tools":
+            return "arena-tools"
+    else:
+        return "scenerio"
+
 def get_predefined_task(ns: str, mode="random", start_stage: int = 1, PATHS: dict = None):
 
     # TODO extend get_predefined_task(mode="string") such that user can choose between task, if mode is
@@ -421,7 +543,7 @@ def get_predefined_task(ns: str, mode="random", start_stage: int = 1, PATHS: dic
     if mode == "manual":
         rospy.set_param("/task_mode", "manual")
         obstacles_manager.register_random_obstacles(20, 0.4)
-        task = ManualTask(obstacles_manager, robot_manager)
+        task = ManualTask(ns, obstacles_manager, robot_manager)
         print("manual tasks requested")
     if mode == "staged":
         rospy.set_param("/task_mode", "staged")
@@ -429,6 +551,9 @@ def get_predefined_task(ns: str, mode="random", start_stage: int = 1, PATHS: dic
             ns, obstacles_manager, robot_manager, start_stage, PATHS)
     if mode == "scenario":
         rospy.set_param("/task_mode", "scenario")
-        task = ScenerioTask(obstacles_manager, robot_manager,
-            PATHS['scenario'])
+        scenario_format = get_scenario_file_format(PATHS['scenario'])
+        if scenario_format == "arena-tools":
+            task = ScenarioTask(obstacles_manager, robot_manager, PATHS['scenario'])
+        else:
+            task = ScenerioTask(obstacles_manager, robot_manager, PATHS['scenario'])
     return task

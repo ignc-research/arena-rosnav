@@ -1,18 +1,24 @@
-version: "3.3"
+version: '3'
 services:
-  ros:
-    image: llalal/docker:arena-rosnav
-    command: "tail -f /dev/null"
+  roslaunch:
+    build: ./
+    command: tail -f /dev/null
+    volumes: 
+      - .:/root/catkin_ws/src/arena-rosnav
     environment:
-      DISPLAY: novnc:0.0
-    volumes:
-      - ./:/root/catkin_ws/src/arena-rosnav/
-      
-  novnc:
+      - DISPLAY=novnc:0.0
+    image: arena_rosnav
+    networks:
+      - x11
+    container_name: arena-rosnav
+  novnc:  
     image: theasp/novnc:latest
-    environment:
-      DISPLAY_WIDTH: 1920
-      DISPLAY_HEIGHT: 1080
-      RUN_XTERM: "no"
+    env_file:
+      - ./docker/novnc.env
     ports:
       - "8080:8080"
+    networks:
+      - x11
+    container_name: novnc
+networks:
+  x11:

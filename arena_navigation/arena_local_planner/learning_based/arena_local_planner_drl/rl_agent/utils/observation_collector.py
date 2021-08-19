@@ -61,7 +61,7 @@ class ObservationCollector:
             )
         )
 
-        self._laser_num_beams = rospy.get_param("/laser_num_beams")
+        self._laser_num_beams = num_lidar_beams
         # for frequency controlling
         self._action_frequency = 1 / rospy.get_param("/robot_action_rate")
 
@@ -145,11 +145,12 @@ class ObservationCollector:
         )
         merged_obs = np.hstack([scan, np.array([rho, theta])])
 
-        obs_dict = {}
-        obs_dict["laser_scan"] = scan
-        obs_dict["goal_in_robot_frame"] = [rho, theta]
-        obs_dict["global_plan"] = self._globalplan
-        obs_dict["robot_pose"] = self._robot_pose
+        obs_dict = {
+            "laser_scan": scan,
+            "goal_in_robot_frame": [rho, theta],
+            "global_plan": self._globalplan,
+            "robot_pose": self._robot_pose,
+        }
 
         self._laser_deque.clear()
         self._rs_deque.clear()
@@ -177,7 +178,7 @@ class ObservationCollector:
             laser_stamp = laser_scan_msg.header.stamp.to_sec()
             robot_stamp = robot_pose_msg.header.stamp.to_sec()
 
-            while not abs(laser_stamp - robot_stamp) <= self._sync_slop:
+            while abs(laser_stamp - robot_stamp) > self._sync_slop:
                 if laser_stamp > robot_stamp:
                     if len(self._rs_deque) == 0:
                         return laser_scan, robot_pose
@@ -199,10 +200,7 @@ class ObservationCollector:
         return laser_scan, robot_pose
 
     def call_service_takeSimStep(self, t=None):
-        if t is None:
-            request = StepWorldRequest()
-        else:
-            request = StepWorldRequest(t)
+        request = StepWorldRequest() if t is None else StepWorldRequest(t)
         timeout = 12
         try:
             for i in range(timeout):
@@ -271,8 +269,7 @@ class ObservationCollector:
         return self.pose3D_to_pose2D(pose)
 
     def process_subgoal_msg(self, msg_Subgoal):
-        pose2d = self.pose3D_to_pose2D(msg_Subgoal.pose)
-        return pose2d
+        return self.pose3D_to_pose2D(msg_Subgoal.pose)
 
     @staticmethod
     def process_global_plan_msg(globalplan):
@@ -282,8 +279,7 @@ class ObservationCollector:
                 globalplan.poses,
             )
         )
-        global_plan_np = np.array(list(map(lambda p2d: [p2d.x, p2d.y], global_plan_2d)))
-        return global_plan_np
+        return np.array(list(map(lambda p2d: [p2d.x, p2d.y], global_plan_2d)))
 
     @staticmethod
     def pose3D_to_pose2D(pose3d):

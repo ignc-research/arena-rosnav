@@ -1,10 +1,9 @@
 import numpy as np
+import scipy.spatial
+
 from numpy.lib.utils import safe_eval
-import rospy
 from geometry_msgs.msg import Pose2D
 from typing import Tuple
-import scipy.spatial
-from rl_agent.utils.debug import timeit
 
 
 class RewardCalculator:

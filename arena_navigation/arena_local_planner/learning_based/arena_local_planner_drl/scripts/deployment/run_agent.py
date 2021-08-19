@@ -12,16 +12,12 @@ from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv, VecNorm
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.evaluation import evaluate_policy
 
+from rl_agent.envs.flatland_gym_env import FlatlandEnv
 from task_generator.task_generator.tasks import StopReset
-from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.rl_agent.envs.flatland_gym_env import (
-    FlatlandEnv,
-)
-from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.tools.argsparser import (
-    parse_run_agent_args,
-)
-from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.tools.train_agent_utils import *
+from tools.argsparser import parse_run_agent_args
+from tools.train_agent_utils import load_hyperparameters_json, print_hyperparameters
 
-### HYPERPARAMETERS ###
+### AGENT LIST ###
 AGENTS = [
     "AGENT_1_2021_04_02__22_03",
     "AGENT_2_2021_03_30__23_10",
@@ -43,8 +39,6 @@ AGENTS = [
     "AGENT_18_2021_04_11__13_54",
     "AGENT_19_2021_04_12__13_17",
 ]
-max_steps_per_episode = np.inf
-eval_episodes = 1000
 
 
 def get_paths(args: dict, AGENT: str):
@@ -71,13 +65,16 @@ def get_paths(args: dict, AGENT: str):
     return PATHS
 
 
-def make_env(with_ns: bool, PATHS: dict, PARAMS: dict, log: bool = False):
+def make_env(
+    with_ns: bool, PATHS: dict, PARAMS: dict, log: bool = False, max_steps: int = 1000
+):
     """
-    Utility function for multiprocessed env
+    Utility function for the evaluation environment.
 
     :param params: (dict) hyperparameters of agent to be trained
     :param PATHS: (dict) script relevant paths
     :param log: (bool) to differentiate between train and eval env
+    :param max_steps: (int) number of steps before the episode is stopped
     :return: (Callable)
     """
 
@@ -89,7 +86,7 @@ def make_env(with_ns: bool, PATHS: dict, PARAMS: dict, log: bool = False):
             PARAMS["reward_fnc"],
             PARAMS["discrete_action_space"],
             goal_radius=0.05,
-            max_steps_per_episode=max_steps_per_episode,
+            max_steps_per_episode=max_steps,
             train_mode=False,
             task_mode="scenario",
             PATHS=PATHS,
@@ -142,7 +139,9 @@ if __name__ == "__main__":
         PARAMS = load_hyperparameters_json(PATHS)
         print_hyperparameters(PARAMS)
 
-        env = DummyVecEnv([make_env(ns_for_nodes, PATHS, PARAMS, args.log)])
+        env = DummyVecEnv(
+            [make_env(ns_for_nodes, PATHS, PARAMS, args.log, args.max_steps)]
+        )
         if PARAMS["normalize"]:
             if not os.path.isfile(PATHS["vecnorm"]):
                 # without it agent performance will be strongly altered
@@ -158,7 +157,7 @@ if __name__ == "__main__":
 
         try:
             evaluate_policy(
-                model=agent, env=env, n_eval_episodes=eval_episodes, deterministic=True
+                model=agent, env=env, n_eval_episodes=args.num_eps, deterministic=True
             )
         except StopReset:
             pass
