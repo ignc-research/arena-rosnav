@@ -59,7 +59,7 @@ class ObservationCollector():
         self.obstacle_radius = self.read_saftey_distance_parameter_from_yaml()['obstacle radius']
         self.human_behavior_tokens= copy.deepcopy(self.safe_dists_factor)
         for i,item in enumerate(list(self.human_behavior_tokens.items())):
-            self.human_behavior_tokens[ item[0]] = i
+            self.human_behavior_tokens[ item[0]] = -1
         self.human_type_ids= copy.deepcopy(self.safe_dists_human_type)
         for i,item in enumerate(list(self.human_type_ids.items())):
             self.human_type_ids[ item[0]] = i
@@ -314,7 +314,7 @@ class ObservationCollector():
                 coordinate_humans[1][i]=position.y
                 rho_humans[i], theta_humans[i] = ObservationCollector._get_pose_in_robot_frame(position, self._robot_pose)
                 _,theta_robot_in_human_frame[i] = ObservationCollector._get_pose_in_robot_frame(self._robot_pose, position)
-             
+
             #sort the humans according to the relative position to robot
             human_pos_index=np.argsort(rho_humans)
             rho_humans, theta_humans=rho_humans[human_pos_index], theta_humans[human_pos_index]
@@ -457,7 +457,7 @@ class ObservationCollector():
      
         theta = (np.arctan2(y_relative, x_relative) -
                 robot_pos.theta+5*np.pi) % (2*np.pi)-np.pi
-    
+
         return rho, theta
 
 
@@ -689,6 +689,7 @@ class ObservationCollector():
         quaternion = (pose3d.orientation.x, pose3d.orientation.y,
                       pose3d.orientation.z, pose3d.orientation.w)
         euler = euler_from_quaternion(quaternion)
+        
         yaw = euler[2]
         pose2d.theta = yaw
         return pose2d
