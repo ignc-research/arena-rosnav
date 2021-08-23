@@ -5,7 +5,7 @@
   <param name="train_mode" value="$(arg train_mode)" />
   
   <arg name="local_planner"   default="teb"/> 
-  <arg name="rviz_file"       default="nav"/>
+  <arg name="rviz_file"       default="nav_LP"/>
   <arg name="disable_scenario"    default="true"/>
   <arg name="scenario_file"   default="empty_map.json"/>
   <arg name="reset"   default="true"/>
@@ -13,7 +13,7 @@
 
   <!-- To make the training more efficient make sure this step_size*laser_update_rate == 1  -->
   <arg name="step_size" default="0.01"/>
-  <arg name="update_rate" default="250"/>
+  <arg name="update_rate" default="500"/>
   <arg name="show_viz"  default="true"/>
   <arg name="viz_pub_rate" default="30" />
   <arg name="use_rviz" default="true"/>
@@ -109,7 +109,7 @@
   </include>
   <include file="$(find arena_bringup)/launch/sublaunch_testing/intermediate_planner.launch">
 
-  </include> -->
+  </include> 
 
 
 

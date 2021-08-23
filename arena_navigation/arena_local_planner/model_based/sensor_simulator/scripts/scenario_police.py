@@ -4,7 +4,7 @@ import math
 import rospy
 from sensor_msgs.msg import LaserScan
 from std_msgs.msg import Int16
-from visualization_msgs.msg import Marker
+from visualization_msgs.msg import Marker, MarkerArray
 from nav_msgs.msg import Path, Odometry
 from ford_msgs.msg import Clusters
 from geometry_msgs.msg import PoseStamped
@@ -28,7 +28,8 @@ class police():
 
         self.update_cluster = True
         self.gp_published = False
-
+        
+        self.sm = MarkerArray()
  
         # sub
         self.scan = rospy.Subscriber('/scan',LaserScan, self.cbScan)
@@ -40,6 +41,10 @@ class police():
         rospy.Subscriber('/subgoal_wpg',PoseStamped, self.cb_subgoal_wpg)
         rospy.Subscriber('/vis_global_path',Path, self.cb_global_path)
         # rospy.Subscriber('/obst_odom',Clusters, self.cb_cluster)
+        
+        # sunscribe to static map 
+        rospy.Subscriber('/flatland_server/debug/layer/static',MarkerArray, self.cb_gmap)
+        rospy.Subscriber('/scenario_reset',Int16, self.cb_reset)
 
 
         # pub
@@ -51,6 +56,9 @@ class police():
         self.pub_subg_wpg = rospy.Publisher('police/subgoal_wpg', PoseStamped, queue_size=10)
         self.pub_subgp = rospy.Publisher('police/gplan', Path, queue_size=10)
         # self.pub_obst_odom = rospy.Publisher('police/obst_odom',Clusters,queue_size=1)
+
+        # publish static map
+        self.pub_sm = rospy.Publisher('police/static_map', MarkerArray, queue_size=10)
 
 
         rospy.Timer(rospy.Duration(0.5),self.publish_state)
@@ -93,6 +101,15 @@ class police():
 
     def get_mb_path(self,msg):
         self.n_replan_mb += 1
+
+    def cb_reset(self,msg):
+        # print(msg)
+        # collect static and dynamic obstacles
+        if msg == 2:
+            self.pub_sm(sm)
+
+    def cb_gmap(self, msg):
+        sm = msg
 
 
     def publish_state(self, event):
