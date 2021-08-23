@@ -11,11 +11,7 @@
       "teb"
     ]
   },
-  "map": {
-    "numb_dynamic_obstacles": 18,
-    "numb_static_obstacles": 0
-  },
-  "run_all_agents_each_iteration": true,
+  "run_all_agents_each_iteration": false,
   "update_global_plan_frequency": 4,
   "all_in_one_planner_frequency": 4
 }

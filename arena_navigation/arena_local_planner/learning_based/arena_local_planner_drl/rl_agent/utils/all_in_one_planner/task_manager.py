@@ -1,11 +1,10 @@
 import json
 import os
-import time
+import subprocess
 
 import nav_msgs.srv
 import rospkg
 import rospy
-import std_srvs.srv
 from nav_msgs.srv import GetMap
 from task_generator.obstacles_manager import ObstaclesManager
 from task_generator.robot_manager import RobotManager
@@ -29,20 +28,17 @@ class TaskManager:
         self.task.reset()
 
     def _get_random_task(self, paths: dict):
-        config_path = paths['all_in_one_parameters']
+        config_path = paths['map_parameters']
         with open(config_path, 'r') as params_json:
-            config_data = json.load(params_json)
+            map_params = json.load(params_json)
 
-        assert config_data is not None, "Error: All in one parameter file cannot be found!"
+        assert map_params is not None, "Error: Map parameter file cannot be found!"
 
-        if 'map' in config_data:
-            map_params = config_data['map']
-            numb_static_obst = map_params['numb_static_obstacles']
-            numb_dyn_obst = map_params['numb_dynamic_obstacles']
-        else:
-            rospy.logwarn("No map parameters found in config file. Use 18 dynamic and 0 static obstacles.")
-            numb_static_obst = 0
-            numb_dyn_obst = 18
+        numb_static_obst = map_params['numb_static_obstacles']
+        numb_dyn_obst = map_params['numb_dynamic_obstacles']
+        map_type = map_params['type']
+
+        self._start_map_generator_node(map_type)
 
         service_client_get_map = rospy.ServiceProxy('/' + self.ns + '/static_map', GetMap)
         map_response = service_client_get_map()
@@ -55,6 +51,16 @@ class TaskManager:
         prob_dyn_obst = float(numb_dyn_obst) / numb_obst
         self.obstacles_manager.register_random_obstacles(numb_obst, prob_dyn_obst)
         return RandomTask(self.obstacles_manager, self.robot_manager)
+
+    def _start_map_generator_node(self, map_type: str):
+        package = 'simulator_setup'
+        launch_file = 'map_generator.launch'
+        arg1 = "ns:=" + self.ns
+        arg2 = "type:=" + map_type
+
+        # Use subprocess to execute .launch file
+        self._global_planner_process = subprocess.Popen(["roslaunch", package, launch_file, arg1, arg2],
+                                                        stdout=subprocess.DEVNULL)
 
     def _update_map(self):
         new_map = self._request_new_map(nav_msgs.srv.GetMapRequest())

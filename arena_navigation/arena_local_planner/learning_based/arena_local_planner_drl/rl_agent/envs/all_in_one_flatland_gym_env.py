@@ -32,7 +32,8 @@ class AllInOneEnv(gym.Env):
                  evaluation: bool = False,
                  evaluation_episodes: int = 40,
                  seed: int = 1,
-                 extended_eval: bool = False):
+                 extended_eval: bool = False,
+                 ):
 
         super(AllInOneEnv, self).__init__()
 
@@ -73,7 +74,12 @@ class AllInOneEnv(gym.Env):
                 self._service_name_step, StepWorld)
 
         # instantiate task manager
-        self.task_manager = TaskManager(self.ns, 1, paths)  # TODO make reset interval parameter
+        # TODO make reset interval parameter
+        if self._evaluation:
+            map_update_freq = 1
+        else:
+            map_update_freq = 5
+        self.task_manager = TaskManager(self.ns, map_update_freq, paths)
         self._seed = seed
 
         if self._evaluation:

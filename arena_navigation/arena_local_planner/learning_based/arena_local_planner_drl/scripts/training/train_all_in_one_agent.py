@@ -1,6 +1,5 @@
 import argparse
 import json
-import os
 import random
 import sys
 import time
@@ -8,7 +7,6 @@ import warnings
 from multiprocessing import Process
 
 import rosnode
-import rospkg
 from rl_agent.envs.all_in_one_flatland_gym_env import AllInOneEnv
 from rl_agent.envs.all_in_one_models.drl.drl_agent import setup_and_start_drl_server
 from scripts.custom_policy import *
@@ -113,7 +111,8 @@ def get_paths(agent_version: str, args, all_in_one_config: str = "all_in_one_def
             os.path.join(dir, 'configs', 'all_in_one_hyperparameters', all_in_one_config),
         'drl_agents':
             os.path.join(
-                dir, 'agents')
+                dir, 'agents'),
+        'map_parameters': os.path.join(dir, 'configs', 'all_in_one_hyperparameters', 'map_parameters', "mixed.json")
     }
 
     if not os.path.exists(paths['model']):

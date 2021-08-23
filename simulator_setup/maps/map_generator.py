@@ -6,6 +6,7 @@ import yaml
 from PIL import Image
 from matplotlib.ticker import FixedLocator
 
+
 def create_yaml_files(map_name, dir_path, ns: str):
     empty_yaml = {
         "image": "{1}_{0}.png".format("empty_map", ns),
@@ -194,8 +195,15 @@ def create_outdoor_map(height, width, obstacle_number, obstacle_extra_radius):
     return map
 
 
-def create_random_map(height, width, corridor_radius, iterations, obstacle_number, obstacle_extra_radius):
-    if np.random.random() >= 0.5:
+def create_random_map(height, width, corridor_radius, iterations, obstacle_number, obstacle_extra_radius,
+                      map_type: str):
+    if map_type == "mixed":
+        if np.random.random() >= 0.5:
+            map_type = "indoor"
+        else:
+            map_type = "outdoor"
+
+    if map_type == "indoor":
         map = create_indoor_map(height, width, corridor_radius, iterations)
         return map
     else:

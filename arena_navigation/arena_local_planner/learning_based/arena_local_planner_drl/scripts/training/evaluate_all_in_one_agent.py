@@ -13,9 +13,10 @@ from tools.train_agent_utils import check_hyperparam_format, print_hyperparamete
 base_Agent = 'all_in_one_agents_2xteb_rlca_rule05_policy13'
 primitive_agents = ['rlca_only', 'teb_only', 'drl_only', 'mpc_only', 'global_path_following_only',
                     'teb_large_min_dist_only']
-AGENTS = ['teb_only']
+AGENTS = ['drl_only', 'teb_only', 'rlca_only']
 eval_episodes = 100
 seed = random.randint(1, 1000)
+map_config = "indoor.json"
 
 
 def get_paths(AGENT: str, primitive_agent=False, is_random_agent=False):
@@ -28,7 +29,8 @@ def get_paths(AGENT: str, primitive_agent=False, is_random_agent=False):
                                      'default_settings.yaml'),
             'curriculum': os.path.join(dir, 'configs', 'training_curriculum_map1small.yaml'),
             'drl_agents': os.path.join(dir, 'agents'),
-            'hyperparams': os.path.join(dir, 'configs', 'hyperparameters', 'all_in_one_default.json')
+            'hyperparams': os.path.join(dir, 'configs', 'hyperparameters', 'all_in_one_default.json'),
+            'map_parameters': os.path.join(dir, 'configs', 'all_in_one_hyperparameters', 'map_parameters', map_config)
         }
     else:
         paths = {
@@ -40,7 +42,8 @@ def get_paths(AGENT: str, primitive_agent=False, is_random_agent=False):
             'robot_as': os.path.join(rospkg.RosPack().get_path('arena_local_planner_drl'), 'configs',
                                      'default_settings.yaml'),
             'curriculum': os.path.join(dir, 'configs', 'training_curriculum_map1small.yaml'),
-            'drl_agents': os.path.join(dir, 'agents')
+            'drl_agents': os.path.join(dir, 'agents'),
+            'map_parameters': os.path.join(dir, 'configs', 'all_in_one_hyperparameters', 'map_parameters', map_config)
         }
     if is_random_agent:
         AGENT = "random"

@@ -38,6 +38,7 @@ class MapGenerator:
         # initialize occupancy grid
         self.occupancy_grid = OccupancyGrid()
         self.ns = rospy.get_param("~ns")
+        self.map_type = rospy.get_param("~map_type")
 
         # self.generate_initial_map() # initial random map generation (before first episode)
         rospy.Subscriber("/" + self.ns + '/map', OccupancyGrid, self.get_occupancy_grid)
@@ -57,7 +58,8 @@ class MapGenerator:
             corridor_radius=self.cr,
             iterations=self.iterations,
             obstacle_number=self.obsnum,
-            obstacle_extra_radius=self.obsrad
+            obstacle_extra_radius=self.obsrad,
+            map_type=self.map_type
         )
         make_image(map, self.ns)
         rospy.loginfo("Initial random map generated.")
@@ -69,7 +71,8 @@ class MapGenerator:
             corridor_radius=self.cr,
             iterations=self.iterations,
             obstacle_number=self.obsnum,
-            obstacle_extra_radius=self.obsrad
+            obstacle_extra_radius=self.obsrad,
+            map_type=self.map_type
         )
         make_image(map, self.ns)
         map = np.flip(map, axis=0)

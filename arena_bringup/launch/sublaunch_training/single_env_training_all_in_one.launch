@@ -20,12 +20,6 @@
         <arg name="ns" value="$(arg ns)"/>
     </include>
 
-    <!-- start map generator node -->
-    <node pkg="simulator_setup" name="map_generator_node" type="map_generator_node.py" ns="$(arg ns)">
-      <param name="ns" value="$(arg ns)" />
-      <remap from="/clock" to="/$(arg ns)/clock"/>
-    </node>
-
     <!-- map server-->
     <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_path)" ns="$(arg ns)">
       <!-- In multi-env training /clock not available, since we only want one map_server, it's clock topic is remapped to /clock -->
