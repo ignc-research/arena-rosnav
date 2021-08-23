@@ -46,24 +46,26 @@ class ObservationCollectorAllInOne:
             self.observation_space = ObservationCollectorAllInOne._stack_spaces((
                 spaces.Box(low=0, high=lidar_range, shape=(
                     num_lidar_beams,), dtype=np.float32),
-                spaces.Box(low=0, high=10, shape=(1,), dtype=np.float32),
+                spaces.Box(low=0, high=30, shape=(1,), dtype=np.float32),
                 spaces.Box(low=-np.pi, high=np.pi, shape=(1,), dtype=np.float32),
-                spaces.Box(low=0, high=10, shape=(2,), dtype=np.float32),
+                spaces.Box(low=0, high=30, shape=(1,), dtype=np.float32),
+                spaces.Box(low=-np.pi, high=np.pi, shape=(1,), dtype=np.float32),
                 spaces.Box(low=-2.7, high=2.7, shape=(2 * numb_models,), dtype=np.float32)
             ))
         else:
             self.observation_space = ObservationCollectorAllInOne._stack_spaces((
                 spaces.Box(low=0, high=lidar_range, shape=(
                     num_lidar_beams,), dtype=np.float32),
-                spaces.Box(low=0, high=10, shape=(1,), dtype=np.float32),
+                spaces.Box(low=0, high=30, shape=(1,), dtype=np.float32),
                 spaces.Box(low=-np.pi, high=np.pi, shape=(1,), dtype=np.float32),
-                spaces.Box(low=0, high=10, shape=(2,), dtype=np.float32)
+                spaces.Box(low=0, high=30, shape=(1,), dtype=np.float32),
+                spaces.Box(low=-np.pi, high=np.pi, shape=(1,), dtype=np.float32)
             ))
 
         self._required_obs = required_obs
 
         # TODO make this a parameter
-        self._planning_horizon = 3
+        self._planning_horizon = 2.7
 
         self._clock = Clock()
         self._scan = LaserScan()
@@ -173,17 +175,21 @@ class ObservationCollectorAllInOne:
             self._iterations_global_plan_exists += 1
             self._dist_to_global_plan = self._get_distance_from_global_plan(self._globalplan, self._robot_pose)
 
-        rho, theta = ObservationCollectorAllInOne._get_goal_pose_in_robot_frame(
+        rho_local, theta_local = ObservationCollectorAllInOne._get_goal_pose_in_robot_frame(
             self._subgoal, self._robot_pose)
+
+        rho_global, theta_global = ObservationCollectorAllInOne._get_goal_pose_in_robot_frame(
+            self._goal, self._robot_pose)
 
         local_goal_x, local_goal_y = ObservationCollectorAllInOne._get_local_goal_in_robot_frame_xy(
             self._subgoal, self._robot_pose)
 
-        merged_obs = np.float32(np.hstack([scan, np.array([rho, theta]), np.array([self._goal.x, self._goal.y])]))
+        merged_obs = np.float32(
+            np.hstack([scan, np.array([rho_local, theta_local]), np.array([rho_global, theta_global])]))
 
         obs_dict = {'laser_scan': scan,
                     'goal_map_frame': self._subgoal,
-                    'goal_in_robot_frame': [rho, theta],
+                    'goal_in_robot_frame': [rho_local, theta_local],
                     'goal_in_robot_frame_xy': [local_goal_x, local_goal_y],
                     'global_plan': self._globalplan,
                     'new_global_plan': self._new_global_plan,
