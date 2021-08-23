@@ -342,7 +342,7 @@ class ObservationCollector():
                     # print(theta_humans[i])
                     obs_dict['human_obstacles_in_robot_frame'] = np.vstack([obs_dict['human_obstacles_in_robot_frame'], rho_behavior])
                     #determine the safe_dist for every human
-                    safe_dist_=self.safe_dists_human_type[ty] * self.safe_dists_factor[self._human_behavior[i]]
+                    safe_dist_=self.safe_dists_human_type[ty]  # * self.safe_dists_factor[self._human_behavior[i]]
                     _radius =self.obstacle_radius[ty]
                     _human_behavior_token=self.human_behavior_tokens[self._human_behavior[i]]
                     #robot centric 4 elements in state
