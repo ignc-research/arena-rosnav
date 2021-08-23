@@ -12,7 +12,7 @@ safety distance factor:
   Loading: 0.7
   LoweringForks: 0.8
   Driving: 1.4
-  TellStory: 1.0
+  TellStory: 0.8
   GroupTalking: 0.8
   Listening: 0.8
   TalkingAndWalking: 0.9

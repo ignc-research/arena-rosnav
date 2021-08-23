@@ -67,7 +67,7 @@
     - 1
     - dynamic_obstacles/big_forklift.model.yaml
     servicerobot:
-    - 0
+    - 1
     - dynamic_obstacles/servicerobot.model.yaml
   robot obstacles:
     random_wanderer:
