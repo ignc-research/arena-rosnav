@@ -8,11 +8,12 @@ from stable_baselines3.common.vec_env import VecNormalize
 
 def evaluate_policy_manually(policy: callable, env: VecNormalize, episodes: int, log_folder: str, gamma: float,
                              all_in_config_file: str):
+    gamma = 1
     rewards = np.zeros((episodes,))
     global_path_rewards = np.zeros((episodes,))
     collisions = np.zeros((episodes,))
-    distance_travelled = np.zeros((episodes,))
-    travel_time = np.zeros((episodes,))
+    distance_travelled = []
+    travel_time = []
     is_success = np.zeros((episodes,))
     computation_times = []
 
@@ -45,25 +46,15 @@ def evaluate_policy_manually(policy: callable, env: VecNormalize, episodes: int,
                 rewards[i] = current_reward
                 global_path_rewards[i] = info['global_path_reward']
                 collisions[i] = info['collisions']
-                distance_travelled[i] = info['distance_travelled']
-                travel_time[i] = info['time']
                 is_success[i] = info['is_success']
+                if is_success[i] == 1:
+                    distance_travelled.append(info['distance_travelled'])
+                    travel_time.append(info['time'])
+
                 model_distribution[i, :] = info['model_distribution']
                 model_distribution_close_obst_dist[i, :] = info['model_distribution_close_obst_dist']
                 model_distribution_medium_obst_dist[i, :] = info['model_distribution_medium_obst_dist']
                 model_distribution_large_obst_dist[i, :] = info['model_distribution_large_obst_dist']
-
-    # omit first run as it is often falsy (for move-base based models)
-    global_path_rewards = global_path_rewards[1:]
-    rewards = rewards[1:]
-    collisions = collisions[1:]
-    distance_travelled = distance_travelled[1:]
-    travel_time = travel_time[1:]
-    is_success = is_success[1:]
-    model_distribution = model_distribution[1:, :]
-    model_distribution_close_obst_dist = model_distribution_close_obst_dist[1:, :]
-    model_distribution_medium_obst_dist = model_distribution_medium_obst_dist[1:, :]
-    model_distribution_large_obst_dist = model_distribution_large_obst_dist[1:, :]
 
     # remove empty entries
     model_distribution_close_obst_dist = [i for i in model_distribution_close_obst_dist if np.sum(i) != 0]
@@ -71,14 +62,13 @@ def evaluate_policy_manually(policy: callable, env: VecNormalize, episodes: int,
     model_distribution_large_obst_dist = [i for i in model_distribution_large_obst_dist if np.sum(i) != 0]
 
     comp_times_mean_per_second = np.mean(computation_times) * (
-                10.0 / env.env_method("get_all_in_one_planner_frequency")[0])
+            10.0 / env.env_method("get_all_in_one_planner_frequency")[0])
     # save results
     with open(log_folder + '/evaluation_full.csv', 'w', newline='') as file:
         writer = csv.writer(file)
-        writer.writerow(["rewards", "collisions", "distance_travelled", "time", "is_success"])
+        writer.writerow(["rewards", "collisions", "is_success"])
         for i in range(episodes - 1):
-            writer.writerow(["{:.2f}".format(rewards[i]), collisions[i], "{:.2f}".format(distance_travelled[i]),
-                             "{:.2f}".format(travel_time[i]), is_success[i]])
+            writer.writerow(["{:.2f}".format(rewards[i]), collisions[i], is_success[i]])
 
     with open(log_folder + "/evaluation_summary.txt", 'w') as file:
         file.write("Mean reward: " + str(np.mean(rewards)) + "\n")
