@@ -196,17 +196,16 @@ class RewardCalculator:
                             laser_scan: np.ndarray,
                             goal_in_robot_frame: Tuple[float, float],
                             *args, **kwargs):
-        if laser_scan.min() > self.safe_dist:
-            self._reward_distance_global_plan(
-                kwargs['global_plan'], kwargs['robot_pose'], reward_factor=0.2, penalty_factor=0.3)
-        else:
+        if not laser_scan.min() > self.safe_dist:
             self.last_dist_to_path = None
         self._reward_goal_reached(
-            goal_in_robot_frame, reward=15)
+            goal_in_robot_frame, reward=1.5)
         self._reward_safe_dist(
-            laser_scan, punishment=0.25)
+            laser_scan, punishment=0.02)
+        self._reward_goal_approached(kwargs['sub_goal'], kwargs['new_global_plan'], reward_factor=0.05,
+                                     penalty_factor=0.1)
         self._reward_collision(
-            laser_scan, punishment=10)
+            laser_scan, punishment=1)
 
     def _reward_following_global_plan_relativ(self,
                                               action: np.array,
@@ -275,6 +274,7 @@ class RewardCalculator:
 
     def _reward_goal_approached(self,
                                 goal_in_robot_frame=Tuple[float, float],
+                                new_global_plan=False,
                                 reward_factor: float = 0.3,
                                 penalty_factor: float = 0.5):
         """
@@ -284,7 +284,7 @@ class RewardCalculator:
         :param reward_factor (float, optional): positive factor for approaching goal. defaults to 0.3
         :param penalty_factor (float, optional): negative factor for withdrawing from goal. defaults to 0.5
         """
-        if self.last_goal_dist is not None:
+        if self.last_goal_dist is not None and not new_global_plan:
             # goal_in_robot_frame : [rho, theta]
 
             # higher negative weight when moving away from goal
@@ -297,6 +297,9 @@ class RewardCalculator:
 
             # print("reward_goal_approached:  {}".format(reward))
             self.curr_reward += reward
+
+            if self.extended_eval:
+                self.global_plan_reward += reward
         self.last_goal_dist = goal_in_robot_frame[0]
 
     def _reward_collision(self,

@@ -61,12 +61,10 @@ class StepProcessor:
 
         # calculate reward
         reward_sum, reward_info = self._reward_calculator.get_reward(
-            self._last_obs_dict['laser_scan'], self._last_obs_dict['goal_in_robot_frame'],
+            self._last_obs_dict['laser_scan'], self._last_obs_dict['global_goal_robot_frame'],
             action=action_model, global_plan=self._last_obs_dict['global_plan'],
-            robot_pose=self._last_obs_dict['robot_pose'],
-            dist_to_global_plan=self._last_obs_dict['dist_to_global_plan'],
-            iterations_global_plan_exists=self._last_obs_dict['iterations_global_plan_exists'],
-            initial_distance_to_global_plan=self._last_obs_dict['initial_distance_to_global_plan'])
+            robot_pose=self._last_obs_dict['robot_pose'], sub_goal=self._last_obs_dict['goal_in_robot_frame'],
+            new_global_plan=self._last_obs_dict['new_global_plan'])
 
         # repeat with selected local planner
         for i in range(self._all_in_one_planner_frequency - 1):
@@ -81,12 +79,10 @@ class StepProcessor:
 
                 # calculate reward
                 reward, reward_info = self._reward_calculator.get_reward(
-                    self._last_obs_dict['laser_scan'], self._last_obs_dict['goal_in_robot_frame'],
+                    self._last_obs_dict['laser_scan'], self._last_obs_dict['global_goal_robot_frame'],
                     action=action_model, global_plan=self._last_obs_dict['global_plan'],
-                    robot_pose=self._last_obs_dict['robot_pose'],
-                    dist_to_global_plan=self._last_obs_dict['dist_to_global_plan'],
-                    iterations_global_plan_exists=self._last_obs_dict['iterations_global_plan_exists'],
-                    initial_distance_to_global_plan=self._last_obs_dict['initial_distance_to_global_plan'])
+                    robot_pose=self._last_obs_dict['robot_pose'], sub_goal=self._last_obs_dict['goal_in_robot_frame'],
+                    new_global_plan=self._last_obs_dict['new_global_plan'])
                 reward_sum += reward
 
         if self._run_all_agents_each_iteration:
@@ -162,7 +158,7 @@ class StepProcessor:
                 "Parameter \"run_all_agents_each_iteration\" not found in config file. Use default value \"true\"")
             self._run_all_agents_each_iteration = True
         else:
-            self._run_all_agents_each_iteration = True
+            self._run_all_agents_each_iteration = False
         # extract update rate of global planner
         if 'update_global_plan_frequency' in config_data:
             self._update_global_plan_frequency = config_data['update_global_plan_frequency']

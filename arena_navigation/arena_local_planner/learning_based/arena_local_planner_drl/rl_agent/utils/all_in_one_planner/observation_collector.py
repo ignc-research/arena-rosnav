@@ -10,7 +10,6 @@ import rospkg
 import rospy
 # services
 import rosservice
-import scipy.spatial
 import std_srvs.srv
 import visualization_msgs.msg
 from flatland_msgs.srv import StepWorld, StepWorldRequest
@@ -46,9 +45,9 @@ class ObservationCollectorAllInOne:
             self.observation_space = ObservationCollectorAllInOne._stack_spaces((
                 spaces.Box(low=0, high=lidar_range, shape=(
                     num_lidar_beams,), dtype=np.float32),
-                spaces.Box(low=0, high=30, shape=(1,), dtype=np.float32),
+                spaces.Box(low=0, high=20, shape=(1,), dtype=np.float32),
                 spaces.Box(low=-np.pi, high=np.pi, shape=(1,), dtype=np.float32),
-                spaces.Box(low=0, high=30, shape=(1,), dtype=np.float32),
+                spaces.Box(low=0, high=20, shape=(1,), dtype=np.float32),
                 spaces.Box(low=-np.pi, high=np.pi, shape=(1,), dtype=np.float32),
                 spaces.Box(low=-2.7, high=2.7, shape=(2 * numb_models,), dtype=np.float32)
             ))
@@ -56,16 +55,16 @@ class ObservationCollectorAllInOne:
             self.observation_space = ObservationCollectorAllInOne._stack_spaces((
                 spaces.Box(low=0, high=lidar_range, shape=(
                     num_lidar_beams,), dtype=np.float32),
-                spaces.Box(low=0, high=30, shape=(1,), dtype=np.float32),
+                spaces.Box(low=0, high=20, shape=(1,), dtype=np.float32),
                 spaces.Box(low=-np.pi, high=np.pi, shape=(1,), dtype=np.float32),
-                spaces.Box(low=0, high=30, shape=(1,), dtype=np.float32),
+                spaces.Box(low=0, high=20, shape=(1,), dtype=np.float32),
                 spaces.Box(low=-np.pi, high=np.pi, shape=(1,), dtype=np.float32)
             ))
 
         self._required_obs = required_obs
 
         # TODO make this a parameter
-        self._planning_horizon = 2.7
+        self._planning_horizon = 4
 
         self._clock = Clock()
         self._scan = LaserScan()
@@ -74,15 +73,11 @@ class ObservationCollectorAllInOne:
         self._goal = Pose2D()
         self._goal3D = Pose()
         self._subgoal = Pose2D()
+        self._old_subgoal = Pose2D()
         self._globalplan = np.array([])
         self._globalplan_raw = nav_msgs.msg.Path()
         self._twist = Twist()
         self._new_global_plan = True
-
-        self._iterations_global_plan_exists = 0
-        self._dist_to_global_plan = 0
-        self._initial_distance_to_global_plan = 0
-        self.kdtree = None
 
         # train mode?
         self._is_train_mode = rospy.get_param("/train_mode")
@@ -164,16 +159,11 @@ class ObservationCollectorAllInOne:
             else:
                 service_available = True
             if service_available:
-                self._dist_to_global_plan = self._get_distance_from_global_plan(self._globalplan, self._robot_pose)
                 self._make_new_global_plan(self._robot_pose)
                 self._new_global_plan = True
             # extract subgoal from new global plan
             self._subgoal = self._extract_subgoal(self._globalplan)
             self._visualize_subgoal(self._subgoal)
-            self._iterations_global_plan_exists = 0
-        else:
-            self._iterations_global_plan_exists += 1
-            self._dist_to_global_plan = self._get_distance_from_global_plan(self._globalplan, self._robot_pose)
 
         rho_local, theta_local = ObservationCollectorAllInOne._get_goal_pose_in_robot_frame(
             self._subgoal, self._robot_pose)
@@ -185,7 +175,7 @@ class ObservationCollectorAllInOne:
             self._subgoal, self._robot_pose)
 
         merged_obs = np.float32(
-            np.hstack([scan, np.array([rho_local, theta_local]), np.array([rho_global, theta_global])]))
+            np.hstack([scan, np.array([rho_global, theta_global]), np.array([rho_local, theta_local])]))
 
         obs_dict = {'laser_scan': scan,
                     'goal_map_frame': self._subgoal,
@@ -197,9 +187,7 @@ class ObservationCollectorAllInOne:
                     'robot_pose': self._robot_pose,
                     'robot_twist': self._twist,
                     'global_goal': np.array([self._goal.x, self._goal.y]),
-                    'dist_to_global_plan': self._dist_to_global_plan,
-                    'iterations_global_plan_exists': self._iterations_global_plan_exists,
-                    'initial_distance_to_global_plan': self._initial_distance_to_global_plan
+                    'global_goal_robot_frame': np.array([rho_global, theta_global])
                     }
 
         # if necessary add last 3 laser scans to obs dict
@@ -419,9 +407,6 @@ class ObservationCollectorAllInOne:
             for pose in self._globalplan_raw.poses:
                 pose.header.frame_id = "map"
 
-            self.kdtree = scipy.spatial.cKDTree(self._globalplan)  # reset kdtree
-            self._initial_distance_to_global_plan, _ = self.kdtree.query([robot_pose.x, robot_pose.y])
-
     def _visualize_subgoal(self, subgoal: Pose2D):
         subgoal_msg = Marker()
         subgoal_msg.header.frame_id = "map"
@@ -463,13 +448,6 @@ class ObservationCollectorAllInOne:
             next_pose_xy = global_plan[i]
 
         return Pose2D(next_pose_xy[0], next_pose_xy[1], 0)
-
-    def _get_distance_from_global_plan(self, global_plan, robot_pose):
-        if global_plan.size == 0:
-            return 0
-
-        dist, _ = self.kdtree.query([robot_pose.x, robot_pose.y])
-        return dist
 
     @staticmethod
     def process_global_plan_msg(globalplan):
