@@ -4,10 +4,10 @@
 # ------------ default config block ------------
 # 1: will plot, 0: will not plot
 default_cfg:
-    plot_trj:        1        # plot agent trajectory
+    plot_trj:        1      # plot agent trajectory
     plot_zones:      0        # plot collision zones
     plot_grid:       0        # zone grid
-    plot_obst:       0        # plot obstacles (start, end, direction)
+    plot_obst:       1       # plot obstacles (start, end, direction)
     plot_collisions: 0       # plot a circle where agent collided
     plot_sm:         1        # plot static map
     plot_gp:         0        # plot global plan

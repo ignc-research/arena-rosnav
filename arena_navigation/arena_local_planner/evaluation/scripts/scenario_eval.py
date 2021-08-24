@@ -96,7 +96,20 @@ class newBag():
         if plot_sm:
             sm_csv = self.bag.message_by_topic(self.topic_sm)
             df_sm  = pd.read_csv(sm_csv, error_bad_lines=False)
-            #plt.scatter(sm[1], sm[0],s = 0.2 , c = "grey")
+
+            # get origin from map yml
+            map = (self.file_name.split("_")[0])
+            # remmeber curr dir
+            remember_path = os.path.abspath(os.curdir)
+            # change to map dir
+            os.chdir("../../../../simulator_setup/maps/"+map)
+            path_map = os.path.abspath(os.curdir)
+            # move back to eval path
+            os.chdir(remember_path)
+            with open(path_map+"/map.yaml", "r") as ymlfile:
+                map_yml = yaml.safe_load(ymlfile)
+            orig_x = map_yml["origin"][0]
+            orig_y = map_yml["origin"][1]
 
             for i in range(len(df_sm)): 
                 df_str = (df_sm.loc[i,"markers"])
@@ -113,8 +126,7 @@ class newBag():
                 # print((df_str))
                 points_x = []
                 points_y = []
-                orig_x = 0#-16.600000
-                orig_y = 0#-6.650000
+
                 for p in points:
                     pxy = p.split("\n")
                     try:
@@ -126,7 +138,11 @@ class newBag():
                         print(e)
 
             
+            img = plt.imread(path_map+"/map.png")
+            # plt.imshow(img, extent=[-16, -50, -6, 17])
             plt.scatter(points_x, points_y, s = 0.2, c = "grey")
+
+            # print(self.csv_dir)
 
         odom_csv = self.bag.message_by_topic(self.odom_topic)
         df_odom  = pd.read_csv(odom_csv, error_bad_lines=False)
@@ -355,8 +371,11 @@ class newBag():
 
         for run_a in xya:
             for col_xy in run_a:
-                all_cols_x.append(-col_xy[1])
-                all_cols_y.append(col_xy[0])
+                #all_cols_x.append(-col_xy[1])
+                #all_cols_y.append(col_xy[0])
+
+                all_cols_x.append(col_xy[0])
+                all_cols_y.append(col_xy[1])
 
                 if plt_cfg["plot_collisions"]:
                     circle = plt.Circle((-col_xy[1], col_xy[0]), 0.3, color=clr, fill = True, alpha = 0.6)
@@ -788,7 +807,7 @@ def fancy_print(msg,success):
 def plot_arrow(start,end):
     global ax
     # ax.arrow(-start[1], start[0], -end[1], end[0], head_width=0.05, head_length=0.1, fc='k', ec='k')
-    plt.arrow(-start[1], start[0], -end[1], end[0],  
+    plt.arrow(start[0], start[1], end[0], end[1],  
         head_width = 0.2, 
         width = 0, 
         ec = "black",
@@ -798,7 +817,7 @@ def plot_arrow(start,end):
 def plot_dyn_obst(ob_xy):
     global ax
 
-    circle = plt.Circle((-ob_xy[1], ob_xy[0]), 0.3, color="black", fill = False, alpha = 1)
+    circle = plt.Circle((ob_xy[0], ob_xy[1]), 0.3, color="black", fill = False, alpha = 1)
     ax.add_patch(circle)
 
 def read_scn_file(map, ob):
