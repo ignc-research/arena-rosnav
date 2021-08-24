@@ -5,7 +5,7 @@ from typing import Any,Callable,List,Union
 ENV_REGISTRY = Registry('environment registry')
 
 
-def build_env(cfg:CfgNode,task,ns,train_mode,debug):
+def build_env(cfg:CfgNode,task,ns,train_mode,debug,**kwargs):
     """build a env 
 
     Args:
@@ -14,12 +14,12 @@ def build_env(cfg:CfgNode,task,ns,train_mode,debug):
         ns ([type]): namespace 
     """
     env_name  = cfg.ENV.NAME
-    return ENV_REGISTRY.get(env_name)(cfg,task,ns,train_mode,debug)
+    return ENV_REGISTRY.get(env_name)(cfg,task,ns,train_mode,debug,**kwargs)
 
 # task can be callable object, use string here to avoid circle import
-def build_env_wrapper(cfg:CfgNode,task:Union[Callable,"task_generator.AbsTask"],ns:str,train_mode:bool,debug:bool):
+def build_env_wrapper(cfg:CfgNode,task:Union[Callable,"task_generator.AbsTask"],ns:str,train_mode:bool,debug:bool,**kwags):
     def wrap():
-        env = build_env(cfg,task,ns,train_mode=train_mode,debug=debug)
+        env = build_env(cfg,task,ns,train_mode=train_mode,debug=debug,**kwags)
         return env
     return wrap
     

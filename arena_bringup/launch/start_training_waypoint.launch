@@ -16,9 +16,10 @@
   <!-- Here are the argument that may be frequently changed -->
   <arg name="ns_prefix" default="sim" />
   <arg name="num_envs" default="6" />
-  <arg name="local_planner" default="drl"/>  
+  <arg name="local_planner" default="drl"/>
+  <!-- if pretran_mode is on then please use pretraining_wp_multi_env to collect expert data-->
+  <arg name="pretrain_mode" default="false"/>
   <!-- train mode  -->
-  <arg name="train_mode"       default="true"/>
 
   <!-- To make the training more efficient make sure this step_size*laser_update_rate == 1  -->
   <arg name="step_size" default="0.05"/>
@@ -37,7 +38,7 @@
   <!--  PARAMS DON'T CHANGE THEM  -->¬
   <param name="update_rate" value="$(arg update_rate)" />
   <param name="use_sim_time" value="true" />
-  <param name="train_mode" value="$(arg train_mode)" />
+  <param name="train_mode" value="true" />
   <param name="num_envs" value="$(arg num_envs)" />
   <param name="step_size" value="$(arg step_size)" /> 
   <param name="obs_vel" value="$(arg obs_vel)" /> 
@@ -63,107 +64,166 @@
     <remap from="/clock" to="/$(arg ns_prefix)_1/clock" />
   </node>
 
-  <group if="$(eval arg('train_mode') == false)">
-  <!-- makes sure that action's will be published according to sim time in eval mode-->
-    <node name="action_publisher" pkg="arena_local_planner_drl" type="action_publisher.py"/>
-  </group>
-
   <!-- set the log format -->
   <env name="ROSCONSOLE_FORMAT" value="[${severity} ${time} ${logger}]: ${message}" />
   <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training_waypoint.launch" if="$(eval num_envs>=1)">
-    <arg name="ns" value="$(arg ns_prefix)_1" />
-  </include>
+    <arg name="ns" value="$(arg ns_prefix)_1"/>
+    <arg name="pretrain_mode" value="$(arg pretrain_mode)"/>
+    <arg name="local_planner" value="$(arg local_planner)"/>
+</include>
   <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training_waypoint.launch" if="$(eval num_envs>=2)">
     <arg name="ns" value="$(arg ns_prefix)_2" />
-  </include>
+    <arg name="pretrain_mode" value="$(arg pretrain_mode)"/>
+    <arg name="local_planner" value="$(arg local_planner)"/>
+</include>
   <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training_waypoint.launch" if="$(eval num_envs>=3)">
     <arg name="ns" value="$(arg ns_prefix)_3" />
-  </include>
+    <arg name="pretrain_mode" value="$(arg pretrain_mode)"/>
+    <arg name="local_planner" value="$(arg local_planner)"/>
+</include>
   <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training_waypoint.launch" if="$(eval num_envs>=4)">
     <arg name="ns" value="$(arg ns_prefix)_4" />
-  </include>
+    <arg name="pretrain_mode" value="$(arg pretrain_mode)"/>
+    <arg name="local_planner" value="$(arg local_planner)"/>
+</include>
   <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training_waypoint.launch" if="$(eval num_envs>=5)">
     <arg name="ns" value="$(arg ns_prefix)_5" />
-  </include>
+    <arg name="pretrain_mode" value="$(arg pretrain_mode)"/>
+    <arg name="local_planner" value="$(arg local_planner)"/>
+</include>
   <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training_waypoint.launch" if="$(eval num_envs>=6)">
     <arg name="ns" value="$(arg ns_prefix)_6" />
-  </include>
+    <arg name="pretrain_mode" value="$(arg pretrain_mode)"/>
+    <arg name="local_planner" value="$(arg local_planner)"/>
+</include>
   <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training_waypoint.launch" if="$(eval num_envs>=7)">
     <arg name="ns" value="$(arg ns_prefix)_7" />
-  </include>
+    <arg name="pretrain_mode" value="$(arg pretrain_mode)"/>
+    <arg name="local_planner" value="$(arg local_planner)"/>
+</include>
   <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training_waypoint.launch" if="$(eval num_envs>=8)">
     <arg name="ns" value="$(arg ns_prefix)_8" />
-  </include>
+    <arg name="pretrain_mode" value="$(arg pretrain_mode)"/>
+    <arg name="local_planner" value="$(arg local_planner)"/>
+</include>
   <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training_waypoint.launch" if="$(eval num_envs>=9)">
     <arg name="ns" value="$(arg ns_prefix)_9" />
-  </include>
+    <arg name="pretrain_mode" value="$(arg pretrain_mode)"/>
+    <arg name="local_planner" value="$(arg local_planner)"/>
+</include>
   <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training_waypoint.launch" if="$(eval num_envs>=10)">
     <arg name="ns" value="$(arg ns_prefix)_10" />
-  </include>
+    <arg name="pretrain_mode" value="$(arg pretrain_mode)"/>
+    <arg name="local_planner" value="$(arg local_planner)"/>
+</include>
   <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training_waypoint.launch" if="$(eval num_envs>=11)">
     <arg name="ns" value="$(arg ns_prefix)_11" />
-  </include>
+    <arg name="pretrain_mode" value="$(arg pretrain_mode)"/>
+    <arg name="local_planner" value="$(arg local_planner)"/>
+</include>
   <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training_waypoint.launch" if="$(eval num_envs>=12)">
     <arg name="ns" value="$(arg ns_prefix)_12" />
-  </include>
+    <arg name="pretrain_mode" value="$(arg pretrain_mode)"/>
+    <arg name="local_planner" value="$(arg local_planner)"/>
+</include>
   <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training_waypoint.launch" if="$(eval num_envs>=13)">
     <arg name="ns" value="$(arg ns_prefix)_13" />
-  </include>
+    <arg name="pretrain_mode" value="$(arg pretrain_mode)"/>
+    <arg name="local_planner" value="$(arg local_planner)"/>
+</include>
   <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training_waypoint.launch" if="$(eval num_envs>=14)">
     <arg name="ns" value="$(arg ns_prefix)_14" />
-  </include>
+    <arg name="pretrain_mode" value="$(arg pretrain_mode)"/>
+    <arg name="local_planner" value="$(arg local_planner)"/>
+</include>
   <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training_waypoint.launch" if="$(eval num_envs>=15)">
     <arg name="ns" value="$(arg ns_prefix)_15" />
-  </include>
+    <arg name="pretrain_mode" value="$(arg pretrain_mode)"/>
+    <arg name="local_planner" value="$(arg local_planner)"/>
+</include>
   <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training_waypoint.launch" if="$(eval num_envs>=16)">
     <arg name="ns" value="$(arg ns_prefix)_16" />
-  </include>
+    <arg name="pretrain_mode" value="$(arg pretrain_mode)"/>
+    <arg name="local_planner" value="$(arg local_planner)"/>
+</include>
   <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training_waypoint.launch" if="$(eval num_envs>=17)">
     <arg name="ns" value="$(arg ns_prefix)_17" />
-  </include>
+    <arg name="pretrain_mode" value="$(arg pretrain_mode)"/>
+    <arg name="local_planner" value="$(arg local_planner)"/>
+</include>
   <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training_waypoint.launch" if="$(eval num_envs>=18)">
     <arg name="ns" value="$(arg ns_prefix)_18" />
-  </include>
+    <arg name="pretrain_mode" value="$(arg pretrain_mode)"/>
+    <arg name="local_planner" value="$(arg local_planner)"/>
+</include>
   <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training_waypoint.launch" if="$(eval num_envs>=19)">
     <arg name="ns" value="$(arg ns_prefix)_19" />
-  </include>
+    <arg name="pretrain_mode" value="$(arg pretrain_mode)"/>
+    <arg name="local_planner" value="$(arg local_planner)"/>
+</include>
   <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training_waypoint.launch" if="$(eval num_envs>=20)">
     <arg name="ns" value="$(arg ns_prefix)_20" />
-  </include>
+    <arg name="pretrain_mode" value="$(arg pretrain_mode)"/>
+    <arg name="local_planner" value="$(arg local_planner)"/>
+</include>
   <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training_waypoint.launch" if="$(eval num_envs>=21)">
     <arg name="ns" value="$(arg ns_prefix)_21" />
-  </include>
+    <arg name="pretrain_mode" value="$(arg pretrain_mode)"/>
+    <arg name="local_planner" value="$(arg local_planner)"/>
+</include>
   <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training_waypoint.launch" if="$(eval num_envs>=22)">
     <arg name="ns" value="$(arg ns_prefix)_22" />
-  </include>
+    <arg name="pretrain_mode" value="$(arg pretrain_mode)"/>
+    <arg name="local_planner" value="$(arg local_planner)"/>
+</include>
   <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training_waypoint.launch" if="$(eval num_envs>=23)">
     <arg name="ns" value="$(arg ns_prefix)_23" />
-  </include>
+    <arg name="pretrain_mode" value="$(arg pretrain_mode)"/>
+    <arg name="local_planner" value="$(arg local_planner)"/>
+</include>
   <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training_waypoint.launch" if="$(eval num_envs>=24)">
     <arg name="ns" value="$(arg ns_prefix)_24" />
-  </include>
+    <arg name="pretrain_mode" value="$(arg pretrain_mode)"/>
+    <arg name="local_planner" value="$(arg local_planner)"/>
+</include>
   <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training_waypoint.launch" if="$(eval num_envs>=25)">
     <arg name="ns" value="$(arg ns_prefix)_25" />
-  </include>
+    <arg name="pretrain_mode" value="$(arg pretrain_mode)"/>
+    <arg name="local_planner" value="$(arg local_planner)"/>
+</include>
   <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training_waypoint.launch" if="$(eval num_envs>=26)">
     <arg name="ns" value="$(arg ns_prefix)_26" />
-  </include>
+    <arg name="pretrain_mode" value="$(arg pretrain_mode)"/>
+    <arg name="local_planner" value="$(arg local_planner)"/>
+</include>
   <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training_waypoint.launch" if="$(eval num_envs>=27)">
     <arg name="ns" value="$(arg ns_prefix)_27" />
-  </include>
+    <arg name="pretrain_mode" value="$(arg pretrain_mode)"/>
+    <arg name="local_planner" value="$(arg local_planner)"/>
+</include>
   <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training_waypoint.launch" if="$(eval num_envs>=28)">
     <arg name="ns" value="$(arg ns_prefix)_28" />
-  </include>
+    <arg name="pretrain_mode" value="$(arg pretrain_mode)"/>
+    <arg name="local_planner" value="$(arg local_planner)"/>
+</include>
   <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training_waypoint.launch" if="$(eval num_envs>=29)">
     <arg name="ns" value="$(arg ns_prefix)_29" />
-  </include>
+    <arg name="pretrain_mode" value="$(arg pretrain_mode)"/>
+    <arg name="local_planner" value="$(arg local_planner)"/>
+</include>
   <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training_waypoint.launch" if="$(eval num_envs>=30)">
     <arg name="ns" value="$(arg ns_prefix)_30" />
-  </include>
+    <arg name="pretrain_mode" value="$(arg pretrain_mode)"/>
+    <arg name="local_planner" value="$(arg local_planner)"/>
+</include>
   <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training_waypoint.launch" if="$(eval num_envs>=31)">
     <arg name="ns" value="$(arg ns_prefix)_31" />
-  </include>
+    <arg name="pretrain_mode" value="$(arg pretrain_mode)"/>
+    <arg name="local_planner" value="$(arg local_planner)"/>
+</include>
   <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training_waypoint.launch" if="$(eval num_envs>=32)">
     <arg name="ns" value="$(arg ns_prefix)_32" />
-  </include>
+    <arg name="pretrain_mode" value="$(arg pretrain_mode)"/>
+    <arg name="local_planner" value="$(arg local_planner)"/>
+</include>
 </launch>

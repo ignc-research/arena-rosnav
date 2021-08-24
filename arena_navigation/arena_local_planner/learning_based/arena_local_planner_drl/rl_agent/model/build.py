@@ -7,7 +7,7 @@ MODEL_REGISTRY = Registry('reinforcement learning model registry')
 
 
 
-def build_model(cfg:CfgNode,env,tensorboard_log:str,debug:bool = False):
+def build_model(cfg:CfgNode,env,tensorboard_log:str = '',debug:bool = False):
     # policy name is insignificant, according to the implementation of
     # MLpPolicy and CnnPolicy, the only difference between them is 
     # the default feature extractor, since we use our customized one

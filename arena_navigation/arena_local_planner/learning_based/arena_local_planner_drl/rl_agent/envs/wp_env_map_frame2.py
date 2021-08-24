@@ -55,7 +55,8 @@ class WPEnvMapFrame2(gym.Env):
         is_action_space_discrete: bool,
         step_timeout: float,
         max_steps_per_episode,
-        stage_dynamic_obstacle
+        stage_dynamic_obstacle,
+        is_pretrain_mode_on:bool = False,
     ):
         """Default env
         Flatland yaml node check the entries in the yaml file, therefore other robot related parameters cound only be saved in an other file.
@@ -71,6 +72,7 @@ class WPEnvMapFrame2(gym.Env):
         # Define action and observation space
         # They must be gym.spaces objects
         self.ns = ns
+        self._is_pretrain_mode_on = is_pretrain_mode_on
         try:
             # given every environment enough time to initialize, if we dont put sleep,
             # the training script may crash.
@@ -78,10 +80,10 @@ class WPEnvMapFrame2(gym.Env):
             self._ns_int = ns_int
             time.sleep(ns_int * 2)
         except Exception:
-            rospy.logwarn(
-                f"Can't not determinate the number of the environment, training script may crash!"
-            )
-            pass
+            if not is_pretrain_mode_on:
+                rospy.logwarn(
+                    f"Can't not determinate the number of the environment, training script may crash!"
+                )
 
         # process specific namespace in ros system
         self.ns_prefix = "" if (ns == "" or ns is None) else "/" + ns + "/"
@@ -95,7 +97,7 @@ class WPEnvMapFrame2(gym.Env):
 
         if callable(task):
             task = task()
-        self.task = task
+        self.task:'ABSTask' = task
 
         if self._is_train_mode:
             # TODO change it back to info
@@ -126,7 +128,8 @@ class WPEnvMapFrame2(gym.Env):
             stage_dynamic_obstacle,
             0.3, # hardcoded
             self._robot_radius,
-            10
+            10,
+            self._is_pretrain_mode_on
         )
         self.observation_space = self.observation_collector.get_observation_space()
         self.reward_calculator = build_reward_calculator(
@@ -141,6 +144,9 @@ class WPEnvMapFrame2(gym.Env):
         self._step_timeout = step_timeout
         self._curr_steps_count = 0
         self._max_steps_per_episode = max_steps_per_episode
+        if self._is_pretrain_mode_on:
+            self._last_dist_subgoal_goal_squre = None
+            self._pretrain_early_stop_curr_episode = False
 
         self.agent_action_pub = rospy.Publisher(
             f"{self.ns_prefix}waypoint", PoseStamped, queue_size=1, tcp_nodelay=True
@@ -149,7 +155,7 @@ class WPEnvMapFrame2(gym.Env):
     
 
     @classmethod
-    def from_config(cls, cfg: CfgNode, task, ns, train_mode, debug):
+    def from_config(cls, cfg: CfgNode, task, ns, train_mode, debug,**kwargs):
 
         # TODO The code here is very dirty, later on we will put reward related
         # stuffes in other places
@@ -164,6 +170,10 @@ class WPEnvMapFrame2(gym.Env):
         )
         max_steps_per_episode = cfg.TRAINING.MAX_STEPS_PER_EPISODE
         stage_dynamic_obstacle= cfg.EVAL.CURRICULUM.STAGE_DYNAMIC_OBSTACLE
+        if 'is_pretrain_mode_on' in kwargs:
+            is_pretrain_mode_on = kwargs['is_pretrain_mode_on']
+        else:
+            is_pretrain_mode_on = False
 
         return dict(
             ns=ns,
@@ -178,7 +188,8 @@ class WPEnvMapFrame2(gym.Env):
             is_action_space_discrete=is_action_space_discrete,
             step_timeout=step_timeout,
             max_steps_per_episode=max_steps_per_episode,
-            stage_dynamic_obstacle = stage_dynamic_obstacle
+            stage_dynamic_obstacle = stage_dynamic_obstacle,
+            is_pretrain_mode_on = is_pretrain_mode_on
         )
 
     def setup_by_configuration(
@@ -255,9 +266,11 @@ class WPEnvMapFrame2(gym.Env):
                 linear_range = setting_data["waypoint_generator"]["continuous_actions"][
                     "linear_range"
                 ]
+                linear_range = [eval(i) if isinstance(i,str) else i for i in linear_range]
                 angular_range = setting_data["waypoint_generator"][
                     "continuous_actions"
                 ]["angular_range"]
+                angular_range = [eval(i) if isinstance(i,str) else i for i in angular_range]
                 self.action_space = spaces.Box(
                     low=np.array([linear_range[0], angular_range[0]]),
                     high=np.array([linear_range[1], angular_range[1]]),
@@ -278,8 +291,8 @@ class WPEnvMapFrame2(gym.Env):
         # DEBUG
         # print(f"action: {action}")
         robot_pose2d = self.observation_collector.robot_pose2d
-        subgoal = self.observation_collector._subgoal
-        assert robot_pose2d is not None and subgoal is not None 
+        ref_pos = self.observation_collector._ref_pos
+        assert robot_pose2d is not None and ref_pos is not None 
         robot_x, robot_y = robot_pose2d.x,robot_pose2d.y
         if self._is_action_space_discrete:
             x = self._discrete_acitons[int(action)][0]
@@ -290,12 +303,12 @@ class WPEnvMapFrame2(gym.Env):
         self._waypoint_x = robot_x+x
         self._waypoint_y = robot_y+y
         # check the new waypoint close to the goal or not
-        if (self._waypoint_x - subgoal.x) ** 2 + (
-            self._waypoint_y - subgoal.y
+        if (self._waypoint_x - ref_pos.x) ** 2 + (
+            self._waypoint_y - ref_pos.y
         ) ** 2 < self._goal_radius ** 2:
             self.is_waypoint_set_to_global_goal = True
-            self._waypoint_x = subgoal.x
-            self._waypoint_y = subgoal.y
+            self._waypoint_x = ref_pos.x
+            self._waypoint_y = ref_pos.y
 
         # rospy.loginfo(f"sub goal pos: [x,y] = {curr_sub_goal.x} {curr_sub_goal.y} ")
         # rospy.loginfo(f"waypoint pos: [x,y] = {self._waypoint_x} {self._waypoint_y}")
@@ -321,6 +334,24 @@ class WPEnvMapFrame2(gym.Env):
         action_msg.pose.orientation.w = 1
         action_msg.header.frame_id = "map"
         self.agent_action_pub.publish(action_msg)
+    
+    def _pretrain_mode_move_robot_to_sub_goal(self,min_dist_subgoal_goal=0.5):
+
+        global_goal = self.goal_pos
+        sub_goal = self.observation_collector._subgoal
+        assert global_goal is not None
+        assert sub_goal is not None
+        dist_squre =  (sub_goal.x - global_goal.x)**2 + (sub_goal.y - global_goal.y)**2
+        if self._last_dist_subgoal_goal_squre is not None and abs(dist_squre-self._last_dist_subgoal_goal_squre)<0.1:
+            self._pretrain_early_stop_curr_episode = True
+        self._last_dist_subgoal_goal_squre = dist_squre
+        if dist_squre<min_dist_subgoal_goal**2:
+            sub_goal = global_goal
+            self.is_waypoint_set_to_global_goal = True
+        robot_manager = self.task.robot_manager
+        robot_manager.move_robot(sub_goal)
+        self._waypoint_x = sub_goal.x
+        self._waypoint_y = sub_goal.y
 
     def step(self, action):
         """
@@ -328,22 +359,29 @@ class WPEnvMapFrame2(gym.Env):
                         1   -   collision with obstacle
                         2   -   goal reached
         """
-        self._set_and_pub_waypoint(action)
+        if not self._is_pretrain_mode_on:
+            self._set_and_pub_waypoint(action)
+        else:
+            # waypoint is also set to subgoal
+            self._pretrain_mode_move_robot_to_sub_goal()
         # set waypoint on the observation collector and it will check whether the
         # robot already reach it.
         self.observation_collector.set_waypoint(self._waypoint_x, self._waypoint_y)
-        if self._is_train_mode:
+        if self._is_pretrain_mode_on or self._is_train_mode:
             # run the simulation and check the event and record important event
             self.observation_collector.wait_for_step_end(timeout=self._step_timeout)
         # prepare the input of the NN
         else:
             # it supposed to see new waypoint arrival there.
             self.observation_collector.wait_for_new_event()
-        merged_obs = self.observation_collector._observation
+
+        merged_obs = self.observation_collector.get_observation()
         info = {"event": None,"done":None,"is_success":None}
+        if self._is_pretrain_mode_on:
+            info['expert_action'] = [self._waypoint_x, self._waypoint_y]
         # if the waypoint is set to the global goal,
         # the predicted action will do nothing, so we need to set the reward to 0
-        if self.is_waypoint_set_to_global_goal:
+        if self.is_waypoint_set_to_global_goal or self._is_pretrain_mode_on and self._pretrain_early_stop_curr_episode:
             reward = self.reward_calculator.get_reward_goal_reached()
             info["event"] = "GlobalGoalReached"
             done = True
@@ -387,14 +425,20 @@ class WPEnvMapFrame2(gym.Env):
     def reset(self):
         self._curr_steps_count = 0
         self.reward_calculator.reset_on_episode_start()
-        self.observation_collector.clear_on_episode_start()
+        
         if self._is_train_mode:
-            remaining_try_times = 5
+            if self._is_pretrain_mode_on:
+                self._last_dist_subgoal_goal_squre = None
+                self._pretrain_early_stop_curr_episode = False
+                remaining_try_times = 20
+            else:
+                remaining_try_times = 5
         else:
             remaining_try_times = 1
 
         while remaining_try_times >= 0:
             remaining_try_times -= 1
+            self.observation_collector.clear_on_episode_start()
             self.is_waypoint_set_to_global_goal = False
             # Take care reset will call step world service.
             reset_info = self.task.reset(
@@ -402,15 +446,19 @@ class WPEnvMapFrame2(gym.Env):
             )
             robot_start_pos = reset_info["robot_start_pos"]
             robot_goal_pos = reset_info["robot_goal_pos"]
+            # plan manager is not stable, the publication of the goal is sometimes missing 
+            self.goal_pos = robot_goal_pos
             # set the waypoint to the start position of the robot so that the robot will be freezed as we call step_world for updating the laser and other info from sensors
             self._pub_robot_pos_as_waypoint(robot_start_pos)
+
             # if succeed
             if self.observation_collector.reset():
                 break
-            print(
-                f"{self.ns} reset remaining try times {remaining_try_times},curr robot: {[robot_start_pos.x,robot_start_pos.y]} goal: {[robot_goal_pos.x,robot_goal_pos.y]}"
-            )
-        merged_obs = self.observation_collector._observation 
+            if remaining_try_times<2:
+                print(
+                    f"{self.ns} reset remaining try times {remaining_try_times},curr robot: {[robot_start_pos.x,robot_start_pos.y]} goal: {[robot_goal_pos.x,robot_goal_pos.y]}"
+                )
+        merged_obs = self.observation_collector.get_observation()
         # DEBUG
         rospy.loginfo("wp_env reset done")
         return merged_obs

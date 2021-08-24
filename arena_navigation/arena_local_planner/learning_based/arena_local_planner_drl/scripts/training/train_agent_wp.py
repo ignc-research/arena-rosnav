@@ -33,6 +33,11 @@ from gym.utils import colorize
 def get_default_arg_parser():
     parser = ArgumentParser()
     parser.add_argument(
+        '--load_pretrain_model',
+        help="load pretrained policy and Vecenv",
+        action="store_true"
+    )
+    parser.add_argument(
         '--conf_file',
         help="The path of the config file. In training mode this is optional. but in deployment mode this is mandatory",
         type=str)
@@ -173,16 +178,28 @@ def make_envs(cfg, args: argparse.Namespace, namespaces: List[str]):
 
             eval_env = VecNormalize(eval_env, training=False,
                                     norm_obs=True, norm_reward=False, clip_reward=15)
+
+            if args.load_pretrain_model:
+                import pickle
+                print("Loading pretrained model for training")
+                curr_dir_path = os.path.abspath(os.path.dirname(__file__))
+                vec_normalize_obs_rms_file = os.path.join(curr_dir_path,'pretraining_data','vecnorm_obs_rms.pkl')
+                with open(vec_normalize_obs_rms_file,'rb') as f:
+                    obs_rms = pickle.load(f)
+                    train_env.obs_rms = copy.deepcopy(obs_rms)
+                    eval_env.obs_rms = obs_rms
+
         else:
             dir_path  = os.path.split(args.conf_file)[0]
 
             if args.load_best_model_for_deploy:
+                # TODO is the filename correct?
                 vec_normalize_file = os.path.join(
-                    dir_path, 'vec_normalize.pkl')
+                    dir_path, 'vec_norm.pkl')
             else:
                 vec_normalize_file = os.path.join(
-                    dir_path, 'final_vec_normalize.pkl') 
-        
+                    dir_path, 'final_vec_norm.pkl') 
+            print("Loading saved model for evaluation")
             assert os.path.isfile(
                 vec_normalize_file), f"{vec_normalize_file} does't exist"
             eval_env = VecNormalize.load(vec_normalize_file, eval_env)
@@ -253,6 +270,16 @@ def deploy_run(model, env):
     except StopReset:
         print("ALL scenrios haved be evaluated, program exit!")
 
+def load_pretrain_policy(cfg,model,pretrain_dirpath):  
+    pretrained_policy_file_name = "pretrain_policy.pkl"
+    pretrained_policy_file_path = os.path.join(pretrain_dirpath, pretrained_policy_file_name)
+    import pickle
+    with open(pretrain_dirpath,'rb') as f:
+        pretrained_policy = pickle.load(f)
+    model.policy = pretrained_policy
+    return model
+
+
 
 def main():
     parser = get_default_arg_parser()
@@ -260,6 +287,7 @@ def main():
     cfg = setup_config(args)
     namespaces = get_namespaces(args)
     training_env, eval_env = make_envs(cfg, args, namespaces)
+
 
     if not args.deploy:
         try:
@@ -275,7 +303,7 @@ def main():
             model.save(cfg.OUTPUT_DIR+"/final_model.zip")
             print(f"Successfully saved the model to {cfg.OUTPUT_DIR+'/final_model.zip'}")
             if cfg.INPUT.NORM:
-                training_env.save(cfg.OUTPUT_DIR+"/final_vec_normalize.pkl")
+                training_env.save(cfg.OUTPUT_DIR+"/final_vec_norm.pkl")
                 print(f"Successfully saved the normalized environment to {cfg.OUTPUT_DIR+'/final_model.pkl'}")
     else:
         model = load_model(cfg, args, eval_env)

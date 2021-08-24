@@ -1,0 +1,6 @@
+<launch>
+
+<node pkg="arena_local_planner_drl" type="local_planner_deploy.py" name="local_planner_deploy" output="screen">
+</node>
+
+</launch>

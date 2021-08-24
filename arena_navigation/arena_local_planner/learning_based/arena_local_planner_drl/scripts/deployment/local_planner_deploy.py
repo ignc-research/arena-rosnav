@@ -56,7 +56,10 @@ if __name__ == "__main__":
     rospy.init_node("local_planner",anonymous=True)
     ns = rospy.get_namespace()
     ns = ns.strip('/')
-    ns_prefix = '/'+ns+'/'
+    if len(ns):
+        ns_prefix = '/'+ns+'/'
+    else:
+        ns_prefix = '/'
     observation_collector = ObservationCollectorAllInOne(ns=ns,num_lidar_beams=laser_num_beams,lidar_range=laser_max_range,subgoal_topic_name="waypoint",train_mode=False,no_wait_for_next_circle=True)
     agent_action_pub = rospy.Publisher(
                 f"{ns_prefix}cmd_vel", Twist, queue_size=1

@@ -62,7 +62,7 @@ _C.WAYPOINT_GENERATOR.ACTIONS_DEF = os.path.join(
 _C.WAYPOINT_GENERATOR.ROBOT_WAYPOINT_MIN_DIST = 0.5
 # make sure this value bigger than the linear value defined in the configs/waypoint_generator_actions*.yaml
 _C.WAYPOINT_GENERATOR.GOAL_RADIUS = 0.75
-_C.WAYPOINT_GENERATOR.IS_ACTION_SPACE_DISCRETE = True
+_C.WAYPOINT_GENERATOR.IS_ACTION_SPACE_DISCRETE = False
 # unit m/s should be set with the consideration of the lookahead distance defined in the launch file and robot's veloctiy
 # e.g. lookahead_distance = 2m robot_velocity = 0.3m/s   average_reach_time = 2/0.3 == 6.6 s 
 _C.WAYPOINT_GENERATOR.STEP_TIMEOUT = 25

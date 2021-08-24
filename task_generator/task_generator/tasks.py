@@ -2,7 +2,7 @@ import os
 from abc import ABC, abstractmethod
 from threading import Condition, Lock
 from filelock import FileLock
-from typing import List
+from typing import List, Optional
 from rl_agent.config.config import CfgNode, configurable
 import rospy
 import rospkg
@@ -141,7 +141,12 @@ class StagedRandomTask(RandomTask):
         self.ns_prefix = "/" if ns == '' else "/"+ns+"/"
         import re
         pattern = re.compile('\d+')
-        self.ns_idx = int(pattern.search(ns).group(0))
+        tmp = pattern.search(ns)
+        if tmp is not None:
+            ns_idx = pattern.search(ns).group(0)
+        else:
+            ns_idx = 1
+        self.ns_idx = ns_idx
 
         assert len(stage_static) == len(stage_dynamic) and init_stage_idx>=0 and init_stage_idx< len(stage_static)
         self._stage_dynamic = stage_dynamic
@@ -184,7 +189,7 @@ class StagedRandomTask(RandomTask):
             rospy.loginfo(f"ENV {self.ns} tried to trigger previous stage but already reached first one")
 
     def _set_stage(self):
-        if self.ns_idx == 1:
+        if self.ns_idx == 1 :
             rospy.set_param("/curr_stage",self._curr_stage)
             if self._curr_stage == len(self._stage_dynamic)-1:
                 rospy.set_param("/last_stage_reached",True)

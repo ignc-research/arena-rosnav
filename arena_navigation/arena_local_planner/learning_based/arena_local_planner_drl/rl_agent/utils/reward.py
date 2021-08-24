@@ -714,6 +714,6 @@ class RewardCalculatorWP2_RULE00():
             if not self.no_timeout_reward  and self.oc.important_event == ObservationCollectorWP2.Event.TIMEOUT:
                 self.times_timeout +=1
                 self.curr_reward += self.reward_on_timeout_cost
-            elif not self.no_progress_reward and self.oc.last_dist_subgoal_robot is not None:
-                self.curr_reward += self.reward_on_progress_base*(self.oc.last_dist_subgoal_robot-self.oc.dist_subgoal_robot)
+            elif not self.no_progress_reward and self.oc.last_dist_ref_pos_robot is not None:
+                self.curr_reward += self.reward_on_progress_base*(self.oc.last_dist_ref_pos_robot-self.oc.dist_ref_pos_robot)
         return self.curr_reward       
