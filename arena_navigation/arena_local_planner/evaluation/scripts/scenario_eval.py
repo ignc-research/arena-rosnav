@@ -2,11 +2,10 @@
 import sys
 import copy
 import pprint as pp
-import bagpy
 from bagpy import bagreader
 import pandas as pd
 import json
-import rospkg
+# import rospkg
 import yaml
 # for plots
 import matplotlib
@@ -20,8 +19,6 @@ import matplotlib.cm as cm
 # calc
 import numpy as np
 import math
-import seaborn as sb
-import rospy 
 from visualization_msgs.msg import Marker, MarkerArray
 import pathlib
 import os
@@ -824,8 +821,17 @@ def read_scn_file(map, ob):
     # gets start / goal of each scenario as global param
     global start, goal, plt_cfg
     # find json path
-    rospack = rospkg.RosPack()
-    json_path = rospack.get_path('simulator_setup')+'/scenarios/eval/'
+    # rospack = rospkg.RosPack()
+    # json_path = rospack.get_path('simulator_setup')+'/scenarios/eval/'
+
+    # remmeber curr dir
+    remember_path = os.path.abspath(os.curdir)
+    # change to map dir
+    os.chdir("../../../../simulator_setup/scenarios/eval/")
+    json_path = os.path.abspath(os.curdir)
+    # move back to eval path
+    os.chdir(remember_path)
+
 
     for file in os.listdir(json_path):
         if file.endswith(".json") and map in file and ob in file:
