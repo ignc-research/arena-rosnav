@@ -7,10 +7,13 @@ Panels:
         - /robot1
         - /robot1/my_robot1
         - /Map1
+        - /Map1/static_layer1
         - /Map1/Map1
+        - /Map1/Global_costmap1
         - /Local plan1/teb1
         - /Sensors1
         - /Sensors1/LaserScan1
+        - /obstacles1
         - /obstacles1/static1/01
         - /obstacles1/static1/11
         - /obstacles1/static1/21
@@ -19,6 +22,7 @@ Panels:
         - /obstacles1/static1/51
         - /obstacles1/static1/61
         - /obstacles1/static1/71
+        - /obstacles1/dynamic1
         - /obstacles1/dynamic1/01
         - /obstacles1/dynamic1/11
         - /obstacles1/dynamic1/21
@@ -34,6 +38,9 @@ Panels:
         - /obstacles1/dynamic1/121
         - /obstacles1/dynamic1/131
         - /obstacles1/dynamic1/141
+        - /obstacles1/dynamic1/151
+        - /obstacles1/dynamic1/161
+        - /obstacles1/dynamic1/171
         - /Plan Manager1/subgoal1
         - /Goal Pose1
         - /Marker2
@@ -185,32 +192,32 @@ Visualization Manager:
       Displays:
         - Class: rviz/MarkerArray
           Enabled: true
-          Marker Topic: /flatland_server/debug/layer/static
+          Marker Topic: /sim_1/flatland_server/debug/layer/static
           Name: static_layer
           Namespaces:
-            {}
+            "": true
           Queue Size: 100
           Value: true
         - Alpha: 0.699999988079071
           Class: rviz/Map
           Color Scheme: map
           Draw Behind: false
-          Enabled: true
+          Enabled: false
           Name: Map
           Topic: /sim_1/map
           Unreliable: false
           Use Timestamp: false
-          Value: true
+          Value: false
         - Alpha: 0.699999988079071
           Class: rviz/Map
           Color Scheme: map
           Draw Behind: false
-          Enabled: false
+          Enabled: true
           Name: Global_costmap
-          Topic: /move_base/global_costmap/costmap
+          Topic: /sim_1/global_planner/global_costmap/costmap
           Unreliable: false
           Use Timestamp: false
-          Value: false
+          Value: true
         - Alpha: 0.699999988079071
           Class: rviz/Map
           Color Scheme: costmap
@@ -689,7 +696,7 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
-              Marker Topic: /sim_2/flatland_server/debug/model/obstacle__random_dynamic_06
+              Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_09
               Name: 6
               Namespaces:
                 "": true
@@ -729,7 +736,7 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
-              Marker Topic: /eval_sim/flatland_server/debug/model/obstacle__random_dynamic_11
+              Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_11
               Name: 11
               Namespaces:
                 "": true
@@ -761,26 +768,26 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
-              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_05
+              Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_15
               Name: 15
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
-              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_16
+              Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_16
               Name: 16
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
-              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_17
+              Marker Topic: /eval_sim/flatland_server/debug/model/obstacle__random_dynamic_17
               Name: 17
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -1317,7 +1324,7 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 21.49274444580078
+      Scale: 30.195758819580078
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
       X: 11.092154502868652
@@ -1339,5 +1346,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1606
-  X: 2175
-  Y: 318
+  X: 2267
+  Y: 82
