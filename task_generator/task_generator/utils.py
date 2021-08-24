@@ -14,7 +14,7 @@ def generate_freespace_indices(map_: OccupancyGrid):
     width_in_cell, height_in_cell = map_.info.width, map_.info.height
     map_2d = np.reshape(map_.data, (height_in_cell, width_in_cell))
     inflation_layer = np.zeros(shape=map_2d.shape)
-    ir = 6  # inflation radius
+    ir = 7  # inflation radius
     for (x, y), element in np.ndenumerate(map_2d):
         if element > 0:
             inflation_layer[x-ir:x+ir, y-ir:y+ir] = 1
