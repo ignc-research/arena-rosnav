@@ -9,7 +9,7 @@ from multiprocessing import Process
 import rosnode
 from rl_agent.envs.all_in_one_flatland_gym_env import AllInOneEnv
 from rl_agent.envs.all_in_one_models.drl.drl_agent import setup_and_start_drl_server
-from scripts.custom_policy import *
+from scripts.all_in_one_policies import *
 from stable_baselines3 import PPO
 from stable_baselines3.common.callbacks import EvalCallback
 from stable_baselines3.common.monitor import Monitor
@@ -112,7 +112,7 @@ def get_paths(agent_version: str, args, all_in_one_config: str = "all_in_one_def
         'drl_agents':
             os.path.join(
                 dir, 'agents'),
-        'map_parameters': os.path.join(dir, 'configs', 'all_in_one_hyperparameters', 'map_parameters', "mixed.json")
+        'map_parameters': os.path.join(dir, 'configs', 'all_in_one_hyperparameters', 'map_parameters', "indoor.json")
     }
 
     if not os.path.exists(paths['model']):
@@ -218,55 +218,10 @@ if __name__ == '__main__':
         model = PPO.load(
             os.path.join(paths['model'], "best_model"), env)
         update_hyperparam_model(model, paths, params, args.n_envs)
-    elif args.custom_mlp:
-        # custom mlp flag
-        model = PPO(
-            "MlpPolicy", env,
-            policy_kwargs=dict(
-                net_arch=args.net_arch, activation_fn=get_act_fn(args.act_fn)),
-            gamma=params['gamma'], n_steps=params['n_steps'],
-            ent_coef=params['ent_coef'], learning_rate=params['learning_rate'],
-            vf_coef=params['vf_coef'], max_grad_norm=params['max_grad_norm'],
-            gae_lambda=params['gae_lambda'], batch_size=params['m_batch_size'],
-            n_epochs=params['n_epochs'], clip_range=params['clip_range'],
-            tensorboard_log=paths['tb'], verbose=1
-        )
     elif args.agent is not None:
-        # predefined agent flag
-        if args.agent == "MLP_ARENA2D":
-            model = PPO(
-                MLP_ARENA2D_POLICY, env,
-                gamma=params['gamma'], n_steps=params['n_steps'],
-                ent_coef=params['ent_coef'], learning_rate=params['learning_rate'],
-                vf_coef=params['vf_coef'], max_grad_norm=params['max_grad_norm'],
-                gae_lambda=params['gae_lambda'], batch_size=params['m_batch_size'],
-                n_epochs=params['n_epochs'], clip_range=params['clip_range'],
-                tensorboard_log=paths['tb'], verbose=1
-            )
-
-        elif args.agent in ['AGENT_1', 'AGENT_2', 'AGENT_3', 'AGENT_4', 'AGENT_9', 'AGENT_10', 'AGENT_11', 'AGENT_12',
-                            'AGENT_17', 'AGENT_18']:
+        if args.agent in ['AGENT_1']:
             if args.agent == 'AGENT_1':
                 policy_kwargs = policy_kwargs_agent_1
-            elif args.agent == 'AGENT_2':
-                policy_kwargs = policy_kwargs_agent_2
-            elif args.agent == 'AGENT_3':
-                policy_kwargs = policy_kwargs_agent_3
-            elif args.agent == 'AGENT_4':
-                policy_kwargs = policy_kwargs_agent_4
-            elif args.agent == 'AGENT_9':
-                policy_kwargs = policy_kwargs_agent_9
-            elif args.agent == 'AGENT_10':
-                policy_kwargs = policy_kwargs_agent_10
-            elif args.agent == 'AGENT_11':
-                policy_kwargs = policy_kwargs_agent_11
-            elif args.agent == 'AGENT_12':
-                policy_kwargs = policy_kwargs_agent_12
-            elif args.agent == 'AGENT_17':
-                policy_kwargs = policy_kwargs_agent_17
-            elif args.agent == 'AGENT_18':
-                policy_kwargs = policy_kwargs_agent_18
-
             model = PPO(
                 "CnnPolicy", env,
                 policy_kwargs=policy_kwargs,
@@ -278,28 +233,9 @@ if __name__ == '__main__':
                 tensorboard_log=paths.get('tb'), verbose=1
             )
 
-        elif args.agent in ['AGENT_5', 'AGENT_6', 'AGENT_7', 'AGENT_8', 'AGENT_13', 'AGENT_14', 'AGENT_15', 'AGENT_16',
-                            'AGENT_19', 'AGENT_20']:
-            if args.agent == 'AGENT_5':
-                policy_kwargs = policy_kwargs_agent_5
-            elif args.agent == 'AGENT_6':
-                policy_kwargs = policy_kwargs_agent_6
-            elif args.agent == 'AGENT_7':
-                policy_kwargs = policy_kwargs_agent_7
-            elif args.agent == 'AGENT_8':
-                policy_kwargs = policy_kwargs_agent_8
-            elif args.agent == 'AGENT_13':
-                policy_kwargs = policy_kwargs_agent_13
-            elif args.agent == 'AGENT_14':
-                policy_kwargs = policy_kwargs_agent_14
-            elif args.agent == 'AGENT_15':
-                policy_kwargs = policy_kwargs_agent_15
-            elif args.agent == 'AGENT_16':
-                policy_kwargs = policy_kwargs_agent_16
-            elif args.agent == 'AGENT_19':
-                policy_kwargs = policy_kwargs_agent_19
-            elif args.agent == 'AGENT_20':
-                policy_kwargs = policy_kwargs_agent_19
+        elif args.agent in ['AGENT_11']:
+            if args.agent == 'AGENT_11':
+                policy_kwargs = policy_kwargs_agent_11
 
             model = PPO(
                 "MlpPolicy", env,
@@ -332,7 +268,7 @@ if __name__ == '__main__':
     print("Start training...")
 
     if args.n is None:
-        n_timesteps = 10000000
+        n_timesteps = 15000000
     else:
         n_timesteps = args.n
 
