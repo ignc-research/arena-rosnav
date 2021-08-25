@@ -91,3 +91,19 @@ docker exec -it arena-rosnav bash
 roslaunch arena_bringup start_arena_flatland.launch  train_mode:=true 	use_viz:=true  task_mode:=random
 ```
 9. open http://localhost:8080/vnc.html you will see the rviz window in browser
+
+# troubleshooting
+Error message:
+```c++ fatail error: Killed signal terminated program cc1plus
+...
+Invoking "make -j8 -l8" failes
+```
+Solution
+in Dockerfile change
+```
+catkin_make -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=/usr/bin/python3
+```
+to
+```
+catkin_make -j1 -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=/usr/bin/python3
+```
