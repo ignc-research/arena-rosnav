@@ -27,6 +27,7 @@ RUN apt-get -y update && apt-get install -y \
     python3.6 \
     python3.6-dev \
     libpython3.6-dev \
+    python3-scipy \
     python3-catkin-pkg-modules \
     python3-rospkg-modules \
     python3-empy \
@@ -42,6 +43,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y tzdata \
 && DEBIAN_FRONTEND=noninteractive apt-get install -y keyboard-configuration
 RUN apt-get install -y software-properties-common
 RUN apt-get install wget
+
 # 2. Prepare virtual environment
 RUN pip3 install --upgrade pip \
 && pip3 install virtualenv  virtualenvwrapper\
@@ -62,46 +64,33 @@ ENV WORKON_HOME=/root/.python_env \
 RUN . /usr/local/bin/virtualenvwrapper.sh \
 && mkvirtualenv --python=python3.6 rosnav \ 
 && workon rosnav \
+&& pip3 install --upgrade pip \
 && pip3 install --extra-index-url https://rospypi.github.io/simple/ rospy rosbag tf tf2_ros --ignore-installed \
 && pip3 install pyyaml catkin_pkg netifaces pathlib \
 && pip3 install filelock
 #&& pip3 --no-cache-dir install stable-baselines3
 
+
 # 4. Install Arena-Rosnav repo and compile
 RUN git clone https://github.com/ignc-research/arena-rosnav /root/catkin_ws/src/arena-rosnav
-RUN wget https://raw.githubusercontent.com/Ann-Rachel/arena-rosnav/docker_new/docker-compose.yml
-RUN cp docker-compose.yml /root/catkin_ws/src/arena-rosnav
-RUN mkdir /root/catkin_ws/src/arena-rosnav/docker/
-RUN wget https://raw.githubusercontent.com/Ann-Rachel/arena-rosnav/docker_new/docker/entrypoint_train.sh \
-&& wget https://raw.githubusercontent.com/Ann-Rachel/arena-rosnav/docker_new/docker/Dockerfile \
-&& wget https://raw.githubusercontent.com/Ann-Rachel/arena-rosnav/docker_new/docker/novnc.env \
-&& wget https://raw.githubusercontent.com/Ann-Rachel/arena-rosnav/docker_new/docker/py_train.sh \
-&& wget https://raw.githubusercontent.com/Ann-Rachel/arena-rosnav/docker_new/docker/ros.sh \
-&& wget https://raw.githubusercontent.com/Ann-Rachel/arena-rosnav/docker_new/docker/roslaunch.env \
-&& wget https://raw.githubusercontent.com/Ann-Rachel/arena-rosnav/docker_new/docker/train_params.csv 
-RUN cp entrypoint_train.sh /root/catkin_ws/src/arena-rosnav/docker \
-&& cp Dockerfile /root/catkin_ws/src/arena-rosnav/docker \
-&& cp novnc.env /root/catkin_ws/src/arena-rosnav/docker \
-&& cp py_train.sh /root/catkin_ws/src/arena-rosnav/docker \
-&& cp ros.sh /root/catkin_ws/src/arena-rosnav/docker \
-&& cp roslaunch.env /root/catkin_ws/src/arena-rosnav/docker \
-&& cp train_params.csv /root/catkin_ws/src/arena-rosnav/docker
 
 RUN . /usr/local/bin/virtualenvwrapper.sh \
 && . /opt/ros/melodic/setup.sh \
 && workon rosnav \
-&& pip install gym \
-&& pip install PyQt5 \
+&& pip3 install --upgrade pip \
+&& pip3 install gym \
+&& pip3 install PyQt5 \
+&& pip3 install scipy \
 && cd /root/catkin_ws/src/arena-rosnav \
 && git checkout local_planner_subgoalmode \
 && rosws update \
 && cd /root/catkin_ws/src/forks/stable-baselines3 \
 && git pull \
-&& pip install -e .   
+&& pip3 install -e .   
 
-#RUN apt-get -y update && apt-get install -y libvtk7.1-qt
 RUN . /opt/ros/melodic/setup.sh \
 && cd /root/catkin_ws \
+#&& catkin_make -j1 -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=/usr/bin/python3 \
 && catkin_make -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=/usr/bin/python3 \
 && echo $'source /root/catkin_ws/devel/setup.bash' >> /root/.bashrc
 
