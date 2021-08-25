@@ -76,7 +76,7 @@ class WPEnvMapFrame2(gym.Env):
         try:
             # given every environment enough time to initialize, if we dont put sleep,
             # the training script may crash.
-            ns_int = int(ns.split("_")[1])
+            ns_int = int(ns.split("_")[-1])
             self._ns_int = ns_int
             time.sleep(ns_int * 2)
         except Exception:
@@ -452,7 +452,11 @@ class WPEnvMapFrame2(gym.Env):
             self._pub_robot_pos_as_waypoint(robot_start_pos)
 
             # if succeed
-            if self.observation_collector.reset():
+            if self._is_pretrain_mode_on and remaining_try_times<5:
+                super_long_step = True
+            else:
+                super_long_step = False
+            if self.observation_collector.reset(super_long_step = super_long_step):
                 break
             if remaining_try_times<2:
                 print(

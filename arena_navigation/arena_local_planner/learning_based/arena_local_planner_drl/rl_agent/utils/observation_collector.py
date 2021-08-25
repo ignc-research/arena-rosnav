@@ -1140,7 +1140,7 @@ class ObservationCollectorWP2:
             # else it coule be reach the goal
         return self.important_event
 
-    def reset(self) -> bool:
+    def reset(self,super_long_step) -> bool:
         """reset the simulator and intermediate planner to get new subgoal by send some step world request         
 
         Returns:
@@ -1154,7 +1154,10 @@ class ObservationCollectorWP2:
         delta = 0.1
         # set this to a very high value , hope plan manager can do something
         if self.is_pretrain_mode_on:
-            request = StepWorldRequest(30 / self._robot_action_rate)
+            if super_long_step:
+                request = StepWorldRequest(100 / self._robot_action_rate)
+            else:
+                request = StepWorldRequest(30 / self._robot_action_rate) 
             try_times = 10
         else:
             request = StepWorldRequest(1 / self._robot_action_rate)
@@ -1173,7 +1176,7 @@ class ObservationCollectorWP2:
             res = False
             with self.data_lock:
                 if is_pretrain_mode_on:
-                    if self._subgoal or  self._msg_cache is None:    
+                    if self._subgoal is None or  self._msg_cache is None:    
                         res = True
                 else:
                     if self._msg_cache is None:

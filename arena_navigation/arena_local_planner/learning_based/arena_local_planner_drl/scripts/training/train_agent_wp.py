@@ -8,6 +8,7 @@ from typing import List
 from numpy.lib.utils import info
 import rospy
 import numpy as np
+import pickle
 
 from rl_agent.config import get_cfg, CfgNode
 from rl_agent.envs import build_env, build_env_wrapper  # SubprocVecEnv
@@ -33,9 +34,15 @@ from gym.utils import colorize
 def get_default_arg_parser():
     parser = ArgumentParser()
     parser.add_argument(
-        '--load_pretrain_model',
-        help="load pretrained policy and Vecenv",
-        action="store_true"
+        '--pretrained_policy',
+        '--pp',
+        help="Name to pretrained policy in the pretraining subfolder",
+        type=str,
+    ),
+    parser.add_argument(
+        '--rms',
+        help='Name to pretrained rms in the pretraining subfolder',
+        type=str,
     )
     parser.add_argument(
         '--conf_file',
@@ -71,6 +78,14 @@ def get_default_arg_parser():
                         default=None, nargs=argparse.REMAINDER)
     return parser
 
+def check_args(args):
+    if args.pretrained_policy is None:
+        assert args.rms is None
+    else:
+        assert args.rms is not None
+        
+    
+    
 
 def setup_config(args):
     # get the global default config and merge it with the optional config file and arguments
@@ -117,7 +132,7 @@ def get_namespaces(args):
     """
     # identical with the one in launch file
     if not args.deploy:
-        ns_prefix = "sim"
+        ns_prefix = "sim_lei"
         num_envs = rospy.get_param("num_envs")
         assert num_envs>1, "Make sure there are more that 2 simulation environments available since one of them will be used for evalutation"
        
@@ -127,8 +142,11 @@ def get_namespaces(args):
             idx_start,idx_end = args.env_range
             if idx_end == -1:
                 idx_end = num_envs
-            assert idx_start<idx_end and idx_end<=num_envs
-        print(colorize(f"Found {num_envs} ENV {ns_prefix}{idx_start} - {ns_prefix}{idx_end-1} will be used for training!",'green'))
+            assert idx_start<idx_end 
+            if idx_end-idx_start+1>=num_envs:
+                print(colorize(f"YOU request to use ENV {ns_prefix}_{idx_start} ~ {ns_prefix}{idx_end} for training and evaluation, but the number of the \
+                the environments registered on the server is only {num_envs}, make sure you know the exact reason, otherwise there are must be somewhere wrong",'yellow'))
+        print(colorize(f"Found {num_envs} ENV {ns_prefix}_{idx_start} ~ {ns_prefix}_{idx_end-1} will be used for training!",'green'))
         
         ns_list = [ns_prefix+'_'+str(i) for i in range(idx_start, idx_end+1)]
     else:
@@ -179,15 +197,18 @@ def make_envs(cfg, args: argparse.Namespace, namespaces: List[str]):
             eval_env = VecNormalize(eval_env, training=False,
                                     norm_obs=True, norm_reward=False, clip_reward=15)
 
-            if args.load_pretrain_model:
-                import pickle
+            if args.rms is not None:
+                rms_name = args.rms
+                if not rms_name.endswith('pkl'):
+                    rms_name+='.pkl'
                 print("Loading pretrained model for training")
                 curr_dir_path = os.path.abspath(os.path.dirname(__file__))
-                vec_normalize_obs_rms_file = os.path.join(curr_dir_path,'pretraining_data','vecnorm_obs_rms.pkl')
+                vec_normalize_obs_rms_file = os.path.join(curr_dir_path,'pretraining_data',rms_name)
                 with open(vec_normalize_obs_rms_file,'rb') as f:
                     obs_rms = pickle.load(f)
                     train_env.obs_rms = copy.deepcopy(obs_rms)
                     eval_env.obs_rms = obs_rms
+                    print("Loaded rms for the normlized environment for the training and evaluation environment")
 
         else:
             dir_path  = os.path.split(args.conf_file)[0]
@@ -285,6 +306,7 @@ def main():
     parser = get_default_arg_parser()
     args = parser.parse_args()
     cfg = setup_config(args)
+    check_args(args)
     namespaces = get_namespaces(args)
     training_env, eval_env = make_envs(cfg, args, namespaces)
 
@@ -295,6 +317,15 @@ def main():
                                 tensorboard_log=cfg.OUTPUT_DIR, debug=args.debug)
             eval_callback = build_eval_callback(
                 cfg, namespaces, eval_env=eval_env, train_env=training_env)
+            if args.pretrained_policy is not None:
+                pretrained_policy_name = args.pretrained_policy
+                if not pretrained_policy_name.endswith('.pkl'):
+                    pretrained_policy_name += '.pkl'
+                pretrained_policy_path = os.path.join(os.path.dirname(__file__),'pretraining_data',pretrained_policy_name)
+                with open(pretrained_policy_path,'rb') as f:
+                    pretrained_policy = pickle.load(f)
+                    model.policy = pretrained_policy
+                    print(f"Loaded pretrained policy {pretrained_policy_name} ")
             model.learn(
                 total_timesteps=cfg.TRAINING.N_TIMESTEPS, callback=eval_callback, reset_num_timesteps=True)
         except KeyboardInterrupt:

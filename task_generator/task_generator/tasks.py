@@ -32,12 +32,16 @@ class ABSTask(ABC):
 
     """
 
-    def __init__(self, obstacles_manager: ObstaclesManager, robot_manager: RobotManager):
+    def __init__(self, obstacles_manager: ObstaclesManager, robot_manager: RobotManager,ns_map:str=''):
         self.obstacles_manager = obstacles_manager
         self.robot_manager = robot_manager
         self._service_client_get_map = rospy.ServiceProxy('/static_map', GetMap)
         self._map_lock = Lock()
-        rospy.Subscriber('/map', OccupancyGrid, self._update_map)
+        if len(ns_map):
+            map_topic_name = '/'+ns_map+'/'
+        else:
+            map_topic_name = '/map'
+        rospy.Subscriber(map_topic_name, OccupancyGrid, self._update_map)
         # a mutex keep the map is not unchanged during reset task.
 
     @abstractmethod
@@ -56,8 +60,8 @@ class RandomTask(ABSTask):
     """ Evertime the start position and end position of the robot is reset.
     """
 
-    def __init__(self, obstacles_manager: ObstaclesManager, robot_manager: RobotManager):
-        super().__init__(obstacles_manager, robot_manager)
+    def __init__(self, obstacles_manager: ObstaclesManager, robot_manager: RobotManager,**kwargs):
+        super().__init__(obstacles_manager, robot_manager,**kwargs)
 
     def reset(self, **kwargs):
         """[summary]
@@ -136,9 +140,14 @@ class ManualTask(ABSTask):
 class StagedRandomTask(RandomTask):
     @configurable
     def __init__(self, ns: str, obstacles_manager: ObstaclesManager, robot_manager: RobotManager,stage_static:List[int], stage_dynamic:List[int],init_stage_idx:int=0):
-        super().__init__(obstacles_manager, robot_manager)
         self.ns = ns
         self.ns_prefix = "/" if ns == '' else "/"+ns+"/"
+        if ns == '':
+            ns_map  = ''
+        else:
+            idx_last_underscore =  ns.rfind('_')
+            ns_map = ns[:idx_last_underscore]
+        super().__init__(obstacles_manager, robot_manager,ns_map=ns_map)
         import re
         pattern = re.compile('\d+')
         tmp = pattern.search(ns)
@@ -160,7 +169,7 @@ class StagedRandomTask(RandomTask):
     
     @classmethod
     def from_config(cls, cfg:CfgNode,ns):
-        # TODO in future use cfg to build obstacles and robot's manager
+        # TODO in future use cfg to build obstacles and robot's manager 
         obstacles_manager, robot_manager = _get_obs_robot_manager(ns)
         init_stage_idx = cfg.EVAL.CURRICULUM.INIT_STAGE_IDX
         stage_static = cfg.EVAL.CURRICULUM.STAGE_STATIC_OBSTACLE
@@ -207,6 +216,7 @@ class StagedRandomTask(RandomTask):
              Spawning {static_obstacles} static and {dynamic_obstacles} dynamic obstacles!")
     def _remove_obstacles(self):
         self.obstacles_manager.remove_obstacles()
+
 @TASK_REGISTRY.register()
 class ScenerioTask(ABSTask):
     @configurable
@@ -442,7 +452,15 @@ def get_predefined_task(ns: str, mode="random", start_stage: int = 1, PATHS: dic
     return task
 
 def _get_obs_robot_manager(ns):
-    service_client_get_map = rospy.ServiceProxy('/static_map', GetMap)
+    if ns == '':
+        ns_map  = ''
+        ns_map_prefix = '/'
+    else:
+        idx_last_underscore =  ns.rfind('_')
+        ns_map = ns[:idx_last_underscore]
+        ns_map_prefix = '/'+ns_map+'/'
+
+    service_client_get_map = rospy.ServiceProxy(f'{ns_map_prefix}static_map', GetMap)
     map_response = service_client_get_map()
 
     # use rospkg to get the path where the model config yaml file stored

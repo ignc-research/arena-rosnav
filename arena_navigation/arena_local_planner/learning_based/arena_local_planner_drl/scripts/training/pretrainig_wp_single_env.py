@@ -12,6 +12,8 @@ import rospy
 import numpy as np
 import gym
 from tqdm import tqdm
+import pickle
+from typing import Optional
 
 from rl_agent.config import get_cfg, CfgNode
 from rl_agent.envs import build_env, build_env_wrapper  # SubprocVecEnv
@@ -47,13 +49,20 @@ from gym.utils import colorize
 def get_default_arg_parser():
     parser = ArgumentParser()
     parser.add_argument(
-        "--phase1", "-p1",help="phase 1 is to collect expert data", action="store_true"
+        "--phase1", "-p1", help="phase 1 is to collect expert data", action="store_true"
     )
     parser.add_argument(
         "--phase2",
         "-p2",
         help="phase 2 is to use collected data to initialize the network",
         action="store_true",
+    )
+    parser.add_argument(
+        "opt",
+        help="Overwrite the config loaded from the defaults and config file by providing a list of key and value pairs,\
+            In deployment model This feature is disabled.",
+        default=None,
+        nargs=argparse.REMAINDER,
     )
     return parser
 
@@ -63,6 +72,7 @@ def setup_config(args, num_dynamic_obstacles=0):
     cfg = get_cfg(is_cfg_for_waypoint=True)
     # don't wannt waste too much time on config setting, otherwise need to setup new config to
     # use random task
+    cfg.merge_from_list(args.opt)
     cfg.EVAL.CURRICULUM.INIT_STAGE_IDX = 0
     cfg.EVAL.CURRICULUM.STAGE_STATIC_OBSTACLE = (0,)
     cfg.EVAL.CURRICULUM.STAGE_DYNAMIC_OBSTACLE = (num_dynamic_obstacles,)
@@ -115,31 +125,41 @@ def collect_expert_data(
 def pretraining_network(
     cfg,
     args,
-    model:PPO,
+    model: PPO,
     env,
     pretraining_data_dirpath,
     expert_data_np_name,
     batch_size=64,
     epochs=100,
-    num_observation = None,
+    num_observation=None,
     scheduler_gamma=0.7,
     learning_rate=1e-2,
-    log_interval=100,
+    log_interval=1000,
     use_cuda=True,
     seed=1,
-
+    save_on_every_num_epoch=10,
 ):
     class ExpertDataSet(Dataset):
-        def __init__(self, expert_observations, expert_actions,num_observation = None):
+        def __init__(self, expert_observations, expert_actions, num_observation=None):
             if num_observation is not None:
-                num_observation = min(num_observation,len(expert_observations))  
+                num_observation = min(num_observation, len(expert_observations))
             else:
-                num_observation = len(expert_observations)      
-            self.observations = expert_observations[:num_observation,:]
-            self.actions = expert_actions[:num_observation,:]
+                num_observation = len(expert_observations)
+            self.observations = expert_observations[:num_observation, :]
+            idx = expert_observations[:, 360] > 0.5
+            self.observations = self.observations[idx]
+            self.actions = expert_actions[:num_observation, :]
+            self.actions = self.actions[idx]
+            self.norm_rms = False
+        def register_env_norm(self,venv_norm:VecNormalize):
+            self.norm_rms = True
+            self.venv_norm = venv_norm   
 
         def __getitem__(self, index):
-            return (self.observations[index], self.actions[index])
+            if self.norm_rms:
+                return self.venv_norm.normalize_obs(self.observations[index]), self.actions[index]
+            else:
+                return (self.observations[index], self.actions[index])
 
         def __len__(self):
             return len(self.observations)
@@ -167,8 +187,25 @@ def pretraining_network(
                         loss.item(),
                     )
                 )
+    
+    def save_norm_env_policy(epoch_idx, policy, vec_norm):
+        pretrain_policy_filepath = os.path.join(
+            pretraining_data_dirpath, f"pretrain_policy_{epoch_idx}.pkl"
+        )
+        pretrain_vecnorm_obs_rms_filepath = os.path.join(
+            pretraining_data_dirpath, f"vecnorm_obs_rms_{epoch_idx}.pkl"
+        )
+        with open(pretrain_policy_filepath, "wb") as f:
+            pickle.dump(policy, f)
+            print(f"Successfully saved the model to {pretrain_policy_filepath}")
+        if cfg.INPUT.NORM:
+            with open(pretrain_vecnorm_obs_rms_filepath, "wb") as f:
+                pickle.dump(vec_norm.obs_rms, f)
+                print(f"Successfully saved rms to {pretrain_vecnorm_obs_rms_filepath}")
+
     # load data
     filepath = os.path.join(pretraining_data_dirpath, expert_data_np_name)
+
     print(f"Loading numpy array from {filepath}")
     expert_data = np.load(filepath)
     expert_observation, expert_actions = (
@@ -177,21 +214,32 @@ def pretraining_network(
     )
     print(f"loaded expert data successfully!")
     expert_dataset = ExpertDataSet(expert_observation, expert_actions)
-    train_loader = th.utils.data.DataLoader(
-        dataset=expert_dataset, batch_size=batch_size, shuffle=True)
+
     th.manual_seed(seed)
     if cfg.INPUT.NORM:
-        vec_norm = VecNormalize(DummyVecEnv([lambda: env]),True,norm_obs = True,norm_reward=False)
+        vec_norm = VecNormalize(
+            DummyVecEnv([lambda: env]), True, norm_obs=True, norm_reward=False
+        )
         # initialize obs with moving average
         num_observation_warm = int(1e3)
-        random_ints = np.random.choice(len(expert_observation),size = num_observation_warm)
-        expert_observation_vec_warm = expert_observation[random_ints,:]
+        random_ints = np.random.choice(
+            len(expert_observation), size=num_observation_warm
+        )
+        expert_observation_vec_warm = expert_observation[random_ints, :]
         vec_norm.obs_rms.update(expert_observation_vec_warm)
         print("Successfully initialize the normlized env")
+    else:
+        vec_norm = None
+    if vec_norm is not None:
+        expert_dataset.register_env_norm(vec_norm)
+    train_loader = th.utils.data.DataLoader(
+        dataset=expert_dataset, batch_size=batch_size, shuffle=True
+    )    
+
 
 
     use_cuda = use_cuda and th.cuda.is_available()
-    device = th.device('cuda' if use_cuda else 'cpu')
+    device = th.device("cuda" if use_cuda else "cpu")
     policy = model.policy.to(device)
     # Define an Optimizer and a learning rate schedule.
     optimizer = optim.Adadelta(policy.parameters(), lr=learning_rate)
@@ -199,20 +247,18 @@ def pretraining_network(
 
     # Now we are finally ready to train the policy model.
     for epoch in range(1, epochs + 1):
-        train(policy, device, train_loader, optimizer,criterion=nn.MSELoss(),log_interval=log_interval,epoch=epoch)
+        train(
+            policy,
+            device,
+            train_loader,
+            optimizer,
+            criterion=nn.MSELoss(),
+            log_interval=log_interval,
+            epoch=epoch,
+        )
+        if epoch % save_on_every_num_epoch == 0:
+            save_norm_env_policy(epoch_idx=epoch, policy=policy, vec_norm=vec_norm)
         scheduler.step()
-    import pickle
-    pretrain_policy_filepath = os.path.join(pretraining_data_dirpath,"pretrain_policy.pkl")
-    pretrain_vecnorm_obs_rms_filepath = os.path.join(pretraining_data_dirpath,'vecnorm_obs_rms.pkl')
-    with open(pretrain_policy_filepath,'wb') as f:
-        pickle.dump(policy,f)
-        print(f"Successfully saved the model to {pretrain_policy_filepath}")
-    if cfg.INPUT.NORM:
-        with open(pretrain_vecnorm_obs_rms_filepath,'wb') as f:
-            pickle.dump(vec_norm.obs_rms,f)
-            print(f"Successfully saved rms to {pretrain_vecnorm_obs_rms_filepath}")  
-
-
 
 def main():
     NUM_STEPS = 1e6
@@ -232,8 +278,18 @@ def main():
             env, NUM_STEPS, pretraining_data_dirpath, EXPERT_DATA_NP_NAME
         )
     if args.phase2:
-        model =build_model(cfg, env)
-        pretraining_network(cfg, args, model,env,pretraining_data_dirpath, EXPERT_DATA_NP_NAME)
+        model = build_model(cfg, env)
+        EPOCHS = 50
+        pretraining_network(
+            cfg,
+            args,
+            model,
+            env,
+            pretraining_data_dirpath,
+            EXPERT_DATA_NP_NAME,
+            epochs=EPOCHS,
+            save_on_every_num_epoch=10,
+        )
 
 
 if __name__ == "__main__":
