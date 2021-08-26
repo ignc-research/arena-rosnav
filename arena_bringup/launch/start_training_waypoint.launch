@@ -52,10 +52,10 @@
   <param name="laser_update_rate"     value="10"/>
   <param name="/deploy/local_planner_name" value = "$(arg local_planner)"/>
 
-  <!-- use the "rostopic hz /sim_1/cmd_vel /clock:=/sim_1/clock" to check the local planner can catch running of the simulator or not
+  <!-- use the "rostopic hz /sim_lei_1/cmd_vel /clock:=/sim_lei_1/clock" to check the local planner can catch running of the simulator or not
     if the publish rate is lower than the  1/duration   in rl_collision_avoidance_node_tb3.py 
   -->
-  <param name="sleep_time_ms_step_world" value="10"/>
+  <param name="sleep_time_ms_step_world" value="1"/>
 
 
   <!-- map server-->
