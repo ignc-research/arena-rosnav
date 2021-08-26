@@ -58,13 +58,13 @@ _C.WAYPOINT_GENERATOR = CN()
 _C.WAYPOINT_GENERATOR.ACTIONS_DEF = os.path.join(
     arena_local_planner_drl_root, "configs", "waypoint_generator_actions2.yaml"
 )
-# rlca can only take 0.5, 
+# rlca can only take 0.5,
 _C.WAYPOINT_GENERATOR.ROBOT_WAYPOINT_MIN_DIST = 0.5
 # make sure this value bigger than the linear value defined in the configs/waypoint_generator_actions*.yaml
 _C.WAYPOINT_GENERATOR.GOAL_RADIUS = 0.75
 _C.WAYPOINT_GENERATOR.IS_ACTION_SPACE_DISCRETE = False
 # unit m/s should be set with the consideration of the lookahead distance defined in the launch file and robot's veloctiy
-# e.g. lookahead_distance = 2m robot_velocity = 0.3m/s   average_reach_time = 2/0.3 == 6.6 s 
+# e.g. lookahead_distance = 2m robot_velocity = 0.3m/s   average_reach_time = 2/0.3 == 6.6 s
 _C.WAYPOINT_GENERATOR.STEP_TIMEOUT = 25
 
 
@@ -78,29 +78,29 @@ _C.NET_ARCH.VF = [32]
 _C.NET_ARCH.PI = [32]
 _C.NET_ARCH.FEATURE_EXTRACTOR = CN()
 _C.NET_ARCH.FEATURE_EXTRACTOR.NAME = "CNN_Laser_MLP_Goal_Dyn_Obs"
-_C.NET_ARCH.FEATURE_EXTRACTOR.FEATURES_DIM = 32+32+6
+_C.NET_ARCH.FEATURE_EXTRACTOR.FEATURES_DIM = 32 + 32 + 6
 
 _C.TRAINING = CN()
-_C.TRAINING.N_TIMESTEPS = 1e6
-_C.TRAINING.ROBOT_START_POS_GOAL_POS_MIN_DIST = 7
-#MAX_STEPS_PER_EPISODE*lookahead_dist == traj dist
-_C.TRAINING.MAX_STEPS_PER_EPISODE = 60
+_C.TRAINING.N_TIMESTEPS = int(4e6)
+_C.TRAINING.ROBOT_START_POS_GOAL_POS_MIN_DIST = 4
+# MAX_STEPS_PER_EPISODE*lookahead_dist == traj dist
+_C.TRAINING.MAX_STEPS_PER_EPISODE = 300
 
 # parameters meaning can be found here
 # https://stable-baselines3.readthedocs.io/en/master/guide/callbacks.html?highlight=EvalCallback#stable_baselines3.common.callbacks.EvalCallback
 _C.EVAL = CN()
-#DEBUG
+# DEBUG
 _C.EVAL.N_EVAL_EPISODES = 30
-_C.EVAL.EVAL_FREQ = 3000
+_C.EVAL.EVAL_FREQ = int(4e4)
 # if None, disable the callback
 _C.EVAL.STOP_TRAINING_ON_REWARD = None
 _C.EVAL.STOP_TRAINING_ON_REWARD_THRESHOLD = 15
 # only be active when the task is StagedRandomTask
 _C.EVAL.CURRICULUM = CN()
 # "rew" means "mean reward", "succ" means "success rate of episode "
-_C.EVAL.CURRICULUM.THRESHOLD_RANGE = [0.6, 0.8]
+_C.EVAL.CURRICULUM.THRESHOLD_RANGE = [0.7, 0.85]
 _C.EVAL.CURRICULUM.STAGE_STATIC_OBSTACLE = [0, 0, 0]
-_C.EVAL.CURRICULUM.STAGE_DYNAMIC_OBSTACLE = [1, 6, 8]
+_C.EVAL.CURRICULUM.STAGE_DYNAMIC_OBSTACLE = [0, 3, 6]
 _C.EVAL.CURRICULUM.INIT_STAGE_IDX = 0
 
 
@@ -111,13 +111,14 @@ _C.DEPLOY.SCENERIOS_JSON_PATH = "/home/joe/ssd/projects/arena-rosnav-ws/src/aren
 _C.MODEL = CN()
 _C.MODEL.NAME = "PPO"
 _C.MODEL.LEARNING_RATE = 0.0003
-_C.MODEL.BATCH_SIZE = 8
+# mini batch size
+_C.MODEL.BATCH_SIZE = 16
 # stablebaseline requires that
-_C.MODEL.N_STEPS = 2**4 // _C.MODEL.BATCH_SIZE * _C.MODEL.BATCH_SIZE
-_C.MODEL.N_EPOCHS = 5
+_C.MODEL.N_STEPS = 2 ** 10 // _C.MODEL.BATCH_SIZE * _C.MODEL.BATCH_SIZE
+_C.MODEL.N_EPOCHS = 7
 _C.MODEL.GAMMA = 0.9
-_C.MODEL.GAE_LAMBDA = 0.98
-_C.MODEL.CLIP_RANGE = 0.25
+_C.MODEL.GAE_LAMBDA = 0.95
+_C.MODEL.CLIP_RANGE = 0.22
 # this string will be treated as a callable object. we use this to schedule the the clip range
 # _C.MODEL.CLIP_RANGE = f"res = 1-int(n_step/{_C.TRAINING.N_TIMESTEPS}*10)/10"
 _C.MODEL.MAX_GRAD_NORM = 0.5
