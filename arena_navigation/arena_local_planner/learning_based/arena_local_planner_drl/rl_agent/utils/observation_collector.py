@@ -1161,7 +1161,7 @@ class ObservationCollectorWP2:
             try_times = 10
         else:
             request = StepWorldRequest(1 / self._robot_action_rate)
-            try_times = 5
+            try_times = 10
         # # at least call the service once. Even we set subgoal to None when we call clear_on_episode_start,
         # # but it's possible the a callback function is waiting there to set the subgoal to the old one.
         # if self.is_train_mode:
@@ -1189,11 +1189,17 @@ class ObservationCollectorWP2:
             else:
                 time.sleep(1)
             try_times -= 1
+            if try_times == 1:
+                # give it last change to change the inner state in the plan manager
+               request = StepWorldRequest(200 / self._robot_action_rate) 
             if try_times == 0:
                 # DEBUG
-                print(
-                    "no subgoal is published,maybe something is wrong with planmanager, request to generate a new pair of start pos and goal pos"
-                )
+                if self.is_pretrain_mode_on:
+                    print(
+                        "No subgoal is published,maybe something is wrong with planmanager, request to generate a new pair of start pos and goal pos"
+                    )
+                else:
+                    print("No synchronized observation received")
                 return False
         rospy.loginfo("Waypoint generator done step world")
         return True

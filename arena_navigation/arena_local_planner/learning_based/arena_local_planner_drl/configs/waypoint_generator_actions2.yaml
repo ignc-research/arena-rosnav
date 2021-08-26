@@ -1,0 +1,6 @@
+waypoint_generator:
+  continuous_actions:
+    # actually x dont wanna change to much 
+    x_range: [-1.2, 1.2]
+    # actually y 
+    y_range: [-1.2, 1.2]

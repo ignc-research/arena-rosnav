@@ -230,50 +230,47 @@ class WPEnvMapFrame2(gym.Env):
         with open(waypoint_generator_actions_yaml_path, "r") as fd:
             setting_data = yaml.safe_load(fd)
             if self._is_action_space_discrete:
+                raise NotImplementedError("TODO")
                 # self._discrete_actions is a list, each element is a dict with the keys ["name", 'linear','angular']
-                discrete_acitons_def = setting_data["waypoint_generator"][
-                    "discrete_actions"
-                ]
-                self._discrete_acitons = []
-                for actions_def in discrete_acitons_def:
-                    if isinstance(actions_def["angular"], list):
-                        linear = actions_def["linear"]
-                        angular_def = list(
-                            map(
-                                lambda x: eval(x) if isinstance(x, str) else x,
-                                actions_def["angular"],
-                            )
-                        )
-                        angulars = np.linspace(*angular_def)
-                        self._discrete_acitons += list(
-                            map(
-                                lambda angular, linear=linear: [linear, angular],
-                                angulars,
-                            )
-                        )
-                    else:
-                        self._discrete_acitons.append(
-                            [
-                                actions_def["linear"],
-                                eval(actions_def["angular"])
-                                if isinstance(actions_def["angular"], str)
-                                else actions_def["angular"],
-                            ]
-                        )
+                # discrete_acitons_def = setting_data["waypoint_generator"][
+                #     "discrete_actions"
+                # ]
+                # self._discrete_acitons = []
+                # for actions_def in discrete_acitons_def:
+                #     if isinstance(actions_def["angular"], list):
+                #         linear = actions_def["linear"]
+                #         angular_def = list(
+                #             map(
+                #                 lambda x: eval(x) if isinstance(x, str) else x,
+                #                 actions_def["angular"],
+                #             )
+                #         )
+                #         angulars = np.linspace(*angular_def)
+                #         self._discrete_acitons += list(
+                #             map(
+                #                 lambda angular, linear=linear: [linear, angular],
+                #                 angulars,
+                #             )
+                #         )
+                #     else:
+                #         self._discrete_acitons.append(
+                #             [
+                #                 actions_def["linear"],
+                #                 eval(actions_def["angular"])
+                #                 if isinstance(actions_def["angular"], str)
+                #                 else actions_def["angular"],
+                #             ]
+                #         )
                 self.action_space = spaces.Discrete(len(self._discrete_acitons))
             else:
                 # TODO  read the range data from unified config file
-                linear_range = setting_data["waypoint_generator"]["continuous_actions"][
-                    "linear_range"
+                x_range = setting_data["waypoint_generator"]["continuous_actions"][
+                    "x_range"
                 ]
-                linear_range = [eval(i) if isinstance(i,str) else i for i in linear_range]
-                angular_range = setting_data["waypoint_generator"][
-                    "continuous_actions"
-                ]["angular_range"]
-                angular_range = [eval(i) if isinstance(i,str) else i for i in angular_range]
+                y_range = setting_data["waypoint_generator"]["continuous_actions"]["y_range"]
                 self.action_space = spaces.Box(
-                    low=np.array([linear_range[0], angular_range[0]]),
-                    high=np.array([linear_range[1], angular_range[1]]),
+                    low=np.array([x_range[0], y_range[0]]),
+                    high=np.array([x_range[1], y_range[1]]),
                     dtype=np.float,
                 )
 

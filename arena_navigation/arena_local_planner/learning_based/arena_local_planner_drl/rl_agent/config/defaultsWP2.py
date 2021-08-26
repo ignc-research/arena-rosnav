@@ -56,7 +56,7 @@ _C.REWARD.NO_TIMEOUT_REWARD = True
 _C.WAYPOINT_GENERATOR = CN()
 
 _C.WAYPOINT_GENERATOR.ACTIONS_DEF = os.path.join(
-    arena_local_planner_drl_root, "configs", "waypoint_generator_actions_3actions.yaml"
+    arena_local_planner_drl_root, "configs", "waypoint_generator_actions2.yaml"
 )
 # rlca can only take 0.5, 
 _C.WAYPOINT_GENERATOR.ROBOT_WAYPOINT_MIN_DIST = 0.5
@@ -84,7 +84,7 @@ _C.TRAINING = CN()
 _C.TRAINING.N_TIMESTEPS = 1e6
 _C.TRAINING.ROBOT_START_POS_GOAL_POS_MIN_DIST = 7
 #MAX_STEPS_PER_EPISODE*lookahead_dist == traj dist
-_C.TRAINING.MAX_STEPS_PER_EPISODE = 30
+_C.TRAINING.MAX_STEPS_PER_EPISODE = 60
 
 # parameters meaning can be found here
 # https://stable-baselines3.readthedocs.io/en/master/guide/callbacks.html?highlight=EvalCallback#stable_baselines3.common.callbacks.EvalCallback
