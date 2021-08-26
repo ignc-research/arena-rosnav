@@ -143,11 +143,11 @@ class StagedRandomTask(RandomTask):
         self.ns = ns
         self.ns_prefix = "/" if ns == '' else "/"+ns+"/"
         if ns == '':
-            ns_map  = ''
+            self.ns_no_idx  = ''
         else:
             idx_last_underscore =  ns.rfind('_')
-            ns_map = ns[:idx_last_underscore]
-        super().__init__(obstacles_manager, robot_manager,ns_map=ns_map)
+            self.ns_no_idx = ns[:idx_last_underscore]
+        super().__init__(obstacles_manager, robot_manager,ns_map=self.ns_no_idx)
         import re
         pattern = re.compile('\d+')
         tmp = pattern.search(ns)
@@ -188,23 +188,16 @@ class StagedRandomTask(RandomTask):
             self._curr_stage = self._curr_stage + 1
             self._set_stage()
         else:
-            rospy.loginfo(f"ENV {self.ns} tried to trigger next stage but already reached last one")
+            print(f"StagedRandomTask: ENV {self.ns} tried to trigger next stage but already reached last one")
 
     def previous_stage(self, msg: Bool):
         if self._curr_stage >0 : 
             self._curr_stage = self._curr_stage - 1
             self._set_stage()
         else:
-            rospy.loginfo(f"ENV {self.ns} tried to trigger previous stage but already reached first one")
+            print(f"StagedRandomTask: ENV {self.ns} tried to trigger previous stage but already reached first one")
 
     def _set_stage(self):
-        if self.ns_idx == 1 :
-            rospy.set_param("/curr_stage",self._curr_stage)
-            if self._curr_stage == len(self._stage_dynamic)-1:
-                rospy.set_param("/last_stage_reached",True)
-            else:
-                rospy.set_param("/last_stage_reached",False)
-
         self._remove_obstacles()
         static_obstacles = self._stage_static[self._curr_stage]
         dynamic_obstacles = self._stage_dynamic[self._curr_stage]

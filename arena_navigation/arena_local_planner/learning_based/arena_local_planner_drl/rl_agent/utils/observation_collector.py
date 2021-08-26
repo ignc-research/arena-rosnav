@@ -1023,6 +1023,7 @@ class ObservationCollectorWP2:
         else:
             self.cv_important_event_deployment = threading.Condition()
         self.data_lock = threading.Lock()
+        self.dynamic_topic_listening_lock = threading.Lock()
         # define variables
         self._subgoal: Optional[Pose2D] = None
         self.last_dist_ref_pos_robot: Optional[float] = None
@@ -1057,47 +1058,48 @@ class ObservationCollectorWP2:
     def setup_dynamic_topics_listening(self):
         """In Curriculum Learning the number of  dynamic obstacles is dynamically changing.
         """
-        # this prefix is hardcoded in the class ObstaclesManager's member function _generate_dynamic_obstacle_yaml_tween2 and _generate_random_obstacle_yaml
-        robot_groundtruth_pos_name_prefix = "dynamic_obstalce_groundtruth_pose_"
-        curr_stage = rospy.get_param("/curr_stage", -1)
-        if curr_stage != -1:
-            assert curr_stage < len(
-                self._nums_dynamic_obstacles
-            ), "please check the stage configuration"
-            self.curr_num_dynamic_obstacles = self._nums_dynamic_obstacles[curr_stage]
-        else:
-            # in scenerio_task this will be set to the param server.
-            self.curr_num_dynamic_obstacles = rospy.get_param(
-                "/curr_num_dynamic_obstacles", -1
-            )
-        # unregister the old topics
-        for sub in self.dynamic_obstacle_pose_subs + [
-            self._laserscan_sub,
-            self._robot_state_sub,
-        ]:
-            sub.sub.unregister()
-        self.dynamic_obstacle_pose_subs = []
-        for idx in range(self.curr_num_dynamic_obstacles):
-            self.dynamic_obstacle_pose_subs.append(
-                message_filters.Subscriber(
-                    self.ns_prefix + robot_groundtruth_pos_name_prefix + str(idx + 1),
-                    Odometry,
+        with self.dynamic_topic_listening_lock:
+            # this prefix is hardcoded in the class ObstaclesManager's member function _generate_dynamic_obstacle_yaml_tween2 and _generate_random_obstacle_yaml
+            robot_groundtruth_pos_name_prefix = "dynamic_obstalce_groundtruth_pose_"
+            curr_stage = rospy.get_param("/curr_stage", -1)
+            if curr_stage != -1:
+                assert curr_stage < len(
+                    self._nums_dynamic_obstacles
+                ), "please check the stage configuration"
+                self.curr_num_dynamic_obstacles = self._nums_dynamic_obstacles[curr_stage]
+            else:
+                # in scenerio_task this will be set to the param server.
+                self.curr_num_dynamic_obstacles = rospy.get_param(
+                    "/curr_num_dynamic_obstacles", -1
                 )
+            # unregister the old topics
+            for sub in self.dynamic_obstacle_pose_subs + [
+                self._laserscan_sub,
+                self._robot_state_sub,
+            ]:
+                sub.sub.unregister()
+            self.dynamic_obstacle_pose_subs = []
+            for idx in range(self.curr_num_dynamic_obstacles):
+                self.dynamic_obstacle_pose_subs.append(
+                    message_filters.Subscriber(
+                        self.ns_prefix + robot_groundtruth_pos_name_prefix + str(idx + 1),
+                        Odometry,
+                    )
+                )
+            self._laserscan_sub = message_filters.Subscriber(
+                f"{self.ns_prefix}scan", LaserScan
             )
-        self._laserscan_sub = message_filters.Subscriber(
-            f"{self.ns_prefix}scan", LaserScan
-        )
-        self._robot_state_sub = message_filters.Subscriber(
-            f"{self.ns_prefix}odom", Odometry
-        )
+            self._robot_state_sub = message_filters.Subscriber(
+                f"{self.ns_prefix}odom", Odometry
+            )
 
-        self.ts = message_filters.ApproximateTimeSynchronizer(
-            [self._laserscan_sub, self._robot_state_sub]
-            + self.dynamic_obstacle_pose_subs,
-            1,
-            0.1,
-        )
-        self.ts.registerCallback(self._callback_all_observations)
+            self.ts = message_filters.ApproximateTimeSynchronizer(
+                [self._laserscan_sub, self._robot_state_sub]
+                + self.dynamic_obstacle_pose_subs,
+                1,
+                0.1,
+            )
+            self.ts.registerCallback(self._callback_all_observations)
 
     def wait_for_step_end(
         self, timeout: float = 1000000
@@ -1146,63 +1148,64 @@ class ObservationCollectorWP2:
         Returns:
             bool: if failed, return False
         """
-        # DEBUG
-        rospy.loginfo("Waypoint generator start reset run step world ")
-        # normally making the simulator running for 1/self._robot_action_rate will make sure
-        # the new states will be updated.
-        # but sometimes it seems like the intermediate planner takes quite a lot steps to make a subgoal.
-        delta = 0.1
-        # set this to a very high value , hope plan manager can do something
-        if self.is_pretrain_mode_on:
-            if super_long_step:
-                request = StepWorldRequest(100 / self._robot_action_rate)
-            else:
-                request = StepWorldRequest(30 / self._robot_action_rate) 
-            try_times = 10
-        else:
-            request = StepWorldRequest(1 / self._robot_action_rate)
-            try_times = 10
-        # # at least call the service once. Even we set subgoal to None when we call clear_on_episode_start,
-        # # but it's possible the a callback function is waiting there to set the subgoal to the old one.
-        # if self.is_train_mode:
-        #     # this dirty code is write to handle the bug in planmanager. plan manager need clock signal 
-        #     # to change inner state
-        #     self._step_world_srv(request)
-        #     # time.sleep(0.5)
-        #     # self._step_world_srv(request)
-
-        # In pretrain mode, _subgoal is used as expert pos
-        def is_any_data_none(is_pretrain_mode_on):
-            res = False
-            with self.data_lock:
-                if is_pretrain_mode_on:
-                    if self._subgoal is None or  self._msg_cache is None:    
-                        res = True
+        with self.dynamic_topic_listening_lock:
+            # DEBUG
+            rospy.loginfo("Waypoint generator start reset run step world ")
+            # normally making the simulator running for 1/self._robot_action_rate will make sure
+            # the new states will be updated.
+            # but sometimes it seems like the intermediate planner takes quite a lot steps to make a subgoal.
+            delta = 0.1
+            # set this to a very high value , hope plan manager can do something
+            if self.is_pretrain_mode_on:
+                if super_long_step:
+                    request = StepWorldRequest(100 / self._robot_action_rate)
                 else:
-                    if self._msg_cache is None:
-                        res = True
-            return res
-
-        while is_any_data_none(self.is_pretrain_mode_on):
-            if self.is_train_mode:
-                self._step_world_srv(request)
+                    request = StepWorldRequest(30 / self._robot_action_rate) 
+                try_times = 10
             else:
-                time.sleep(1)
-            try_times -= 1
-            if try_times == 1:
-                # give it last change to change the inner state in the plan manager
-               request = StepWorldRequest(200 / self._robot_action_rate) 
-            if try_times == 0:
-                # DEBUG
-                if self.is_pretrain_mode_on:
-                    print(
-                        "No subgoal is published,maybe something is wrong with planmanager, request to generate a new pair of start pos and goal pos"
-                    )
+                request = StepWorldRequest(1 / self._robot_action_rate)
+                try_times = 10
+            # # at least call the service once. Even we set subgoal to None when we call clear_on_episode_start,
+            # # but it's possible the a callback function is waiting there to set the subgoal to the old one.
+            # if self.is_train_mode:
+            #     # this dirty code is write to handle the bug in planmanager. plan manager need clock signal 
+            #     # to change inner state
+            #     self._step_world_srv(request)
+            #     # time.sleep(0.5)
+            #     # self._step_world_srv(request)
+
+            # In pretrain mode, _subgoal is used as expert pos
+            def is_any_data_none(is_pretrain_mode_on):
+                res = False
+                with self.data_lock:
+                    if is_pretrain_mode_on:
+                        if self._subgoal is None or  self._msg_cache is None:    
+                            res = True
+                    else:
+                        if self._msg_cache is None:
+                            res = True
+                return res
+
+            while is_any_data_none(self.is_pretrain_mode_on):
+                if self.is_train_mode:
+                    self._step_world_srv(request)
                 else:
-                    print("No synchronized observation received")
-                return False
-        rospy.loginfo("Waypoint generator done step world")
-        return True
+                    time.sleep(1)
+                try_times -= 1
+                if try_times == 1:
+                    # give it last change to change the inner state in the plan manager
+                    request = StepWorldRequest(200 / self._robot_action_rate) 
+                if try_times == 0:
+                    # DEBUG
+                    if self.is_pretrain_mode_on:
+                        print(
+                            "No subgoal is published,maybe something is wrong with planmanager, request to generate a new pair of start pos and goal pos"
+                        )
+                    else:
+                        print("No synchronized observation received")
+                    return False
+            rospy.loginfo("Waypoint generator done step world")
+            return True
 
     def clear_subgoal(self):
         with self.data_lock:

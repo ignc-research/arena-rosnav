@@ -3,7 +3,7 @@ import warnings
 import rospy
 import numpy as np
 
-from typing import List
+from typing import List, Tuple
 from std_msgs.msg import Bool
 import time
 from stable_baselines3.common.callbacks import BaseCallback, EvalCallback
@@ -21,74 +21,99 @@ class TrainStageCallbackWP(BaseCallback):
     :param task_mode (str): training task mode, if not 'staged' callback won't be called
     :param verbose:
     """
-    def __init__(self,
-                namespaces:List[str],
-                task_name: str = '',
-                lower_threshold:float = 0,
-                upper_threshold:float = 0,
-                verbose = 0):
 
-        super().__init__(verbose = verbose)
+    def __init__(
+        self,
+        namespaces: List[str],
+        task_name: str,
+        lower_threshold: float,
+        upper_threshold: float,
+        stage_idx_range: Tuple[int, int],
+        init_stage_idx: int = 0,
+        verbose=0,
+    ):
+
+        super().__init__(verbose=verbose)
         self.namespaces = namespaces
         self.verbose = verbose
         self.activated = task_name == "StagedRandomTask"
         self.upper_threshold = upper_threshold
         self.lower_threshold = lower_threshold
+        self.stage_idx_range = stage_idx_range
+        self.curr_stage_idx = init_stage_idx
 
+        #DEBUG Only
+        self.direction_m = False
         if self.activated:
-            self._instantiate_publishers()
+            self.setup_stage_publishers()
 
             self._trigger = Bool()
             self._trigger.data = True
+        print("TrainStageCallbackWP: TrainStageCallbackWP initialized!")
+        print(f"TrainStageCallbackWP: Current Stage is : {self.curr_stage_idx}")
 
-
-
-
-    def _instantiate_publishers(self):
+    def setup_stage_publishers(self):
         self._publishers_next = []
         self._publishers_previous = []
 
         for ns in self.namespaces:
             self._publishers_next.append(
-                rospy.Publisher(f"/{ns}/next_stage", Bool, queue_size=1))
+                rospy.Publisher(f"/{ns}/next_stage", Bool, queue_size=1)
+            )
             self._publishers_previous.append(
-                rospy.Publisher(f"/{ns}/previous_stage", Bool, queue_size=1))
+                rospy.Publisher(f"/{ns}/previous_stage", Bool, queue_size=1)
+            )
 
     def _on_step(self, EvalObject: EvalCallback) -> bool:
-        assert (isinstance(EvalObject, EvalCallback)
+        assert isinstance(
+            EvalObject, EvalCallback
         ), f"InitiateNewTrainStage must be called within EvalCallback"
-        
+
         if self.activated:
 
-            if EvalObject.n_eval_episodes < 10:
-                warnings.warn("Only %d evaluation episodes considered for threshold monitoring," 
-                    "results might not represent agent performance well" % EvalObject.n_eval_episodes)
-                return
-            
-            if EvalObject.last_success_rate <= self.lower_threshold:
-                for i,pub in enumerate(self._publishers_previous):
-                    pub.publish(self._trigger)
-                    if i==0:
-                       self.log_curr_stage(EvalObject.logger)
+            if EvalObject.n_eval_episodes < 2:
+                warnings.warn(
+                    "Only %d evaluation episodes considered for threshold monitoring,"
+                    "results might not represent agent performance well"
+                    % EvalObject.n_eval_episodes
+                )
+                return 
+            # if EvalObject.last_success_rate <= self.lower_threshold and self.curr_stage_idx>self.stage_idx_range[0]:
+            #     self.curr_stage_idx -= 1
+            #     for i, pub in enumerate(self._publishers_previous):
+            #         pub.publish(self._trigger)
+            #         time.sleep(1)
+            #         if i == 0:
+            #             self.log_curr_stage(EvalObject.logger)
 
-            elif EvalObject.last_success_rate >= self.upper_threshold:
+            # elif EvalObject.last_success_rate >= self.upper_threshold and self.curr_stage_idx<self.stage_idx_range[1]:
+            #     self.curr_stage_idx += 1 
+            #     for i, pub in enumerate(self._publishers_next):
+            #         pub.publish(self._trigger)
+            #         time.sleep(1)
+            #         if i == 0:
+            #             self.log_curr_stage(EvalObject.logger)
+            if self.direction_m:
+                self.direction_m = not self.direction_m
+                self.curr_stage_idx -= 1
+                for i, pub in enumerate(self._publishers_previous):
+                    pub.publish(self._trigger)
+                    time.sleep(1)
+                    if i == 0:
+                        self.log_curr_stage(EvalObject.logger)
+
+            else :
+                self.direction_m = not self.direction_m
+                self.curr_stage_idx += 1 
                 for i, pub in enumerate(self._publishers_next):
                     pub.publish(self._trigger)
-                    if i==0:
+                    time.sleep(1)
+                    if i == 0:
                         self.log_curr_stage(EvalObject.logger)
-                
-                if not rospy.get_param("/last_stage_reached"):
-                    EvalObject.best_mean_reward = -np.inf
-                    EvalObject.last_success_rate = -np.inf
-    
-    def log_curr_stage(self,logger):
-        time.sleep(1)
-        curr_stage = rospy.get_param("/curr_stage",-1)
-        logger.record("stage_idx",curr_stage) 
 
-
-
-
+    def log_curr_stage(self, logger):
+        print(f"Current Stage is : {self.curr_stage_idx}")
+        logger.record("stage_idx", self.curr_stage_idx)
 
 
 class StopTrainingOnRewardThreshold(BaseCallback):
@@ -108,16 +133,20 @@ class StopTrainingOnRewardThreshold(BaseCallback):
         self.reward_threshold = reward_threshold
 
     def _on_step(self) -> bool:
-        assert self.parent is not None, "``StopTrainingOnMinimumReward`` callback must be used " "with an ``EvalCallback``"
+        assert self.parent is not None, (
+            "``StopTrainingOnMinimumReward`` callback must be used "
+            "with an ``EvalCallback``"
+        )
         # Convert np.bool_ to bool, otherwise callback() is False won't work
- 
+
         continue_training = not bool(
-            self.parent.best_mean_reward >= self.reward_threshold and
-            rospy.get_param("/last_stage_reached",True))
-            
+            self.parent.best_mean_reward >= self.reward_threshold
+            and rospy.get_param("/last_stage_reached", True)
+        )
+
         if self.verbose > 0 and not continue_training:
-                print(
-                    f"Stopping training because the mean reward {self.parent.best_mean_reward:.2f} "
-                    f" is above the threshold {self.reward_threshold}"
-                )
+            print(
+                f"Stopping training because the mean reward {self.parent.best_mean_reward:.2f} "
+                f" is above the threshold {self.reward_threshold}"
+            )
         return continue_training

@@ -34,6 +34,10 @@ from gym.utils import colorize
 def get_default_arg_parser():
     parser = ArgumentParser()
     parser.add_argument(
+        '--ns_prefix', help='Namespace prefix',
+        default= 'sim_lei'
+    )
+    parser.add_argument(
         '--pretrained_policy',
         '--pp',
         help="Name to pretrained policy in the pretraining subfolder",
@@ -132,7 +136,7 @@ def get_namespaces(args):
     """
     # identical with the one in launch file
     if not args.deploy:
-        ns_prefix = "sim_lei"
+        ns_prefix = args.ns_prefix
         num_envs = rospy.get_param("num_envs")
         assert num_envs>1, "Make sure there are more that 2 simulation environments available since one of them will be used for evalutation"
        
@@ -241,11 +245,14 @@ def build_eval_callback(cfg, namespaces: List[str], eval_env, train_env):
         
         thresholds = cfg.EVAL.CURRICULUM.THRESHOLD_RANGE
 
-        thresholds = thresholds[::-1]
+        # thresholds = thresholds[::-1]
+        stage_idx_range = [0,len(cfg.EVAL.CURRICULUM.STAGE_DYNAMIC_OBSTACLE)-1]
         trainstage_callback = TrainStageCallbackWP(
             namespaces,
             cfg.TASK.NAME,
             *thresholds,
+            stage_idx_range = stage_idx_range,
+            init_stage_idx=cfg.EVAL.CURRICULUM.INIT_STAGE_IDX,
             verbose=1)
     else:
         trainstage_callback = None
