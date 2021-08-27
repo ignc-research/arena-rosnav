@@ -2,11 +2,10 @@
 import sys
 import copy
 import pprint as pp
-import bagpy
 from bagpy import bagreader
 import pandas as pd
 import json
-import rospkg
+# import rospkg
 import yaml
 # for plots
 import matplotlib
@@ -20,8 +19,6 @@ import matplotlib.cm as cm
 # calc
 import numpy as np
 import math
-import seaborn as sb
-import rospy 
 from visualization_msgs.msg import Marker, MarkerArray
 import pathlib
 import os
@@ -33,6 +30,7 @@ matplotlib.rcParams.update({'font.size': 15})
 from termcolor import colored, cprint
 class newBag():
     def __init__(self, planner, file_name, bag_name):
+
         # planner
         self.planner         = planner.split("wpg")[0]
         self.wpg             = planner.split("wpg")[1]
@@ -40,15 +38,18 @@ class newBag():
         # csv dir
         self.csv_dir         = bag_name.replace(".bag","")
         # bag topics
-        self.odom_topic      = "/police/odom"
+        self.odom_topic      = "/sensorsim/police/odom"
         self.collision_topic = "/police/collision"
         self.subgoal_topic   = "/police/subgoal"
         self.gp_topic        = "/police/gplan"
         self.wpg_topic       = "/police/subgoal_wpg"
+        self.topic_sm      = "/flatland_server/debug/layer/static"
         # global apth
         self.plot_gp = True
 
         self.nc_total = 0
+
+
         # eval bags
         self.bag = bagreader(bag_name)
         eps = self.split_runs()
@@ -87,7 +88,59 @@ class newBag():
 
     def split_runs(self):
         # get odometry
-        
+        global plot_sm
+        print(plot_sm)
+        if plot_sm:
+            sm_csv = self.bag.message_by_topic(self.topic_sm)
+            df_sm  = pd.read_csv(sm_csv, error_bad_lines=False)
+
+            # get origin from map yml
+            map = (self.file_name.split("_")[0])
+            # remmeber curr dir
+            remember_path = os.path.abspath(os.curdir)
+            # change to map dir
+            os.chdir("../../../../simulator_setup/maps/"+map)
+            path_map = os.path.abspath(os.curdir)
+            # move back to eval path
+            os.chdir(remember_path)
+            with open(path_map+"/map.yaml", "r") as ymlfile:
+                map_yml = yaml.safe_load(ymlfile)
+            orig_x = map_yml["origin"][0]
+            orig_y = map_yml["origin"][1]
+
+            for i in range(len(df_sm)): 
+                df_str = (df_sm.loc[i,"markers"])
+                df_str = df_str.split("points:")[1] 
+                df_str = df_str.split("colors: []")[0]
+                df_str = df_str.replace("z: 0.0","")
+                df_str = df_str.replace("  - ","")
+                df_str = df_str.replace("\n\n","-\n")
+                df_str = df_str.replace("x: ","")
+                df_str = df_str.replace("y: ","")
+                df_str = df_str.replace("    ","")
+                points = df_str.split("-\n")
+
+                # print((df_str))
+                points_x = []
+                points_y = []
+
+                for p in points:
+                    pxy = p.split("\n")
+                    try:
+                        px = round(float(pxy[0]),2) + orig_x
+                        py = round(float(pxy[1]),2) + orig_y
+                        points_x.append(px)
+                        points_y.append(py)
+                    except Exception as e:
+                        print(e)
+
+            
+            img = plt.imread(path_map+"/map.png")
+            # plt.imshow(img, extent=[-16, -50, -6, 17])
+            plt.scatter(points_x, points_y, s = 0.2, c = "grey")
+
+            # print(self.csv_dir)
+
         odom_csv = self.bag.message_by_topic(self.odom_topic)
         df_odom  = pd.read_csv(odom_csv, error_bad_lines=False)
 
@@ -195,7 +248,7 @@ class newBag():
                     n += 1
                     # store the run
                     # print("run_"+str(n))
-                    print(pose_x)
+                    # print(pose_x)
                     if n in select_run or len(select_run) == 0:
                         bags["run_"+str(n)] = [pose_x, pose_y, t, col_xy, subgoal_x, subgoal_y, wpg_x, wpg_y, vel_total]
 
@@ -315,8 +368,11 @@ class newBag():
 
         for run_a in xya:
             for col_xy in run_a:
-                all_cols_x.append(-col_xy[1])
-                all_cols_y.append(col_xy[0])
+                #all_cols_x.append(-col_xy[1])
+                #all_cols_y.append(col_xy[0])
+
+                all_cols_x.append(col_xy[0])
+                all_cols_y.append(col_xy[1])
 
                 if plt_cfg["plot_collisions"]:
                     circle = plt.Circle((-col_xy[1], col_xy[0]), 0.3, color=clr, fill = True, alpha = 0.6)
@@ -394,8 +450,9 @@ class newBag():
                 wp_y   = bags[run][7]
                 vels   = bags[run][8]
 
+
                 x    =  np.array(pose_x)
-                y    = -np.array(pose_y)
+                y    = np.array(pose_y)
                 sg_x =  np.array(sg_x)
                 sg_y = -np.array(sg_y)
                 wp_x =  np.array(wp_x)
@@ -422,13 +479,16 @@ class newBag():
                 path_length = np.sum(np.sqrt(dist_array)) 
                 # for av
                 trajs.append(path_length)
+
                 if path_length > 0 and plt_cfg["plot_trj"]:
                     # print(lgnd)
 
-                    ax.plot(y, x, line_clr, linestyle = line_stl, alpha=0.5)
+                    # ax.plot(y, x, line_clr, linestyle = line_stl, alpha=0.5)
+                    ax.plot(x, y, line_clr, linestyle = line_stl, alpha=0.5)
 
                     ax.set_xlabel("x in [m]")
                     ax.set_ylabel("y in [m]")
+
 
                 pwp = True
                 if plt_cfg["plot_subgoals"]:
@@ -744,7 +804,7 @@ def fancy_print(msg,success):
 def plot_arrow(start,end):
     global ax
     # ax.arrow(-start[1], start[0], -end[1], end[0], head_width=0.05, head_length=0.1, fc='k', ec='k')
-    plt.arrow(-start[1], start[0], -end[1], end[0],  
+    plt.arrow(start[0], start[1], end[0], end[1],  
         head_width = 0.2, 
         width = 0, 
         ec = "black",
@@ -754,15 +814,24 @@ def plot_arrow(start,end):
 def plot_dyn_obst(ob_xy):
     global ax
 
-    circle = plt.Circle((-ob_xy[1], ob_xy[0]), 0.3, color="black", fill = False, alpha = 1)
+    circle = plt.Circle((ob_xy[0], ob_xy[1]), 0.3, color="black", fill = False, alpha = 1)
     ax.add_patch(circle)
 
 def read_scn_file(map, ob):
     # gets start / goal of each scenario as global param
     global start, goal, plt_cfg
     # find json path
-    rospack = rospkg.RosPack()
-    json_path = rospack.get_path('simulator_setup')+'/scenarios/eval/'
+    # rospack = rospkg.RosPack()
+    # json_path = rospack.get_path('simulator_setup')+'/scenarios/eval/'
+
+    # remmeber curr dir
+    remember_path = os.path.abspath(os.curdir)
+    # change to map dir
+    os.chdir("../../../../simulator_setup/scenarios/eval/")
+    json_path = os.path.abspath(os.curdir)
+    # move back to eval path
+    os.chdir(remember_path)
+
 
     for file in os.listdir(json_path):
         if file.endswith(".json") and map in file and ob in file:
@@ -801,7 +870,7 @@ def read_scn_file(map, ob):
     goal  = data["robot"]["goal_pos"]
 
 def eval_cfg(cfg_file, filetype):
-    global ax, sm, start, goal, axlim, plt_cfg, line_clr, line_stl
+    global ax, plot_sm, start, goal, axlim, plt_cfg, line_clr, line_stl
 
     cur_path    = str(pathlib.Path().absolute()) 
     parent_path = str(os.path.abspath(os.path.join(cur_path, os.pardir)))
@@ -854,7 +923,9 @@ def eval_cfg(cfg_file, filetype):
             if not "empty" in map and plt_cfg["plot_sm"]:
                 # offs_x = cfg[curr_figure]["map_origin"][0]
                 # offs_y = cfg[curr_figure]["map_origin"][1]
-                plt.scatter(sm[1], sm[0],s = 0.2 , c = "grey")
+                plot_sm = True
+            else:
+                plot_sm = False
 
             for planner in cfg[curr_figure]["planner"]:
                 # config plot param for planner
@@ -922,7 +993,7 @@ def eval_cfg(cfg_file, filetype):
     plt.show()
 
 def getMap(msg):
-    global ax, sm, map_orig
+    global ax, plot_sm, map_orig
 
     map_orig = [0, 0]
     points_x = []
@@ -950,8 +1021,8 @@ def run(cfg_file, filetype):
     grid_step  = 2
         
     # static map
-    rospy.init_node("eval", disable_signals=True)
-    rospy.Subscriber('/flatland_server/debug/layer/static',MarkerArray, getMap)
+    #rospy.init_node("eval", disable_signals=True)
+    #rospy.Subscriber('/flatland_server/debug/layer/static',MarkerArray, getMap)
     
 
     # eval_cfg("eval_run3_empty.yml")
@@ -963,7 +1034,7 @@ def run(cfg_file, filetype):
 
 
 
-    rospy.spin()
+    #rospy.spin()
 
 if __name__=="__main__":
 

@@ -1,25 +1,34 @@
+# Qualitative Evaluations
+This section describe how to plot the qualitative evaluations from recorded rosbags. The trajectories, collisions, collision zones, and obstacle paths can be visualized.
+<p float="left">
+  <img src="/arena_navigation/arena_local_planner/evaluation/plots/test_plots/map1_obs20_vel02_testplot1.png" width="300" />
+  <img src="/arena_navigation/arena_local_planner/evaluation/plots/test_plots/map1_obs20_vel02_testplot2.png" width="300" /> 
+  <img src="/arena_navigation/arena_local_planner/evaluation/plots/test_plots/map1_obs20_vel02_testplot3.png" width="300" />
+</p>
+
+
 # Installation
 The evaluation script need some packages in order to work and a python version above 3.7. We recommend to create a new venv for evaluation purposes.
 ```
-pip install sklearn
+pip install sklearn bagpy importlib-resources
 ```
 
 # Evaluation
 
-The evaluation script will compare different planners provided as rosbags. The bags need to be recorded while running a scenario (see here), since some topics are needed by the script. The script file is located in script/scenario_eval.py
+The evaluation script file is located in script/scenario_eval.py. It will compare different planners provided as rosbags, which need to be recorded while running a scenario using the command 
 
-Once the config id ready, one can easily start the evaluation with the following steps
+```
+rosbag record -o name_of_bag /scenario_reset -e "(.*)police(.*)"
+```
+More information about how to record can be found [here](https://github.com/ignc-research/arena-rosnav/blob/local_planner_subgoalmode/docs/eval_25042021.md).
+Some example rosbags are located in [rosbags](https://github.com/ignc-research/arena-rosnav/tree/local_planner_subgoalmode/arena_navigation/arena_local_planner/evaluation/bags/scenarios).
 
- * Start Simulation
-```
-roslaunch arena_bringup start_arena_flatland.launch disable_scenario:="false" map_file:="map1" scenario_file:="eval/obstacle_map1_obs10.json" local_planner:="teb"
-```
-Here, one should specify the map on which the rosbags were recorded. 
-* Afterwards run:
+Once the config id ready, run
 
 ```
 python scenario_eval.py test.yml png
 ``` 
+
 Where test.yml is the config file to specify which plots you want to create. More details below. Pay attention that each map may have different origins and you have to specify the origin within the scenario_eval-py script. (Currently the origin is hardcoded on line 845 but we plan to include that parameter into the config in future.) 
 
 Following files will be created: 
@@ -146,9 +155,9 @@ map1_obs20_vel02_testplot3:
 <img width="400" height="400" src="/arena_navigation/arena_local_planner/evaluation/plots/test_plots/map1_obs20_vel02_testplot3.png"> -->
 
 <p float="left">
-  <img src="/arena_navigation/arena_local_planner/evaluation/plots/test_plots/map1_obs20_vel02_testplot1.png" width="320" />
-  <img src="/arena_navigation/arena_local_planner/evaluation/plots/test_plots/map1_obs20_vel02_testplot2.png" width="320" /> 
-  <img src="/arena_navigation/arena_local_planner/evaluation/plots/test_plots/map1_obs20_vel02_testplot3.png" width="320" />
+  <img src="/arena_navigation/arena_local_planner/evaluation/plots/test_plots/map1_obs20_vel02_testplot1.png" width="300" />
+  <img src="/arena_navigation/arena_local_planner/evaluation/plots/test_plots/map1_obs20_vel02_testplot2.png" width="300" /> 
+  <img src="/arena_navigation/arena_local_planner/evaluation/plots/test_plots/map1_obs20_vel02_testplot3.png" width="300" />
 </p>
 
 Here, you can see the three figures generated using the test cfg. First figure uses the default cfg, 2nd figure uses a custom cfg including collision zones and the static map. Figure three uses the default cfg again and uses the cadrl model from run 2. 

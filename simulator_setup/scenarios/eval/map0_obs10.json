@@ -2,7 +2,7 @@
 	"scenarios": [
 		{
 			"scene_name": "new_scenario",
-			"repeats": 15,
+			"repeats": 5,
 			"dynamic_obstacles": {
 				"dynamic_obs_0": {
 					"obstacle_radius": 0.655,
