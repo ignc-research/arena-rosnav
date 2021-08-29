@@ -59,7 +59,7 @@ class ObservationCollector():
         self.obstacle_radius = self.read_saftey_distance_parameter_from_yaml()['obstacle radius']
         self.human_behavior_tokens= copy.deepcopy(self.safe_dists_factor)
         for i,item in enumerate(list(self.human_behavior_tokens.items())):
-            self.human_behavior_tokens[ item[0]] = -1
+            self.human_behavior_tokens[ item[0]] = i
         self.human_type_ids= copy.deepcopy(self.safe_dists_human_type)
         for i,item in enumerate(list(self.human_type_ids.items())):
             self.human_type_ids[ item[0]] = i
@@ -193,7 +193,7 @@ class ObservationCollector():
             scan = np.ones(self._laser_num_beams, dtype=float)*100
       
         self.currentgoal =  Pose2D()
-
+        obs_dict = {}
 
         self.rho_to_via = -1
         self.theta_to_via = -1
@@ -216,6 +216,10 @@ class ObservationCollector():
             self.currentgoal.x = pos.x
             self.currentgoal.y = pos.y
             self.currentgoal.theta = pos.theta
+            vip_vel =self._human_vel[index_agent_requesting_via[0]][0]
+            obs_dict['vip_velocity']=math.sqrt(vip_vel.linear.x*vip_vel.linear.x+vip_vel.linear.y*vip_vel.linear.y)
+            obs_dict['vip_orientation']=pos.theta
+
 
         elif self._human_behavior.size > 0 and 'StateFollowingGuide' in self._human_behavior: 
             index_agent_following_via =numpy.where(self._human_behavior== 'StateFollowingGuide')
@@ -230,6 +234,12 @@ class ObservationCollector():
                 self.currentgoal.x = pos.x
                 self.currentgoal.y = pos.y
                 self.currentgoal.theta = pos.theta
+            vip_vel =self._human_vel[index_agent_following_via[0]][0]
+            obs_dict['vip_velocity']=math.sqrt(vip_vel.linear.x*vip_vel.linear.x+vip_vel.linear.y*vip_vel.linear.y)
+            obs_dict['vip_orientation']=pos.theta
+            
+
+            
        
         elif self._human_behavior.size > 0 and 'StateRequestingFollower' in self._human_behavior: 
             index_agent_requesting_via =numpy.where(self._human_behavior== 'StateRequestingFollower')
@@ -247,6 +257,10 @@ class ObservationCollector():
                 self.currentgoal.x = -1
                 self.currentgoal.y = -1
                 self.currentgoal.theta = -1
+            vip_vel =self._human_vel[index_agent_requesting_via[0]][0]
+            obs_dict['vip_velocity']=math.sqrt(vip_vel.linear.x*vip_vel.linear.x+vip_vel.linear.y*vip_vel.linear.y)
+            obs_dict['vip_orientation']=pos.theta
+            
         
         elif self._human_behavior.size > 0 and 'StateGuideToGoal' in self._human_behavior: 
             index_agent_requesting_via =numpy.where(self._human_behavior== 'StateGuideToGoal')
@@ -264,11 +278,15 @@ class ObservationCollector():
                 self.currentgoal.x = -1
                 self.currentgoal.y = -1
                 self.currentgoal.theta = -1
+            vip_vel =self._human_vel[index_agent_requesting_via[0]][0]
+            obs_dict['vip_velocity']=math.sqrt(vip_vel.linear.x*vip_vel.linear.x+vip_vel.linear.y*vip_vel.linear.y)
+            obs_dict['vip_orientation']=pos.theta
+            
 
         elif self._human_behavior.size > 0 and 'StateClearingGoal' in self._human_behavior: 
             self.flag_requesting_via = 5
             
-            
+        
 
     
         self.robot_to_via_state=[self._robot_pose.x, self._robot_pose.y, self.robot_vx_to_via, self.robot_vy_to_via,
@@ -283,7 +301,7 @@ class ObservationCollector():
         self.robot_self_state=[self._robot_pose.x, self._robot_pose.y, self.robot_vx, self.robot_vy,
                                                      self._robot_pose.theta, self._robot_vel.angular.z, self._radius_robot, rho, theta]
         merged_obs = np.hstack([np.array([self.time_step]), self.flag_requesting_via,self.robot_to_via_state, scan])
-        obs_dict = {}
+        
         obs_dict["robot_velocity"]= math.sqrt(self._robot_vel.linear.x*self._robot_vel.linear.x+self._robot_vel.linear.y*self._robot_vel.linear.y)
         obs_dict["laser_scan"] = scan
         obs_dict['goal_in_robot_frame'] = [rho,theta,self.flag_requesting_via,self.rho_to_via,self.theta_to_via]
@@ -291,6 +309,10 @@ class ObservationCollector():
         count_observable_humans=0  
         obs_dict['human_coordinates_in_robot_frame']= []
         obs_dict['human_obstacles_in_robot_frame'] = np.array([],dtype=object).reshape(0, 4)
+        obs_dict['task_flag']=self.flag_requesting_via 
+        if self.flag_requesting_via == 0 :
+            obs_dict['vip_velocity']= -1
+            obs_dict['vip_orientation']=-1        
 
         agent_massage_is_none = False
         for pos in self._human_position: 
@@ -328,6 +350,7 @@ class ObservationCollector():
             obs_dict['human_behavior']=self._human_behavior
 
 
+
             
             
             
@@ -342,7 +365,7 @@ class ObservationCollector():
                     # print(theta_humans[i])
                     obs_dict['human_obstacles_in_robot_frame'] = np.vstack([obs_dict['human_obstacles_in_robot_frame'], rho_behavior])
                     #determine the safe_dist for every human
-                    safe_dist_=self.safe_dists_human_type[ty]  # * self.safe_dists_factor[self._human_behavior[i]]
+                    safe_dist_=self.safe_dists_human_type[ty]  * self.safe_dists_factor[self._human_behavior[i]]
                     _radius =self.obstacle_radius[ty]
                     _human_behavior_token=self.human_behavior_tokens[self._human_behavior[i]]
                     #robot centric 4 elements in state

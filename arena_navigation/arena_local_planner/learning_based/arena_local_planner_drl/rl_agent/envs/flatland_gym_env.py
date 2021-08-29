@@ -239,12 +239,16 @@ class FlatlandEnv(gym.Env):
         
         # info
         info = {}
+        info['done_reason'] = -1
         if done:
             info['done_reason'] = reward_info['done_reason']
             info['is_success'] = reward_info['is_success']
             self.reward_calculator.kdtree = None
-            history_evaluation=self.reward_calculator.get_history_info()
-            history_evaluation=[self._episode]+history_evaluation+[info['done_reason']]
+            history_evaluation  = [self._episode]+self.reward_calculator.get_history_info()
+            history_evaluation +=history_evaluation+[info['done_reason']]
+            history_evaluation +=[obs_dict['vip_velocity']]
+            history_evaluation +=[obs_dict['robot_velocity']]
+            history_evaluation +=[obs_dict['vip_orientation']]
             self.csv_writer.addData(np.array(history_evaluation))
 
         if self._steps_curr_episode > self._max_steps_per_episode:
@@ -252,8 +256,11 @@ class FlatlandEnv(gym.Env):
             info['done_reason'] = 0
             info['is_success'] = 0
             self.reward_calculator.kdtree = None
-            history_evaluation=self.reward_calculator.get_history_info()
-            history_evaluation=[self._episode]+history_evaluation+[info['done_reason']]
+            history_evaluation  = [self._episode]+self.reward_calculator.get_history_info()
+            history_evaluation +=history_evaluation+[info['done_reason']]
+            history_evaluation +=[obs_dict['vip_velocity']]
+            history_evaluation +=[obs_dict['robot_velocity']]
+            history_evaluation +=[obs_dict['vip_orientation']]
             self.csv_writer.addData(np.array(history_evaluation))
 
         self.last_obs_dict=obs_dict

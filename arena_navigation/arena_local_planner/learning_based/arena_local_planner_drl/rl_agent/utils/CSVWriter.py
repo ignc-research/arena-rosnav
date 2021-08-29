@@ -9,7 +9,7 @@ class CSVWriter():
             data = [['episode', 'nearest distance for adult','nearest distance for child','nearest distance for elder',
             'nearest distance for forklift','nearest distance for servicerobot','nearest distance for random_wanderer','reward',
             'safe distance adult','safe distance child','safe distance elder','safe distance forklift','safe distance servicerobot' 
-            ,'safe distance random_wanderer','done_reason']]
+            ,'safe distance random_wanderer','done_reason','vip_velocity','robot_velocity','vip_orientation']]
             a.writerows(data)
 
     def addData(self, data:np.array):
