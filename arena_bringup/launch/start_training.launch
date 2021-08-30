@@ -55,7 +55,7 @@
     <!-- In multi-env training /clock not available, since we only want one map_server, it's clock topic is remapped to /clock -->
     <remap from="/clock" to="/$(arg ns_prefix)_1/clock" />
   </node>
-
+  <node name="odom_relay" type="relay" pkg="topic_tools" args="/$(arg ns_prefix)_1/clock /clock" />
   <group if="$(eval arg('train_mode') == false)">
   <!-- makes sure that action's will be published according to sim time in eval mode-->
     <node name="action_publisher" pkg="arena_local_planner_drl" type="action_publisher.py"/>
