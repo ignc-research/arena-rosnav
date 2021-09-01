@@ -44,6 +44,7 @@ Panels:
         - /Plan Manager1/subgoal1
         - /Goal Pose1
         - /Marker2
+        - /Path1
         - /Marker3
       Splitter Ratio: 0.4374079406261444
     Tree Height: 679
@@ -92,6 +93,12 @@ Visualization Manager:
               Value: true
             map:
               Value: true
+            sim_10_base_footprint:
+              Value: true
+            sim_10_laser_link:
+              Value: true
+            sim_10_odom:
+              Value: true
             sim_1_base_footprint:
               Value: true
             sim_1_laser_link:
@@ -128,6 +135,24 @@ Visualization Manager:
               Value: true
             sim_6_odom:
               Value: true
+            sim_7_base_footprint:
+              Value: true
+            sim_7_laser_link:
+              Value: true
+            sim_7_odom:
+              Value: true
+            sim_8_base_footprint:
+              Value: true
+            sim_8_laser_link:
+              Value: true
+            sim_8_odom:
+              Value: true
+            sim_9_base_footprint:
+              Value: true
+            sim_9_laser_link:
+              Value: true
+            sim_9_odom:
+              Value: true
           Marker Scale: 1
           Name: TF
           Show Arrows: true
@@ -137,6 +162,10 @@ Visualization Manager:
             map:
               eval_sim_odom:
                 {}
+              sim_10_odom:
+                sim_10_base_footprint:
+                  sim_10_laser_link:
+                    {}
               sim_1_odom:
                 sim_1_base_footprint:
                   sim_1_laser_link:
@@ -160,6 +189,18 @@ Visualization Manager:
               sim_6_odom:
                 sim_6_base_footprint:
                   sim_6_laser_link:
+                    {}
+              sim_7_odom:
+                sim_7_base_footprint:
+                  sim_7_laser_link:
+                    {}
+              sim_8_odom:
+                sim_8_base_footprint:
+                  sim_8_laser_link:
+                    {}
+              sim_9_odom:
+                sim_9_base_footprint:
+                  sim_9_laser_link:
                     {}
           Update Interval: 0
           Value: true
@@ -1256,7 +1297,7 @@ Visualization Manager:
     - Alpha: 1
       Buffer Length: 1
       Class: rviz/Path
-      Color: 25; 255; 0
+      Color: 100; 100; 0
       Enabled: true
       Head Diameter: 0.30000001192092896
       Head Length: 0.20000000298023224
@@ -1273,7 +1314,7 @@ Visualization Manager:
       Radius: 0.029999999329447746
       Shaft Diameter: 0.10000000149011612
       Shaft Length: 0.10000000149011612
-      Topic: /sim_1/globalPlan
+      Topic: /sim_1/global_planner/NavfnROS/plan
       Unreliable: false
       Value: true
     - Class: rviz/Marker
