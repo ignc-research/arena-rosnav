@@ -3,27 +3,33 @@ import os
 import random
 import time
 
+import numpy as np
 import rospkg
+import torch
 from rl_agent.envs.all_in_one_flatland_gym_env import AllInOneEnv
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
-from tools.all_in_one_utils import evaluate_policy_manually
+
+from tools.all_in_one_utils import Evaluator
 from tools.train_agent_utils import check_hyperparam_format, print_hyperparameters
 
-base_Agent = 'all_in_one_agents_2xteb_rlca_rule05_policy13'
+base_Agent = 'indoor_teb_drl4_rule06_policy1'
 primitive_agents = ['rlca_only', 'teb_only', 'drl_only', 'mpc_only', 'global_path_following_only',
                     'teb_large_min_dist_only']
-AGENTS = ['drl_only', 'teb_only', 'rlca_only']
-eval_episodes = 100
+simple_all_in_one_switches = ['simple_all_in_one', 'random']
+
+AGENTS = ['teb_only']
+eval_episodes = 50
 seed = random.randint(1, 1000)
-map_config = "indoor.json"
+map_config = "mixed_default.json"
 
 
 def get_paths(AGENT: str, primitive_agent=False, is_random_agent=False):
     dir = rospkg.RosPack().get_path('arena_local_planner_drl')
     if primitive_agent:
         paths = {
-            'all_in_one_parameters': os.path.join(dir, 'configs', 'all_in_one_hyperparameters', AGENT + '.json'),
+            'all_in_one_parameters': os.path.join(dir, 'configs', 'all_in_one_hyperparameters', 'agent_parameters',
+                                                  AGENT + '.json'),
             'robot_setting': os.path.join(rospkg.RosPack().get_path('simulator_setup'), 'robot', 'myrobot.model.yaml'),
             'robot_as': os.path.join(rospkg.RosPack().get_path('arena_local_planner_drl'), 'configs',
                                      'default_settings.yaml'),
@@ -87,6 +93,36 @@ def random_agent(numb_models: int):
     return _get_random_action
 
 
+def random_action_probs(numb_models: int):
+    def _get_random_action_probs(_, __):
+        return numb_models * np.log([1. / numb_models])
+
+    return _get_random_action_probs
+
+
+def simple_all_in_one(obs):
+    _RS = 4  # robot state size
+    _L = 360  # laser scan size
+    switch_distance = 1.1
+    laser_scan_dynamic = obs[_L:-_RS]
+    min_dist = np.min(laser_scan_dynamic)
+    if min_dist <= switch_distance:
+        return 0
+    else:
+        return 1
+
+
+def simple_all_in_one_action_probs(obs, _):
+    _RS = 4  # robot state size
+    _L = 360  # laser scan size
+    switch_distance = 1.1
+    laser_scan_dynamic = torch.unsqueeze(obs[:, _L:-_RS], 1).cpu().numpy()
+    if np.min(laser_scan_dynamic) <= switch_distance:
+        return [np.log(1), np.log(0)]
+    else:
+        return [np.log(0), np.log(1)]
+
+
 def load_hyperparameters_json(PATHS):
     doc_location = os.path.join(PATHS.get('hyperparams'))
     if os.path.isfile(doc_location):
@@ -111,6 +147,7 @@ if __name__ == "__main__":
             print_hyperparameters(params)
             env = DummyVecEnv([make_env(paths, params)])
             policy = random_agent(env.env_method("get_number_models")[0])
+            action_probs = random_action_probs(env.env_method("get_number_models")[0])
             env = VecNormalize(env)
         elif AGENT in primitive_agents:
             paths = get_paths(AGENT, primitive_agent=True)
@@ -118,9 +155,20 @@ if __name__ == "__main__":
             print_hyperparameters(params)
             env = DummyVecEnv([make_env(paths, params)])
 
-
             def policy(_):
                 return 0
+
+            def action_probs(_, __):
+                return [np.log(1.0)]
+
+        elif AGENT == "simple_all_in_one":
+            paths = get_paths(AGENT, primitive_agent=True)
+            params = load_hyperparameters_json(paths)
+            print_hyperparameters(params)
+            env = DummyVecEnv([make_env(paths, params)])
+            policy = simple_all_in_one
+            action_probs = simple_all_in_one_action_probs
+
         else:
             paths = get_paths(AGENT)
             params = load_hyperparameters_json(paths)
@@ -137,8 +185,13 @@ if __name__ == "__main__":
             def policy(x):
                 return agent.predict(x, deterministic=True)[0]
 
-        evaluate_policy_manually(policy, env, eval_episodes, paths['log'], params['gamma'],
-                                 paths['all_in_one_parameters'])
+
+            def action_probs(x, y):
+                return agent.policy.evaluate_actions(x, y)[1]
+
+        evaluator = Evaluator()
+        evaluator.evaluate_policy_manually(policy, action_probs, env, eval_episodes, paths['log'], params['gamma'],
+                                           paths['all_in_one_parameters'])
 
         env.close()
         print("Evaluation of agent " + AGENT + " completed!")
