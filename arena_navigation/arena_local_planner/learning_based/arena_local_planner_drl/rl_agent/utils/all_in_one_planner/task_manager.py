@@ -2,9 +2,10 @@ import json
 import os
 import random
 import subprocess
-
+import time
 import rospkg
 import rospy
+import rosservice
 from nav_msgs.srv import GetMap
 from rospy import ServiceException
 from task_generator.obstacles_manager import ObstaclesManager
@@ -49,6 +50,16 @@ class TaskManager:
         self._start_map_generator_node(map_type, indoor_prob)
 
         service_client_get_map = rospy.ServiceProxy('/' + self.ns + '/static_map', GetMap)
+
+        service_name = '/' + self.ns + '/static_map'
+        service_list = rosservice.get_service_list()
+        max_tries = 10
+        for i in range(max_tries):
+            if service_name in service_list:
+                break
+            else:
+                time.sleep(1)
+
         map_response = service_client_get_map()
         models_folder_path = rospkg.RosPack().get_path('simulator_setup')
         self.robot_manager = RobotManager(self.ns, map_response.map, os.path.join(
