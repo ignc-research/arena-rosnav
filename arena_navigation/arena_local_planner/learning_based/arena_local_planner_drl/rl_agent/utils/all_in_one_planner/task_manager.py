@@ -1,14 +1,17 @@
 import json
 import os
+import random
 import subprocess
 
-import nav_msgs.srv
 import rospkg
 import rospy
 from nav_msgs.srv import GetMap
+from rospy import ServiceException
 from task_generator.obstacles_manager import ObstaclesManager
 from task_generator.robot_manager import RobotManager
 from task_generator.tasks import RandomTask
+
+from simulator_setup.srv import *
 
 
 class TaskManager:
@@ -18,13 +21,14 @@ class TaskManager:
         self.task = self._get_random_task(paths)
         self.resetMap_interval = reset_map_interval
         self.current_iteration = 0
-        self._request_new_map = rospy.ServiceProxy("/" + self.ns + "/new_map", GetMap)
+        self._request_new_map = rospy.ServiceProxy("/" + self.ns + "/new_map", GetMapWithSeed)
 
-    def reset(self):
+    def reset(self, seed):
         self.current_iteration += 1
         if self.current_iteration % self.resetMap_interval == 0:
             self.current_iteration = 0
-            self._update_map()
+            self._update_map(seed)
+        random.seed(seed)
         self.task.reset()
 
     def _get_random_task(self, paths: dict):
@@ -37,8 +41,12 @@ class TaskManager:
         numb_static_obst = map_params['numb_static_obstacles']
         numb_dyn_obst = map_params['numb_dynamic_obstacles']
         map_type = map_params['type']
+        if map_type == 'mixed':
+            indoor_prob = map_params['indoor_prob']
+        else:
+            indoor_prob = 0
 
-        self._start_map_generator_node(map_type)
+        self._start_map_generator_node(map_type, indoor_prob)
 
         service_client_get_map = rospy.ServiceProxy('/' + self.ns + '/static_map', GetMap)
         map_response = service_client_get_map()
@@ -48,21 +56,29 @@ class TaskManager:
         self.obstacles_manager = ObstaclesManager(self.ns, map_response.map)
         rospy.set_param("/task_mode", "random")
         numb_obst = numb_static_obst + numb_dyn_obst
-        prob_dyn_obst = float(numb_dyn_obst) / numb_obst
+        if numb_obst != 0:
+            prob_dyn_obst = float(numb_dyn_obst) / numb_obst
+        else:
+            prob_dyn_obst = 1
         self.obstacles_manager.register_random_obstacles(numb_obst, prob_dyn_obst)
         return RandomTask(self.obstacles_manager, self.robot_manager)
 
-    def _start_map_generator_node(self, map_type: str):
+    def _start_map_generator_node(self, map_type: str, indoor_prob: float):
         package = 'simulator_setup'
         launch_file = 'map_generator.launch'
         arg1 = "ns:=" + self.ns
         arg2 = "type:=" + map_type
+        arg3 = "indoor_prob:=" + str(indoor_prob)
 
         # Use subprocess to execute .launch file
-        self._global_planner_process = subprocess.Popen(["roslaunch", package, launch_file, arg1, arg2],
+        self._global_planner_process = subprocess.Popen(["roslaunch", package, launch_file, arg1, arg2, arg3],
                                                         stdout=subprocess.DEVNULL)
 
-    def _update_map(self):
-        new_map = self._request_new_map(nav_msgs.srv.GetMapRequest())
-        self.obstacles_manager.update_map(new_map.map)
-        self.robot_manager.update_map(new_map.map)
+    def _update_map(self, seed: int):
+        request = GetMapWithSeedRequest(seed=seed)
+        try:
+            new_map = self._request_new_map(request)
+            self.obstacles_manager.update_map(new_map.map)
+            self.robot_manager.update_map(new_map.map)
+        except ServiceException:
+            pass

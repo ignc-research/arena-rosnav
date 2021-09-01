@@ -78,7 +78,7 @@ class AllInOneEnv(gym.Env):
         if self._evaluation:
             map_update_freq = 1
         else:
-            map_update_freq = 5
+            map_update_freq = 1
         self.task_manager = TaskManager(self.ns, map_update_freq, paths)
         self._seed = seed
 
@@ -150,10 +150,10 @@ class AllInOneEnv(gym.Env):
 
         # reset task manager
         if self._evaluation:
-            random.seed((self._current_eval_iteration % self._evaluation_episodes) * self._seed)
+            seed = (self._current_eval_iteration % self._evaluation_episodes) * self._seed
         else:
-            random.seed()
-        self.task_manager.reset()
+            seed = random.randint(0, 1000000)
+        self.task_manager.reset(seed)
 
         self.reward_calculator.reset()
         self._logger.reset()

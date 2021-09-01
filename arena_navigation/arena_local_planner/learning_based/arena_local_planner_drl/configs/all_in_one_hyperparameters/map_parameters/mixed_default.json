@@ -1,5 +1,6 @@
 {
   "type": "mixed",
+  "indoor_prob": 0.8,
   "numb_dynamic_obstacles": 18,
   "numb_static_obstacles": 0
 }

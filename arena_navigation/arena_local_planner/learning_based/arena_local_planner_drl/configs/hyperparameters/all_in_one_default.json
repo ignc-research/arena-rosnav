@@ -14,7 +14,7 @@
     "clip_range": 0.22,
     "train_max_steps_per_episode": 300,
     "eval_max_steps_per_episode": 350,
-    "goal_radius": 0.4,
+    "goal_radius": 0.6,
     "reward_fnc": "rule_06",
     "discrete_action_space": false,
     "normalize": true,

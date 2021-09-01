@@ -134,6 +134,9 @@ class AllInOneVisualizer:
         marker.color.b = self.colors[action][2]
         marker.color.a = 1
 
+        marker.pose.position.x = -0.5
+        marker.pose.position.y = -1.5
+
         marker.scale.z = 1
 
         marker.text = self._model_names[action]

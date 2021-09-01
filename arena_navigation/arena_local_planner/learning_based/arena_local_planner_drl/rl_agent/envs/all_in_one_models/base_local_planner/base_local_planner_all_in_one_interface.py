@@ -1,11 +1,12 @@
 import subprocess
 import time
 
-import all_in_one_local_planner_interface.srv
 import numpy as np
 import rospy
 import rosservice
 from rl_agent.envs.all_in_one_models.model_base_class import ModelBase
+
+import all_in_one_local_planner_interface.srv
 
 
 class BaseLocalPlannerAgent(ModelBase):

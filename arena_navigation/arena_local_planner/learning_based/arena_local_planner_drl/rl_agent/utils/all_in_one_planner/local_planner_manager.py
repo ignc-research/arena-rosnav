@@ -113,50 +113,50 @@ class LocalPlannerManager:
                 if not os.path.exists(model_based_config_path_full):
                     # case 2: Load config file from config folder
                     model_based_config_path_full = os.path.join(base_dir, 'configs', 'all_in_one_hyperparameters',
-                                                                model_based_config_path)
-                models.append(BaseLocalPlannerAgent(model_based_names[i], self._ns, model_based_config_path_full))
+                                                                'base_local_planner_parameters', model_based_config_path)
+                    models.append(BaseLocalPlannerAgent(model_based_names[i], self._ns, model_based_config_path_full))
 
-        if 'teb' in config_model:
-            teb_names = config_model['teb_names']
-            base_dir = rospkg.RosPack().get_path('arena_local_planner_drl')
-            for i, teb_config_path in enumerate(config_model['teb']):
-                # case 1: Load config file from agent folder
-                teb_config_path_full = os.path.join(base_dir_agent, teb_config_path)
-                if not os.path.exists(teb_config_path_full):
-                    # case 2: Load config file from config folder
-                    teb_config_path_full = os.path.join(base_dir, 'configs', 'all_in_one_hyperparameters',
-                                                        teb_config_path)
-                models.append(TebAllinOneInterfaceAgent(teb_names[i], self._ns, teb_config_path_full))
-
-        self._models = models
-
-        # copy hyperparameter file and model based planners config files
-        if self._is_train_mode and 'model' in paths:
-            doc_location = os.path.join(paths['model'], "all_in_one_parameters.json")
-            if not os.path.exists(doc_location):
-                with open(doc_location, "w", encoding='utf-8') as target:
-                    json.dump(config_data, target, ensure_ascii=False, indent=4)
-            if 'model_based' in config_model:
-                for model_based_config_path in config_model['model_based']:
-                    full_dest_path = os.path.join(paths['model'], model_based_config_path)
-                    base_dir = rospkg.RosPack().get_path('arena_local_planner_drl')
-                    if not os.path.exists(full_dest_path):
-                        source_file_path = os.path.join(base_dir, 'configs', 'all_in_one_hyperparameters',
-                                                        model_based_config_path)
-                        copyfile(source_file_path, full_dest_path)
             if 'teb' in config_model:
-                for teb_config_path in config_model['teb']:
-                    full_dest_path = os.path.join(paths['model'], teb_config_path)
-                    base_dir = rospkg.RosPack().get_path('arena_local_planner_drl')
-                    if not os.path.exists(full_dest_path):
-                        source_file_path = os.path.join(base_dir, 'configs', 'all_in_one_hyperparameters',
-                                                        teb_config_path)
-                        copyfile(source_file_path, full_dest_path)
+                teb_names = config_model['teb_names']
+                base_dir = rospkg.RosPack().get_path('arena_local_planner_drl')
+                for i, teb_config_path in enumerate(config_model['teb']):
+                    # case 1: Load config file from agent folder
+                    teb_config_path_full = os.path.join(base_dir_agent, teb_config_path)
+                    if not os.path.exists(teb_config_path_full):
+                        # case 2: Load config file from config folder
+                        teb_config_path_full = os.path.join(base_dir, 'configs', 'all_in_one_hyperparameters',
+                                                            'base_local_planner_parameters', teb_config_path)
+                    models.append(TebAllinOneInterfaceAgent(teb_names[i], self._ns, teb_config_path_full))
 
-        # collect necessary observations
-        self._required_observations = dict()
-        for m in self._models:
-            self._required_observations.update(m.get_observation_info())
+            self._models = models
 
-        # collect model names
-        self._model_names = [model.get_name() for model in self._models]
+            # copy hyperparameter file and model based planners config files
+            if self._is_train_mode and 'model' in paths:
+                doc_location = os.path.join(paths['model'], "all_in_one_parameters.json")
+                if not os.path.exists(doc_location):
+                    with open(doc_location, "w", encoding='utf-8') as target:
+                        json.dump(config_data, target, ensure_ascii=False, indent=4)
+                if 'model_based' in config_model:
+                    for model_based_config_path in config_model['model_based']:
+                        full_dest_path = os.path.join(paths['model'], model_based_config_path)
+                        base_dir = rospkg.RosPack().get_path('arena_local_planner_drl')
+                        if not os.path.exists(full_dest_path):
+                            source_file_path = os.path.join(base_dir, 'configs', 'all_in_one_hyperparameters',
+                                                            'base_local_planner_parameters', model_based_config_path)
+                            copyfile(source_file_path, full_dest_path)
+                if 'teb' in config_model:
+                    for teb_config_path in config_model['teb']:
+                        full_dest_path = os.path.join(paths['model'], teb_config_path)
+                        base_dir = rospkg.RosPack().get_path('arena_local_planner_drl')
+                        if not os.path.exists(full_dest_path):
+                            source_file_path = os.path.join(base_dir, 'configs', 'all_in_one_hyperparameters',
+                                                            'base_local_planner_parameters', teb_config_path)
+                            copyfile(source_file_path, full_dest_path)
+
+            # collect necessary observations
+            self._required_observations = dict()
+            for m in self._models:
+                self._required_observations.update(m.get_observation_info())
+
+            # collect model names
+            self._model_names = [model.get_name() for model in self._models]
