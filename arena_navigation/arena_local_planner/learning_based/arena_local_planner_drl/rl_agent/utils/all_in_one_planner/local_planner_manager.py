@@ -114,7 +114,7 @@ class LocalPlannerManager:
                     # case 2: Load config file from config folder
                     model_based_config_path_full = os.path.join(base_dir, 'configs', 'all_in_one_hyperparameters',
                                                                 'base_local_planner_parameters', model_based_config_path)
-                    models.append(BaseLocalPlannerAgent(model_based_names[i], self._ns, model_based_config_path_full))
+                models.append(BaseLocalPlannerAgent(model_based_names[i], self._ns, model_based_config_path_full))
 
             if 'teb' in config_model:
                 teb_names = config_model['teb_names']

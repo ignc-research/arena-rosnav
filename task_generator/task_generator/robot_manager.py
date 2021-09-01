@@ -150,7 +150,7 @@ class RobotManager:
 
         if start_pos is None or goal_pos is None:
             # if any of them need to be random generated, we set a higher threshold,otherwise only try once
-            max_try_times = 20
+            max_try_times = 30
         else:
             max_try_times = 1
 
@@ -162,13 +162,13 @@ class RobotManager:
             if start_pos is None:
                 start_pos_ = Pose2D()
                 start_pos_.x, start_pos_.y, start_pos_.theta = get_random_pos_on_map(
-                    self._free_space_indices, self.map, self.ROBOT_RADIUS * 3)
+                    self._free_space_indices, self.map, self.ROBOT_RADIUS * 2.7)
             else:
                 start_pos_ = start_pos
             if goal_pos is None:
                 goal_pos_ = Pose2D()
                 goal_pos_.x, goal_pos_.y, goal_pos_.theta = get_random_pos_on_map(
-                    self._free_space_indices, self.map, self.ROBOT_RADIUS * 3)
+                    self._free_space_indices, self.map, self.ROBOT_RADIUS * 2.7)
             else:
                 goal_pos_ = goal_pos
 

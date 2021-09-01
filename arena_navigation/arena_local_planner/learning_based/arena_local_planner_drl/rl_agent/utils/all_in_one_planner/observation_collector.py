@@ -157,20 +157,19 @@ class ObservationCollectorAllInOne:
         # try to retrieve sync'ed obs
         laser_scan, laser_scan_static, robot_pose, twist = self.get_sync_obs()
 
-        if laser_scan is not None and robot_pose is not None and twist is not None:
+        if laser_scan is not None and robot_pose is not None and twist is not None and laser_scan_static is not None:
             self._scan = laser_scan
             self._robot_pose = robot_pose
             self._twist = twist
             self._scan_static = laser_scan_static
 
-        if len(self._scan.ranges) > 0:
+        if len(self._scan.ranges) > 0 and len(self._scan_static.ranges) > 0:
             scan = self._scan.ranges.astype(np.float32)
             scan_static = self._scan_static.ranges.astype(np.float32)
+            dynamic_scan = self.get_dynamic_scan(scan_static, scan)
         else:
             scan = np.zeros(self._laser_num_beams, dtype=float)
-            scan_static = self._scan_static.ranges.astype(np.float32)
-
-        dynamic_scan = self.get_dynamic_scan(scan_static, scan)
+            scan_static = np.zeros(self._laser_num_beams, dtype=float)
 
         # create new global plan if necessary, extract subgoal and calculate distance to global plan
         if make_new_global_plan or self._global_plan_service is None:
@@ -254,6 +253,7 @@ class ObservationCollectorAllInOne:
 
     def get_sync_obs(self):
         laser_scan = None
+        static_scan = None
         robot_pose = None
         twist = None
         laser_stamp = None
@@ -287,12 +287,13 @@ class ObservationCollectorAllInOne:
         # Extract static scan
         static_laser_stamp = 0
         static_laser_scan_msg = None
-        while laser_stamp > static_laser_stamp and len(self._laser_static_deque) > 0:
-            static_laser_scan_msg = self._laser_static_deque.popleft()
-            static_laser_stamp = static_laser_scan_msg.header.stamp.to_sec()
+        if laser_stamp is not None:
+            while laser_stamp > static_laser_stamp and len(self._laser_static_deque) > 0:
+                static_laser_scan_msg = self._laser_static_deque.popleft()
+                static_laser_stamp = static_laser_scan_msg.header.stamp.to_sec()
 
-        static_scan = self.process_scan_msg(static_laser_scan_msg)
-        self._dyn_scan_msg = static_laser_scan_msg
+            static_scan = self.process_scan_msg(static_laser_scan_msg)
+            self._dyn_scan_msg = static_laser_scan_msg
 
         # print(f"Laser_stamp: {laser_stamp}, Static_stamp: {static_laser_stamp}")
 
