@@ -8,6 +8,6 @@
     "numb_static_obstacles": 0
   },
   "run_all_agents_each_iteration": false,
-  "update_global_plan_frequency": 4,
-  "all_in_one_planner_frequency": 4
+  "update_global_plan_frequency": 10,
+  "all_in_one_planner_frequency": 10
 }
