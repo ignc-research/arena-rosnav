@@ -9,13 +9,13 @@ from multiprocessing import Process
 import rosnode
 from rl_agent.envs.all_in_one_flatland_gym_env import AllInOneEnv
 from rl_agent.envs.all_in_one_models.drl.drl_agent import setup_and_start_drl_server
-from scripts.all_in_one_policies import *
 from stable_baselines3 import PPO
 from stable_baselines3.common.callbacks import EvalCallback
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.utils import set_random_seed
 from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv, VecNormalize
-from tools.custom_mlp_utils import get_act_fn
+
+from scripts.all_in_one_policies import *
 from tools.train_agent_utils import initialize_hyperparameters, update_hyperparam_model
 
 
@@ -108,11 +108,12 @@ def get_paths(agent_version: str, args, all_in_one_config: str = "all_in_one_def
             os.path.join(
                 dir, 'configs', 'training_curriculum_map1small.yaml'),
         'all_in_one_parameters':
-            os.path.join(dir, 'configs', 'all_in_one_hyperparameters', all_in_one_config),
+            os.path.join(dir, 'configs', 'all_in_one_hyperparameters', 'agent_parameters', all_in_one_config),
         'drl_agents':
             os.path.join(
                 dir, 'agents'),
-        'map_parameters': os.path.join(dir, 'configs', 'all_in_one_hyperparameters', 'map_parameters', "indoor.json")
+        'map_parameters': os.path.join(dir, 'configs', 'all_in_one_hyperparameters', 'map_parameters',
+                                       "mixed_default.json")
     }
 
     if not os.path.exists(paths['model']):
@@ -181,7 +182,7 @@ def parse_all_in_one_args():
 if __name__ == '__main__':
 
     # make unique agent version description based on @version
-    eval_episodes = 50
+    eval_episodes = 60
 
     args = parse_all_in_one_args()
 
@@ -219,9 +220,11 @@ if __name__ == '__main__':
             os.path.join(paths['model'], "best_model"), env)
         update_hyperparam_model(model, paths, params, args.n_envs)
     elif args.agent is not None:
-        if args.agent in ['AGENT_1']:
+        if args.agent in ['AGENT_1', 'AGENT_2']:
             if args.agent == 'AGENT_1':
                 policy_kwargs = policy_kwargs_agent_1
+            elif args.agent == 'AGENT_2':
+                policy_kwargs = policy_kwargs_agent_2
             model = PPO(
                 "CnnPolicy", env,
                 policy_kwargs=policy_kwargs,
@@ -262,13 +265,13 @@ if __name__ == '__main__':
 
     eval_cb = EvalCallback(
         eval_env=eval_env, train_env=env,
-        n_eval_episodes=eval_episodes, eval_freq=20000,
+        n_eval_episodes=eval_episodes, eval_freq=40000,
         log_path=paths['eval'], best_model_save_path=paths['model'], deterministic=True)
 
     print("Start training...")
 
     if args.n is None:
-        n_timesteps = 15000000
+        n_timesteps = 20000000
     else:
         n_timesteps = args.n
 
@@ -277,6 +280,7 @@ if __name__ == '__main__':
     model.learn(total_timesteps=n_timesteps, callback=eval_cb)
 
     # training finished, close everything
+    model.save(os.path.join(paths['model'], 'final_model'))
     print(f'Time passed: {time.time() - start}s')
     print("training done!")
     env.close()
