@@ -65,7 +65,7 @@ class ObstaclesManager:
 
         self.map = new_map
         # a tuple stores the indices of the non-occupied spaces. format ((y,....),(x,...)
-        self._free_space_indices = generate_freespace_indices(self.map)
+        self._free_space_indices = generate_freespace_indices(self.map,  inflation_radius=4)
 
         return is_new_map
 
@@ -325,7 +325,7 @@ class ObstaclesManager:
         f = {}
         f["density"] = 1
         f['restitution'] = 0
-        f["layers"] = ["all"]
+        f["layers"] = ["dynamic"]
         f["collision"] = 'true'
         f["sensor"] = "false"
         # dynamic obstacles have the shape of circle
@@ -473,7 +473,7 @@ class ObstaclesManager:
         f = {}
         f["density"] = 1
         f['restitution'] = 1
-        f["layers"] = ["all"]
+        f["layers"] = ["dynamic"]
         f["collision"] = 'true'
         f["sensor"] = "false"
         # dynamic obstacles have the shape of circle
