@@ -5,3 +5,6 @@ layers:
 - name: static
   map: map.yaml
   color: [0, 1, 0, 1]
+- name: dynamic
+  map: map.yaml
+  color: [0, 1, 0, 1]

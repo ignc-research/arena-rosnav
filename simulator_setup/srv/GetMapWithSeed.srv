@@ -1,0 +1,3 @@
+int32 seed
+---
+nav_msgs/OccupancyGrid map

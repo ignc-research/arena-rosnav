@@ -5,3 +5,6 @@ layers:
 - name: static
   map: sim_15_empty.yaml
   color: [0, 1, 0, 1]
+- name: dynamic
+  map: sim_15_empty.yaml
+  color: [0, 1, 0, 1]

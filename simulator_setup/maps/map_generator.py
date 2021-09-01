@@ -30,12 +30,13 @@ def create_yaml_files(map_name, dir_path, ns: str):
 
     world_yaml_properties = {"properties": {"velocity_iterations": 10, "position_iterations": 10}}
     world_yaml_layers = {"layers": [
-        {"name": "static", "map": "{}_empty.yaml".format(ns), "color": [0, 1, 0, 1]}  # ,
-        # {"name": "map","map": "map.yaml","color": [0, 0, 1, 1]}
+        {"name": "static", "map": "{}_empty.yaml".format(ns), "color": [0, 1, 0, 1]},
+        {"name": "dynamic", "map": "{}_empty.yaml".format(ns), "color": [0, 1, 0, 1]}
     ]}
     world_layers_properties = {"properties": {"velocity_iterations": 10, "position_iterations": 10}}
     world_layer_layers = {"layers": [
-        {"name": "static", "map": "{}_map.yaml".format(ns), "color": [0, 1, 0, 1]}]}
+        {"name": "static", "map": "{}_map.yaml".format(ns), "color": [0, 1, 0, 1]},
+        {"name": "dynamic", "map": "{}_map.yaml".format(ns), "color": [0, 1, 0, 1]}]}
 
     with open(dir_path + "/{0}/{1}_map.world.yaml".format(map_name, ns), 'w') as outfile:
         yaml.dump(world_yaml_properties, outfile, sort_keys=False,
@@ -196,9 +197,9 @@ def create_outdoor_map(height, width, obstacle_number, obstacle_extra_radius):
 
 
 def create_random_map(height, width, corridor_radius, iterations, obstacle_number, obstacle_extra_radius,
-                      map_type: str):
+                      map_type: str, indoor_prob: float):
     if map_type == "mixed":
-        if np.random.random() >= 0.5:
+        if np.random.random() <= indoor_prob:
             map_type = "indoor"
         else:
             map_type = "outdoor"

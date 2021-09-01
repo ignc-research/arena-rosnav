@@ -5,3 +5,6 @@ layers:
 - name: static
   map: eval_sim_map.yaml
   color: [0, 1, 0, 1]
+- name: dynamic
+  map: eval_sim_map.yaml
+  color: [0, 1, 0, 1]
