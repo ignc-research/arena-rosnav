@@ -3,7 +3,6 @@ import subprocess
 import time  # for debuging
 from collections import deque
 
-import all_in_one_global_planner_interface.srv
 import nav_msgs
 import numpy as np
 import rospkg
@@ -12,7 +11,6 @@ import rospy
 import rosservice
 import std_srvs.srv
 import visualization_msgs.msg
-from flatland_msgs.srv import StepWorld, StepWorldRequest
 from geometry_msgs.msg import Pose2D, PoseStamped, Pose
 from geometry_msgs.msg import Twist
 from gym import spaces
@@ -24,6 +22,9 @@ from std_msgs.msg import Bool
 # for transformations
 from tf.transformations import *
 from visualization_msgs.msg import Marker
+
+import all_in_one_global_planner_interface.srv
+from flatland_msgs.srv import StepWorld, StepWorldRequest
 
 
 class ObservationCollectorAllInOne:
@@ -45,6 +46,8 @@ class ObservationCollectorAllInOne:
             self.observation_space = ObservationCollectorAllInOne._stack_spaces((
                 spaces.Box(low=0, high=lidar_range, shape=(
                     num_lidar_beams,), dtype=np.float32),
+                spaces.Box(low=0, high=lidar_range, shape=(
+                    num_lidar_beams,), dtype=np.float32),
                 spaces.Box(low=0, high=20, shape=(1,), dtype=np.float32),
                 spaces.Box(low=-np.pi, high=np.pi, shape=(1,), dtype=np.float32),
                 spaces.Box(low=0, high=20, shape=(1,), dtype=np.float32),
@@ -53,6 +56,8 @@ class ObservationCollectorAllInOne:
             ))
         else:
             self.observation_space = ObservationCollectorAllInOne._stack_spaces((
+                spaces.Box(low=0, high=lidar_range, shape=(
+                    num_lidar_beams,), dtype=np.float32),
                 spaces.Box(low=0, high=lidar_range, shape=(
                     num_lidar_beams,), dtype=np.float32),
                 spaces.Box(low=0, high=20, shape=(1,), dtype=np.float32),
@@ -68,6 +73,7 @@ class ObservationCollectorAllInOne:
 
         self._clock = Clock()
         self._scan = LaserScan()
+        self._scan_static = LaserScan()
         self._robot_pose = Pose2D()
         self._robot_vel = Twist()
         self._goal = Pose2D()
@@ -88,14 +94,22 @@ class ObservationCollectorAllInOne:
         self._sync_slop = 0.05
 
         self._laser_deque = deque()
+        self._laser_static_deque = deque()
         self._rs_deque = deque()
+
+        self._dyn_scan_msg = None
 
         # subscriptions
         self._scan_sub = rospy.Subscriber(
             f'{self.ns_prefix}scan', LaserScan, self.callback_scan, tcp_nodelay=True)
 
+        self._scan_static_sub = rospy.Subscriber(
+            f'{self.ns_prefix}scan_static', LaserScan, self.callback_scan_static, tcp_nodelay=True)
+
         self._robot_state_sub = rospy.Subscriber(
             f'{self.ns_prefix}odom', Odometry, self.callback_robot_state, tcp_nodelay=True)
+
+        # self._dynamic_scan_pub = rospy.Publisher(f'{self.ns_prefix}scan_dynamic', LaserScan, queue_size=1)
 
         # self._clock_sub = rospy.Subscriber(
         #     f'{self.ns_prefix}clock', Clock, self.callback_clock, tcp_nodelay=True)
@@ -104,7 +118,8 @@ class ObservationCollectorAllInOne:
             self._subgoal_sub = rospy.Subscriber(
                 f'{self.ns_prefix}subgoal', PoseStamped, self.callback_subgoal)
         else:
-            self._subgoal_visualizer = rospy.Publisher(f'{self.ns_prefix}vis_subgoal', visualization_msgs.msg.Marker)
+            self._subgoal_visualizer = rospy.Publisher(f'{self.ns_prefix}vis_subgoal', visualization_msgs.msg.Marker,
+                                                       queue_size=1)
 
         self._goal_sub = rospy.Subscriber(f'{self.ns_prefix}goal', PoseStamped, self.callback_goal)
 
@@ -140,17 +155,22 @@ class ObservationCollectorAllInOne:
                 pass
 
         # try to retrieve sync'ed obs
-        laser_scan, robot_pose, twist = self.get_sync_obs()
+        laser_scan, laser_scan_static, robot_pose, twist = self.get_sync_obs()
 
         if laser_scan is not None and robot_pose is not None and twist is not None:
             self._scan = laser_scan
             self._robot_pose = robot_pose
             self._twist = twist
+            self._scan_static = laser_scan_static
 
         if len(self._scan.ranges) > 0:
             scan = self._scan.ranges.astype(np.float32)
+            scan_static = self._scan_static.ranges.astype(np.float32)
         else:
             scan = np.zeros(self._laser_num_beams, dtype=float)
+            scan_static = self._scan_static.ranges.astype(np.float32)
+
+        dynamic_scan = self.get_dynamic_scan(scan_static, scan)
 
         # create new global plan if necessary, extract subgoal and calculate distance to global plan
         if make_new_global_plan or self._global_plan_service is None:
@@ -175,7 +195,8 @@ class ObservationCollectorAllInOne:
             self._subgoal, self._robot_pose)
 
         merged_obs = np.float32(
-            np.hstack([scan, np.array([rho_global, theta_global]), np.array([rho_local, theta_local])]))
+            np.hstack(
+                [scan_static, dynamic_scan, np.array([rho_global, theta_global]), np.array([rho_local, theta_local])]))
 
         obs_dict = {'laser_scan': scan,
                     'goal_map_frame': self._subgoal,
@@ -221,10 +242,21 @@ class ObservationCollectorAllInOne:
     def close(self):
         self._global_planner_process.terminate()
 
+    def get_dynamic_scan(self, static_scan: np.ndarray, scan: np.ndarray):
+        diff_scan = np.abs(scan - static_scan)
+        dyanmic_scan = np.where(diff_scan < 0.1, 3.5, scan)
+
+        # self._dyn_scan_msg.ranges = dyanmic_scan
+        # self._dyn_scan_msg.header.stamp = rospy.get_rostime()
+        # self._dynamic_scan_pub.publish(self._dyn_scan_msg)
+
+        return dyanmic_scan
+
     def get_sync_obs(self):
         laser_scan = None
         robot_pose = None
         twist = None
+        laser_stamp = None
 
         # print(f"laser deque: {len(self._laser_deque)}, robot state deque: {len(self._rs_deque)}")
         while len(self._rs_deque) > 0 and len(self._laser_deque) > 0:
@@ -252,8 +284,19 @@ class ObservationCollectorAllInOne:
             if self._first_sync_obs:
                 break
 
-        # print(f"Laser_stamp: {laser_stamp}, Robot_stamp: {robot_stamp}")
-        return laser_scan, robot_pose, twist
+        # Extract static scan
+        static_laser_stamp = 0
+        static_laser_scan_msg = None
+        while laser_stamp > static_laser_stamp and len(self._laser_static_deque) > 0:
+            static_laser_scan_msg = self._laser_static_deque.popleft()
+            static_laser_stamp = static_laser_scan_msg.header.stamp.to_sec()
+
+        static_scan = self.process_scan_msg(static_laser_scan_msg)
+        self._dyn_scan_msg = static_laser_scan_msg
+
+        # print(f"Laser_stamp: {laser_stamp}, Static_stamp: {static_laser_stamp}")
+
+        return laser_scan, static_scan, robot_pose, twist
 
     def call_service_takeSimStep(self, t=None):
         if t is None:
@@ -302,16 +345,16 @@ class ObservationCollectorAllInOne:
         return
 
     def callback_scan(self, msg_laserscan: LaserScan):
-        # republish filtered scan msg
-        # scan_np = np.array(msg_laserscan.ranges)
-        # scan_np[np.isnan(scan_np)] = 0 # msg_laserscan.range_max
-        # msg_laserscan.ranges = scan_np
-        # self._filtered_scan_pub.publish(msg_laserscan)
-
         # save message
         if len(self._laser_deque) == self.max_deque_size:
             self._laser_deque.popleft()
         self._laser_deque.append(msg_laserscan)
+
+    def callback_scan_static(self, msg_laserscan: LaserScan):
+        # save message
+        if len(self._laser_static_deque) == self.max_deque_size:
+            self._laser_static_deque.popleft()
+        self._laser_static_deque.append(msg_laserscan)
 
     def callback_robot_state(self, msg_robotstate):
         if len(self._rs_deque) == self.max_deque_size:
@@ -330,6 +373,7 @@ class ObservationCollectorAllInOne:
         self._scan_stamp = msg_LaserScan.header.stamp.to_sec()
         scan = np.array(msg_LaserScan.ranges)
         scan[np.isnan(scan)] = msg_LaserScan.range_max
+        scan[scan > msg_LaserScan.range_max] = msg_LaserScan.range_max
         msg_LaserScan.ranges = scan
         return msg_LaserScan
 
@@ -351,7 +395,8 @@ class ObservationCollectorAllInOne:
     def _start_global_planner(self):
         # Generate local planner node
         config_path = os.path.join(rospkg.RosPack().get_path('arena_local_planner_drl'), 'configs',
-                                   'all_in_one_hyperparameters', 'global_planner.yaml')
+                                   'all_in_one_hyperparameters', 'base_global_planner_parameters',
+                                   'global_planner.yaml')
         package = 'all_in_one_global_planner_interface'
         launch_file = 'start_global_planner_node.launch'
         arg1 = "ns:=" + self.ns
