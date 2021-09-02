@@ -8,7 +8,6 @@ using std::cout;
 using std::endl;
 void SpacialHorizon::init(ros::NodeHandle &nh)
 {   
-    //exec_state_ = FSM_EXEC_STATE::INIT;
     have_goal_ = false;
     have_odom_ = false;
 
@@ -26,7 +25,8 @@ void SpacialHorizon::init(ros::NodeHandle &nh)
     /* ros communication with public node */
     ros::NodeHandle public_nh;  // sim1/goal
     goal_sub_ = public_nh.subscribe("goal", 1, &SpacialHorizon::goalCallback,this);
-    odom_sub_ = public_nh.subscribe("odom", 1, &SpacialHorizon::odomCallback, this);
+    // odom_sub_ = public_nh.subscribe("odom", 1, &SpacialHorizon::odomCallback, this);
+    amcl_pose_sub_ = public_nh.subscribe("amcl_pose", 1, &SpacialHorizon::amcl_poseCallback, this);
     initialPose_sub_ = public_nh.subscribe("initialpose", 0, &SpacialHorizon::handle_initial_pose, this);
 
     subgoal_DRL_pub_  = public_nh.advertise<geometry_msgs::PoseStamped>("subgoal",10);
@@ -35,15 +35,19 @@ void SpacialHorizon::init(ros::NodeHandle &nh)
     vis_global_path_pub_ = public_nh.advertise<nav_msgs::Path>("vis_global_path", 10, true);
     vis_goal_pub_	 = public_nh.advertise<visualization_msgs::Marker>("vis_goal", 20);
     vis_subgoal_drl_pub_ = public_nh.advertise<visualization_msgs::Marker>("vis_subgoal", 20);
-
 }
 
 void SpacialHorizon::handle_initial_pose(const geometry_msgs::PoseWithCovarianceStampedPtr& msg) {
     initial_pose_ = Eigen::Vector2d(msg->pose.pose.position.x,msg->pose.pose.position.y);
 }
 
+void SpacialHorizon::amcl_poseCallback(const geometry_msgs::PoseWithCovarianceStampedPtr& msg){
+    odom_pos_ = Eigen::Vector2d(msg->pose.pose.position.x, msg->pose.pose.position.y);
+    have_odom_ = true;
+}
+
 void SpacialHorizon::odomCallback(const nav_msgs::OdometryConstPtr& msg){
-    odom_pos_=Eigen::Vector2d(initial_pose_[0] + msg->pose.pose.position.x,initial_pose_[1] - msg->pose.pose.position.y);
+    odom_pos_=Eigen::Vector2d(initial_pose_[0] + msg->pose.pose.position.x, initial_pose_[1] + msg->pose.pose.position.y);
     odom_vel_=Eigen::Vector2d(msg->twist.twist.linear.x,msg->twist.twist.linear.y);
 
     odom_orient_.w() = msg->pose.pose.orientation.w;
@@ -68,6 +72,8 @@ void SpacialHorizon::goalCallback(const geometry_msgs::PoseStampedPtr& msg){
     have_goal_=true;
     std::cout << "[SpacialHorizon] Goal set!" << std::endl;
 
+    getGlobalPath_MoveBase();
+
     // vis goal
     std::vector<Eigen::Vector2d> point_set;
     point_set.push_back(end_pos_);
@@ -78,16 +84,23 @@ void SpacialHorizon::goalCallback(const geometry_msgs::PoseStampedPtr& msg){
 bool SpacialHorizon::getSubgoalSpacialHorizon(Eigen::Vector2d &subgoal){
     double dist_to_goal=(odom_pos_-end_pos_).norm();
     
+    std::cout << "[SpacialHorizon] Dist to goal: " << dist_to_goal << std::endl;
+
+    if(dist_to_goal <= goal_tolerance_){
+        ros::param::set("/bool_goal_reached", true);
+        return false;
+    }
+
     // if near goal
     if(dist_to_goal<planning_horizen_){
         subgoal = end_pos_;
         return true;
     }
 
+    getGlobalPath_MoveBase();
+
     // select the nearst waypoint on global path
     int subgoal_id=0;
-
-    getGlobalPath_MoveBase();
 
     for(size_t i=0; i < global_plan.response.plan.poses.size(); i++){
         Eigen::Vector2d wp_pt = Eigen::Vector2d(global_plan.response.plan.poses[i].pose.position.x, global_plan.response.plan.poses[i].pose.position.y);
@@ -121,7 +134,7 @@ void SpacialHorizon::updateSubgoalDRLCallback(const ros::TimerEvent &e){
 
     subgoal_success=getSubgoalSpacialHorizon(subgoal);
 
-    std::cout<<subgoal_success<<std::endl;
+    // std::cout<<subgoal_success<<std::endl;
 
     if(subgoal_success){
         geometry_msgs::PoseStamped pose_stamped;
@@ -147,6 +160,7 @@ void SpacialHorizon::getGlobalPath_MoveBase(){
 	/* get global path from move_base */
 	ros::NodeHandle nh;
 	std::string service_name = "/move_base/NavfnROS/make_plan";
+    std::cout << "[SpacialHorizon] Get Global Path" << std::endl;
 	while (!ros::service::waitForService(service_name, ros::Duration(3.0))) {
 		ROS_INFO("[SpacialHorizon - GET_PATH] Waiting for service /move_base/NavfnROS/make_plan to become available");
 	}

@@ -37,6 +37,8 @@
   <node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)"/>
 
   <!-- AMCL -->
+  <param name="update_min_d" value="-1"/>
+  <param name="update_min_a" value="-1"/>
   <include file="$(find arena_bringup)/launch/amcl.launch"/>
 
   <!-- move_base -->

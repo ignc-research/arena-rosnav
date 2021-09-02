@@ -78,7 +78,7 @@ class ObservationCollector:
         # synchronization parameters
         self._first_sync_obs = True  # whether to return first sync'd obs or most recent
         self.max_deque_size = 10
-        self._sync_slop = 0.8
+        self._sync_slop = 0.2
 
         self._laser_deque = deque()
         self._rs_deque = deque()
@@ -88,7 +88,7 @@ class ObservationCollector:
         # need to evaulate each possibility
         if self._approx_time_sync:
             self._scan_sub = message_filters.Subscriber(f'{self.ns_prefix}scan', LaserScan)
-            self._robot_state_sub = message_filters.Subscriber(f'{self.ns_prefix}odom', Odometry)
+            self._robot_state_sub = message_filters.Subscriber(f'{self.ns_prefix}amcl_pose', PoseWithCovarianceStamped)
 
             self.ts = message_filters.ApproximateTimeSynchronizer([self._scan_sub, self._robot_state_sub], 10, slop=self._sync_slop)
             # self.ts = message_filters.TimeSynchronizer([self._scan_sub, self._robot_state_sub], 10)
@@ -202,7 +202,7 @@ class ObservationCollector:
                     laser_stamp = laser_scan_msg.header.stamp.to_sec()
 
             laser_scan = self.process_scan_msg(laser_scan_msg)
-            robot_pose, _ = self.process_robot_state_msg(robot_pose_msg)
+            robot_pose = self.process_robot_state_msg(robot_pose_msg)
 
             if self._first_sync_obs:
                 break
@@ -241,9 +241,9 @@ class ObservationCollector:
         self._globalplan = ObservationCollector.process_global_plan_msg(msg_global_plan)
         return
 
-    def callback_odom_scan(self, scan, odom):
+    def callback_odom_scan(self, scan, amcl):
         self._scan = self.process_scan_msg(scan)
-        self._robot_pose, self._robot_vel = self.process_robot_state_msg(odom)
+        self._robot_pose = self.process_robot_state_msg(amcl)
 
     def callback_scan(self, msg_laserscan):
         if len(self._laser_deque) == self.max_deque_size:
@@ -258,7 +258,7 @@ class ObservationCollector:
     def callback_observation_received(self, msg_LaserScan, msg_RobotStateStamped):
         # process sensor msg
         self._scan = self.process_scan_msg(msg_LaserScan)
-        self._robot_pose, self._robot_vel = self.process_robot_state_msg(
+        self._robot_pose = self.process_robot_state_msg(
             msg_RobotStateStamped
         )
         self.obs_received = True
@@ -272,10 +272,10 @@ class ObservationCollector:
         msg_LaserScan.ranges = scan
         return msg_LaserScan
 
-    def process_robot_state_msg(self, msg_Odometry):
-        pose3d = msg_Odometry.pose.pose
-        twist = msg_Odometry.twist.twist
-        return self.pose3D_to_pose2D(pose3d), twist
+    def process_robot_state_msg(self, amcl):
+        pose3d = amcl.pose.pose
+        # twist = msg_Odometry.twist.twist
+        return self.pose3D_to_pose2D(pose3d) #, twist
 
     def process_pose_msg(self, msg_PoseWithCovarianceStamped):
         # remove Covariance

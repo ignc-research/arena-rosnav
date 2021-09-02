@@ -38,7 +38,7 @@ private:
     Eigen::Vector2d end_pos_, end_vel_;
 
     // subscriber
-    ros::Subscriber goal_sub_, odom_sub_, initialPose_sub_;
+    ros::Subscriber goal_sub_, odom_sub_, initialPose_sub_, amcl_pose_sub_;
 
     // publisher
     ros::Publisher subgoal_DRL_pub_;
@@ -63,6 +63,7 @@ private:
     ros::Timer subgoal_DRL_timer_;
     
     /* ros related callback*/
+    void amcl_poseCallback(const geometry_msgs::PoseWithCovarianceStampedPtr& msg);
     void odomCallback(const nav_msgs::OdometryConstPtr& msg);
     void goalCallback(const geometry_msgs::PoseStampedPtr& msg);
     void handle_initial_pose(const geometry_msgs::PoseWithCovarianceStampedPtr& msg);

@@ -7,7 +7,7 @@ from gym.spaces import space
 from typing import Union
 from stable_baselines3.common.env_checker import check_env
 import yaml
-from rl_agent.utils.observation_collector import ObservationCollector
+from rl_agent.utils.observation_collector_amcl import ObservationCollector
 from rl_agent.utils.reward import RewardCalculator
 from rl_agent.utils.debug import timeit
 from task_generator.tasks import ABSTask
@@ -85,7 +85,7 @@ class FlatlandEnv(gym.Env):
         
         # observation collector
         self.observation_collector = ObservationCollector(
-            self.ns, self._laser_num_beams, self._laser_max_range)
+            self.ns, self._laser_num_beams, self._laser_max_range, True)
         self.observation_space = self.observation_collector.get_observation_space()
 
         # reward calculator
