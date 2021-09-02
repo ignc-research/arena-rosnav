@@ -2,7 +2,7 @@
     "agent_name": "",
     "robot": "myrobot",
     "batch_size": 19200,
-    "gamma": 0.99,
+    "gamma": 0.995,
     "n_steps": 4800,
     "ent_coef": 0.008,
     "learning_rate": 0.0003,
