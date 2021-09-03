@@ -897,12 +897,17 @@ class ObservationCollectorWP2:
         self._nums_dynamic_obstacles = nums_dynamic_obstalces
         self._radius_robot = radius_robot
 
-        if not hasattr(radiuses_dynamic_obstalces, "__getitem__"):
-            self._radiuses_dynamic_obstalces = [radiuses_dynamic_obstalces] * int(
-                max(tuple(nums_dynamic_obstalces) + (1,))
-            )
-        else:
-            self._radiuses_dynamic_obstalces = radiuses_dynamic_obstalces
+        # if not hasattr(radiuses_dynamic_obstalces, "__getitem__"):
+        #     self._radiuses_dynamic_obstalces = [radiuses_dynamic_obstalces] * int(
+        #         max(tuple(nums_dynamic_obstalces) + (1,))
+        #     )
+        # else:
+        #     self._radiuses_dynamic_obstalces = radiuses_dynamic_obstalces
+        self._radiuses_dynamic_obstalces = radiuses_dynamic_obstalces
+        
+
+
+
         self._num_dynamic_obstacles_feature_extractor = (
             num_dynamic_obstacles_feature_extractor
         )
@@ -1026,6 +1031,7 @@ class ObservationCollectorWP2:
         self.dynamic_topic_listening_lock = threading.Lock()
         # define variables
         self._subgoal: Optional[Pose2D] = None
+        self._ref_pos: Optional[Pose2D] = None
         self.last_dist_ref_pos_robot: Optional[float] = None
         self.dist_ref_pos_robot: Optional[float] = None
         self._curr_waypoint: Optional[Pose2D] = None
@@ -1335,9 +1341,13 @@ class ObservationCollectorWP2:
             dist_dyn_obs = (
                 dyn_obs_relative_x ** 2 + dyn_obs_relative_y ** 2
             ) ** 0.5
-            min_dist_obstacle_robot = (
-                self._radiuses_dynamic_obstalces[idx] + self._radius_robot
-            )
+
+            if hasattr(self._radiuses_dynamic_obstalces,'__getitem__'):
+                min_dist_obstacle_robot = (
+                    self._radiuses_dynamic_obstalces[idx] + self._radius_robot
+                )
+            else:
+                min_dist_obstacle_robot = self._radiuses_dynamic_obstalces+ self._radius_robot 
             dynamic_obstacles_states.append(
                 [
                     dyn_obs_relative_x,

@@ -233,7 +233,7 @@ class ScenerioTask(ABSTask):
         # The times of current scenerio need to be repeated
         self._max_repeats_curr_scene = 0
         self._scene_pub = rospy.Publisher(
-            '/next_scene',Bool,tcp_nodelay=True)
+            '/next_scene',Bool,tcp_nodelay=True,queue_size=1)
     @classmethod
     def from_config(cls,cfg:CfgNode,ns):
         # TODO in future use cfg to build obstacles and robot's manager
@@ -262,7 +262,7 @@ class ScenerioTask(ABSTask):
                 self._set_new_scenerio()
                 # let observation collector know the exact number of dynamic obstacles in the map to setup it's feature space correctly
                 self._scene_pub.publish(True)
-                rospy.set_param('/curr_num_dynamic_obstacles',len(self._scenerios_data['dynamic_obstacles']))
+                rospy.set_param('/curr_num_dynamic_obstacles',len(self._scenerios_data[0]['dynamic_obstacles']))
                 info["new_scenerio_loaded"] = True
             else:
                 info["new_scenerio_loaded"] = False
