@@ -78,7 +78,7 @@ class AllInOneEnv(gym.Env):
         if self._evaluation:
             map_update_freq = 1
         else:
-            map_update_freq = 1
+            map_update_freq = 20
         self.task_manager = TaskManager(self.ns, map_update_freq, paths)
         self._seed = seed
 
