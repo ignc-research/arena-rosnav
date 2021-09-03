@@ -20,7 +20,7 @@ class Evaluator:
     def evaluate_policy_manually(self, policy: callable, action_probs_func: callable, env: VecNormalize, episodes: int,
                                  log_folder: str, gamma: float,
                                  all_in_config_file: str):
-        gamma = 0.99
+        gamma = 0.995
         rewards = np.zeros((episodes,))
         global_path_rewards = np.zeros((episodes,))
         collisions = np.zeros((episodes,))
@@ -62,7 +62,7 @@ class Evaluator:
                 computation_times.append(comp_time_in_ms)
                 info = info[0]
                 done = done[0]
-                reward = reward[0]
+                reward = env.get_original_reward()[0]
                 obs = obs[0]
                 current_reward += reward * (gamma ** current_iteration)
                 current_iteration += 1

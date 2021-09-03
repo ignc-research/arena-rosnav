@@ -18,10 +18,10 @@ primitive_agents = ['rlca_only', 'teb_only', 'drl_only', 'mpc_only', 'global_pat
                     'teb_large_min_dist_only']
 simple_all_in_one_switches = ['simple_all_in_one', 'random']
 
-AGENTS = ['teb_only']
-eval_episodes = 50
+AGENTS = ['simple_all_in_one', 'teb_only', 'drl_only']
+eval_episodes = 100
 seed = random.randint(1, 1000)
-map_config = "mixed_default.json"
+map_config = "indoor.json"
 
 
 def get_paths(AGENT: str, primitive_agent=False, is_random_agent=False):
@@ -148,15 +148,18 @@ if __name__ == "__main__":
             env = DummyVecEnv([make_env(paths, params)])
             policy = random_agent(env.env_method("get_number_models")[0])
             action_probs = random_action_probs(env.env_method("get_number_models")[0])
-            env = VecNormalize(env)
+            env = VecNormalize(env, norm_obs=False, norm_reward=False)
         elif AGENT in primitive_agents:
             paths = get_paths(AGENT, primitive_agent=True)
             params = load_hyperparameters_json(paths)
             print_hyperparameters(params)
             env = DummyVecEnv([make_env(paths, params)])
+            env = VecNormalize(env, norm_obs=False, norm_reward=False)
+
 
             def policy(_):
                 return 0
+
 
             def action_probs(_, __):
                 return [np.log(1.0)]
@@ -166,6 +169,7 @@ if __name__ == "__main__":
             params = load_hyperparameters_json(paths)
             print_hyperparameters(params)
             env = DummyVecEnv([make_env(paths, params)])
+            env = VecNormalize(env, norm_obs=False, norm_reward=False)
             policy = simple_all_in_one
             action_probs = simple_all_in_one_action_probs
 
