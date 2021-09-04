@@ -356,10 +356,12 @@ class WPEnvMapFrame2(gym.Env):
                         1   -   collision with obstacle
                         2   -   goal reached
         """
+        robot_pose_before = None
         if not self._is_pretrain_mode_on:
             self._set_and_pub_waypoint(action)
         else:
             # waypoint is also set to subgoal
+            robot_pose_before = self.observation_collector.robot_pose2d
             self._pretrain_mode_move_robot_to_sub_goal()
         # set waypoint on the observation collector and it will check whether the
         # robot already reach it.
@@ -375,7 +377,8 @@ class WPEnvMapFrame2(gym.Env):
         merged_obs = self.observation_collector.get_observation()
         info = {"event": None,"done":None,"is_success":None}
         if self._is_pretrain_mode_on:
-            info['expert_action'] = [self._waypoint_x, self._waypoint_y]
+            robot_x, robot_y = robot_pose_before.x, robot_pose_before.y
+            info['expert_action'] = [self._waypoint_x-robot_x, self._waypoint_y-robot_y]
         # if the waypoint is set to the global goal,
         # the predicted action will do nothing, so we need to set the reward to 0
         if self.is_waypoint_set_to_global_goal or self._is_pretrain_mode_on and self._pretrain_early_stop_curr_episode:
@@ -407,6 +410,7 @@ class WPEnvMapFrame2(gym.Env):
             else:
                 done = False
                 info["done"] = False
+
             reward= self.reward_calculator.cal_reward()
         self._curr_steps_count += 1
         if self._curr_steps_count > self._max_steps_per_episode:
@@ -445,6 +449,8 @@ class WPEnvMapFrame2(gym.Env):
             robot_goal_pos = reset_info["robot_goal_pos"]
             # plan manager is not stable, the publication of the goal is sometimes missing 
             self.goal_pos = robot_goal_pos
+            if not self._is_pretrain_mode_on and self._is_train_mode:
+                self.observation_collector._ref_pos = Pose2D(robot_goal_pos.x,robot_goal_pos.y,robot_goal_pos.theta) 
             # set the waypoint to the start position of the robot so that the robot will be freezed as we call step_world for updating the laser and other info from sensors
             self._pub_robot_pos_as_waypoint(robot_start_pos)
 
