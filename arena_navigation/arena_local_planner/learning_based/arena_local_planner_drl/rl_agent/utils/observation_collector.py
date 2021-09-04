@@ -889,6 +889,7 @@ class ObservationCollectorWP2:
             robot_obstacle_min_dist (float): the minimum distance between the robot and the surrunding obstacle
                 if actual distance is under this value, a collision event will be registered.
         """
+
         self.ns = ns
         if ns is None or ns == "":
             self.ns_prefix = "/"
@@ -1049,17 +1050,16 @@ class ObservationCollectorWP2:
     def clear_on_episode_start(self):
         """call it only when the episode is finished.
         """
-        with self.data_lock:
-            self._subgoal: Optional[Pose2D] = None
-            self._ref_pos: Optional[Pose2D] = None
-            self.last_dist_ref_pos_robot: Optional[float] = None
-            self.dist_ref_pos_robot: Optional[float] = None
-            self._curr_waypoint: Optional[Pose2D] = None
-            self.robot_pose2d: Optional[Pose2D] = None
-            self._observation: Optional[np.ndarray] = None
-            self.important_event: Optional[ObservationCollectorWP.Event] = None
-            self._msg_cache = None
-            rospy.loginfo("episode start subgoal None")
+        self._subgoal: Optional[Pose2D] = None
+        self._ref_pos: Optional[Pose2D] = None
+        self.last_dist_ref_pos_robot: Optional[float] = None
+        self.dist_ref_pos_robot: Optional[float] = None
+        self._curr_waypoint: Optional[Pose2D] = None
+        self.robot_pose2d: Optional[Pose2D] = None
+        self._observation: Optional[np.ndarray] = None
+        self.important_event: Optional[ObservationCollectorWP.Event] = None
+        self._msg_cache = None
+        rospy.loginfo("episode start subgoal None")
 
     def setup_dynamic_topics_listening(self):
         """In Curriculum Learning the number of  dynamic obstacles is dynamically changing.
@@ -1183,24 +1183,25 @@ class ObservationCollectorWP2:
             # In pretrain mode, _subgoal is used as expert pos
             def is_any_data_none(is_pretrain_mode_on):
                 res = False
-                with self.data_lock:
-                    if is_pretrain_mode_on:
-                        if self._subgoal is None or  self._msg_cache is None:    
-                            res = True
-                    else:
-                        if self._msg_cache is None:
-                            res = True
+                if is_pretrain_mode_on:
+                    if self._subgoal is None or  self._msg_cache is None:    
+                        res = True
+                else:
+                    if self._ref_pos is None or self._msg_cache is None:
+                        res = True
                 return res
-
+            self._step_world_srv(request)
+            time.sleep(0.01)
             while is_any_data_none(self.is_pretrain_mode_on):
                 if self.is_train_mode:
                     self._step_world_srv(request)
+                    time.sleep(0.01)
                 else:
                     time.sleep(1)
                 try_times -= 1
                 if try_times == 1:
                     # give it last change to change the inner state in the plan manager
-                    request = StepWorldRequest(200 / self._robot_action_rate) 
+                    request = StepWorldRequest(2000 / self._robot_action_rate) 
                 if try_times == 0:
                     # DEBUG
                     if self.is_pretrain_mode_on:
@@ -1214,8 +1215,7 @@ class ObservationCollectorWP2:
             return True
 
     def clear_subgoal(self):
-        with self.data_lock:
-            self._subgoal = None
+        self._subgoal = None
 
     def set_waypoint(self, x, y):
         """set current waypoint, observation collector will use this to check whether the robot is close to this point and trigger the stop of the simulation/
@@ -1363,17 +1363,33 @@ class ObservationCollectorWP2:
             self.curr_num_dynamic_obstacles
             < self._num_dynamic_obstacles_feature_extractor
         ):
-            dynamic_obstacles_states += [[
-                30,
-                0,
-                0,
-                0,
-                self._radiuses_dynamic_obstalces[-1] + self._radius_robot,
-                30]
-            ] * (
-                self._num_dynamic_obstacles_feature_extractor
-                - len(dynamic_obstacles_states)
-            )
+            # dirty code
+            if hasattr(self._radiuses_dynamic_obstalces,'__getitem__'):
+
+                dynamic_obstacles_states += [[
+                    30,
+                    0,
+                    0,
+                    0,
+                    self._radiuses_dynamic_obstalces[-1] + self._radius_robot,
+                    30]
+                ] * (
+                    self._num_dynamic_obstacles_feature_extractor
+                    - len(dynamic_obstacles_states)
+                )
+            else:
+                dynamic_obstacles_states += [[
+                    30,
+                    0,
+                    0,
+                    0,
+                    self._radiuses_dynamic_obstalces + self._radius_robot,
+                    30]
+                ] * (
+                    self._num_dynamic_obstacles_feature_extractor
+                    - len(dynamic_obstacles_states)
+                )
+
         dynamic_obstacles_states = np.array(dynamic_obstacles_states)
         # sort the obstacles' data by the distance in ascending order
         dynamic_obstacles_states = dynamic_obstacles_states[
@@ -1395,9 +1411,6 @@ class ObservationCollectorWP2:
         return self._observation
 
     def _callback_all_observations(self, *msgs):
-        with self.data_lock:
-            if self._ref_pos is None:
-                return
             laserscan_msg = msgs[0]
             robot_state_msg = msgs[1]
             dynamic_obstalce_state_msgs = msgs[2:]
@@ -1424,12 +1437,10 @@ class ObservationCollectorWP2:
             # it's no need to put the check in the end but for simplification. later we can optimize it.
 
     def _callback_ref_pos(self, refpos_msg):
-        with self.data_lock:
-            self._ref_pos = self.pose3D_to_pose2D(refpos_msg.pose)
+        self._ref_pos = self.pose3D_to_pose2D(refpos_msg.pose)
 
     def _callback_subgoal(self, subgoal_msg):
-        with self.data_lock:
-            self._subgoal = self.pose3D_to_pose2D(subgoal_msg.pose)
+        self._subgoal = self.pose3D_to_pose2D(subgoal_msg.pose)
 
     def _callback_stage_changed(self, useless_msg):
         self.setup_dynamic_topics_listening()
