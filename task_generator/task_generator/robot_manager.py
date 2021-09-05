@@ -133,7 +133,7 @@ class RobotManager:
         self.move_robot(start_pos)
 
     def set_start_pos_goal_pos(self, start_pos: Union[Pose2D, None]
-                               = None, goal_pos: Union[Pose2D, None] = None, min_dist=1):
+                               = None, goal_pos: Union[Pose2D, None] = None, min_dist=1,safe_dist = 2):
         """set up start position and the goal postion. Path validation checking will be conducted. If it failed, an
         exception will be raised.
 
@@ -147,6 +147,9 @@ class RobotManager:
 
         def dist(x1, y1, x2, y2):
             return math.sqrt((x1 - x2)**2 + (y1 - y2)**2)
+        
+        if safe_dist is None:
+            safe_dist = self.ROBOT_RADIUS*2
 
         if start_pos is None or goal_pos is None:
             # if any of them need to be random generated, we set a higher threshold,otherwise only try once
@@ -162,13 +165,13 @@ class RobotManager:
             if start_pos is None:
                 start_pos_ = Pose2D()
                 start_pos_.x, start_pos_.y, start_pos_.theta = get_random_pos_on_map(
-                    self._free_space_indices, self.map, self.ROBOT_RADIUS * 2)
+                    self._free_space_indices, self.map, safe_dist)
             else:
                 start_pos_ = start_pos
             if goal_pos is None:
                 goal_pos_ = Pose2D()
                 goal_pos_.x, goal_pos_.y, goal_pos_.theta = get_random_pos_on_map(
-                    self._free_space_indices, self.map, self.ROBOT_RADIUS * 2)
+                    self._free_space_indices, self.map, safe_dist)
             else:
                 goal_pos_ = goal_pos
 

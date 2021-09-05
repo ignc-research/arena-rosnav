@@ -21,7 +21,7 @@ from nav_msgs.msg import Path as nav_Path
 from std_msgs.msg import Bool
 import time
 import math
-from rl_agent.utils.debug import timeit
+from rl_agent.utils.debug import timeit,NPPSERVER
 
 from arena_plan_msgs.msg import RobotState, RobotStateStamped
 
@@ -151,8 +151,11 @@ class WPEnvMapFrame2(gym.Env):
         self.agent_action_pub = rospy.Publisher(
             f"{self.ns_prefix}waypoint", PoseStamped, queue_size=1, tcp_nodelay=True
         )
-
-    
+        # #DEBUG_LASER
+        # if len(ns) and ns[-1]>='0' and ns[-1]<='9'and int(ns[-1]) == 1:
+        #     self.laser_server = NPPSERVER(35555)
+        # else:
+        #     self.laser_server = None  
 
     @classmethod
     def from_config(cls, cfg: CfgNode, task, ns, train_mode, debug,**kwargs):
@@ -420,7 +423,9 @@ class WPEnvMapFrame2(gym.Env):
             info["event"] = "MaxStepsExceed"
         reward_info = self.reward_calculator.get_reward_info()
         info.update(reward_info)
-
+        #DEBUG_LASER
+        # if self.laser_server:
+        #     self.laser_server.send_nparray(merged_obs[:360])
         return merged_obs, reward, done, info
 
     def reset(self):
@@ -468,6 +473,9 @@ class WPEnvMapFrame2(gym.Env):
         merged_obs = self.observation_collector.get_observation()
         # DEBUG
         rospy.loginfo("wp_env reset done")
+         #DEBUG_LASER
+        # if self.laser_server:
+        #     self.laser_server.send_nparray(merged_obs[:360])
         return merged_obs
 
     def close(self):

@@ -404,8 +404,8 @@ class ObstaclesManager:
 
         # define footprint
         f = {}
-        f["density"] = 1
-        f["restitution"] = 0
+        f["density"] = 0
+        f["restitution"] = 1
         f["layers"] = ["all"]
         f["collision"] = "true"
         f["sensor"] = "false"
@@ -478,8 +478,8 @@ class ObstaclesManager:
 
         # define footprint
         f = {}
-        f["density"] = 1
-        f["restitution"] = 0
+        f["density"] = 0
+        f["restitution"] = 1
         f["layers"] = ["all"]
         f["collision"] = "true"
         f["sensor"] = "false"
@@ -510,8 +510,8 @@ class ObstaclesManager:
 
         # define footprint
         f = {}
-        f["density"] = 1
-        f["restitution"] = 0
+        f["density"] = 0
+        f["restitution"] = 1
         f["layers"] = ["all"]
         f["collision"] = "true"
         f["sensor"] = "false"
@@ -572,8 +572,9 @@ class ObstaclesManager:
 
         # define footprint
         f = {}
-        f["density"] = 1
+        f["density"] = 0
         f["restitution"] = 1
+
         f["layers"] = ["all"]
         f["collision"] = "true"
         f["sensor"] = "false"
@@ -659,6 +660,7 @@ class ObstaclesManager:
             prefix_names (Union[list,None], optional): a list of group names. if it is None then all obstacles will
                 be deleted. Defaults to None.
         """
+        assert prefix_names == None
         self._num_obstacle_pub_pos = 0
         if len(self.obstacle_name_list) != 0:
             if prefix_names is None:

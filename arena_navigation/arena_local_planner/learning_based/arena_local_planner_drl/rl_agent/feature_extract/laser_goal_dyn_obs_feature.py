@@ -194,14 +194,12 @@ class Pure_Static_Obs(BaseFeaturesExtractor):
 
         self.laser_fc = nn.Sequential(
             nn.Linear(n_flatten, 32),
-	    nn.ReLU()
+	        nn.ReLU()
         )
 
-        self.dynamic_obstacle_fc = nn.Sequential(
-            nn.Linear(self.DYN_OBS_FEATURE_SIZE*self.NUM_DYN_OBS,32),
+        self.fc = nn.Sequential(
+            nn.Linear(32+3,features_dim),
             nn.ReLU(),
-            nn.Linear(32,32),
-            nn.ReLU()
 	)
 
 
@@ -213,10 +211,8 @@ class Pure_Static_Obs(BaseFeaturesExtractor):
 
         scan_raw_feature = th.unsqueeze(observations[:, :_L], 1)
         robot_raw_feature = observations[:, _L:_L+3]
-        dynamic_obs_raw_feature = observations[:,_L+6:]
         
         scan_feature = self.laser_fc(self.laser_cnn(scan_raw_feature))
-        dynamic_obs_feature = self.dynamic_obstacle_fc(dynamic_obs_raw_feature)
-        features = th.cat((scan_feature,robot_raw_feature ,dynamic_obs_feature),1)
-
-        return features
+        features = th.cat((scan_feature,robot_raw_feature),1)
+        features2 = self.fc(features)
+        return features2

@@ -7,6 +7,7 @@ from typing import List
 
 from numpy.lib.utils import info
 from torch._C import device
+import torch
 from rl_agent.envs.wp_env_map_frame2 import WPEnvMapFrame2
 import rospy
 import numpy as np
@@ -115,7 +116,7 @@ def collect_expert_data(
                 obs = env.reset()
     finally:
         np.savez_compressed(
-            os.path.join(pretraining_data_dirpath, "expert_data_map1_00"),
+            os.path.join(pretraining_data_dirpath, expert_data_np_name),
             expert_actions=expert_actions,
             expert_observations=expert_observations,
         )
@@ -146,18 +147,52 @@ def pretraining_network(
             else:
                 num_observation = len(expert_observations)
             self.observations = expert_observations[:num_observation, :]
-            idx = expert_observations[:, 360] > 0.5
-            self.observations = self.observations[idx]
             self.actions = expert_actions[:num_observation, :]
-            self.actions = self.actions[idx]
+
+            # filter the data 
+            # idx1 = expert_observations[:, 360] > 0.5
+            # idx2 = np.abs((expert_actions**2).sum(axis=1)**0.5-2)<1
+            # a = np.arctan2(expert_observations[:,361],expert_observations[:,362])
+            # b = np.arctan2(expert_actions[:,0],expert_actions[:,1])
+            # c = np.stack((np.abs(a-b),2*np.pi-np.abs(a-b)),axis=1)
+            # d = np.min(c,axis=1)/np.pi*180
+            # idx3 = d<11
+
+            # idx = np.logical_and(idx1, idx2, idx3)
+            # observations = expert_observations[idx]
+            # actions = expert_actions[idx]
+            
+            # thetas = np.arctan2(observations[:,361],observations[:,362])/np.pi*180
+            # idx1 = np.logical_and(thetas>-50,thetas<50)
+            # idx2 = np.logical_and(thetas>-180,thetas<-150)
+            # idx3 = np.logical_and(thetas>-130,thetas<180)            
+            # idx = np.logical_or(idx1,idx2,idx3)
+            # observations_augumented = np.vstack([observations,observations[idx]])
+            # actions_augumented = np.vstack([actions,actions[idx]])
+
+            # self.observations = observations_augumented
+            # self.actions = actions_augumented
+
+
+            # theta = np.arctan2(self.observations[:,361],self.observations[:,362])
+            # rho  = 2
+            # fake_actions = np.array([rho*np.cos(theta),rho*np.sin(theta)]).T
+
+            # self.actions = expert_actions[:num_observation, :]
+            # self.actions = self.actions[idx]
+            # self.actions = fake_actions
             self.norm_rms = False
-        def register_env_norm(self,venv_norm:VecNormalize):
+
+        def register_env_norm(self, venv_norm: VecNormalize):
             self.norm_rms = True
-            self.venv_norm = venv_norm   
+            self.venv_norm = venv_norm
 
         def __getitem__(self, index):
             if self.norm_rms:
-                return self.venv_norm.normalize_obs(self.observations[index]), self.actions[index]
+                return (
+                    self.venv_norm.normalize_obs(self.observations[index]),
+                    self.actions[index],
+                )
             else:
                 return (self.observations[index], self.actions[index])
 
@@ -187,7 +222,7 @@ def pretraining_network(
                         loss.item(),
                     )
                 )
-    
+
     def save_norm_env_policy(epoch_idx, policy, vec_norm):
         pretrain_policy_filepath = os.path.join(
             pretraining_data_dirpath, f"pretrain_policy_{epoch_idx}.pkl"
@@ -234,9 +269,7 @@ def pretraining_network(
         expert_dataset.register_env_norm(vec_norm)
     train_loader = th.utils.data.DataLoader(
         dataset=expert_dataset, batch_size=batch_size, shuffle=True
-    )    
-
-
+    )
 
     use_cuda = use_cuda and th.cuda.is_available()
     device = th.device("cuda" if use_cuda else "cpu")
@@ -260,9 +293,11 @@ def pretraining_network(
             save_norm_env_policy(epoch_idx=epoch, policy=policy, vec_norm=vec_norm)
         scheduler.step()
 
+
 def main():
-    NUM_STEPS = 1e6
+    NUM_STEPS = 1e5
     EXPERT_DATA_NP_NAME = "expert_data_map1_00.npz"
+    # EXPERT_DATA_NP_NAME = "expert_data_emptymap_00.npz"
 
     curr_dirpath = os.path.abspath(os.path.dirname(__file__))
     pretraining_data_dirpath = os.path.join(curr_dirpath, "pretraining_data")

@@ -78,23 +78,7 @@ class TrainStageCallbackWP(BaseCallback):
                     % EvalObject.n_eval_episodes
                 )
                 return 
-            # if EvalObject.last_success_rate <= self.lower_threshold and self.curr_stage_idx>self.stage_idx_range[0]:
-            #     self.curr_stage_idx -= 1
-            #     for i, pub in enumerate(self._publishers_previous):
-            #         pub.publish(self._trigger)
-            #         time.sleep(1)
-            #         if i == 0:
-            #             self.log_curr_stage(EvalObject.logger)
-
-            # elif EvalObject.last_success_rate >= self.upper_threshold and self.curr_stage_idx<self.stage_idx_range[1]:
-            #     self.curr_stage_idx += 1 
-            #     for i, pub in enumerate(self._publishers_next):
-            #         pub.publish(self._trigger)
-            #         time.sleep(1)
-            #         if i == 0:
-            #             self.log_curr_stage(EvalObject.logger)
-            if self.direction_m:
-                self.direction_m = not self.direction_m
+            if EvalObject.last_success_rate <= self.lower_threshold and self.curr_stage_idx>self.stage_idx_range[0]:
                 self.curr_stage_idx -= 1
                 for i, pub in enumerate(self._publishers_previous):
                     pub.publish(self._trigger)
@@ -102,8 +86,7 @@ class TrainStageCallbackWP(BaseCallback):
                     if i == 0:
                         self.log_curr_stage(EvalObject.logger)
 
-            else :
-                self.direction_m = not self.direction_m
+            elif EvalObject.last_success_rate >= self.upper_threshold and self.curr_stage_idx<self.stage_idx_range[1]:
                 self.curr_stage_idx += 1 
                 for i, pub in enumerate(self._publishers_next):
                     pub.publish(self._trigger)
