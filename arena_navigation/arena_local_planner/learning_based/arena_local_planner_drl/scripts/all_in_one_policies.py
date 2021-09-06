@@ -118,6 +118,7 @@ class AGENT_2(BaseFeaturesExtractor):
         )
 
     def forward(self, observations: th.Tensor) -> th.Tensor:
+
         """
         :return: (th.Tensor) features,
             extracted features by the network
@@ -144,5 +145,5 @@ policy_kwargs_agent_2 = dict(features_extractor_class=AGENT_2,
                              net_arch=[dict(vf=[128, 128], pi=[128, 128])],
                              activation_fn=th.nn.ReLU)
 
-policy_kwargs_agent_11 = dict(net_arch=[dict(pi=[64, 64, 64, 32], vf=[64, 64, 64, 32])],
+policy_kwargs_agent_11 = dict(net_arch=[dict(pi=[128, 64, 64, 32], vf=[64, 64, 64, 32])],
                               activation_fn=th.nn.ReLU)

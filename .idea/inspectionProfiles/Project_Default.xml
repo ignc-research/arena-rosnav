@@ -1,0 +1,13 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="PyUnresolvedReferencesInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredIdentifiers">
+        <list>
+          <option value="task_generator.task_generator" />
+          <option value="rl_agent.envs.all_in_one_flatland_gym_env.get_predefined_task" />
+        </list>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>

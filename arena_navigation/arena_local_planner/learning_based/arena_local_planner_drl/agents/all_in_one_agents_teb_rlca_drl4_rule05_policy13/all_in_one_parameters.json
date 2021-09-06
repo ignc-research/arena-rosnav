@@ -1,0 +1,25 @@
+{
+    "models": {
+        "rlca": true,
+        "drl": [
+            "rule_04"
+        ],
+        "drl_names": [
+            "drl_4"
+        ],
+        "use_drl_servers": 1,
+        "model_based": [
+            "teb_static_obst.yaml"
+        ],
+        "model_based_names": [
+            "teb"
+        ]
+    },
+    "map": {
+        "numb_dynamic_obstacles": 18,
+        "numb_static_obstacles": 0
+    },
+    "run_all_agents_each_iteration": false,
+    "update_global_plan_frequency": 4,
+    "all_in_one_planner_frequency": 4
+}

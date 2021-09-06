@@ -1,0 +1,18 @@
+{
+    "models": {
+        "rlca": true,
+        "teb": [
+            "teb_static_obst.yaml"
+        ],
+        "teb_names": [
+            "teb"
+        ],
+        "teb_move_base": false,
+        "teb_move_base_names": []
+    },
+    "map": {
+        "numb_dynamic_obstacles": 18,
+        "numb_static_obstacles": 6
+    },
+    "run_all_agents_each_iteration": true
+}

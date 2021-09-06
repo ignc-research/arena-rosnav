@@ -1,0 +1,8 @@
+prefix=/home/johannes/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/model_based/all_in_one_local_planner_interface/cmake-build-debug/devel
+
+Name: all_in_one_local_planner_interface
+Description: Description of all_in_one_local_planner_interface
+Version: 0.0.0
+Cflags: -I/home/johannes/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/model_based/all_in_one_local_planner_interface/cmake-build-debug/devel/include
+Libs: -L${prefix}/lib 
+Requires: costmap_2d message_generation mpc_local_planner teb_local_planner nav_core roscpp rospy std_msgs nav_msgs tf2 tf2_ros

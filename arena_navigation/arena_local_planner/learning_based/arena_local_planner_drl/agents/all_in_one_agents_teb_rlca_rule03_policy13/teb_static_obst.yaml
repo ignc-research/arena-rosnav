@@ -8,7 +8,7 @@ acc_lim_theta: 35 # Robot is able to reach max_vel instantly
 min_turning_radius: 0.0 # diff-drive robot (can turn on place!)
 
 # Obstacles
-min_obstacle_dist: 0.25 # TODO play with this parameter --> Currently very low to let robot drive close to obstacles
+min_obstacle_dist: 0.5 # TODO play with this parameter --> Currently very low to let robot drive close to obstacles
 inflation_dist: 0.3
 include_costmap_obstacles: False
 include_dynamic_obstacles: True

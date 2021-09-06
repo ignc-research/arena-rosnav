@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/johannes/catkin_ws/src/arena-rosnav/arena_navigation/arena_timespace_planner/cmake-build-debug/devel/setup.sh

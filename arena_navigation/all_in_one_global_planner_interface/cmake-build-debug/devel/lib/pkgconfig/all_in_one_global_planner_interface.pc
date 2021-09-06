@@ -1,0 +1,8 @@
+prefix=/home/johannes/catkin_ws/src/arena-rosnav/arena_navigation/all_in_one_global_planner_interface/cmake-build-debug/devel
+
+Name: all_in_one_global_planner_interface
+Description: Description of all_in_one_global_planner_interface
+Version: 0.0.0
+Cflags: -I/home/johannes/catkin_ws/src/arena-rosnav/arena_navigation/all_in_one_global_planner_interface/cmake-build-debug/devel/include
+Libs: -L${prefix}/lib 
+Requires: costmap_2d message_generation nav_core nav_msgs roscpp std_msgs tf2 tf2_ros

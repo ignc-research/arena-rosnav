@@ -1,0 +1,14 @@
+{
+  "models": {
+    "drl": [
+      "rule_04"
+    ],
+    "drl_names": [
+      "drl_04"
+    ]
+  },
+  "map": {
+    "numb_dynamic_obstacles": 18,
+    "numb_static_obstacles": 0
+  }
+}

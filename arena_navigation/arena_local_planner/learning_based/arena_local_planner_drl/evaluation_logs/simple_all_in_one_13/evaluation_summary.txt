@@ -1,0 +1,12 @@
+Mean reward: 0.7911545259602822
+Mean global path reward: 0.38868807942439526
+Mean collisions: 0.05
+Mean distance travelled: 13.794193548387097
+Mean time: 43.193548387096776
+Mean success rate: 0.93
+Mean computation time per second simulation time 240.8498448124858
+Mean model distribution: [0.2139757 0.7860243]
+Mean model distribution close obstacle distance: [0.24776776 0.75223224]
+Mean model distribution medium obstacle distance: [0.02263519 0.97736481]
+Mean model distribution large obstacle distance: [0. 1.]
+With models: ['drl_4', 'teb']

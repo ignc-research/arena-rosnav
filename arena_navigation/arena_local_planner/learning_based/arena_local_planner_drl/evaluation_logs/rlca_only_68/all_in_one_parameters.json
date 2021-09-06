@@ -1,0 +1,9 @@
+{
+  "models": {
+    "rlca": true
+  },
+  "map": {
+    "numb_dynamic_obstacles": 20,
+    "numb_static_obstacles": 6
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "models": {
+    "rlca": false,
+    "drl": ["rule_04"],
+    "drl_names": ["drl_4"],
+    "use_drl_servers": 1,
+    "model_based": [
+      "teb_static_obst.yaml"
+    ],
+    "model_based_names": [
+      "teb"
+    ]
+  },
+  "run_all_agents_each_iteration": false,
+  "update_global_plan_frequency": 4,
+  "all_in_one_planner_frequency": 4
+}

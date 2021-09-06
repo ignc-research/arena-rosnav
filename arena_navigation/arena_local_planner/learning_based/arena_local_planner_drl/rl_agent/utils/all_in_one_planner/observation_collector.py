@@ -170,6 +170,7 @@ class ObservationCollectorAllInOne:
         else:
             scan = np.zeros(self._laser_num_beams, dtype=float)
             scan_static = np.zeros(self._laser_num_beams, dtype=float)
+            dynamic_scan = np.zeros(self._laser_num_beams, dtype=float)
 
         # create new global plan if necessary, extract subgoal and calculate distance to global plan
         if make_new_global_plan or self._global_plan_service is None:
@@ -220,6 +221,7 @@ class ObservationCollectorAllInOne:
             obs_dict['laser_3'] = self._last_three_laser_scans
 
         self._laser_deque.clear()
+        self._laser_static_deque.clear()
         self._rs_deque.clear()
 
         self._new_global_plan = False

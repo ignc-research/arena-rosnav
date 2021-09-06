@@ -1,0 +1,8 @@
+prefix=/home/johannes/catkin_ws/src/arena-rosnav/arena_navigation/arena_timespace_planner/cmake-build-debug/devel
+
+Name: arena_timespace_planner
+Description: Description of arena_timespace_planner
+Version: 0.0.0
+Cflags: -I/home/johannes/catkin_ws/src/arena-rosnav/arena_navigation/arena_timespace_planner/include
+Libs: -L${prefix}/lib -larena_timespace_planner
+Requires: arena_mapping arena_path_search arena_traj_planner arena_dynamic_channel visualization_msgs geometry_msgs nav_msgs roscpp rospy sensor_msgs std_msgs

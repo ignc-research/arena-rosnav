@@ -1,0 +1,11 @@
+Mean reward: 14.187297896546816
+Mean collisions: 0.04081632653061224
+Mean distance travelled: 13.131020408163264
+Mean time: 41.80612244897959
+Mean success rate: 0.9591836734693877
+Mean computation time per second simulation time 304.65810042161206
+Mean model distribution: [1.]
+Mean model distribution close obstacle distance: [1.]
+Mean model distribution medium obstacle distance: [1.]
+Mean model distribution large obstacle distance: [1.]
+With models: ['teb']

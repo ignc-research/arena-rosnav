@@ -1,9 +1,9 @@
 {
-    "agent_name": "all_in_one_agents_teb_rlca_rule03_policy13.v0",
+    "agent_name": "all_in_one_agents_teb_rlca_rule03_policy13",
     "robot": "myrobot",
     "batch_size": 19200,
     "gamma": 0.99,
-    "n_steps": 3200,
+    "n_steps": 19200,
     "ent_coef": 0.005,
     "learning_rate": 0.0003,
     "vf_coef": 0.22,

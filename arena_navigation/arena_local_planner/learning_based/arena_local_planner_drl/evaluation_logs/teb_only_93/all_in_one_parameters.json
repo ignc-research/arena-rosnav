@@ -1,0 +1,10 @@
+ {
+  "models": {
+    "model_based": ["teb_static_obst.yaml"],
+    "model_based_names": ["teb"]
+  },
+  "map": {
+    "numb_dynamic_obstacles": 20,
+    "numb_static_obstacles": 6
+  }
+}

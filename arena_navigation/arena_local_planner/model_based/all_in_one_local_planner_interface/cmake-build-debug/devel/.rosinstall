@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/johannes/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/model_based/all_in_one_local_planner_interface/cmake-build-debug/devel/setup.sh
