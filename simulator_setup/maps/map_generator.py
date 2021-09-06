@@ -197,7 +197,8 @@ def create_outdoor_map(height, width, obstacle_number, obstacle_extra_radius):
 
 
 def create_random_map(height, width, corridor_radius, iterations, obstacle_number, obstacle_extra_radius,
-                      map_type: str, indoor_prob: float):
+                      map_type: str, indoor_prob: float, seed: int):
+    np.random.seed(seed)
     if map_type == "mixed":
         if np.random.random() <= indoor_prob:
             map_type = "indoor"

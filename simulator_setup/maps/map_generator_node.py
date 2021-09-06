@@ -56,22 +56,6 @@ class MapGenerator:
         self.occupancy_grid = occgrid_msg
 
     def generate_initial_map(self):  # generate random map png in random_map directory
-        random.seed(0)
-        map = create_random_map(
-            height=self.height,
-            width=self.width,
-            corridor_radius=self.cr,
-            iterations=self.iterations,
-            obstacle_number=self.obsnum,
-            obstacle_extra_radius=self.obsrad,
-            map_type=self.map_type,
-            indoor_prob=self.indoor_prob
-        )
-        make_image(map, self.ns)
-        rospy.loginfo("Initial random map generated.")
-
-    def generate_mapdata(self, seed: int = 0):  # generate random map data array for occupancy grid
-        random.seed(seed)
         map = create_random_map(
             height=self.height,
             width=self.width,
@@ -81,6 +65,22 @@ class MapGenerator:
             obstacle_extra_radius=self.obsrad,
             map_type=self.map_type,
             indoor_prob=self.indoor_prob,
+            seed=0
+        )
+        make_image(map, self.ns)
+        rospy.loginfo("Initial random map generated.")
+
+    def generate_mapdata(self, seed: int = 0):  # generate random map data array for occupancy grid
+        map = create_random_map(
+            height=self.height,
+            width=self.width,
+            corridor_radius=self.cr,
+            iterations=self.iterations,
+            obstacle_number=self.obsnum,
+            obstacle_extra_radius=self.obsrad,
+            map_type=self.map_type,
+            indoor_prob=self.indoor_prob,
+            seed=seed
         )
         make_image(map, self.ns)
         map = np.flip(map, axis=0)
@@ -99,7 +99,7 @@ class MapGenerator:
     #         rospy.loginfo("New random map published.")
 
     def new_episode_callback(self, request: GetMapWithSeedRequest):
-        seed = GetMapWithSeedRequest.seed
+        seed = request.seed
         self.occupancy_grid.data = self.generate_mapdata(seed)
         self.mappub.publish(self.occupancy_grid)
         srv_response = GetMapWithSeedResponse(map=self.occupancy_grid)
