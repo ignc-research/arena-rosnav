@@ -7,14 +7,21 @@
   <arg name="load_rule" default="rule_03" />
   <param name="load_rule" value="$(arg load_rule)" />
 
-  <!-- run_agent -->
-  <!-- <node pkg = "arena_local_planner_drl" type="run_agent_node" name="run_agent_node" output="screen"> -->
-    <!-- <param name="load_rule" value="$(arg load_rule)" /> -->
-  <!-- </node> -->
-  <!-- <node pkg = "arena_local_planner_drl" type="run_agent2" name="run_agent2" output="screen" /> -->
+  <!-- move_base -->
+  <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+    <rosparam file="$(find conventional)/config/costmap_common_params_$(arg model).yaml" command="load" ns="global_costmap" />
+    <rosparam file="$(find conventional)/config/costmap_common_params_$(arg model).yaml" command="load" ns="local_costmap" />   
+    <rosparam file="$(find conventional)/config/local_costmap_params.yaml" command="load" />
+    <rosparam file="$(find conventional)/config/global_costmap_params.yaml" command="load" />
+  </node>
+
+  <!-- spacial_horizon -->
+  <node pkg="arena_spacial_horizon" type="spacial_horizon_node" name="spacial_horizon_node" output="screen">
+    <rosparam file="$(find arena_bringup)/launch/plan_fsm_param.yaml" command="load" /> <!-- ns="fsm"-->
+  </node>
 
   <!-- action_publisher -->
   <!-- makes sure that drl actions will be published according to sim time in eval mode-->
-  <!-- <node name="action_publisher" pkg="arena_local_planner_drl" type="action_publisher.py"/> -->
+  <node name="action_publisher" pkg="arena_local_planner_drl" type="action_publisher.py"/>
 
 </launch>

@@ -87,6 +87,7 @@ class ObservationCollector:
         # ApproximateTimeSynchronizer appears to be slow for training, but with real robot, own sync method doesn't accept almost any messages as synced
         # need to evaulate each possibility
         if self._approx_time_sync:
+            print("[observation_collector_amcl]: using ApproxTimeSync")
             self._scan_sub = message_filters.Subscriber(f'{self.ns_prefix}scan_mapped', LaserScan)
             self._robot_state_sub = message_filters.Subscriber(f'{self.ns_prefix}amcl_pose', PoseWithCovarianceStamped)
 

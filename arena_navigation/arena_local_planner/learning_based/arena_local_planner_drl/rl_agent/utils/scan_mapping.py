@@ -2,10 +2,11 @@
 
 import rospy
 from sensor_msgs.msg import LaserScan
+import numpy as np
 
 class ScanMapper():
     """
-    A class that switches the laserscan representations from the /scan topic for different navigation algorithms, see more in the mep_scan.launch
+    A class that switches the laserscan representations from the /scan topic for different navigation algorithms, see more in the map_scan.launch
     Parameters: angle_min, angle_max, increment from roslaunch 
     Subscribed topics: /scan
     Published topics: /scan_mapped
@@ -26,7 +27,16 @@ class ScanMapper():
         data.angle_min = rospy.get_param('angle_min')
         data.angle_max = rospy.get_param('angle_max')
         data.angle_increment = rospy.get_param('increment')
+        data.ranges = self.shift_scan_data(data.ranges)
+        data.intensities = self.shift_scan_data(data.intensities)
         self._new_scan_pub.publish(data)
+
+    def shift_scan_data(self, array):
+        print("[scan_mapping]: shifting data")
+        tmp = np.array(array)
+        shift = int(len(tmp) * 0.25)
+        shifted_data = np.roll(tmp, -shift)
+        return shifted_data
 
 
 
