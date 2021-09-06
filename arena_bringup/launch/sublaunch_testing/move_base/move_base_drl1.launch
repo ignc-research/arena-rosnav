@@ -19,8 +19,12 @@
     <rosparam file="$(find arena_bringup)/launch/plan_fsm_param.yaml" command="load" /> <!-- ns="fsm"-->
   </node>
 
+  <!-- scan mapping, because training and real scan calibration may differ -->
+  <include file="$(find arena_bringup)/launch/map_scan.launch">
+  </include>
+
   <!-- run_agent -->
-  <!-- <node name="DRL_local_planner" pkg="arena_local_planner_drl" type="drl_agent_real_node.py" args="$(arg agent_name)"/> -->
+  <node name="DRL_local_planner" pkg="arena_local_planner_drl" type="drl_agent_real_node.py" args="$(arg agent_name)"/>
 
   <!-- action_publisher -->
   <!-- makes sure that drl actions will be published according to sim time in eval mode-->
