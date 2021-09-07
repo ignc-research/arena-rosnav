@@ -1190,8 +1190,9 @@ class ObservationCollectorWP2:
                     if self._ref_pos is None or self._msg_cache is None:
                         res = True
                 return res
-            self._step_world_srv(request)
-            time.sleep(0.01)
+            if self.is_train_mode:
+                self._step_world_srv(request)
+                time.sleep(0.01)
             while is_any_data_none(self.is_pretrain_mode_on):
                 if self.is_train_mode:
                     self._step_world_srv(request)
