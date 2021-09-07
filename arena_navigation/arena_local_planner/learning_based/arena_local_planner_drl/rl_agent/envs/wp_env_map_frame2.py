@@ -233,37 +233,39 @@ class WPEnvMapFrame2(gym.Env):
         with open(waypoint_generator_actions_yaml_path, "r") as fd:
             setting_data = yaml.safe_load(fd)
             if self._is_action_space_discrete:
-                raise NotImplementedError("TODO")
                 # self._discrete_actions is a list, each element is a dict with the keys ["name", 'linear','angular']
-                # discrete_acitons_def = setting_data["waypoint_generator"][
-                #     "discrete_actions"
-                # ]
-                # self._discrete_acitons = []
-                # for actions_def in discrete_acitons_def:
-                #     if isinstance(actions_def["angular"], list):
-                #         linear = actions_def["linear"]
-                #         angular_def = list(
-                #             map(
-                #                 lambda x: eval(x) if isinstance(x, str) else x,
-                #                 actions_def["angular"],
-                #             )
-                #         )
-                #         angulars = np.linspace(*angular_def)
-                #         self._discrete_acitons += list(
-                #             map(
-                #                 lambda angular, linear=linear: [linear, angular],
-                #                 angulars,
-                #             )
-                #         )
-                #     else:
-                #         self._discrete_acitons.append(
-                #             [
-                #                 actions_def["linear"],
-                #                 eval(actions_def["angular"])
-                #                 if isinstance(actions_def["angular"], str)
-                #                 else actions_def["angular"],
-                #             ]
-                #         )
+                discrete_acitons_def = setting_data["waypoint_generator"][
+                    "discrete_actions"
+                ]
+                self._discrete_acitons = []
+                for actions_def in discrete_acitons_def:
+                    if isinstance(actions_def["angular"], list):
+                        linear = actions_def["linear"]
+                        angular_def = list(
+                            map(
+                                lambda x: eval(x) if isinstance(x, str) else x,
+                                actions_def["angular"],
+                            )
+                        )
+                        angulars = np.linspace(*angular_def)
+                        self._discrete_acitons += list(
+                            map(
+                                lambda angular, linear=linear: [linear*np.cos(angular), linear*np.sin(angular)],
+                                angulars,
+                            )
+                        )
+                    else:
+                        raise NotImplementedError("")
+                        # self._discrete_acitons.append(
+                        #     [
+                        #         actions_def["linear"]*np.cos(),
+                        #         eval(actions_def["angular"])
+                        #         if isinstance(actions_def["angular"], str)
+                        #         else actions_def["angular"],
+                        #     ]
+                        # )
+                #np cache
+                self._discrete_acitons_np = np.array(self._discrete_acitons)
                 self.action_space = spaces.Discrete(len(self._discrete_acitons))
             else:
                 # TODO  read the range data from unified config file
@@ -358,7 +360,7 @@ class WPEnvMapFrame2(gym.Env):
         done_reasons:   0   -   exceeded max steps
                         1   -   collision with obstacle
                         2   -   goal reached
-        """
+        """           
         robot_pose_before = None
         if not self._is_pretrain_mode_on:
             self._set_and_pub_waypoint(action)
@@ -381,7 +383,12 @@ class WPEnvMapFrame2(gym.Env):
         info = {"event": None,"done":None,"is_success":None}
         if self._is_pretrain_mode_on:
             robot_x, robot_y = robot_pose_before.x, robot_pose_before.y
-            info['expert_action'] = [self._waypoint_x-robot_x, self._waypoint_y-robot_y]
+            if not self._is_action_space_discrete:
+                info['expert_action'] = [self._waypoint_x-robot_x, self._waypoint_y-robot_y]
+            else:
+                diff_relative = self._discrete_acitons_np - np.array([self._waypoint_x-robot_x, self._waypoint_y-robot_y])
+                info['expert_action'] = np.argmin((diff_relative**2).sum(axis=1))
+
         # if the waypoint is set to the global goal,
         # the predicted action will do nothing, so we need to set the reward to 0
         if self.is_waypoint_set_to_global_goal or self._is_pretrain_mode_on and self._pretrain_early_stop_curr_episode:
