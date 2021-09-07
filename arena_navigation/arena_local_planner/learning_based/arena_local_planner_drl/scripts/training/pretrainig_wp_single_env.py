@@ -59,6 +59,21 @@ def get_default_arg_parser():
         action="store_true",
     )
     parser.add_argument(
+        "--expert_data_np_name",
+        '-e',
+        default="expert_data_map1_00.npz"
+    )
+    parser.add_argument(
+        "--epochs",
+        default=50,
+        type=int,
+    )
+    parser.add_argument(
+        "--name_prefix",
+        help = 'The name prefix to to the pretrained model and environment',
+        default="",
+    )
+    parser.add_argument(
         "opt",
         help="Overwrite the config loaded from the defaults and config file by providing a list of key and value pairs,\
             In deployment model This feature is disabled.",
@@ -99,7 +114,7 @@ def collect_expert_data(
     pretraining_data_dirpath = os.path.join(curr_dirpath, "pretraining_data")
     os.makedirs(pretraining_data_dirpath, exist_ok=True)
     print(f"expert data will be saved to:\n\t{pretraining_data_dirpath}")
-    assert isinstance(env.action_space, gym.spaces.Box)
+    # assert isinstance(env.action_space, gym.spaces.Box)
     try:
         expert_observations = np.empty((num_steps,) + env.observation_space.shape)
         expert_actions = np.empty((num_steps,) + env.action_space.shape)
@@ -139,6 +154,7 @@ def pretraining_network(
     use_cuda=True,
     seed=1,
     save_on_every_num_epoch=10,
+    name_prefix = ''
 ):
     class ExpertDataSet(Dataset):
         def __init__(self, expert_observations, expert_actions, num_observation=None):
@@ -223,12 +239,15 @@ def pretraining_network(
                     )
                 )
 
-    def save_norm_env_policy(epoch_idx, policy, vec_norm):
+    def save_norm_env_policy(epoch_idx, policy, vec_norm,name_prefix=''):
+        if len(name_prefix):
+            name_prefix += '_'
+
         pretrain_policy_filepath = os.path.join(
-            pretraining_data_dirpath, f"pretrain_policy_{epoch_idx}.pkl"
+            pretraining_data_dirpath, f"{name_prefix}pretrain_policy_{epoch_idx}.pkl"
         )
         pretrain_vecnorm_obs_rms_filepath = os.path.join(
-            pretraining_data_dirpath, f"vecnorm_obs_rms_{epoch_idx}.pkl"
+            pretraining_data_dirpath, f"{name_prefix}pretrain_vecnormvecnorm_obs_rms_{epoch_idx}.pkl"
         )
         with open(pretrain_policy_filepath, "wb") as f:
             pickle.dump(policy, f)
@@ -290,22 +309,22 @@ def pretraining_network(
             epoch=epoch,
         )
         if epoch % save_on_every_num_epoch == 0:
-            save_norm_env_policy(epoch_idx=epoch, policy=policy, vec_norm=vec_norm)
+            save_norm_env_policy(epoch_idx=epoch, policy=policy, vec_norm=vec_norm,name_prefix=name_prefix)
         scheduler.step()
 
 
-def main():
+def main():    
+    parser = get_default_arg_parser()
+    args = parser.parse_args()
+    print(args)
     NUM_STEPS = 1e5
-    EXPERT_DATA_NP_NAME = "expert_data_map1_00.npz"
+    EXPERT_DATA_NP_NAME = args.expert_data_np_name
     # EXPERT_DATA_NP_NAME = "expert_data_emptymap_00.npz"
-
     curr_dirpath = os.path.abspath(os.path.dirname(__file__))
     pretraining_data_dirpath = os.path.join(curr_dirpath, "pretraining_data")
 
     os.makedirs(pretraining_data_dirpath, exist_ok=True)
 
-    parser = get_default_arg_parser()
-    args = parser.parse_args()
     cfg = setup_config(args, 0)
     env = make_env(cfg)
     if args.phase1:
@@ -314,7 +333,7 @@ def main():
         )
     if args.phase2:
         model = build_model(cfg, env)
-        EPOCHS = 50
+        EPOCHS = args.epochs
         pretraining_network(
             cfg,
             args,
@@ -324,6 +343,7 @@ def main():
             EXPERT_DATA_NP_NAME,
             epochs=EPOCHS,
             save_on_every_num_epoch=10,
+            name_prefix=args.name_prefix,
         )
 
 
