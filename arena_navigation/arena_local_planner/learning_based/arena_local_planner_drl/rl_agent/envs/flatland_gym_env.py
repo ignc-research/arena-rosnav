@@ -136,8 +136,6 @@ class FlatlandEnv(gym.Env):
         self._collisions = 0
         self._in_crash = False
 
-        # publisher for random map training
-        self.demand_map_pub = rospy.Publisher("/demand", String, queue_size=1)
 
     def setup_by_configuration(self, robot_yaml_path: str, settings_yaml_path: str):
         """get the configuration from the yaml file, including robot radius, discrete action space and continuous action space.
@@ -256,13 +254,11 @@ class FlatlandEnv(gym.Env):
         return merged_obs, reward, done, info
 
     def reset(self):
-        self.demand_map_pub.publish("") # publisher to demand a map update
         # set task
         # regenerate start position end goal position of the robot and change the obstacles accordingly
         self.agent_action_pub.publish(Twist())
         if self._is_train_mode:
-            self._sim_step_client()
-        time.sleep(0.1) # map_pub needs some time to update map            
+            self._sim_step_client()          
         self.task.reset()
         self.reward_calculator.reset()
         self._steps_curr_episode = 0
