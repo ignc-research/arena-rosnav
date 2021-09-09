@@ -37,7 +37,13 @@ from rl_agent.utils.debug import timeit
 
 
 class ObservationCollector:
-    def __init__(self, ns: str, num_lidar_beams: int, lidar_range: float):
+    def __init__(
+        self,
+        ns: str,
+        num_lidar_beams: int,
+        lidar_range: float,
+        external_time_sync: bool = False,
+    ):
         """a class to collect and merge observations
 
         Args:
@@ -54,10 +60,15 @@ class ObservationCollector:
         self.observation_space = ObservationCollector._stack_spaces(
             (
                 spaces.Box(
-                    low=0, high=lidar_range, shape=(num_lidar_beams,), dtype=np.float32
+                    low=0,
+                    high=lidar_range,
+                    shape=(num_lidar_beams,),
+                    dtype=np.float32,
                 ),
                 spaces.Box(low=0, high=10, shape=(1,), dtype=np.float32),
-                spaces.Box(low=-np.pi, high=np.pi, shape=(1,), dtype=np.float32),
+                spaces.Box(
+                    low=-np.pi, high=np.pi, shape=(1,), dtype=np.float32
+                ),
             )
         )
 
@@ -76,7 +87,10 @@ class ObservationCollector:
         self._is_train_mode = rospy.get_param("/train_mode")
 
         # synchronization parameters
-        self._first_sync_obs = True  # whether to return first sync'd obs or most recent
+        self._ext_time_sync = external_time_sync
+        self._first_sync_obs = (
+            True  # whether to return first sync'd obs or most recent
+        )
         self.max_deque_size = 10
         self._sync_slop = 0.05
 
@@ -84,16 +98,37 @@ class ObservationCollector:
         self._rs_deque = deque()
 
         # subscriptions
-        self._scan_sub = rospy.Subscriber(
-            f"{self.ns_prefix}scan", LaserScan, self.callback_scan, tcp_nodelay=True
-        )
+        # ApproximateTimeSynchronizer appears to be slow for training, but with real robot, own sync method doesn't accept almost any messages as synced
+        # need to evaulate each possibility
+        if self._ext_time_sync:
+            self._scan_sub = message_filters.Subscriber(
+                f"{self.ns_prefix}scan", LaserScan
+            )
+            self._robot_state_sub = message_filters.Subscriber(
+                f"{self.ns_prefix}odom", Odometry
+            )
 
-        self._robot_state_sub = rospy.Subscriber(
-            f"{self.ns_prefix}odom",
-            Odometry,
-            self.callback_robot_state,
-            tcp_nodelay=True,
-        )
+            self.ts = message_filters.ApproximateTimeSynchronizer(
+                [self._scan_sub, self._robot_state_sub],
+                self.max_deque_size,
+                slop=self._sync_slop,
+            )
+            # self.ts = message_filters.TimeSynchronizer([self._scan_sub, self._robot_state_sub], 10)
+            self.ts.registerCallback(self.callback_odom_scan)
+        else:
+            self._scan_sub = rospy.Subscriber(
+                f"{self.ns_prefix}scan",
+                LaserScan,
+                self.callback_scan,
+                tcp_nodelay=True,
+            )
+
+            self._robot_state_sub = rospy.Subscriber(
+                f"{self.ns_prefix}odom",
+                Odometry,
+                self.callback_robot_state,
+                tcp_nodelay=True,
+            )
 
         # self._clock_sub = rospy.Subscriber(
         #     f'{self.ns_prefix}clock', Clock, self.callback_clock, tcp_nodelay=True)
@@ -126,14 +161,15 @@ class ObservationCollector:
             except Exception:
                 pass
 
-        # try to retrieve sync'ed obs
-        laser_scan, robot_pose = self.get_sync_obs()
-        if laser_scan is not None and robot_pose is not None:
-            # print("Synced successfully")
-            self._scan = laser_scan
-            self._robot_pose = robot_pose
-        # else:
-        #     print("Not synced")
+        if not self._ext_time_sync:
+            # try to retrieve sync'ed obs
+            laser_scan, robot_pose = self.get_sync_obs()
+            if laser_scan is not None and robot_pose is not None:
+                # print("Synced successfully")
+                self._scan = laser_scan
+                self._robot_pose = robot_pose
+            # else:
+            #     print("Not synced")
 
         if len(self._scan.ranges) > 0:
             scan = self._scan.ranges.astype(np.float32)
@@ -161,9 +197,9 @@ class ObservationCollector:
         y_relative = goal_pos.y - robot_pos.y
         x_relative = goal_pos.x - robot_pos.x
         rho = (x_relative ** 2 + y_relative ** 2) ** 0.5
-        theta = (np.arctan2(y_relative, x_relative) - robot_pos.theta + 4 * np.pi) % (
-            2 * np.pi
-        ) - np.pi
+        theta = (
+            np.arctan2(y_relative, x_relative) - robot_pos.theta + 4 * np.pi
+        ) % (2 * np.pi) - np.pi
         return rho, theta
 
     def get_sync_obs(self):
@@ -218,6 +254,10 @@ class ObservationCollector:
         except rospy.ServiceException as e:
             rospy.logdebug("step Service call failed: %s" % e)
 
+    def callback_odom_scan(self, scan, odom):
+        self._scan = self.process_scan_msg(scan)
+        self._robot_pose, self._robot_vel = self.process_robot_state_msg(odom)
+
     def callback_clock(self, msg_Clock):
         self._clock = msg_Clock.clock.to_sec()
         return
@@ -227,7 +267,9 @@ class ObservationCollector:
         return
 
     def callback_global_plan(self, msg_global_plan):
-        self._globalplan = ObservationCollector.process_global_plan_msg(msg_global_plan)
+        self._globalplan = ObservationCollector.process_global_plan_msg(
+            msg_global_plan
+        )
         return
 
     def callback_scan(self, msg_laserscan):
@@ -240,7 +282,9 @@ class ObservationCollector:
             self._rs_deque.popleft()
         self._rs_deque.append(msg_robotstate)
 
-    def callback_observation_received(self, msg_LaserScan, msg_RobotStateStamped):
+    def callback_observation_received(
+        self, msg_LaserScan, msg_RobotStateStamped
+    ):
         # process sensor msg
         self._scan = self.process_scan_msg(msg_LaserScan)
         self._robot_pose, self._robot_vel = self.process_robot_state_msg(
