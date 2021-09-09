@@ -6,7 +6,7 @@ NavfnROS:
   lethal_cost: 100
 
 global_costmap:
-  update_frequency: 6.0
+  update_frequency: 2.0
   publish_frequency: 1.0
   transform_tolerance: 0.3
 

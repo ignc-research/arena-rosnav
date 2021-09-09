@@ -162,13 +162,13 @@ class RobotManager:
             if start_pos is None:
                 start_pos_ = Pose2D()
                 start_pos_.x, start_pos_.y, start_pos_.theta = get_random_pos_on_map(
-                    self._free_space_indices, self.map, self.ROBOT_RADIUS * 2.7)
+                    self._free_space_indices, self.map, self.ROBOT_RADIUS * 2.2)
             else:
                 start_pos_ = start_pos
             if goal_pos is None:
                 goal_pos_ = Pose2D()
                 goal_pos_.x, goal_pos_.y, goal_pos_.theta = get_random_pos_on_map(
-                    self._free_space_indices, self.map, self.ROBOT_RADIUS * 2.7)
+                    self._free_space_indices, self.map, self.ROBOT_RADIUS * 2.2)
             else:
                 goal_pos_ = goal_pos
 

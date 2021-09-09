@@ -68,9 +68,6 @@ class ObservationCollectorAllInOne:
 
         self._required_obs = required_obs
 
-        # TODO make this a parameter
-        self._planning_horizon = 4
-
         self._clock = Clock()
         self._scan = LaserScan()
         self._scan_static = LaserScan()
@@ -87,6 +84,12 @@ class ObservationCollectorAllInOne:
 
         # train mode?
         self._is_train_mode = rospy.get_param("/train_mode")
+
+        # TODO make this a parameter
+        if self._is_train_mode:
+            self._planning_horizon = 4.5
+        else:
+            self._planning_horizon = 3.5
 
         # synchronization parameters
         self._first_sync_obs = True  # whether to return first sync'd obs or most recent
@@ -114,12 +117,8 @@ class ObservationCollectorAllInOne:
         # self._clock_sub = rospy.Subscriber(
         #     f'{self.ns_prefix}clock', Clock, self.callback_clock, tcp_nodelay=True)
 
-        if not self._is_train_mode:
-            self._subgoal_sub = rospy.Subscriber(
-                f'{self.ns_prefix}subgoal', PoseStamped, self.callback_subgoal)
-        else:
-            self._subgoal_visualizer = rospy.Publisher(f'{self.ns_prefix}vis_subgoal', visualization_msgs.msg.Marker,
-                                                       queue_size=1)
+        self._subgoal_visualizer = rospy.Publisher(f'{self.ns_prefix}vis_subgoal', visualization_msgs.msg.Marker,
+                                                   queue_size=1)
 
         self._goal_sub = rospy.Subscriber(f'{self.ns_prefix}goal', PoseStamped, self.callback_goal)
 
@@ -199,6 +198,7 @@ class ObservationCollectorAllInOne:
                 [scan_static, dynamic_scan, np.array([rho_global, theta_global]), np.array([rho_local, theta_local])]))
 
         obs_dict = {'laser_scan': scan,
+                    'scan_dynamic': dynamic_scan,
                     'goal_map_frame': self._subgoal,
                     'goal_in_robot_frame': [rho_local, theta_local],
                     'goal_in_robot_frame_xy': [local_goal_x, local_goal_y],
@@ -402,17 +402,23 @@ class ObservationCollectorAllInOne:
                                    'global_planner.yaml')
         package = 'all_in_one_global_planner_interface'
         launch_file = 'start_global_planner_node.launch'
-        arg1 = "ns:=" + self.ns
+        if self.ns == "":
+            arg1 = "ns:=_"
+            arg4 = "use_ns:=false"
+        else:
+            arg1 = "ns:=" + self.ns
+            arg4 = "use_ns:=true"
+
         arg2 = "node_name:=" + 'global_planner'
         arg3 = "config_path:=" + config_path
 
         # Use subprocess to execute .launch file
         if self._is_train_mode:
-            self._global_planner_process = subprocess.Popen(["roslaunch", package, launch_file, arg1, arg2, arg3],
+            self._global_planner_process = subprocess.Popen(["roslaunch", package, launch_file, arg1, arg2, arg3, arg4],
                                                             stdout=subprocess.DEVNULL,
                                                             stderr=subprocess.STDOUT)
         else:
-            self._global_planner_process = subprocess.Popen(["roslaunch", package, launch_file, arg1, arg2, arg3],
+            self._global_planner_process = subprocess.Popen(["roslaunch", package, launch_file, arg1, arg2, arg3, arg4],
                                                             stdout=subprocess.DEVNULL)
 
         self._global_plan_service = None
@@ -420,8 +426,8 @@ class ObservationCollectorAllInOne:
 
     def _wait_for_global_plan_service(self) -> bool:
         # wait until service is available
-        make_plan_service_name = "/" + self.ns + "/" + "global_planner" + "/" + "makeGlobalPlan"
-        reset_costmap_service_name = "/" + self.ns + "/" + "global_planner" + "/" + "resetGlobalCostmap"
+        make_plan_service_name = self.ns_prefix + "global_planner" + "/" + "makeGlobalPlan"
+        reset_costmap_service_name = self.ns_prefix + "global_planner" + "/" + "resetGlobalCostmap"
         service_list = rosservice.get_service_list()
         max_tries = 10
         for i in range(max_tries):

@@ -38,7 +38,7 @@ teb_local_planner:
   costmap_converter_rate: 20 # Twice the update rate of the all in one planner --> TEB should always have the new update for obstacles
 
 local_costmap:
-  update_frequency: 20.0
+  update_frequency: 10.0
   publish_frequency: 1 # Publishing only relevant for visualization
 
   rolling_window: true

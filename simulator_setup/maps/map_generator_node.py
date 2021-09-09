@@ -32,7 +32,7 @@ class MapGenerator:
 
         # indoor map parameter
         self.cr = 4
-        self.iterations = 100
+        self.iterations = 85
 
         # outdoor map parameter
         self.obsnum = 25

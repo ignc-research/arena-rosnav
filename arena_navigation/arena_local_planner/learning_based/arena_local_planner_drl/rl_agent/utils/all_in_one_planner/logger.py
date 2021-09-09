@@ -52,6 +52,7 @@ class Logger:
 
         # for logging
         if self._extended_eval:
+            info['local_planner_comp_time'] = reward_info['local_planner_comp_time']
             if done:
                 info['global_path_reward'] = reward_info['global_path_reward']
                 info['collisions'] = self._collisions
@@ -75,6 +76,9 @@ class Logger:
                         self._last_actions_switch_large_obst_dist)
                 else:
                     info['model_distribution_large_obst_dist'] = self._last_actions_switch_large_obst_dist
+
+                if self._evaluation:
+                    print("Model distribution: " + str(info['model_distribution']))
 
         return info, self._in_crash
 

@@ -40,7 +40,7 @@ def make_all_in_one_envs(rank: int, paths: dict, params: dict, train: bool = Tru
                 AllInOneEnv("eval_sim", paths['robot_setting'], paths['robot_as'], params['reward_fnc'],
                             goal_radius=params['goal_radius'],
                             paths=paths, train_mode=False, max_steps_per_episode=params['eval_max_steps_per_episode'],
-                            drl_server=drl_server_url_ind, evaluation=True, seed=seed,
+                            drl_server=drl_server_url_ind, evaluation=True, extended_eval=True, seed=seed,
                             evaluation_episodes=eval_episodes),
                 paths.get('eval'),
                 info_keywords=("done_reason", "is_success"))
@@ -260,18 +260,18 @@ if __name__ == '__main__':
             load_path=load_path, venv=eval_env)
         print("Succesfully loaded VecNormalize object from pickle file..")
     else:
-        env = VecNormalize(env, training=True, norm_obs=True, norm_reward=True)
-        eval_env = VecNormalize(eval_env, training=True, norm_obs=True, norm_reward=True)
+        env = VecNormalize(env, training=True, norm_obs=True, norm_reward=False)
+        eval_env = VecNormalize(eval_env, training=True, norm_obs=True, norm_reward=False)
 
     eval_cb = EvalCallback(
         eval_env=eval_env, train_env=env,
-        n_eval_episodes=eval_episodes, eval_freq=40000,
+        n_eval_episodes=eval_episodes, eval_freq=35000,
         log_path=paths['eval'], best_model_save_path=paths['model'], deterministic=True)
 
     print("Start training...")
 
     if args.n is None:
-        n_timesteps = 20000000
+        n_timesteps = 6000000
     else:
         n_timesteps = args.n
 

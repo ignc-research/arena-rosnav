@@ -1,4 +1,5 @@
 import json
+import time
 
 import numpy as np
 import rospy
@@ -60,29 +61,33 @@ class StepProcessor:
         merged_obs = self._get_new_obs()
 
         # calculate reward
-        reward_sum, reward_info = self._reward_calculator.get_reward(
-            self._last_obs_dict['laser_scan'], self._last_obs_dict['global_goal_robot_frame'],
-            action=action_model, global_plan=self._last_obs_dict['global_plan'],
-            robot_pose=self._last_obs_dict['robot_pose'], sub_goal=self._last_obs_dict['goal_in_robot_frame'],
-            new_global_plan=self._last_obs_dict['new_global_plan'])
+        reward_sum, reward_info = self._get_reward(action_model)
+
+        if self._reward_calculator.extended_eval:
+            comp_time = np.zeros((self._all_in_one_planner_frequency - 1,))
 
         # repeat with selected local planner
         for i in range(self._all_in_one_planner_frequency - 1):
             if not reward_info['is_done']:
                 # execute and publish action
+
+                if self._reward_calculator.extended_eval:
+                    start_time = time.time()
+
                 action_model = self._local_planner_manager.execute_local_planner(action, self._last_obs_dict,
                                                                                  clip=self._action_bounds)
+
+                if self._reward_calculator.extended_eval:
+                    end_time = time.time()
+                    comp_time[i] = (end_time - start_time) * 1000
+
                 self._pub_action(action_model)
 
                 # extract new observation
                 merged_obs = self._get_new_obs()
 
                 # calculate reward
-                reward, reward_info = self._reward_calculator.get_reward(
-                    self._last_obs_dict['laser_scan'], self._last_obs_dict['global_goal_robot_frame'],
-                    action=action_model, global_plan=self._last_obs_dict['global_plan'],
-                    robot_pose=self._last_obs_dict['robot_pose'], sub_goal=self._last_obs_dict['goal_in_robot_frame'],
-                    new_global_plan=self._last_obs_dict['new_global_plan'])
+                reward, reward_info = self._get_reward(action_model)
                 reward_sum += reward
 
         if self._run_all_agents_each_iteration:
@@ -104,6 +109,9 @@ class StepProcessor:
             reward_info['done_reason'] = 0
             if self._reward_calculator.extended_eval:
                 reward_info['global_path_reward'] = self._reward_calculator.global_plan_reward
+
+        if self._reward_calculator.extended_eval:
+            reward_info['local_planner_comp_time'] = np.mean(comp_time)
 
         self._current_gym_step += 1
 
@@ -173,3 +181,10 @@ class StepProcessor:
             rospy.logwarn(
                 'Parameter \"all_in_one_planner_frequency\" not found in config file. Us edefault value of 5!')
             self._all_in_one_planner_frequency = 4
+
+    def _get_reward(self, action_model):
+        return self._reward_calculator.get_reward(
+            self._last_obs_dict['laser_scan'], self._last_obs_dict['global_goal_robot_frame'],
+            action=action_model, global_plan=self._last_obs_dict['global_plan'],
+            robot_pose=self._last_obs_dict['robot_pose'], sub_goal=self._last_obs_dict['goal_in_robot_frame'],
+            new_global_plan=self._last_obs_dict['new_global_plan'], scan_dynamic=self._last_obs_dict['scan_dynamic'])

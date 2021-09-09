@@ -1,6 +1,7 @@
 from typing import Tuple
 
 import numpy as np
+import rospy
 import scipy.spatial
 from geometry_msgs.msg import Pose2D
 
@@ -21,6 +22,8 @@ class RewardCalculator:
                                   if the robot get too close to them it will be punished. Unit[ m ]
         :param goal_radius (float): The minimum distance to goal that goal position is considered to be reached.
         """
+        self._is_train_mode = rospy.get_param("/train_mode")
+
         self.curr_reward = 0
         # additional info will be stored here and be returned alonge with reward.
         self.info = {}
@@ -46,8 +49,8 @@ class RewardCalculator:
             'rule_02': RewardCalculator._cal_reward_rule_02,
             'rule_03': RewardCalculator._cal_reward_rule_03,
             'rule_04': RewardCalculator._cal_reward_rule_04,
-            'rule_05': RewardCalculator._cal_reward_rule_05,
-            'rule_06': RewardCalculator._cal_reward_rule_06
+            'rule_06': RewardCalculator._cal_reward_rule_06,
+            'rule_07': RewardCalculator._cal_reward_rule_07
         }
         self.cal_func = self._cal_funcs[rule]
 
@@ -176,22 +179,6 @@ class RewardCalculator:
         self._reward_goal_approached(
             goal_in_robot_frame, reward_factor=0.3, penalty_factor=0.4)
 
-    def _cal_reward_rule_05(self,
-                            laser_scan: np.ndarray,
-                            goal_in_robot_frame: Tuple[float, float],
-                            *args, **kwargs
-                            ):
-        self._reward_following_global_plan_relativ(kwargs['action'], kwargs['dist_to_global_plan'],
-                                                   kwargs['initial_distance_to_global_plan'],
-                                                   kwargs['iterations_global_plan_exists'], laser_scan,
-                                                   reward_factor=0.04, penalty_factor=0.06)
-        self._reward_goal_reached(
-            goal_in_robot_frame, reward=25)
-        self._reward_safe_dist(
-            laser_scan, punishment=0.25)
-        self._reward_collision(
-            laser_scan, punishment=30)
-
     def _cal_reward_rule_06(self,
                             laser_scan: np.ndarray,
                             goal_in_robot_frame: Tuple[float, float],
@@ -207,48 +194,31 @@ class RewardCalculator:
         self._reward_collision(
             laser_scan, punishment=2)
 
-    def _reward_following_global_plan_relativ(self,
-                                              action: np.array,
-                                              dist_to_path: float,
-                                              initial_distance_to_global_plan: float,
-                                              iterations_global_plan_exists: int,
-                                              scan: np.ndarray,
-                                              reward_factor=0.1,
-                                              penalty_factor=0.2):
-        dist_to_path = dist_to_path - initial_distance_to_global_plan
-
-        if iterations_global_plan_exists == 0:
-            iterations_global_plan_exists = self._global_planner_frequency
-
-        allowed_distance = iterations_global_plan_exists * 0.002
-        punished_distance = iterations_global_plan_exists * 0.004
-
-        if allowed_distance > dist_to_path:
-            reward_gp = reward_factor
-        elif punished_distance > dist_to_path:
-            reward_gp = 0
+    def _cal_reward_rule_07(self,
+                            laser_scan: np.ndarray,
+                            goal_in_robot_frame: Tuple[float, float],
+                            *args, **kwargs):
+        if not laser_scan.min() > self.safe_dist:
+            self.last_dist_to_path = None
+        scan_dynamic = kwargs['scan_dynamic']
+        if np.min(scan_dynamic) < 1.4:
+            # case 1: Obstacle avoidance
+            self._reward_safe_dist(
+                laser_scan, punishment=0.03)
+            self._reward_goal_approached(kwargs['sub_goal'], kwargs['new_global_plan'], reward_factor=0.1,
+                                         penalty_factor=0.0)
         else:
-            reward_gp = -penalty_factor
+            # case 2: global path following
+            self._reward_goal_approached(kwargs['sub_goal'], kwargs['new_global_plan'], reward_factor=0.1,
+                                         penalty_factor=0.5)
+            # Punish standing still
+            self._standing_still(kwargs['action'], punishment=0.005)
 
-        # if robot is barely moving give zero reward --> Don't count standing still as global path following.
-        if action[0] < 0.05:
-            reward_gp = 0
-
-        # in the case that the distance is falsy (e.g. after reset)
-        if dist_to_path > iterations_global_plan_exists * 0.03:
-            reward_gp = 0
-
-        # in the case that obstacles are close by -> global path not reliable
-        if np.min(scan) < 0.7:
-            reward_gp = 0
-
-        # print(
-        #     'r ' + str(reward_gp) + " - dist: " + str(dist_to_path) + " - iter: " + str(iterations_global_plan_exists))
-
-        if self.extended_eval:
-            self.global_plan_reward += reward_gp
-
-        self.curr_reward += reward_gp
+        # check for final rewards
+        self._reward_goal_reached(
+            goal_in_robot_frame, reward=3)
+        self._reward_collision(
+            laser_scan, punishment=3)
 
     def _reward_goal_reached(self,
                              goal_in_robot_frame=Tuple[float, float],
@@ -314,14 +284,13 @@ class RewardCalculator:
         if laser_scan.min() <= self.robot_radius:
             self.curr_reward -= punishment
 
-            # if not self.extended_eval:
-            self.info['is_done'] = True
-            self.info['done_reason'] = 1
-            self.info['is_success'] = 0
-            if self.extended_eval:
-                self.info['global_path_reward'] = self.global_plan_reward
-            # else:
-            self.info['crash'] = True
+            if self._is_train_mode:
+                self.info['is_done'] = True
+                self.info['done_reason'] = 1
+                self.info['is_success'] = 0
+                if self.extended_eval:
+                    self.info['global_path_reward'] = self.global_plan_reward
+                self.info['crash'] = True
 
     def _reward_safe_dist(self,
                           laser_scan: np.ndarray,
@@ -449,3 +418,7 @@ class RewardCalculator:
             vel_diff = abs(curr_ang_vel - last_ang_vel)
             self.curr_reward -= (vel_diff ** 4) / 2500
         self.last_action = action
+
+    def _standing_still(self, action, punishment):
+        if action[0] < 0.1:
+            self.curr_reward -= punishment
