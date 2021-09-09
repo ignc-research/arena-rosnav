@@ -5,7 +5,7 @@
   ARENA: {min: -3.12413936, max: 3.14159265359, increment: 0.01745}
   DRL: {min: -1.5707963267948966, max: 4.694936014, increment:  0.017453292}
 -->
-  <!-- turtlebot angles   -->
+  <!-- turtlebot angles starting from infront of turtlebot and going counterclockwise   -->
   <!-- <arg name="angle_min"     default="0.0"/>  
   <arg name="angle_max"     default= "6.2657318115234375"/>  
   <arg name="increment"     default= "0.01745329238474369"/>    -->
@@ -15,10 +15,15 @@
   <arg name="angle_max"     default= "4.694936014"/>  
   <arg name="increment"     default= "0.017453292"/> 
 
+  <!-- ARENA angles   -->
+  <!-- <arg name="angle_min"     default= "-3.12413936"/>  
+  <arg name="angle_max"     default= "3.14159265359"/>  
+  <arg name="increment"     default= "0.01745"/>  -->
+
   <!-- testing angles   -->
-  <!-- <arg name="angle_min"     default= "0"/>  
-  <arg name="angle_max"     default= "6.28319"/>  
-  <arg name="increment"     default= "0.01745330555"/>  -->
+  <!-- <arg name="angle_min"     default= "1.5707963267948966"/>  
+  <arg name="angle_max"     default= "7.85398163397"/>  
+  <arg name="increment"     default= "0.01745"/>  -->
   
   <param name="angle_min"       value="$(arg angle_min)"/>
   <param name="angle_max"       value="$(arg angle_max)"/>  
@@ -26,6 +31,6 @@
   
 
 <!-- publish new scan topic -->
-  <node pkg="arena_local_planner_drl" type="scan_mapping.py" name="scanmapper">
+  <node pkg="arena_local_planner_drl" type="scan_mapping.py" name="scanmapper" output="screen">
   </node>
 </launch>

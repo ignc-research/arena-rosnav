@@ -87,8 +87,8 @@ class ObservationCollector:
         # ApproximateTimeSynchronizer appears to be slow for training, but with real robot, own sync method doesn't accept almost any messages as synced
         # need to evaulate each possibility
         if self._approx_time_sync:
-            print("[observation_collector_amcl]: using ApproxTimeSync")
             self._scan_sub = message_filters.Subscriber(f'{self.ns_prefix}scan_mapped', LaserScan)
+            # self._robot_state_sub = message_filters.Subscriber(f'{self.ns_prefix}odom', Odometry)
             self._robot_state_sub = message_filters.Subscriber(f'{self.ns_prefix}amcl_pose', PoseWithCovarianceStamped)
 
             self.ts = message_filters.ApproximateTimeSynchronizer([self._scan_sub, self._robot_state_sub], 10, slop=self._sync_slop)
@@ -96,7 +96,7 @@ class ObservationCollector:
             self.ts.registerCallback(self.callback_odom_scan)
         else:
             self._scan_sub = rospy.Subscriber(
-                f"{self.ns_prefix}scan", LaserScan, self.callback_scan, tcp_nodelay=True
+                f"{self.ns_prefix}scan_mapped", LaserScan, self.callback_scan, tcp_nodelay=True
             )
 
             self._robot_state_sub = rospy.Subscriber(
@@ -242,9 +242,11 @@ class ObservationCollector:
         self._globalplan = ObservationCollector.process_global_plan_msg(msg_global_plan)
         return
 
-    def callback_odom_scan(self, scan, amcl):
+    def callback_odom_scan(self, scan, odom):
         self._scan = self.process_scan_msg(scan)
-        self._robot_pose = self.process_robot_state_msg(amcl)
+        # self._robot_pose, self._robot_vel  = self.process_robot_state_msg(odom)
+        # for amcl
+        self._robot_pose = self.process_robot_state_msg(odom)
 
     def callback_scan(self, msg_laserscan):
         if len(self._laser_deque) == self.max_deque_size:
@@ -273,10 +275,12 @@ class ObservationCollector:
         msg_LaserScan.ranges = scan
         return msg_LaserScan
 
-    def process_robot_state_msg(self, amcl):
-        pose3d = amcl.pose.pose
+    def process_robot_state_msg(self, msg_Odometry):
+        pose3d = msg_Odometry.pose.pose
+        # for amcl
+        return self.pose3D_to_pose2D(pose3d)
         # twist = msg_Odometry.twist.twist
-        return self.pose3D_to_pose2D(pose3d) #, twist
+        # return self.pose3D_to_pose2D(pose3d), twist
 
     def process_pose_msg(self, msg_PoseWithCovarianceStamped):
         # remove Covariance

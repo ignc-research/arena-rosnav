@@ -87,7 +87,7 @@ class ObservationCollector:
         # ApproximateTimeSynchronizer appears to be slow for training, but with real robot, own sync method doesn't accept almost any messages as synced
         # need to evaulate each possibility
         if self._approx_time_sync:
-            self._scan_sub = message_filters.Subscriber(f'{self.ns_prefix}scan', LaserScan)
+            self._scan_sub = message_filters.Subscriber(f'{self.ns_prefix}scan_mapped', LaserScan)
             self._robot_state_sub = message_filters.Subscriber(f'{self.ns_prefix}odom', Odometry)
 
             self.ts = message_filters.ApproximateTimeSynchronizer([self._scan_sub, self._robot_state_sub], 10, slop=self._sync_slop)
@@ -95,7 +95,7 @@ class ObservationCollector:
             self.ts.registerCallback(self.callback_odom_scan)
         else:
             self._scan_sub = rospy.Subscriber(
-                f"{self.ns_prefix}scan", LaserScan, self.callback_scan, tcp_nodelay=True
+                f"{self.ns_prefix}scan_mapped", LaserScan, self.callback_scan, tcp_nodelay=True
             )
 
             self._robot_state_sub = rospy.Subscriber(

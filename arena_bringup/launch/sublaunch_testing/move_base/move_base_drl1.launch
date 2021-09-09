@@ -24,7 +24,7 @@
   </include>
 
   <!-- run_agent -->
-  <node name="DRL_local_planner" pkg="arena_local_planner_drl" type="drl_agent_real_node.py" args="$(arg agent_name)"/>
+  <node name="DRL_local_planner" pkg="arena_local_planner_drl" type="drl_agent_real_node.py" args="$(arg agent_name)" output="screen"/>
 
   <!-- action_publisher -->
   <!-- makes sure that drl actions will be published according to sim time in eval mode-->

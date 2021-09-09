@@ -41,7 +41,7 @@ private:
     ros::Subscriber goal_sub_, odom_sub_, initialPose_sub_, amcl_pose_sub_;
 
     // publisher
-    ros::Publisher subgoal_DRL_pub_;
+    ros::Publisher subgoal_DRL_pub_, globalPlan_DRL_pub_;
 
     // vis publisher
     ros::Publisher vis_subgoal_drl_pub_;

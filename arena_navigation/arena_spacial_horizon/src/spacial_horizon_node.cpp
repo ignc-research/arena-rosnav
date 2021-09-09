@@ -30,6 +30,7 @@ void SpacialHorizon::init(ros::NodeHandle &nh)
     initialPose_sub_ = public_nh.subscribe("initialpose", 0, &SpacialHorizon::handle_initial_pose, this);
 
     subgoal_DRL_pub_  = public_nh.advertise<geometry_msgs::PoseStamped>("subgoal",10);
+    globalPlan_DRL_pub_  = public_nh.advertise<nav_msgs::Path>("globalPlan",10);
 
     /* visualization */
     vis_global_path_pub_ = public_nh.advertise<nav_msgs::Path>("vis_global_path", 10, true);
@@ -83,11 +84,10 @@ void SpacialHorizon::goalCallback(const geometry_msgs::PoseStampedPtr& msg){
 
 bool SpacialHorizon::getSubgoalSpacialHorizon(Eigen::Vector2d &subgoal){
     double dist_to_goal=(odom_pos_-end_pos_).norm();
-    
-    std::cout << "[SpacialHorizon] Dist to goal: " << dist_to_goal << std::endl;
 
     if(dist_to_goal <= goal_tolerance_){
         ros::param::set("/bool_goal_reached", true);
+        std::cout << "[SpacialHorizon] Goal reached!" << dist_to_goal << std::endl;
         return false;
     }
 
@@ -160,7 +160,6 @@ void SpacialHorizon::getGlobalPath_MoveBase(){
 	/* get global path from move_base */
 	ros::NodeHandle nh;
 	std::string service_name = "/move_base/NavfnROS/make_plan";
-    std::cout << "[SpacialHorizon] Get Global Path" << std::endl;
 	while (!ros::service::waitForService(service_name, ros::Duration(3.0))) {
 		ROS_INFO("[SpacialHorizon - GET_PATH] Waiting for service /move_base/NavfnROS/make_plan to become available");
 	}
@@ -199,6 +198,7 @@ void SpacialHorizon::callPlanningService(ros::ServiceClient &serviceClient, nav_
 		//srv.response.plan.poses is the container to save the result, traverse and take out
 		if (!srv.response.plan.poses.empty()) {
 			visualizeGlobalPath(vis_global_path_pub_);
+            globalPlan_DRL_pub_.publish(srv.response.plan);
 		}else{
 			ROS_WARN("[SpacialHorizon - GET_PATH] Got empty plan");
 		}

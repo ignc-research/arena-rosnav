@@ -116,6 +116,9 @@ class DRLAgent:
             if not goal_reached:
                 obs = self.get_observations()
                 action = self.get_action(obs)
+                # goal_reached = rospy.get_param("/bool_goal_reached")
+                # if goal_reached:
+                #     action = [0, 0]
                 self.publish_action(action)
 
     def _get_disc_action(self, action: int):
