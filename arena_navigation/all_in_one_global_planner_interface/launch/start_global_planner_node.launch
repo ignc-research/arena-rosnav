@@ -1,6 +1,7 @@
 <launch>
     <!-- Arguments -->
-    <arg name="ns"/>
+    <arg name="ns" default=""/>
+    <arg name="use_ns" default="true" />
     <arg name="config_path"/>
 
     <arg name="node_name" default="global_planner_node"/>
@@ -9,21 +10,42 @@
     <arg name="base_footprint" default="$(arg ns)_base_footprint"/>
     <arg name="scan_frame" default="$(arg ns)_laser_link"/>
 
-    <node pkg="all_in_one_global_planner_interface" type="GlobalPlannerInterface" respawn="false"
-          name="$(arg node_name)" output="screen" ns="$(arg ns)">
-        <!-- load params -->
-        <rosparam file="$(arg config_path)" command="load"/>
+    <group if="$(eval arg('use_ns') == true)">
+      <node pkg="all_in_one_global_planner_interface" type="GlobalPlannerInterface" respawn="false"
+            name="$(arg node_name)" output="screen" ns="$(arg ns)">
+          <!-- load params -->
+          <rosparam file="$(arg config_path)" command="load"/>
 
-        <!-- Set namespace specific parameters -->
-        <!-- global costmap params -->
-        <param name="global_costmap/global_frame" value="$(arg global_frame)"/>
-        <param name="global_costmap/robot_base_frame" value="$(arg base_footprint)"/>
+          <!-- Set namespace specific parameters -->
+          <!-- global costmap params -->
+         <param name="global_costmap/global_frame" value="$(arg global_frame)"/>
+         <param name="global_costmap/robot_base_frame" value="$(arg base_footprint)"/>
 
-        <param name="global_costmap/scan/sensor_frame" value="$(arg scan_frame)"/>
+         <param name="global_costmap/scan/sensor_frame" value="$(arg scan_frame)"/>
 
-        <!-- remaps due to namespace -->
-        <remap from="/clock" to="/$(arg ns)/clock"/>
-        <remap from="map" to="/$(arg ns)/map"/>
+         <!-- remaps due to namespace -->
+         <remap from="/clock" to="/$(arg ns)/clock"/>
+         <remap from="map" to="/$(arg ns)/map"/>
 
-    </node>
+      </node>
+    </group>
+
+    <group if="$(eval arg('use_ns') == false)">
+      <node pkg="all_in_one_global_planner_interface" type="GlobalPlannerInterface" respawn="false"
+            name="$(arg node_name)" output="screen">
+          <!-- load params -->
+          <rosparam file="$(arg config_path)" command="load"/>
+
+          <!-- Set namespace specific parameters -->
+          <!-- global costmap params -->
+         <param name="global_costmap/global_frame" value="map"/>
+         <param name="global_costmap/robot_base_frame" value="base_footprint"/>
+
+         <param name="global_costmap/scan/sensor_frame" value="laser_link"/>
+
+         <!-- remaps due to namespace -->
+         <remap from="map" to="/map"/>
+
+      </node>
+    </group>
 </launch>

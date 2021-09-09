@@ -1,6 +1,7 @@
 <launch>
     <!-- Arguments -->
     <arg name="ns"/>
+    <arg name="use_ns" default="true" />
     <arg name="config_path"/>
 
     <arg name="node_name" default="local_planner_node_teb"/>
@@ -10,23 +11,48 @@
     <arg name="base_footprint" default="$(arg ns)_base_footprint"/>
     <arg name="scan_frame" default="$(arg ns)_laser_link"/>
 
-    <node pkg="all_in_one_local_planner_interface" type="all_in_one_local_planner_node" respawn="false"
-          name="$(arg node_name)" output="screen" ns="$(arg ns)">
-        <!-- load params -->
-        <rosparam file="$(arg config_path)" command="load"/>
 
-        <!-- Set namespace specific parameters -->
-        <!-- local costmap params -->
-        <param name="local_costmap/scan/sensor_frame" value="$(arg scan_frame)"/>
-        <param name="local_costmap/global_frame" value="$(arg robot_frame)"/>
-        <param name="local_costmap/robot_base_frame" value="$(arg base_footprint)"/>
 
-        <!-- param only relevant for teb -->
-        <param name="$teb_local_planner/map_frame" value="$(arg robot_frame)"/>
+    <group if="$(eval arg('use_ns') == true)">
+      <node pkg="all_in_one_local_planner_interface" type="all_in_one_local_planner_node" respawn="false"
+            name="$(arg node_name)" output="screen" ns="$(arg ns)">
+          <!-- load params -->
+          <rosparam file="$(arg config_path)" command="load"/>
 
-        <!-- remaps due to namespace -->
-        <remap from="/clock" to="/$(arg ns)/clock"/>
-        <remap from="map" to="/$(arg ns)/map"/>
+          <!-- Set namespace specific parameters -->
+          <!-- local costmap params -->
+          <param name="local_costmap/scan/sensor_frame" value="$(arg scan_frame)"/>
+          <param name="local_costmap/global_frame" value="$(arg robot_frame)"/>
+          <param name="local_costmap/robot_base_frame" value="$(arg base_footprint)"/>
 
-    </node>
+          <!-- param only relevant for teb -->
+          <param name="$teb_local_planner/map_frame" value="$(arg robot_frame)"/>
+
+          <!-- remaps due to namespace -->
+          <remap from="/clock" to="/$(arg ns)/clock"/>
+          <remap from="map" to="/$(arg ns)/map"/>
+
+      </node>
+    </group>
+
+    <group if="$(eval arg('use_ns') == false)">
+      <node pkg="all_in_one_local_planner_interface" type="all_in_one_local_planner_node" respawn="false"
+            name="$(arg node_name)" output="screen">
+          <!-- load params -->
+          <rosparam file="$(arg config_path)" command="load"/>
+
+          <!-- Set namespace specific parameters -->
+          <!-- local costmap params -->
+          <param name="local_costmap/scan/sensor_frame" value="laser_link"/>
+          <param name="local_costmap/global_frame" value="map"/>
+          <param name="local_costmap/robot_base_frame" value="base_footprint"/>
+
+          <!-- param only relevant for teb -->
+          <param name="$teb_local_planner/map_frame" value="odom"/>
+
+          <!-- remaps due to namespace -->
+          <remap from="map" to="/map"/>
+
+      </node>
+    </group>
 </launch>

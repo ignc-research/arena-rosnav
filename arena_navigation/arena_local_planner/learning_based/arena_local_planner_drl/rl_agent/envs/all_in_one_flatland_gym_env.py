@@ -33,6 +33,7 @@ class AllInOneEnv(gym.Env):
                  evaluation_episodes: int = 40,
                  seed: int = 1,
                  extended_eval: bool = False,
+                 run_scenario: bool = False
                  ):
 
         super(AllInOneEnv, self).__init__()
@@ -79,7 +80,7 @@ class AllInOneEnv(gym.Env):
             map_update_freq = 1
         else:
             map_update_freq = 20
-        self.task_manager = TaskManager(self.ns, map_update_freq, paths)
+        self.task_manager = TaskManager(self.ns, map_update_freq, paths, run_scenario)
         self._seed = seed
 
         if self._evaluation:
@@ -121,8 +122,10 @@ class AllInOneEnv(gym.Env):
         self._last_obs_dict = dict()
         self._last_merged_obs = np.zeros(shape=self.observation_space.shape)
 
-        self._local_planner_manager.wait_for_agents(self._sim_step_client)
-        self.reset()
+        if self._is_train_mode:
+            self._local_planner_manager.wait_for_agents(self._sim_step_client)
+            self.reset()
+
         rospy.loginfo("Environment " + self.ns + ": All agents are loaded - Gym environment is ready!")
 
     def step(self, action: int):
@@ -145,7 +148,7 @@ class AllInOneEnv(gym.Env):
         self._local_planner_manager.reset_planners()
         self.observation_collector.reset()
 
-        if self._is_train_mode or self._evaluation:
+        if self._is_train_mode:
             self._sim_step_client()
 
         # reset task manager

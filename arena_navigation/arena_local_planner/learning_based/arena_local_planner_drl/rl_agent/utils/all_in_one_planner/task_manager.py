@@ -10,26 +10,32 @@ from nav_msgs.srv import GetMap
 from rospy import ServiceException
 from task_generator.obstacles_manager import ObstaclesManager
 from task_generator.robot_manager import RobotManager
-from task_generator.tasks import RandomTask
+from task_generator.tasks import *
+
 
 from simulator_setup.srv import *
 
 
 class TaskManager:
 
-    def __init__(self, ns: str, reset_map_interval: int, paths: dict):
+    def __init__(self, ns: str, reset_map_interval: int, paths: dict, run_scenario: bool):
         self.ns = ns
-        self.task = self._get_random_task(paths)
-        self.resetMap_interval = reset_map_interval
-        self.current_iteration = 0
-        self._request_new_map = rospy.ServiceProxy("/" + self.ns + "/new_map", GetMapWithSeed)
+        self.run_scenario = run_scenario
+        if self.run_scenario:
+            self.task = get_predefined_task(ns, mode='scenario', start_stage=1, PATHS=paths)
+        else:
+            self.task = self._get_random_task(paths)
+            self.resetMap_interval = reset_map_interval
+            self.current_iteration = 0
+            self._request_new_map = rospy.ServiceProxy("/" + self.ns + "/new_map", GetMapWithSeed)
 
     def reset(self, seed):
-        self.current_iteration += 1
-        if self.current_iteration % self.resetMap_interval == 0:
-            self.current_iteration = 0
-            self._update_map(seed)
-        random.seed(seed)
+        if not self.run_scenario:
+            self.current_iteration += 1
+            if self.current_iteration % self.resetMap_interval == 0:
+                self.current_iteration = 0
+                self._update_map(seed)
+            random.seed(seed)
         self.task.reset()
 
     def _get_random_task(self, paths: dict):

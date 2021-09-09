@@ -14,15 +14,15 @@ class AllInOneVisualizer:
 
         self.agent_visualization = rospy.Publisher(f'{ns_prefix}all_in_one_action_vis', Marker, queue_size=1)
 
-        if self._evaluation:
-            self.agent_visualization_trajectory = rospy.Publisher(f'{ns_prefix}all_in_one_action_trajectory_vis',
-                                                                  Marker,
-                                                                  queue_size=1)
-            self.collision_visualization = rospy.Publisher(f'{ns_prefix}collision_vis',
-                                                           Marker,
-                                                           queue_size=1)
-            self._setup_trajectory_marker()
-            self._collisions_markers = []
+        #if self._evaluation:
+        self.agent_visualization_trajectory = rospy.Publisher(f'{ns_prefix}all_in_one_action_trajectory_vis',
+                                                              Marker,
+                                                              queue_size=1)
+        self.collision_visualization = rospy.Publisher(f'{ns_prefix}collision_vis',
+                                                       Marker,
+                                                       queue_size=1)
+        self._setup_trajectory_marker()
+        self._collisions_markers = []
 
         self._model_names = model_names
         self.colors = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0], [1.0, 1.0, 0.0], [1.0, 0.0, 1.0],
@@ -40,11 +40,11 @@ class AllInOneVisualizer:
         # visualize
         if self._current_iteration % self._visualize_every_x_iterations == 0:
             self._visualize_action(action)
-            if self._evaluation:
-                self._visualize_episode_actions_as_path(action, robot_pose)
-                if self._visualize_crash and is_in_crash:
-                    self._visualize_collision(robot_pose)
-                    self._collisions += 1
+            # if self._evaluation:
+            self._visualize_episode_actions_as_path(action, robot_pose)
+            if self._visualize_crash and is_in_crash:
+                self._visualize_collision(robot_pose)
+                self._collisions += 1
         self._current_iteration += 1
 
     def reset_visualizer(self):
