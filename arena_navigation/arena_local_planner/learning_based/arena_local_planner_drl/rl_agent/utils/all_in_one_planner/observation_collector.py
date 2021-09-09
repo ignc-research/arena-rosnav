@@ -294,8 +294,9 @@ class ObservationCollectorAllInOne:
                 static_laser_scan_msg = self._laser_static_deque.popleft()
                 static_laser_stamp = static_laser_scan_msg.header.stamp.to_sec()
 
-            static_scan = self.process_scan_msg(static_laser_scan_msg)
-            self._dyn_scan_msg = static_laser_scan_msg
+            if static_laser_scan_msg is not None:
+                static_scan = self.process_scan_msg(static_laser_scan_msg)
+                self._dyn_scan_msg = static_laser_scan_msg
 
         # print(f"Laser_stamp: {laser_stamp}, Static_stamp: {static_laser_stamp}")
 
