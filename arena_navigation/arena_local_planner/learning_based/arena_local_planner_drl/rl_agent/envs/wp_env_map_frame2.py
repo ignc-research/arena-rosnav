@@ -404,9 +404,9 @@ class WPEnvMapFrame2(gym.Env):
                 == self.observation_collector.Event.TIMEOUT
             ):
                 info["event"] = "Timeout"
-                done = True
-                info["done"] = True
-                self.reward_calculator.save_info_on_episode_end()
+                done = False
+                info["done"] = False
+                # self.reward_calculator.save_info_on_episode_end()
                 info['is_success'] = False
             elif (
                 self.observation_collector.important_event

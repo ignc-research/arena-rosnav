@@ -50,7 +50,7 @@ _C.REWARD.REWARD_ON_TIME_COST = 0.01
 _C.REWARD.REWARD_ON_TIMEOUT = -0.3
 _C.REWARD.REWARD_ON_PROGRESS_BASE = 0.01
 _C.REWARD.NO_PROGRESS_REWARD = True
-_C.REWARD.NO_TIMEOUT_REWARD = True
+_C.REWARD.NO_TIMEOUT_REWARD = False
 
 
 _C.WAYPOINT_GENERATOR = CN()
@@ -58,7 +58,7 @@ _C.WAYPOINT_GENERATOR = CN()
 _C.WAYPOINT_GENERATOR.ACTIONS_DEF = os.path.join(
     arena_local_planner_drl_root, "configs", "waypoint_generator_actions2.yaml"
 )
-# rlca can only take 0.5,
+# rlca can only take 0.5, remember robot's radius is 0.3
 _C.WAYPOINT_GENERATOR.ROBOT_WAYPOINT_MIN_DIST = 0.5
 # make sure this value bigger than the linear value defined in the configs/waypoint_generator_actions*.yaml
 _C.WAYPOINT_GENERATOR.GOAL_RADIUS = 0.75
@@ -121,7 +121,7 @@ _C.MODEL.LEARNING_RATE = 0.0003
 # mini batch size
 _C.MODEL.BATCH_SIZE = 16
 # stablebaseline requires that
-_C.MODEL.N_STEPS = 2 ** 10 // _C.MODEL.BATCH_SIZE * _C.MODEL.BATCH_SIZE
+_C.MODEL.N_STEPS = 4 ** 10 // _C.MODEL.BATCH_SIZE * _C.MODEL.BATCH_SIZE
 _C.MODEL.N_EPOCHS = 7
 _C.MODEL.GAMMA = 0.9
 _C.MODEL.GAE_LAMBDA = 0.95
