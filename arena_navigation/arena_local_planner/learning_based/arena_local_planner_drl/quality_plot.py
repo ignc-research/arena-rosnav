@@ -88,39 +88,45 @@ for path in pathes :
     ax.text(np.where(task_flag==5)[0][0]+10, 14, 'Task Seperation',fontsize=7,rotation=270,color='black')
 
     plt.title( '                      Task1                                 Task 4                    Task5       ')
-    plt.ylabel('Distance to Vip (m)')
-    plt.xlabel('Time (s)')
+    plt.ylabel('Distance to Vip (m)',fontsize=12)
+    plt.xlabel('Time (s)',fontsize=12)
 
 
     plt.axhline(y=4.0 ,linestyle='--',color='red')
     ax.text(20, 4.4, 'Max Distance Thresthold',fontsize=6,color='tab:red')
+    fig.canvas.draw()
 
+    fig.tight_layout()
     plt.axis([0, time_steps.size, 2.0, 18.0])
-    ax.legend(loc=1, prop={'size': 8}) 
+    ax.legend(loc=1, prop={'size': 12}) 
 
     plt.savefig(path+'Distance_To_Vip.png')
 
     plt.show(block=False)
 
     fig, ax = plt.subplots()  # Create a figure containing a single axes.
+
     ax.plot(time_steps,smooth(vip_velocity,.9) ,'-',label ='Vip complete velocity',color='tab:red',alpha=0.7)
     ax.plot(time_steps, smooth(robot_velocity ,.9),'-',label='Agent complete velocity',color='tab:blue',alpha=0.7)
 
     plt.axvline(x=np.where(task_flag==4)[0][0],color='black')
-    ax.text(np.where(task_flag==4)[0][0]+10, 14, 'Task Seperation',fontsize=7,rotation=270,color='black')
+    # ax.text(np.where(task_flag==4)[0][0]+10, 14, 'Task Seperation',fontsize=7,rotation=270,color='black')
 
     plt.axvline(x=np.where(task_flag==5)[0][0],color='black')
-    ax.text(np.where(task_flag==5)[0][0]+10, 14, 'Task Seperation',fontsize=7,rotation=270,color='black')
+    # ax.text(np.where(task_flag==5)[0][0]+10, 14, 'Task Seperation',fontsize=7,rotation=270,color='black')
 
     plt.title('                      Task1                                 Task 4                    Task5       ')
 
-    plt.ylabel('Velocitys (m/s) ')
-    plt.xlabel('Time (s)')
+    plt.ylabel('Velocitys (m/s) ',fontsize=12)
+    plt.xlabel('Time (s)',fontsize=12)
+    fig.canvas.draw()
+    fig.tight_layout()
 
+    plt.axis([0, time_steps.size, 0.0, 4.0])
+    ax.legend(loc=2, prop={'size': 12}) 
+    # 
 
-    ax.legend(loc=2, prop={'size': 6}) 
-
-    plt.axis([0, vip_rho.size, -1.0, 4.0])
+  
     plt.savefig(path+'Vip-Velocity.png')
     plt.show(block=False)
 
@@ -139,7 +145,7 @@ for path in pathes :
 
 
 
-    plt.savefig(path+'Orientation_Difference.png')
+    # plt.savefig(path+'Orientation_Difference.png')
     plt.show(block=False)
 
 
@@ -148,11 +154,12 @@ for path in pathes :
     d = 70
     plt.figure(figsize=(w, h), dpi=d)
     fig, ax = plt.subplots()
+
     # plt.grid()
     ax.axis([0, 25, 0, 20])
     string_path_data =  [] 
-    plt.xlabel('X Coordinates')
-    plt.ylabel('Y Coordinates')
+    plt.xlabel('X Coordinates',fontsize=12)
+    plt.ylabel('Y Coordinates',fontsize=12)
 
     for i in range(len(robot_pos_x)) :
         x = robot_pos_x[i]
@@ -179,7 +186,6 @@ for path in pathes :
             
             ax.text(x, y+0.2, i,color='tab:blue',fontstyle='oblique',verticalalignment='bottom')
             plt.scatter([x], [y],color='tab:blue')
-
 
 
 
@@ -241,7 +247,7 @@ for path in pathes :
     xs, ys = zip(*verts)
     ax.plot(xs, ys, '--', lw=2, color='tab:red', ms=2,label ='Vip complete path')
 
-    ax.legend()
+    
 
     color =['#e6194b', '#3cb44b', '#ffe119', '#4363d8', '#f58231', '#911eb4', '#46f0f0', '#f032e6', '#bcf60c', '#fabebe', '#008080', '#e6beff',
     '#9a6324', '#fffac8', '#800000', '#aaffc3', '#808000', '#ffd8b1', '#000075', '#808080', '#ffffff', '#000000']
@@ -323,9 +329,11 @@ for path in pathes :
                 # ax.text(x, y, i,color='green',alpha= 0.7)
                 
 
-        ax.legend()
+        ax.legend(loc=2, prop={'size': 12}) 
 
 
+    fig.canvas.draw()
+    fig.tight_layout()
 
 
 

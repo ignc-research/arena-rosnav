@@ -219,6 +219,8 @@ class ObservationCollector():
             vip_vel =self._human_vel[index_agent_requesting_via[0]][0]
             obs_dict['vip_velocity']=math.sqrt(vip_vel.linear.x*vip_vel.linear.x+vip_vel.linear.y*vip_vel.linear.y)
             obs_dict['vip_orientation']=pos.theta
+            obs_dict["vip_pos_x"]=pos.x
+            obs_dict["vip_pos_y"]=pos.y
 
 
         elif self._human_behavior.size > 0 and 'StateFollowingGuide' in self._human_behavior: 
@@ -237,6 +239,8 @@ class ObservationCollector():
             vip_vel =self._human_vel[index_agent_following_via[0]][0]
             obs_dict['vip_velocity']=math.sqrt(vip_vel.linear.x*vip_vel.linear.x+vip_vel.linear.y*vip_vel.linear.y)
             obs_dict['vip_orientation']=pos.theta
+            obs_dict["vip_pos_x"]=pos.x
+            obs_dict["vip_pos_y"]=pos.y
             
 
             
@@ -260,6 +264,8 @@ class ObservationCollector():
             vip_vel =self._human_vel[index_agent_requesting_via[0]][0]
             obs_dict['vip_velocity']=math.sqrt(vip_vel.linear.x*vip_vel.linear.x+vip_vel.linear.y*vip_vel.linear.y)
             obs_dict['vip_orientation']=pos.theta
+            obs_dict["vip_pos_x"]=pos.x
+            obs_dict["vip_pos_y"]=pos.y
             
         
         elif self._human_behavior.size > 0 and 'StateGuideToGoal' in self._human_behavior: 
@@ -281,17 +287,32 @@ class ObservationCollector():
             vip_vel =self._human_vel[index_agent_requesting_via[0]][0]
             obs_dict['vip_velocity']=math.sqrt(vip_vel.linear.x*vip_vel.linear.x+vip_vel.linear.y*vip_vel.linear.y)
             obs_dict['vip_orientation']=pos.theta
+            obs_dict["vip_pos_x"]=pos.x
+            obs_dict["vip_pos_y"]=pos.y
+            
             
 
         elif self._human_behavior.size > 0 and 'StateClearingGoal' in self._human_behavior: 
             self.flag_requesting_via = 5
+            index_agent_requesting_via =numpy.where(self._human_behavior== 'StateClearingGoal')
+            pos = self._human_position[index_agent_requesting_via[0]][0]
+            self.rho_to_via, self.theta_to_via = ObservationCollector._get_pose_in_robot_frame(pos, self._robot_pose)
+            self.rot_to_via=np.arctan2(pos.y - self._robot_pose.y, pos.x - self._robot_pose.x)
+            self.robot_vx_to_via = self._robot_vel.linear.x * np.cos(self.rot_to_via) + self._robot_vel.linear.y * np.sin(self.rot_to_via)
+            self.robot_vy_to_via = self._robot_vel.linear.y * np.cos(self.rot_to_via) - self._robot_vel.linear.x * np.sin(self.rot_to_via)
+            vip_vel =self._human_vel[index_agent_requesting_via[0]][0]
+            obs_dict['vip_velocity']=math.sqrt(vip_vel.linear.x*vip_vel.linear.x+vip_vel.linear.y*vip_vel.linear.y)
+            obs_dict['vip_orientation']=pos.theta
+            obs_dict["vip_pos_x"]=pos.x
+            obs_dict["vip_pos_y"]=pos.y
             
         
 
     
         self.robot_to_via_state=[self._robot_pose.x, self._robot_pose.y, self.robot_vx_to_via, self.robot_vy_to_via,
         self._robot_pose.theta, self._robot_vel.angular.z, self._radius_robot, self.rho_to_via, self.theta_to_via]
-  
+        obs_dict['vip_rho']=self.rho_to_via        
+
        
         #claculating diffrent robot infos 
         rho, theta = ObservationCollector._get_pose_in_robot_frame(self.currentgoal, self._robot_pose)
@@ -303,6 +324,10 @@ class ObservationCollector():
         merged_obs = np.hstack([np.array([self.time_step]), self.flag_requesting_via,self.robot_to_via_state, scan])
         
         obs_dict["robot_velocity"]= math.sqrt(self._robot_vel.linear.x*self._robot_vel.linear.x+self._robot_vel.linear.y*self._robot_vel.linear.y)
+        obs_dict["robot_pos_x"]=self._robot_pose.x
+        obs_dict["robot_pos_y"]=self._robot_pose.y
+
+        obs_dict['robot_orientation'] =self._robot_pose.theta
         obs_dict["laser_scan"] = scan
         obs_dict['goal_in_robot_frame'] = [rho,theta,self.flag_requesting_via,self.rho_to_via,self.theta_to_via]
         # initlaising array with dimensions an filling them up with coordinate of agents and rho(density)and theta (angle)
@@ -312,7 +337,10 @@ class ObservationCollector():
         obs_dict['task_flag']=self.flag_requesting_via 
         if self.flag_requesting_via == 0 :
             obs_dict['vip_velocity']= -1
-            obs_dict['vip_orientation']=-1        
+            obs_dict['vip_orientation']=-1
+            obs_dict["vip_pos_x"]=-1
+            obs_dict["vip_pos_y"]=-1
+                 
 
         agent_massage_is_none = False
         for pos in self._human_position: 
@@ -350,8 +378,6 @@ class ObservationCollector():
             obs_dict['human_behavior']=self._human_behavior
 
 
-
-            
             
             
             for i, ty in enumerate(self._human_type):
@@ -451,7 +477,7 @@ class ObservationCollector():
                     merged_obs = np.hstack([merged_obs,obs])
 
         #TODO more proper method is needed to supplement info blanks (finished)
-        if count_observable_robo_obstacles==0:
+        if count_observable_robo_obstacles==0 :                                                                                                                                 
             obs_empty=np.array(self.robot_self_state+[0]*10)
             merged_obs = np.hstack([merged_obs,obs_empty])
             count_observable_robo_obstacles=count_observable_robo_obstacles+1

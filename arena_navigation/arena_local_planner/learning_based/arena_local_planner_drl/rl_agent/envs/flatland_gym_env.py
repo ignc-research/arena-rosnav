@@ -18,6 +18,8 @@ from geometry_msgs.msg import Twist
 from flatland_msgs.srv import StepWorld, StepWorldRequest
 from std_msgs.msg import Bool
 import time
+import copy
+
 
 class Actions():
     # Define 11 choices of actions to be:
@@ -62,8 +64,11 @@ class FlatlandEnv(gym.Env):
             goal_radius (float, optional): [description]. Defaults to 0.1.
         """
         super(FlatlandEnv, self).__init__()
-    
-
+     
+        self.safe_dists_factor = self.read_saftey_distance_parameter_from_yaml()['safety distance factor']
+        self.human_behavior_tokens= copy.deepcopy(self.safe_dists_factor)
+        for i,item in enumerate(list(self.human_behavior_tokens.items())):
+            self.human_behavior_tokens[ item[0]] = i
         self.ns = ns
         try:
             # given every environment enough time to initialize, if we dont put sleep,
@@ -244,24 +249,41 @@ class FlatlandEnv(gym.Env):
             info['done_reason'] = reward_info['done_reason']
             info['is_success'] = reward_info['is_success']
             self.reward_calculator.kdtree = None
-            history_evaluation  = [self._episode]+self.reward_calculator.get_history_info()
-            history_evaluation +=history_evaluation+[info['done_reason']]
-            history_evaluation +=[obs_dict['vip_velocity']]
-            history_evaluation +=[obs_dict['robot_velocity']]
-            history_evaluation +=[obs_dict['vip_orientation']]
-            self.csv_writer.addData(np.array(history_evaluation))
-
+            # history_evaluation  = [self._episode]+self.reward_calculator.get_history_info()
+            # history_evaluation +=history_evaluation+[info['done_reason']]
+            # history_evaluation +=[obs_dict['vip_velocity']]
+            # history_evaluation +=[obs_dict['robot_velocity']]
+            # history_evaluation +=[obs_dict['vip_orientation']]
+            # history_evaluation +=[obs_dict['robot_orientation']]
+            # history_evaluation +=[obs_dict['vip_rho']]
+            # history_evaluation +=[obs_dict['task_flag']]
+            
+            # self.csv_writer.addData(np.array(history_evaluation))
+        num_obs= [0,0,5,10,20,20]
         if self._steps_curr_episode > self._max_steps_per_episode:
             done = True
             info['done_reason'] = 0
             info['is_success'] = 0
             self.reward_calculator.kdtree = None
-            history_evaluation  = [self._episode]+self.reward_calculator.get_history_info()
-            history_evaluation +=history_evaluation+[info['done_reason']]
-            history_evaluation +=[obs_dict['vip_velocity']]
-            history_evaluation +=[obs_dict['robot_velocity']]
-            history_evaluation +=[obs_dict['vip_orientation']]
-            self.csv_writer.addData(np.array(history_evaluation))
+        history_evaluation  = [self._episode] 
+        history_evaluation +=[obs_dict['task_flag']] +self.reward_calculator.get_history_info()
+        history_evaluation +=[info['done_reason']]
+        history_evaluation +=time.gmtime()
+        history_evaluation +=[obs_dict['vip_velocity']]
+        history_evaluation +=[obs_dict['robot_velocity']]
+        history_evaluation +=[obs_dict['vip_orientation']]
+        history_evaluation +=[obs_dict['robot_orientation']]
+        history_evaluation +=[obs_dict['vip_rho']]
+        history_evaluation +=[obs_dict['robot_pos_x']]
+        history_evaluation +=[obs_dict['robot_pos_y']]
+        history_evaluation +=[obs_dict['vip_pos_x']]
+        history_evaluation +=[obs_dict['vip_pos_y']]
+        for i in np.arange(1,num_obs[rospy.get_param("/curr_stage", -1)]):
+            history_evaluation += [obs_dict['human_coordinates_in_robot_frame'][0][i]]
+            history_evaluation += [obs_dict['human_coordinates_in_robot_frame'][1][i]]
+            history_evaluation += [self.human_behavior_tokens[obs_dict['human_behavior'][i]]]
+        
+        self.csv_writer.addData(np.array(history_evaluation))
 
         self.last_obs_dict=obs_dict
 
@@ -286,6 +308,19 @@ class FlatlandEnv(gym.Env):
 
     def close(self):
         pass
+
+    def read_saftey_distance_parameter_from_yaml(self):
+        
+        file_location = os.path.join(rospkg.RosPack().get_path('simulator_setup'), 'saftey_distance_parameter.yaml')
+        
+        
+        if os.path.isfile(file_location):
+            with open(file_location, "r") as file:
+                saftey_distance_parameter = yaml.load(file, Loader=yaml.FullLoader)       
+        assert isinstance(
+             saftey_distance_parameter, dict), "'saftey_distance_parameter.yaml' has wrong fromat! Has to encode dictionary!"
+                
+        return saftey_distance_parameter
 
 
 if __name__ == '__main__':
