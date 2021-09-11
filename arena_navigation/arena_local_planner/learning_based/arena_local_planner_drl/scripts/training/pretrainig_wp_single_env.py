@@ -247,7 +247,7 @@ def pretraining_network(
             pretraining_data_dirpath, f"{name_prefix}pretrain_policy_{epoch_idx}.pkl"
         )
         pretrain_vecnorm_obs_rms_filepath = os.path.join(
-            pretraining_data_dirpath, f"{name_prefix}pretrain_vecnormvecnorm_obs_rms_{epoch_idx}.pkl"
+            pretraining_data_dirpath, f"{name_prefix}pretrain_vecnorm_obs_rms_{epoch_idx}.pkl"
         )
         with open(pretrain_policy_filepath, "wb") as f:
             pickle.dump(policy, f)
