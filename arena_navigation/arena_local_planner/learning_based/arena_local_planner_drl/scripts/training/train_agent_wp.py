@@ -220,7 +220,7 @@ def make_envs(cfg, args: argparse.Namespace, namespaces: List[str]):
             if args.load_best_model_for_deploy:
                 # TODO is the filename correct?
                 vec_normalize_file = os.path.join(
-                    dir_path, 'vec_norm.pkl')
+                    dir_path, 'vec_normalize.pkl')
             else:
                 vec_normalize_file = os.path.join(
                     dir_path, 'final_vec_norm.pkl') 
@@ -272,16 +272,28 @@ def build_eval_callback(cfg, namespaces: List[str], eval_env, train_env):
 
 
 def load_model(cfg, args, env):
+    saved_model_file_names = ["best_model.zip","final_model.zip"]
     if args.load_best_model_for_deploy:     
-        saved_model_file_name = "best_model.zip"
+        model_file_idx = 0
     else:
-        saved_model_file_name ="final_model.zip"
+        model_file_idx = 1
+    model_file_found = False
+    for _ in range(2):
+        dir_path  = os.path.split(args.conf_file)[0]
+        model_file = os.path.join(dir_path, saved_model_file_names[model_file_idx])
+        if not os.path.exists(model_file):
+            print(f"Model file {model_file} not found")
+            model_file_idx  = 1-model_file_idx
+        else:
+            model_file_found = True
+            break 
+    if not model_file_found:
+        raise FileNotFoundError("You know the reason")
 
-    dir_path  = os.path.split(args.conf_file)[0]
-    model_file = os.path.join(dir_path, saved_model_file_name)
     if cfg.MODEL.NAME == 'PPO':
         from stable_baselines3 import PPO
         model = PPO.load(model_file, env)
+        print(f"loaded {model_file}")
     else:
         raise NotImplementedError()
     return model

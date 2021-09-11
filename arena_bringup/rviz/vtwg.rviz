@@ -388,8 +388,8 @@ Visualization Manager:
           Displays:
             - Class: rviz/MarkerArray
               Enabled: true
-              Marker Topic: /sim_4/flatland_server/debug/model/obstacle__random_static_00
-              Name: 0
+              Marker Topic: flatland_server/debug/model/obstacle__random_dynamic_00
+              Name: 1
               Namespaces:
                 "": true
               Queue Size: 100

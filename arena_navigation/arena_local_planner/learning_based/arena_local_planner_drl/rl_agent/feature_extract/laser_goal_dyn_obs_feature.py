@@ -83,7 +83,11 @@ class CNN_Laser_MLP_Goal_Dyn_Obs(BaseFeaturesExtractor):
             nn.ReLU(),
             nn.Linear(32,32),
             nn.ReLU()
-	)
+	)   
+        self.features_fc = nn.Sequential(
+            nn.Linear(features_dim,features_dim),
+            nn.ReLU(),
+        )
 
 
     def forward(self, observations: th.Tensor) -> th.Tensor:
@@ -98,9 +102,9 @@ class CNN_Laser_MLP_Goal_Dyn_Obs(BaseFeaturesExtractor):
         
         scan_feature = self.laser_fc(self.laser_cnn(scan_raw_feature))
         dynamic_obs_feature = self.dynamic_obstacle_fc(dynamic_obs_raw_feature)
-        features = th.cat((scan_feature,robot_raw_feature ,dynamic_obs_feature),1)
-
-        return features
+        features1 = th.cat((scan_feature,robot_raw_feature ,dynamic_obs_feature),1)
+        features2 = self.features_fc(features1)
+        return features2
 
 @FEATURE_REGISTRY.register()
 class Pure_Dyn_Obs(BaseFeaturesExtractor):
