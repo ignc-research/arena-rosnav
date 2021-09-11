@@ -266,9 +266,9 @@ class FlatlandEnv(gym.Env):
             info['is_success'] = 0
             self.reward_calculator.kdtree = None
         history_evaluation  = [self._episode] 
-        history_evaluation +=[obs_dict['task_flag']] +self.reward_calculator.get_history_info()
+        history_evaluation +=[obs_dict['task_flag']] 
         history_evaluation +=[info['done_reason']]
-        history_evaluation +=time.gmtime()
+        history_evaluation +=[time.time()] +self.reward_calculator.get_history_info()
         history_evaluation +=[obs_dict['vip_velocity']]
         history_evaluation +=[obs_dict['robot_velocity']]
         history_evaluation +=[obs_dict['vip_orientation']]
