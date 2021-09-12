@@ -10,7 +10,7 @@
             "type": "adult",
             "yaml_file": "/home/ducanor/catkin_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
             "number_of_peds": 1,
-            "vmax": 1.0,
+            "vmax": 0.5,
             "start_up_mode": "default",
             "wait_time": 0.0,
             "trigger_zone_radius": 0.0,
@@ -55,7 +55,7 @@
             "type": "adult",
             "yaml_file": "/home/ducanor/catkin_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
             "number_of_peds": 1,
-            "vmax": 1.0,
+            "vmax": 0.5,
             "start_up_mode": "default",
             "wait_time": 0.0,
             "trigger_zone_radius": 0.0,
@@ -108,7 +108,7 @@
             "type": "adult",
             "yaml_file": "/home/ducanor/catkin_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
             "number_of_peds": 1,
-            "vmax": 1.0,
+            "vmax": 0.5,
             "start_up_mode": "default",
             "wait_time": 0.0,
             "trigger_zone_radius": 0.0,
@@ -153,7 +153,7 @@
             "type": "adult",
             "yaml_file": "/home/ducanor/catkin_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
             "number_of_peds": 1,
-            "vmax": 1.0,
+            "vmax": 0.5,
             "start_up_mode": "default",
             "wait_time": 0.0,
             "trigger_zone_radius": 0.0,
@@ -206,7 +206,7 @@
             "type": "adult",
             "yaml_file": "/home/ducanor/catkin_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
             "number_of_peds": 1,
-            "vmax": 1.0,
+            "vmax": 0.5,
             "start_up_mode": "default",
             "wait_time": 0.0,
             "trigger_zone_radius": 0.0,
@@ -252,12 +252,12 @@
     ],
     "static_obstacles": [],
     "robot_position": [
-        2.58,
-        2.55
+        2.55,
+        2.74
     ],
     "robot_goal": [
-        16.5,
-        15.94
+        16.59,
+        15.97
     ],
     "map_path": "/home/ducanor/catkin_ws/src/arena-rosnav/simulator_setup/maps/eval_indoor/map.yaml",
     "format": "arena-tools"
