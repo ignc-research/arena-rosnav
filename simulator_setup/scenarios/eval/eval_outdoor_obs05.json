@@ -4,8 +4,8 @@
             "name": "1",
             "id": 0,
             "pos": [
-                14.52,
-                25.71
+                14.08,
+                18.95
             ],
             "type": "adult",
             "yaml_file": "/home/ducanor/catkin_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
@@ -35,12 +35,12 @@
             "force_factor_robot": 0.0,
             "waypoints": [
                 [
-                    25.84,
-                    18.45
+                    17.41,
+                    7.81
                 ],
                 [
-                    14.65,
-                    25.8
+                    14.1,
+                    18.56
                 ]
             ],
             "waypoint_mode": 0
@@ -49,8 +49,8 @@
             "name": "2",
             "id": 0,
             "pos": [
-                7.32,
-                10.83
+                2.57,
+                16.17
             ],
             "type": "adult",
             "yaml_file": "/home/ducanor/catkin_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
@@ -80,12 +80,12 @@
             "force_factor_robot": 0.0,
             "waypoints": [
                 [
-                    8.59,
-                    25.35
+                    17.89,
+                    18.27
                 ],
                 [
-                    7.36,
-                    10.86
+                    2.34,
+                    16.08
                 ]
             ],
             "waypoint_mode": 0
@@ -94,8 +94,8 @@
             "name": "3",
             "id": 0,
             "pos": [
-                10.19,
-                1.58
+                11.46,
+                3.99
             ],
             "type": "adult",
             "yaml_file": "/home/ducanor/catkin_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
@@ -125,12 +125,12 @@
             "force_factor_robot": 0.0,
             "waypoints": [
                 [
-                    9.83,
-                    12.59
+                    8.96,
+                    15.24
                 ],
                 [
-                    10.22,
-                    1.51
+                    11.45,
+                    3.88
                 ]
             ],
             "waypoint_mode": 0
@@ -139,8 +139,8 @@
             "name": "4",
             "id": 0,
             "pos": [
-                14.54,
-                11.87
+                10.35,
+                18.87
             ],
             "type": "adult",
             "yaml_file": "/home/ducanor/catkin_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
@@ -156,34 +156,34 @@
             "requesting_service_probability": 0.0,
             "requesting_guide_probability": 0.0,
             "requesting_follower_probability": 0.0,
-            "max_talking_distance": 5.0,
-            "max_servicing_radius": 5.0,
-            "talking_base_time": 10.0,
+            "max_talking_distance": 5,
+            "max_servicing_radius": 5,
+            "talking_base_time": 10,
             "tell_story_base_time": 0.0,
-            "group_talking_base_time": 10.0,
-            "talking_and_walking_base_time": 6.0,
-            "receiving_service_base_time": 20.0,
-            "requesting_service_base_time": 30.0,
-            "force_factor_desired": 1.0,
-            "force_factor_obstacle": 1.0,
-            "force_factor_social": 5.0,
-            "force_factor_robot": 0.0,
+            "group_talking_base_time": 10,
+            "talking_and_walking_base_time": 6,
+            "receiving_service_base_time": 20,
+            "requesting_service_base_time": 30,
+            "force_factor_desired": 1,
+            "force_factor_obstacle": 1,
+            "force_factor_social": 5,
+            "force_factor_robot": 0,
             "waypoints": [
                 [
-                    20.56,
-                    6.21
+                    13.0,
+                    12.22
                 ],
                 [
-                    26.69,
-                    9.33
+                    19.13,
+                    12.3
                 ],
                 [
-                    20.56,
-                    6.16
+                    13.04,
+                    12.37
                 ],
                 [
-                    14.27,
-                    12.09
+                    10.12,
+                    18.93
                 ]
             ],
             "waypoint_mode": 0
@@ -223,8 +223,8 @@
             "force_factor_robot": 0.0,
             "waypoints": [
                 [
-                    14.48,
-                    9.87
+                    14.28,
+                    11.14
                 ],
                 [
                     2.76,
