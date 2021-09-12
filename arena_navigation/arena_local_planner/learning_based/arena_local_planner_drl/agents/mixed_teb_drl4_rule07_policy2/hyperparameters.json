@@ -1,0 +1,23 @@
+{
+    "agent_name": "mixed_teb_drl4_rule07_policy2",
+    "robot": "myrobot",
+    "batch_size": 19200,
+    "gamma": 0.99,
+    "n_steps": 1200,
+    "ent_coef": 0.008,
+    "learning_rate": 0.0003,
+    "vf_coef": 0.22,
+    "max_grad_norm": 0.5,
+    "gae_lambda": 0.95,
+    "m_batch_size": 15,
+    "n_epochs": 3,
+    "clip_range": 0.22,
+    "train_max_steps_per_episode": 275,
+    "eval_max_steps_per_episode": 300,
+    "goal_radius": 0.6,
+    "reward_fnc": "rule_07",
+    "discrete_action_space": false,
+    "normalize": true,
+    "task_mode": "random",
+    "curr_stage": 1
+}
