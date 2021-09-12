@@ -35,8 +35,8 @@
             "force_factor_robot": 0.0,
             "waypoints": [
                 [
-                    17.41,
-                    7.81
+                    16.5,
+                    8.21
                 ],
                 [
                     14.1,
@@ -49,8 +49,8 @@
             "name": "2",
             "id": 0,
             "pos": [
-                2.57,
-                16.17
+                2.25,
+                14.59
             ],
             "type": "adult",
             "yaml_file": "/home/ducanor/catkin_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
@@ -80,12 +80,12 @@
             "force_factor_robot": 0.0,
             "waypoints": [
                 [
-                    17.89,
-                    18.27
+                    11.6,
+                    13.44
                 ],
                 [
-                    2.34,
-                    16.08
+                    2.14,
+                    14.62
                 ]
             ],
             "waypoint_mode": 0
@@ -125,8 +125,8 @@
             "force_factor_robot": 0.0,
             "waypoints": [
                 [
-                    8.96,
-                    15.24
+                    6.15,
+                    12.63
                 ],
                 [
                     11.45,
@@ -170,16 +170,16 @@
             "force_factor_robot": 0,
             "waypoints": [
                 [
-                    13.0,
-                    12.22
+                    15.25,
+                    15.46
                 ],
                 [
                     19.13,
                     12.3
                 ],
                 [
-                    13.04,
-                    12.37
+                    15.06,
+                    15.57
                 ],
                 [
                     10.12,
@@ -223,8 +223,8 @@
             "force_factor_robot": 0.0,
             "waypoints": [
                 [
-                    14.28,
-                    11.14
+                    12.58,
+                    8.21
                 ],
                 [
                     2.76,
@@ -236,12 +236,12 @@
     ],
     "static_obstacles": [],
     "robot_position": [
-        1.91,
-        2.4
+        20.86,
+        20.22
     ],
     "robot_goal": [
-        17.12,
-        16.71
+        3.18,
+        3.59
     ],
     "map_path": "/home/ducanor/catkin_ws/src/arena-rosnav/simulator_setup/maps/eval_outdoor/map.yaml",
     "format": "arena-tools"
