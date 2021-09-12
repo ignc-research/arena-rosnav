@@ -121,8 +121,8 @@
             "name": "4",
             "id": 0,
             "pos": [
-                12.35,
-                19.36
+                9.28,
+                10.15
             ],
             "type": "adult",
             "yaml_file": "/home/ducanor/catkin_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
@@ -229,8 +229,8 @@
             "name": "7",
             "id": 0,
             "pos": [
-                5.18,
-                7.28
+                15.56,
+                10.89
             ],
             "type": "adult",
             "yaml_file": "/home/ducanor/catkin_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
