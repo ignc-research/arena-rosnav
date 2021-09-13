@@ -820,9 +820,6 @@ def plot_dyn_obst(ob_xy):
 def read_scn_file(map, ob):
     # gets start / goal of each scenario as global param
     global start, goal, plt_cfg
-    # find json path
-    # rospack = rospkg.RosPack()
-    # json_path = rospack.get_path('simulator_setup')+'/scenarios/eval/'
 
     # remmeber curr dir
     remember_path = os.path.abspath(os.curdir)
