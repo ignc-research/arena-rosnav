@@ -1,8 +1,8 @@
 # Quantitative Plotting of .ods files
 This `ods_eval.py` script creates quantitative plots (bar plots) from .ods files.
 The format of the ods files should be as follows:
-- first column planners
-- other columns metrics to be evaluated
+- first column: planners
+- other columns: metrics to be evaluated
 - the .ods file name should be distinguishable and contain information about the obstacle number used.
 - naming of the planners and metrics must be consistent
 

@@ -37,6 +37,8 @@ def load_config_yaml():
         return config["color_mapping"],config["label_mapping"],config["leave_out_planner"]
 
 def plot_bars(data):
+    print("----------")
+    print("Begin plotting.")
     color_mapping, label_mapping, leave_out_planner = load_config_yaml()
     df_names = list(data.keys())
     planners = get_planners(data)
@@ -44,8 +46,11 @@ def plot_bars(data):
         for leave_out in leave_out_planner:
             planners.remove(leave_out)
             print(leave_out + " was left out.")
-    except:
+    except TypeError:
         print("No planners were left out.")
+    except ValueError:
+        planners = get_planners(data)
+        print("One or more planner to leave out not found. Check spelling. All planners plotted.")
     metrics = get_metrics(data)
 
     bar_num = len(planners)
@@ -72,6 +77,8 @@ def plot_bars(data):
         ax.grid('on')
         plt.legend(loc='upper left')
         plt.savefig(path+'/{0}.png'.format(metric))
+    print("Finish plotting.")
+    print("----------")
 
 
 if __name__ == "__main__": # execute code
