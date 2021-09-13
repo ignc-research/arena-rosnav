@@ -21,13 +21,16 @@ label_mapping:
   travel_time: "Time traveled"
   distance_travelled: "Distance traveled"
   reward_rule07: "Reward (Rule 07)"
-  comp_time_1_iteration_in_ms: "Computation Time per Iteration [ms]"
-  comp_time_1_iteration_local_planner_in_ms: "Computation Time of Local Planner per Iteration [ms]"
+  comp_time_1_iteration_in_ms: "Computation Time [ms/iteration]"
+  comp_time_1_iteration_local_planner_in_ms: "Local Planner Computation Time [ms/iteration]"
   distribution_drl_teb: "Distribution DRL:TEB"
   # labels for the ods_files, should be the obstacle number used
-  indoor_map_100iterations: "indoor"
-  outdoor_map_100iterations: "outdoor"
-
+  outdoor_map_05obs: "5 Obstacles"
+  outdoor_map_10obs: "10 Obstacles"
+  outdoor_map_20obs: "20 Obstacles"
+  indoor_map_05obs: "5 Obstacles"
+  indoor_map_10obs: "10 Obstacles"
+  indoor_map_20obs: "20 Obstacles"
 leave_out_planner:
   # - simple_all_in_one
   # - mpc

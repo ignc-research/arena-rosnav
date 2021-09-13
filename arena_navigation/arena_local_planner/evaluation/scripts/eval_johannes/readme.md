@@ -16,7 +16,7 @@ Note: KeyErrors mostly appear due to missing assignments or typos in the assignm
 
 ## How to use the script
 ```
-python <path_to_script/ods.eval.py> <path_to_ods_file_directory/ods_files>
+python <path_to_script/ods.eval.py> <path_to_ods_file_directory>
 ```
 
 The script will return a directory with one .png file per metric in it.
