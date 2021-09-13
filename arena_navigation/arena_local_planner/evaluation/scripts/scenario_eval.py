@@ -844,27 +844,48 @@ def read_scn_file(map, ob):
             data = l
     
     # get json data
-    for do in data["dynamic_obstacles"]:
-        sp   = data["dynamic_obstacles"][do]["start_pos"]
-        sp_x = sp[0]
-        sp_y = sp[1]
+    # for do in data["dynamic_obstacles"]:
+    #     sp   = data["dynamic_obstacles"][do]["start_pos"]
+    #     sp_x = sp[0]
+    #     sp_y = sp[1]
 
-        wp   = data["dynamic_obstacles"][do]["waypoints"][0]
-        wp_x = wp[0]
-        wp_y = wp[1]
+    #     wp   = data["dynamic_obstacles"][do]["waypoints"][0]
+    #     wp_x = wp[0]
+    #     wp_y = wp[1]
         
-        ep_x = sp_x + wp_x
-        ep_y = sp_y + wp_y
-        ep   = [ep_x, ep_y]
+    #     ep_x = sp_x + wp_x
+    #     ep_y = sp_y + wp_y
+    #     ep   = [ep_x, ep_y]
 
-        if plt_cfg["plot_obst"]:
-            plot_dyn_obst(sp)
-            plot_dyn_obst(ep)
-            plot_arrow(sp,wp)
+    #     if plt_cfg["plot_obst"]:
+    #         plot_dyn_obst(sp)
+    #         plot_dyn_obst(ep)
+    #         plot_arrow(sp,wp)
+
+    for do in data["pedsim_agents"]:
+            sp   = data["pedsim_agents"][do]["pos"]
+            wp_x = []
+            wp_y = []
+            wp = []
+            for i in range(len(data["pedsim_agents"][do]["waypoints"])):
+                wp_x[i] = data["pedsim_agents"][do]["waypoints"][i][0]
+                wp_y[i] = data["pedsim_agents"][do]["waypoints"][i][1]
+                wp[i]   = [wp_x[i], wp_y[i]]
+                if plt_cfg["plot_obst"]:
+                    if range(len(do["waypoints"])) > 1:
+                        plot_dyn_obst(sp)
+                        plot_arrow[sp, wp[0]]
+                        plot_arrow(wp[i],wp[i+1])
+                    else: 
+                        plot_dyn_obst(sp)
+                        plot_arrow(sp,wp[i])
 
         
-    start = data["robot"]["start_pos"]
-    goal  = data["robot"]["goal_pos"]
+    # start = data["robot"]["start_pos"]
+    # goal  = data["robot"]["goal_pos"]
+
+    start = data["robot_position"]
+    goal  = data["robot_goal"]
 
 def eval_cfg(cfg_file, filetype):
     global ax, plot_sm, start, goal, axlim, plt_cfg, line_clr, line_stl
