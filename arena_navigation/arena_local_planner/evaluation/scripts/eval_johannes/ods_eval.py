@@ -34,12 +34,18 @@ def load_config_yaml():
     dir_path = os.path.dirname(os.path.realpath(__file__))
     with open(dir_path+"/eval_config.yaml", "r") as stream:
         config = yaml.safe_load(stream)
-        return config["color_mapping"],config["label_mapping"]
+        return config["color_mapping"],config["label_mapping"],config["leave_out_planner"]
 
 def plot_bars(data):
-    color_mapping, label_mapping = load_config_yaml()
+    color_mapping, label_mapping, leave_out_planner = load_config_yaml()
     df_names = list(data.keys())
     planners = get_planners(data)
+    try:
+        for leave_out in leave_out_planner:
+            planners.remove(leave_out)
+            print(leave_out + " was left out.")
+    except:
+        print("No planners were left out.")
     metrics = get_metrics(data)
 
     bar_num = len(planners)

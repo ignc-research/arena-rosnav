@@ -10,6 +10,7 @@ The format of the ods files should be as follows:
 In the `eval_config.yaml` file you have to specify the color_mapping and label_mapping.
 In the label_mapping section you must assign each planner and metric a label, which will then be used in the plot.
 You must also assign a label to the .ods files which should be the obstacle number used.
+It's possible to leave out planners which you have data for but don't want to include in the plots. Simply create a list of unwanted planners in the leave_out_planners section.
 
 Note: KeyErrors mostly appear due to missing assignments or typos in the assignments.
 

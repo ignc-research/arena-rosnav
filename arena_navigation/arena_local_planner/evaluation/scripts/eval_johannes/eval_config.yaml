@@ -27,3 +27,8 @@ label_mapping:
   # labels for the ods_files, should be the obstacle number used
   indoor_map_100iterations: "indoor"
   outdoor_map_100iterations: "outdoor"
+
+leave_out_planner:
+  # - simple_all_in_one
+  # - mpc
+  # - teb
