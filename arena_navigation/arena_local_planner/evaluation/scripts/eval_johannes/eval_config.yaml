@@ -1,0 +1,34 @@
+color_mapping:
+  drl: "tab:green"
+  teb: "tab:blue"
+  mpc: "tab:orange"
+  rlca: "tab:red"
+  dwa: "tab:purple"
+  simple_all_in_one: "tab:pink"
+  all_in_one_rule06_nn2: "tab:cyan"
+label_mapping:
+  # labels for planners
+  drl: "DRL"
+  teb: "TEB"
+  mpc: "MPC"
+  rlca: "RLCA"
+  dwa: "DWA"
+  simple_all_in_one: "Simple All-in-One"
+  all_in_one_rule06_nn2: "All-in-One Rule 06 NN2"
+  # labels for metrics
+  success_rate: "Success Rate"
+  collisions: "Collisions"
+  travel_time: "Time traveled"
+  distance_travelled: "Distance traveled"
+  reward_rule07: "Reward (Rule 07)"
+  comp_time_1_iteration_in_ms: "Computation Time per Iteration [ms]"
+  comp_time_1_iteration_local_planner_in_ms: "Computation Time of Local Planner per Iteration [ms]"
+  distribution_drl_teb: "Distribution DRL:TEB"
+  # labels for the ods_files, should be the obstacle number used
+  indoor_map_100iterations: "indoor"
+  outdoor_map_100iterations: "outdoor"
+
+leave_out_planner:
+  # - simple_all_in_one
+  # - mpc
+  # - teb
