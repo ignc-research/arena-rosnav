@@ -35,3 +35,14 @@ leave_out_planner:
   # - simple_all_in_one
   # - mpc
   # - teb
+subdirectory_names: # subdirectory names for plot_pies.py, if none leave empty
+  - indoor
+  - outdoor
+pie_labels:
+  outdoor_map_05obs: "Outdoor map 5 obs"
+  outdoor_map_10obs: "Outdoor map 10 obs"
+  outdoor_map_20obs: "Outdoor map 20 obs"
+  indoor_map_05obs: "Indoor map 5 obs"
+  indoor_map_10obs: "Indoor map 10 obs"
+  indoor_map_20obs: "Indoor map 20 obs"
+
