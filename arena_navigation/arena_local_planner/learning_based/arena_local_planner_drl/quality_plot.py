@@ -75,30 +75,33 @@ for path in pathes :
 
     time_steps = np.arange(vip_rho.size)
     fig, ax = plt.subplots()  # Create a figure containing a single axes.
-    ax.plot(time_steps,smooth(vip_rho,0.9 )  ,'-',color='tab:red',alpha=0.7,label='Agent complete distance to vip')
+    ax.plot(time_steps,smooth(vip_rho,0.9 )  ,'-',color='tab:green',alpha=0.7,label='Agent complete distance to vip')
     # plt.axvline(x=np.where(task_flag==2)[0][0],label ='Tasks Seperation')
     # plt.title('Task1                                     Task2       ')
     # plt.axvline(x=np.where(task_flag==2)[0][0],color='black')
     # ax.text(np.where(task_flag==2)[0][0]+10, 2.5, 'Task Seperation',fontsize=8,rotation=270,color='black')
 
     plt.axvline(x=np.where(task_flag==4)[0][0],color='black')
-    ax.text(np.where(task_flag==4)[0][0]+10, 14, 'Task Seperation',fontsize=7,rotation=270,color='black')
+    ax.text(np.where(task_flag==4)[0][0]+10, 10, 'Task Seperation',rotation=270,color='black',fontsize=10)
 
     plt.axvline(x=np.where(task_flag==5)[0][0],color='black')
-    ax.text(np.where(task_flag==5)[0][0]+10, 14, 'Task Seperation',fontsize=7,rotation=270,color='black')
+    ax.text(np.where(task_flag==5)[0][0]+10, 10, 'Task Seperation',rotation=270,color='black',fontsize=10)
 
     plt.title( '                      Task1                                 Task 4                    Task5       ')
-    plt.ylabel('Distance to Vip (m)',fontsize=12)
-    plt.xlabel('Time (s)',fontsize=12)
+    plt.ylabel('Distance to Vip (m)',fontsize=14)
+    plt.xlabel('Time (s)',fontsize=14)
 
 
     plt.axhline(y=4.0 ,linestyle='--',color='red')
-    ax.text(20, 4.4, 'Max Distance Thresthold',fontsize=6,color='tab:red')
+    ax.text(20, 4.4, 'Max Distance Thresthold',fontsize=8,color='tab:red')
     fig.canvas.draw()
 
     fig.tight_layout()
     plt.axis([0, time_steps.size, 2.0, 18.0])
-    ax.legend(loc=1, prop={'size': 12}) 
+    ax.legend(loc=1, prop={'size': 14}) 
+    plt.xticks(fontsize=12 ) 
+    plt.yticks(fontsize=12 ) 
+
 
     plt.savefig(path+'Distance_To_Vip.png')
 
@@ -106,8 +109,8 @@ for path in pathes :
 
     fig, ax = plt.subplots()  # Create a figure containing a single axes.
 
-    ax.plot(time_steps,smooth(vip_velocity,.9) ,'-',label ='Vip complete velocity',color='tab:red',alpha=0.7)
-    ax.plot(time_steps, smooth(robot_velocity ,.9),'-',label='Agent complete velocity',color='tab:blue',alpha=0.7)
+    ax.plot(time_steps,smooth(vip_velocity,.9) ,'--',label ='Vip complete velocity',color='tab:green',alpha=0.7)
+    ax.plot(time_steps, smooth(robot_velocity ,.9),'-',label='Agent complete velocity',color='tab:green',alpha=0.7)
 
     plt.axvline(x=np.where(task_flag==4)[0][0],color='black')
     # ax.text(np.where(task_flag==4)[0][0]+10, 14, 'Task Seperation',fontsize=7,rotation=270,color='black')
@@ -117,14 +120,16 @@ for path in pathes :
 
     plt.title('                      Task1                                 Task 4                    Task5       ')
 
-    plt.ylabel('Velocitys (m/s) ',fontsize=12)
-    plt.xlabel('Time (s)',fontsize=12)
+    plt.ylabel('Velocitys (m/s) ',fontsize=14)
+    plt.xlabel('Time (s)',fontsize=14)
     fig.canvas.draw()
     fig.tight_layout()
 
     plt.axis([0, time_steps.size, 0.0, 4.0])
-    ax.legend(loc=2, prop={'size': 12}) 
+    ax.legend(loc=2, prop={'size': 14}) 
     # 
+    plt.xticks(fontsize=12 ) 
+    plt.yticks(fontsize=12 ) 
 
   
     plt.savefig(path+'Vip-Velocity.png')
@@ -144,6 +149,8 @@ for path in pathes :
     # ax.legend(loc=1, prop={'size': 8}) 
 
 
+    plt.xticks(fontsize=12 ) 
+    plt.yticks(fontsize=12 ) 
 
     # plt.savefig(path+'Orientation_Difference.png')
     plt.show(block=False)
@@ -158,8 +165,8 @@ for path in pathes :
     # plt.grid()
     ax.axis([0, 25, 0, 20])
     string_path_data =  [] 
-    plt.xlabel('X Coordinates',fontsize=12)
-    plt.ylabel('Y Coordinates',fontsize=12)
+    plt.xlabel('X Coordinates',fontsize=14)
+    plt.ylabel('Y Coordinates',fontsize=14)
 
     for i in range(len(robot_pos_x)) :
         x = robot_pos_x[i]
@@ -167,15 +174,15 @@ for path in pathes :
         
         if i == 0:
             string_path_data = string_path_data +[(mpath.Path.MOVETO,(x,y))]
-            ax.text(x, y+0.2, '  start 0',color='tab:blue',fontstyle='oblique')
+            ax.text(x, y+0.2, '  start 0',color='tab:green',fontstyle='oblique',fontsize=10)
             x_start = x
             y_start = y
-            plt.scatter([x], [y],color='tab:blue')
+            plt.scatter([x], [y],color='tab:green')
 
 
         elif  i == len(robot_pos_x) -1 : 
             string_path_data = string_path_data +[(mpath.Path.STOP,(x,y))]
-            ax.text(x, y+0.2, 'End                      ',color='tab:blue',fontstyle='oblique')
+            ax.text(x, y+0.2, 'End                      ',color='tab:green',fontstyle='oblique',fontsize=10)
 
 
         else :
@@ -184,8 +191,8 @@ for path in pathes :
 
         if i % 50 == 0 and i > 0 and (np.absolute(x_start - x )> 0.5 and np.absolute(y_start - y) > 0.5 ) :
             
-            ax.text(x, y+0.2, i,color='tab:blue',fontstyle='oblique',verticalalignment='bottom')
-            plt.scatter([x], [y],color='tab:blue')
+            ax.text(x, y+0.2, i,color='tab:green',fontstyle='oblique',verticalalignment='bottom' ,fontsize=10)
+            plt.scatter([x], [y],color='tab:green')
 
 
 
@@ -199,7 +206,7 @@ for path in pathes :
                                     arrowstyle="-|>,head_length=10,head_width=5")
     # ax.add_patch(fap1)
     xs, ys = zip(*verts)
-    ax.plot(xs, ys, '--', lw=2, color='tab:blue', ms=2,label ='Agent complete path')
+    ax.plot(xs, ys, '--', lw=2, color='tab:green', ms=2,label ='Agent complete path')
     # plt.show()
     xs, ys
 
@@ -213,7 +220,7 @@ for path in pathes :
         
         if i == 0:
             string_path_data = string_path_data +[(mpath.Path.MOVETO,(x,y))]
-            ax.text(x, y+0.2, '  Start 0 ',color='tab:red',fontstyle='oblique')
+            ax.text(x, y+0.2, '  Start 0 ',color='tab:red',fontstyle='oblique',fontsize=10)
             x_start = x
             y_start = y
             plt.scatter([x], [y],color='tab:red')
@@ -221,14 +228,14 @@ for path in pathes :
         elif  i == len(robot_pos_x) -1 : 
             string_path_data = string_path_data +[(mpath.Path.STOP,(x,y))]
             # ax.text(x, y, i,color='red')
-            ax.text(x, y+0.2, 'End                      ',color='tab:red',fontstyle='oblique')
+            ax.text(x, y+0.2, 'End                      ',color='tab:red',fontstyle='oblique',fontsize=10)
         else :
             string_path_data = string_path_data +[(mpath.Path.LINETO,(x,y))]
             
 
         if i % 50 == 0 and i > 0 and (np.absolute(x_start - x )> 0.5 and np.absolute(y_start - y) > 0.5 )  :
             
-            ax.text(x, y+0.2, i,color='tab:red',fontstyle='oblique')
+            ax.text(x, y+0.2, i,color='tab:red',fontstyle='oblique',fontsize=10)
             plt.scatter([x], [y],color='tab:red')
 
 
@@ -290,9 +297,9 @@ for path in pathes :
 
         xs, ys = zip(*verts)
         if j ==1 :
-            ax.plot(xs, ys, '--', lw=2, color='tab:green',alpha= 0.3, ms=3,label ='obstacle path')
+            ax.plot(xs, ys, '--', lw=2, color='tab:brown',alpha= 0.3, ms=3,label ='obstacle path')
         else :
-            ax.plot(xs, ys, '--', lw=2, color='tab:green',alpha= 0.3, ms=3)
+            ax.plot(xs, ys, '--', lw=2, color='tab:brown',alpha= 0.3, ms=3)
 
 
     for j in np.arange(1,20):
@@ -307,15 +314,15 @@ for path in pathes :
 
             
             if i == 0:
-                ax.text(x, y+0.2, i,color='tab:green',alpha= 0.7,fontstyle='oblique')
+                ax.text(x, y+0.2, i,color='tab:brown',alpha= 0.7,fontstyle='oblique',fontsize=10)
                 x_start = x
                 y_start = y
-                plt.scatter([x], [y],color='tab:green',alpha= 0.3)
+                plt.scatter([x], [y],color='tab:brown',alpha= 0.3)
 
             elif  i == len(robot_pos_x) -1 : 
                 # ax.text(x, y, i,color='red')
-                ax.text(x, y+0.2, i,color='tab:green',alpha= 0.7,fontstyle='oblique')
-                plt.scatter([x], [y],color='tab:green',alpha= 0.3)
+                ax.text(x, y+0.2, i,color='tab:brown',alpha= 0.7,fontstyle='oblique',fontsize=10)
+                plt.scatter([x], [y],color='tab:brown',alpha= 0.3)
 
             # ax.plot(xs, ys, '--', lw=2, color=color[j], ms=3,label ='obstacle path')
 
@@ -329,11 +336,13 @@ for path in pathes :
                 # ax.text(x, y, i,color='green',alpha= 0.7)
                 
 
-        ax.legend(loc=2, prop={'size': 12}) 
+        ax.legend(loc=1, prop={'size': 14}) 
 
 
     fig.canvas.draw()
     fig.tight_layout()
+    plt.xticks(fontsize=12 ) 
+    plt.yticks(fontsize=12 ) 
 
 
 

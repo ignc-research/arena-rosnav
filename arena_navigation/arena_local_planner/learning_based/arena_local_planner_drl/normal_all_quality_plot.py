@@ -51,7 +51,7 @@ path = 'evaluation_360/'
 
 pathes = ['5Obs','10Obs','20Obs','crowd','running']
 for i,l in enumerate(pathes):
-    pathes[i] = 'data/guidingHuman/' + l +'/'
+    pathes[i] = 'data/normal/' + l +'/'
 
 for path in pathes :
     data = pd.read_csv(path+'evaluation_360_1.csv')
@@ -65,8 +65,6 @@ for path in pathes :
     time_steps = np.arange(len(task_flag)) 
 
 
-    plt.axvline(x=np.where(task_flag==2)[0][0],color='black',)
-    ax.text(np.where(task_flag==2)[0][0]+10, 12, 'Task Seperation',fontsize=10,rotation=270,color='black')
 
     plt.axhline(y=4.0 ,linestyle='--',color='red')
     ax.text(20, 4.4, 'Max Distance Thresthold',fontsize=10,color='tab:red')
@@ -129,7 +127,7 @@ for path in pathes :
     plt.yticks(fontsize=12 ) 
 
 
-    plt.savefig(path+'Distance_To_Vip.png',dpi=300)
+    # plt.savefig(path+'Distance_To_Vip.png',dpi=300)
 
     plt.show(block=False)
 
@@ -150,12 +148,8 @@ for path in pathes :
     time_steps = np.arange(len(task_flag)) 
 
 
-    plt.axvline(x=np.where(task_flag==2)[0][0],color='black')
-    # ax.text(np.where(task_flag==2)[0][0]+10, 2.5, 'Task Seperation',fontsize=8,rotation=270,color='black')
 
-    ax.plot(time_steps, vip_velocity,'--',label ='Vip raw',color='tab:purple',alpha=0.9)
     ax.plot(time_steps, robot_velocity,'-',label='Agent raw',color='tab:purple',alpha=0.9)
-    plt.plot([len( time_steps)], [vip_velocity[-1]], marker='x', markersize=7, color="tab:purple")
     plt.plot([len( time_steps)], [robot_velocity[-1]], marker='x', markersize=7, color="tab:purple")
 
     data = pd.read_csv(path+'evaluation_360_2.csv')
@@ -169,9 +163,7 @@ for path in pathes :
     time_steps = np.arange(len(task_flag)) 
 
 
-    ax.plot(time_steps, vip_velocity,'--',label ='Vip with safety model',color='tab:orange',alpha=0.9)
     ax.plot(time_steps, robot_velocity,'-',label='Agent with safety model',color='tab:orange',alpha=0.9)
-    plt.plot([len( time_steps)], [vip_velocity[-1]], marker='x', markersize=7, color="tab:orange")
     plt.plot([len( time_steps)], [robot_velocity[-1]], marker='x', markersize=7, color="tab:orange")
 
     data = pd.read_csv(path+'evaluation_360_3.csv')
@@ -184,9 +176,7 @@ for path in pathes :
     time_steps = np.arange(len(task_flag)) 
 
 
-    ax.plot(time_steps,vip_velocity ,'--',label ='Vip without safety model',color='tab:blue',alpha=0.9)
     ax.plot(time_steps,robot_velocity ,'-',label='Agent without safety model',color='tab:blue',alpha=0.9)
-    plt.plot([len( time_steps)], [vip_velocity[-1]], marker='x', markersize=6, color="tab:blue")
     plt.plot([len( time_steps)], [robot_velocity[-1]], marker='x', markersize=6, color="tab:blue")
 
     data = pd.read_csv(path+'evaluation_360_4.csv')
@@ -200,9 +190,7 @@ for path in pathes :
     time_steps = np.arange(len(task_flag)) 
 
 
-    ax.plot(time_steps,vip_velocity ,'--',label ='Vip complete',color='tab:green',alpha=0.9)
     ax.plot(time_steps, robot_velocity ,'-',label='Agent complete',color='tab:green',alpha=0.9)
-    plt.plot([len( time_steps)], [vip_velocity[-1]], marker='x', markersize=6, color="tab:green")
     plt.plot([len( time_steps)], [robot_velocity[-1]], marker='x', markersize=6, color="tab:green")
 
     plt.ylabel('Velocitys (m/s) ',fontsize=14)
@@ -239,8 +227,6 @@ for path in pathes :
         robot_pos_y = np.array(data['robot_pos_y'])
         vip_pos_x = np.array(data['vip_pos_x'])
         vip_pos_y = np.array(data['vip_pos_y'])
-        # vip_pos_y = smooth(vip_pos_y,0.001)
-        # robot_pos_y = smooth(vip_pos_y,0.001)
 
 
         # plt.grid()
@@ -285,58 +271,13 @@ for path in pathes :
 
 
         # fap1 = mpatches.FancyArrowPatch(path=string_path,
-        #                                 arrowstyle="-|>,head_length=10,head_width=5")
+        #                                 arrowstyle="-|>,head_length=10,head_width=5")l
         # ax.add_patch(fap1)
         xs, ys = zip(*verts)
         ax.plot(xs, ys, '-', lw=2, color=color[j], ms=8,label ='Agent'+label[j],alpha= 1.0)
         # plt.show()
-        xs, ys
 
-        string_path_data =  [] 
-        x_start = -1
-        y_start = -1
-
-        for i in range(len(robot_pos_x)) :
-            x = vip_pos_x[i]
-            y = vip_pos_y[i]
-            
-            if i == 0:
-                string_path_data = string_path_data +[(mpath.Path.MOVETO,(x,y))]
-                ax.text(x, y+0.2, '  Start 0 ',color=colorVip[j],fontstyle='oblique',alpha=0.4,fontsize=10)
-                x_start = x
-                y_start = y
-                plt.scatter([x], [y],color=colorVip[j],alpha=0.4)
-
-            elif  i == len(robot_pos_x) -1 : 
-                string_path_data = string_path_data +[(mpath.Path.STOP,(x,y))]
-                # ax.text(x, y, i,color='red')
-                ax.text(x, y+0.2, 'End                      ',color=colorVip[j],fontstyle='oblique',alpha=0.4,fontsize=10)
-            else :
-                string_path_data = string_path_data +[(mpath.Path.LINETO,(x,y))]
-                
-
-            if i % 50 == 0 and i > 0 and (np.absolute(x_start - x )> 0.5 and np.absolute(y_start - y) > 0.5 )  :
-                
-                ax.text(x, y+0.2, i,color=color[j],fontstyle='oblique',alpha=0.4,fontsize=10)
-                plt.scatter([x], [y],color=color[j],alpha=0.4)
-
-
-        codes, verts = zip(*string_path_data)
-
-
-
-        string_path = mpath.Path(verts, codes)
-        patch = mpatches.PathPatch(string_path, facecolor="none", lw=2)
-
-
-        fap1 = mpatches.FancyArrowPatch(path=string_path,
-                                        arrowstyle="-|>,head_length=10,head_width=5",color='tab:orange',alpha=0.4)
-        # ax.add_patch(fap1)
-
-        xs, ys = zip(*verts)
-        ax.plot(xs, ys, '--', lw=2, color=colorVip[j], ms=1,label ='Vip'+label[j],alpha= 0.8)
-
-        # ax.legend(loc=3, prop={'size': 12})
+    
 
     for j in np.arange(1,20):
         string_path_data =  [] 
