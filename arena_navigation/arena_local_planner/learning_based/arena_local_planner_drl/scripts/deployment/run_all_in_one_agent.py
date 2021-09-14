@@ -19,7 +19,7 @@ from tools.all_in_one_utils import Evaluator
 from tools.argsparser import parse_run_agent_args
 from tools.train_agent_utils import print_hyperparameters
 
-PRIMITIVE_AGENTS = ['simple_all_in_one', 'random', 'drl_only', 'teb_only']
+PRIMITIVE_AGENTS = ['simple_all_in_one', 'random', 'drl_only', 'teb_only', 'rlca_only', 'mpc_only']
 AVAILABLE_AGENTS = ['mixed_teb_drl4_rule06_policy2', 'simple_all_in_one']
 AGENTS = ['mixed_teb_drl4_rule06_policy2']
 max_steps_per_episode = np.inf
@@ -126,10 +126,10 @@ if __name__ == "__main__":
                 policy = simple_all_in_one
                 action_probs = simple_all_in_one_action_probs
             else:
-                paths = get_paths(AGENT, primitive_agent=True)
+                paths = get_paths(AGENT, args, primitive_agent=True)
                 params = load_hyperparameters_json(paths)
                 print_hyperparameters(params)
-                env = DummyVecEnv([make_env(paths, params)])
+                env = DummyVecEnv([make_env(ns_for_nodes, paths, params, args.log)])
                 env = VecNormalize(env, norm_obs=False, norm_reward=False)
 
 
@@ -142,7 +142,7 @@ if __name__ == "__main__":
 
             evaluator = Evaluator()
             evaluator.evaluate_policy_manually(policy, action_probs, env, eval_episodes, paths['log'], params['gamma'],
-                                               paths['all_in_one_parameters'])
+                                               paths['all_in_one_parameters'], log_statistics=False)
         else:
             PATHS = get_paths(AGENT, args, False, False)
 
