@@ -1,4 +1,4 @@
-image: eval_outdoor.png
+image: map.png
 resolution: 0.25
 origin: [0.0, 0.0, 0.0]
 negate: 0
