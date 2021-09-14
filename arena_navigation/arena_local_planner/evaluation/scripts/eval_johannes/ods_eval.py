@@ -73,7 +73,7 @@ def plot_bars(data):
         plt.xlabel('No. Obstacles', fontsize=15)
         plt.xticks([r + ((len(planners))/2-0.5)*bar_width for r in x_ticks_base], [label_mapping[df_name] for df_name in df_names]) # NOTE: hardcoded for obs quantity
         plt.ylabel('{}'.format(label_mapping[metric]), fontsize=15)
-        plt.title("{}".format(label_mapping[metric]), fontweight='bold', fontsize=16)
+        plt.title("{} over No. Obstacles".format(label_mapping[metric]), fontweight='bold', fontsize=16)
         ax.grid('on')
         plt.legend(loc='upper left')
         plt.savefig(path+'/{0}.png'.format(metric))
