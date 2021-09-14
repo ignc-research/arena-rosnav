@@ -71,7 +71,7 @@ for path in pathes :
     plt.axhline(y=4.0 ,linestyle='--',color='red')
     ax.text(20, 4.4, 'Max Distance Thresthold',fontsize=10,color='tab:red')
 
-    ax.plot(time_steps,vip_rho,'-',color='tab:purple',alpha=0.9,label ='Agent raw')
+    ax.plot(time_steps,vip_rho,'-',color='tab:purple',alpha=0.9,label ='$SDRL_{raw}$')
     plt.plot([len(time_steps)], [vip_rho[-1]], marker='x', markersize=7, color="tab:purple")
 
 
@@ -82,7 +82,7 @@ for path in pathes :
     task_flag = np.array(data['task_flag'])
     time_steps = np.arange(len(task_flag)) 
 
-    ax.plot(time_steps,vip_rho,'-',color='tab:orange',alpha=0.9,label ='Agent with safety model')
+    ax.plot(time_steps,vip_rho,'-',color='tab:orange',alpha=0.9,label ='$SDRl_{SafeZone}$')
     plt.plot([len(time_steps)], [vip_rho[-1]], marker='x', markersize=7, color="tab:orange")
 
 
@@ -94,7 +94,7 @@ for path in pathes :
     task_flag = np.array(data['task_flag'])
     time_steps = np.arange(len(task_flag)) 
 
-    ax.plot(time_steps,vip_rho,'-',color='tab:blue',alpha=0.9,label ='Agent without safety model')
+    ax.plot(time_steps,vip_rho,'-',color='tab:blue',alpha=0.9,label ='$SDRl_{NosafeZone}$')
     plt.plot([len(time_steps)], [vip_rho[-1]], marker='x', markersize=7, color="tab:blue")
 
     data = pd.read_csv(path+'evaluation_360_4.csv')
@@ -105,7 +105,7 @@ for path in pathes :
     time_steps = np.arange(len(task_flag)) 
 
 
-    ax.plot(time_steps,vip_rho,'-',color='tab:green',alpha=0.9,label ='Agent complete')
+    ax.plot(time_steps,vip_rho,'-',color='tab:green',alpha=0.9,label ='$SDRl_{complete}$')
     plt.plot([len(time_steps)], [vip_rho[-1]], marker='x', markersize=7, color="tab:green")
 
 
@@ -153,8 +153,8 @@ for path in pathes :
     plt.axvline(x=np.where(task_flag==2)[0][0],color='black')
     # ax.text(np.where(task_flag==2)[0][0]+10, 2.5, 'Task Seperation',fontsize=8,rotation=270,color='black')
 
-    ax.plot(time_steps, vip_velocity,'--',label ='Vip raw',color='tab:purple',alpha=0.9)
-    ax.plot(time_steps, robot_velocity,'-',label='Agent raw',color='tab:purple',alpha=0.9)
+    ax.plot(time_steps, vip_velocity,'--',label ='$VIP_{raw}$',color='tab:purple',alpha=0.9)
+    ax.plot(time_steps, robot_velocity,'-',label='$SDRL_{raw}$',color='tab:purple',alpha=0.9)
     plt.plot([len( time_steps)], [vip_velocity[-1]], marker='x', markersize=7, color="tab:purple")
     plt.plot([len( time_steps)], [robot_velocity[-1]], marker='x', markersize=7, color="tab:purple")
 
@@ -169,8 +169,8 @@ for path in pathes :
     time_steps = np.arange(len(task_flag)) 
 
 
-    ax.plot(time_steps, vip_velocity,'--',label ='Vip with safety model',color='tab:orange',alpha=0.9)
-    ax.plot(time_steps, robot_velocity,'-',label='Agent with safety model',color='tab:orange',alpha=0.9)
+    ax.plot(time_steps, vip_velocity,'--',label ='$VIP_{SafeZone}$',color='tab:orange',alpha=0.9)
+    ax.plot(time_steps, robot_velocity,'-',label='$SDRL_{SafeZone}$',color='tab:orange',alpha=0.9)
     plt.plot([len( time_steps)], [vip_velocity[-1]], marker='x', markersize=7, color="tab:orange")
     plt.plot([len( time_steps)], [robot_velocity[-1]], marker='x', markersize=7, color="tab:orange")
 
@@ -184,8 +184,8 @@ for path in pathes :
     time_steps = np.arange(len(task_flag)) 
 
 
-    ax.plot(time_steps,vip_velocity ,'--',label ='Vip without safety model',color='tab:blue',alpha=0.9)
-    ax.plot(time_steps,robot_velocity ,'-',label='Agent without safety model',color='tab:blue',alpha=0.9)
+    ax.plot(time_steps,vip_velocity ,'--',label ='$VIP_{NoSafeZone}$',color='tab:blue',alpha=0.9)
+    ax.plot(time_steps,robot_velocity ,'-',label='$SDRL_{NoSafeZone}$l',color='tab:blue',alpha=0.9)
     plt.plot([len( time_steps)], [vip_velocity[-1]], marker='x', markersize=6, color="tab:blue")
     plt.plot([len( time_steps)], [robot_velocity[-1]], marker='x', markersize=6, color="tab:blue")
 
@@ -200,8 +200,8 @@ for path in pathes :
     time_steps = np.arange(len(task_flag)) 
 
 
-    ax.plot(time_steps,vip_velocity ,'--',label ='Vip complete',color='tab:green',alpha=0.9)
-    ax.plot(time_steps, robot_velocity ,'-',label='Agent complete',color='tab:green',alpha=0.9)
+    ax.plot(time_steps,vip_velocity ,'--',label ='$VIP_{complete}$',color='tab:green',alpha=0.9)
+    ax.plot(time_steps, robot_velocity ,'-',label='$SDRl_{complete}$',color='tab:green',alpha=0.9)
     plt.plot([len( time_steps)], [vip_velocity[-1]], marker='x', markersize=6, color="tab:green")
     plt.plot([len( time_steps)], [robot_velocity[-1]], marker='x', markersize=6, color="tab:green")
 
@@ -227,7 +227,7 @@ for path in pathes :
     color=['tab:purple','tab:orange','tab:blue','tab:green']
     colorVip=['purple','orange','blue','green']
 
-    label=[' raw',' with safety model',' wihout safety model',' complete']
+    label= [' $SDRL_{raw}$','$SDRL_{SafeZone}$','$SDRL_{NoSafeZone}$','$SDRL_{Complete}$'] 
 
 
     for j in range(4):
@@ -288,14 +288,14 @@ for path in pathes :
         #                                 arrowstyle="-|>,head_length=10,head_width=5")
         # ax.add_patch(fap1)
         xs, ys = zip(*verts)
-        ax.plot(xs, ys, '-', lw=2, color=color[j], ms=8,label ='Agent'+label[j],alpha= 1.0)
+        ax.plot(xs, ys, '-', lw=2, color=color[j], ms=8,label =label[j],alpha= 1.0)
         # plt.show()
         xs, ys
 
         string_path_data =  [] 
         x_start = -1
         y_start = -1
-
+        label1= [' $VIP_{raw}$','$VIP_{SafeZone}$','$VIP_{NoSafeZone}$','$VIP_{Complete}$']     
         for i in range(len(robot_pos_x)) :
             x = vip_pos_x[i]
             y = vip_pos_y[i]
@@ -334,7 +334,7 @@ for path in pathes :
         # ax.add_patch(fap1)
 
         xs, ys = zip(*verts)
-        ax.plot(xs, ys, '--', lw=2, color=colorVip[j], ms=1,label ='Vip'+label[j],alpha= 0.8)
+        ax.plot(xs, ys, '--', lw=2, color=colorVip[j], ms=1,label =label1[j],alpha= 0.8)
 
         # ax.legend(loc=3, prop={'size': 12})
 
@@ -376,7 +376,7 @@ for path in pathes :
 
         xs, ys = zip(*verts)
         if j ==1 :
-            ax.plot(xs, ys, '--', lw=2, color='black',alpha= 0.3, ms=3,label ='obstacle path')
+            ax.plot(xs, ys, '--', lw=2, color='black',alpha= 0.3, ms=3,label ='obstacle')
         else :
             ax.plot(xs, ys, '--', lw=2, color='black',alpha= 0.3, ms=3)
 
@@ -415,7 +415,7 @@ for path in pathes :
                 # ax.text(x, y, i,color='green',alpha= 0.7)
                 
 
-    ax.legend(loc=3, prop={'size': 8})
+    ax.legend(loc=3, prop={'size': 12})
 
     fig.canvas.draw()
     fig.tight_layout()

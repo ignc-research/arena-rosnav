@@ -75,7 +75,7 @@ for path in pathes :
 
     time_steps = np.arange(vip_rho.size)
     fig, ax = plt.subplots()  # Create a figure containing a single axes.
-    ax.plot(time_steps,smooth(vip_rho,0.9 )  ,'-',color='tab:green',alpha=0.7,label='Agent complete distance to vip')
+    ax.plot(time_steps,smooth(vip_rho,0.9 )  ,'-',color='tab:green',alpha=0.7,label='$SDRL_{Complete}$')
     # plt.axvline(x=np.where(task_flag==2)[0][0],label ='Tasks Seperation')
     # plt.title('Task1                                     Task2       ')
     # plt.axvline(x=np.where(task_flag==2)[0][0],color='black')
@@ -109,8 +109,8 @@ for path in pathes :
 
     fig, ax = plt.subplots()  # Create a figure containing a single axes.
 
-    ax.plot(time_steps,smooth(vip_velocity,.9) ,'--',label ='Vip complete velocity',color='tab:green',alpha=0.7)
-    ax.plot(time_steps, smooth(robot_velocity ,.9),'-',label='Agent complete velocity',color='tab:green',alpha=0.7)
+    ax.plot(time_steps,smooth(vip_velocity,.9) ,'--',label ='$VIP_{Complete}$ ',color='tab:green',alpha=0.7)
+    ax.plot(time_steps, smooth(robot_velocity ,.9),'-',label='$SDRL_{Complete}$',color='tab:green',alpha=0.7)
 
     plt.axvline(x=np.where(task_flag==4)[0][0],color='black')
     # ax.text(np.where(task_flag==4)[0][0]+10, 14, 'Task Seperation',fontsize=7,rotation=270,color='black')
@@ -206,7 +206,7 @@ for path in pathes :
                                     arrowstyle="-|>,head_length=10,head_width=5")
     # ax.add_patch(fap1)
     xs, ys = zip(*verts)
-    ax.plot(xs, ys, '--', lw=2, color='tab:green', ms=2,label ='Agent complete path')
+    ax.plot(xs, ys, '--', lw=2, color='tab:green', ms=2,label ='$SDRL_{Complete}$')
     # plt.show()
     xs, ys
 
@@ -220,23 +220,23 @@ for path in pathes :
         
         if i == 0:
             string_path_data = string_path_data +[(mpath.Path.MOVETO,(x,y))]
-            ax.text(x, y+0.2, '  Start 0 ',color='tab:red',fontstyle='oblique',fontsize=10)
+            ax.text(x, y+0.2, '  Start 0 ',color='tab:green',fontstyle='oblique',fontsize=10)
             x_start = x
             y_start = y
-            plt.scatter([x], [y],color='tab:red')
+            plt.scatter([x], [y],color='tab:green')
 
         elif  i == len(robot_pos_x) -1 : 
             string_path_data = string_path_data +[(mpath.Path.STOP,(x,y))]
             # ax.text(x, y, i,color='red')
-            ax.text(x, y+0.2, 'End                      ',color='tab:red',fontstyle='oblique',fontsize=10)
+            ax.text(x, y+0.2, 'End                      ',color='tab:green',fontstyle='oblique',fontsize=10)
         else :
             string_path_data = string_path_data +[(mpath.Path.LINETO,(x,y))]
             
 
         if i % 50 == 0 and i > 0 and (np.absolute(x_start - x )> 0.5 and np.absolute(y_start - y) > 0.5 )  :
             
-            ax.text(x, y+0.2, i,color='tab:red',fontstyle='oblique',fontsize=10)
-            plt.scatter([x], [y],color='tab:red')
+            ax.text(x, y+0.2, i,color='tab:green',fontstyle='oblique',fontsize=10)
+            plt.scatter([x], [y],color='tab:green')
 
 
     codes, verts = zip(*string_path_data)
@@ -249,10 +249,10 @@ for path in pathes :
 
     fap1 = mpatches.FancyArrowPatch(path=string_path,
                                     arrowstyle="-|>,head_length=10,head_width=5",color='red')
-    ax.add_patch(fap1)
+    # ax.add_patch(fap1)
 
     xs, ys = zip(*verts)
-    ax.plot(xs, ys, '--', lw=2, color='tab:red', ms=2,label ='Vip complete path')
+    ax.plot(xs, ys, '-', lw=2, color='tab:green', ms=2,label ='$VIP_{Complete}$')
 
     
 
@@ -297,7 +297,7 @@ for path in pathes :
 
         xs, ys = zip(*verts)
         if j ==1 :
-            ax.plot(xs, ys, '--', lw=2, color='tab:brown',alpha= 0.3, ms=3,label ='obstacle path')
+            ax.plot(xs, ys, '--', lw=2, color='tab:brown',alpha= 0.3, ms=3,label ='Obstacle ')
         else :
             ax.plot(xs, ys, '--', lw=2, color='tab:brown',alpha= 0.3, ms=3)
 
