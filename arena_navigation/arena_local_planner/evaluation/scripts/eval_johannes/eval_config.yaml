@@ -1,0 +1,51 @@
+color_mapping:
+  drl: "tab:green"
+  teb: "tab:blue"
+  mpc: "tab:orange"
+  rlca: "tab:red"
+  dwa: "tab:purple"
+  simple_all_in_one: "tab:pink"
+  all_in_one_rule06_nn2: "tab:cyan"
+label_mapping:
+  # labels for planners
+  drl: "DRL"
+  teb: "TEB"
+  mpc: "MPC"
+  rlca: "RLCA"
+  dwa: "DWA"
+  simple_all_in_one: "Simple All-in-One"
+  all_in_one_rule06_nn2: "All-in-One"
+  # labels for metrics
+  success_rate: "Success Rate"
+  collisions: "Collisions"
+  Travel time: "Time traveled [s]"
+  distance travelled: "Distance traveled [m]"
+  reward (rule 07): "Reward"
+  comp time 1 iteration in ms: "Comp.time/iteration [ms]"
+  comp time 1 iteration local planner in ms: "tc of Local Planner per Iteration [ms]"
+  distribution drl-teb: "Distribution DRL:TEB"
+  # labels for the ods_files, should be the obstacle number used
+  outdoor_map_05obs: "5"
+  outdoor_map_10obs: "10"
+  outdoor_map_20obs: "20"
+  indoor_map_05obs: "5"
+  indoor_map_10obs: "10"
+  indoor_map_20obs: "20"
+
+
+
+leave_out_planner:
+  # - simple_all_in_one
+  # - mpc
+  # - teb
+subdirectory_names: # subdirectory names for plot_pies.py, if none leave empty
+  - indoor
+  - outdoor
+pie_labels:
+  outdoor_map_05obs: "Outdoor map 5 obs"
+  outdoor_map_10obs: "Outdoor map 10 obs"
+  outdoor_map_20obs: "Outdoor map 20 obs"
+  indoor_map_05obs: "Indoor map 5 obs"
+  indoor_map_10obs: "Indoor map 10 obs"
+  indoor_map_20obs: "Indoor map 20 obs"
+
