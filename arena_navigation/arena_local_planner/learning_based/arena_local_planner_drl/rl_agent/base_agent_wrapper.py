@@ -264,7 +264,7 @@ class BaseDRLAgent(ABC):
         """
         merged_obs, obs_dict = self.observation_collector.get_observations()
         if self._agent_params["normalize"]:
-            self.normalize_observations(merged_obs)
+            merged_obs = self.normalize_observations(merged_obs)
         return merged_obs, obs_dict
 
     def normalize_observations(self, merged_obs: np.ndarray) -> np.ndarray:
