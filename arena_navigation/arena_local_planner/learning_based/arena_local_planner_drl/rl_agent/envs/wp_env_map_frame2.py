@@ -428,6 +428,7 @@ class WPEnvMapFrame2(gym.Env):
             done = True
             info["done"] = True
             info["event"] = "MaxStepsExceed"
+            info["is_success"] = False
         reward_info = self.reward_calculator.get_reward_info()
         info.update(reward_info)
         #DEBUG_LASER
