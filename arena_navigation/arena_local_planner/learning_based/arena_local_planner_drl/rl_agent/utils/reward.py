@@ -1,7 +1,8 @@
 import numpy as np
+import math
 from numpy.lib.utils import safe_eval
 import rospy
-from geometry_msgs.msg import Pose2D
+from geometry_msgs.msg import Pose2D, PoseStamped
 from typing import Tuple
 import scipy.spatial
 from rl_agent.utils.debug import timeit
@@ -41,6 +42,7 @@ class RewardCalculator():
             'rule_03': RewardCalculator._cal_reward_rule_03,
             'rule_04': RewardCalculator._cal_reward_rule_04,
             'rule_05': RewardCalculator._cal_reward_rule_05,
+            'rule_06': RewardCalculator._cal_reward_rule_06,
             }
         self.cal_func = self._cal_funcs[rule]
 
@@ -182,11 +184,90 @@ class RewardCalculator():
             laser_scan, punishment=10)
         self._reward_goal_approached(
             goal_in_robot_frame, reward_factor=0.3, penalty_factor=0.4)
-        #self._test_reward()
-  
-    def _test_reward(self):
-        self.curr_reward +=100
+        self._reward_time_elapsed(kwargs['time_elapsed'], kwargs['global_plan'])
+
+    def _cal_reward_rule_06(self, 
+                             laser_scan: np.ndarray, 
+                             goal_in_robot_frame: Tuple[float,float],
+                             *args,**kwargs):
+        self._reward_abrupt_direction_change(
+            kwargs['action'])
+        self._reward_following_global_plan(
+            kwargs['global_plan'], kwargs['robot_pose'], kwargs['action'])
+        if laser_scan.min() > self.safe_dist:
+            self._reward_distance_global_plan(
+                kwargs['global_plan'], kwargs['robot_pose'], reward_factor=0.2, penalty_factor=0.3)
+        else:
+            self.last_dist_to_path = None
+        self._reward_goal_reached(
+            goal_in_robot_frame, reward=15)
+        self._reward_safe_dist(
+            laser_scan, punishment=0.25)
+        self._reward_collision(
+            laser_scan, punishment=10)
+        self._reward_goal_approached(
+            goal_in_robot_frame, reward_factor=0.3, penalty_factor=0.4)
+        self._reward_time_elapsed(kwargs['time_elapsed'], kwargs['global_plan'])
+        self._reward_waypoints_set_near_global_plan(kwargs['goal'], kwargs['subgoal'], kwargs['last_subgoal'],kwargs['amount_rewarded_subgoals'], kwargs['global_plan'])
+
+    def _reward_waypoints_set_near_global_plan(self,
+                             goal: Pose2D,
+                             subgoal: PoseStamped,
+                             last_subgoal: PoseStamped,
+                             amount_rewarded_subgoals: int,
+                             global_plan: np.array):
+        """
+        Reward for putting a reward close to the global path.
+        The further away from the global plan a waypoint is set, the less points are archived by this reward.
+        There will be no reward for placing it onto the goal, because this is not learned but coded to be done, when the robot gets close enough.
+        The reward will be devided by estimated amounts of waypoints set, which is 1 waypoint each 200 meter (of global plan), starting at 500 meters
         
+        :param goal (Pose2D): the global goal, which is to be reached
+        :param subgoal (PoseStamped): the current subgoal, which is to be reached. Gains a reward, if different from last_subgoal
+        :param last_subgoal (PoseStamped): the last subgoal, which was rewarded. Used to check, if a new subgoal has been published, which needs to be rewarded
+        :param amount_rewarded_subgoal (int): amount of already rewarded subgoals. Used for punishment, if too many subgoals are used
+        :param global_plan: (np.ndarray): vector containing poses on global plan
+        """
+        estimatedSubgoalAmount = math.floor(len(global_plan)/200) -1
+        max_subgoal_gp_dist = 1.5 # range of the circle around ref-subgoal set in wp3_env
+        if len(global_plan) > 500 and not (subgoal.pose.position.x == last_subgoal.pose.position.x and subgoal.pose.position.y == last_subgoal.pose.position.y) and not (subgoal.pose.position.x == goal.x and subgoal.pose.position.y == goal.y):
+            if amount_rewarded_subgoals >= estimatedSubgoalAmount:
+                self.curr_reward -= 0.5
+            else:
+                subgoal_gp_dist = np.inf
+                for gp_point in global_plan:
+                    dist = ((gp_point[0] - subgoal.pose.position.x)**2 + (gp_point[1] - subgoal.pose.position.y)**2)**0.5
+                    if dist < subgoal_gp_dist:
+                        subgoal_gp_dist = dist
+                self.curr_reward += (1 - ((subgoal_gp_dist/max_subgoal_gp_dist) ** 0.5))
+            print("subgoal rewarded")
+            self.info['subgoal_was_rewarded'] = True
+        else:
+            self.info['subgoal_was_rewarded'] = False
+
+    def _reward_time_elapsed(self,
+                             time_elapsed: float,
+                             global_plan: np.array):
+        """
+        Reward for being fast / punishment for being slow.
+        If the run is in range of 70% of the best time/ meter of global path there will be a reaward. 
+        When the 70% mark is exceeded, there will be a punishment and the run will fail with reason 'max steps exceeded'
+        
+        :param time_elapsed (float): time, which elapsed since the first action was published 
+        :param global_plan: (np.ndarray): vector containing poses on global plan
+        """
+        time_factor = 0.058180871140939415 #time / meter of global path needed for the best 70% of evaluated runs
+        if time_factor * len(global_plan) - time_elapsed >= 0.5* time_factor * len(global_plan): #if more than 50% of the available time is left, then get a higher reward, to not reward slow robots inadequate.
+            self.curr_reward += 0.019
+        elif time_factor * len(global_plan) - time_elapsed <= 0: # if available time is exhausted, punish the robot instead
+            self.curr_reward -= 0.01
+            if self.info['is_done'] == True: #if goal was reached, but the robot did not satisfy the target time, the 15 points granted by reaching the goal need to be removed.
+                self.curr_reward -= 15 
+            self.info['done_reason'] = 0
+            self.info['is_success'] = 0 
+        else: #in this case the robot is in the lower half of the available time, now he only gets small rewards, so it is not worth to slow down to accumulate rewards, while available time is not exhausted.
+            self.curr_reward += 0.001
+
     def _reward_goal_reached(self,
                              goal_in_robot_frame = Tuple[float,float], 
                              reward: float=15):
@@ -197,7 +278,7 @@ class RewardCalculator():
         :param reward (float, optional): reward amount for reaching. defaults to 15
         """
         if goal_in_robot_frame[0] < self.goal_radius:
-            self.curr_reward = reward
+            self.curr_reward += reward
             self.info['is_done'] = True
             self.info['done_reason'] = 2
             self.info['is_success'] = 1

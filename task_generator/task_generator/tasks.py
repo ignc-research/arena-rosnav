@@ -124,6 +124,7 @@ class ManualTask(ABSTask):
 class StagedRandomTask(RandomTask):
     def __init__(self, ns: str, obstacles_manager: ObstaclesManager, robot_manager: RobotManager, start_stage: int = 1, PATHS=None):
         super().__init__(obstacles_manager, robot_manager)
+        ns = "eval_sim"
         self.ns = ns
         self.ns_prefix = "" if ns == '' else "/"+ns+"/"
 
@@ -158,7 +159,6 @@ class StagedRandomTask(RandomTask):
         if self._curr_stage < len(self._stages):
             self._curr_stage = self._curr_stage + 1
             self._initiate_stage()
-
             if self.ns == "eval_sim":
                 rospy.set_param("/curr_stage", self._curr_stage)
                 with self._lock_json:
@@ -186,6 +186,7 @@ class StagedRandomTask(RandomTask):
                 f"({self.ns}) INFO: Tried to trigger previous stage but already reached first one")
 
     def _initiate_stage(self):
+
         self._remove_obstacles()
         
         static_obstacles = self._stages[self._curr_stage]['static']

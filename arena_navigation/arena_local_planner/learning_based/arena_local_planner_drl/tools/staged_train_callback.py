@@ -27,6 +27,7 @@ class InitiateNewTrainStage(BaseCallback):
                 task_mode: str = "staged", 
                 verbose = 0):
 
+
         super(InitiateNewTrainStage, self).__init__(verbose = verbose)
         self.n_envs = n_envs
         self.threshhold_type = treshhold_type
@@ -55,7 +56,7 @@ class InitiateNewTrainStage(BaseCallback):
 
         self.verbose = verbose
         self.activated = bool(task_mode == "staged")
-
+        
         if self.activated:
             rospy.set_param("/last_stage_reached", False)
             self._instantiate_publishers()
@@ -69,6 +70,7 @@ class InitiateNewTrainStage(BaseCallback):
 
         self._publishers_next.append(
             rospy.Publisher(f"/eval_sim/next_stage", Bool, queue_size=1))
+        
         self._publishers_previous.append(
             rospy.Publisher(f"/eval_sim/previous_stage", Bool, queue_size=1))
 
