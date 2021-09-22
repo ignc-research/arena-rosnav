@@ -8,6 +8,8 @@
   <arg name="update_rate" default="100"/>
   <!-- train mode  -->
   <arg name="train_mode"       default="true"/>
+  <!-- danger zone mode  -->
+  <arg name="useDangerZone"    default="false"/>
   <!-- the folder name under the path simulator_setup/maps  -->
   <arg name="map_folder_name" default="map_empty" />
 
@@ -30,8 +32,9 @@
   <param name="update_rate" value="$(arg update_rate)" />
   <param name="use_sim_time" value="true" />
   <param name="train_mode" value="$(arg train_mode)" />
+  <param name="useDangerZone" value="$(arg useDangerZone)" />
   <param name="num_envs" value="$(arg num_envs)" />
-  <param name="step_size" value="$(arg step_size)" /> 
+  <param name="step_size" value="$(arg step_size)" />
   <param name="obs_vel" value="$(arg obs_vel)" /> 
   <arg name="map_path" default="$(find simulator_setup)/maps/$(arg map_folder_name)/map.yaml" />
   <param name="world_path" value="$(find simulator_setup)/maps/$(arg map_folder_name)/map.world.yaml" />
