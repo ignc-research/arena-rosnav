@@ -217,8 +217,10 @@ class CNN_LaserVAE_Obstalcle_GlobalPlan(BaseFeaturesExtractor):
 
         all_features = th.cat((scan_feature, dynamic_obs_feature,global_path_feature),1)
         attention_coff = th.softmax(self.attention_coff_fc(all_features),dim=1)
-        attention_coff = th.softmax(self.attention_coff_fc(all_features),dim=1).unsqueeze(1)
-        all_features_att_applied = th.bmm(attention_coff,all_features.view(-1,3,64))
+        
+        # attention_coff = th.softmax(self.attention_coff_fc(all_features),dim=1).unsqueeze(1)
+        # all_features_att_applied = th.bmm(attention_coff,all_features.view(-1,3,64))
+
         all_features_with_attention = th.cat((scan_feature*attention_coff[:,0][:,None],dynamic_obs_feature*attention_coff[:,1][:,None],global_path_feature*attention_coff[:,2][:,None]),axis=1)
 
         return all_features_with_attention
