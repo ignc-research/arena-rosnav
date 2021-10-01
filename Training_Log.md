@@ -52,8 +52,8 @@ Found pretraining still used old false data -> recollect pretraining data
 1. Training clip fraction extremely high(about 0.66),although the the loss keeps  decreasing.--> it can move to the goal, but explorration is not enough,need to increase the epsilon, using pretrain 10 data, to make the agent less likely to reach the goal at the beginning
 ### Daliy PLAN
 - [x] Evalutation mode not correctly running, need to find issue in the environment.
-- [ ] Training again with new settings.(if not working, 2 change feature extractor of laser, use the one in the paper(Point net?Deep Local Trajectory Replanning and Control for Robot Navigation) 1 discreat action)
-- [ ] Collect pretraining data for a mixed environment. 
+- [x] Training again with new settings.(if not working, 2 change feature extractor of laser, use the one in the paper(Point net?Deep Local Trajectory Replanning and Control for Robot Navigation) 1 discreat action)
+- [x] Collect pretraining data for a mixed environment. 
 ### RUN
 ***IMPORTANT CHANGE***
 Rename previous trained policy with the postfix 'con_actions'
@@ -62,7 +62,7 @@ Rename previous trained policy with the postfix 'con_actions'
 1.1 `roslaunch arena_bringup start_arena_flatland_waypoint.launch local_planner:=None train_mode:=true`
 1.2 `python pretrainig_wp_single_env -p2 --epochs=20 --expert_data_np_name=expert_data_map1_00.npz --name_prefix=dis_actions NET_ARCH.FEATURE_EXTRACTOR.NAME Pure_Static_Obs WAYPOINT_GENERATOR.IS_ACTION_SPACE_DISCRETE True `
    pretraining script does't support discrete action
-   - [ ] solve it!
+   - [x] solve it!
 
 ***MODIFICATION ***
 timeout will not terminate the environment anymore
@@ -116,8 +116,8 @@ same as in 09.08
 1.2 `python train_agent_wp.py --pretrained_policy=con_actions_mix_Env_pretrain_policy_10.pkl --rms=con_actions_mix_Env_pretrain_vecnorm_obs_rms_10.pkl --ns_prefix=sim_lei_map1 TRAINING.MAX_STEPS_PER_EPISODE 100 EVAL.CURRICULUM.STAGE_DYNAMIC_OBSTACLE '[13,16,0]' NET_ARCH.FEATURE_EXTRACTOR.NAME "CNN_Laser_MLP_Goal_Dyn_Obs" REWARD.NO_TIMEOUT_REWARD False`
 
 #### IMPORTANT:
-- [ ] Introduce global path into observation (Adaption include pretraining script)!
-- [ ] V shape for laser
+- [x] Introduce global path into observation (Adaption include pretraining script)!
+- [x] V shape for laser
 - [x] https://arxiv.org/pdf/2102.13073.pdf objects, stable-baselines3 dont support recurrent policy. 
 - [ ] Include Johanns code to dynamically change the map!
 #### Training 
@@ -190,11 +190,18 @@ CHANGES
 
 ### 2021.10.1
 ### TODO List
-- [ ] intermediate planning will not subscribe to goal and accordingly generate the global path, currently it can 
+- [x] intermediate planning will not subscribe to goal and accordingly generate the global path, currently it can 
 #### Collect pretraining data for mixed Environment
 1.1 `roslaunch arena_bringup start_arena_flatland_waypoint.launch train_mode:=true map_file:=outdoor global_planner_active_mode:=false rviz_file:=vtwg_pretrain use_plan_manager:=false`
 1.2 ``
 1.3 `python pretrainig_wp_single_env.py -p1 -p2 TRAINING.MAX_STEPS_PER_EPISODE 800  EVAL.CURRICULUM.STAGE_DYNAMIC_OBSTACLE '[20,8,13]' NET_ARCH.FEATURE_EXTRACTOR.NAME "CNN_LaserVAE_Obstalcle_GlobalPlan"  EVAL.CURRICULUM.THRESHOLD_RANGE '[0.5, 0.75]' INPUT.NORM False ENV.NAME "WPEnvMapFrame3" WAYPOINT_GENERATOR.IS_ACTION_SPACE_DISCRETE True NET_ARCH.FEATURE_EXTRACTOR.FEATURES_DIM 192 `
-
-
+### 2021.10.2
+#### Unfortunately pretraining not working, the loss doesn't change.
+- [ ] check in the observation, actually sample only 10 points from the global path seems not enough.
+- [ ] dynamic obstacle's states 
+- [ ] visualize the net again.
+- [ ] even no pretraining at the beginning,the action is not correct!.print it and debug it
+#### try without pretraining.
+1.1 `roslaunch arena_bringup start_training_waypoint.launch num_envs:=6 pretrain_mode:=false local_planner:=drl env_start_idx:=1 map_folder_name:=map_empty ns_prefix:=sim_lei_map_outdoor map_file:=outdoor` 
+1.2 `python train_agent_wp.py --ns_prefix=sim_lei_map_outdoor TRAINING.MAX_STEPS_PER_EPISODE 800 TRAINING.MAX_STEPS_PER_EPISODE 800  EVAL.CURRICULUM.STAGE_DYNAMIC_OBSTACLE '[3,20,13]' NET_ARCH.FEATURE_EXTRACTOR.NAME "CNN_LaserVAE_Obstalcle_GlobalPlan"  EVAL.CURRICULUM.THRESHOLD_RANGE '[0.5, 0.75]' INPUT.NORM False ENV.NAME "WPEnvMapFrame3" WAYPOINT_GENERATOR.IS_ACTION_SPACE_DISCRETE True NET_ARCH.FEATURE_EXTRACTOR.FEATURES_DIM 192`
 

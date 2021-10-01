@@ -3,10 +3,13 @@
    conda activate <your-env>
    cd crings and run `python setup.py install`
 
+# Visualize training
+1.An Example `roslaunch arena_bringup visualization_training.launch ns_map:=outdoor rviz_file:=vtwg ns:=sim_lei_map_outdoor_1`
+
 # Pretraining
 ## collecting export data
 1. Run `roslaunch arena_bringup start_arena_flatland_waypoint.launch train_mode:=true map_file:=outdoor  global_planner_active_mode:=false use_plan_manager:=false rviz_file:=vtwg_pretrain` to disable local planner and plan manager.`global_planner_active_mode` is actually not work(anyone fix it?)
-2. Go the directory *arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/scripts/training* and run `python pretrainig_wp_single_env.py -p1 -p2 TRAINING.MAX_STEPS_PER_EPISODE 200  EVAL.CURRICULUM.STAGE_DYNAMIC_OBSTACLE '[20,8,13]' NET_ARCH.FEATURE_EXTRACTOR.NAME "CNN_LaserV_Obstalcle_GlobalPlan"  EVAL.CURRICULUM.THRESHOLD_RANGE '[0.5, 0.75]' INPUT.NORM False ENV.NAME "WPEnvMapFrame3" WAYPOINT_GENERATOR.IS_ACTION_SPACE_DISCRETE True NET_ARCH.FEATURE_EXTRACTOR.FEATURES_DIM 192 TRAINING.ROBOT_START_POS_GOAL_POS_MIN_DIST 10`, some params can not be set as args, you can check the code and modify it.
+2. Go the directory *arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/scripts/training* and run `python pretrainig_wp_single_env.py -p1 -p2 TRAINING.MAX_STEPS_PER_EPISODE 200  EVAL.CURRICULUM.STAGE_DYNAMIC_OBSTACLE '[20,8,13]' NET_ARCH.FEATURE_EXTRACTOR.NAME "CNN_LaserVAE_Obstalcle_GlobalPlan"  EVAL.CURRICULUM.THRESHOLD_RANGE '[0.5, 0.75]' INPUT.NORM False ENV.NAME "WPEnvMapFrame3" WAYPOINT_GENERATOR.IS_ACTION_SPACE_DISCRETE True NET_ARCH.FEATURE_EXTRACTOR.FEATURES_DIM 192 TRAINING.ROBOT_START_POS_GOAL_POS_MIN_DIST 10`, some params can not be set as args, you can check the code and modify it.
 3. add params `-p2` to enable pretraining and save trained model.
 # Training
 
