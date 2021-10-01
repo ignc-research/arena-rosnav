@@ -104,7 +104,7 @@ same as in 09.08
 
 ## 2021.09.11
 ### Mixed ENV
-- [ ] Timo's talk is totally correct, shall we include global path into the observation space????
+- [x] Timo's talk is totally correct, shall we include global path into the observation space????, done in 2021.09.28
 #### Pretraining
 1.1 `roslaunch arena_bringup start_arena_flatland_waypoint.launch local_planner:=None train_mode:=true`
 1.2 `python pretrainig_wp_single_env.py -p2 --epochs=20 --expert_data_np_name=expert_data_map1_00.npz --name_prefix=con_actions_mix_Env NET_ARCH.FEATURE_EXTRACTOR.NAME CNN_Laser_MLP_Goal_Dyn_Obs WAYPOINT_GENERATOR.IS_ACTION_SPACE_DISCRETE False NET_ARCH.FEATURE_EXTRACTOR.FEATURES_DIM 70 WAYPOINT_GENERATOR.IS_ACTION_SPACE_DISCRETE False`
@@ -126,3 +126,75 @@ same as in 09.08
 ### Training Test
 1.1 `roslaunch arena_bringup start_training_waypoint.launch num_envs:=2 pretrain_mode:=false local_planner:=drl env_start_idx:=1 map_folder_name:=map1 ns_prefix:=sim_lei_map1 include_global_planner:=true`
 1.2 `python train_agent_wp.py --ns_prefix=sim_lei_map1 TRAINING.MAX_STEPS_PER_EPISODE 100 EVAL.CURRICULUM.STAGE_DYNAMIC_OBSTACLE '[16,3,0]' NET_ARCH.FEATURE_EXTRACTOR.NAME CNN_Laser_Obstalcle_GlobalPlan NET_ARCH.FEATURE_EXTRACTOR.FEATURES_DIM 196 ENV.NAME WPEnvMapFrame2 `
+
+## 2021.09.17
+Eval pure static and dynamic env 
+pretraining remote server 100? local 0.8????????
+use zeromq!!!!
+### Dynamic
+1.1 `roslaunch arena_bringup start_training_waypoint.launch num_envs:=6 pretrain_mode:=false local_planner:=drl env_start_idx:=1 map_folder_name:=map_empty ns_prefix:=sim_lei_map_empty`
+1.2 `python train_agent_wp.py --pretrained_policy=con_actions_pretrain_policy_10.pkl --rms=con_actions_pretrain_vecnormvecnorm_obs_rms_10.pkl --ns_prefix=sim_lei_map_empty TRAINING.MAX_STEPS_PER_EPISODE 800  EVAL.CURRICULUM.STAGE_DYNAMIC_OBSTACLE '[2,8,13]' NET_ARCH.FEATURE_EXTRACTOR.NAME "Pure_Dyn_Obs"  EVAL.CURRICULUM.THRESHOLD_RANGE '[0.5, 0.75]'` 
+### Static
+1.1 `roslaunch arena_bringup start_training_waypoint.launch num_envs:=6 pretrain_mode:=false local_planner:=drl env_start_idx:=1 map_folder_name:=map1 ns_prefix:=sim_lei_map1`
+
+1.2 `python train_agent_wp.py --ns_prefix=sim_lei_map1 TRAINING.MAX_STEPS_PER_EPISODE 800  EVAL.CURRICULUM.STAGE_DYNAMIC_OBSTACLE '[0,0,0]'`
+
+## 2021.09.26
+### Important Notes
+1.Don't forget to change eval json file path accordingly.
+2.change eval behaviour, follow subgoal or goal,  self.ref_pos_topic_name = f"{self.ns_prefix}goal"
+3.added server client mode, enable in the file **arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/scripts/deployment/local_planner_deploy.py**
+   #PARAM
+   agent = DrlAgent(drl_model_path,'drl_rule_04',ns,True,2)
+
+### Check Results
+1. tensorboard too less data, EVAL_FREQ=4e4???? check it!!!!!!!!
+2. timeout should terminate or not? 
+#### Check Dynamic
+1. change the field `SCENERIOS_JSON_PATH` in the Hyperparameters.json file to empty map
+2. change server path to local path
+3. `roslaunch arena_bringup start_arena_flatland_waypoint.launch map_file:=map_empty`
+4. `python train_agent_wp.py --conf_file=/home/joe/ssd/projects/arena-rosnav-ws/src/arena-rosnav/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/output/Pure_Dyn_Obs_2021_09_16_19_31_16/Hyperparams.yaml --deploy`
+Results:
+1.action space too small, mention it in thesis
+   -> redefine action_space?????,pretraining is also important
+2. proper pretraining is necessary
+#### check Static
+1. change the field `SCENERIOS_JSON_PATH` in the Hyperparameters.json file to map1
+2. change server path to local path
+3. `roslaunch arena_bringup start_arena_flatland_waypoint.launch`
+4. `python train_agent_wp.py --conf_file=/home/joe/ssd/projects/arena-rosnav-ws/src/arena-rosnav/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/output/Pure_Static_Obs_2021_09_16_19_34_06/Hyperparams.yaml --deploy`
+Results:
+1. global path too close to the obstacle
+2. pure static will not be researched anymore,sure?
+
+
+
+### TODO List
+- [x] enlarge the distance between global trajectory and obstacle
+
+   change here:\
+   node_.param("sdf_map/obstacles_inflation", mp_.obstacles_inflation_, 0.01);
+
+- [ ] check Eval_FREQ, change it to a small value.
+
+### 2021.09.28
+#### Test new env
+1.  `roslaunch arena_bringup start_training_waypoint.launch num_envs:=6 pretrain_mode:=false local_planner:=drl env_start_idx:=1 map_folder_name:=map1 ns_prefix:=sim_lei_map1 include_global_planner:=True`
+2.  `python train_agent_wp.py --ns_prefix=sim_lei_map1 TRAINING.MAX_STEPS_PER_EPISODE 800  EVAL.CURRICULUM.STAGE_DYNAMIC_OBSTACLE '[2,8,13]' NET_ARCH.FEATURE_EXTRACTOR.NAME "CNN_LaserV_Obstalcle_GlobalPlan"  EVAL.CURRICULUM.THRESHOLD_RANGE '[0.5, 0.75]' INPUT.NORM False ENV.NAME "WPEnvMapFrame3" `
+### 2021.09.29
+####
+CHANGES
+1. Mapping.cpp not subscribed to sensor anymore. fuck this!
+
+
+### 2021.10.1
+### TODO List
+- [ ] intermediate planning will not subscribe to goal and accordingly generate the global path, currently it can 
+#### Collect pretraining data for mixed Environment
+1.1 `roslaunch arena_bringup start_arena_flatland_waypoint.launch train_mode:=true map_file:=outdoor global_planner_active_mode:=false rviz_file:=vtwg_pretrain use_plan_manager:=false`
+1.2 ``
+1.3 `python pretrainig_wp_single_env.py -p1 -p2 TRAINING.MAX_STEPS_PER_EPISODE 800  EVAL.CURRICULUM.STAGE_DYNAMIC_OBSTACLE '[20,8,13]' NET_ARCH.FEATURE_EXTRACTOR.NAME "CNN_LaserVAE_Obstalcle_GlobalPlan"  EVAL.CURRICULUM.THRESHOLD_RANGE '[0.5, 0.75]' INPUT.NORM False ENV.NAME "WPEnvMapFrame3" WAYPOINT_GENERATOR.IS_ACTION_SPACE_DISCRETE True NET_ARCH.FEATURE_EXTRACTOR.FEATURES_DIM 192 `
+
+
+

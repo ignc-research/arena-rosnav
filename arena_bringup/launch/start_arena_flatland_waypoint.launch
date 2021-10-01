@@ -5,6 +5,9 @@
   <!-- <arg name="local_planner"   default="rlca"/> -->
   <!-- local_planner could be "None", this is useful to collect data for pretraining -->
   <arg name="local_planner" default="drl"/> 
+  <arg name="use_plan_manager" default="true"/>
+  <!-- if true it will subscribe global goal and generate corresponding data,otherwise only provide service for this purpose -->
+  <arg name="global_planner_active_mode" default="true"/>
   <arg name="rviz_file"       default="vtwg_deploy"/>
   <arg name="train_mode"      default="false"/>
   <!-- drl or teb -->
@@ -28,7 +31,7 @@
   <arg name="global_frame_id"   value="map"/>
   <arg name="odom_frame_id"     value="odom"/>
   <arg name="base_frame_id"     value="base_footprint"/>
-  
+  <param name="sleep_time_ms_step_world" value="5"/>
   <arg name="odom_ground_truth" default="/odometry/ground_truth"/>
 
   <!-- Visualization -->
@@ -55,7 +58,12 @@
   </node>
 
   <include file="$(find arena_bringup)/launch/sublaunch_testing/intermediate_planner.launch">
+    <arg name="active_mode" value="$(arg global_planner_active_mode)"/>
   </include>
+  
+
+
+
   <!-- use fake localization-->
   <include file="$(find arena_bringup)/launch/sublaunch_testing/fake_localization.launch">
     <arg name="global_frame_id"   value="$(arg global_frame_id)"/>
@@ -63,15 +71,16 @@
   </include>
 
   <!-- start plan manager-->
-  <include file="$(find arena_bringup)/launch/sublaunch_testing/plan_manager.launch">
+  <include file="$(find arena_bringup)/launch/sublaunch_testing/plan_manager.launch" if="$(eval arg('use_plan_manager'))">
     <arg name="train_mode"        value="false"/>
     <arg name="global_frame_id"   value="$(arg global_frame_id)"/>
     <arg name="odom_frame_id"     value="$(arg odom_frame_id)"/>
     <arg name="base_frame_id"     value="$(arg base_frame_id)"/>
     <arg name="local_planner"     value="$(arg local_planner)"/>
+
     <!-- 0.3 is robot's velocity 2 is plan zone for waypoint generator -->
     <!-- <arg name="look_ahead_distance"     default="$(eval  2 if arg('local_planner')!='None' else 0.3*2 ) "/>   meter, double -->
-    <arg name="look_ahead_distance"     default="2" if="$(eval arg('local_planner') != 'None')"/>
+    <arg name="look_ahead_distance"     default="6" if="$(eval arg('local_planner') != 'None')"/>
     <arg name="look_ahead_distance"     default="0.6" if="$(eval arg('local_planner') == 'None')"/>    <!-- meter, double-->
     <arg name="tolerance_approach"      default="0.6"/>   <!-- meter, double-->
     <arg name="timeout_goal"     default="330" if="$(eval arg('local_planner') != 'None')"/>
@@ -80,6 +89,14 @@
     <arg name="timeout_subgoal"     default="0.01" if="$(eval arg('local_planner') == 'None')"/>  
   </include>
 
-  
-    
+  <!-- dont have the fking time to modify the the src code again and again-->
+  <param name="look_ahead_distance"     value="6" if="$(eval arg('local_planner') != 'None')"/>
+  <param name="look_ahead_distance"     value="0.6" if="$(eval arg('local_planner') == 'None')"/>    <!-- meter, double-->
+  <param name="tolerance_approach"      value="0.6"/>   <!-- meter, double-->
+  <param name="timeout_goal"     value="330" if="$(eval arg('local_planner') != 'None')"/>
+  <param name="timeout_goal"     value="100" if="$(eval arg('local_planner') == 'None')"/>  
+  <param name="timeout_subgoal"     value="30" if="$(eval arg('local_planner') != 'None')"/>
+  <param name="timeout_subgoal"     value="0.01" if="$(eval arg('local_planner') == 'None')"/>  
+  <include file="$(find arena_bringup)/launch/sublaunch_testing/move_base/move_base_$(arg local_planner).launch" unless="$(arg global_planner_active_mode)">
+  </include> 
 </launch>

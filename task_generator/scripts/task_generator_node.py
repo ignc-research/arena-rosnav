@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+from rviz import #! /usr/bin/env python
 
 from logging import setLogRecordFactory
 import rospy

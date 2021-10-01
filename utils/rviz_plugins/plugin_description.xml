@@ -6,6 +6,13 @@
       Tool for setting 3D goal
     </description>
   </class>
+  <class name="rviz_plugins/ExpertActionAnnoTool"
+  type="rviz::ExpertActionAnnoTool"
+  base_class_type="rviz::Tool">
+  <description>
+  Tool for setting 3D goal as expert action
+  </description>
+</class>
   <class name="rviz_plugins/ProbMapDisplay"
          type="rviz::ProbMapDisplay"
          base_class_type="rviz::Display">

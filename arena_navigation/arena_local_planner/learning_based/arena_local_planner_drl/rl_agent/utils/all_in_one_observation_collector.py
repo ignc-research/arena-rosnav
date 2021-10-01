@@ -125,7 +125,7 @@ class ObservationCollectorAllInOne:
             scan = self._scan.ranges.astype(np.float32)
         else:
             scan = np.zeros(self._laser_num_beams, dtype=float)
-
+        
         rho, theta = ObservationCollectorAllInOne._get_goal_pose_in_robot_frame(
             self._subgoal, self._robot_pose)
 
@@ -166,8 +166,10 @@ class ObservationCollectorAllInOne:
         y_relative = goal_pos.y - robot_pos.y
         x_relative = goal_pos.x - robot_pos.x
         rho = (x_relative ** 2 + y_relative ** 2) ** 0.5
-        theta = (np.arctan2(y_relative, x_relative) -
-                 robot_pos.theta + 4 * np.pi) % (2 * np.pi) - np.pi
+        # all calculation are wrong?
+        theta = (np.arctan2(y_relative, x_relative) - robot_pos.theta + 4 * np.pi) % (
+            2 * np.pi
+        ) - np.pi
         return rho, theta
 
     def get_sync_obs(self):

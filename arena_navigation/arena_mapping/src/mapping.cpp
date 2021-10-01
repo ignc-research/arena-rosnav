@@ -5,8 +5,10 @@ void GridMap::initMap(ros::NodeHandle& nh){
     node_ = nh;
 
     /* get parameters*/
-    std::string static_map_service_name = "/static_map";  
+    std::string static_map_service_name = "static_map";
+    std::cout << "GridMap is waiting for the service\t" << static_map_service_name << std::endl;
     ros::service::waitForService(static_map_service_name); // important
+    std::cout << "GridMap found the service\t" << static_map_service_name << std::endl; 
     static_map_client_= nh.serviceClient<nav_msgs::GetMap>(static_map_service_name);  
     bool is_static_map_avail=get_static_map();
     if (!is_static_map_avail){ROS_ERROR("No static map available, please check map_server.");}
@@ -35,7 +37,8 @@ void GridMap::initMap(ros::NodeHandle& nh){
 
     // local map
     node_.param("sdf_map/frame_id", mp_.frame_id_, std::string("map"));
-    node_.param("sdf_map/obstacles_inflation", mp_.obstacles_inflation_, 0.01);
+    // node_.param("sdf_map/obstacles_inflation", mp_.obstacles_inflation_, 0.01);
+    node_.param("sdf_map/obstacles_inflation", mp_.obstacles_inflation_, 1.0);
     node_.param("sdf_map/local_bound_inflate", mp_.local_bound_inflate_, 0.0);
     node_.param("sdf_map/local_map_margin", mp_.local_map_margin_, 50);
 
@@ -159,14 +162,14 @@ void GridMap::initMap(ros::NodeHandle& nh){
 
     ros::NodeHandle public_nh("");
     // sensor sub: syn message filter
-    scan_sub_.reset(new message_filters::Subscriber<sensor_msgs::LaserScan>(public_nh, "scan", 50));
-    odom_sub_.reset(new message_filters::Subscriber<nav_msgs::Odometry>(public_nh, "odometry/ground_truth", 100));
-    sync_scan_odom_.reset(new message_filters::Synchronizer<SyncPolicyScanOdom>(SyncPolicyScanOdom(100), *scan_sub_, *odom_sub_));
-    sync_scan_odom_->registerCallback(boost::bind(&GridMap::scanOdomCallback, this, _1, _2));
+    // scan_sub_.reset(new message_filters::Subscriber<sensor_msgs::LaserScan>(public_nh, "scan", 50));
+    // odom_sub_.reset(new message_filters::Subscriber<nav_msgs::Odometry>(public_nh, "odometry/ground_truth", 100));
+    // sync_scan_odom_.reset(new message_filters::Synchronizer<SyncPolicyScanOdom>(SyncPolicyScanOdom(100), *scan_sub_, *odom_sub_));
+    // sync_scan_odom_->registerCallback(boost::bind(&GridMap::scanOdomCallback, this, _1, _2));
 
     // sensor sub
-    indep_scan_sub_ =public_nh.subscribe<sensor_msgs::LaserScan>("scan", 10, &GridMap::scanCallback, this);
-    indep_odom_sub_ =public_nh.subscribe<nav_msgs::Odometry>("odometry/ground_truth", 10, &GridMap::odomCallback, this);
+    // indep_scan_sub_ =public_nh.subscribe<sensor_msgs::LaserScan>("scan", 10, &GridMap::scanCallback, this);
+    // indep_odom_sub_ =public_nh.subscribe<nav_msgs::Odometry>("odometry/ground_truth", 10, &GridMap::odomCallback, this);
 
     // timer callbacks
     occ_timer_ = public_nh.createTimer(ros::Duration(0.05),   &GridMap::updateOccupancyCallback, this); // raycasting & setCacheOccupancy is the key

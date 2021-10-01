@@ -53,3 +53,7 @@ __pycache__
 .vscode/
 .env
 **/.vscode
+
+#bak
+*.bak
+!ring.py.bak

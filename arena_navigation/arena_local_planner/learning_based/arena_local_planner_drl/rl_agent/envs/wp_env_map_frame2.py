@@ -21,7 +21,7 @@ from nav_msgs.msg import Path as nav_Path
 from std_msgs.msg import Bool
 import time
 import math
-from rl_agent.utils.debug import timeit,NPPSERVER
+from rl_agent.utils.debug import timeit, NPPSERVER
 
 from arena_plan_msgs.msg import RobotState, RobotStateStamped
 
@@ -37,7 +37,7 @@ class WPEnvMapFrame2(gym.Env):
     In the training phase, subgoal is set to global goal (in the launch file)
     In the deployment, lookahead distance must be set big enough.
     """
-    
+
     INFO_KEYS = ("event", "done")
 
     @configurable
@@ -56,7 +56,7 @@ class WPEnvMapFrame2(gym.Env):
         step_timeout: float,
         max_steps_per_episode,
         stage_dynamic_obstacle,
-        is_pretrain_mode_on:bool = False,
+        is_pretrain_mode_on: bool = False,
     ):
         """Default env
         Flatland yaml node check the entries in the yaml file, therefore other robot related parameters cound only be saved in an other file.
@@ -97,7 +97,7 @@ class WPEnvMapFrame2(gym.Env):
 
         if callable(task):
             task = task()
-        self.task:'ABSTask' = task
+        self.task: "ABSTask" = task
 
         if self._is_train_mode:
             # TODO change it back to info
@@ -126,10 +126,10 @@ class WPEnvMapFrame2(gym.Env):
             self._robot_waypoint_min_dist,
             self._robot_obstacle_min_dist,
             stage_dynamic_obstacle,
-            0.3, # hardcoded
+            0.3,  # hardcoded
             self._robot_radius,
             10,
-            self._is_pretrain_mode_on
+            self._is_pretrain_mode_on,
         )
         self.observation_space = self.observation_collector.get_observation_space()
         self.reward_calculator = build_reward_calculator(
@@ -138,7 +138,7 @@ class WPEnvMapFrame2(gym.Env):
         self._step_counter = 0
         self._waypoint_x = None
         self._waypoint_y = None
-        self.is_waypoint_set_to_global_goal = False
+        self.is_waypoint_set_to_ref_pos = False
         self._goal_radius = goal_radius
         self._robot_start_pos_goal_pos_min_dist = robot_start_pos_goal_pos_min_dist
         self._step_timeout = step_timeout
@@ -155,10 +155,10 @@ class WPEnvMapFrame2(gym.Env):
         # if len(ns) and ns[-1]>='0' and ns[-1]<='9'and int(ns[-1]) == 1:
         #     self.laser_server = NPPSERVER(35555)
         # else:
-        #     self.laser_server = None  
+        #     self.laser_server = None
 
     @classmethod
-    def from_config(cls, cfg: CfgNode, task, ns, train_mode, debug,**kwargs):
+    def from_config(cls, cfg: CfgNode, task, ns, train_mode, debug, **kwargs):
 
         # TODO The code here is very dirty, later on we will put reward related
         # stuffes in other places
@@ -172,9 +172,9 @@ class WPEnvMapFrame2(gym.Env):
             cfg.TRAINING.ROBOT_START_POS_GOAL_POS_MIN_DIST
         )
         max_steps_per_episode = cfg.TRAINING.MAX_STEPS_PER_EPISODE
-        stage_dynamic_obstacle= cfg.EVAL.CURRICULUM.STAGE_DYNAMIC_OBSTACLE
-        if 'is_pretrain_mode_on' in kwargs:
-            is_pretrain_mode_on = kwargs['is_pretrain_mode_on']
+        stage_dynamic_obstacle = cfg.EVAL.CURRICULUM.STAGE_DYNAMIC_OBSTACLE
+        if "is_pretrain_mode_on" in kwargs:
+            is_pretrain_mode_on = kwargs["is_pretrain_mode_on"]
         else:
             is_pretrain_mode_on = False
 
@@ -191,8 +191,8 @@ class WPEnvMapFrame2(gym.Env):
             is_action_space_discrete=is_action_space_discrete,
             step_timeout=step_timeout,
             max_steps_per_episode=max_steps_per_episode,
-            stage_dynamic_obstacle = stage_dynamic_obstacle,
-            is_pretrain_mode_on = is_pretrain_mode_on
+            stage_dynamic_obstacle=stage_dynamic_obstacle,
+            is_pretrain_mode_on=is_pretrain_mode_on,
         )
 
     def setup_by_configuration(
@@ -250,7 +250,10 @@ class WPEnvMapFrame2(gym.Env):
                         angulars = np.linspace(*angular_def)
                         self._discrete_acitons += list(
                             map(
-                                lambda angular, linear=linear: [linear*np.cos(angular), linear*np.sin(angular)],
+                                lambda angular, linear=linear: [
+                                    linear * np.cos(angular),
+                                    linear * np.sin(angular),
+                                ],
                                 angulars,
                             )
                         )
@@ -264,7 +267,7 @@ class WPEnvMapFrame2(gym.Env):
                         #         else actions_def["angular"],
                         #     ]
                         # )
-                #np cache
+                # np cache
                 self._discrete_acitons_np = np.array(self._discrete_acitons)
                 self.action_space = spaces.Discrete(len(self._discrete_acitons))
             else:
@@ -272,7 +275,9 @@ class WPEnvMapFrame2(gym.Env):
                 x_range = setting_data["waypoint_generator"]["continuous_actions"][
                     "x_range"
                 ]
-                y_range = setting_data["waypoint_generator"]["continuous_actions"]["y_range"]
+                y_range = setting_data["waypoint_generator"]["continuous_actions"][
+                    "y_range"
+                ]
                 self.action_space = spaces.Box(
                     low=np.array([x_range[0], y_range[0]]),
                     high=np.array([x_range[1], y_range[1]]),
@@ -294,23 +299,28 @@ class WPEnvMapFrame2(gym.Env):
         # print(f"action: {action}")
         robot_pose2d = self.observation_collector.robot_pose2d
         ref_pos = self.observation_collector._ref_pos
-        assert robot_pose2d is not None and ref_pos is not None 
-        robot_x, robot_y = robot_pose2d.x,robot_pose2d.y
+        assert robot_pose2d is not None and ref_pos is not None
+        robot_x, robot_y = robot_pose2d.x, robot_pose2d.y
         if self._is_action_space_discrete:
             x = self._discrete_acitons[int(action)][0]
             y = self._discrete_acitons[int(action)][1]
         else:
-            x, y= action
-
-        self._waypoint_x = robot_x+x
-        self._waypoint_y = robot_y+y
+            x, y = action
+        self._waypoint_x = robot_x + x
+        self._waypoint_y = robot_y + y
         # check the new waypoint close to the goal or not
         if (self._waypoint_x - ref_pos.x) ** 2 + (
             self._waypoint_y - ref_pos.y
         ) ** 2 < self._goal_radius ** 2:
-            self.is_waypoint_set_to_global_goal = True
+            self.is_waypoint_set_to_ref_pos = True
             self._waypoint_x = ref_pos.x
             self._waypoint_y = ref_pos.y
+        if not self._is_train_mode:
+            dist_subgal_robot = (
+                (robot_x - ref_pos.x) ** 2 + (robot_y - ref_pos.y) ** 2
+            ) ** 0.5
+            print(f"dist_subgal:{dist_subgal_robot}")
+            print(f"Action x,y: {[x,y]}")
 
         # rospy.loginfo(f"sub goal pos: [x,y] = {curr_sub_goal.x} {curr_sub_goal.y} ")
         # rospy.loginfo(f"waypoint pos: [x,y] = {self._waypoint_x} {self._waypoint_y}")
@@ -336,20 +346,25 @@ class WPEnvMapFrame2(gym.Env):
         action_msg.pose.orientation.w = 1
         action_msg.header.frame_id = "map"
         self.agent_action_pub.publish(action_msg)
-    
-    def _pretrain_mode_move_robot_to_sub_goal(self,min_dist_subgoal_goal=0.5):
+
+    def _pretrain_mode_move_robot_to_sub_goal(self, min_dist_subgoal_goal=0.5):
 
         global_goal = self.goal_pos
         sub_goal = self.observation_collector._subgoal
         assert global_goal is not None
         assert sub_goal is not None
-        dist_squre =  (sub_goal.x - global_goal.x)**2 + (sub_goal.y - global_goal.y)**2
-        if self._last_dist_subgoal_goal_squre is not None and abs(dist_squre-self._last_dist_subgoal_goal_squre)<0.1:
+        dist_squre = (sub_goal.x - global_goal.x) ** 2 + (
+            sub_goal.y - global_goal.y
+        ) ** 2
+        if (
+            self._last_dist_subgoal_goal_squre is not None
+            and abs(dist_squre - self._last_dist_subgoal_goal_squre) < 0.1
+        ):
             self._pretrain_early_stop_curr_episode = True
         self._last_dist_subgoal_goal_squre = dist_squre
-        if dist_squre<min_dist_subgoal_goal**2:
+        if dist_squre < min_dist_subgoal_goal ** 2:
             sub_goal = global_goal
-            self.is_waypoint_set_to_global_goal = True
+            self.is_waypoint_set_to_ref_pos = True
         robot_manager = self.task.robot_manager
         robot_manager.move_robot(sub_goal)
         self._waypoint_x = sub_goal.x
@@ -360,7 +375,7 @@ class WPEnvMapFrame2(gym.Env):
         done_reasons:   0   -   exceeded max steps
                         1   -   collision with obstacle
                         2   -   goal reached
-        """           
+        """
         robot_pose_before = None
         if not self._is_pretrain_mode_on:
             self._set_and_pub_waypoint(action)
@@ -380,34 +395,63 @@ class WPEnvMapFrame2(gym.Env):
             self.observation_collector.wait_for_new_event()
 
         merged_obs = self.observation_collector.get_observation()
-        info = {"event": None,"done":None,"is_success":None}
+        info = {"event": None, "done": None, "is_success": None}
         if self._is_pretrain_mode_on:
             robot_x, robot_y = robot_pose_before.x, robot_pose_before.y
             if not self._is_action_space_discrete:
-                info['expert_action'] = [self._waypoint_x-robot_x, self._waypoint_y-robot_y]
+                info["expert_action"] = [
+                    self._waypoint_x - robot_x,
+                    self._waypoint_y - robot_y,
+                ]
             else:
-                diff_relative = self._discrete_acitons_np - np.array([self._waypoint_x-robot_x, self._waypoint_y-robot_y])
-                info['expert_action'] = np.argmin((diff_relative**2).sum(axis=1))
+                diff_relative = self._discrete_acitons_np - np.array(
+                    [self._waypoint_x - robot_x, self._waypoint_y - robot_y]
+                )
+                info["expert_action"] = np.argmin((diff_relative ** 2).sum(axis=1))
 
         # if the waypoint is set to the global goal,
         # the predicted action will do nothing, so we need to set the reward to 0
-        if self.is_waypoint_set_to_global_goal or self._is_pretrain_mode_on and self._pretrain_early_stop_curr_episode:
-            reward = self.reward_calculator.get_reward_goal_reached()
-            info["event"] = "GlobalGoalReached"
-            done = True
-            info["done"] = True
-            self.reward_calculator.save_info_on_episode_end()
-            info['is_success'] = True
+        if (
+            self.is_waypoint_set_to_ref_pos
+            or self._is_pretrain_mode_on
+            and self._pretrain_early_stop_curr_episode
+        ):
+            if (
+                self._is_train_mode
+                or self.observation_collector.is_refpos_identialto_globalpos()
+            ):
+                reward = self.reward_calculator.get_reward_goal_reached()
+                info["event"] = "GlobalGoalReached"
+                done = True
+                info["done"] = True
+                self.reward_calculator.save_info_on_episode_end()
+                info["is_success"] = True
+            else:
+                reward = self.reward_calculator.get_reward_goal_reached()
+                info["event"] = "SubGoalReached"
+                done = False
+                info["done"] = False
+                self.reward_calculator.save_info_on_episode_end()
+                info["is_success"] = False
+
         else:
             if (
                 self.observation_collector.important_event
                 == self.observation_collector.Event.TIMEOUT
             ):
-                info["event"] = "Timeout"
-                done = False
-                info["done"] = False
-                # self.reward_calculator.save_info_on_episode_end()
-                info['is_success'] = False
+                if self._is_train_mode:
+                    info["event"] = "Timeout"
+                    done = False
+                    info["done"] = False
+                    # self.reward_calculator.save_info_on_episode_end()
+                    info["is_success"] = False
+                else:
+                    info["event"] = "Timeout"
+                    done = True
+                    info["done"] = False
+                    # self.reward_calculator.save_info_on_episode_end()
+                    info["is_success"] = False
+
             elif (
                 self.observation_collector.important_event
                 == self.observation_collector.Event.COLLISIONDETECTED
@@ -416,12 +460,12 @@ class WPEnvMapFrame2(gym.Env):
                 info["done"] = True
                 done = True
                 self.reward_calculator.save_info_on_episode_end()
-                info['is_success'] = False
+                info["is_success"] = False
             else:
                 done = False
                 info["done"] = False
 
-            reward= self.reward_calculator.cal_reward()
+            reward = self.reward_calculator.cal_reward()
         self._curr_steps_count += 1
         if self._curr_steps_count > self._max_steps_per_episode:
             print(f"ENV:{self.ns} STEPS {self. _curr_steps_count}")
@@ -431,7 +475,7 @@ class WPEnvMapFrame2(gym.Env):
             info["is_success"] = False
         reward_info = self.reward_calculator.get_reward_info()
         info.update(reward_info)
-        #DEBUG_LASER
+        # DEBUG_LASER
         # if self.laser_server:
         #     self.laser_server.send_nparray(merged_obs[:360])
         return merged_obs, reward, done, info
@@ -439,7 +483,7 @@ class WPEnvMapFrame2(gym.Env):
     def reset(self):
         self._curr_steps_count = 0
         self.reward_calculator.reset_on_episode_start()
-        
+
         if self._is_train_mode:
             if self._is_pretrain_mode_on:
                 self._last_dist_subgoal_goal_squre = None
@@ -453,35 +497,37 @@ class WPEnvMapFrame2(gym.Env):
         while remaining_try_times >= 0:
             remaining_try_times -= 1
             self.observation_collector.clear_on_episode_start()
-            self.is_waypoint_set_to_global_goal = False
+            self.is_waypoint_set_to_ref_pos = False
             # Take care reset will call step world service.
             reset_info = self.task.reset(
                 min_dist_start_pos_goal_pos=self._robot_start_pos_goal_pos_min_dist
             )
             robot_start_pos = reset_info["robot_start_pos"]
             robot_goal_pos = reset_info["robot_goal_pos"]
-            # plan manager is not stable, the publication of the goal is sometimes missing 
+            # plan manager is not stable, the publication of the goal is sometimes missing
             self.goal_pos = robot_goal_pos
             if not self._is_pretrain_mode_on and self._is_train_mode:
-                self.observation_collector._ref_pos = Pose2D(robot_goal_pos.x,robot_goal_pos.y,robot_goal_pos.theta) 
+                self.observation_collector._ref_pos = Pose2D(
+                    robot_goal_pos.x, robot_goal_pos.y, robot_goal_pos.theta
+                )
             # set the waypoint to the start position of the robot so that the robot will be freezed as we call step_world for updating the laser and other info from sensors
             self._pub_robot_pos_as_waypoint(robot_start_pos)
 
             # if succeed
-            if self._is_pretrain_mode_on and remaining_try_times<5:
+            if self._is_pretrain_mode_on and remaining_try_times < 5:
                 super_long_step = True
             else:
                 super_long_step = False
-            if self.observation_collector.reset(super_long_step = super_long_step):
+            if self.observation_collector.reset(super_long_step=super_long_step):
                 break
-            if remaining_try_times<2:
+            if remaining_try_times < 2:
                 print(
                     f"{self.ns} reset remaining try times {remaining_try_times},curr robot: {[robot_start_pos.x,robot_start_pos.y]} goal: {[robot_goal_pos.x,robot_goal_pos.y]}"
                 )
         merged_obs = self.observation_collector.get_observation()
         # DEBUG
         rospy.loginfo("wp_env reset done")
-         #DEBUG_LASER
+        # DEBUG_LASER
         # if self.laser_server:
         #     self.laser_server.send_nparray(merged_obs[:360])
         return merged_obs
