@@ -5,8 +5,8 @@
     <arg name="lambda_heu"      value="0.1" />
     
     <arg name="plan_horizon"    value=""/>
-    
-
+    <arg name="active_mode"     default="true"/> 
+    <param name="global_planner/active_mode"            value="$(eval active_mode)" />
     <!-- arena_plan_manager -->
     <node pkg="arena_intermediate_planner" name="inter_planner" type="arena_intermediate_planner" output="screen">
         <!-- <param name="$(arg plan_horizon)/train_mode" value="$(arg train_mode)"/> -->
@@ -16,7 +16,7 @@
         <param name="$(arg plan_horizon)/global_planner/use_oneshot"            value="true" />
         <param name="$(arg plan_horizon)/global_planner/use_optimization_esdf"  value="true" />
         <param name="$(arg plan_horizon)/global_planner/use_optimization_astar" value="true" />
-        
+
 
         <!-- Global plan: Landmark -->
         <param name="$(arg plan_horizon)/global_planner/rou_thresh"             value="15.0" />

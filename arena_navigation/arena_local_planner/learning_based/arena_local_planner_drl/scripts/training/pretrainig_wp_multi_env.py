@@ -170,6 +170,7 @@ def collect_expert_data(venv: VecNormalize, num_steps, num_skip_first_n_steps=10
     #     print(f"Expert data have been saved to the path {pretraining_data_dirpath}")
 
 def main():
+    print("DEPRECATED")
     num_steps = 1e6
     parser = get_default_arg_parser()
     args = parser.parse_args()

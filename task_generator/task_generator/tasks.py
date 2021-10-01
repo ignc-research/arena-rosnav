@@ -32,16 +32,19 @@ class ABSTask(ABC):
 
     """
 
-    def __init__(self, obstacles_manager: ObstaclesManager, robot_manager: RobotManager,ns_map:str=''):
+    def __init__(self, obstacles_manager: ObstaclesManager, robot_manager: RobotManager,ns:str=''):
         self.obstacles_manager = obstacles_manager
         self.robot_manager = robot_manager
-        self._service_client_get_map = rospy.ServiceProxy('/static_map', GetMap)
+        
         self._map_lock = Lock()
-        if len(ns_map):
-            map_topic_name = '/'+ns_map+'/'
+
+        if len(ns):
+            ns_prefix = '/'+ns+'/'
         else:
-            map_topic_name = '/map'
-        rospy.Subscriber(map_topic_name, OccupancyGrid, self._update_map)
+            ns_prefix = '/'
+        rospy.Subscriber(ns_prefix+'map', OccupancyGrid, self._update_map)
+        self._service_client_get_map = rospy.ServiceProxy(ns_prefix+'static_map', GetMap)
+
         # a mutex keep the map is not unchanged during reset task.
 
     @abstractmethod
@@ -142,12 +145,7 @@ class StagedRandomTask(RandomTask):
     def __init__(self, ns: str, obstacles_manager: ObstaclesManager, robot_manager: RobotManager,stage_static:List[int], stage_dynamic:List[int],init_stage_idx:int=0):
         self.ns = ns
         self.ns_prefix = "/" if ns == '' else "/"+ns+"/"
-        if ns == '':
-            self.ns_no_idx  = ''
-        else:
-            idx_last_underscore =  ns.rfind('_')
-            self.ns_no_idx = ns[:idx_last_underscore]
-        super().__init__(obstacles_manager, robot_manager,ns_map=self.ns_no_idx)
+        super().__init__(obstacles_manager, robot_manager,ns=ns)
         import re
         pattern = re.compile('\d+')
         tmp = pattern.search(ns)
@@ -445,15 +443,10 @@ def get_predefined_task(ns: str, mode="random", start_stage: int = 1, PATHS: dic
     return task
 
 def _get_obs_robot_manager(ns):
-    if ns == '':
-        ns_map  = ''
-        ns_map_prefix = '/'
-    else:
-        idx_last_underscore =  ns.rfind('_')
-        ns_map = ns[:idx_last_underscore]
-        ns_map_prefix = '/'+ns_map+'/'
 
-    service_client_get_map = rospy.ServiceProxy(f'{ns_map_prefix}static_map', GetMap)
+    ns_prefix =  "/"+ns+"/" if len(ns) else "/"
+
+    service_client_get_map = rospy.ServiceProxy(f'{ns_prefix}static_map', GetMap)
     map_response = service_client_get_map()
 
     # use rospkg to get the path where the model config yaml file stored

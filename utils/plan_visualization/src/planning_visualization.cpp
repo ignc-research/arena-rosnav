@@ -24,7 +24,6 @@ void PlanningVisualization::displaySphereList(const vector<Eigen::Vector3d>& lis
   mk.action          = visualization_msgs::Marker::DELETE;
   mk.id              = id;
   pubs_[pub_id].publish(mk);
-
   mk.action             = visualization_msgs::Marker::ADD;
   mk.pose.orientation.x = 0.0;
   mk.pose.orientation.y = 0.0;
@@ -35,11 +34,9 @@ void PlanningVisualization::displaySphereList(const vector<Eigen::Vector3d>& lis
   mk.color.g = color(1);
   mk.color.b = color(2);
   mk.color.a = color(3);
-
   mk.scale.x = resolution;
   mk.scale.y = resolution;
   mk.scale.z = resolution;
-
   geometry_msgs::Point pt;
   for (int i = 0; i < int(list.size()); i++) {
     pt.x = list[i](0);
@@ -48,7 +45,6 @@ void PlanningVisualization::displaySphereList(const vector<Eigen::Vector3d>& lis
     mk.points.push_back(pt);
   }
   pubs_[pub_id].publish(mk);
-  ros::Duration(0.001).sleep();
 }
 
 void PlanningVisualization::displayLineList(const vector<Eigen::Vector3d>& list1,double line_width,
@@ -86,8 +82,6 @@ void PlanningVisualization::displayLineList(const vector<Eigen::Vector3d>& list1
     //mk.points.push_back(pt);
   }
   pubs_[pub_id].publish(mk);
-
-  ros::Duration(0.001).sleep();
 }
 
 void PlanningVisualization::drawGoal(geometry_msgs::PoseStamped goal, double resolution,

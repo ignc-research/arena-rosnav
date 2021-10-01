@@ -61,11 +61,11 @@ _C.WAYPOINT_GENERATOR.ACTIONS_DEF = os.path.join(
 # rlca can only take 0.5, remember robot's radius is 0.3
 _C.WAYPOINT_GENERATOR.ROBOT_WAYPOINT_MIN_DIST = 0.5
 # make sure this value bigger than the linear value defined in the configs/waypoint_generator_actions*.yaml
-_C.WAYPOINT_GENERATOR.GOAL_RADIUS = 0.75
+_C.WAYPOINT_GENERATOR.GOAL_RADIUS = 0.7
 _C.WAYPOINT_GENERATOR.IS_ACTION_SPACE_DISCRETE = False
 # unit m/s should be set with the consideration of the lookahead distance defined in the launch file and robot's veloctiy
 # e.g. lookahead_distance = 2m robot_velocity = 0.3m/s   average_reach_time = 2/0.3 == 6.6 s
-_C.WAYPOINT_GENERATOR.STEP_TIMEOUT = 25
+_C.WAYPOINT_GENERATOR.STEP_TIMEOUT = 10
 
 
 _C.INPUT = CN()
@@ -76,14 +76,21 @@ _C.INPUT.NORM_SAVE_FILENAME = "norm_env.nenv"
 _C.NET_ARCH = CN()
 _C.NET_ARCH.VF = [32,32]
 _C.NET_ARCH.PI = [32,32]
+
 _C.NET_ARCH.FEATURE_EXTRACTOR = CN()
+
 # _C.NET_ARCH.FEATURE_EXTRACTOR.NAME = "CNN_Laser_MLP_Goal_Dyn_Obs"
 # _C.NET_ARCH.FEATURE_EXTRACTOR.FEATURES_DIM = 32 + 32 + 6
-#DEBUG
+
 # _C.NET_ARCH.FEATURE_EXTRACTOR.NAME = "Pure_Dyn_Obs"
 # _C.NET_ARCH.FEATURE_EXTRACTOR.FEATURES_DIM = 32 + 6
+
 _C.NET_ARCH.FEATURE_EXTRACTOR.NAME = "Pure_Static_Obs"
 _C.NET_ARCH.FEATURE_EXTRACTOR.FEATURES_DIM = 32 + 6
+
+# _C.NET_ARCH.FEATURE_EXTRACTOR.NAME = "CNN_LaserVAE_Obstalcle_GlobalPlan"
+# _C.NET_ARCH.FEATURE_EXTRACTOR.FEATURES_DIM = 64+64+64
+
 
 
 _C.TRAINING = CN()

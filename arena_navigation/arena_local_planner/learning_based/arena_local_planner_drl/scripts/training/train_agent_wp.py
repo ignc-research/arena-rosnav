@@ -224,9 +224,16 @@ def make_envs(cfg, args: argparse.Namespace, namespaces: List[str]):
             else:
                 vec_normalize_file = os.path.join(
                     dir_path, 'final_vec_norm.pkl') 
+                if not os.path.isfile(vec_normalize_file):
+                    print("load final_vec_norm.pkl failed, try to load another one!")
+                    vec_normalize_file = os.path.join(
+                        dir_path, 'vec_normalize.pkl')
+                
+
             print("Loading saved model for evaluation")
             assert os.path.isfile(
                 vec_normalize_file), f"{vec_normalize_file} does't exist"
+                
             eval_env = VecNormalize.load(vec_normalize_file, eval_env)
             # in case the loaded one's training is True
             eval_env.training = False
