@@ -225,12 +225,12 @@ if __name__ == "__main__":
     trainstage_cb = InitiateNewTrainStage(
         n_envs=args.n_envs,
         treshhold_type="succ", 
-        upper_threshold=0.8, lower_threshold=0.65, 
+        upper_threshold=0.85, lower_threshold=0.60, 
         task_mode=params['task_mode'], verbose=1)
     
     # stop training on reward threshold callback
     stoptraining_cb = StopTrainingOnRewardThreshold(
-        treshhold_type="succ", threshold=0.8, verbose=1)
+        treshhold_type="succ", threshold=0.9, verbose=1)
 
     # instantiate eval environment
     # take task_manager from first sim (currently evaluation only provided for single process)

@@ -207,7 +207,7 @@ class RewardCalculator():
             laser_scan, punishment=10)
         self._reward_goal_approached(
             goal_in_robot_frame, reward_factor=0.3, penalty_factor=0.4)
-        self._reward_time_elapsed(kwargs['time_elapsed'], kwargs['global_plan'])
+        #self._reward_time_elapsed(kwargs['time_elapsed'], kwargs['global_plan'])
         self._reward_waypoints_set_near_global_plan(kwargs['goal'], kwargs['subgoal'], kwargs['last_subgoal'],kwargs['amount_rewarded_subgoals'], kwargs['global_plan'])
 
     def _reward_waypoints_set_near_global_plan(self,
@@ -220,7 +220,7 @@ class RewardCalculator():
         Reward for putting a reward close to the global path.
         The further away from the global plan a waypoint is set, the less points are archived by this reward.
         There will be no reward for placing it onto the goal, because this is not learned but coded to be done, when the robot gets close enough.
-        The reward will be devided by estimated amounts of waypoints set, which is 1 waypoint each 200 meter (of global plan), starting at 500 meters
+        The reward will be devided by estimated amounts of waypoints set, which is 1 waypoint each 100 meter (of global plan)
         
         :param goal (Pose2D): the global goal, which is to be reached
         :param subgoal (PoseStamped): the current subgoal, which is to be reached. Gains a reward, if different from last_subgoal
@@ -228,9 +228,9 @@ class RewardCalculator():
         :param amount_rewarded_subgoal (int): amount of already rewarded subgoals. Used for punishment, if too many subgoals are used
         :param global_plan: (np.ndarray): vector containing poses on global plan
         """
-        estimatedSubgoalAmount = math.floor(len(global_plan)/200) -1
+        estimatedSubgoalAmount = math.floor(len(global_plan)/100) -1
         max_subgoal_gp_dist = 1.5 # range of the circle around ref-subgoal set in wp3_env
-        if len(global_plan) > 500 and not (subgoal.pose.position.x == last_subgoal.pose.position.x and subgoal.pose.position.y == last_subgoal.pose.position.y) and not (subgoal.pose.position.x == goal.x and subgoal.pose.position.y == goal.y):
+        if not (subgoal.pose.position.x == last_subgoal.pose.position.x and subgoal.pose.position.y == last_subgoal.pose.position.y) and not (subgoal.pose.position.x == goal.x and subgoal.pose.position.y == goal.y):
             if amount_rewarded_subgoals >= estimatedSubgoalAmount:
                 self.curr_reward -= 0.5
             else:
@@ -240,7 +240,6 @@ class RewardCalculator():
                     if dist < subgoal_gp_dist:
                         subgoal_gp_dist = dist
                 self.curr_reward += (1 - ((subgoal_gp_dist/max_subgoal_gp_dist) ** 0.5))
-            print("subgoal rewarded")
             self.info['subgoal_was_rewarded'] = True
         else:
             self.info['subgoal_was_rewarded'] = False

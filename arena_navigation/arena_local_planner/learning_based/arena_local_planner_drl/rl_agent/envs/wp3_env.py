@@ -124,6 +124,7 @@ class wp3Env(gym.Env):
         self._globalGoal = rospy.Subscriber(f'{self.ns_prefix}goal', PoseStamped, self.cbGlobalGoal)                 # to set wp on global goal if circle touces it
         self._globalPlan_sub = rospy.Subscriber(f'{self.ns_prefix}globalPlan', nav_Path, self.cbglobalPlan)
         self._twist_sub = rospy.Subscriber(f'{self.ns_prefix}cmd_vel', Twist, self.cbTwist)                          # to calculate distance traveled 
+        #self._map_sub = rospy.Subscriber(f'{self.ns_prefix}map', ,self.cbMap)
         self._wp4train_reached =False
 
         # action agent publisher
@@ -211,7 +212,7 @@ class wp3Env(gym.Env):
 
         with open(settings_yaml_path, 'r') as fd:
             setting_data = yaml.safe_load(fd)
-            #print(settings_yaml_path)
+            print(settings_yaml_path)
             if self._is_action_space_discrete:
                 # self._discrete_actions is a list, each element is a dict with the keys ["name", 'linear','angular']
                 self._discrete_acitons = setting_data['robot']['discrete_actions']
@@ -275,6 +276,10 @@ class wp3Env(gym.Env):
             point.pose.orientation.w=1
             point.header.frame_id="map"
             circle.poses.append(point)
+            #test = np.array([point.pose.position.x,point.pose.position.y])
+            #for x in ObservationCollector.process_global_plan_msg(self._globalPlan):
+            #    if math.isclose(x[0], test[0]):  
+            #        raise Warning("foundit", x,test)
 
             # if circle touches the global goal, immediately place subgoal on global goal
             if ((math.isclose(circle.poses[j].pose.position.x, self._globalGoal.x, rel_tol=0.2)) and (math.isclose(circle.poses[j].pose.position.y, self._globalGoal.y, rel_tol=0.2)) and not (self._action_msg.pose.position.x == self._globalGoal.x and self._action_msg.pose.position.y == self._globalGoal.y)):    
@@ -295,12 +300,15 @@ class wp3Env(gym.Env):
             q = self._robot_pose.pose.orientation
             robot_angle = np.arctan2(2.0*(q.w*q.z + q.x*q.y), 1-2*(q.y*q.y+q.z*q.z))
             angle_grad = action[0] + robot_angle
-            self._action_msg.pose.position.x = self._ref_wp.pose.position.x + (self.range_circle*math.cos(angle_grad))         
-            self._action_msg.pose.position.y = self._ref_wp.pose.position.y + (self.range_circle*math.sin(angle_grad))
-            self.agent_action_pub.publish(self._action_msg)
-            print("subgoal published #2 at",self._action_msg.pose.position.x,self._action_msg.pose.position.y)
-            self._action_count += 1
             self.firstTime +=1
+            if not (action[0] == -5):
+                self._action_msg.pose.position.x = self._ref_wp.pose.position.x + (self.range_circle*math.cos(angle_grad))         
+                self._action_msg.pose.position.y = self._ref_wp.pose.position.y + (self.range_circle*math.sin(angle_grad))
+                self.agent_action_pub.publish(self._action_msg)
+                print("subgoal published #2 at",self._action_msg.pose.position.x,self._action_msg.pose.position.y)
+                self._action_count += 1
+            else:
+                print("Info: Waypoint was not moved")
             #print("distance robot to wp: {}".format(dist_robot_wp[0]))
             
         #wait for robot to reach the waypoint first
@@ -326,15 +334,16 @@ class wp3Env(gym.Env):
                 q = self._robot_pose.pose.orientation
                 robot_angle = np.arctan2(2.0*(q.w*q.z + q.x*q.y), 1-2*(q.y*q.y+q.z*q.z))
                 angle_grad = action[0] + robot_angle 
-                self._action_msg.pose.position.x = self._ref_wp.pose.position.x + (self.range_circle*math.cos(angle_grad))         
-                self._action_msg.pose.position.y = self._ref_wp.pose.position.y + (self.range_circle*math.sin(angle_grad))   
-                self._action_msg.pose.orientation.w = 1
-                #print("action message looks like {}".format(self._action_msg))
-                self.agent_action_pub.publish(self._action_msg)
-                print("subgoal published #4 at",self._action_msg.pose.position.x,self._action_msg.pose.position.y)
-                self._action_count += 1
-                
-                self._action_count += 1
+                if not (action[0] == -5):
+                    self._action_msg.pose.position.x = self._ref_wp.pose.position.x + (self.range_circle*math.cos(angle_grad))         
+                    self._action_msg.pose.position.y = self._ref_wp.pose.position.y + (self.range_circle*math.sin(angle_grad))   
+                    self._action_msg.pose.orientation.w = 1
+                    #print("action message looks like {}".format(self._action_msg))
+                    self.agent_action_pub.publish(self._action_msg)
+                    print("subgoal published #4 at",self._action_msg.pose.position.x,self._action_msg.pose.position.y)
+                    self._action_count += 1
+                else:
+                    print("Info: Waypoint was not moved")
     def _translate_disc_action(self, action):
         new_action = np.array([])
         #new_action = np.append(new_action, self._discrete_acitons[action]['linear']) # not needed anymore
@@ -375,8 +384,6 @@ class wp3Env(gym.Env):
             global_plan=ObservationCollector.process_global_plan_msg(self._globalPlan), 
             action=new_action, 
             time_elapsed = time.time() - self.time_start, #time which elapsed since the 1st action has been published
-            #goal_len=self.goal_len, 
-            #action_count= self._action_count,
             goal=self._globalGoal,
             subgoal=self._action_msg,
             last_subgoal = self._last_rewarded_waypoint,

@@ -50,10 +50,12 @@ class ObservationCollector():
 
         # define observation_space
         self.observation_space = ObservationCollector._stack_spaces((
-            spaces.Box(low=0, high=lidar_range, shape=(
+            spaces.Box(low=0, high=lidar_range, shape=( # Laser scans
                 num_lidar_beams,), dtype=np.float32),
             spaces.Box(low=0, high=10, shape=(1,), dtype=np.float32),
-            spaces.Box(low=-np.pi, high=np.pi, shape=(1,), dtype=np.float32)
+            spaces.Box(low=-np.pi, high=np.pi, shape=(1,), dtype=np.float32),
+            spaces.Box(low=-100, high=100, shape=(2,), dtype=np.float32) #global goal #not exact, TODO: find way to define exact values for low&high
+            #spaces.Box(low=-100, high=100, shape=(2,), dtype=np.float32) # "optimal" waypoint #not exact, TODO: find way to define exact values for low&high
         ))
 
         self._laser_num_beams = rospy.get_param("/laser_num_beams")
@@ -135,7 +137,9 @@ class ObservationCollector():
         rho_goal, theta_goal = ObservationCollector._get_goal_pose_in_robot_frame(self._globalGoal,self._subgoal)
         rho, theta = ObservationCollector._get_goal_pose_in_robot_frame(
             self._subgoal, self._robot_pose)
-        merged_obs = np.hstack([scan, np.array([rho, theta])])
+        merged_obs = np.hstack([scan, np.array([rho, theta]),np.array([self._globalGoal.x,self._globalGoal.y])])
+        #merged_obs = np.hstack([scan, np.array([rho, theta])])
+
 
         obs_dict = {}
         obs_dict['laser_scan'] = scan
