@@ -281,19 +281,21 @@ class RewardCalculator():
         :param global_plan: (np.ndarray): vector containing poses on global plan
         :param rule: (int): The rule from which the method is called
         """
-        estimatedSubgoalAmount = math.floor(len(global_plan)/100) -1
+        if rule in [6]:
+            estimatedSubgoalAmount = 100000 
+        else:
+            estimatedSubgoalAmount = math.floor(len(global_plan)/100) -1
         max_subgoal_gp_dist = 1.5 # range of the circle around ref-subgoal set in wp3_env
         if not (subgoal.pose.position.x == last_subgoal.pose.position.x and subgoal.pose.position.y == last_subgoal.pose.position.y) and not (subgoal.pose.position.x == goal.x and subgoal.pose.position.y == goal.y):
             if amount_rewarded_subgoals >= estimatedSubgoalAmount:
-                if rule in [7,8]:
-                    self.curr_reward -= 0.5
+                self.curr_reward -= 0.5
             else:
                 subgoal_gp_dist = np.inf
                 for gp_point in global_plan:
                     dist = ((gp_point[0] - subgoal.pose.position.x)**2 + (gp_point[1] - subgoal.pose.position.y)**2)**0.5
                     if dist < subgoal_gp_dist:
                         subgoal_gp_dist = dist
-                if rule in [7,8]:
+                if rule in [6,8]:
                     self.curr_reward += (1 - ((subgoal_gp_dist/max_subgoal_gp_dist) ** 0.5))
                 else:
                     self.curr_reward += 1
