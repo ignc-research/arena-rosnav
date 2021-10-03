@@ -190,6 +190,7 @@ class RewardCalculator():
                              laser_scan: np.ndarray, 
                              goal_in_robot_frame: Tuple[float,float],
                              *args,**kwargs):
+        self._rule = 6                     
         self._reward_abrupt_direction_change(
             kwargs['action'])
         self._reward_following_global_plan(
@@ -208,14 +209,65 @@ class RewardCalculator():
         self._reward_goal_approached(
             goal_in_robot_frame, reward_factor=0.3, penalty_factor=0.4)
         #self._reward_time_elapsed(kwargs['time_elapsed'], kwargs['global_plan'])
-        self._reward_waypoints_set_near_global_plan(kwargs['goal'], kwargs['subgoal'], kwargs['last_subgoal'],kwargs['amount_rewarded_subgoals'], kwargs['global_plan'])
+        self._reward_waypoints_set_near_global_plan(kwargs['goal'], kwargs['subgoal'], kwargs['last_subgoal'],kwargs['amount_rewarded_subgoals'], kwargs['global_plan'], self._rule)
+
+    def _cal_reward_rule_07(self, 
+                             laser_scan: np.ndarray, 
+                             goal_in_robot_frame: Tuple[float,float],
+                             *args,**kwargs):
+        self._rule = 7                   
+        self._reward_abrupt_direction_change(
+            kwargs['action'])
+        self._reward_following_global_plan(
+            kwargs['global_plan'], kwargs['robot_pose'], kwargs['action'])
+        if laser_scan.min() > self.safe_dist:
+            self._reward_distance_global_plan(
+                kwargs['global_plan'], kwargs['robot_pose'], reward_factor=0.2, penalty_factor=0.3)
+        else:
+            self.last_dist_to_path = None
+        self._reward_goal_reached(
+            goal_in_robot_frame, reward=15)
+        self._reward_safe_dist(
+            laser_scan, punishment=0.25)
+        self._reward_collision(
+            laser_scan, punishment=10)
+        self._reward_goal_approached(
+            goal_in_robot_frame, reward_factor=0.3, penalty_factor=0.4)
+        #self._reward_time_elapsed(kwargs['time_elapsed'], kwargs['global_plan'])
+        self._reward_waypoints_set_near_global_plan(kwargs['goal'], kwargs['subgoal'], kwargs['last_subgoal'],kwargs['amount_rewarded_subgoals'], kwargs['global_plan'], self._rule)
+
+    def _cal_reward_rule_08(self, 
+                             laser_scan: np.ndarray, 
+                             goal_in_robot_frame: Tuple[float,float],
+                             *args,**kwargs):
+        self._rule = 8                   
+        self._reward_abrupt_direction_change(
+            kwargs['action'])
+        self._reward_following_global_plan(
+            kwargs['global_plan'], kwargs['robot_pose'], kwargs['action'])
+        if laser_scan.min() > self.safe_dist:
+            self._reward_distance_global_plan(
+                kwargs['global_plan'], kwargs['robot_pose'], reward_factor=0.2, penalty_factor=0.3)
+        else:
+            self.last_dist_to_path = None
+        self._reward_goal_reached(
+            goal_in_robot_frame, reward=15)
+        self._reward_safe_dist(
+            laser_scan, punishment=0.25)
+        self._reward_collision(
+            laser_scan, punishment=10)
+        self._reward_goal_approached(
+            goal_in_robot_frame, reward_factor=0.3, penalty_factor=0.4)
+        #self._reward_time_elapsed(kwargs['time_elapsed'], kwargs['global_plan'])
+        self._reward_waypoints_set_near_global_plan(kwargs['goal'], kwargs['subgoal'], kwargs['last_subgoal'],kwargs['amount_rewarded_subgoals'], kwargs['global_plan'], self._rule)
 
     def _reward_waypoints_set_near_global_plan(self,
                              goal: Pose2D,
                              subgoal: PoseStamped,
                              last_subgoal: PoseStamped,
                              amount_rewarded_subgoals: int,
-                             global_plan: np.array):
+                             global_plan: np.array,
+                             rule: int):
         """
         Reward for putting a reward close to the global path.
         The further away from the global plan a waypoint is set, the less points are archived by this reward.
@@ -227,19 +279,24 @@ class RewardCalculator():
         :param last_subgoal (PoseStamped): the last subgoal, which was rewarded. Used to check, if a new subgoal has been published, which needs to be rewarded
         :param amount_rewarded_subgoal (int): amount of already rewarded subgoals. Used for punishment, if too many subgoals are used
         :param global_plan: (np.ndarray): vector containing poses on global plan
+        :param rule: (int): The rule from which the method is called
         """
         estimatedSubgoalAmount = math.floor(len(global_plan)/100) -1
         max_subgoal_gp_dist = 1.5 # range of the circle around ref-subgoal set in wp3_env
         if not (subgoal.pose.position.x == last_subgoal.pose.position.x and subgoal.pose.position.y == last_subgoal.pose.position.y) and not (subgoal.pose.position.x == goal.x and subgoal.pose.position.y == goal.y):
             if amount_rewarded_subgoals >= estimatedSubgoalAmount:
-                self.curr_reward -= 0.5
+                if rule in [7,8]:
+                    self.curr_reward -= 0.5
             else:
                 subgoal_gp_dist = np.inf
                 for gp_point in global_plan:
                     dist = ((gp_point[0] - subgoal.pose.position.x)**2 + (gp_point[1] - subgoal.pose.position.y)**2)**0.5
                     if dist < subgoal_gp_dist:
                         subgoal_gp_dist = dist
-                self.curr_reward += (1 - ((subgoal_gp_dist/max_subgoal_gp_dist) ** 0.5))
+                if rule in [7,8]:
+                    self.curr_reward += (1 - ((subgoal_gp_dist/max_subgoal_gp_dist) ** 0.5))
+                else:
+                    self.curr_reward += 1
             self.info['subgoal_was_rewarded'] = True
         else:
             self.info['subgoal_was_rewarded'] = False
