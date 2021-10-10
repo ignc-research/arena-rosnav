@@ -82,8 +82,8 @@ def get_default_arg_parser():
                         default=None, nargs=argparse.REMAINDER)
     return parser
 
-def check_args(args):
-    if args.pretrained_policy is None:
+def check_args(args,cfg):
+    if args.pretrained_policy is None or not cfg.INPUT.NORM:
         assert args.rms is None
     else:
         assert args.rms is not None
@@ -332,7 +332,7 @@ def main():
     parser = get_default_arg_parser()
     args = parser.parse_args()
     cfg = setup_config(args)
-    check_args(args)
+    check_args(args,cfg)
     namespaces = get_namespaces(args)
     training_env, eval_env = make_envs(cfg, args, namespaces)
 

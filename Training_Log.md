@@ -197,11 +197,33 @@ CHANGES
 1.3 `python pretrainig_wp_single_env.py -p1 -p2 TRAINING.MAX_STEPS_PER_EPISODE 800  EVAL.CURRICULUM.STAGE_DYNAMIC_OBSTACLE '[20,8,13]' NET_ARCH.FEATURE_EXTRACTOR.NAME "CNN_LaserVAE_Obstalcle_GlobalPlan"  EVAL.CURRICULUM.THRESHOLD_RANGE '[0.5, 0.75]' INPUT.NORM False ENV.NAME "WPEnvMapFrame3" WAYPOINT_GENERATOR.IS_ACTION_SPACE_DISCRETE True NET_ARCH.FEATURE_EXTRACTOR.FEATURES_DIM 192 `
 ### 2021.10.2
 #### Unfortunately pretraining not working, the loss doesn't change.
-- [ ] check in the observation, actually sample only 10 points from the global path seems not enough.
-- [ ] dynamic obstacle's states 
-- [ ] visualize the net again.
-- [ ] even no pretraining at the beginning,the action is not correct!.print it and debug it
+- [x] check in the observation, actually sample only 10 points from the global path seems not enough.
+- [x] dynamic obstacle's states 
+- [x] visualize the net again. -> vis and debug done
+- [x] even no pretraining at the beginning,the action is not correct!.print it and debug it, -> it's correct now, i did nothing to it. 
 #### try without pretraining.
-1.1 `roslaunch arena_bringup start_training_waypoint.launch num_envs:=6 pretrain_mode:=false local_planner:=drl env_start_idx:=1 map_folder_name:=map_empty ns_prefix:=sim_lei_map_outdoor map_file:=outdoor` 
-1.2 `python train_agent_wp.py --ns_prefix=sim_lei_map_outdoor TRAINING.MAX_STEPS_PER_EPISODE 800 TRAINING.MAX_STEPS_PER_EPISODE 800  EVAL.CURRICULUM.STAGE_DYNAMIC_OBSTACLE '[3,20,13]' NET_ARCH.FEATURE_EXTRACTOR.NAME "CNN_LaserVAE_Obstalcle_GlobalPlan"  EVAL.CURRICULUM.THRESHOLD_RANGE '[0.5, 0.75]' INPUT.NORM False ENV.NAME "WPEnvMapFrame3" WAYPOINT_GENERATOR.IS_ACTION_SPACE_DISCRETE True NET_ARCH.FEATURE_EXTRACTOR.FEATURES_DIM 192`
+1.1 `roslaunch arena_bringup start_training_waypoint.launch num_envs:=6 pretrain_mode:=false local_planner:=drl env_start_idx:=1 map_folder_name:=outdoor ns_prefix:=sim_lei_map_outdoor` 
+1.2 `python train_agent_wp.py --ns_prefix=sim_lei_map_outdoor TRAINING.MAX_STEPS_PER_EPISODE 800  EVAL.CURRICULUM.STAGE_DYNAMIC_OBSTACLE '[3,20,13]' NET_ARCH.FEATURE_EXTRACTOR.NAME "CNN_LaserVAE_Obstalcle_GlobalPlan"  EVAL.CURRICULUM.THRESHOLD_RANGE '[0.5, 0.75]' INPUT.NORM False ENV.NAME "WPEnvMapFrame3" WAYPOINT_GENERATOR.IS_ACTION_SPACE_DISCRETE True NET_ARCH.FEATURE_EXTRACTOR.FEATURES_DIM 192`
+### 2021.10.06
+### Pretraining results
+1. After reduced the layers of nn, loss reduced but not much.
+
+### Training with pretrained model (no attention)
+#### Test and visualization
+1.`roslaunch arena_bringup start_training_waypoint.launch num_envs:=2 pretrain_mode:=false local_planner:=drl env_start_idx:=1 map_folder_name:=outdoor ns_prefix:=sim_lei_map_outdoor` 
+1. `python train_agent_wp.py --ns_prefix=sim_lei_map_outdoor --pretrained_policy=WPEnvMapFrame3/pretrain_policy_10.pkl TRAINING.MAX_STEPS_PER_EPISODE 800  EVAL.CURRICULUM.STAGE_DYNAMIC_OBSTACLE '[17,20,23]' NET_ARCH.FEATURE_EXTRACTOR.NAME "CNN_LaserVAE_Obstalcle_GlobalPlan"  EVAL.CURRICULUM.THRESHOLD_RANGE '[0.5, 0.75]' INPUT.NORM False ENV.NAME "WPEnvMapFrame3" WAYPOINT_GENERATOR.IS_ACTION_SPACE_DISCRETE True NET_ARCH.FEATURE_EXTRACTOR.FEATURES_DIM 96 `
+### 2021.10.10
+Eventually find the error in the pretraining script. it works now.
+1. training with *WPEnvMapFrame3_fake_action_filtered.npz*(Data will be ruled out if robot too close(within 1m) to the goal or the action is abnormal) are much more better. 
+2. Attension based method the weight of global plan will come to 1 very soon, which is not wanted, maybe illustrated on the thesis.
+3. Have no idea why if use cpu for training the loss decreased not much 
+#### Pretraining
+##### Attension based
+1. `roslaunch arena_bringup start_arena_flatland_waypoint.launch train_mode:=true map_file:=outdoor global_planner_active_mode:=false rviz_file:=vtwg_pretrain use_plan_manager:=false`
+2. `python pretrainig_wp_single_env.py -p2 -e=WPEnvMapFrame3_fake_action_filtered.npz  --epochs=100 --name_prefix=attension_based  TRAINING.MAX_STEPS_PER_EPISODE 800  EVAL.CURRICULUM.STAGE_DYNAMIC_OBSTACLE '[17,20,23]' NET_ARCH.FEATURE_EXTRACTOR.NAME "CNN_LaserVAE_Obstalcle_GlobalPlan_Attention"  EVAL.CURRICULUM.THRESHOLD_RANGE '[0.75, 0.85]' INPUT.NORM False ENV.NAME "WPEnvMapFrame3" WAYPOINT_GENERATOR.IS_ACTION_SPACE_DISCRETE True NET_ARCH.FEATURE_EXTRACTOR.FEATURES_DIM 96`
+
+#### Training
+##### Attension based
+1.`roslaunch arena_bringup start_training_waypoint.launch num_envs:=6 pretrain_mode:=false local_planner:=drl env_start_idx:=1 map_folder_name:=outdoor ns_prefix:=sim_lei_outdoor`
+2.`python train_agent_wp.py --pretrained_policy=WPEnvMapFrame3/attension_based_pretrain_policy_100.pkl --ns_prefix=sim_lei_outdoor TRAINING.MAX_STEPS_PER_EPISODE 800  EVAL.CURRICULUM.STAGE_DYNAMIC_OBSTACLE '[17,20,23]' NET_ARCH.FEATURE_EXTRACTOR.NAME "CNN_LaserVAE_Obstalcle_GlobalPlan_Attention"  EVAL.CURRICULUM.THRESHOLD_RANGE '[0.75, 0.85]' INPUT.NORM False ENV.NAME "WPEnvMapFrame3" WAYPOINT_GENERATOR.IS_ACTION_SPACE_DISCRETE True NET_ARCH.FEATURE_EXTRACTOR.FEATURES_DIM 96 WAYPOINT_GENERATOR.GOAL_RADIUS 1.5`
 

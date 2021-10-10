@@ -61,10 +61,11 @@ def get_default_arg_parser():
         action="store_true",
     )
     parser.add_argument(
-        "--expert_data_np_name", "-e", default="expert_data_map1_00.npz"
+        "--expert_data_np_name", "-e",
+        type=str
     )
     parser.add_argument(
-        "--epochs", default=50, type=int,
+        "--epochs", default=500, type=int,
     )
     parser.add_argument(
         "--name_prefix",
@@ -189,11 +190,11 @@ def pretraining_network(
     epochs=100,
     num_observation=None,
     scheduler_gamma=0.7,
-    learning_rate=1e-2,
+    learning_rate=1e-3,
     log_interval=1000,
     use_cuda=True,
     seed=1,
-    save_on_every_num_epoch=10,
+    save_on_every_num_epoch=50,
     name_prefix="",
 ):
 
@@ -268,12 +269,14 @@ def pretraining_network(
         log_interval,
         epoch,
         tensorboard_log: str = "",
-        ent_weight: float = 1e-3,
+        ent_weight: float = 0,
         l2_weight: float = 0.0,
     ):
+        from torch.distributions import Categorical
         # scripts adapted from
         # https://colab.research.google.com/github/Stable-Baselines-Team/rl-colab-notebooks/blob/sb3/pretraining.ipynb
         policy.train()
+        running_loss = .0
         for batch_idx, (obs, acts) in enumerate(train_loader):
 
             obs, acts = obs.to(device).detach(), acts.to(device).detach()
@@ -288,8 +291,8 @@ def pretraining_network(
             ent_loss = -ent_weight * entropy
             neglogp = -log_prob
             l2_loss = l2_weight * l2_norm
-            loss = neglogp + ent_loss + l2_loss
-            # loss = neglogp
+            # loss = neglogp + ent_loss + l2_loss
+            loss = neglogp
 
             stats_dict = dict(
                 neglogp=neglogp.item(),
@@ -303,7 +306,7 @@ def pretraining_network(
             # TODO_D tensorboard log
 
             optimizer.zero_grad()
-            loss.backward(retain_graph=True)
+            loss.backward(retain_graph=False)
             optimizer.step()
             if batch_idx % log_interval == 0:
                 print(
@@ -373,8 +376,9 @@ def pretraining_network(
     device = th.device("cuda" if use_cuda else "cpu")
     policy = model.policy.to(device)
     # Define an Optimizer and a learning rate schedule.
-    optimizer = optim.Adadelta(policy.parameters(), lr=learning_rate)
-    scheduler = StepLR(optimizer, step_size=1, gamma=scheduler_gamma)
+    # optimizer = optim.Adadelta(policy.parameters(), lr=learning_rate)
+    optimizer = optim.SGD(policy.parameters(), lr=learning_rate, momentum=0.9)
+
 
     # Now we are finally ready to train the policy model.
     for epoch in range(1, epochs + 1):
@@ -394,7 +398,6 @@ def pretraining_network(
                 vec_norm=vec_norm,
                 name_prefix=name_prefix,
             )
-        scheduler.step()
 
 
 def main():
@@ -413,7 +416,10 @@ def main():
     )
     os.makedirs(pretraining_data_dirpath, exist_ok=True)
     # you can change it
-    expert_data_np_name = env_class_name + ".npz"
+    if not args.expert_data_np_name:
+        expert_data_np_name = env_class_name + ".npz"
+    else:
+        expert_data_np_name = args.expert_data_np_name 
     if args.phase1:
         collect_expert_data(
             env, NUM_STEPS, pretraining_data_dirpath, expert_data_np_name
@@ -429,7 +435,7 @@ def main():
             pretraining_data_dirpath,
             expert_data_np_name,
             epochs=EPOCHS,
-            save_on_every_num_epoch=10,
+            save_on_every_num_epoch=20,
             name_prefix=args.name_prefix,
         )
 

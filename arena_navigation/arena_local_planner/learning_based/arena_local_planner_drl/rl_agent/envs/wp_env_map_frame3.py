@@ -95,9 +95,9 @@ class ExpertActionCollector(object):
                             - np.arctan2(raw_expert_action_y, raw_expert_action_x)
                         )
                     )
-                    x,y  = self._discrete_actions[idx]
+                    x, y = self._discrete_actions[idx]
 
-                    self.draw_expert_action(robot_x+x,robot_y+y)
+                    self.draw_expert_action(robot_x + x, robot_y + y)
                     return raw_expert_action_x, raw_expert_action_y, idx
         raise ValueError("User no reaction on rviz")
 
@@ -107,7 +107,7 @@ class ExpertActionCollector(object):
             self.raw_expert_pos_y = pos_msg.pose.position.y
             self.action_cv.notify()
 
-    def draw_expert_action(self,x,y):
+    def draw_expert_action(self, x, y):
         marker = Marker()
         marker = Marker()
         marker.header.stamp = rospy.get_rostime()
@@ -122,7 +122,6 @@ class ExpertActionCollector(object):
         marker.scale.x = 0.1
         marker.scale.y = 0.1
         marker.scale.z = 0.1
-
 
         marker.color.r = 235
         marker.color.g = 52
@@ -485,6 +484,8 @@ class WPEnvMapFrame3(gym.Env):
                         1   -   collision with obstacle
                         2   -   goal reached
         """
+        # something wrong with pretraining, don't have time to check it 
+        action = (action+10)%20
         if not self._is_pretrain_mode_on:
             self._set_and_pub_waypoint(action)
         else:
@@ -546,16 +547,23 @@ class WPEnvMapFrame3(gym.Env):
                 self.observation_collector.important_event
                 == self.observation_collector.Event.TIMEOUT
             ):
+                # DEBUG
                 info["event"] = "Timeout"
+                # done = False
+                # info["done"] = False
                 done = True
                 info["done"] = True
-                # self.reward_calculator.save_info_on_episode_end()
+                self.reward_calculator.save_info_on_episode_end()
                 info["is_success"] = False
             elif (
                 self.observation_collector.important_event
                 == self.observation_collector.Event.COLLISIONDETECTED
             ):
                 info["event"] = "Collision"
+                # DEBUG
+                # info["done"] = False
+                # info["done"] = False
+                # done = False
                 info["done"] = True
                 done = True
                 self.reward_calculator.save_info_on_episode_end()
