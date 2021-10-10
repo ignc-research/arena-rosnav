@@ -17,7 +17,7 @@ from geometry_msgs.msg import Twist, PoseStamped, Pose2D
 from flatland_msgs.srv import StepWorld, StepWorldRequest
 from nav_msgs.msg import Odometry
 from nav_msgs.msg import Path as nav_Path
-from std_msgs.msg import Bool
+from std_msgs.msg import Bool, Float32
 import time
 import math
 from rl_agent.utils.debug import timeit
@@ -109,6 +109,12 @@ class wp3Env(gym.Env):
         self._previous_time = 0
         self._step_counter = 0
         self._amount_rewarded_waypoints = 0
+        self._circle = np.array([])
+        self._curr_gp_point = 0
+        self._globalPlanArray = np.array([])
+        self._curr_goal = Pose2D()
+        self._robot_close_to_goal = False
+        self._suggested_action = Pose2D()
 
         # reward calculator
         if safe_dist is None:
@@ -136,6 +142,9 @@ class wp3Env(gym.Env):
         # visualization publisher         
         self.circle_pub = rospy.Publisher(f'{self.ns_prefix}zViz', nav_Path, queue_size=1)                               # create the circle on which the wp are placed for visualization
         
+        #observation (suggested action) publisher
+        self._suggested_action_pub = rospy.Publisher(f'{self.ns_prefix}suggested_action', Pose2D, queue_size=1)
+
         # service clients
         self._is_train_mode = rospy.get_param("/train_mode")
         if self._is_train_mode:
@@ -212,7 +221,7 @@ class wp3Env(gym.Env):
 
         with open(settings_yaml_path, 'r') as fd:
             setting_data = yaml.safe_load(fd)
-            print(settings_yaml_path)
+            #print(settings_yaml_path)
             if self._is_action_space_discrete:
                 # self._discrete_actions is a list, each element is a dict with the keys ["name", 'linear','angular']
                 self._discrete_acitons = setting_data['robot']['discrete_actions']
@@ -276,24 +285,21 @@ class wp3Env(gym.Env):
             point.pose.orientation.w=1
             point.header.frame_id="map"
             circle.poses.append(point)
-            #test = np.array([point.pose.position.x,point.pose.position.y])
-            #for x in ObservationCollector.process_global_plan_msg(self._globalPlan):
-            #    if math.isclose(x[0], test[0]):  
-            #        raise Warning("foundit", x,test)
-
             # if circle touches the global goal, immediately place subgoal on global goal
-            if ((math.isclose(circle.poses[j].pose.position.x, self._globalGoal.x, rel_tol=0.2)) and (math.isclose(circle.poses[j].pose.position.y, self._globalGoal.y, rel_tol=0.2)) and not (self._action_msg.pose.position.x == self._globalGoal.x and self._action_msg.pose.position.y == self._globalGoal.y)):    
-                self._action_msg.pose.position.x = self._globalGoal.x 
-                self._action_msg.pose.position.y = self._globalGoal.y 
-                self._action_msg.pose.orientation.w = 1
-                self.agent_action_pub.publish(self._action_msg)
-                print("subgoal published #1 at",self._action_msg.pose.position.x,self._action_msg.pose.position.y)
-                self._action_count += 1
+            #if ((math.isclose(circle.poses[j].pose.position.x, self._globalGoal.x, rel_tol=0.2)) and (math.isclose(circle.poses[j].pose.position.y, self._globalGoal.y, rel_tol=0.2)) and not (self._action_msg.pose.position.x == self._globalGoal.x and self._action_msg.pose.position.y == self._globalGoal.y)):    
+                #self._action_msg.pose.position.x = self._globalGoal.x 
+                #self._action_msg.pose.position.y = self._globalGoal.y 
+                #self._action_msg.pose.orientation.w = 1
+                #self.agent_action_pub.publish(self._action_msg)
+                #print("subgoal published #1 at",self._action_msg.pose.position.x,self._action_msg.pose.position.y)
+                #self._action_count += 1
             i += 0.2
             j += 1
         
         #visualize circle by publishing all poses to /zViz topic
         self.circle_pub.publish(circle)
+        #create array from circle
+        self._circle = ObservationCollector.process_global_plan_msg(circle)
        
        # First spawn 
         if self.firstTime < 1:
@@ -301,14 +307,14 @@ class wp3Env(gym.Env):
             robot_angle = np.arctan2(2.0*(q.w*q.z + q.x*q.y), 1-2*(q.y*q.y+q.z*q.z))
             angle_grad = action[0] + robot_angle
             self.firstTime +=1
-            if not (action[0] == -5):
+            if not (action[0] == -0.5):
                 self._action_msg.pose.position.x = self._ref_wp.pose.position.x + (self.range_circle*math.cos(angle_grad))         
                 self._action_msg.pose.position.y = self._ref_wp.pose.position.y + (self.range_circle*math.sin(angle_grad))
                 self.agent_action_pub.publish(self._action_msg)
-                print("subgoal published #2 at",self._action_msg.pose.position.x,self._action_msg.pose.position.y)
+                #print("subgoal published #2 at",self._action_msg.pose.position.x,self._action_msg.pose.position.y)
                 self._action_count += 1
-            else:
-                print("Info: Waypoint was not moved")
+            #else:
+                #print("Info: Waypoint was not moved")
             #print("distance robot to wp: {}".format(dist_robot_wp[0]))
             
         #wait for robot to reach the waypoint first
@@ -322,34 +328,114 @@ class wp3Env(gym.Env):
             dist_rg = np.linalg.norm(dist_robot_goal)            
             #todo consider the distance to global path when choosing next optimal waypoint
             #send a goal message (posestamped) as action, remeber to normalize the quaternions (put orientationw as 1) and set the frame id of the goal to "map"! 
-            if dist_robot_goal[0] < 2:
-                if not (self._action_msg.pose.position.x == self._globalGoal.x and self._action_msg.pose.position.y == self._globalGoal.y):
-                    self._action_msg.pose.position.x = self._globalGoal.x 
-                    self._action_msg.pose.position.y = self._globalGoal.y 
-                    self._action_msg.pose.orientation.w = 1
-                    self.agent_action_pub.publish(self._action_msg)
-                    print("subgoal published #3 at",self._action_msg.pose.position.x,self._action_msg.pose.position.y)
-                    self._action_count += 1
+            if (False):#dist_robot_goal[0] < 2:
+                pass
+                #if not (self._action_msg.pose.position.x == self._globalGoal.x and self._action_msg.pose.position.y == self._globalGoal.y):
+                    #self._action_msg.pose.position.x = self._globalGoal.x 
+                    #self._action_msg.pose.position.y = self._globalGoal.y 
+                    #self._action_msg.pose.orientation.w = 1
+                    #self.agent_action_pub.publish(self._action_msg)
+                    #self._stop_waypoint_calc = True
+                    #print("subgoal published #3 at",self._action_msg.pose.position.x,self._action_msg.pose.position.y)
+                    #self._action_count += 1
             else:
                 q = self._robot_pose.pose.orientation
                 robot_angle = np.arctan2(2.0*(q.w*q.z + q.x*q.y), 1-2*(q.y*q.y+q.z*q.z))
                 angle_grad = action[0] + robot_angle 
-                if not (action[0] == -5):
-                    self._action_msg.pose.position.x = self._ref_wp.pose.position.x + (self.range_circle*math.cos(angle_grad))         
-                    self._action_msg.pose.position.y = self._ref_wp.pose.position.y + (self.range_circle*math.sin(angle_grad))   
-                    self._action_msg.pose.orientation.w = 1
+                if not (action[0] == -0.5):
+                    if action[0] == 0.5:
+                        self._action_msg.pose.position.x = self._globalGoal.x         
+                        self._action_msg.pose.position.y = self._globalGoal.y   
+                        self._action_msg.pose.orientation.w = 1
+                    else:
+                        self._action_msg.pose.position.x = self._ref_wp.pose.position.x + (self.range_circle*math.cos(angle_grad))         
+                        self._action_msg.pose.position.y = self._ref_wp.pose.position.y + (self.range_circle*math.sin(angle_grad))   
+                        self._action_msg.pose.orientation.w = 1
                     #print("action message looks like {}".format(self._action_msg))
                     self.agent_action_pub.publish(self._action_msg)
-                    print("subgoal published #4 at",self._action_msg.pose.position.x,self._action_msg.pose.position.y)
+                    #print("subgoal published #4 at",self._action_msg.pose.position.x,self._action_msg.pose.position.y)
                     self._action_count += 1
-                else:
-                    print("Info: Waypoint was not moved")
+                #else:
+                    #print("Info: Waypoint was not moved")
     def _translate_disc_action(self, action):
         new_action = np.array([])
         #new_action = np.append(new_action, self._discrete_acitons[action]['linear']) # not needed anymore
         new_action = np.append(new_action, self._discrete_acitons[action]['angular'])    
             
         return new_action
+
+    def _calculate_optimal_waypoint(self):
+        criticalSection = False
+        #inital step size is 5% of glob path length
+        stepSize = math.floor(len(self._globalPlanArray)/20)
+        #if robot is close to goal (6.5 meters) recommend to move the subgoal onto the goal position
+        if (((self._globalGoal.x - self._robot_pose.pose.position.x)**2 + (self._globalGoal.y - self._robot_pose.pose.position.y)**2)**0.5) < 6.5:
+            self._robot_close_to_goal = True
+            # if waypoint on goal, recomment don't move, otherwise recommend set waypoint onto goal
+            if (self._action_msg.pose.position.x == self._globalGoal.x and self._action_msg.pose.position.y == self._globalGoal.y):
+                return -0.5
+            else:
+                return 0.5
+        # start at the beginning of the global plan, if new episode started, else start from last known point, also lower stepSize in this case 
+        if ((self._curr_goal.x == 0 and self._curr_goal.y == 0 and self._curr_goal.theta == 0) or self._curr_goal.x != self._globalGoal.x or self._curr_goal.y != self._globalGoal.y):
+            curr_gp_point = 0
+            #save current goal for reference
+            self._curr_goal.x, self._curr_goal.y = self._globalGoal.x, self._globalGoal.y
+        else:
+            curr_gp_point = self._curr_gp_point
+            stepSize = math.floor(stepSize/4)
+            #print("curr gp coord:", self._globalPlanArray[curr_gp_point])
+            #print("curr circle coord:", self._circle[10])
+            #time.sleep(10)
+        # start roughly in the middle of the circle
+        curr_circle_point = self._circle[10] 
+        #calculate where the middle of the circle and global plan are clostest together or intersect
+        min_dist = np.inf
+        #print(self._circle)
+        while(True):
+            #print("GP:", self._globalPlanArray[curr_gp_point], "\ncircle: ",curr_circle_point)
+            dist = ((self._globalPlanArray[curr_gp_point][0] - curr_circle_point[0])**2 + (self._globalPlanArray[curr_gp_point][1] - curr_circle_point[1])**2)**0.5
+            if dist < min_dist:
+                min_dist = dist
+                #criticalSection == False means you overshot only once, but this time you're closer again
+                if criticalSection:
+                    optimal_angle = wp3Env._calculate_closest_angle(self, curr_gp_point - math.floor(stepSize/2), curr_gp_point)
+                    break
+                #only step forward, if there is global path to step on, otherwise step onto last point of global plan
+                if curr_gp_point + stepSize < len(self._globalPlanArray):
+                    curr_gp_point += stepSize
+                else:
+                    curr_gp_point = len(self._globalPlanArray) -1
+            else:
+                #critialSection == True means you overshot twice at this point
+                if criticalSection:
+                    optimal_angle = wp3Env._calculate_closest_angle(self, curr_gp_point - stepSize, curr_gp_point)
+                    break
+                criticalSection = True
+                curr_gp_point -= math.floor(stepSize/2)
+
+                #go half way back. If you're still further away, you overshot the intersection. 
+                # so you need to search between now (which is half way back) and at most 1 way back (worst case) from here => between curr_gp_point and curr_gp_point -= stepSize)
+                
+                #if you go back half way and you're closer, then it is between current position and another half way back => curr_gp_point and curr_gp_point -= floor(stepSize/2)
+        #save last used gp point minus one step to variable to start from there later
+        #print("current point:", curr_gp_point)
+        self._curr_gp_point = curr_gp_point - stepSize
+        return optimal_angle
+
+    def _calculate_closest_angle(self, gp_point_1, gp_point_2):
+        #print(gp_point_2 - gp_point_1)
+        min_dist = np.inf
+        min_dist_circle_index = 0
+        for i in range(len(self._circle)):
+            for j in range(gp_point_2 - gp_point_1):
+                circle_gp_dist = ((self._globalPlanArray[gp_point_1+j][0] - self._circle[i][0])**2 + (self._globalPlanArray[gp_point_1+j][1] - self._circle[i][1])**2)**0.5
+                #print(i, min_dist, circle_gp_dist)
+                if circle_gp_dist < min_dist:
+                    min_dist = circle_gp_dist
+                    min_dist_circle_index = i
+        #print(min_dist)            
+        return round(-2 + 0.2 * min_dist_circle_index,2)
 
     def step(self, action):
         """
@@ -360,6 +446,14 @@ class wp3Env(gym.Env):
         if self._is_action_space_discrete:
             action = self._translate_disc_action(action)
         self._pub_action(action)
+        #test what would happen, if robot always uses suggested action
+        #self._pub_action(np.array([self._suggested_action]))
+        self._globalPlanArray = ObservationCollector.process_global_plan_msg(self._globalPlan)
+        if len(self._globalPlanArray) > 0 and len(self._circle) > 0:
+            self._suggested_action.x = wp3Env._calculate_optimal_waypoint(self)
+            #print(self._suggested_action.x)
+            self._suggested_action_pub.publish(self._suggested_action)
+            #print("suggested action:", self._suggested_action)
         if self._steps_curr_episode == 0:
             self.time_start = time.time() #reward will be calculated based on the elapsed time. Time starts right after publishing the action and stops when first reward gets calculated
         self._steps_curr_episode += 1
@@ -381,13 +475,14 @@ class wp3Env(gym.Env):
         reward, reward_info = self.reward_calculator.get_reward(
             obs_dict['laser_scan'], obs_dict['goal_in_robot_frame'],
             robot_pose=obs_dict['robot_pose'], 
-            global_plan=ObservationCollector.process_global_plan_msg(self._globalPlan), 
+            global_plan=self._globalPlanArray, 
             action=new_action, 
             time_elapsed = time.time() - self.time_start, #time which elapsed since the 1st action has been published
             goal=self._globalGoal,
             subgoal=self._action_msg,
             last_subgoal = self._last_rewarded_waypoint,
-            amount_rewarded_subgoals = self._amount_rewarded_waypoints
+            amount_rewarded_subgoals = self._amount_rewarded_waypoints,
+            robot_close_to_goal = self._robot_close_to_goal
             )
         
         if reward_info['subgoal_was_rewarded']:
@@ -405,14 +500,14 @@ class wp3Env(gym.Env):
             info['done_reason'] = reward_info['done_reason']
             info['is_success'] = reward_info['is_success']
             self.reward_calculator.kdtree = None
-            info['gp_len'] = len(ObservationCollector.process_global_plan_msg(self._globalPlan))
+            info['gp_len'] = len(self._globalPlanArray)
 
         if self._steps_curr_episode > self._max_steps_per_episode:
             done = True
             info['done_reason'] = 0
             info['is_success'] = 0
             self.reward_calculator.kdtree = None
-            info['gp_len'] = len(ObservationCollector.process_global_plan_msg(self._globalPlan))
+            info['gp_len'] = len(self._globalPlanArray)
 
                 # for logging
         if self._extended_eval:
@@ -438,6 +533,9 @@ class wp3Env(gym.Env):
         self._action_count = 0
         self._last_rewarded_waypoint = PoseStamped()
         self._amount_rewarded_waypoints = 0
+        self._robot_close_to_goal = False
+        self._curr_gp_point = 0
+        self._suggested_action = Pose2D()
         # extended eval info
         if self._extended_eval:
             self._last_robot_pose = None

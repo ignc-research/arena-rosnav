@@ -3,6 +3,7 @@ import threading
 from typing import Tuple
 
 from numpy.core.numeric import normalize_axis_tuple
+from geometry_msgs import msg
 import rospy
 import random
 import numpy as np
@@ -17,6 +18,7 @@ from geometry_msgs.msg import Twist
 from nav_msgs.msg import Path
 from rosgraph_msgs.msg import Clock
 from nav_msgs.msg import Odometry
+from std_msgs.msg import Float32
 
 # services
 from flatland_msgs.srv import StepWorld, StepWorldRequest
@@ -54,8 +56,8 @@ class ObservationCollector():
                 num_lidar_beams,), dtype=np.float32),
             spaces.Box(low=0, high=10, shape=(1,), dtype=np.float32),
             spaces.Box(low=-np.pi, high=np.pi, shape=(1,), dtype=np.float32),
-            spaces.Box(low=-100, high=100, shape=(2,), dtype=np.float32) #global goal #not exact, TODO: find way to define exact values for low&high
-            #spaces.Box(low=-100, high=100, shape=(2,), dtype=np.float32) # "optimal" waypoint #not exact, TODO: find way to define exact values for low&high
+            spaces.Box(low=-100, high=100, shape=(2,), dtype=np.float32), #global goal #not exact, TODO: find way to define exact values for low&high
+            spaces.Box(low=-2.0, high=2.0, shape=(1,), dtype=np.float32) #optimal angle for waypoint
         ))
 
         self._laser_num_beams = rospy.get_param("/laser_num_beams")
@@ -69,6 +71,7 @@ class ObservationCollector():
         self._subgoal = Pose2D()
         self._globalGoal = PoseStamped()
         self._globalplan = np.array([])
+        self._suggested_action = np.array([])
 
         # train mode?
         self._is_train_mode = rospy.get_param("/train_mode")
@@ -87,6 +90,8 @@ class ObservationCollector():
 
         self._robot_state_sub = rospy.Subscriber(
             f'{self.ns_prefix}odom', Odometry, self.callback_robot_state, tcp_nodelay=True)
+
+        self._suggested_action_sub = rospy.Subscriber(f'{self.ns_prefix}suggested_action', Pose2D, self.callback_suggested_action, tcp_nodelay=True)
         
         # self._clock_sub = rospy.Subscriber(
         #     f'{self.ns_prefix}clock', Clock, self.callback_clock, tcp_nodelay=True)
@@ -135,9 +140,11 @@ class ObservationCollector():
             scan = np.zeros(self._laser_num_beams, dtype=float)
             
         rho_goal, theta_goal = ObservationCollector._get_goal_pose_in_robot_frame(self._globalGoal,self._subgoal)
-        rho, theta = ObservationCollector._get_goal_pose_in_robot_frame(
-            self._subgoal, self._robot_pose)
-        merged_obs = np.hstack([scan, np.array([rho, theta]),np.array([self._globalGoal.x,self._globalGoal.y])])
+        rho, theta = ObservationCollector._get_goal_pose_in_robot_frame(self._subgoal, self._robot_pose)
+        if len(self._suggested_action) == 0:
+            self._suggested_action = np.array([0.0])
+        print(self._suggested_action)
+        merged_obs = np.hstack([scan, np.array([rho, theta]),np.array([self._globalGoal.x,self._globalGoal.y]),self._suggested_action])
         #merged_obs = np.hstack([scan, np.array([rho, theta])])
 
 
@@ -214,9 +221,13 @@ class ObservationCollector():
 
         except rospy.ServiceException as e:
             rospy.logdebug("step Service call failed: %s" % e)
-   
+    
     def callback_globalGoal(self,msg_Subgoal):
         self._globalGoal=self.process_subgoal_msg(msg_Subgoal)    
+        return
+
+    def callback_suggested_action(self,msg_suggested_action):
+        self._suggested_action= np.array([msg_suggested_action.x])
         return
 
     def callback_clock(self, msg_Clock):

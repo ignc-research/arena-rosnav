@@ -10,7 +10,7 @@ from torch import nn
 from stable_baselines3.common.policies import ActorCriticPolicy
 from stable_baselines3.common.torch_layers import BaseFeaturesExtractor
 
-_RS = 4  # robot state size
+_RS = 5  # robot state size
 
 ROBOT_SETTING_PATH = rospkg.RosPack().get_path('simulator_setup')
 yaml_ROBOT_SETTING_PATH = os.path.join(ROBOT_SETTING_PATH, 'robot', 'myrobot.model.yaml')

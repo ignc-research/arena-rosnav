@@ -209,7 +209,7 @@ class RewardCalculator():
         self._reward_goal_approached(
             goal_in_robot_frame, reward_factor=0.3, penalty_factor=0.4)
         #self._reward_time_elapsed(kwargs['time_elapsed'], kwargs['global_plan'])
-        self._reward_waypoints_set_near_global_plan(kwargs['goal'], kwargs['subgoal'], kwargs['last_subgoal'],kwargs['amount_rewarded_subgoals'], kwargs['global_plan'], self._rule)
+        self._reward_waypoints_set_near_global_plan(kwargs['goal'], kwargs['subgoal'], kwargs['last_subgoal'],kwargs['amount_rewarded_subgoals'], kwargs['global_plan'], kwargs['robot_close_to_goal'], self._rule)
 
     def _cal_reward_rule_07(self, 
                              laser_scan: np.ndarray, 
@@ -234,7 +234,7 @@ class RewardCalculator():
         self._reward_goal_approached(
             goal_in_robot_frame, reward_factor=0.3, penalty_factor=0.4)
         #self._reward_time_elapsed(kwargs['time_elapsed'], kwargs['global_plan'])
-        self._reward_waypoints_set_near_global_plan(kwargs['goal'], kwargs['subgoal'], kwargs['last_subgoal'],kwargs['amount_rewarded_subgoals'], kwargs['global_plan'], self._rule)
+        self._reward_waypoints_set_near_global_plan(kwargs['goal'], kwargs['subgoal'], kwargs['last_subgoal'],kwargs['amount_rewarded_subgoals'], kwargs['global_plan'], kwargs['robot_close_to_goal'], self._rule)
 
     def _cal_reward_rule_08(self, 
                              laser_scan: np.ndarray, 
@@ -259,7 +259,7 @@ class RewardCalculator():
         self._reward_goal_approached(
             goal_in_robot_frame, reward_factor=0.3, penalty_factor=0.4)
         #self._reward_time_elapsed(kwargs['time_elapsed'], kwargs['global_plan'])
-        self._reward_waypoints_set_near_global_plan(kwargs['goal'], kwargs['subgoal'], kwargs['last_subgoal'],kwargs['amount_rewarded_subgoals'], kwargs['global_plan'], self._rule)
+        self._reward_waypoints_set_near_global_plan(kwargs['goal'], kwargs['subgoal'], kwargs['last_subgoal'],kwargs['amount_rewarded_subgoals'], kwargs['global_plan'], kwargs['robot_close_to_goal'], self._rule)
 
     def _reward_waypoints_set_near_global_plan(self,
                              goal: Pose2D,
@@ -267,6 +267,7 @@ class RewardCalculator():
                              last_subgoal: PoseStamped,
                              amount_rewarded_subgoals: int,
                              global_plan: np.array,
+                             robot_close_to_goal: bool, 
                              rule: int):
         """
         Reward for putting a reward close to the global path.
@@ -279,27 +280,38 @@ class RewardCalculator():
         :param last_subgoal (PoseStamped): the last subgoal, which was rewarded. Used to check, if a new subgoal has been published, which needs to be rewarded
         :param amount_rewarded_subgoal (int): amount of already rewarded subgoals. Used for punishment, if too many subgoals are used
         :param global_plan: (np.ndarray): vector containing poses on global plan
+        :param robot_close_to_goal (bool): Boolean to signalize that robot is close to goal
         :param rule: (int): The rule from which the method is called
         """
+
+        scaling_factor = 1
+        estimatedSubgoalAmount = math.floor(len(global_plan)/100) -1
         if rule in [6]:
-            estimatedSubgoalAmount = 100000 
-        else:
-            estimatedSubgoalAmount = math.floor(len(global_plan)/100) -1
+            if estimatedSubgoalAmount == -1:
+                estimatedSubgoalAmount = 0
+            scaling_factor = 1 / (estimatedSubgoalAmount +1)
+            estimatedSubgoalAmount = 100000
         max_subgoal_gp_dist = 1.5 # range of the circle around ref-subgoal set in wp3_env
-        if not (subgoal.pose.position.x == last_subgoal.pose.position.x and subgoal.pose.position.y == last_subgoal.pose.position.y) and not (subgoal.pose.position.x == goal.x and subgoal.pose.position.y == goal.y):
+        if not (subgoal.pose.position.x == last_subgoal.pose.position.x and subgoal.pose.position.y == last_subgoal.pose.position.y):
             if amount_rewarded_subgoals >= estimatedSubgoalAmount:
-                self.curr_reward -= 0.5
+                self.curr_reward -= 0.5 * scaling_factor
             else:
-                subgoal_gp_dist = np.inf
-                for gp_point in global_plan:
-                    dist = ((gp_point[0] - subgoal.pose.position.x)**2 + (gp_point[1] - subgoal.pose.position.y)**2)**0.5
-                    if dist < subgoal_gp_dist:
-                        subgoal_gp_dist = dist
-                if rule in [6,8]:
-                    self.curr_reward += (1 - ((subgoal_gp_dist/max_subgoal_gp_dist) ** 0.5))
+                if subgoal.pose.position.x == goal.x and subgoal.pose.position.y == goal.y:
+                    if robot_close_to_goal:
+                        self.curr_reward += 1 * scaling_factor
+                    else:
+                        self.curr_reward -= 5 * scaling_factor
                 else:
-                    self.curr_reward += 1
-            self.info['subgoal_was_rewarded'] = True
+                    subgoal_gp_dist = np.inf
+                    for gp_point in global_plan:
+                        dist = ((gp_point[0] - subgoal.pose.position.x)**2 + (gp_point[1] - subgoal.pose.position.y)**2)**0.5
+                        if dist < subgoal_gp_dist:
+                            subgoal_gp_dist = dist
+                    if rule in [6,8]:
+                        self.curr_reward += (1 - ((subgoal_gp_dist/max_subgoal_gp_dist) ** 0.5)) * scaling_factor
+                    else:
+                        self.curr_reward += 1 * scaling_factor
+                self.info['subgoal_was_rewarded'] = True
         else:
             self.info['subgoal_was_rewarded'] = False
 
