@@ -709,11 +709,12 @@ def read_scn_file(map, ob):
     global start, goal, plt_cfg
     # find json path
     rospack = rospkg.RosPack()
-    json_path = rospack.get_path('simulator_setup')+'/scenarios/eval/'
+    json_path = '/Users/borismeinardus/catkin_ws/src/arena-rosnav/simulator_setup/scenarios/eval'
 
     for file in os.listdir(json_path):
         if file.endswith(".json") and map in file and ob in file:
             jf = file
+    jf = '/eval_real.json'
     # read file
     with open(json_path+"/"+jf, 'r') as myfile:
         data=myfile.read()
@@ -725,27 +726,27 @@ def read_scn_file(map, ob):
             data = l
     
     # get json data
-    for do in data["dynamic_obstacles"]:
-        sp   = data["dynamic_obstacles"][do]["start_pos"]
-        sp_x = sp[0]
-        sp_y = sp[1]
+    # for do in data["dynamic_obstacles"]:
+    #     sp   = data["dynamic_obstacles"][do]["start_pos"]
+    #     sp_x = sp[0]
+    #     sp_y = sp[1]
 
-        wp   = data["dynamic_obstacles"][do]["waypoints"][0]
-        wp_x = wp[0]
-        wp_y = wp[1]
+    #     wp   = data["dynamic_obstacles"][do]["waypoints"][0]
+    #     wp_x = wp[0]
+    #     wp_y = wp[1]
         
-        ep_x = sp_x + wp_x
-        ep_y = sp_y + wp_y
-        ep   = [ep_x, ep_y]
+    #     ep_x = sp_x + wp_x
+    #     ep_y = sp_y + wp_y
+    #     ep   = [ep_x, ep_y]
 
-        if plt_cfg["plot_obst"]:
-            plot_dyn_obst(sp)
-            plot_dyn_obst(ep)
-            plot_arrow(sp,wp)
+    #     if plt_cfg["plot_obst"]:
+    #         plot_dyn_obst(sp)
+    #         plot_dyn_obst(ep)
+    #         plot_arrow(sp,wp)
 
         
-    start = data["robot"]["start_pos"]
-    goal  = data["robot"]["goal_pos"]
+    # start = data["robot"]["start_pos"]
+    # goal  = data["robot"]["goal_pos"]
 
 def eval_cfg(cfg_file, filetype):
     global ax, sm, start, goal, axlim, plt_cfg, line_clr, line_stl
@@ -798,10 +799,10 @@ def eval_cfg(cfg_file, filetype):
                 legend_elements.append(gp_el)
 
 
-            if not "empty" in map and plt_cfg["plot_sm"]:
+            # if not "empty" in map and plt_cfg["plot_sm"]:
                 # offs_x = cfg[curr_figure]["map_origin"][0]
                 # offs_y = cfg[curr_figure]["map_origin"][1]
-                plt.scatter(sm[1], sm[0],s = 0.2 , c = "grey")
+                # plt.scatter(sm[1], sm[0],s = 0.2 , c = "grey")
 
             for planner in cfg[curr_figure]["planner"]:
                 # config plot param for planner

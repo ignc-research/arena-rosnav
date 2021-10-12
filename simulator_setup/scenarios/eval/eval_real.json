@@ -1,0 +1,10 @@
+{
+    "pedsim_agents": [
+        {
+        }
+    ],
+	"static_obstacles": [],
+	"dynamic_obstacles": [],
+    "map_path": "/home/borismeinardus/catkin_ws/src/arena-rosnav/simulator_setup/maps/robo_lab/map.yaml",
+    "format": "arena-tools"
+}
