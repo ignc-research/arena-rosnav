@@ -109,6 +109,9 @@ class ActorCriticPolicyVAE(ActorCriticPolicy):
                         print("Skip randomly initializing VAE Module")
                         continue
                     m.apply(partial(self.init_weights, gain=gain))
+
+        self.optimizer = self.optimizer_class(self.parameters(), lr=lr_schedule(1), **self.optimizer_kwargs)
+        
 register_policy("ActorCriticPolicyVAE",ActorCriticPolicyVAE)
 
 MODEL_REGISTRY = Registry('reinforcement learning model registry')

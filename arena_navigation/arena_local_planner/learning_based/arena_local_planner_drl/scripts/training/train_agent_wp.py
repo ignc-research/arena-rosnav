@@ -1,6 +1,7 @@
 import os
 import copy
 import argparse
+from sys import getallocatedblocks
 import time
 from argparse import ArgumentParser
 from typing import List
@@ -349,8 +350,12 @@ def main():
                     pretrained_policy_name += '.pkl'
                 pretrained_policy_path = os.path.join(os.path.dirname(__file__),'pretraining_data',pretrained_policy_name)
                 with open(pretrained_policy_path,'rb') as f:
+                    unpretrained_policy =model.policy
                     pretrained_policy = pickle.load(f)
                     model.policy = pretrained_policy
+                    # fix a mistake made long before,normally it's not necessary
+                    if unpretrained_policy.optimizer:
+                        model.policy.optimizer = unpretrained_policy.optimizer 
                     print(f"Loaded pretrained policy {pretrained_policy_name} ")
             model.learn(
                 total_timesteps=cfg.TRAINING.N_TIMESTEPS, callback=eval_callback, reset_num_timesteps=True)
