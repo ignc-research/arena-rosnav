@@ -220,11 +220,15 @@ if __name__ == '__main__':
             os.path.join(paths['model'], "best_model"), env)
         update_hyperparam_model(model, paths, params, args.n_envs)
     elif args.agent is not None:
-        if args.agent in ['AGENT_1', 'AGENT_2']:
+        if args.agent in ['AGENT_1', 'AGENT_2', 'AGENT_3', 'AGENT_4']:
             if args.agent == 'AGENT_1':
                 policy_kwargs = policy_kwargs_agent_1
             elif args.agent == 'AGENT_2':
                 policy_kwargs = policy_kwargs_agent_2
+            elif args.agent == 'AGENT_3':
+                policy_kwargs = policy_kwargs_agent_3
+            elif args.agent == 'AGENT_4':
+                policy_kwargs = policy_kwargs_agent_4
             model = PPO(
                 "CnnPolicy", env,
                 policy_kwargs=policy_kwargs,
@@ -265,13 +269,13 @@ if __name__ == '__main__':
 
     eval_cb = EvalCallback(
         eval_env=eval_env, train_env=env,
-        n_eval_episodes=eval_episodes, eval_freq=35000,
+        n_eval_episodes=eval_episodes, eval_freq=30000,
         log_path=paths['eval'], best_model_save_path=paths['model'], deterministic=True)
 
     print("Start training...")
 
     if args.n is None:
-        n_timesteps = 6000000
+        n_timesteps = 10000000
     else:
         n_timesteps = args.n
 
