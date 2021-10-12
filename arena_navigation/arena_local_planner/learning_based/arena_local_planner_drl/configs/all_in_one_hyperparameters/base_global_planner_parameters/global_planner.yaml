@@ -1,5 +1,5 @@
 reset_costmap_automatically: True
-reset_costmap_interval: 4
+reset_costmap_interval: 3
 global_planner_type: navfn/NavfnROS
 
 NavfnROS:

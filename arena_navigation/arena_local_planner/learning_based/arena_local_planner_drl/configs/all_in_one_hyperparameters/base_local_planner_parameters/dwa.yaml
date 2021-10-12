@@ -1,26 +1,29 @@
-local_planner_type: "base_local_planner/TrajectoryPlannerROS"
-local_planner_name: "global_path_following"
-min_tolerated_x_vel: 0.0 # If linear velocity is below this threshold costmap will be resetted as it assumed that the robot is stuck
+local_planner_type: "dwa_local_planner/DWAPlannerROS"
+local_planner_name: "dwa_local_planner"
+min_tolerated_x_vel: 0.07 # If linear velocity is below this threshold costmap will be resetted as it assumed that the robot is stuck
 max_time_between_resets: 1 # Max time in s between two costmap resets.
 reset_costmap_automatically: False
 reset_costmap_interval: 5  # Time between automatic costmap resets in seconds
 
-global_path_following:
-  controller_frequency: 20
-  acc_lim_x: 30
-  acc_lim_theta: 30
+dwa_local_planner:
   max_vel_x: 0.3
-  yaw_goal_tolerance: 3
-  xy_goal_tolerance: 0.2
+  min_vel_x: -0.15
+  max_vel_y: 0
+  max_vel_theta: 2.7
+  min_vel_theta: -2.7
+  acc_lim_x: 10 # No bounds
+  acc_lim_theta: 30 # No bounds
+  min_turning_radius: 0.0 # diff-drive robot (can turn on place!)
 
-# Local Costmap not needed
+  yaw_goal_tolerance: 10 # Rotation at goal is irrelevant
+
 local_costmap:
   update_frequency: 10.0
   publish_frequency: 1 # Publishing only relevant for visualization
 
   rolling_window: true
-  width: 3
-  height: 3
+  width: 7 # 2x laser scan range
+  height: 7
   resolution: 0.1
   transform_tolerance: 0.3 # allowed delay for the tf data
 
@@ -33,5 +36,12 @@ local_costmap:
     inflation_radius: 0.3 # Use low inflation radius as goals might spawn close to obstacles
     map_type: costmap
 
+    observation_sources: scan
+    scan: { data_type: LaserScan, marking: true, topic: scan, clearing: true }
+
+  inflation_layer:
+    inflation_radius: 0.3
+
   plugins:
+    - { name: inflation_layer,     type: "costmap_2d::InflationLayer" }
     - { name: obstacle_layer,      type: "costmap_2d::ObstacleLayer" }

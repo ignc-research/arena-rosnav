@@ -1,7 +1,7 @@
  {
   "models": {
-    "model_based": ["mpc_minimum_time_default.yaml"],
-    "model_based_names": ["mpc"]
+    "model_based": ["dwa.yaml"],
+    "model_based_names": ["dwa"]
   },
    "run_all_agents_each_iteration": false,
   "update_global_plan_frequency": 10,

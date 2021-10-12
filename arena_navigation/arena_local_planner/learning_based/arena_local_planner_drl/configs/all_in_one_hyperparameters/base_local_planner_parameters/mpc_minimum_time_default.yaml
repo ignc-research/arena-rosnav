@@ -16,11 +16,11 @@ mpc_local_planner:
     type: "unicycle"
     unicycle:
       max_vel_x: 0.3
-      max_vel_x_backwards: 0.0
+      max_vel_x_backwards: -0.15
       max_vel_theta: 2.7
       acc_lim_x: 0.0 # deactive bounds with zero
       dec_lim_x: 0.0 # deactive bounds with zero
-      acc_lim_theta: 0.2 # deactivate bounds with zero
+      acc_lim_theta: 0 # deactivate bounds with zero
 
   ## Footprint model for collision avoidance
   footprint_model:
@@ -99,7 +99,7 @@ mpc_local_planner:
     type: "ipopt"
     ipopt:
       iterations: 100
-      max_cpu_time: -1.0
+      max_cpu_time: 0.05
       ipopt_numeric_options:
         tol: 1e-4
       ipopt_string_options:
@@ -118,7 +118,7 @@ mpc_local_planner:
       weight_adapt_max_bounds: 500
 
 local_costmap:
-  update_frequency: 20.0
+  update_frequency: 10.0
   publish_frequency: 1 # Publishing only relevant for visualization
 
   rolling_window: true
