@@ -19,7 +19,7 @@ from tools.all_in_one_utils import Evaluator
 from tools.argsparser import parse_run_agent_args
 from tools.train_agent_utils import print_hyperparameters
 
-PRIMITIVE_AGENTS = ['simple_all_in_one', 'random', 'drl_only', 'teb_only', 'rlca_only', 'mpc_only']
+PRIMITIVE_AGENTS = ['simple_all_in_one', 'random', 'drl_only', 'teb_only', 'rlca_only', 'mpc_only', 'dwa_only']
 AVAILABLE_AGENTS = ['mixed_teb_drl4_rule06_policy2', 'simple_all_in_one']
 AGENTS = ['mixed_teb_drl4_rule06_policy2']
 max_steps_per_episode = np.inf

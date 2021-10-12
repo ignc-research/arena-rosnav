@@ -13,15 +13,19 @@ from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 from tools.all_in_one_utils import Evaluator
 from tools.train_agent_utils import check_hyperparam_format, print_hyperparameters
 
-base_Agent = 'indoor_teb_drl4_rule06_policy1'
-primitive_agents = ['rlca_only', 'teb_only', 'drl_only', 'mpc_only', 'global_path_following_only',
+base_Agent1 = 'mixed_teb_drl4_rule06_policy2'
+base_Agent2 = 'mixed_teb_drl4_rule07_policy3'
+primitive_agents = ['rlca_only', 'teb_only', 'drl_only', 'mpc_only', 'dwa_only',
                     'teb_large_min_dist_only']
-simple_all_in_one_switches = ['simple_all_in_one', 'random']
+simple_all_in_one_switches = ['simple_all_in_one', 'random', 'drl_only', 'teb_only']
 
-AGENTS = ['simple_all_in_one', 'teb_only', 'drl_only']
-eval_episodes = 100
-seed = random.randint(1, 1000)
-map_config = "indoor.json"
+AGENTS = ['drl_only']
+eval_episodes = 50
+#  seed = random.randint(1, 1000)
+seed = 2
+map_config = "indoor_obs20.json"
+
+evaluation_name = "indoor_obs20_all"
 
 
 def get_paths(AGENT: str, primitive_agent=False, is_random_agent=False):
@@ -55,11 +59,12 @@ def get_paths(AGENT: str, primitive_agent=False, is_random_agent=False):
         AGENT = "random"
     eval_numb = 0
     paths['log'] = os.path.join(rospkg.RosPack().get_path('arena_local_planner_drl'), 'evaluation_logs',
+                                evaluation_name,
                                 AGENT + "_" + str(eval_numb))
     while os.path.exists(paths['log']):
         eval_numb += 1
         paths['log'] = os.path.join(rospkg.RosPack().get_path('arena_local_planner_drl'), 'evaluation_logs',
-                                    AGENT + "_" + str(eval_numb))
+                                    evaluation_name, AGENT + "_" + str(eval_numb))
     os.makedirs(paths['log'])
 
     return paths

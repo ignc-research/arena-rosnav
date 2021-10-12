@@ -186,5 +186,5 @@ class StepProcessor:
         return self._reward_calculator.get_reward(
             self._last_obs_dict['laser_scan'], self._last_obs_dict['global_goal_robot_frame'],
             action=action_model, global_plan=self._last_obs_dict['global_plan'],
-            robot_pose=self._last_obs_dict['robot_pose'], sub_goal=self._last_obs_dict['goal_in_robot_frame'],
+            robot_pose=self._last_obs_dict['robot_pose'], sub_goal=self._last_obs_dict['goal_reward_robot_frame'],
             new_global_plan=self._last_obs_dict['new_global_plan'], scan_dynamic=self._last_obs_dict['scan_dynamic'])

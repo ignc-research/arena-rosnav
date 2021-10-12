@@ -201,7 +201,7 @@ class RewardCalculator:
         if not laser_scan.min() > self.safe_dist:
             self.last_dist_to_path = None
         scan_dynamic = kwargs['scan_dynamic']
-        if np.min(scan_dynamic) < 1.4:
+        if np.min(scan_dynamic) < 1.3:
             # case 1: Obstacle avoidance
             self._reward_safe_dist(
                 laser_scan, punishment=0.03)
@@ -210,15 +210,15 @@ class RewardCalculator:
         else:
             # case 2: global path following
             self._reward_goal_approached(kwargs['sub_goal'], kwargs['new_global_plan'], reward_factor=0.1,
-                                         penalty_factor=0.5)
+                                         penalty_factor=0.4)
             # Punish standing still
-            self._standing_still(kwargs['action'], punishment=0.005)
+            self._standing_still(kwargs['action'], punishment=0.004)
 
         # check for final rewards
         self._reward_goal_reached(
             goal_in_robot_frame, reward=3)
         self._reward_collision(
-            laser_scan, punishment=3)
+            laser_scan, punishment=5)
 
     def _reward_goal_reached(self,
                              goal_in_robot_frame=Tuple[float, float],
