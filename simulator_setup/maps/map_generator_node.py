@@ -2,6 +2,7 @@
 import random
 
 import nav_msgs.srv
+import rospkg
 import rospy
 from map_generator import *
 from nav_msgs.msg import OccupancyGrid
@@ -14,29 +15,23 @@ class MapGenerator:
         # initial value for scenario number
         self.nr = -1
 
-        # # general map parameter
-        # self.height = rospy.get_param("~map_height")
-        # self.width = rospy.get_param("~map_width")
-
-        # # indoor map parameter
-        # self.cr = rospy.get_param("~corridor_radius")
-        # self.iterations = rospy.get_param("~iterations")
-
-        # # outdoor map parameter
-        # self.obsnum = rospy.get_param("~obstacle_number")
-        # self.obsrad = rospy.get_param("~obstacle_radius")
-
         # general map parameter
-        self.height = 101
-        self.width = 101
+        self.height = 200
+        self.width = 200
+
+        self.resolution = 0.11
 
         # indoor map parameter
-        self.cr = 4
-        self.iterations = 85
+        self.corridor_radius = 9
+        self.iterations = 50
+        self.room_number = 10
+        self.room_width = 60
+        self.room_height = 50
+        self.no_overlap = True
 
         # outdoor map parameter
-        self.obsnum = 25
-        self.obsrad = 2
+        self.obstacle_number = 25
+        self.obstacle_extra_radius = 3
 
         # initialize occupancy grid
         self.occupancy_grid = OccupancyGrid()
@@ -51,6 +46,10 @@ class MapGenerator:
 
         self.mappub = rospy.Publisher("/" + self.ns + '/map', OccupancyGrid, queue_size=1)
 
+        # initialize yaml files
+        map_dir = os.path.join(rospkg.RosPack().get_path('simulator_setup'), 'maps')
+        create_yaml_files('random_map', map_dir, self.resolution, self.ns)
+
     # a bit cheating: copy OccupancyGrid meta data from map_server of initial map
     def get_occupancy_grid(self, occgrid_msg):
         self.occupancy_grid = occgrid_msg
@@ -59,10 +58,14 @@ class MapGenerator:
         map = create_random_map(
             height=self.height,
             width=self.width,
-            corridor_radius=self.cr,
+            corridor_radius=self.corridor_radius,
             iterations=self.iterations,
-            obstacle_number=self.obsnum,
-            obstacle_extra_radius=self.obsrad,
+            obstacle_number=self.obstacle_number,
+            obstacle_extra_radius=self.obstacle_extra_radius,
+            room_number=self.room_number,
+            room_width=self.room_width,
+            room_height=self.room_height,
+            no_overlap=self.no_overlap,
             map_type=self.map_type,
             indoor_prob=self.indoor_prob,
             seed=0
@@ -74,10 +77,14 @@ class MapGenerator:
         map = create_random_map(
             height=self.height,
             width=self.width,
-            corridor_radius=self.cr,
+            corridor_radius=self.corridor_radius,
             iterations=self.iterations,
-            obstacle_number=self.obsnum,
-            obstacle_extra_radius=self.obsrad,
+            obstacle_number=self.obstacle_number,
+            obstacle_extra_radius=self.obstacle_extra_radius,
+            room_number=self.room_number,
+            room_width=self.room_width,
+            room_height=self.room_height,
+            no_overlap=self.no_overlap,
             map_type=self.map_type,
             indoor_prob=self.indoor_prob,
             seed=seed

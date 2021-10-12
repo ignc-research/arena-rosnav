@@ -3,6 +3,7 @@ import os
 import random
 import subprocess
 import time
+
 import rospkg
 import rospy
 import rosservice
@@ -11,7 +12,6 @@ from rospy import ServiceException
 from task_generator.obstacles_manager import ObstaclesManager
 from task_generator.robot_manager import RobotManager
 from task_generator.tasks import *
-
 
 from simulator_setup.srv import *
 
@@ -28,11 +28,12 @@ class TaskManager:
             self.resetMap_interval = reset_map_interval
             self.current_iteration = 0
             self._request_new_map = rospy.ServiceProxy("/" + self.ns + "/new_map", GetMapWithSeed)
+            self.new_map = False
 
     def reset(self, seed):
+        self.current_iteration += 1
         if not self.run_scenario:
-            self.current_iteration += 1
-            if self.current_iteration % self.resetMap_interval == 0:
+            if not self.new_map or self.current_iteration % self.resetMap_interval == 0:
                 self.current_iteration = 0
                 self._update_map(seed)
             random.seed(seed)
@@ -88,8 +89,7 @@ class TaskManager:
         arg3 = "indoor_prob:=" + str(indoor_prob)
 
         # Use subprocess to execute .launch file
-        self._global_planner_process = subprocess.Popen(["roslaunch", package, launch_file, arg1, arg2, arg3],
-                                                        stdout=subprocess.DEVNULL)
+        self._global_planner_process = subprocess.Popen(["roslaunch", package, launch_file, arg1, arg2, arg3])
 
     def _update_map(self, seed: int):
         request = GetMapWithSeedRequest(seed=seed)
@@ -97,5 +97,6 @@ class TaskManager:
             new_map = self._request_new_map(request)
             self.obstacles_manager.update_map(new_map.map)
             self.robot_manager.update_map(new_map.map)
+            self.new_map = True
         except ServiceException:
-            pass
+            self.new_map = False

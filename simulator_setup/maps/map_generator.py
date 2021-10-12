@@ -1,23 +1,22 @@
 import os
+import random
 
-import matplotlib.pyplot as plt
 import numpy as np
 import yaml
 from PIL import Image
-from matplotlib.ticker import FixedLocator
 
 
-def create_yaml_files(map_name, dir_path, ns: str):
+def create_yaml_files(map_name, dir_path, resolution, ns: str):
     empty_yaml = {
         "image": "{1}_{0}.png".format("empty_map", ns),
-        "resolution": 0.20,
+        "resolution": resolution,
         "origin": [0.0, 0.0, 0.0],  # [-x,-y,0.0]
         "negate": 0,
         "occupied_thresh": 0.65,
         "free_thresh": 0.196}
     map_yaml = {
         "image": "{1}_{0}.png".format(map_name, ns),
-        "resolution": 0.20,
+        "resolution": resolution,
         "origin": [0.0, 0.0, 0.0],  # [-x,-y,0.0]
         "negate": 0,
         "occupied_thresh": 0.65,
@@ -51,42 +50,27 @@ def create_yaml_files(map_name, dir_path, ns: str):
                   default_flow_style=None)  # 2nd part must be with default_flow_style=None
 
 
-def make_image_for_human(map, map_name):  # create human-aestethic PNG file from occupancy map (1:occupied, 0:free)
-    height = map.shape[0]
-    width = map.shape[1]
-    fig, ax = plt.subplots(figsize=(5, 5))
-    ax.imshow(map, cmap='binary',
-              interpolation='none')  # heatmap, interpolation "none" image scaling big->small, "nearest" small->big
-    plt.axis("on")
-    ax.axes.get_xaxis().set_visible(True)
-    ax.axes.get_yaxis().set_visible(True)
-    ax.set_xticks(range(0, width, 10))
-    ax.set_xticklabels(range(0, width, 10))
-    ax.set_yticks(range(0, height, 10))
-    ax.set_yticklabels(range(0, height, 10))
-    ax.xaxis.set_minor_locator(FixedLocator(range(0, width, 1)))
-    ax.yaxis.set_minor_locator(FixedLocator(range(0, height, 1)))
-    plt.grid("on", which="both", color="black")
-    plt.savefig("{0}/{0}_human.png".format(map_name), bbox_inches='tight')
-
-
-def make_image(map, ns: str):  # create PNG file from occupancy map (1:occupied, 0:free) and
-    # now = datetime.datetime.now()
+def make_image(map, ns: str):  # create PNG file from occupancy map (1:occupied, 0:free) and the necessary yaml files
     img = Image.fromarray(((map - 1) ** 2 * 255).astype('uint8'))  # monochromatic image
     imgrgb = img.convert('RGB')
-    # map_name = "map_{}".format(now.strftime("%Y_%m_%d_%H_%M_%S")) # create mapname from current datetime
     map_name = "random_map"
-    dir_path = os.path.dirname(
-        os.path.realpath(__file__))  # get path for current file, does not work if os.chdir() was used
+    dir_path = os.path.dirname(os.path.realpath(
+        __file__))  # get path for current file, does not work if os.chdir() was used, NOTE: change directory if needed
     try:
-        os.mkdir(dir_path + "/" + map_name)  # create directory based on mapname
+        os.mkdir(dir_path + "/" + map_name)  # create directory based on mapname where this script is located
     except:
         pass
     imgrgb.save(dir_path + "/{0}/{1}_{0}.png".format(map_name, ns))  # save map in map directory
-    create_yaml_files(map_name, dir_path, ns)  # create corresponding yaml files
-    # create empty map with same size as map
+
     create_empty_map(map.shape[0], map.shape[1], map_name, dir_path, ns)
-    # make_image_for_human(map,map_name) # create human friendly map png
+
+
+def create_empty_map(height, width, map_name, dir_path, ns: str):
+    map = np.tile(1, [height, width])
+    map[slice(1, height - 1), slice(1, width - 1)] = 0
+    img = Image.fromarray(((map - 1) ** 2 * 255).astype('uint8'))  # monochromatic image
+    imgrgb = img.convert('RGB')
+    imgrgb.save(dir_path + "/{0}/{2}_{1}.png".format(map_name, "empty_map", ns))  # save map in map directory
 
 
 def initialize_map(height, width,
@@ -131,7 +115,7 @@ def get_constellation(node1, node2):
     # there are two relevant constellations for the 2 nodes, which must be considered when creating the horizontal and vertical path
     # 1: lower left and upper right
     # 2: upper left and lower right
-    # each of the 2 constellation have 2 permutations which must be considered as well    
+    # each of the 2 constellation have 2 permutations which must be considered as well
     constellation1 = {
         "permutation1": node1[0] > node2[0] and node1[1] < node2[1],  # x1>x2 and y1<y2
         "permutation2": node1[0] < node2[0] and node1[1] > node2[1]}  # x1<x2 and y1>y2
@@ -173,7 +157,81 @@ def create_path(node1, node2, corridor_radius, map):
                                                                                 y1 + corridor_radius + 1)] = 0  # vertical path
 
 
-def create_indoor_map(height, width, corridor_radius, iterations):
+def create_rooms(map, tree, room_number, room_width, room_height, no_overlap):
+    rooms_created = 0
+    rooms_list = []
+    room_vertical_radius = room_width // 2
+    room_horizontal_radius = room_height // 2
+    distance = 2 * (room_vertical_radius ** 2 + room_horizontal_radius ** 2) ** 0.5
+    for room in range(1, room_number + 1):
+        if rooms_created == room_number:
+            break
+        for i, node in enumerate(random.sample(tree, len(tree))):
+            x1 = node[0] - room_horizontal_radius
+            x2 = node[0] + room_horizontal_radius
+            y1 = node[1] - room_vertical_radius
+            y2 = node[1] + room_vertical_radius
+
+            if x1 < 0 or x2 > map.shape[1] or y1 < 0 or y2 > map.shape[0]:  # if room is out of map
+                if (i == len(tree) - 1) and (room > rooms_created):
+                    print("No valid position for room " + str(room) + " found.")
+                continue
+
+            if rooms_created == room_number:
+                break
+            if no_overlap:
+                if len(rooms_list) == 0:
+                    try:
+                        map[x1, y1]
+                        map[x1, y2]
+                        map[x2, y1]
+                        map[x2, y2]
+                        map[slice(x1, x2), slice(y1, y2)] = 0
+                        rooms_created += 1
+                        rooms_list.append(node)
+                        print("Room " + str(room) + " created at position " + str(node[0]) + "," + str(node[1]))
+                        break
+                    except:
+                        pass
+                else:
+                    for room_node in rooms_list:
+                        collision = False
+                        if np.linalg.norm(np.array(node) - np.array(room_node)) < distance:
+                            if (i == len(tree) - 1) and (room > rooms_created):
+                                print("No valid position for room " + str(room) + " found.")
+                            collision = True
+                            break
+                    if collision:
+                        continue
+                    try:
+                        map[x1, y1]
+                        map[x1, y2]
+                        map[x2, y1]
+                        map[x2, y2]
+                        map[slice(x1, x2), slice(y1, y2)] = 0
+                        rooms_created += 1
+                        rooms_list.append(node)
+                        print("Room " + str(room) + " created at position " + str(node[0]) + "," + str(node[1]))
+                        break
+                    except:
+                        pass
+
+            else:
+                try:
+                    map[x1, y1]
+                    map[x1, y2]
+                    map[x2, y1]
+                    map[x2, y2]
+                    map[slice(x1, x2), slice(y1, y2)] = 0
+                    rooms_created += 1
+                    rooms_list.append(node)
+                    print("Room " + str(room) + " created at position " + str(node[0]) + "," + str(node[1]))
+                    break
+                except:
+                    pass
+
+
+def create_indoor_map(height, width, corridor_radius, iterations, room_number, room_width, room_height, no_overlap):
     tree = []  # initialize empty tree
     map = initialize_map(height, width)
     insert_root_node(map, tree)
@@ -183,10 +241,11 @@ def create_indoor_map(height, width, corridor_radius, iterations):
                                          tree)  # nearest node must be found before inserting the new node into the tree, else nearest node will be itself
         insert_new_node(random_position, tree, map)
         create_path(random_position, nearest_node, corridor_radius, map)
+    create_rooms(map, tree, room_number, room_width, room_height, no_overlap)
     return map
 
 
-def create_outdoor_map(height, width, obstacle_number, obstacle_extra_radius):
+def create_outdoor_map(height, width, obstacle_number, obstacle_extra_radius, room_number, room_width, room_height):
     map = initialize_map(height, width, type="outdoor")
     for i in range(obstacle_number):
         random_position = sample(map, obstacle_extra_radius)
@@ -196,9 +255,10 @@ def create_outdoor_map(height, width, obstacle_number, obstacle_extra_radius):
     return map
 
 
-def create_random_map(height, width, corridor_radius, iterations, obstacle_number, obstacle_extra_radius,
-                      map_type: str, indoor_prob: float, seed: int):
+def create_random_map(height, width, corridor_radius, iterations, obstacle_number, obstacle_extra_radius, room_number,
+                      room_width, room_height, no_overlap, map_type: str, indoor_prob: float, seed: int):
     np.random.seed(seed)
+    random.seed(seed)
     if map_type == "mixed":
         if np.random.random() <= indoor_prob:
             map_type = "indoor"
@@ -206,19 +266,42 @@ def create_random_map(height, width, corridor_radius, iterations, obstacle_numbe
             map_type = "outdoor"
 
     if map_type == "indoor":
-        map = create_indoor_map(height, width, corridor_radius, iterations)
+        map = create_indoor_map(height, width, corridor_radius, iterations, room_number, room_width, room_height,
+                                no_overlap)
         return map
     else:
-        map = create_outdoor_map(height, width, obstacle_number, obstacle_extra_radius)
+        map = create_outdoor_map(height, width, obstacle_number, obstacle_extra_radius, room_number, room_width,
+                                 room_height)
         return map
 
 
-def create_empty_map(height, width, map_name, dir_path, ns: str):
-    map = np.tile(1, [height, width])
-    map[slice(1, height - 1), slice(1, width - 1)] = 0
-    img = Image.fromarray(((map - 1) ** 2 * 255).astype('uint8'))  # monochromatic image
-    imgrgb = img.convert('RGB')
-    imgrgb.save(dir_path + "/{0}/{2}_{1}.png".format(map_name, "empty_map", ns))  # save map in map directory
+# NOTE: if you only need the functions comment the main function
+if __name__ == '__main__':
+    # map generation parameters loaded from config.yaml
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    with open(dir_path + '/config.yaml') as f:
+        config = yaml.safe_load(f)
+    height = config["height"]
+    width = config["width"]
+    resolution = config["resolution"]
+    corridor_radius = config["corridor_radius"]
+    iterations = config["iterations"]
+    room_number = config["room_number"]
+    room_width = config["room_width"]
+    room_height = config["room_height"]
+    no_overlap = config["no_overlap"]
+    obstacle_number = config["obstacle_number"]
+    obstacle_extra_radius = config["obstacle_extra_radius"]
+    maptype = config["maptype"]
+    map_name = config["map_name"]
 
-# if __name__ == '__main__':
-#     make_image(create_empty_map(101,101))
+    # create outdoor map
+    if maptype == "outdoor":
+        outdoor_map = create_outdoor_map(height, width, obstacle_number, obstacle_extra_radius)
+        make_image(outdoor_map, maptype, map_name, resolution)
+
+    # create indoor map
+    if maptype == "indoor":
+        indoor_map = create_indoor_map(height, width, corridor_radius, iterations, room_number, room_width, room_height,
+                                       no_overlap)
+        make_image(indoor_map, maptype, map_name, resolution)

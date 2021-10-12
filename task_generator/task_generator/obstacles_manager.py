@@ -65,7 +65,7 @@ class ObstaclesManager:
 
         self.map = new_map
         # a tuple stores the indices of the non-occupied spaces. format ((y,....),(x,...)
-        self._free_space_indices = generate_freespace_indices(self.map,  inflation_radius=4)
+        self._free_space_indices = generate_freespace_indices(self.map,  inflation_radius=6)
 
         return is_new_map
 

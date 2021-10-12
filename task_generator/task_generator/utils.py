@@ -4,7 +4,7 @@ from nav_msgs.msg import OccupancyGrid
 import random
 
 
-def generate_freespace_indices(map_: OccupancyGrid, inflation_radius: int = 6):
+def generate_freespace_indices(map_: OccupancyGrid, inflation_radius: int = 5):
     """generate the indices(represented in a tuple) of the freesapce based on the map
 
     Returns:
