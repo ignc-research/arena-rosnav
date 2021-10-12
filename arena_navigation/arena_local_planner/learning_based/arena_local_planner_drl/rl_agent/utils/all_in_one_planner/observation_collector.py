@@ -76,6 +76,7 @@ class ObservationCollectorAllInOne:
         self._goal = Pose2D()
         self._goal3D = Pose()
         self._subgoal = Pose2D()
+        self._subgoal_reward = Pose2D()
         self._old_subgoal = Pose2D()
         self._globalplan = np.array([])
         self._globalplan_raw = nav_msgs.msg.Path()
@@ -85,11 +86,10 @@ class ObservationCollectorAllInOne:
         # train mode?
         self._is_train_mode = rospy.get_param("/train_mode")
 
-        # TODO make this a parameter
-        if self._is_train_mode:
-            self._planning_horizon = 4.5
-        else:
-            self._planning_horizon = 3.5
+        # TODO make this a parameter --> Also dependant on map resolution (?)
+        self._planning_horizon = 5.5
+
+        self._reward_subgoal_horizon = 2
 
         # synchronization parameters
         self._first_sync_obs = True  # whether to return first sync'd obs or most recent
@@ -181,7 +181,9 @@ class ObservationCollectorAllInOne:
                 self._make_new_global_plan(self._robot_pose)
                 self._new_global_plan = True
             # extract subgoal from new global plan
-            self._subgoal = self._extract_subgoal(self._globalplan)
+            self._subgoal = self._extract_subgoal(self._globalplan, self._planning_horizon)
+            self._subgoal_reward = self._extract_subgoal(self._globalplan, self._reward_subgoal_horizon)
+
             self._visualize_subgoal(self._subgoal)
 
         rho_local, theta_local = ObservationCollectorAllInOne._get_goal_pose_in_robot_frame(
@@ -193,6 +195,9 @@ class ObservationCollectorAllInOne:
         local_goal_x, local_goal_y = ObservationCollectorAllInOne._get_local_goal_in_robot_frame_xy(
             self._subgoal, self._robot_pose)
 
+        subgoal_reward_robot_frame_x, subgoal_reward_robot_frame_y = ObservationCollectorAllInOne._get_local_goal_in_robot_frame_xy(
+            self._subgoal_reward, self._robot_pose)
+
         merged_obs = np.float32(
             np.hstack(
                 [scan_static, dynamic_scan, np.array([rho_global, theta_global]), np.array([rho_local, theta_local])]))
@@ -200,6 +205,7 @@ class ObservationCollectorAllInOne:
         obs_dict = {'laser_scan': scan,
                     'scan_dynamic': dynamic_scan,
                     'goal_map_frame': self._subgoal,
+                    'goal_reward_robot_frame': [subgoal_reward_robot_frame_x, subgoal_reward_robot_frame_y],
                     'goal_in_robot_frame': [rho_local, theta_local],
                     'goal_in_robot_frame_xy': [local_goal_x, local_goal_y],
                     'global_plan': self._globalplan,
@@ -481,7 +487,7 @@ class ObservationCollectorAllInOne:
 
         self._subgoal_visualizer.publish(subgoal_msg)
 
-    def _extract_subgoal(self, global_plan) -> Pose2D:
+    def _extract_subgoal(self, global_plan, lookahead_dist: float) -> Pose2D:
         # extract subgoal by getting point on global path with @_planning_horizon distance
 
         if global_plan.size == 0:
@@ -493,12 +499,12 @@ class ObservationCollectorAllInOne:
         if global_plan.size <= 2:
             return Pose2D(end_xy[0], end_xy[1], 0)
 
-        if np.linalg.norm(start_xy - end_xy) < self._planning_horizon:
+        if np.linalg.norm(start_xy - end_xy) < lookahead_dist:
             return Pose2D(end_xy[0], end_xy[1], 0)
 
         i = 1
         next_pose_xy = global_plan[i]
-        while np.linalg.norm(start_xy - next_pose_xy) < self._planning_horizon and i < global_plan.size - 1:
+        while np.linalg.norm(start_xy - next_pose_xy) < lookahead_dist and i < global_plan.size - 1:
             i += 1
             next_pose_xy = global_plan[i]
 
