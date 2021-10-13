@@ -162,6 +162,7 @@ class WPEnvMapFrame3(gym.Env):
         stage_dynamic_obstacle,
         num_poses_global_path,
         is_pretrain_mode_on: bool = False,
+        terminate_on_timeout:bool = True
     ):
         """Default env
         Flatland yaml node check the entries in the yaml file, therefore other robot related parameters cound only be saved in an other file.
@@ -220,7 +221,7 @@ class WPEnvMapFrame3(gym.Env):
         rospy.set_param("/laser_num_beams", self._laser_num_beams)
         self._robot_waypoint_min_dist = robot_waypoint_min_dist
         self._robot_obstacle_min_dist = self._robot_radius
-
+        self._terminate_on_timeout = terminate_on_timeout
         if self._is_pretrain_mode_on:
             self.expert_action_collector = ExpertActionCollector(self)
 
@@ -283,6 +284,7 @@ class WPEnvMapFrame3(gym.Env):
         )
         max_steps_per_episode = cfg.TRAINING.MAX_STEPS_PER_EPISODE
         stage_dynamic_obstacle = cfg.EVAL.CURRICULUM.STAGE_DYNAMIC_OBSTACLE
+        terminate_on_timeout = cfg.TRAINING.TERMINATE_ON_TIMEOUT
         if "is_pretrain_mode_on" in kwargs:
             is_pretrain_mode_on = kwargs["is_pretrain_mode_on"]
         else:
@@ -304,6 +306,7 @@ class WPEnvMapFrame3(gym.Env):
             stage_dynamic_obstacle=stage_dynamic_obstacle,
             is_pretrain_mode_on=is_pretrain_mode_on,
             num_poses_global_path=num_poses_global_path,
+            terminate_on_timeout = terminate_on_timeout,
         )
 
     def setup_by_configuration(
@@ -549,11 +552,13 @@ class WPEnvMapFrame3(gym.Env):
             ):
                 # DEBUG
                 info["event"] = "Timeout"
-                # done = False
-                # info["done"] = False
-                done = True
-                info["done"] = True
-                self.reward_calculator.save_info_on_episode_end()
+                if self._terminate_on_timeout:     
+                    done = True
+                    info["done"] = True
+                    self.reward_calculator.save_info_on_episode_end()
+                else:
+                    done = False
+                    info["done"] = False
                 info["is_success"] = False
             elif (
                 self.observation_collector.important_event

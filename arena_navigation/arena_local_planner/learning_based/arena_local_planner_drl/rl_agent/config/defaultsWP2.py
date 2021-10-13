@@ -98,7 +98,7 @@ _C.TRAINING.N_TIMESTEPS = int(4e6)
 _C.TRAINING.ROBOT_START_POS_GOAL_POS_MIN_DIST = 4
 # MAX_STEPS_PER_EPISODE*lookahead_dist == traj dist
 _C.TRAINING.MAX_STEPS_PER_EPISODE = 300
-
+_C.TRAINING.TERMINATE_ON_TIMEOUT = True
 # parameters meaning can be found here
 # https://stable-baselines3.readthedocs.io/en/master/guide/callbacks.html?highlight=EvalCallback#stable_baselines3.common.callbacks.EvalCallback
 _C.EVAL = CN()
@@ -130,12 +130,12 @@ _C.MODEL.BATCH_SIZE = 16
 # stablebaseline requires that
 _C.MODEL.N_STEPS = 2**10 // _C.MODEL.BATCH_SIZE * _C.MODEL.BATCH_SIZE
 _C.MODEL.N_EPOCHS = 7
-_C.MODEL.GAMMA = 0.9
+_C.MODEL.GAMMA = 0.92
 _C.MODEL.GAE_LAMBDA = 0.95
 _C.MODEL.CLIP_RANGE = 0.22
 # this string will be treated as a callable object. we use this to schedule the the clip range
 # _C.MODEL.CLIP_RANGE = f"res = 1-int(n_step/{_C.TRAINING.N_TIMESTEPS}*10)/10"
 _C.MODEL.MAX_GRAD_NORM = 0.5
-_C.MODEL.ENT_COEF = 0.01
-_C.MODEL.VF_COEF = 0.5
+_C.MODEL.ENT_COEF = 0.005
+_C.MODEL.VF_COEF = 0.22
 
