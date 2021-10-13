@@ -225,5 +225,29 @@ Eventually find the error in the pretraining script. it works now.
 #### Training
 ##### Attension based
 1.`roslaunch arena_bringup start_training_waypoint.launch num_envs:=6 pretrain_mode:=false local_planner:=drl env_start_idx:=1 map_folder_name:=outdoor ns_prefix:=sim_lei_outdoor`
-2.`python train_agent_wp.py --pretrained_policy=WPEnvMapFrame3/attension_based_pretrain_policy_100.pkl --ns_prefix=sim_lei_outdoor TRAINING.MAX_STEPS_PER_EPISODE 800  EVAL.CURRICULUM.STAGE_DYNAMIC_OBSTACLE '[17,20,23]' NET_ARCH.FEATURE_EXTRACTOR.NAME "CNN_LaserVAE_Obstalcle_GlobalPlan_Attention"  EVAL.CURRICULUM.THRESHOLD_RANGE '[0.75, 0.85]' INPUT.NORM False ENV.NAME "WPEnvMapFrame3" WAYPOINT_GENERATOR.IS_ACTION_SPACE_DISCRETE True NET_ARCH.FEATURE_EXTRACTOR.FEATURES_DIM 96 WAYPOINT_GENERATOR.GOAL_RADIUS 1.5`
+2.`python train_agent_wp.py --pretrained_policy=WPEnvMapFrame3/attension_based_pretrain_policy_100.pkl --ns_prefix=sim_lei_outdoor TRAINING.MAX_STEPS_PER_EPISODE 400  EVAL.CURRICULUM.STAGE_DYNAMIC_OBSTACLE '[17,20,23]' NET_ARCH.FEATURE_EXTRACTOR.NAME "CNN_LaserVAE_Obstalcle_GlobalPlan_Attention"  EVAL.CURRICULUM.THRESHOLD_RANGE '[0.75, 0.85]' INPUT.NORM False ENV.NAME "WPEnvMapFrame3" WAYPOINT_GENERATOR.IS_ACTION_SPACE_DISCRETE True NET_ARCH.FEATURE_EXTRACTOR.FEATURES_DIM 96 WAYPOINT_GENERATOR.GOAL_RADIUS 1.5`
 
+### 2021.10.13
+#### local training
+1. `roslaunch arena_bringup start_training_waypoint.launch num_envs:=8 pretrain_mode:=false local_planner:=drl env_start_idx:=1 map_folder_name:=outdoor ns_prefix:=sim_lei_outdoor`
+2. `python train_agent_wp.py --pretrained_policy=WPEnvMapFrame3/attension_based_pretrain_policy_40.pkl --ns_prefix=sim_lei_outdoor TRAINING.MAX_STEPS_PER_EPISODE 400  EVAL.CURRICULUM.STAGE_DYNAMIC_OBSTACLE '[17,20,23]' NET_ARCH.FEATURE_EXTRACTOR.NAME "CNN_LaserVAE_Obstalcle_GlobalPlan_Attention"  EVAL.CURRICULUM.THRESHOLD_RANGE '[0.75, 0.85]' INPUT.NORM False ENV.NAME "WPEnvMapFrame3" WAYPOINT_GENERATOR.IS_ACTION_SPACE_DISCRETE True NET_ARCH.FEATURE_EXTRACTOR.FEATURES_DIM 96 WAYPOINT_GENERATOR.GOAL_RADIUS 1.5` 
+##### Results
+1. directly terminating the training when the event "TIMEOUT" or "COLLISION" is maybe not good idea, so we need to change this behaviour and adjust the reward
+2. eval frequenz should reduce a bit
+
+# TODO
+ - [x] check training results on the server which use *20.pkl at 12:30 pm, if it has similar results, we need adjust api
+ to enable customize the behaviour of "TIMEOUT" or "COLLISION" (terminate or continue with a relaive higher negative reward,especially collision.
+
+##### Changes
+1. made a new map *outdoor2* which is basically rotated from the orignal outdoor map -> test indicate the pretraining learns shortcut which make the robot not simply follow the global path, but considerd the points much far away, lets see how RL merge this desired behaviour and local info together-> pay more attention on local environment
+2.  added new setting `TRAINING.Teminate_ON_TIMEOUT = True`, we want to test what would happen if we set it to False
+
+### 2021.10.14
+one with attention one without
+##### local training
+1. `roslaunch arena_bringup start_training_waypoint.launch num_envs:=8 pretrain_mode:=false local_planner:=drl env_start_idx:=1 map_folder_name:=outdoor2 ns_prefix:=sim_lei_outdoor`
+2. `python train_agent_wp.py --pretrained_policy=WPEnvMapFrame3/attension_based_pretrain_policy_20.pkl --ns_prefix=sim_lei_outdoor TRAINING.MAX_STEPS_PER_EPISODE 400  EVAL.CURRICULUM.STAGE_DYNAMIC_OBSTACLE '[17,20,23]' NET_ARCH.FEATURE_EXTRACTOR.NAME "CNN_LaserVAE_Obstalcle_GlobalPlan_Attention"  EVAL.CURRICULUM.THRESHOLD_RANGE '[0.75, 0.85]' INPUT.NORM False ENV.NAME "WPEnvMapFrame3" WAYPOINT_GENERATOR.IS_ACTION_SPACE_DISCRETE True NET_ARCH.FEATURE_EXTRACTOR.FEATURES_DIM 96 WAYPOINT_GENERATOR.GOAL_RADIUS 1.5 TRAINING.TERMINATE_ON_TIMEOUT False ` 
+##### server training
+1. `roslaunch arena_bringup start_training_waypoint.launch num_envs:=11 pretrain_mode:=false local_planner:=drl env_start_idx:=1 map_folder_name:=outdoor2 ns_prefix:=sim_lei_outdoor`
+2. `python train_agent_wp.py --pretrained_policy=WPEnvMapFrame3/normal_pretrain_policy_20.pkl --ns_prefix=sim_lei_outdoor TRAINING.MAX_STEPS_PER_EPISODE 400  EVAL.CURRICULUM.STAGE_DYNAMIC_OBSTACLE '[17,20,23]' NET_ARCH.FEATURE_EXTRACTOR.NAME "CNN_LaserVAE_Obstalcle_GlobalPlan"  EVAL.CURRICULUM.THRESHOLD_RANGE '[0.75, 0.85]' INPUT.NORM False ENV.NAME "WPEnvMapFrame3" WAYPOINT_GENERATOR.IS_ACTION_SPACE_DISCRETE True NET_ARCH.FEATURE_EXTRACTOR.FEATURES_DIM 96 WAYPOINT_GENERATOR.GOAL_RADIUS 1.5 TRAINING.TERMINATE_ON_TIMEOUT False ` 
