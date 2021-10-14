@@ -115,6 +115,8 @@ class wp3Env(gym.Env):
         self._curr_goal = Pose2D()
         self._robot_close_to_goal = False
         self._suggested_action = Pose2D()
+        #self._goal_action_count = 0
+        #self._post_action_count = False
 
         # reward calculator
         if safe_dist is None:
@@ -328,16 +330,14 @@ class wp3Env(gym.Env):
             dist_rg = np.linalg.norm(dist_robot_goal)            
             #todo consider the distance to global path when choosing next optimal waypoint
             #send a goal message (posestamped) as action, remeber to normalize the quaternions (put orientationw as 1) and set the frame id of the goal to "map"! 
-            if (False):#dist_robot_goal[0] < 2:
-                pass
-                #if not (self._action_msg.pose.position.x == self._globalGoal.x and self._action_msg.pose.position.y == self._globalGoal.y):
-                    #self._action_msg.pose.position.x = self._globalGoal.x 
-                    #self._action_msg.pose.position.y = self._globalGoal.y 
-                    #self._action_msg.pose.orientation.w = 1
-                    #self.agent_action_pub.publish(self._action_msg)
-                    #self._stop_waypoint_calc = True
+            if dist_robot_goal[0] < 2:
+                if not (self._action_msg.pose.position.x == self._globalGoal.x and self._action_msg.pose.position.y == self._globalGoal.y):
+                    self._action_msg.pose.position.x = self._globalGoal.x 
+                    self._action_msg.pose.position.y = self._globalGoal.y 
+                    self._action_msg.pose.orientation.w = 1
+                    self.agent_action_pub.publish(self._action_msg)
                     #print("subgoal published #3 at",self._action_msg.pose.position.x,self._action_msg.pose.position.y)
-                    #self._action_count += 1
+                    self._action_count += 1
             else:
                 q = self._robot_pose.pose.orientation
                 robot_angle = np.arctan2(2.0*(q.w*q.z + q.x*q.y), 1-2*(q.y*q.y+q.z*q.z))
@@ -393,6 +393,9 @@ class wp3Env(gym.Env):
         min_dist = np.inf
         #print(self._circle)
         while(True):
+            #in case the global plan is recalculated, start from the beginning
+            if curr_gp_point > len(self._globalPlanArray):
+                curr_gp_point = 0
             #print("GP:", self._globalPlanArray[curr_gp_point], "\ncircle: ",curr_circle_point)
             dist = ((self._globalPlanArray[curr_gp_point][0] - curr_circle_point[0])**2 + (self._globalPlanArray[curr_gp_point][1] - curr_circle_point[1])**2)**0.5
             if dist < min_dist:
@@ -446,6 +449,13 @@ class wp3Env(gym.Env):
         if self._is_action_space_discrete:
             action = self._translate_disc_action(action)
         self._pub_action(action)
+        ###DEBUG###
+        #if action == 0.5:
+        #    self._goal_action_count += 1
+        #    self._post_action_count = True
+        #if self._post_action_count:
+        #    print(self._goal_action_count)
+        #    self._post_action_count = False
         #test what would happen, if robot always uses suggested action
         #self._pub_action(np.array([self._suggested_action]))
         self._globalPlanArray = ObservationCollector.process_global_plan_msg(self._globalPlan)

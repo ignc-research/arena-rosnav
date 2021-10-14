@@ -143,7 +143,7 @@ class ObservationCollector():
         rho, theta = ObservationCollector._get_goal_pose_in_robot_frame(self._subgoal, self._robot_pose)
         if len(self._suggested_action) == 0:
             self._suggested_action = np.array([0.0])
-        print(self._suggested_action)
+        #print(self._suggested_action)
         merged_obs = np.hstack([scan, np.array([rho, theta]),np.array([self._globalGoal.x,self._globalGoal.y]),self._suggested_action])
         #merged_obs = np.hstack([scan, np.array([rho, theta])])
 
