@@ -22,11 +22,11 @@ class MapGenerator:
         self.resolution = 0.11
 
         # indoor map parameter
-        self.corridor_radius = 9
+        self.corridor_radius = 8
         self.iterations = 50
-        self.room_number = 10
-        self.room_width = 60
-        self.room_height = 50
+        self.room_number = 5
+        self.room_width = 45
+        self.room_height = 55
         self.no_overlap = True
 
         # outdoor map parameter
