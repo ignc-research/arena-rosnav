@@ -32,6 +32,7 @@ class RewardCalculator:
         self.last_goal_dist = None
         self.last_dist_to_path = None
         self.last_action = None
+        self.robot_moved = False
         self.safe_dist = safe_dist
         self.extended_eval = extended_eval
 
@@ -62,6 +63,7 @@ class RewardCalculator:
         self.last_dist_to_path = None
         self.last_action = None
         self.kdtree = None
+        self.robot_moved = False
 
         if self.extended_eval:
             self._collision_reward = 0
@@ -201,7 +203,7 @@ class RewardCalculator:
         if not laser_scan.min() > self.safe_dist:
             self.last_dist_to_path = None
         scan_dynamic = kwargs['scan_dynamic']
-        if np.min(scan_dynamic) < 1.3:
+        if np.min(scan_dynamic) < 1.4:
             # case 1: Obstacle avoidance
             self._reward_safe_dist(
                 laser_scan, punishment=0.03)
@@ -210,9 +212,9 @@ class RewardCalculator:
         else:
             # case 2: global path following
             self._reward_goal_approached(kwargs['sub_goal'], kwargs['new_global_plan'], reward_factor=0.1,
-                                         penalty_factor=0.4)
+                                         penalty_factor=0.6)
             # Punish standing still
-            self._standing_still(kwargs['action'], punishment=0.004)
+            self._standing_still(kwargs['action'], punishment=0.006)
 
         # check for final rewards
         self._reward_goal_reached(
@@ -256,20 +258,20 @@ class RewardCalculator:
         """
         if self.last_goal_dist is not None and not new_global_plan:
             # goal_in_robot_frame : [rho, theta]
+            if np.abs(self.last_goal_dist - goal_in_robot_frame[
+                0]) < 0.1:  # larger values only possible if robot was moved (resetted)
+                # higher negative weight when moving away from goal
+                if (self.last_goal_dist - goal_in_robot_frame[0]) > 0:
+                    w = reward_factor
+                else:
+                    w = penalty_factor
+                reward = w * (self.last_goal_dist - goal_in_robot_frame[0])
 
-            # higher negative weight when moving away from goal
-            # (to avoid driving unnecessary circles when train in contin. action space)
-            if (self.last_goal_dist - goal_in_robot_frame[0]) > 0:
-                w = reward_factor
-            else:
-                w = penalty_factor
-            reward = w * (self.last_goal_dist - goal_in_robot_frame[0])
+                self.curr_reward += reward
 
-            # print("reward_goal_approached:  {}".format(reward))
-            self.curr_reward += reward
+                if self.extended_eval:
+                    self.global_plan_reward += reward
 
-            if self.extended_eval:
-                self.global_plan_reward += reward
         self.last_goal_dist = goal_in_robot_frame[0]
 
     def _reward_collision(self,
@@ -420,5 +422,7 @@ class RewardCalculator:
         self.last_action = action
 
     def _standing_still(self, action, punishment):
-        if action[0] < 0.1:
+        if action[0] + 0.1 * action[1] < 0.1 and self.robot_moved:
             self.curr_reward -= punishment
+        else:
+            self.robot_moved = True

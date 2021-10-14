@@ -4,7 +4,6 @@ import gym
 import numpy as np
 import rospy
 import yaml
-from flatland_msgs.srv import StepWorld
 from gym import spaces
 from rl_agent.utils.all_in_one_planner.local_planner_manager import LocalPlannerManager
 from rl_agent.utils.all_in_one_planner.logger import Logger
@@ -13,6 +12,8 @@ from rl_agent.utils.all_in_one_planner.reward_calculator import RewardCalculator
 from rl_agent.utils.all_in_one_planner.step_processor import StepProcessor
 from rl_agent.utils.all_in_one_planner.task_manager import TaskManager
 from rl_agent.utils.all_in_one_planner.visualizer import AllInOneVisualizer
+
+from flatland_msgs.srv import StepWorld
 
 
 class AllInOneEnv(gym.Env):
@@ -108,7 +109,8 @@ class AllInOneEnv(gym.Env):
         self.reward_calculator.set_global_planner_frequency(self._global_planner_frequency)
 
         self._logger = Logger(extended_eval, evaluation, max_steps_per_episode,
-                              self._local_planner_manager.get_numb_models(), self._all_in_one_planner_frequency)
+                              self._local_planner_manager.get_numb_models(), self._all_in_one_planner_frequency,
+                              self._local_planner_manager.get_model_names())
 
         # observation collector
         self.observation_collector = ObservationCollectorAllInOne(

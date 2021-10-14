@@ -8,11 +8,12 @@ from geometry_msgs.msg import Pose2D
 class Logger:
 
     def __init__(self, extended_eval: bool, is_evaluation: bool, max_steps_per_episode: int, number_models: int,
-                 all_in_one_planner_frequency: int):
+                 all_in_one_planner_frequency: int, model_names: [str]):
         self._extended_eval = extended_eval
         self._evaluation = is_evaluation
         self._max_steps_per_episode = max_steps_per_episode
         self._number_models = number_models
+        self._model_names = model_names
 
         # for extended eval
         self._action_frequency = (1 / rospy.get_param("/robot_action_rate")) * all_in_one_planner_frequency
@@ -78,7 +79,7 @@ class Logger:
                     info['model_distribution_large_obst_dist'] = self._last_actions_switch_large_obst_dist
 
                 if self._evaluation:
-                    print("Model distribution: " + str(info['model_distribution']))
+                    print("Model distribution: " + str(info['model_distribution']) + " - " + str(self._model_names))
 
         return info, self._in_crash
 

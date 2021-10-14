@@ -220,7 +220,7 @@ if __name__ == '__main__':
             os.path.join(paths['model'], "best_model"), env)
         update_hyperparam_model(model, paths, params, args.n_envs)
     elif args.agent is not None:
-        if args.agent in ['AGENT_1', 'AGENT_2', 'AGENT_3', 'AGENT_4']:
+        if args.agent in ['AGENT_1', 'AGENT_2', 'AGENT_3', 'AGENT_4', 'AGENT_5']:
             if args.agent == 'AGENT_1':
                 policy_kwargs = policy_kwargs_agent_1
             elif args.agent == 'AGENT_2':
@@ -229,6 +229,8 @@ if __name__ == '__main__':
                 policy_kwargs = policy_kwargs_agent_3
             elif args.agent == 'AGENT_4':
                 policy_kwargs = policy_kwargs_agent_4
+            elif args.agent == 'AGENT_5':
+                policy_kwargs = policy_kwargs_agent_5
             model = PPO(
                 "CnnPolicy", env,
                 policy_kwargs=policy_kwargs,

@@ -155,5 +155,10 @@ policy_kwargs_agent_4 = dict(features_extractor_class=AGENT_2,
                              net_arch=[dict(vf=[64, 32, 32], pi=[64, 32, 32, 16])],
                              activation_fn=th.nn.ReLU)
 
+policy_kwargs_agent_5 = dict(features_extractor_class=AGENT_2,
+                             features_extractor_kwargs=dict(features_dim=64),
+                             net_arch=[dict(vf=[64, 32, 32], pi=[64, 32, 32, 16])],
+                             activation_fn=th.nn.ReLU)
+
 policy_kwargs_agent_11 = dict(net_arch=[dict(pi=[128, 64, 64, 32], vf=[64, 64, 64, 32])],
                               activation_fn=th.nn.ReLU)
