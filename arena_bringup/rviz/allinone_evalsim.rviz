@@ -15,6 +15,7 @@ Panels:
         - /Sensors1/LaserScan1
         - /LaserScan1
         - /LaserScan2
+        - /obstacles1
         - /obstacles1/static1/01
         - /obstacles1/static1/11
         - /obstacles1/static1/21
@@ -45,6 +46,11 @@ Panels:
         - /obstacles1/dynamic1/171
         - /obstacles1/dynamic1/181
         - /obstacles1/dynamic1/191
+        - /obstacles1/dynamic1/201
+        - /obstacles1/dynamic1/211
+        - /obstacles1/dynamic1/221
+        - /obstacles1/dynamic1/231
+        - /obstacles1/dynamic1/241
       Splitter Ratio: 0.5411764979362488
     Tree Height: 1156
   - Class: rviz/Selection
@@ -797,7 +803,7 @@ Visualization Manager:
               Marker Topic: /eval_sim/flatland_server/debug/model/obstacle__random_dynamic_18
               Name: 17
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -805,7 +811,7 @@ Visualization Manager:
               Marker Topic: /eval_sim/flatland_server/debug/model/obstacle__random_dynamic_19
               Name: 18
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -818,7 +824,7 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
-              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_20
+              Marker Topic: /eval_sim/flatland_server/debug/model/obstacle__random_dynamic_21
               Name: 20
               Namespaces:
                 {}
@@ -826,7 +832,7 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
-              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_21
+              Marker Topic: /eval_sim/flatland_server/debug/model/obstacle__random_dynamic_21
               Name: 21
               Namespaces:
                 {}
@@ -834,7 +840,7 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
-              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_22
+              Marker Topic: /eval_sim/flatland_server/debug/model/obstacle__random_dynamic_22
               Name: 22
               Namespaces:
                 {}
@@ -842,7 +848,7 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
-              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_23
+              Marker Topic: /eval_sim/flatland_server/debug/model/obstacle__random_dynamic_23
               Name: 23
               Namespaces:
                 {}
@@ -850,7 +856,7 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
-              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_24
+              Marker Topic: /eval_sim/flatland_server/debug/model/obstacle__random_dynamic_24
               Name: 24
               Namespaces:
                 {}
@@ -1318,6 +1324,14 @@ Visualization Manager:
         "": true
       Queue Size: 100
       Value: true
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /eval_sim/all_in_one_action_forced
+      Name: Marker
+      Namespaces:
+        "": true
+      Queue Size: 100
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 0; 0; 0
@@ -1348,7 +1362,7 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Angle: -7.8449859619140625
+      Angle: -7.849976539611816
       Class: rviz/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
@@ -1358,11 +1372,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 32.41031265258789
+      Scale: 33.27402877807617
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
-      X: 11.092154502868652
-      Y: 5.0976786613464355
+      X: 10.861687660217285
+      Y: 11.037259101867676
     Saved: ~
 Window Geometry:
   Displays:

@@ -44,7 +44,8 @@ class StepProcessor:
     def get_step_parameters(self):
         return self._run_all_agents_each_iteration, \
                self._all_in_one_planner_frequency, \
-               self._update_global_plan_frequency
+               self._update_global_plan_frequency, \
+               self._stabilize_with_hard_coding
 
     def process_step(self, action: int):
         # get action from chosen model
@@ -115,7 +116,14 @@ class StepProcessor:
 
         self._current_gym_step += 1
 
-        return action_model, self._last_obs_dict, self._last_merged_obs, reward_sum, reward_info
+        next_forced_action = -1
+        if not reward_info['is_done'] and self._stabilize_with_hard_coding:
+            dynamic_scan_min = np.min(self._last_obs_dict['scan_dynamic'])
+            if dynamic_scan_min < self._lower_stabilize_th:
+                next_forced_action = self._lower_stabilize_agent
+            if dynamic_scan_min > self._upper_stabilize_th:
+                next_forced_action = self._upper_stabilize_agent
+        return action_model, self._last_obs_dict, self._last_merged_obs, reward_sum, reward_info, next_forced_action
 
     def reset(self):
         # regenerate start position end goal position of the robot and change the obstacles accordingly
@@ -181,6 +189,23 @@ class StepProcessor:
             rospy.logwarn(
                 'Parameter \"all_in_one_planner_frequency\" not found in config file. Us edefault value of 5!')
             self._all_in_one_planner_frequency = 4
+
+        if "stabilize with hard coding" in config_data:
+            stabilize_data = config_data["stabilize with hard coding"]
+            self._stabilize_with_hard_coding = True
+            self._lower_stabilize_th = stabilize_data['lower_bound']
+            self._upper_stabilize_th = stabilize_data['upper_bound']
+            model_names = self._local_planner_manager.get_model_names()
+            if stabilize_data['lower_agent'] not in model_names:
+                rospy.logerr("Can't find " + stabilize_data['lower_agent'] + " in agent list!")
+            else:
+                self._lower_stabilize_agent = model_names.index(stabilize_data['lower_agent'])
+            if stabilize_data['lower_agent'] not in model_names:
+                rospy.logerr("Can't find " + stabilize_data['upper_agent'] + " in agent list!")
+            else:
+                self._upper_stabilize_agent = model_names.index(stabilize_data['upper_agent'])
+        else:
+            self._stabilize_with_hard_coding = False
 
     def _get_reward(self, action_model):
         return self._reward_calculator.get_reward(

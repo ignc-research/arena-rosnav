@@ -9,8 +9,13 @@ from visualization_msgs.msg import Marker
 
 class AllInOneVisualizer:
 
-    def __init__(self, evaluation: bool, model_names: [str], ns_prefix: str, visualize_every_x_iterations: int = 1,
-                 visualize_crash: bool = False):
+    def __init__(self, evaluation: bool, model_names: [str], ns_prefix: str, stabilize_with_hard_coding: bool,
+                 visualize_every_x_iterations: int = 1, visualize_crash: bool = False):
+        self._stabilize_with_hard_coding = stabilize_with_hard_coding
+        if self._stabilize_with_hard_coding:
+            self.action_forced_visualization = rospy.Publisher(f'{ns_prefix}all_in_one_action_forced', Marker,
+                                                               queue_size=1)
+
         self._evaluation = evaluation
         self._is_train_mode = rospy.get_param("/train_mode")
 
@@ -40,13 +45,15 @@ class AllInOneVisualizer:
 
         self._last_action = -1
 
-    def visualize_step(self, action: int, is_in_crash: bool, robot_pose: Pose2D):
+    def visualize_step(self, action: int, is_in_crash: bool, robot_pose: Pose2D, is_next_action_forced: bool = False):
         # visualize
         if self._current_iteration % self._visualize_every_x_iterations == 0:
             if self._last_action != action:
                 self._last_action = action
                 self._visualize_action(action)
             self._visualize_episode_actions_as_path(action, robot_pose)
+        if self._stabilize_with_hard_coding:
+            self._visualize_is_forced(is_next_action_forced)
         if self._visualize_crash and is_in_crash:
             self._visualize_collision(robot_pose)
             self._collisions += 1
@@ -155,3 +162,26 @@ class AllInOneVisualizer:
         marker.text = self._model_names[action]
 
         self.agent_visualization.publish(marker)
+
+    def _visualize_is_forced(self, is_next_action_forced: bool):
+        marker = Marker()
+        marker.header.stamp = rospy.get_rostime()
+        marker.header.frame_id = 'map'
+        marker.id = 2005
+
+        marker.type = visualization_msgs.msg.Marker.TEXT_VIEW_FACING
+        marker.action = visualization_msgs.msg.Marker.ADD
+
+        marker.color.r = 1
+        marker.color.g = 1
+        marker.color.b = 1
+        marker.color.a = 1
+
+        marker.pose.position.x = -1.5
+        marker.pose.position.y = -1.5
+
+        marker.scale.z = 1
+
+        marker.text = "Forced: " + str(is_next_action_forced)
+
+        self.action_forced_visualization.publish(marker)

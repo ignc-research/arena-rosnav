@@ -258,8 +258,8 @@ class RewardCalculator:
         """
         if self.last_goal_dist is not None and not new_global_plan:
             # goal_in_robot_frame : [rho, theta]
-            if np.abs(self.last_goal_dist - goal_in_robot_frame[
-                0]) < 0.1:  # larger values only possible if robot was moved (resetted)
+            # larger values only possible if robot was moved (resetted)
+            if np.abs(self.last_goal_dist - goal_in_robot_frame[0]) < 0.1:
                 # higher negative weight when moving away from goal
                 if (self.last_goal_dist - goal_in_robot_frame[0]) > 0:
                     w = reward_factor
@@ -424,5 +424,7 @@ class RewardCalculator:
     def _standing_still(self, action, punishment):
         if action[0] + 0.1 * action[1] < 0.1 and self.robot_moved:
             self.curr_reward -= punishment
+            if self.extended_eval:
+                self.global_plan_reward -= punishment
         else:
             self.robot_moved = True

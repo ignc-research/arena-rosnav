@@ -95,16 +95,16 @@ class AllInOneEnv(gym.Env):
 
         self.action_space = spaces.Discrete(self._local_planner_manager.get_numb_models())
 
-        # set up visualizer
-        self._visualizer = AllInOneVisualizer(self._evaluation, self._local_planner_manager.get_model_names(),
-                                              self.ns_prefix)
-
         self._step_processor = StepProcessor(self._is_train_mode, self.ns_prefix, paths['all_in_one_parameters'],
                                              self._max_steps_per_episode,
                                              self._local_planner_manager, self.reward_calculator, self._action_bounds)
 
-        self._run_all_agents_each_iteration, self._all_in_one_planner_frequency, self._global_planner_frequency = \
-            self._step_processor.get_step_parameters()
+        self._run_all_agents_each_iteration, self._all_in_one_planner_frequency, self._global_planner_frequency, \
+            self._stabilize_with_hard_coding = self._step_processor.get_step_parameters()
+
+        # set up visualizer
+        self._visualizer = AllInOneVisualizer(self._evaluation, self._local_planner_manager.get_model_names(),
+                                              self.ns_prefix, self._stabilize_with_hard_coding)
 
         self.reward_calculator.set_global_planner_frequency(self._global_planner_frequency)
 
@@ -131,18 +131,31 @@ class AllInOneEnv(gym.Env):
         rospy.loginfo("Environment " + self.ns + ": All agents are loaded - Gym environment is ready!")
 
     def step(self, action: int):
-        action_model, self._last_obs_dict, self._last_merged_obs, reward, reward_info = \
-            self._step_processor.process_step(action)
+        is_next_action_forced = True
 
-        done = reward_info['is_done']
+        while is_next_action_forced:
+            action_model, self._last_obs_dict, self._last_merged_obs, reward, reward_info, next_forced_action = \
+                self._step_processor.process_step(action)
 
-        # info
-        info, in_crash = self._logger.get_step_info(done, reward_info, self._last_obs_dict, reward, action,
-                                                    self._steps_curr_episode)
+            done = reward_info['is_done']
 
-        self._visualizer.visualize_step(action, in_crash, self._last_obs_dict['robot_pose'])
+            # if next action is forced run one more iteration instead of calling switch
+            if next_forced_action >= 0:
+                action = next_forced_action
+            else:
+                is_next_action_forced = False
 
-        self._steps_curr_episode += 1
+            # info
+            info, in_crash = self._logger.get_step_info(done, reward_info, self._last_obs_dict, reward, action,
+                                                        self._steps_curr_episode)
+
+            self._visualizer.visualize_step(action, in_crash, self._last_obs_dict['robot_pose'], is_next_action_forced)
+
+            self._steps_curr_episode += 1
+
+        # do not give reward for forced actions
+        if next_forced_action >= 0:
+            reward = 0
 
         return np.float32(self._last_merged_obs), reward, done, info
 
