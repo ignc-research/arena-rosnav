@@ -113,7 +113,7 @@ def get_paths(agent_version: str, args, all_in_one_config: str = "all_in_one_def
             os.path.join(
                 dir, 'agents'),
         'map_parameters': os.path.join(dir, 'configs', 'all_in_one_hyperparameters', 'map_parameters',
-                                       "mixed_default.json")
+                                       "indoor_obs20.json")
     }
 
     if not os.path.exists(paths['model']):
@@ -182,7 +182,7 @@ def parse_all_in_one_args():
 if __name__ == '__main__':
 
     # make unique agent version description based on @version
-    eval_episodes = 60
+    eval_episodes = 80
 
     args = parse_all_in_one_args()
 
@@ -271,13 +271,13 @@ if __name__ == '__main__':
 
     eval_cb = EvalCallback(
         eval_env=eval_env, train_env=env,
-        n_eval_episodes=eval_episodes, eval_freq=30000,
+        n_eval_episodes=eval_episodes, eval_freq=20000,
         log_path=paths['eval'], best_model_save_path=paths['model'], deterministic=True)
 
     print("Start training...")
 
     if args.n is None:
-        n_timesteps = 10000000
+        n_timesteps = 3000000
     else:
         n_timesteps = args.n
 

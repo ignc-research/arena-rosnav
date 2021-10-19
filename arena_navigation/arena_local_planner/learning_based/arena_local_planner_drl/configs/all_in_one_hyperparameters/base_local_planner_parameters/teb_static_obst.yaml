@@ -35,7 +35,7 @@ teb_local_planner:
   # Costmap converter plugin
   costmap_converter_plugin: "costmap_converter::CostmapToPolygonsDBSMCCH"
   costmap_converter_spin_thread: True
-  costmap_converter_rate: 20 # Twice the update rate of the all in one planner --> TEB should always have the new update for obstacles
+  costmap_converter_rate: 10 # Twice the update rate of the all in one planner --> TEB should always have the new update for obstacles
 
 local_costmap:
   update_frequency: 10.0

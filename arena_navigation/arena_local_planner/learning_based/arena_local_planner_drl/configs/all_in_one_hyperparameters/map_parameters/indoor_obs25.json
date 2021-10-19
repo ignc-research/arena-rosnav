@@ -1,5 +1,5 @@
 {
   "type": "indoor",
-  "numb_dynamic_obstacles": 20,
+  "numb_dynamic_obstacles": 25,
   "numb_static_obstacles": 0
 }

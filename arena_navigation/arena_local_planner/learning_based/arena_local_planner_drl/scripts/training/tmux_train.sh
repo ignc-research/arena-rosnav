@@ -9,7 +9,7 @@ split-window -h \; \
 send-keys 'workon rosnav' C-m \; \
 send-keys 'source catkin_ws/devel/setup.zsh' C-m \; \
 send-keys 'roscd arena_local_planner_drl/' C-m \; \
-send-keys "python3 scripts/training/train_all_in_one_agent.py --agent AGENT_5 --eval_log --tb --n_envs $num_envs --agent_name mixed_teb_drl4_rule07_policy5 --all_in_one_config all_in_one_default.json" C-m \; \
+send-keys "python3 scripts/training/train_all_in_one_agent.py --agent AGENT_2 --eval_log --tb --n_envs $num_envs --agent_name indoor_teb_drl4_rlca_rule07_policy2_forced0.6-3.5 --all_in_one_config all_in_one_default_with_forced_actions.json" C-m \; \
 split-window -h \; \
 send-keys 'roslaunch arena_bringup visualization_training.launch use_rviz:=true rviz_file:=allinone_train' \; \
 select-layout even-horizontal \; \

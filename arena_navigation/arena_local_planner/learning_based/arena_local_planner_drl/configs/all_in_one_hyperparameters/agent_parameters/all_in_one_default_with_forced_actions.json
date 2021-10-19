@@ -1,6 +1,6 @@
 {
   "models": {
-    "rlca": false,
+    "rlca": true,
     "drl": ["rule_04"],
     "drl_names": ["drl_4"],
     "use_drl_servers": 1,
