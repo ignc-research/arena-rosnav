@@ -24,10 +24,10 @@ class MapGenerator:
         # indoor map parameter
         self.corridor_radius = 8
         self.iterations = 50
-        self.room_number = 5
-        self.room_width = 45
-        self.room_height = 55
-        self.no_overlap = True
+        self.room_number = 4
+        self.room_width = 55
+        self.room_height = 60
+        self.no_overlap = False
 
         # outdoor map parameter
         self.obstacle_number = 25
