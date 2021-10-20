@@ -1,3 +1,4 @@
+import csv
 import json
 import os
 import random
@@ -15,17 +16,18 @@ from tools.train_agent_utils import check_hyperparam_format, print_hyperparamete
 
 base_Agent1 = 'mixed_teb_drl4_rule06_policy2'
 base_Agent2 = 'mixed_teb_drl4_rule07_policy3'
+base_Agent3 = 'mixed_teb_drl4_rule07_policy5'
 primitive_agents = ['rlca_only', 'teb_only', 'drl_only', 'mpc_only', 'dwa_only',
-                    'teb_large_min_dist_only']
+                    'teb_large_min_dist_only', 'teb_dyn_obst_only']
 simple_all_in_one_switches = ['simple_all_in_one', 'random', 'drl_only', 'teb_only']
 
-AGENTS = ['drl_only']
+AGENTS = ['drl_only', 'teb_only', 'simple_all_in_one']
 eval_episodes = 50
 #  seed = random.randint(1, 1000)
 seed = 2
-map_config = "indoor_obs20.json"
+map_config = "indoor_obs05.json"
 
-evaluation_name = "indoor_obs20_all"
+evaluation_name = "indoor_obs05_50"
 
 
 def get_paths(AGENT: str, primitive_agent=False, is_random_agent=False):
@@ -142,12 +144,12 @@ def load_hyperparameters_json(PATHS):
 if __name__ == "__main__":
 
     start = time.time()
-    while len(AGENTS) != 0:
-        AGENT = AGENTS.pop(0)
+    summary_all: [[str]] = []
+    for AGENT in AGENTS:
         print(f"START RUNNING AGENT:    {AGENT}")
 
         if AGENT == "random":
-            paths = get_paths(base_Agent, is_random_agent=True)
+            paths = get_paths('base_Agent', is_random_agent=True)
             params = load_hyperparameters_json(paths)
             print_hyperparameters(params)
             env = DummyVecEnv([make_env(paths, params)])
@@ -199,11 +201,24 @@ if __name__ == "__main__":
                 return agent.policy.evaluate_actions(x, y)[1]
 
         evaluator = Evaluator()
-        evaluator.evaluate_policy_manually(policy, action_probs, env, eval_episodes, paths['log'], params['gamma'],
-                                           paths['all_in_one_parameters'])
-
+        summary = evaluator.evaluate_policy_manually(policy, action_probs, env, eval_episodes, paths['log'],
+                                                     params['gamma'],
+                                                     paths['all_in_one_parameters'])
+        summary_all.append(summary)
         env.close()
         print("Evaluation of agent " + AGENT + " completed!")
+
+    # save summary of all runs
+    log_dir = os.path.join(rospkg.RosPack().get_path('arena_local_planner_drl'), 'evaluation_logs',
+                           evaluation_name)
+    with open(log_dir + '/evaluation_summary.csv', 'w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(
+            ["Planner", "Mean success rate", "Mean collisions", "Mean time", "Mean distance travelled", "Mean reward",
+             "Mean computation time per second simulation time",
+             "Mean computation per local planner iteration", "Mean model distribution"])
+        for i, row in enumerate(summary_all):
+            writer.writerow([AGENTS[i]] + row)
 
     time = round(time.time() - start)
     print(f"Time passed:    {time}s")

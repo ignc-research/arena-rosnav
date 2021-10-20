@@ -20,7 +20,7 @@ class Evaluator:
     def evaluate_policy_manually(self, policy: callable, action_probs_func: callable, env: VecNormalize, episodes: int,
                                  log_folder: str, gamma: float,
                                  all_in_config_file: str, log_statistics=True):
-        gamma = 0.995
+        gamma = 0.99
         rewards = np.zeros((episodes,))
         global_path_rewards = np.zeros((episodes,))
         collisions = np.zeros((episodes,))
@@ -36,6 +36,8 @@ class Evaluator:
         model_distribution_large_obst_dist = np.zeros((episodes, env.env_method("get_number_models")[0]))
 
         model_names = env.env_method('get_model_names')[0]
+
+        env.reset()
 
         # run evaluation
         for i in range(episodes):
@@ -115,7 +117,8 @@ class Evaluator:
                 file.write("Mean time: " + str(np.mean(travel_time)) + "\n")
                 file.write("Mean success rate: " + str(np.mean(is_success)) + "\n")
                 file.write("Mean computation time per second simulation time " + str(comp_times_mean_per_second) + "\n")
-                file.write("Mean computation per local planner iteration " + str(np.mean(computation_times_local_planner)) + "\n")
+                file.write("Mean computation per local planner iteration " + str(
+                    np.mean(computation_times_local_planner)) + "\n")
                 file.write("Mean model distribution: " + str(np.mean(model_distribution, axis=0)) + "\n")
                 file.write("Mean model distribution close obstacle distance: " + str(
                     np.mean(model_distribution_close_obst_dist, axis=0)) + "\n")
@@ -125,20 +128,25 @@ class Evaluator:
                     np.mean(model_distribution_large_obst_dist, axis=0)) + "\n")
                 file.write("With models: " + str(env.env_method("get_model_names")[0]))
 
+            summary_csv = [str(np.mean(is_success)), str(np.mean(collisions)), str(np.mean(travel_time)),
+                           str(np.mean(distance_travelled)), str(np.mean(rewards)),
+                           str(comp_times_mean_per_second), str(np.mean(computation_times_local_planner)),
+                           str(np.mean(model_distribution, axis=0))]
             with open(log_folder + '/evaluation_summary.csv', 'w', newline='') as file:
                 writer = csv.writer(file)
-                writer.writerow(["Mean success rate", str(np.mean(is_success))])
-                writer.writerow(["Mean collisions", str(np.mean(collisions))])
-                writer.writerow(["Mean time", str(np.mean(travel_time))])
-                writer.writerow(["Mean distance travelled", str(np.mean(distance_travelled))])
-                writer.writerow(["Mean reward",  str(np.mean(rewards))])
-                writer.writerow(["Mean computation time per second simulation time", str(comp_times_mean_per_second)])
-                writer.writerow(["Mean computation per local planner iteration", str(
-                    np.mean(computation_times_local_planner))])
-                writer.writerow(["Mean model distribution", str(np.mean(model_distribution, axis=0))])
+                writer.writerow(["Mean success rate", summary_csv[0]])
+                writer.writerow(["Mean collisions", summary_csv[1]])
+                writer.writerow(["Mean time", summary_csv[2]])
+                writer.writerow(["Mean distance travelled", summary_csv[3]])
+                writer.writerow(["Mean reward", summary_csv[4]])
+                writer.writerow(["Mean computation time per second simulation time", summary_csv[5]])
+                writer.writerow(["Mean computation per local planner iteration", summary_csv[6]])
+                writer.writerow(["Mean model distribution", summary_csv[7]])
 
             # copy config file
             copyfile(all_in_config_file, log_folder + '/all_in_one_parameters.json')
+
+            return summary_csv
 
     def visualize_action_probs(self, action_probs: [float], names: [str]):
         for i in range(action_probs.size):
