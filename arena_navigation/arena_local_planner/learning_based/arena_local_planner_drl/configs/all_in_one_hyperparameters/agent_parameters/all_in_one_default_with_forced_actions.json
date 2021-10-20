@@ -3,7 +3,7 @@
     "rlca": true,
     "drl": ["rule_04"],
     "drl_names": ["drl_4"],
-    "use_drl_servers": 1,
+    "use_drl_servers": 2,
     "model_based": [
       "teb_static_obst.yaml"
     ],
