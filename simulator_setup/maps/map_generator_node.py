@@ -27,11 +27,11 @@ class MapGenerator:
         self.room_number = 4
         self.room_width = 55
         self.room_height = 60
-        self.no_overlap = False
+        self.no_overlap = True
 
         # outdoor map parameter
         self.obstacle_number = 25
-        self.obstacle_extra_radius = 3
+        self.obstacle_extra_radius = 6
 
         # initialize occupancy grid
         self.occupancy_grid = OccupancyGrid()

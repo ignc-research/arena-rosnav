@@ -1,5 +1,6 @@
 import argparse
 import json
+import os.path
 import random
 import sys
 import time
@@ -29,12 +30,14 @@ def make_all_in_one_envs(rank: int, paths: dict, params: dict, train: bool = Tru
             drl_server_url_ind = None
 
         if train:
+            paths['map_parameters'] = os.path.join(paths['map_folder'], 'tmp', "map_" + str(rank) + ".json")
             all_in_one_env = AllInOneEnv(f"sim_{rank + 1}", paths['robot_setting'], paths['robot_as'],
                                          params['reward_fnc'],
                                          goal_radius=params['goal_radius'], paths=paths,
                                          max_steps_per_episode=params['train_max_steps_per_episode'],
                                          drl_server=drl_server_url_ind)
         else:
+            paths['map_parameters'] = os.path.join(paths['map_folder'], "mixed_default.json")
             seed = random.randint(1, 1000)
             all_in_one_env = Monitor(
                 AllInOneEnv("eval_sim", paths['robot_setting'], paths['robot_as'], params['reward_fnc'],
@@ -113,7 +116,8 @@ def get_paths(agent_version: str, args, all_in_one_config: str = "all_in_one_def
             os.path.join(
                 dir, 'agents'),
         'map_parameters': os.path.join(dir, 'configs', 'all_in_one_hyperparameters', 'map_parameters',
-                                       "indoor_obs20.json")
+                                       "map_curriculum_16envs.yaml"),
+        'map_folder': os.path.join(dir, 'configs', 'all_in_one_hyperparameters', 'map_parameters')
     }
 
     if not os.path.exists(paths['model']):
@@ -125,6 +129,18 @@ def get_paths(agent_version: str, args, all_in_one_config: str = "all_in_one_def
     else:
         paths['tb'] = None
     return paths
+
+
+def unzip_map_parameters(paths: dict, numb_envs: int):
+    if not os.path.exists(os.path.join(paths['map_folder'], 'tmp')):
+        os.makedirs(os.path.join(paths['map_folder'], 'tmp'))
+    with open(paths['map_parameters'], "r") as map_yaml:
+        map_data = yaml.safe_load(map_yaml)
+        for i in range(numb_envs):
+            env_map_data = map_data[i+1]
+            map_env_path = os.path.join(paths['map_folder'], 'tmp', "map_" + str(i) + ".json")
+            with open(map_env_path, "w") as map_json:
+                json.dump(env_map_data, map_json)
 
 
 def set_up_drl_server(all_in_one_config_path: str):
@@ -197,6 +213,8 @@ if __name__ == '__main__':
     # wait_for_nodes(n_envs=args.n_envs, timeout=10)
 
     params = initialize_hyperparameters(paths, None, n_envs=args.n_envs, config_name='all_in_one_default')
+
+    unzip_map_parameters(paths, args.n_envs)
 
     if args.load:
         paths['all_in_one_parameters'] = os.path.join(paths['model'], 'all_in_one_parameters.json')
@@ -271,13 +289,13 @@ if __name__ == '__main__':
 
     eval_cb = EvalCallback(
         eval_env=eval_env, train_env=env,
-        n_eval_episodes=eval_episodes, eval_freq=20000,
+        n_eval_episodes=eval_episodes, eval_freq=30000,
         log_path=paths['eval'], best_model_save_path=paths['model'], deterministic=True)
 
     print("Start training...")
 
     if args.n is None:
-        n_timesteps = 3000000
+        n_timesteps = 20000000
     else:
         n_timesteps = args.n
 
