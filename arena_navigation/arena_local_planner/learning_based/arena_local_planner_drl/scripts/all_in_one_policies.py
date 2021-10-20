@@ -162,3 +162,6 @@ policy_kwargs_agent_5 = dict(features_extractor_class=AGENT_2,
 
 policy_kwargs_agent_11 = dict(net_arch=[dict(pi=[128, 64, 64, 32], vf=[64, 64, 64, 32])],
                               activation_fn=th.nn.ReLU)
+
+policy_kwargs_agent_12 = dict(net_arch=[512, dict(pi=[512, 256, 128], vf=[512, 256, 128])],
+                              activation_fn=th.nn.ReLU)
