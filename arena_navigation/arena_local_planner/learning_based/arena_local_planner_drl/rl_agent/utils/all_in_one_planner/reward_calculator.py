@@ -94,6 +94,15 @@ class RewardCalculator:
     def set_global_planner_frequency(self, freq: int):
         self._global_planner_frequency = freq
 
+    def check_done(self, laser_scan, goal_in_robot_frame):
+        """
+            Only checks for final rewards. Can be used to calculate termination status in between steps
+        """
+        self._reset()
+        self._reward_collision(laser_scan)
+        self._reward_goal_reached(goal_in_robot_frame)
+        return self.curr_reward, self.info
+
     def _cal_reward_rule_00(self,
                             laser_scan: np.ndarray,
                             goal_in_robot_frame: Tuple[float, float],
@@ -200,21 +209,19 @@ class RewardCalculator:
                             laser_scan: np.ndarray,
                             goal_in_robot_frame: Tuple[float, float],
                             *args, **kwargs):
-        if not laser_scan.min() > self.safe_dist:
-            self.last_dist_to_path = None
         scan_dynamic = kwargs['scan_dynamic']
-        if np.min(scan_dynamic) < 1.4:
+        if np.min(scan_dynamic) < 1.3:
             # case 1: Obstacle avoidance
             self._reward_safe_dist(
                 laser_scan, punishment=0.03)
-            self._reward_goal_approached(kwargs['sub_goal'], kwargs['new_global_plan'], reward_factor=0.1,
-                                         penalty_factor=0.0)
+            self._reward_goal_approached(kwargs['sub_goal'], kwargs['sub_goal_old'], kwargs['new_global_plan'],
+                                         reward_factor=0.1, penalty_factor=0.0)
         else:
             # case 2: global path following
-            self._reward_goal_approached(kwargs['sub_goal'], kwargs['new_global_plan'], reward_factor=0.1,
-                                         penalty_factor=0.6)
+            self._reward_goal_approached(kwargs['sub_goal'], kwargs['sub_goal_old'], kwargs['new_global_plan'],
+                                         reward_factor=0.1, penalty_factor=1)
             # Punish standing still
-            self._standing_still(kwargs['action'], punishment=0.006)
+            self._standing_still(kwargs['action'], punishment=0.005)
 
         # check for final rewards
         self._reward_goal_reached(
@@ -246,6 +253,7 @@ class RewardCalculator:
 
     def _reward_goal_approached(self,
                                 goal_in_robot_frame=Tuple[float, float],
+                                goal_in_robot_frame_old=Tuple[float, float],
                                 new_global_plan=False,
                                 reward_factor: float = 0.3,
                                 penalty_factor: float = 0.5):
@@ -256,21 +264,30 @@ class RewardCalculator:
         :param reward_factor (float, optional): positive factor for approaching goal. defaults to 0.3
         :param penalty_factor (float, optional): negative factor for withdrawing from goal. defaults to 0.5
         """
-        if self.last_goal_dist is not None and not new_global_plan:
+
+        if self.last_goal_dist is not None:
+            reward = 0
+            if new_global_plan:
+                dist = self.last_goal_dist - goal_in_robot_frame_old[0]
+            else:
+                dist = self.last_goal_dist - goal_in_robot_frame[0]
+
             # goal_in_robot_frame : [rho, theta]
             # larger values only possible if robot was moved (resetted)
-            if np.abs(self.last_goal_dist - goal_in_robot_frame[0]) < 0.1:
+            if np.abs(dist) < 0.35:
                 # higher negative weight when moving away from goal
-                if (self.last_goal_dist - goal_in_robot_frame[0]) > 0:
+                if dist > 0:
                     w = reward_factor
                 else:
                     w = penalty_factor
-                reward = w * (self.last_goal_dist - goal_in_robot_frame[0])
+                reward = w * dist
 
                 self.curr_reward += reward
 
                 if self.extended_eval:
                     self.global_plan_reward += reward
+
+            # print(str(reward) + " --- " + str(dist))
 
         self.last_goal_dist = goal_in_robot_frame[0]
 

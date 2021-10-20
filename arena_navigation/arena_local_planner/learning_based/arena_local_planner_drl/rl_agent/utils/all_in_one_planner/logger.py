@@ -129,10 +129,10 @@ class Logger:
         self._last_robot_pose = obs_dict['robot_pose']
 
         self._last_actions_switch[action] += 1
-        min_obst_dist = np.min(obs_dict['laser_scan'])
-        if min_obst_dist < 1.5:
+        min_obst_dist = np.min(obs_dict['scan_dynamic'])
+        if min_obst_dist < 1.2:
             self._last_actions_switch_close_obst_dist[action] += 1
-        elif min_obst_dist < 3:
+        elif min_obst_dist < 2.5:
             self._last_actions_switch_medium_obst_dist[action] += 1
         else:
             self._last_actions_switch_large_obst_dist[action] += 1

@@ -59,10 +59,11 @@ class StepProcessor:
         self._pub_action(action_model)
 
         # extract new observation
-        merged_obs = self._get_new_obs()
+        merged_obs, made_new_global_plan = self._get_new_obs()
 
-        # calculate reward
-        reward_sum, reward_info = self._get_reward(action_model)
+        # check for final
+        reward, reward_info = self._reward_calculator.check_done(self._last_obs_dict['laser_scan'],
+                                                                 self._last_obs_dict['global_goal_robot_frame'])
 
         if self._reward_calculator.extended_eval:
             comp_time = np.zeros((self._all_in_one_planner_frequency - 1,))
@@ -85,11 +86,15 @@ class StepProcessor:
                 self._pub_action(action_model)
 
                 # extract new observation
-                merged_obs = self._get_new_obs()
+                merged_obs, made_new_global_plan_tmp = self._get_new_obs()
+                made_new_global_plan = made_new_global_plan or made_new_global_plan_tmp
 
                 # calculate reward
-                reward, reward_info = self._get_reward(action_model)
-                reward_sum += reward
+                reward, reward_info = self._reward_calculator.check_done(self._last_obs_dict['laser_scan'],
+                                                                         self._last_obs_dict['global_goal_robot_frame'])
+
+        # calculate detailed reward
+        reward, reward_info = self._get_reward(action_model, made_new_global_plan)
 
         if self._run_all_agents_each_iteration:
             self._last_merged_obs[:-2 * self._local_planner_manager.get_numb_models()] = merged_obs
@@ -104,6 +109,7 @@ class StepProcessor:
             self._last_obs_dict['last_actions'] = self._last_actions
             self._last_merged_obs[:2 * self._local_planner_manager.get_numb_models()] = self._last_actions.flatten()
 
+        # Check if maximum number of iterations is reached
         if self._current_gym_step > self._max_iterations:
             reward_info['is_done'] = True
             reward_info['is_success'] = 0
@@ -123,7 +129,8 @@ class StepProcessor:
                 next_forced_action = self._lower_stabilize_agent
             if dynamic_scan_min > self._upper_stabilize_th:
                 next_forced_action = self._upper_stabilize_agent
-        return action_model, self._last_obs_dict, self._last_merged_obs, reward_sum, reward_info, next_forced_action
+
+        return action_model, self._last_obs_dict, self._last_merged_obs, reward, reward_info, next_forced_action
 
     def reset(self):
         # regenerate start position end goal position of the robot and change the obstacles accordingly
@@ -147,13 +154,11 @@ class StepProcessor:
         self._current_gym_step = 0
 
     def _get_new_obs(self):
-        if self._current_iteration % self._update_global_plan_frequency == 0:
-            merged_obs, self._last_obs_dict = self._observation_collector.get_observations(make_new_global_plan=True)
-        else:
-            merged_obs, self._last_obs_dict = self._observation_collector.get_observations(make_new_global_plan=False)
+        make_new_global_plan = self._current_iteration % self._update_global_plan_frequency == 0
+        merged_obs, self._last_obs_dict = self._observation_collector.get_observations(make_new_global_plan=make_new_global_plan)
         self._current_iteration += 1
 
-        return merged_obs
+        return merged_obs, make_new_global_plan
 
     def _pub_action(self, action):
         action_msg = Twist()
@@ -207,9 +212,10 @@ class StepProcessor:
         else:
             self._stabilize_with_hard_coding = False
 
-    def _get_reward(self, action_model):
+    def _get_reward(self, action_model, made_new_global_plan: bool):
         return self._reward_calculator.get_reward(
             self._last_obs_dict['laser_scan'], self._last_obs_dict['global_goal_robot_frame'],
             action=action_model, global_plan=self._last_obs_dict['global_plan'],
             robot_pose=self._last_obs_dict['robot_pose'], sub_goal=self._last_obs_dict['goal_reward_robot_frame'],
-            new_global_plan=self._last_obs_dict['new_global_plan'], scan_dynamic=self._last_obs_dict['scan_dynamic'])
+            sub_goal_old=self._last_obs_dict['goal_reward_robot_frame_old'],
+            new_global_plan=made_new_global_plan, scan_dynamic=self._last_obs_dict['scan_dynamic'])
