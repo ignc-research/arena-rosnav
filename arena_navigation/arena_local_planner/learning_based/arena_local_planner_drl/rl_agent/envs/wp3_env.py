@@ -321,7 +321,8 @@ class wp3Env(gym.Env):
             
         #wait for robot to reach the waypoint first
         #if self._step_counter - self._previous_time > 30:
-        if True:#dist_robot_wp[0] < 0.6: #From now on it should be possible to always set a new waypoint.
+        #TODO: after test set this if back to "if True"
+        if (True): #dist_robot_wp[0] < 0.6: #From now on it should be possible to always set a new waypoint.
             self._previous_time = self._step_counter
             _, obs_dict = self.observation_collector.get_observations()
             dist_robot_goal = obs_dict['goal_in_robot_frame']
@@ -393,8 +394,8 @@ class wp3Env(gym.Env):
         min_dist = np.inf
         #print(self._circle)
         while(True):
-            #in case the global plan is recalculated, start from the beginning
-            if curr_gp_point > len(self._globalPlanArray):
+            #in case the global plan is recalculated and therefor the point is not on the path anymore, start from the beginning
+            if curr_gp_point < 0 or curr_gp_point > len(self._globalPlanArray):
                 curr_gp_point = 0
             #print("GP:", self._globalPlanArray[curr_gp_point], "\ncircle: ",curr_circle_point)
             dist = ((self._globalPlanArray[curr_gp_point][0] - curr_circle_point[0])**2 + (self._globalPlanArray[curr_gp_point][1] - curr_circle_point[1])**2)**0.5
