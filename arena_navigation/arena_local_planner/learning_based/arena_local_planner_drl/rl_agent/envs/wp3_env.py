@@ -321,8 +321,7 @@ class wp3Env(gym.Env):
             
         #wait for robot to reach the waypoint first
         #if self._step_counter - self._previous_time > 30:
-        #TODO: after test set this if back to "if True"
-        if (True): #dist_robot_wp[0] < 0.6: #From now on it should be possible to always set a new waypoint.
+        if True: #dist_robot_wp[0] < 0.6: #From now on it should be possible to always set a new waypoint.
             self._previous_time = self._step_counter
             _, obs_dict = self.observation_collector.get_observations()
             dist_robot_goal = obs_dict['goal_in_robot_frame']
