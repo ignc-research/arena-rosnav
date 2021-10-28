@@ -56,7 +56,7 @@ class ObservationCollector():
                 num_lidar_beams,), dtype=np.float32),
             spaces.Box(low=0, high=10, shape=(1,), dtype=np.float32),
             spaces.Box(low=-np.pi, high=np.pi, shape=(1,), dtype=np.float32),
-            spaces.Box(low=-100, high=100, shape=(2,), dtype=np.float32), #global goal #not exact, TODO: find way to define exact values for low&high
+            spaces.Box(low=-100, high=100, shape=(3,), dtype=np.float32), #reference subgoal coordinate + orientation
             spaces.Box(low=-2.0, high=2.0, shape=(1,), dtype=np.float32) #optimal angle for waypoint
         ))
 
@@ -144,7 +144,7 @@ class ObservationCollector():
         if len(self._suggested_action) == 0:
             self._suggested_action = np.array([0.0])
         #print(self._suggested_action)
-        merged_obs = np.hstack([scan, np.array([rho, theta]),np.array([self._globalGoal.x,self._globalGoal.y]),self._suggested_action])
+        merged_obs = np.hstack([scan, np.array([rho, theta]),np.array([self._subgoal.x, self._subgoal.y, self._subgoal.theta]),self._suggested_action])
         #merged_obs = np.hstack([scan, np.array([rho, theta])])
 
 
