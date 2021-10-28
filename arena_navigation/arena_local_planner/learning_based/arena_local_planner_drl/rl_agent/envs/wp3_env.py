@@ -394,7 +394,7 @@ class wp3Env(gym.Env):
         #print(self._circle)
         while(True):
             #in case the global plan is recalculated and therefor the point is not on the path anymore, start from the beginning
-            if curr_gp_point < 0 or curr_gp_point > len(self._globalPlanArray):
+            if curr_gp_point < 0 or curr_gp_point >= len(self._globalPlanArray):
                 curr_gp_point = 0
             #print("GP:", self._globalPlanArray[curr_gp_point], "\ncircle: ",curr_circle_point)
             dist = ((self._globalPlanArray[curr_gp_point][0] - curr_circle_point[0])**2 + (self._globalPlanArray[curr_gp_point][1] - curr_circle_point[1])**2)**0.5
