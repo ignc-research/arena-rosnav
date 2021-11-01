@@ -74,7 +74,7 @@
   </include>
 
   <!-- start task_generator node -->
-  <arg name="timeout"        default="3.0"/>
+  <arg name="timeout"        default="2.0"/>
   <include file="$(find arena_bringup)/launch/sublaunch_testing/task_generator.launch" unless="$(eval arg('disable_scenario') or arg('train_mode'))">
    <arg name="scenarios_json_path"  value="$(find simulator_setup)/scenarios/$(arg scenario_file)"/>
    <arg name="auto_reset"           value="$(arg reset)"/>

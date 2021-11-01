@@ -88,7 +88,7 @@ class ObservationCollectorAllInOne:
         self._is_train_mode = rospy.get_param("/train_mode")
 
         # TODO make this a parameter --> Also dependant on map resolution (?)
-        self._planning_horizon = 5.5
+        self._planning_horizon = 6
 
         self._reward_subgoal_horizon = 0.5
 

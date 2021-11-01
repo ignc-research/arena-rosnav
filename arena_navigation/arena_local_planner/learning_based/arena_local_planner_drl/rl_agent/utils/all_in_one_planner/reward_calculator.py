@@ -221,7 +221,7 @@ class RewardCalculator:
             self._reward_goal_approached(kwargs['sub_goal'], kwargs['sub_goal_old'], kwargs['new_global_plan'],
                                          reward_factor=0.1, penalty_factor=1)
             # Punish standing still
-            self._standing_still(kwargs['action'], punishment=0.005)
+            self._standing_still(kwargs['action'], punishment=0.003)
 
         # check for final rewards
         self._reward_goal_reached(

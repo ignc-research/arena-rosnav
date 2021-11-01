@@ -21,6 +21,7 @@ teb_local_planner:
   # Obstacles
   min_obstacle_dist: 0.3
   inflation_dist: 0.2
+  dynamic_obstacle_inflation_dist: 0.7
   include_costmap_obstacles: False
   include_dynamic_obstacles: True
 
@@ -28,8 +29,8 @@ teb_local_planner:
   yaw_goal_tolerance: 10 # Rotation at goal is irrelevant
   enable_homotopy_class_planning: True
   free_goal_vel: True # Velocity at goal is irrelevant
-  no_inner_iterations: 3  # default 5 -> make calculation slightly faster
-  no_outer_iterations: 3  # default 4 -> make calculation slightly faster
+  no_inner_iterations: 5  # default 5 -> make calculation slightly faster
+  no_outer_iterations: 4  # default 4 -> make calculation slightly faster
   max_global_plan_lookahead_dist: 3
 
   # Costmap converter plugin
@@ -38,8 +39,8 @@ teb_local_planner:
   costmap_converter_rate: 20
 
 local_costmap:
-  update_frequency: 10.0
-  publish_frequency: 1 # Publishing only relevant for visualization
+  update_frequency: 20.0
+  publish_frequency: 2 # Publishing only relevant for visualization
 
   rolling_window: true
   width: 7 # 2x laser scan range
