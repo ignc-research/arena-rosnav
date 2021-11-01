@@ -51,6 +51,7 @@ class get_metrics():
         df["min_clearing_distance"] = [np.nanmin(x) for x in df["laser_scan"]]
         df["mean_clearing_distance"] = [np.nanmean(x) for x in df["laser_scan"]]
         df["median_clearing_distance"] = [np.nanmedian(x) for x in df["laser_scan"]]
+        df["curvature"],df["normalized_curvature"] = self.get_curvature(df)
         return df
 
     def get_action_type(self,df):
@@ -72,6 +73,32 @@ class get_metrics():
             else:
                 computation_time_column.append(x-df["time"][i-1])
         return computation_time_column
+    
+    def get_curvature(self,df):
+        curvature_list = []
+        normalized_curvature_list = []
+        episodes = np.unique(df["episode"])
+        for episode in episodes:
+            points = [list(x) for x in zip(df.loc[df["episode"]==episode,"robot_pos_x"],df.loc[df["episode"]==episode,"robot_pos_y"])]
+            for i,point in enumerate(points):
+                try:
+                    x = np.array(point)
+                    y = np.array(points[i+1])
+                    z = np.array(points[i+2])
+                    curvature_list.append(self.calc_curvature(x,y,z)[0])
+                    normalized_curvature_list.append(self.calc_curvature(x,y,z)[1])
+                    continue
+                except:
+                    curvature_list.append(np.nan)
+                    normalized_curvature_list.append(np.nan)
+                    continue
+        return curvature_list, normalized_curvature_list
+
+    def calc_curvature(self,x,y,z): # Menger curvature of 3 points
+        triangle_area = 0.5 * np.abs(x[0]*(y[1]-z[1]) + y[0]*(z[1]-x[1]) + z[0]*(x[1]-y[1]))
+        curvature = 4*triangle_area / (np.abs(np.linalg.norm(x-y)) * np.abs(np.linalg.norm(y-z)) * np.abs(np.linalg.norm(z-x)))
+        normalized_curvature = curvature* (np.abs(np.linalg.norm(x-y)) + np.abs(np.linalg.norm(y-z)))
+        return [curvature, normalized_curvature]
 
     def get_summary_df(self,df): # NOTE: column specification hardcoded !
         sum_df = df.groupby(["episode"]).sum()
@@ -81,6 +108,7 @@ class get_metrics():
         summary_df["collision"] = sum_df["collision"]
         summary_df["path_length"] = self.get_path_length(df)
         summary_df["success"],summary_df["done_reason"]  = self.get_success(summary_df)
+        summary_df["max_curvature"] = self.get_max_curvature(df)
         summary_df = summary_df.drop(columns = ['robot_lin_vel_x', 'robot_lin_vel_y', 'robot_ang_vel', 'robot_orientation', 'robot_pos_x', 'robot_pos_y'])
         print(summary_df)
         return summary_df
@@ -108,21 +136,26 @@ class get_metrics():
         return path_length_list
 
     def get_success(self,summary_df):
-        success = []
-        done_reason = []
-        # summary_df.loc[3,"collision"] = 45
-        summary_df.loc[3,"time"] = 192
+        success_list = []
+        done_reason_list = []
         for episode in summary_df.index:
             if summary_df.loc[episode,"collision"] > self.config["collision_treshold"]:
-                success.append(False)
-                done_reason.append("collision")
+                success_list.append(False)
+                done_reason_list.append("collision")
             elif summary_df.loc[episode,"time"] > self.config["time_out_treshold"]:
-                success.append(False)
-                done_reason.append("time_out")
+                success_list.append(False)
+                done_reason_list.append("time_out")
             else:
-                success.append(True)
-                done_reason.append("goal_reached")
-        return success, done_reason
+                success_list.append(True)
+                done_reason_list.append("goal_reached")
+        return success_list, done_reason_list
+
+    def get_max_curvature(self,df):
+        max_curvature_list = []
+        episodes = np.unique(df["episode"])
+        for episode in episodes:
+            max_curvature_list.append(np.max(df.loc[df["episode"]==episode,"curvature"]))
+        return max_curvature_list
 
     def get_paths_travelled(self,df):
         paths_travelled = {}
