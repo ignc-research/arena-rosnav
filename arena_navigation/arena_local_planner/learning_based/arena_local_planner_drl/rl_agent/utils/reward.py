@@ -293,6 +293,7 @@ class RewardCalculator():
             estimatedSubgoalAmount = 100000
         max_subgoal_gp_dist = 1.5 # range of the circle around ref-subgoal set in wp3_env
         #give reward if subgoal is not the same as last step (except goal)
+        self.info['subgoal_was_rewarded'] = True
         if not (subgoal.pose.position.x == last_subgoal.pose.position.x and subgoal.pose.position.y == last_subgoal.pose.position.y) or (subgoal.pose.position.x == goal.x and subgoal.pose.position.y == goal.y):
             if amount_rewarded_subgoals >= estimatedSubgoalAmount:
                 #punishment, if too many waypoints were set. Don't punish if waypoint is on the goal
@@ -311,11 +312,13 @@ class RewardCalculator():
                         dist = ((gp_point[0] - subgoal.pose.position.x)**2 + (gp_point[1] - subgoal.pose.position.y)**2)**0.5
                         if dist < subgoal_gp_dist:
                             subgoal_gp_dist = dist
-                    if rule in [6,8]:
-                        self.curr_reward += (1 - ((subgoal_gp_dist/max_subgoal_gp_dist) ** 0.5)) * scaling_factor
+                    if not np.isposinf(subgoal_gp_dist):
+                        if rule in [6,8]:
+                            self.curr_reward += (1 - ((subgoal_gp_dist/max_subgoal_gp_dist) ** 0.5)) * scaling_factor
+                        else:
+                            self.curr_reward += 1 * scaling_factor
                     else:
-                        self.curr_reward += 1 * scaling_factor
-                self.info['subgoal_was_rewarded'] = True
+                        self.info['subgoal_was_rewarded'] = False
         else:
             self.info['subgoal_was_rewarded'] = False
 
