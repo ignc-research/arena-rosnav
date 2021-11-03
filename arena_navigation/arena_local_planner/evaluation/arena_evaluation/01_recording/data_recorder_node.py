@@ -28,6 +28,7 @@ class recorder():
             writer = csv.writer(file, delimiter = ',')
             header = [["episode","time","laser_scan","robot_lin_vel_x","robot_lin_vel_y","robot_ang_vel","robot_orientation","robot_pos_x","robot_pos_y","action"]]
             writer.writerows(header)
+            file.close()
         
         # initialize variables to be recorded with default values, NOTE: time is recorded as well, but no need for seperate variable
         self.episode = 0
@@ -98,6 +99,7 @@ class recorder():
         with open(self.dir_path+"/{0}_{1}_{2}.csv".format(self.local_planner,self.scenario,self.now), "a+", newline = "") as file:
             writer = csv.writer(file, delimiter = ',') # writer has to be defined again for the code to work
             writer.writerows(data.reshape(1,-1)) # reshape into line vector
+            file.close()
 
 
 if __name__=="__main__":
