@@ -1,4 +1,5 @@
 import numpy as np
+from numpy.core.fromnumeric import size
 import pandas as pd
 import glob # usefull for listing all files of a type in a directory
 import os
@@ -26,6 +27,7 @@ class get_metrics():
         files = glob.glob("{0}/*.csv".format(self.data_dir)) # get all the csv files paths in the directory where this script is located
         for file in files: # summarize all the csv files and add to dictionary
             df = self.extend_df(pd.read_csv(file, converters = {"laser_scan":self.string_to_float_list, "action": self.string_to_float_list}))
+            df = self.drop_last_episode(df)
             file_name = file.split("/")[-1].split("_")[:-2] # cut off date and time and .csv ending
             file_name = "_".join(file_name) # join together to only include local planner, map and obstacle number
             data[file_name] = {
@@ -34,9 +36,10 @@ class get_metrics():
                 "paths_travelled": self.get_paths_travelled(df),
                 "collision_zones": self.get_collision_zones(df)
             }
-        # self.grab_data(files)
-        # with open(self.dir_path+"/data_{}.json".format(self.now), "w") as outfile:
-        #     json.dump(data, outfile)
+        # self.grab_data(files) # TODO: activate
+        with open(self.dir_path+"/data_{}.json".format(self.now), "w") as outfile:
+            json.dump(data, outfile)
+        return data
 
     def grab_data(self,files): # move data from 01_recording into 02_evaluattion into a data folder with timestamp
         os.mkdir(self.dir_path+"/data_{}".format(self.now))
@@ -129,6 +132,11 @@ class get_metrics():
         roughness = 2 * triangle_area / np.abs(np.linalg.norm(z-x))**2 # basically height / base (relative height)
         return roughness
 
+    def drop_last_episode(self,df):
+        episodes = np.unique(df["episode"])
+        df = df.drop(df[df["episode"] == episodes[-1]].index)
+        return df
+
     def get_summary_df(self,df): # NOTE: column specification hardcoded !
         sum_df = df.groupby(["episode"]).sum()
         mean_df = df.groupby(["episode"]).mean()
@@ -218,38 +226,26 @@ class get_metrics():
         return paths_travelled
 
     def get_collision_zones(self,df):
-        print("Finding collision zones")
 # https://github.com/ignc-research/arena-rosnav/blob/local_planner_subgoalmode/arena_navigation/arena_local_planner/evaluation/plots/run_7/map1_obs10_vel05_testplot2.png
-        collision_zones = {}
-        episodes = np.unique(df["episode"])
-        for episode in episodes:
-            subdf = df.loc[df["episode"]==episode,["robot_pos_x","robot_pos_y","collision"]]
-            subdf = subdf.loc[subdf["collision"]==True]
-            points = [list(x) for x in list(zip(subdf["robot_pos_x"],subdf["robot_pos_y"]))]
-            if len(points) == 0:
-                collision_zones[str(episode)] = []
-                print("No kmeans")
-                continue
-            elif len(points) == 1 or len(points) == 2:
-                collision_zones[str(episode)] = points
-                print("No kmeans")
-                continue
+        collisions = df.loc[df["collision"]==True,["robot_pos_x","robot_pos_y","collision"]]
+        points = [list(x) for x in list(zip(collisions["robot_pos_x"],collisions["robot_pos_y"]))]
 
-            silhouette_score_list = []
-            kmax = len(points)-1
-            for k in range(2, kmax+1):
-                kmeans = KMeans(n_clusters = k).fit(points)
-                labels = kmeans.labels_
-                silhouette_score_list.append(silhouette_score(points, labels, metric = 'euclidean'))
-            best_k = np.argmax(silhouette_score_list) + 2 # kmeans here starts at 2 centroids so argmax 0 equals 2 centroids
-            print(best_k, np.max(silhouette_score_list))
-            # kmeans = KMeans(n_clusters = best_k).fit(points)
-            # centroids = kmeans.cluster_centers_
-            # print([centroids,episode])
-            # plt.scatter(*zip(*points))
-            # plt.scatter(*zip(*centroids), color = "red")
-            # plt.show()
-        return collision_zones
+        silhouette_score_list = []
+        kmax = len(points)-1
+        for k in range(2, kmax+1):
+            kmeans = KMeans(n_clusters = k).fit(points)
+            labels = kmeans.labels_
+            silhouette_score_list.append(silhouette_score(points, labels, metric = 'euclidean'))
+        best_k = np.argmax(silhouette_score_list) + 2 # kmeans here starts at 2 centroids so argmax 0 equals 2 centroids
+        kmeans = KMeans(n_clusters = best_k).fit(points)
+        centroids = kmeans.cluster_centers_
+        _ , counts = np.unique(kmeans.labels_, return_counts=True)
+        # plt.scatter(*zip(*points))
+        # plt.scatter(*zip(*centroids), color = "red")
+        # for i,centroid in enumerate(centroids):
+        #     plt.gca().add_patch(plt.Circle(centroid, self.config["robot_radius"]*counts[i], color='b', fill=False))
+        # plt.show()
+        return {"centroids": centroids.tolist(), "counts": counts.tolist(), "collisions": collisions.values.tolist()}
 
 if __name__=="__main__":
     metrics = get_metrics()
