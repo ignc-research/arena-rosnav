@@ -6,6 +6,9 @@ import time
 import yaml
 import json
 import matplotlib.pyplot as plt
+import warnings
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
 
 class get_metrics():
     def __init__(self):
@@ -27,8 +30,9 @@ class get_metrics():
             file_name = "_".join(file_name) # join together to only include local planner, map and obstacle number
             data[file_name] = {
                 "df": df.to_dict(orient = "list"),
-                "summary_df": self.get_summary_df(df),
-                "paths_travelled": self.get_paths_travelled(df)
+                "summary_df": self.get_summary_df(df).to_dict(orient = "list"),
+                "paths_travelled": self.get_paths_travelled(df),
+                "collision_zones": self.get_collision_zones(df)
             }
         # self.grab_data(files)
         # with open(self.dir_path+"/data_{}.json".format(self.now), "w") as outfile:
@@ -52,6 +56,7 @@ class get_metrics():
         df["mean_clearing_distance"] = [np.nanmean(x) for x in df["laser_scan"]]
         df["median_clearing_distance"] = [np.nanmedian(x) for x in df["laser_scan"]]
         df["curvature"],df["normalized_curvature"] = self.get_curvature(df)
+        df["roughness"] = self.get_roughness(df)
         return df
 
     def get_action_type(self,df):
@@ -96,9 +101,33 @@ class get_metrics():
 
     def calc_curvature(self,x,y,z): # Menger curvature of 3 points
         triangle_area = 0.5 * np.abs(x[0]*(y[1]-z[1]) + y[0]*(z[1]-x[1]) + z[0]*(x[1]-y[1]))
-        curvature = 4*triangle_area / (np.abs(np.linalg.norm(x-y)) * np.abs(np.linalg.norm(y-z)) * np.abs(np.linalg.norm(z-x)))
-        normalized_curvature = curvature* (np.abs(np.linalg.norm(x-y)) + np.abs(np.linalg.norm(y-z)))
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')        
+            curvature = 4*triangle_area / (np.abs(np.linalg.norm(x-y)) * np.abs(np.linalg.norm(y-z)) * np.abs(np.linalg.norm(z-x)))
+            normalized_curvature = curvature* (np.abs(np.linalg.norm(x-y)) + np.abs(np.linalg.norm(y-z)))
         return [curvature, normalized_curvature]
+
+    def get_roughness(self,df):
+        roughness_list = []
+        episodes = np.unique(df["episode"])
+        for episode in episodes:
+            points = [list(x) for x in zip(df.loc[df["episode"]==episode,"robot_pos_x"],df.loc[df["episode"]==episode,"robot_pos_y"])]
+            for i,point in enumerate(points):
+                try:
+                    x = np.array(point)
+                    y = np.array(points[i+1])
+                    z = np.array(points[i+2])
+                    roughness_list.append(self.calc_roughness(x,y,z))
+                    continue
+                except:
+                    roughness_list.append(np.nan)
+                    continue
+        return roughness_list
+
+    def calc_roughness(self,x,y,z):
+        triangle_area = 0.5 * np.abs(x[0]*(y[1]-z[1]) + y[0]*(z[1]-x[1]) + z[0]*(x[1]-y[1]))
+        roughness = 2 * triangle_area / np.abs(np.linalg.norm(z-x))**2 # basically height / base (relative height)
+        return roughness
 
     def get_summary_df(self,df): # NOTE: column specification hardcoded !
         sum_df = df.groupby(["episode"]).sum()
@@ -109,8 +138,8 @@ class get_metrics():
         summary_df["path_length"] = self.get_path_length(df)
         summary_df["success"],summary_df["done_reason"]  = self.get_success(summary_df)
         summary_df["max_curvature"] = self.get_max_curvature(df)
+        summary_df["angle_over_length"] , summary_df["cusps"] = self.get_AOL(df,summary_df) # NOTE: in simulation cusps will never occur, unnessary
         summary_df = summary_df.drop(columns = ['robot_lin_vel_x', 'robot_lin_vel_y', 'robot_ang_vel', 'robot_orientation', 'robot_pos_x', 'robot_pos_y'])
-        print(summary_df)
         return summary_df
     
     def get_time(self,df):
@@ -157,15 +186,70 @@ class get_metrics():
             max_curvature_list.append(np.max(df.loc[df["episode"]==episode,"curvature"]))
         return max_curvature_list
 
+    def get_AOL(self,df,summary_df):
+        AOL_list = []
+        cusps_list = []
+        episodes = np.unique(df["episode"])
+        for episode in episodes:
+            path_length = summary_df.loc[episode,"path_length"]
+            total_yaw = 0
+            cusps = 0
+            yaws = list(df.loc[df["episode"]==episode,"robot_orientation"])
+            for i,yaw in enumerate(yaws):
+                if i == 0:
+                    continue
+                else:
+                    yaw_diff = np.abs(yaw-yaws[i-1])
+                    if yaw_diff == np.pi:
+                        cusps += 1
+                    total_yaw += yaw_diff
+            AOL_list.append(total_yaw/path_length)
+            cusps_list.append(cusps)
+        return AOL_list, cusps_list
+
     def get_paths_travelled(self,df):
         paths_travelled = {}
         episodes = np.unique(df["episode"])
         for episode in episodes:
-            paths_travelled[episode] = list(zip(df.loc[df["episode"]==episode,"robot_pos_x"],df.loc[df["episode"]==episode,"robot_pos_y"]))
+            paths_travelled[str(episode)] = list(zip(df.loc[df["episode"]==episode,"robot_pos_x"],df.loc[df["episode"]==episode,"robot_pos_y"]))
             # plt.figure(episode)
             # plt.scatter(*zip(*paths_travelled[episode]))
             # plt.show()
         return paths_travelled
+
+    def get_collision_zones(self,df):
+        print("Finding collision zones")
+# https://github.com/ignc-research/arena-rosnav/blob/local_planner_subgoalmode/arena_navigation/arena_local_planner/evaluation/plots/run_7/map1_obs10_vel05_testplot2.png
+        collision_zones = {}
+        episodes = np.unique(df["episode"])
+        for episode in episodes:
+            subdf = df.loc[df["episode"]==episode,["robot_pos_x","robot_pos_y","collision"]]
+            subdf = subdf.loc[subdf["collision"]==True]
+            points = [list(x) for x in list(zip(subdf["robot_pos_x"],subdf["robot_pos_y"]))]
+            if len(points) == 0:
+                collision_zones[str(episode)] = []
+                print("No kmeans")
+                continue
+            elif len(points) == 1 or len(points) == 2:
+                collision_zones[str(episode)] = points
+                print("No kmeans")
+                continue
+
+            silhouette_score_list = []
+            kmax = len(points)-1
+            for k in range(2, kmax+1):
+                kmeans = KMeans(n_clusters = k).fit(points)
+                labels = kmeans.labels_
+                silhouette_score_list.append(silhouette_score(points, labels, metric = 'euclidean'))
+            best_k = np.argmax(silhouette_score_list) + 2 # kmeans here starts at 2 centroids so argmax 0 equals 2 centroids
+            print(best_k, np.max(silhouette_score_list))
+            # kmeans = KMeans(n_clusters = best_k).fit(points)
+            # centroids = kmeans.cluster_centers_
+            # print([centroids,episode])
+            # plt.scatter(*zip(*points))
+            # plt.scatter(*zip(*centroids), color = "red")
+            # plt.show()
+        return collision_zones
 
 if __name__=="__main__":
     metrics = get_metrics()
