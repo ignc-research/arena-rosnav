@@ -305,7 +305,7 @@ class RewardCalculator():
                         self.curr_reward += 1 * scaling_factor
                     else:
                         self.curr_reward -= 5 * scaling_factor
-                        #print("set subgoal on goal too early!")
+                        #rint("set subgoal on goal too early!")
                 else:
                     subgoal_gp_dist = np.inf
                     for gp_point in global_plan:

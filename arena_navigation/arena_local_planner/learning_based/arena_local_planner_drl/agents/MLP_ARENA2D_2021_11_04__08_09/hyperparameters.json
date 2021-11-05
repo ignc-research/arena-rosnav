@@ -1,5 +1,5 @@
 {
-    "agent_name": "MLP_ARENA2D_2021_11_01__11_17",
+    "agent_name": "MLP_ARENA2D_2021_11_04__08_09",
     "robot": "myrobot",
     "batch_size": 19200,
     "gamma": 0.99,
@@ -19,5 +19,5 @@
     "discrete_action_space": true,
     "normalize": true,
     "task_mode": "staged",
-    "curr_stage": 2
+    "curr_stage": 1
 }
