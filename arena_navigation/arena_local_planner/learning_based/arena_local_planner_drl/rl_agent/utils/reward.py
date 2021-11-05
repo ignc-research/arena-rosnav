@@ -43,6 +43,8 @@ class RewardCalculator():
             'rule_04': RewardCalculator._cal_reward_rule_04,
             'rule_05': RewardCalculator._cal_reward_rule_05,
             'rule_06': RewardCalculator._cal_reward_rule_06,
+            'rule_07': RewardCalculator._cal_reward_rule_07,
+            'rule_08': RewardCalculator._cal_reward_rule_08,
             }
         self.cal_func = self._cal_funcs[rule]
 
