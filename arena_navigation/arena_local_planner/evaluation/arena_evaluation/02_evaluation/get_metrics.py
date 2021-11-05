@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import warnings
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
+import sys
 
 class get_metrics():
     def __init__(self):
@@ -23,14 +24,17 @@ class get_metrics():
             self.config = yaml.safe_load(file)
 
     def evaluate_data(self): # read in all csv files and compute metrics
-        print("Start data transformation and evaluation: {}".format(time.strftime("%H:%M:%S")))
+        print("INFO: Start data transformation and evaluation: {}".format(time.strftime("%H:%M:%S")))
         data = {}
         files = glob.glob("{0}/*.csv".format(self.data_dir)) # get all the csv files paths in the directory where this script is located
+        if len(files) == 0:
+            print("INFO: No files to evaluate were found in /01_recording. Terminating script.")
+            sys.exit()
         for file in files: # summarize all the csv files and add to dictionary
             file_name = file.split("/")[-1].split("_")[:-2] # cut off date and time and .csv ending
             file_name = "_".join(file_name) # join together to only include local planner, map and obstacle number
             print("-------------------------------------------------------------------------------------------------")
-            print("Beginning data tranformation and evaluation for: {}".format(file_name))
+            print("INFO: Beginning data tranformation and evaluation for: {}".format(file_name))
             df = self.extend_df(pd.read_csv(file, converters = {"laser_scan":self.string_to_float_list, "action": self.string_to_float_list}))
             df = self.drop_last_episode(df)
             data[file_name] = {
@@ -39,13 +43,12 @@ class get_metrics():
                 "paths_travelled": self.get_paths_travelled(df),
                 "collision_zones": self.get_collision_zones(df)
             }
-            print(data[file_name]["collision_zones"]["counts"])
-            print("Data tranformation and evaluation finished for: {}".format(file_name))
-            print("-------------------------------------------------------------------------------------------------")
+            print("INFO: Data tranformation and evaluation finished for: {}".format(file_name))
         self.grab_data(files) # TODO: activate
         with open(self.dir_path+"/data_{}.json".format(self.now), "w") as outfile:
             json.dump(data, outfile)
-        print("End data transformation and evaluation: {}".format(time.strftime("%y-%m-%d_%H:%M:%S")))
+        print("-------------------------------------------------------------------------------------------------")
+        print("INFO: End data transformation and evaluation: {}".format(time.strftime("%y-%m-%d_%H:%M:%S")))
         return data
 
     def grab_data(self,files): # move data from 01_recording into 02_evaluattion into a data folder with timestamp
