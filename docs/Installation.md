@@ -4,7 +4,7 @@
 
 ##### Prerequisites
 
-In order to use the install script you need to have [Poetry](https://python-poetry.org/docs/), Python 3.8+, curl and git installed and available in your shell.
+In order to use the install script you need to have [Poetry](https://python-poetry.org/docs/), Python 3.8+ and the correct `python-dev` library for your Python version installed and available in your shell. It is important that your activated Python version is the one which you want to use for the Poetry virtual environment.
 
 #### Installation
 
@@ -15,7 +15,7 @@ In order to use the install script you need to have [Poetry](https://python-poet
 ```
 
 
-If you have troubles with the installation we recommend to follow the manual installation procedure below and replacing `melodic` by `noetic` in the respective places. Pay attention to changing the ROS dependency branches in the `.rosinstall` as well.
+If you have troubles with the installation we recommend to step through the installation script by hand or follow the manual installation procedure below and replacing `melodic` by `noetic` in the respective places. Pay attention to selecting the correct `.rosinstall` in the project root directory as well.
 
 #### Manual Installation (Melodic or Noetic)
 
@@ -53,8 +53,13 @@ source ~/.zshrc
 ```
 
 *	Dependencies for building packages
+Melodic:
 ```
 sudo apt install python-rosdep python-rosinstall python-rosinstall-generator python-wstool build-essential
+```
+Noetic:
+```
+sudo apt install python3-rosdep python3-rosinstall python3-rosinstall-generator python3-wstool build-essential
 ```
 
 * Initialize rosdep
