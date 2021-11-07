@@ -29,7 +29,10 @@ with open(yaml_ROBOT_SETTING_PATH, "r") as fd:
             laser_angle_max = plugin["angle"]["max"]
             laser_angle_increment = plugin["angle"]["increment"]
             _L = int(
-                round((laser_angle_max - laser_angle_min) / laser_angle_increment) + 1
+                round(
+                    (laser_angle_max - laser_angle_min) / laser_angle_increment
+                )
+                + 1
             )  # num of laser beams
             break
 
@@ -57,7 +60,10 @@ class MLP_ARENA2D(nn.Module):
 
         # Body network
         self.body_net = nn.Sequential(
-            nn.Linear(_L + _RS, 64), nn.ReLU(), nn.Linear(64, feature_dim), nn.ReLU()
+            nn.Linear(_L + _RS, 64),
+            nn.ReLU(),
+            nn.Linear(64, feature_dim),
+            nn.ReLU(),
         )
 
         # Policy network
@@ -119,7 +125,9 @@ class AGENT_1(BaseFeaturesExtractor):
         This corresponds to the number of unit for the last layer.
     """
 
-    def __init__(self, observation_space: gym.spaces.Box, features_dim: int = 128):
+    def __init__(
+        self, observation_space: gym.spaces.Box, features_dim: int = 128
+    ):
         super(AGENT_1, self).__init__(observation_space, features_dim + _RS)
 
         self.cnn = nn.Sequential(
@@ -174,7 +182,9 @@ class AGENT_2(BaseFeaturesExtractor):
         This corresponds to the number of unit for the last layer.
     """
 
-    def __init__(self, observation_space: gym.spaces.Box, features_dim: int = 128):
+    def __init__(
+        self, observation_space: gym.spaces.Box, features_dim: int = 128
+    ):
         super(AGENT_2, self).__init__(observation_space, features_dim + _RS)
 
         self.cnn = nn.Sequential(
@@ -229,7 +239,9 @@ class AGENT_3(BaseFeaturesExtractor):
         This corresponds to the number of unit for the last layer.
     """
 
-    def __init__(self, observation_space: gym.spaces.Box, features_dim: int = 128):
+    def __init__(
+        self, observation_space: gym.spaces.Box, features_dim: int = 128
+    ):
         super(AGENT_3, self).__init__(observation_space, features_dim + _RS)
 
         self.cnn = nn.Sequential(
@@ -289,7 +301,9 @@ class AGENT_4(BaseFeaturesExtractor):
         This corresponds to the number of unit for the last layer.
     """
 
-    def __init__(self, observation_space: gym.spaces.Box, features_dim: int = 32):
+    def __init__(
+        self, observation_space: gym.spaces.Box, features_dim: int = 32
+    ):
         super(AGENT_4, self).__init__(observation_space, features_dim + _RS)
 
         self.cnn = nn.Sequential(
@@ -364,7 +378,8 @@ and value network.
 :constant policy_kwargs_navrep: (dict)
 """
 policy_kwargs_agent_7 = dict(
-    net_arch=[128, 64, 64, dict(pi=[64, 64], vf=[64, 64])], activation_fn=th.nn.ReLU
+    net_arch=[128, 64, 64, dict(pi=[64, 64], vf=[64, 64])],
+    activation_fn=th.nn.ReLU,
 )
 
 """
@@ -373,7 +388,8 @@ and value network.
 :constant policy_kwargs_navrep: (dict)
 """
 policy_kwargs_agent_8 = dict(
-    net_arch=[64, 64, 64, dict(pi=[64, 64], vf=[64, 64])], activation_fn=th.nn.ReLU
+    net_arch=[64, 64, 64, dict(pi=[64, 64], vf=[64, 64])],
+    activation_fn=th.nn.ReLU,
 )
 
 """
@@ -397,7 +413,9 @@ class AGENT_10(BaseFeaturesExtractor):
         This corresponds to the number of unit for the last layer.
     """
 
-    def __init__(self, observation_space: gym.spaces.Box, features_dim: int = 32):
+    def __init__(
+        self, observation_space: gym.spaces.Box, features_dim: int = 32
+    ):
         super(AGENT_10, self).__init__(observation_space, features_dim + _RS)
 
         self.cnn = nn.Sequential(
@@ -493,7 +511,8 @@ and value network.
 :constant policy_kwargs_navrep: (dict)
 """
 policy_kwargs_agent_15 = dict(
-    net_arch=[64, 64, 64, 64, dict(pi=[64, 64], vf=[64, 64])], activation_fn=th.nn.ReLU
+    net_arch=[64, 64, 64, 64, dict(pi=[64, 64], vf=[64, 64])],
+    activation_fn=th.nn.ReLU,
 )
 
 """
@@ -536,7 +555,8 @@ and value network.
 :constant policy_kwargs_navrep: (dict)
 """
 policy_kwargs_agent_19 = dict(
-    net_arch=[128, 128, 128, dict(pi=[64, 64], vf=[64, 64])], activation_fn=th.nn.ReLU
+    net_arch=[128, 128, 128, dict(pi=[64, 64], vf=[64, 64])],
+    activation_fn=th.nn.ReLU,
 )
 
 """
@@ -546,5 +566,72 @@ and value network.
 """
 policy_kwargs_agent_20 = dict(
     net_arch=[128, 128, 128, 128, dict(pi=[64, 64, 64], vf=[64, 64, 64])],
+    activation_fn=th.nn.ReLU,
+)
+
+
+class AGENT_22(BaseFeaturesExtractor):
+    """
+    Custom Convolutional Neural Network (Nature CNN) to serve as feature extractor ahead of the policy and value head.
+    Architecture was taken as reference from: https://github.com/ethz-asl/navrep
+    (CNN_NAVREP)
+    :param observation_space: (gym.Space)
+    :param features_dim: (int) Number of features extracted.
+        This corresponds to the number of unit for the last layer.
+    """
+
+    def __init__(
+        self, observation_space: gym.spaces.Box, features_dim: int = 32
+    ):
+        super(AGENT_22, self).__init__(observation_space, features_dim + _RS)
+
+        self.cnn = nn.Sequential(
+            nn.Conv1d(1, 32, 8, 4),
+            nn.ReLU(),
+            nn.Conv1d(32, 64, 9, 4),
+            nn.ReLU(),
+            nn.Conv1d(64, 128, 6, 4),
+            nn.ReLU(),
+            nn.Conv1d(128, 256, 4, 4),
+            nn.ReLU(),
+            nn.Flatten(),
+        )
+
+        # Compute shape by doing one forward pass
+        with th.no_grad():
+            tensor_forward = th.randn(1, 1, _L)
+            n_flatten = self.cnn(tensor_forward).shape[1]
+
+        self.fc_1 = nn.Sequential(
+            nn.Linear(n_flatten, 128),
+            nn.ReLU(),
+        )
+
+        self.fc_2 = nn.Sequential(nn.Linear(128, features_dim), nn.ReLU())
+
+    def forward(self, observations: th.Tensor) -> th.Tensor:
+        """
+        :return: (th.Tensor) features,
+            extracted features by the network
+        """
+
+        laser_scan = th.unsqueeze(observations[:, :-_RS], 1)
+        robot_state = observations[:, -_RS:]
+
+        extracted_features = self.fc_2(self.fc_1(self.cnn(laser_scan)))
+        features = th.cat((extracted_features, robot_state), 1)
+
+        return features
+
+
+"""
+Global constant to be passed as an argument to the PPO of Stable-Baselines3 in order to build both the policy
+and value network.
+:constant policy_kwargs_navrep: (dict)
+"""
+policy_kwargs_agent_22 = dict(
+    features_extractor_class=AGENT_22,
+    features_extractor_kwargs=dict(features_dim=128),
+    net_arch=[dict(vf=[64, 64, 64], pi=[64, 64, 64])],
     activation_fn=th.nn.ReLU,
 )

@@ -8,6 +8,7 @@ from typing import Union
 from stable_baselines3.common.env_checker import check_env
 import yaml
 from rl_agent.utils.observation_collector import ObservationCollector
+from rl_agent.utils.CSVWriter import CSVWriter
 from rl_agent.utils.reward import RewardCalculator
 from rl_agent.utils.debug import timeit
 from task_generator.tasks import ABSTask
@@ -87,9 +88,20 @@ class FlatlandEnv(gym.Env):
 
         # observation collector
         self.observation_collector = ObservationCollector(
-            self.ns, self._laser_num_beams, self._laser_max_range
+            self.ns,
+            self._laser_num_beams,
+            self._laser_max_range,
+            external_time_sync=True,
         )
-        self.observation_space = self.observation_collector.get_observation_space()
+        self.observation_space = (
+            self.observation_collector.get_observation_space()
+        )
+
+        #csv writer
+        self.csv_writer=CSVWriter()
+        rospy.loginfo("======================================================")
+        rospy.loginfo("CSVWriter initialized.")
+        rospy.loginfo("======================================================")        
 
         # reward calculator
         if safe_dist is None:
@@ -126,6 +138,7 @@ class FlatlandEnv(gym.Env):
         )
 
         self._steps_curr_episode = 0
+        self._episode = 0
         self._max_steps_per_episode = max_steps_per_episode
 
         # for extended eval
@@ -136,10 +149,9 @@ class FlatlandEnv(gym.Env):
         self._collisions = 0
         self._in_crash = False
 
-        # publisher for random map training
-        self.demand_map_pub = rospy.Publisher("/demand", String, queue_size=1)
-
-    def setup_by_configuration(self, robot_yaml_path: str, settings_yaml_path: str):
+    def setup_by_configuration(
+        self, robot_yaml_path: str, settings_yaml_path: str
+    ):
         """get the configuration from the yaml file, including robot radius, discrete action space and continuous action space.
 
         Args:
@@ -165,7 +177,8 @@ class FlatlandEnv(gym.Env):
                     laser_angle_increment = plugin["angle"]["increment"]
                     self._laser_num_beams = int(
                         round(
-                            (laser_angle_max - laser_angle_min) / laser_angle_increment
+                            (laser_angle_max - laser_angle_min)
+                            / laser_angle_increment
                         )
                         + 1
                     )
@@ -175,7 +188,9 @@ class FlatlandEnv(gym.Env):
             setting_data = yaml.safe_load(fd)
             if self._is_action_space_discrete:
                 # self._discrete_actions is a list, each element is a dict with the keys ["name", 'linear','angular']
-                self._discrete_acitons = setting_data["robot"]["discrete_actions"]
+                self._discrete_acitons = setting_data["robot"][
+                    "discrete_actions"
+                ]
                 self.action_space = spaces.Discrete(len(self._discrete_acitons))
             else:
                 linear_range = setting_data["robot"]["continuous_actions"][
@@ -198,8 +213,12 @@ class FlatlandEnv(gym.Env):
 
     def _translate_disc_action(self, action):
         new_action = np.array([])
-        new_action = np.append(new_action, self._discrete_acitons[action]["linear"])
-        new_action = np.append(new_action, self._discrete_acitons[action]["angular"])
+        new_action = np.append(
+            new_action, self._discrete_acitons[action]["linear"]
+        )
+        new_action = np.append(
+            new_action, self._discrete_acitons[action]["angular"]
+        )
 
         return new_action
 
@@ -244,7 +263,17 @@ class FlatlandEnv(gym.Env):
             done = True
             info["done_reason"] = 0
             info["is_success"] = 0
-
+        history_evaluation  = [self._episode]
+        history_evaluation +=[info['done_reason']]
+        history_evaluation +=[time.time()]
+        history_evaluation +=[obs_dict["laser_scan"]]        
+        history_evaluation +=[np.sqrt((obs_dict['robot_pose'].x)**2+(obs_dict['robot_pose'].y)**2)] # robot_velocity
+        history_evaluation +=[obs_dict['robot_pose'].theta] # robot_orientation
+        history_evaluation +=[obs_dict['robot_pose'].x] # robot_pos_x
+        history_evaluation +=[obs_dict['robot_pose'].y] # robot_pos_y
+        history_evaluation +=[action] # action np.array
+        
+        self.csv_writer.addData(np.array(history_evaluation))
         # for logging
         if self._extended_eval and done:
             info["collisions"] = self._collisions
@@ -256,13 +285,12 @@ class FlatlandEnv(gym.Env):
         return merged_obs, reward, done, info
 
     def reset(self):
-        self.demand_map_pub.publish("") # publisher to demand a map update
         # set task
         # regenerate start position end goal position of the robot and change the obstacles accordingly
+        self._episode += 1
         self.agent_action_pub.publish(Twist())
         if self._is_train_mode:
             self._sim_step_client()
-        time.sleep(0.1) # map_pub needs some time to update map            
         self.task.reset()
         self.reward_calculator.reset()
         self._steps_curr_episode = 0
@@ -322,6 +350,9 @@ if __name__ == "__main__":
     print("start")
 
     flatland_env = FlatlandEnv()
+    rospy.loginfo("======================================================")
+    rospy.loginfo("CSVWriter initialized.")
+    rospy.loginfo("======================================================")      
     check_env(flatland_env, warn=True)
 
     # init env

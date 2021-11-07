@@ -180,12 +180,11 @@ void PlanManager::execFSMCallback(const ros::TimerEvent &e)
   {
     if (mode_ == TRAIN)
     {
-      //cout<<"EXEC_LOCAL"<<"Train mode"<<endl;
-      start_state_.reset(new RobotState(cur_state_->pose2d, cur_state_->theta, cur_state_->vel2d, cur_state_->w));
-      bool global_plan_success = planner_collector_->generate_global_plan(*start_state_, *end_state_);
-      if(global_plan_success){
-        global_plan_pub_.publish(planner_collector_->global_path_);
-      }
+      cout<<"EXEC_LOCAL"<<"Train mode"<<endl;
+      // start_state_.reset(new RobotState(cur_state_->pose2d, cur_state_->theta, cur_state_->vel2d, cur_state_->w));
+      // bool global_plan_success = planner_collector_->generate_global_plan(*start_state_, *end_state_);
+      // if(global_plan_success){
+      //   global_plan_pub_.publish(planner_collector_->global_path_);
       return;
     }
 

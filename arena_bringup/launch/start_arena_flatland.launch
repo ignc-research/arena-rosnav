@@ -3,9 +3,10 @@
 
   <arg name="train_mode"       default="false"/>
   <param name="train_mode" value="$(arg train_mode)" />
+  <arg name="use_recorder"       default="false"/>
   
   <arg name="local_planner"   default="teb"/> 
-  <arg name="rviz_file"       default="nav_LP"/>
+  <arg name="rviz_file"       default="nav"/>
   <arg name="disable_scenario"    default="true"/>
   <arg name="scenario_file"   default="empty_map.json"/>
   <arg name="reset"   default="true"/>
@@ -53,6 +54,12 @@
   <arg name="base_frame_id"     value="base_footprint"/>
   <arg name="odom_ground_truth" default="/odometry/ground_truth"/>
 
+  <!-- data recorder -->
+  <group if="$(eval arg('use_recorder') == true)">
+    <node pkg="arena_evaluation" name="data_recorder_node" type="data_recorder_node.py" />
+      <param name="local_planner"  value="$(arg local_planner)"/>
+      <param name="scenario_file"  value="$(arg scenario_file)"/>
+  </group>
 
  <!-- use simulator-->
   <include file="$(find arena_bringup)/launch/sublaunch_testing/flatland_simulator.launch">
@@ -82,8 +89,8 @@
    <arg name="timeout"              value="$(arg timeout)"/>
   </include>
 
-  <include file="$(find arena_bringup)/launch/sublaunch_testing/sensor_sim.launch" unless="$(eval arg('disable_scenario') or arg('train_mode'))">
-  </include>
+  <!-- <include file="$(find arena_bringup)/launch/sublaunch_testing/sensor_sim.launch" unless="$(eval arg('disable_scenario') or arg('train_mode'))">
+  </include> -->
 
   
 
