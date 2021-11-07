@@ -28,7 +28,7 @@ sudo apt-get install aptitude
 sudo aptitude install curl git
 
 mkdir -p catkin_ws/src && cd catkin_ws/src
-git clone --depth 1 --branch MARL_noetic https://github.com/wittenator/arena-rosnav.git
+git clone --depth 1 --branch local_planner_subgoalmode https://github.com/wittenator/arena-rosnav.git
 cd arena-rosnav
 
 if [ $ROS_NAME_VERSION = "noetic" ]; then
