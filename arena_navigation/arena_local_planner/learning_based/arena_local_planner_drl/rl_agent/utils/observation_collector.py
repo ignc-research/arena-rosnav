@@ -149,7 +149,6 @@ class ObservationCollector():
             self._suggested_action = np.array([0.0])
         if len(self._left_waypoints) == 0:
             self._left_waypoints = np.array([0])
-        print(self._left_waypoints)
         merged_obs = np.hstack([scan, np.array([rho, theta]),np.array([self._subgoal.x, self._subgoal.y, self._subgoal.theta]),self._suggested_action, self._left_waypoints])
         #merged_obs = np.hstack([scan, np.array([rho, theta])])
 
