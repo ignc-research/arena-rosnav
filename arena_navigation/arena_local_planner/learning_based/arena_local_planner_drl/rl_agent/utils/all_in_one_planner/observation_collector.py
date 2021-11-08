@@ -1,7 +1,9 @@
+import json
 import os
 import subprocess
 import time  # for debuging
 from collections import deque
+from typing import Tuple
 
 import nav_msgs
 import numpy as np
@@ -14,6 +16,7 @@ import visualization_msgs.msg
 from geometry_msgs.msg import Pose2D, PoseStamped, Pose
 from geometry_msgs.msg import Twist
 from gym import spaces
+from gym.spaces import Box
 from nav_msgs.msg import Odometry
 from rosgraph_msgs.msg import Clock
 # observation msgs
@@ -29,7 +32,7 @@ from flatland_msgs.srv import StepWorld, StepWorldRequest
 
 class ObservationCollectorAllInOne:
     def __init__(self, ns: str, num_lidar_beams: int, lidar_range: float, numb_models: int, required_obs: dict,
-                 include_model_actions: bool = False):
+                 all_in_one_config: str, include_model_actions: bool = False):
 
         self.ns = ns
         if ns is None or ns == "":
@@ -41,30 +44,36 @@ class ObservationCollectorAllInOne:
         # for frequency controlling
         self._action_frequency = 1 / rospy.get_param("/robot_action_rate")
 
+        self._reduced_num_laser_beams = self._extract_obs_space_info(all_in_one_config)
+        self._full_laser_range = self._reduced_num_laser_beams < 0
+
         # define observation_space
-        if include_model_actions:
-            self.observation_space = ObservationCollectorAllInOne._stack_spaces((
-                spaces.Box(low=0, high=lidar_range, shape=(
-                    num_lidar_beams,), dtype=np.float32),
-                spaces.Box(low=0, high=lidar_range, shape=(
-                    num_lidar_beams,), dtype=np.float32),
-                spaces.Box(low=0, high=20, shape=(1,), dtype=np.float32),
-                spaces.Box(low=-np.pi, high=np.pi, shape=(1,), dtype=np.float32),
-                spaces.Box(low=0, high=20, shape=(1,), dtype=np.float32),
-                spaces.Box(low=-np.pi, high=np.pi, shape=(1,), dtype=np.float32),
-                spaces.Box(low=-2.7, high=2.7, shape=(2 * numb_models,), dtype=np.float32)
-            ))
+        if self._full_laser_range:
+            laser_space = ObservationCollectorAllInOne._stack_spaces((spaces.Box(low=0, high=lidar_range, shape=(
+                num_lidar_beams,), dtype=np.float32), spaces.Box(low=0, high=lidar_range, shape=(num_lidar_beams,),
+                                                                 dtype=np.float32)))
         else:
-            self.observation_space = ObservationCollectorAllInOne._stack_spaces((
-                spaces.Box(low=0, high=lidar_range, shape=(
-                    num_lidar_beams,), dtype=np.float32),
-                spaces.Box(low=0, high=lidar_range, shape=(
-                    num_lidar_beams,), dtype=np.float32),
-                spaces.Box(low=0, high=20, shape=(1,), dtype=np.float32),
-                spaces.Box(low=-np.pi, high=np.pi, shape=(1,), dtype=np.float32),
-                spaces.Box(low=0, high=20, shape=(1,), dtype=np.float32),
-                spaces.Box(low=-np.pi, high=np.pi, shape=(1,), dtype=np.float32)
-            ))
+            laser_space = ObservationCollectorAllInOne._stack_spaces((spaces.Box(low=0, high=lidar_range, shape=(
+                self._reduced_num_laser_beams,), dtype=np.float32), spaces.Box(low=0, high=lidar_range,
+                                                                               shape=(self._reduced_num_laser_beams,),
+                                                                               dtype=np.float32)))
+
+        goal_space = ObservationCollectorAllInOne._stack_spaces(
+            (spaces.Box(low=0, high=20, shape=(1,), dtype=np.float32),
+             spaces.Box(low=-np.pi, high=np.pi, shape=(1,), dtype=np.float32),
+             spaces.Box(low=0, high=20, shape=(1,), dtype=np.float32),
+             spaces.Box(low=-np.pi, high=np.pi, shape=(1,), dtype=np.float32)))
+
+        if include_model_actions:
+            action_obs_space = spaces.Box(low=-2.7, high=2.7, shape=(2 * numb_models,), dtype=np.float32)
+        else:
+            action_obs_space = ()
+
+        self.observation_space = ObservationCollectorAllInOne._stack_spaces((
+            laser_space,
+            goal_space,
+            action_obs_space
+        ))
 
         self._required_obs = required_obs
 
@@ -203,9 +212,17 @@ class ObservationCollectorAllInOne:
         subgoal_reward_robot_frame_old_rho, subgoal_reward_robot_frame_old_theta = ObservationCollectorAllInOne._get_goal_pose_in_robot_frame(
             self._subgoal_reward_old, self._robot_pose)
 
+        if self._full_laser_range:
+            laser_vec = np.hstack([scan_static, dynamic_scan])
+        else:
+            dyn_vec = self._calc_reduced_laser_vec(dynamic_scan)
+            static_vec = self._calc_reduced_laser_vec(scan_static)
+            laser_vec = np.hstack([dyn_vec, static_vec])
+
+        print(laser_vec)
+
         merged_obs = np.float32(
-            np.hstack(
-                [scan_static, dynamic_scan, np.array([rho_global, theta_global]), np.array([rho_local, theta_local])]))
+            np.hstack([laser_vec, np.array([rho_global, theta_global]), np.array([rho_local, theta_local])]))
 
         obs_dict = {'laser_scan': scan,
                     'scan_dynamic': dynamic_scan,
@@ -409,6 +426,9 @@ class ObservationCollectorAllInOne:
         pose2d = self.pose3D_to_pose2D(msg_Subgoal.pose)
         return pose2d
 
+    def _calc_reduced_laser_vec(self, laser_scan: np.array):
+        return list(map(np.min, np.array_split(laser_scan, self._reduced_num_laser_beams)))
+
     def _start_global_planner(self):
         # Generate local planner node
         config_path = os.path.join(rospkg.RosPack().get_path('arena_local_planner_drl'), 'configs',
@@ -496,7 +516,6 @@ class ObservationCollectorAllInOne:
 
     def _extract_subgoal(self, global_plan, lookahead_dist: float) -> Pose2D:
         # extract subgoal by getting point on global path with @_planning_horizon distance
-
         if global_plan.size == 0:
             return self._goal
 
@@ -516,6 +535,22 @@ class ObservationCollectorAllInOne:
             next_pose_xy = global_plan[i]
 
         return Pose2D(next_pose_xy[0], next_pose_xy[1], 0)
+
+    @staticmethod
+    def _extract_obs_space_info(all_in_one_config_path: str):
+        with open(all_in_one_config_path, 'r') as config_json:
+            all_in_one_config = json.load(config_json)
+
+        assert all_in_one_config is not None, "Error: All in one parameter file cannot be found!"
+
+        if 'observation_space' not in all_in_one_config:
+            return -1
+        else:
+            obs_info = all_in_one_config['observation_space']
+            if obs_info['laser_range'] == 'full':
+                return -1
+            else:
+                return obs_info['size_laser_vector']
 
     @staticmethod
     def process_global_plan_msg(globalplan):
@@ -558,6 +593,7 @@ class ObservationCollectorAllInOne:
         low = []
         high = []
         for space in ss:
-            low.extend(space.low.tolist())
-            high.extend(space.high.tolist())
+            if type(space) == Box:
+                low.extend(space.low.tolist())
+                high.extend(space.high.tolist())
         return spaces.Box(np.array(low).flatten(), np.array(high).flatten())

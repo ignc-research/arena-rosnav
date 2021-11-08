@@ -115,7 +115,7 @@ class AllInOneEnv(gym.Env):
         # observation collector
         self.observation_collector = ObservationCollectorAllInOne(
             self.ns, self._laser_num_beams, self._laser_max_range, self._local_planner_manager.get_numb_models(),
-            self._local_planner_manager.get_required_observations(),
+            self._local_planner_manager.get_required_observations(), paths['all_in_one_parameters'],
             include_model_actions=self._run_all_agents_each_iteration)
 
         self._step_processor.set_observation_collector(self.observation_collector)
