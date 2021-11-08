@@ -17,7 +17,7 @@ from geometry_msgs.msg import Twist, PoseStamped, Pose2D
 from flatland_msgs.srv import StepWorld, StepWorldRequest
 from nav_msgs.msg import Odometry
 from nav_msgs.msg import Path as nav_Path
-from std_msgs.msg import Bool, Float32
+from std_msgs.msg import Bool, Float32, Int8
 import time
 import math
 from rl_agent.utils.debug import timeit
@@ -109,6 +109,7 @@ class wp3Env(gym.Env):
         self._previous_time = 0
         self._step_counter = 0
         self._amount_rewarded_waypoints = 0
+        self._amount_waypoints_left = 0
         self._circle = np.array([])
         self._curr_gp_point = 0
         self._globalPlanArray = np.array([])
@@ -146,6 +147,8 @@ class wp3Env(gym.Env):
         
         #observation (suggested action) publisher
         self._suggested_action_pub = rospy.Publisher(f'{self.ns_prefix}suggested_action', Pose2D, queue_size=1)
+        #observation (left waypoints) publisher
+        self._left_waypoints_pub = rospy.Publisher(f'{self.ns_prefix}left_waypoints', Int8, queue_size=1)
 
         # service clients
         self._is_train_mode = rospy.get_param("/train_mode")
@@ -499,6 +502,9 @@ class wp3Env(gym.Env):
             self._last_rewarded_waypoint.pose.position.x = self._action_msg.pose.position.x
             self._last_rewarded_waypoint.pose.position.y = self._action_msg.pose.position.y
             self._amount_rewarded_waypoints += 1
+
+        self._amount_waypoints_left = 1 if reward_info['estimated_subgoals'] == 100000 else max(0,reward_info['estimated_subgoals'] - self._amount_rewarded_waypoints)
+        self._left_waypoints_pub.publish(self._amount_waypoints_left)
         done = reward_info['is_done']
         #print("reward:  {}".format(reward))
                 # extended eval info
@@ -543,6 +549,7 @@ class wp3Env(gym.Env):
         self._action_count = 0
         self._last_rewarded_waypoint = PoseStamped()
         self._amount_rewarded_waypoints = 0
+        self._amount_waypoints_left = 0
         self._robot_close_to_goal = False
         self._curr_gp_point = 0
         self._suggested_action = Pose2D()

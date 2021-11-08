@@ -294,13 +294,14 @@ class RewardCalculator():
             scaling_factor = 1 / (estimatedSubgoalAmount +1)
             estimatedSubgoalAmount = 100000
         max_subgoal_gp_dist = 1.5 # range of the circle around ref-subgoal set in wp3_env
+        self.info['estimated_subgoals'] = estimatedSubgoalAmount
         #give reward if subgoal is not the same as last step (except goal)
         self.info['subgoal_was_rewarded'] = True
         if not (subgoal.pose.position.x == last_subgoal.pose.position.x and subgoal.pose.position.y == last_subgoal.pose.position.y) or (subgoal.pose.position.x == goal.x and subgoal.pose.position.y == goal.y):
             if amount_rewarded_subgoals >= estimatedSubgoalAmount:
                 #punishment, if too many waypoints were set. Don't punish if waypoint is on the goal
                 if not (subgoal.pose.position.x == goal.x and subgoal.pose.position.y == goal.y):
-                    self.curr_reward -= 0.5 * scaling_factor
+                    self.curr_reward -= 0.2 * scaling_factor
             else:
                 if subgoal.pose.position.x == goal.x and subgoal.pose.position.y == goal.y:
                     if robot_close_to_goal:

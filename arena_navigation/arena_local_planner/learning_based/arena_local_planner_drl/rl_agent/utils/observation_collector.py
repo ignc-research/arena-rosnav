@@ -18,7 +18,7 @@ from geometry_msgs.msg import Twist
 from nav_msgs.msg import Path
 from rosgraph_msgs.msg import Clock
 from nav_msgs.msg import Odometry
-from std_msgs.msg import Float32
+from std_msgs.msg import Float32, Int8
 
 # services
 from flatland_msgs.srv import StepWorld, StepWorldRequest
@@ -57,7 +57,8 @@ class ObservationCollector():
             spaces.Box(low=0, high=10, shape=(1,), dtype=np.float32),
             spaces.Box(low=-np.pi, high=np.pi, shape=(1,), dtype=np.float32),
             spaces.Box(low=-100, high=100, shape=(3,), dtype=np.float32), #reference subgoal coordinate + orientation
-            spaces.Box(low=-2.0, high=2.0, shape=(1,), dtype=np.float32) #optimal angle for waypoint
+            spaces.Box(low=-2.0, high=2.0, shape=(1,), dtype=np.float32), #optimal angle for waypoint
+            spaces.Box(low=0, high=25, shape=(1,), dtype=np.float32) #waypoints left to set freely
         ))
 
         self._laser_num_beams = rospy.get_param("/laser_num_beams")
@@ -72,6 +73,7 @@ class ObservationCollector():
         self._globalGoal = PoseStamped()
         self._globalplan = np.array([])
         self._suggested_action = np.array([])
+        self._left_waypoints = np.array([])
 
         # train mode?
         self._is_train_mode = rospy.get_param("/train_mode")
@@ -92,6 +94,8 @@ class ObservationCollector():
             f'{self.ns_prefix}odom', Odometry, self.callback_robot_state, tcp_nodelay=True)
 
         self._suggested_action_sub = rospy.Subscriber(f'{self.ns_prefix}suggested_action', Pose2D, self.callback_suggested_action, tcp_nodelay=True)
+
+        self._left_waypoints_sub = rospy.Subscriber(f'{self.ns_prefix}left_waypoints', Int8, self.callback_left_waypoints, tcp_nodelay=True)
         
         # self._clock_sub = rospy.Subscriber(
         #     f'{self.ns_prefix}clock', Clock, self.callback_clock, tcp_nodelay=True)
@@ -143,8 +147,10 @@ class ObservationCollector():
         rho, theta = ObservationCollector._get_goal_pose_in_robot_frame(self._subgoal, self._robot_pose)
         if len(self._suggested_action) == 0:
             self._suggested_action = np.array([0.0])
-        #print(self._suggested_action)
-        merged_obs = np.hstack([scan, np.array([rho, theta]),np.array([self._subgoal.x, self._subgoal.y, self._subgoal.theta]),self._suggested_action])
+        if len(self._left_waypoints) == 0:
+            self._left_waypoints = np.array([0])
+        print(self._left_waypoints)
+        merged_obs = np.hstack([scan, np.array([rho, theta]),np.array([self._subgoal.x, self._subgoal.y, self._subgoal.theta]),self._suggested_action, self._left_waypoints])
         #merged_obs = np.hstack([scan, np.array([rho, theta])])
 
 
@@ -228,6 +234,10 @@ class ObservationCollector():
 
     def callback_suggested_action(self,msg_suggested_action):
         self._suggested_action= np.array([msg_suggested_action.x])
+        return
+
+    def callback_left_waypoints(self,msg_left_waypoints):
+        self._left_waypoints= np.array([msg_left_waypoints.data])
         return
 
     def callback_clock(self, msg_Clock):
