@@ -2,6 +2,7 @@ import numpy as np
 import glob # usefull for listing all files of a type in a directory
 import os
 import time
+from scipy.ndimage.measurements import label
 import yaml
 import json
 import matplotlib.pyplot as plt
@@ -61,11 +62,16 @@ class plotter():
         self.keys = self.data.keys()
 
     def get_qualitative_plots(self):
+# https://github.com/ignc-research/arena-rosnav/blob/local_planner_subgoalmode/arena_navigation/arena_local_planner/evaluation/plots/run_7/map1_obs10_vel05_testplot2.png
         ### get scenario properties ###
         self.get_map() # self.maps
         self.get_obstacle_number() # self.obstacle_numbers
         self.get_velocity() # self.velocities
         self.get_planner() # self.planners
+
+        # lists for calculation of start and goal
+        start_point = {"x":[],"y":[]}
+        goal_point = {"x":[],"y":[]}
 
         ### iteration part ###
         for map in self.maps:
@@ -106,18 +112,46 @@ class plotter():
                         episodes = paths.keys()
                         for i,episode in enumerate(episodes):
                             if i == 0:
-                                x,y = to_ros_coords(paths[episode], img, map_resolution, map_origin)
-                                plt.scatter(x,y, # coordinates need to transformed to ros format
+                                plt.plot([],[], # plot legend only with empty lines
+                                "-",
                                 label = self.config["labels"][planner],
                                 color = self.config["color_scheme"][planner],
-                                alpha = self.config["path_alpha"],
-                                s = self.config["path_size"])
-                            else:
+                                linewidth = 2)
+
                                 x,y = to_ros_coords(paths[episode], img, map_resolution, map_origin)
-                                plt.scatter(x,y, # coordinates need to transformed to ros format
+                                x = x[1:-1] # NOTE: sometimes episode is wrongly assigned _> skip first and last coordinates
+                                y = y[1:-1]
+                                start_point["x"].append(x[0])
+                                start_point["y"].append(y[0])
+                                goal_point["x"].append(x[-1])
+                                goal_point["y"].append(y[-1])
+                                plt.plot(x[1:-1],y[1:-1], # coordinates need to transformed to ros format
+                                "-",
                                 color = self.config["color_scheme"][planner],
                                 alpha = self.config["path_alpha"],
-                                s = self.config["path_size"])
+                                linewidth = self.config["path_size"])
+                            else:
+                                x,y = to_ros_coords(paths[episode], img, map_resolution, map_origin)
+                                x = x[1:-1] # NOTE: sometimes episode is wrongly assigned _> skip first and last coordinates
+                                y = y[1:-1]
+                                start_point["x"].append(x[0])
+                                start_point["y"].append(y[0])
+                                goal_point["x"].append(x[-1])
+                                goal_point["y"].append(y[-1])
+                                plt.plot(x[1:-1],y[1:-1], # coordinates need to transformed to ros format
+                                "-",
+                                color = self.config["color_scheme"][planner],
+                                alpha = self.config["path_alpha"],
+                                linewidth = self.config["path_size"])
+
+                    # labels for legend only
+                    plt.scatter([],[], marker = self.config["start_marker"], label = "Start", color = self.config["start_point_color"])
+                    plt.scatter([],[], marker = self.config["goal_marker"], label = "Goal", color = self.config["goal_point_color"])
+                    # start and goal point
+                    plt.scatter(np.mean(start_point["x"]),np.mean(start_point["y"]), marker = self.config["start_marker"], s = self.config["start_size"]/map_resolution, color = self.config["start_point_color"])
+                    plt.scatter(np.mean(goal_point["x"]),np.mean(goal_point["y"]), marker = self.config["goal_marker"], s = self.config["goal_size"]/map_resolution, color = self.config["goal_point_color"])
+
+                    plt.legend()
                     plt.show()
                     sys.exit()
 
@@ -170,8 +204,7 @@ class plotter():
         self.planners = np.unique([self.data[key]["planner"] for key in self.keys])
 
 def to_ros_coords(coords, img, map_resolution, map_origin):
-    # return [[img.shape[1] + (x-map_origin[0])/map_resolution, img.shape[0] - (y-map_origin[1])/map_resolution] for x,y in coords]
-    return [x/map_resolution for x,y in coords], [y/map_resolution for x,y in coords]
+    return  [img.shape[0] - (y-map_origin[1])/map_resolution for x,y in coords],[img.shape[1] - (x-map_origin[0])/map_resolution for x,y in coords]
 
 if __name__=="__main__":
     Plotter = plotter()

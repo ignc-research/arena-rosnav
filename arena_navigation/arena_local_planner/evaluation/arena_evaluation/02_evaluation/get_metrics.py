@@ -240,7 +240,6 @@ class get_metrics():
         return paths_travelled
 
     def get_collision_zones(self,df):
-# https://github.com/ignc-research/arena-rosnav/blob/local_planner_subgoalmode/arena_navigation/arena_local_planner/evaluation/plots/run_7/map1_obs10_vel05_testplot2.png
         collisions = df.loc[df["collision"]==True,["robot_pos_x","robot_pos_y","collision"]]
         points = [list(x) for x in list(zip(collisions["robot_pos_x"],collisions["robot_pos_y"]))]
 

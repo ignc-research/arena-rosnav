@@ -6,6 +6,9 @@ color_scheme:
   mpc: tab:red
   rlca: tab:purple
   teb: tab:orange
+goal_marker: '*'
+goal_point_color: tab:brown
+goal_size: 5
 labels:
   drl: DRL
   dwa: DWA
@@ -14,10 +17,13 @@ labels:
   rlca: RLCA
   teb: TEB
 most_recent_file: data_21-11-04_13:16:31.json
-path_alpha: 0.3
-path_size: 0.1
+path_alpha: 0.5
+path_size: 0.5
 plot_collision_zones: true
 plot_collisions: null
 plot_qualitative: true
 specified_data_filename: null
 specify_data: true
+start_marker: ^
+start_point_color: tab:grey
+start_size: 5
