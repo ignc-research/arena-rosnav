@@ -1,5 +1,23 @@
 collision_zone_base_diameter: 0.1
+color_scheme:
+  drl: tab:blue
+  dwa: tab:green
+  ego: tab:grey
+  mpc: tab:red
+  rlca: tab:purple
+  teb: tab:orange
+labels:
+  drl: DRL
+  dwa: DWA
+  ego: EGO
+  mpc: MPC
+  rlca: RLCA
+  teb: TEB
 most_recent_file: data_21-11-04_13:16:31.json
+path_alpha: 0.3
+path_size: 0.1
+plot_collision_zones: true
+plot_collisions: null
 plot_qualitative: true
 specified_data_filename: null
 specify_data: true
