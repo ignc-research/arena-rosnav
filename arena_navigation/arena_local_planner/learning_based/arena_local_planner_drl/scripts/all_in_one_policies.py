@@ -135,7 +135,7 @@ class AGENT_2(BaseFeaturesExtractor):
         return features
 
 
-policy_kwargs_agent_1 = dict(features_extractor_class=AGENT_1,
+policy_kwargs_agent_1 = dict(features_extractor_class=AGENT_2,
                              features_extractor_kwargs=dict(features_dim=64),
                              net_arch=[dict(vf=[64, 64, 64], pi=[64, 64, 64])],
                              activation_fn=th.nn.ReLU)
@@ -164,4 +164,7 @@ policy_kwargs_agent_11 = dict(net_arch=[dict(pi=[128, 64, 64, 32], vf=[64, 64, 6
                               activation_fn=th.nn.ReLU)
 
 policy_kwargs_agent_12 = dict(net_arch=[512, dict(pi=[512, 256, 128], vf=[512, 256, 128])],
+                              activation_fn=th.nn.ReLU)
+
+policy_kwargs_agent_13 = dict(net_arch=[dict(pi=[128, 128], vf=[128, 128])],
                               activation_fn=th.nn.ReLU)
