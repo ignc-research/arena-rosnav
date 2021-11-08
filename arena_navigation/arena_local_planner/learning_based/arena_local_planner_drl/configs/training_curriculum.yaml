@@ -1,22 +1,22 @@
 1:
-  dynamic_human: 1
+  dynamic_human: 0
   dynamic_robot: 0
   static: 0
 2:
-  dynamic_human: 5
+  dynamic_human: 1
   dynamic_robot: 0
   static: 0
 3:
-  dynamic_human: 10
+  dynamic_human: 2
   dynamic_robot: 0
   static: 0
 4:
-  dynamic_human: 20
-  dynamic_robot: 0
+  dynamic_human: 3
+  dynamic_robot: 1
   static: 0
 5:
-  dynamic_human: 20
-  dynamic_robot: 3
+  dynamic_human: 5
+  dynamic_robot: 2
   static: 0
 6:
   dynamic_human: 6

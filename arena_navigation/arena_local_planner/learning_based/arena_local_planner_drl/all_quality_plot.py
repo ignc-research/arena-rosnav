@@ -415,7 +415,7 @@ for path in pathes :
                 # ax.text(x, y, i,color='green',alpha= 0.7)
                 
 
-    ax.legend(loc=3, prop={'size': 12})
+    ax.legend(loc=3, prop={'size': 11})
 
     fig.canvas.draw()
     fig.tight_layout()

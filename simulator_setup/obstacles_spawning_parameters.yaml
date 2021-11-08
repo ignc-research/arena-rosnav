@@ -5,7 +5,7 @@
     - obstacles/shelf.yaml
   human obstacles:
     adult:
-    - 1
+    - 0
     - dynamic_obstacles/person_two_legged.model.yaml
     child:
     - 0
@@ -33,16 +33,16 @@
     - 1
     - dynamic_obstacles/person_two_legged.model.yaml
     child:
-    - 1
+    - 0
     - dynamic_obstacles/person_two_legged_child.model.yaml
     elder:
-    - 1
+    - 0
     - dynamic_obstacles/person_single_circle_elder.model.yaml
     forklift:
-    - 1
+    - 0
     - dynamic_obstacles/big_forklift.model.yaml
     servicerobot:
-    - 1
+    - 0
     - dynamic_obstacles/servicerobot.model.yaml
   robot obstacles:
     random_wanderer:
@@ -55,19 +55,19 @@
     - obstacles/shelf.yaml
   human obstacles:
     adult:
-    - 2
+    - 1
     - dynamic_obstacles/person_two_legged.model.yaml
     child:
-    - 2
+    - 1
     - dynamic_obstacles/person_two_legged_child.model.yaml
     elder:
-    - 2
+    - 0
     - dynamic_obstacles/person_single_circle_elder.model.yaml
     forklift:
-    - 2
+    - 0
     - dynamic_obstacles/big_forklift.model.yaml
     servicerobot:
-    - 2
+    - 0
     - dynamic_obstacles/servicerobot.model.yaml
   robot obstacles:
     random_wanderer:
@@ -80,23 +80,23 @@
     - obstacles/shelf.yaml
   human obstacles:
     adult:
-    - 4
+    - 1
     - dynamic_obstacles/person_two_legged.model.yaml
     child:
-    - 4
+    - 1
     - dynamic_obstacles/person_two_legged_child.model.yaml
     elder:
-    - 4
+    - 1
     - dynamic_obstacles/person_single_circle_elder.model.yaml
     forklift:
-    - 4
+    - 0
     - dynamic_obstacles/big_forklift.model.yaml
     servicerobot:
-    - 4
+    - 0
     - dynamic_obstacles/servicerobot.model.yaml
   robot obstacles:
     random_wanderer:
-    - 0
+    - 1
     - dynamic_obstacles/random_wanderer.model.yaml
 5:
   static obstacles:
@@ -105,23 +105,23 @@
     - obstacles/shelf.yaml
   human obstacles:
     adult:
-    - 4
+    - 1
     - dynamic_obstacles/person_two_legged.model.yaml
     child:
-    - 4
+    - 1
     - dynamic_obstacles/person_two_legged_child.model.yaml
     elder:
-    - 4
+    - 1
     - dynamic_obstacles/person_single_circle_elder.model.yaml
     forklift:
-    - 4
+    - 1
     - dynamic_obstacles/big_forklift.model.yaml
     servicerobot:
-    - 4
+    - 1
     - dynamic_obstacles/servicerobot.model.yaml
   robot obstacles:
     random_wanderer:
-    - 3
+    - 2
     - dynamic_obstacles/random_wanderer.model.yaml
 6:
   static obstacles:

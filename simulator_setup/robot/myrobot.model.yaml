@@ -6,7 +6,6 @@ bodies:  # List of named bodies
     footprints:
       - type: circle
         radius: 0.3
-        # radius: 0.116042
         center: [0.0,0.0]
         layers: ["all"]
         collision: true
@@ -14,16 +13,66 @@ bodies:  # List of named bodies
         friction: 0.1
         restitution: 0
         sensor: false
-      
+
+      # - type: polygon  # wheel
+      #   sensor: true
+      #   points: [[-.06025, -.2], [-.06025, -.15], [.06025, -.15], [.06025, -.2]]
+      #   density: 1
+      #   radius: 0.3
+      #   layers: ["all"]
+
+      # - type: polygon  # wheel
+      #   sensor: true
+      #   points: [[-.06025, .2], [-.06025, .15], [.06025, .15], [.06025, .2]]
+      #   density: 1
+      #   radius: 0.3
+      #   layers: ["all"]
+
+
+  - name: laser_mount 
+    pose: [0, 0, 0] 
+    type: dynamic  
+    color: [1, 0, 0, 0.75] 
+    footprints:
+      - type: polygon  # Laser model
+        sensor: true
+        points: [[.025, -.025], [.025, 0.025], [-.025, 0.025], [-.025, -0.025]]
+        layers: []
+        density: 1
+
+  - name: shell
+    pose: [0,0,0]
+    type: dynamic
+    color: [0,0,1,1.0]
+    footprints:
+      - type: circle
+        radius: 0.3
+        center: [0, 0]
+        density: 1
+        layers: ["all"]
+
+
+
+
+joints:
+  - type: weld
+    name: laser_mount_weld
+    bodies: 
+      - name: laser_mount
+        anchor: [0, 0]
+      - name: base_footprint
+        anchor: [0, 0]
+  - type: weld
+    name: shell_mount_weld
+    bodies: 
+      - name: shell
+        anchor: [0, 0]
+      - name: base_footprint
+        anchor: [0, 0]  
 
 plugins:
-  - type: DiffDrive 
-    name: diff_drive 
-    body: base_footprint
-    odom_frame_id: odom
-    odom_pub: /odom  # topic odom is published on
-    pub_rate: 20
-  
+
+
   - type: Laser
     name: laser
     frame: laser_mount
@@ -38,15 +87,22 @@ plugins:
     range: 8
      
     #for fc or trans 360
-    angle: {min: -1.5707963267948966, max: 4.694936014, increment:  0.017453292}
+    angle: {min: -2.356194490192345, max: 2.356194490192345, increment: 0.04363323129985824}
 
     #for gru 64
     # angle: {min: -1.570796327, max: 4.694935688, increment:  0.0877}
 
-    noise_std_dev: 0.0
-    update_rate: 10
+    noise_std_dev: 0.01
+    update_rate: 40
     layers: ["all"]
 
+  - type: DiffDrive 
+    name: diff_drive 
+    body: base_footprint
+    odom_frame_id: odom
+    odom_pub: /odom  # topic odom is published on
+    pub_rate: 20
+  
 
   - type: ModelTfPublisher
     name: tf_publisher

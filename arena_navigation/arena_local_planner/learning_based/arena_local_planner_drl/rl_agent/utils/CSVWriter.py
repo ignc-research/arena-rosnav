@@ -6,12 +6,12 @@ class CSVWriter():
     def __init__(self):
         # create evaluation.csv file
         peds = []
-        num_obs= [0,0,5,10,20,20]
+        # num_obs= [0,0,5,10,20,20,0,7]
 
-        for i in np.arange(1,num_obs[rospy.get_param("/curr_stage", -1)]) :
-            peds += ['ped_pos_x'+str(i)]
-            peds += ['ped_pos_y'+str(i)]
-            peds += ['ped_behavior'+str(i)]
+        # for i in np.arange(1,num_obs[rospy.get_param("/curr_stage", -1)]) :
+        #     peds += ['ped_pos_x'+str(i)]
+        #     peds += ['ped_pos_y'+str(i)]
+        #     peds += ['ped_behavior'+str(i)]
 
 
         with open('evaluation.csv', 'w+', newline = '') as fp:

@@ -166,7 +166,7 @@ class FlatlandEnv(gym.Env):
                             self._robot_radius = footprint.setdefault(
                                 'radius', 0.3)*1.05
                         if footprint['radius']:
-                            self._robot_radius = footprint['radius']*1.05
+                           self._robot_radius = footprint['radius']*1.05
             # get laser related information
             for plugin in robot_data['plugins']:
                 if plugin['type'] == 'Laser':
@@ -259,31 +259,32 @@ class FlatlandEnv(gym.Env):
             # history_evaluation +=[obs_dict['task_flag']]
             
             # self.csv_writer.addData(np.array(history_evaluation))
-        num_obs= [0,0,5,10,20,20]
+
+        # num_obs= [0,0,5,10,20,20,0,7]
         if self._steps_curr_episode > self._max_steps_per_episode:
             done = True
             info['done_reason'] = 0
             info['is_success'] = 0
             self.reward_calculator.kdtree = None
-        history_evaluation  = [self._episode] 
-        history_evaluation +=[obs_dict['task_flag']] 
-        history_evaluation +=[info['done_reason']]
-        history_evaluation +=[time.time()] +self.reward_calculator.get_history_info()
-        history_evaluation +=[obs_dict['vip_velocity']]
-        history_evaluation +=[obs_dict['robot_velocity']]
-        history_evaluation +=[obs_dict['vip_orientation']]
-        history_evaluation +=[obs_dict['robot_orientation']]
-        history_evaluation +=[obs_dict['vip_rho']]
-        history_evaluation +=[obs_dict['robot_pos_x']]
-        history_evaluation +=[obs_dict['robot_pos_y']]
-        history_evaluation +=[obs_dict['vip_pos_x']]
-        history_evaluation +=[obs_dict['vip_pos_y']]
-        for i in np.arange(1,num_obs[rospy.get_param("/curr_stage", -1)]):
-            history_evaluation += [obs_dict['human_coordinates_in_robot_frame'][0][i]]
-            history_evaluation += [obs_dict['human_coordinates_in_robot_frame'][1][i]]
-            history_evaluation += [self.human_behavior_tokens[obs_dict['human_behavior'][i]]]
+            history_evaluation  = [self._episode] 
+            history_evaluation +=[obs_dict['task_flag']] 
+            history_evaluation +=[info['done_reason']]
+            history_evaluation +=[time.time()] +self.reward_calculator.get_history_info()
+            history_evaluation +=[obs_dict['vip_velocity']]
+            history_evaluation +=[obs_dict['robot_velocity']]
+            history_evaluation +=[obs_dict['vip_orientation']]
+            history_evaluation +=[obs_dict['robot_orientation']]
+            history_evaluation +=[obs_dict['vip_rho']]
+            history_evaluation +=[obs_dict['robot_pos_x']]
+            history_evaluation +=[obs_dict['robot_pos_y']]
+            history_evaluation +=[obs_dict['vip_pos_x']]
+            history_evaluation +=[obs_dict['vip_pos_y']]
+        # for i in np.arange(1,len(obs_dict['human_coordinates_in_robot_frame'][0])):
+        #     history_evaluation += [obs_dict['human_coordinates_in_robot_frame'][0][i]]
+        #     history_evaluation += [obs_dict['human_coordinates_in_robot_frame'][1][i]]
+        #     history_evaluation += [self.human_behavior_tokens[obs_dict['human_behavior'][i]]]
         
-        self.csv_writer.addData(np.array(history_evaluation))
+            self.csv_writer.addData(np.array(history_evaluation))
 
         self.last_obs_dict=obs_dict
 
@@ -321,7 +322,7 @@ class FlatlandEnv(gym.Env):
              saftey_distance_parameter, dict), "'saftey_distance_parameter.yaml' has wrong fromat! Has to encode dictionary!"
                 
         return saftey_distance_parameter
-
+  
 
 if __name__ == '__main__':
 
