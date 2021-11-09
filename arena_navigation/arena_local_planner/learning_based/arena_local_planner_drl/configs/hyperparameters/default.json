@@ -15,7 +15,7 @@
     "train_max_steps_per_episode": 500,
     "eval_max_steps_per_episode": 650,
     "goal_radius": 0.6,
-    "reward_fnc": "rule_08",
+    "reward_fnc": "rule_06",
     "discrete_action_space": true,
     "normalize": true,
     "task_mode": "staged",
