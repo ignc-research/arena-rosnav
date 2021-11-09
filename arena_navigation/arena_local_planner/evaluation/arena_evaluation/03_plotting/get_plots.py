@@ -6,8 +6,10 @@ from scipy.ndimage.measurements import label
 import yaml
 import json
 import matplotlib.pyplot as plt
+import matplotlib.patches as patches
 from matplotlib import image
 import scipy.ndimage as ndimage
+import skimage.io
 import sys
 
 class plotter():
@@ -18,7 +20,8 @@ class plotter():
         self.read_config()
         self.grab_data()
         self.load_data()
-        # os.mkdir(self.dir_path + "/plots_{}".format(self.now))
+        self.plot_dir = self.dir_path + "/plots_{}".format(self.now)
+        os.mkdir(self.plot_dir)
 
     def read_config(self):
         with open(self.dir_path+"/get_plots_config.yaml") as file:
@@ -69,10 +72,6 @@ class plotter():
         self.get_velocity() # self.velocities
         self.get_planner() # self.planners
 
-        # lists for calculation of start and goal
-        start_point = {"x":[],"y":[]}
-        goal_point = {"x":[],"y":[]}
-
         ### iteration part ###
         for map in self.maps:
             map_keys = [] # list of keys with current map
@@ -99,13 +98,13 @@ class plotter():
                     ### plotting part ###
                     plt.figure()
 
-                    # plot image
+                    # plot map image
                     img= image.imread("{0}/{1}".format(map_path,map_file))
                     img_rotated = ndimage.rotate(img, 90, reshape=True) # rotate by 90 degree to get rviz konvention
                     plt.imshow(img_rotated)
 
                     # plot each planners path and if flag given collisions and zones
-                    for key in obs_keys:
+                    for key in sorted(obs_keys):
                         # plot paths for every episode
                         planner = self.data[key]["planner"]
                         paths = self.data[key]["paths_travelled"]
@@ -118,42 +117,62 @@ class plotter():
                                 color = self.config["color_scheme"][planner],
                                 linewidth = 2)
 
-                                x,y = to_ros_coords(paths[episode], img, map_resolution, map_origin)
-                                x = x[1:-1] # NOTE: sometimes episode is wrongly assigned _> skip first and last coordinates
-                                y = y[1:-1]
-                                start_point["x"].append(x[0])
-                                start_point["y"].append(y[0])
-                                goal_point["x"].append(x[-1])
-                                goal_point["y"].append(y[-1])
-                                plt.plot(x[1:-1],y[1:-1], # coordinates need to transformed to ros format
-                                "-",
+                            x,y = to_ros_coords(paths[episode], img, map_resolution, map_origin)
+                            x = x[1:-1] # NOTE: sometimes episode is wrongly assigned _> skip first and last coordinates
+                            y = y[1:-1]
+                            plt.plot(x,y,
+                            "-",
+                            color = self.config["color_scheme"][planner],
+                            alpha = self.config["path_alpha"],
+                            linewidth = self.config["path_size"]/map_resolution)
+
+                            if self.config["plot_progression"]:
+                                x_progression = x[0::self.config["progression_steps"]]
+                                y_progression = y[0::self.config["progression_steps"]]
+                                plt.scatter(x_progression,y_progression,
                                 color = self.config["color_scheme"][planner],
                                 alpha = self.config["path_alpha"],
-                                linewidth = self.config["path_size"])
-                            else:
-                                x,y = to_ros_coords(paths[episode], img, map_resolution, map_origin)
-                                x = x[1:-1] # NOTE: sometimes episode is wrongly assigned _> skip first and last coordinates
-                                y = y[1:-1]
-                                start_point["x"].append(x[0])
-                                start_point["y"].append(y[0])
-                                goal_point["x"].append(x[-1])
-                                goal_point["y"].append(y[-1])
-                                plt.plot(x[1:-1],y[1:-1], # coordinates need to transformed to ros format
-                                "-",
-                                color = self.config["color_scheme"][planner],
-                                alpha = self.config["path_alpha"],
-                                linewidth = self.config["path_size"])
+                                s = self.config["progression_size"]/map_resolution)
 
-                    # labels for legend only
-                    plt.scatter([],[], marker = self.config["start_marker"], label = "Start", color = self.config["start_point_color"])
-                    plt.scatter([],[], marker = self.config["goal_marker"], label = "Goal", color = self.config["goal_point_color"])
-                    # start and goal point
-                    plt.scatter(np.mean(start_point["x"]),np.mean(start_point["y"]), marker = self.config["start_marker"], s = self.config["start_size"]/map_resolution, color = self.config["start_point_color"])
-                    plt.scatter(np.mean(goal_point["x"]),np.mean(goal_point["y"]), marker = self.config["goal_marker"], s = self.config["goal_size"]/map_resolution, color = self.config["goal_point_color"])
+                        # plot collisions
+                        if self.config["plot_collisions"]:
+                            collisions = self.data[key]["collision_zones"]["collisions"]
+                            if len(collisions) != 0:
+                                x,y = to_ros_coords(collisions, img, map_resolution, map_origin)
+                                plt.scatter(x,y,
+                                    color = self.config["color_scheme"][planner],
+                                    alpha = self.config["collision_alpha"],
+                                    s = self.config["collision_size"]/map_resolution)
+                        # plot collision zones and centroids
+                        if self.config["plot_collision_zones"]:
+                            centroids = self.data[key]["collision_zones"]["centroids"]
+                            if len(centroids) != 0:
+                                counts = self.data[key]["collision_zones"]["counts"]
+                                x,y = to_ros_coords(centroids, img, map_resolution, map_origin)
+                                plt.scatter(x,y,
+                                    color = self.config["color_scheme"][planner],
+                                    alpha = self.config["collision_alpha"],
+                                    s = self.config["collision_size"]/map_resolution)
+                                for i,centroid in enumerate(centroids):
+                                    # plot circle for collision zone
+                                    plt.gca().add_patch(plt.Circle(tuple(to_ros_coords(centroid, img, map_resolution, map_origin)),
+                                    radius = self.config["collision_zone_base_diameter"]*counts[i]/map_resolution,
+                                    color=self.config["color_scheme"][planner],
+                                    fill=False))
+                                    # plot transparent circle as background of zone
+                                    plt.gca().add_patch(plt.Circle(tuple(to_ros_coords(centroid, img, map_resolution, map_origin)),
+                                    radius = self.config["collision_zone_base_diameter"]*counts[i]/map_resolution,
+                                    color=self.config["color_scheme"][planner],
+                                    fill=True,
+                                    alpha = self.config["collision_zone_alpha"]))
 
-                    plt.legend()
-                    plt.show()
-                    sys.exit()
+                    # plot scenario properties (start, goal, dynamic obstacles)
+                    self.plot_scenario(obs_keys, img,  map_resolution, map_origin)
+
+                    if self.config["plot_legend"]:
+                        plt.legend(loc=self.config["legend_position"])
+                    plt.tight_layout()
+                    plt.savefig(self.plot_dir + "/qualitative_plot_{0}_{1}_{2}_{3}".format(map,obstacle_number,velocity,self.now))
 
     def get_map(self): # get map from df file name
         self.map_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))) + "/simulator_setup/maps"
@@ -203,8 +222,72 @@ class plotter():
                 self.data[key]["planner"] = "base_planner"
         self.planners = np.unique([self.data[key]["planner"] for key in self.keys])
 
+    def plot_scenario(self, keys, img,  map_resolution, map_origin):
+        scenario_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))) + "/simulator_setup/scenarios/eval"
+        scenario_dict = {x.split("/")[-1].replace(".json",""):x for x in sorted(glob.glob("{0}/*.json".format(scenario_dir)))}
+        for scene in sorted(scenario_dict.keys()): # check if a map in /simulator_setup/maps fits scenario name
+            if scene in keys[0]:
+                scenario_path = scenario_dict[scene]
+        with open(scenario_path) as file:
+            scenario = json.load(file)
+        if "pedsim_agents" in scenario.keys():
+            dynamic_obstacles = scenario["pedsim_agents"]
+            obstacle_paths = [[obstacle["pos"]]+ obstacle["waypoints"] for obstacle in dynamic_obstacles]
+            start_x, start_y = to_ros_coords(scenario["robot_position"], img, map_resolution, map_origin)
+            goal_x, goal_y = to_ros_coords(scenario["robot_goal"], img, map_resolution, map_origin)
+            obstacle_paths = transform_waypoints(obstacle_paths, img, map_resolution, map_origin, ped_sim=True)
+        else:
+            start = scenario["scenarios"][0]["robot"]["start_pos"]
+            goal = scenario["scenarios"][0]["robot"]["goal_pos"]
+            dynamic_obstacles = scenario["scenarios"][0]["dynamic_obstacles"]
+            obstacle_paths = [[dynamic_obstacles[obstacle]["start_pos"][:-1]]+[waypoint[:-1] for waypoint in dynamic_obstacles[obstacle]["waypoints"]] for obstacle in dynamic_obstacles]
+            start_x, start_y = to_ros_coords(start, img, map_resolution, map_origin)
+            goal_x, goal_y = to_ros_coords(goal, img, map_resolution, map_origin)
+            obstacle_paths = transform_waypoints(obstacle_paths, img, map_resolution, map_origin)
+
+        # plot start point and goal
+        # labels for legend only
+        plt.scatter([],[], marker = self.config["start_marker"], label = "Start", color = self.config["start_point_color"])
+        plt.scatter([],[], marker = self.config["goal_marker"], label = "Goal", color = self.config["goal_point_color"])
+        # start and goal point
+        plt.scatter(start_x,start_y, marker = self.config["start_marker"], s = self.config["start_size"]/map_resolution, color = self.config["start_point_color"])
+        plt.scatter(goal_x,goal_y, marker = self.config["goal_marker"], s = self.config["goal_size"]/map_resolution, color = self.config["goal_point_color"])
+
+        # plot dynamic obstacle path
+        for path in obstacle_paths:
+            # plot waypoints as circles
+            for i,waypoint in enumerate(path):
+                plt.gca().add_patch(plt.Circle(waypoint,
+                    radius = self.config["obstacle_radius"]/map_resolution,
+                    color=self.config["obstacle_color"],
+                    fill=False))
+                if i == len(path)-1:
+                    continue
+                plt.gca().add_patch(patches.FancyArrowPatch(waypoint, path[i+1], arrowstyle='<->', mutation_scale = self.config["path_arrow_size"], color = self.config["path_arrow_color"]))
+
 def to_ros_coords(coords, img, map_resolution, map_origin):
-    return  [img.shape[0] - (y-map_origin[1])/map_resolution for x,y in coords],[img.shape[1] - (x-map_origin[0])/map_resolution for x,y in coords]
+    if type(coords) == tuple:
+        return  [img.shape[0] - (y-map_origin[1])/map_resolution for x,y in coords],[img.shape[1] - (x-map_origin[0])/map_resolution for x,y in coords]
+    elif type(coords) == list and (type(coords[0]) == float or type(coords[0]) == int):
+        return  img.shape[0] - (coords[1]-map_origin[1])/map_resolution,img.shape[1] - (coords[0]-map_origin[0])/map_resolution
+    elif type(coords) == list:
+        return  [img.shape[0] - (point[1]-map_origin[1]) / map_resolution for point in coords],[img.shape[1] - (point[0]-map_origin[0]) / map_resolution for point in coords]
+
+def transform_waypoints(obstacle_paths, img, map_resolution, map_origin, ped_sim = False): # only necessary for old scenario.json
+    transformed_paths = []
+    if ped_sim:
+        for path in obstacle_paths:
+            transformed_paths.append([list(to_ros_coords(p,img, map_resolution, map_origin)) for p in path])
+    else:
+        for path in obstacle_paths:
+            start = list(to_ros_coords(path[0],img, map_resolution, map_origin))
+            waypoint = list(to_ros_coords((np.array(path[0]) + np.array(path[1])).tolist(),img, map_resolution, map_origin))
+            transformed_paths.append([start,waypoint])
+    return transformed_paths
+
+
+
+
 
 if __name__=="__main__":
     Plotter = plotter()

@@ -1,4 +1,7 @@
-collision_zone_base_diameter: 0.1
+collision_alpha: 0.1
+collision_size: 1.0
+collision_zone_alpha: 0.075
+collision_zone_base_diameter: 0.025
 color_scheme:
   drl: tab:blue
   dwa: tab:green
@@ -8,7 +11,7 @@ color_scheme:
   teb: tab:orange
 goal_marker: '*'
 goal_point_color: tab:brown
-goal_size: 5
+goal_size: 20
 labels:
   drl: DRL
   dwa: DWA
@@ -16,14 +19,23 @@ labels:
   mpc: MPC
   rlca: RLCA
   teb: TEB
-most_recent_file: data_21-11-04_13:16:31.json
-path_alpha: 0.5
+legend_position: upper left
+most_recent_file: data_21-11-09_16:48:21.json
+obstacle_color: black
+obstacle_radius: 0.3
+path_alpha: 0.3
+path_arrow_color: black
+path_arrow_size: 5
 path_size: 0.5
 plot_collision_zones: true
-plot_collisions: null
+plot_collisions: true
+plot_legend: true
+plot_progression: false
 plot_qualitative: true
+progression_size: 3
+progression_steps: 20
 specified_data_filename: null
 specify_data: true
 start_marker: ^
 start_point_color: tab:grey
-start_size: 5
+start_size: 20

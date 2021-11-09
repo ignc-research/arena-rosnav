@@ -234,9 +234,6 @@ class get_metrics():
         episodes = np.unique(df["episode"])
         for episode in episodes:
             paths_travelled[str(episode)] = list(zip(df.loc[df["episode"]==episode,"robot_pos_x"],df.loc[df["episode"]==episode,"robot_pos_y"]))
-            # plt.figure(episode)
-            # plt.scatter(*zip(*paths_travelled[episode]))
-            # plt.show()
         return paths_travelled
 
     def get_collision_zones(self,df):
@@ -255,12 +252,6 @@ class get_metrics():
         kmeans = KMeans(n_clusters = best_k).fit(points)
         centroids = kmeans.cluster_centers_
         _ , counts = np.unique(kmeans.labels_, return_counts=True)
-        # plt.figure()
-        # plt.scatter(*zip(*points))
-        # plt.scatter(*zip(*centroids), color = "red")
-        # for i,centroid in enumerate(centroids):
-        #     plt.gca().add_patch(plt.Circle(centroid, self.config["robot_radius"]*counts[i], color='b', fill=False))
-        # plt.savefig(self.dir_path+"/collision_{}.png".format(time.time()))
         return {"centroids": centroids.tolist(), "counts": counts.tolist(), "collisions": collisions.values.tolist()}
 
 if __name__=="__main__":
