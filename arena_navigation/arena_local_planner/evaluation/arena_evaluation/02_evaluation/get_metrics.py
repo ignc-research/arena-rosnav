@@ -1,12 +1,10 @@
 import numpy as np
-from numpy.core.fromnumeric import size
 import pandas as pd
 import glob # usefull for listing all files of a type in a directory
 import os
 import time
 import yaml
 import json
-import matplotlib.pyplot as plt
 import warnings
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score

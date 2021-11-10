@@ -4,8 +4,10 @@
   <arg name="train_mode"       default="false"/>
   <param name="train_mode" value="$(arg train_mode)" />
   <arg name="use_recorder"       default="false"/>
+  <arg name="record_only_planner"       default="true"/>
   
-  <arg name="local_planner"   default="teb"/> 
+  <arg name="local_planner"   default="teb"/>
+  <arg name="waypoint_generator"   default="spatial_horizon"/>
   <arg name="rviz_file"       default="nav"/>
   <arg name="disable_scenario"    default="true"/>
   <arg name="scenario_file"   default="empty_map.json"/>
@@ -58,6 +60,8 @@
   <group if="$(eval arg('use_recorder') == true)">
     <node pkg="arena_evaluation" name="data_recorder_node" type="data_recorder_node.py" />
       <param name="local_planner"  value="$(arg local_planner)"/>
+      <param name="waypoint_generator"  value="$(arg waypoint_generator)"/>
+      <param name="record_only_planner"  value="$(arg record_only_planner)"/>
       <param name="scenario_file"  value="$(arg scenario_file)"/>
   </group>
 

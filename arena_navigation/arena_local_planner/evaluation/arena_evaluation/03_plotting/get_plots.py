@@ -2,15 +2,12 @@ import numpy as np
 import glob # usefull for listing all files of a type in a directory
 import os
 import time
-from scipy.ndimage.measurements import label
 import yaml
 import json
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from matplotlib import image
 import scipy.ndimage as ndimage
-import skimage.io
-import sys
 
 class plotter():
     def __init__(self):
@@ -23,6 +20,7 @@ class plotter():
         self.plot_dir = self.dir_path + "/plots_{}".format(self.now)
         os.mkdir(self.plot_dir)
 
+### load data ###
     def read_config(self):
         with open(self.dir_path+"/get_plots_config.yaml") as file:
             self.config = yaml.safe_load(file)
@@ -62,10 +60,11 @@ class plotter():
         self.config["most_recent_file"] = self.data_file_name
         with open(self.dir_path+"/get_plots_config.yaml", 'w') as file: # update most_recent_file in config
             yaml.dump(self.config, file)
-        self.keys = self.data.keys()
+        self.keys = list(self.data.keys())
+### end of block load data ###
 
+### qualitative plots ###
     def get_qualitative_plots(self):
-# https://github.com/ignc-research/arena-rosnav/blob/local_planner_subgoalmode/arena_navigation/arena_local_planner/evaluation/plots/run_7/map1_obs10_vel05_testplot2.png
         ### get scenario properties ###
         self.get_map() # self.maps
         self.get_obstacle_number() # self.obstacle_numbers
@@ -107,6 +106,8 @@ class plotter():
                     for key in sorted(obs_keys):
                         # plot paths for every episode
                         planner = self.data[key]["planner"]
+                        if planner in self.config["leave_out_planner"]:
+                            continue
                         paths = self.data[key]["paths_travelled"]
                         episodes = paths.keys()
                         for i,episode in enumerate(episodes):
@@ -210,7 +211,7 @@ class plotter():
         self.velocities = np.unique([self.data[key]["velocity"] for key in self.keys])
 
     def get_planner(self):
-        planners = list(self.config["color_scheme"].keys())
+        planners = list(self.config["labels"].keys())
         planner_found = False
         for key in self.keys:
             for planner in planners: # check if a map in /simulator_setup/maps fits scenario name
@@ -264,7 +265,15 @@ class plotter():
                 if i == len(path)-1:
                     continue
                 plt.gca().add_patch(patches.FancyArrowPatch(waypoint, path[i+1], arrowstyle='<->', mutation_scale = self.config["path_arrow_size"], color = self.config["path_arrow_color"]))
+### end of block qualitative plots ###
 
+### quantitative plots ###
+    def get_quantitative_plots(self):
+        print(self.data[self.keys[0]]["summary_df"].keys())
+
+
+
+# x,y coordinate transformations needed for qualitative plots
 def to_ros_coords(coords, img, map_resolution, map_origin):
     if type(coords) == tuple:
         return  [img.shape[0] - (y-map_origin[1])/map_resolution for x,y in coords],[img.shape[1] - (x-map_origin[0])/map_resolution for x,y in coords]
@@ -293,3 +302,5 @@ if __name__=="__main__":
     Plotter = plotter()
     if Plotter.config["plot_qualitative"]:
         Plotter.get_qualitative_plots()
+    if Plotter.config["plot_quantitative"]:
+        Plotter.get_quantitative_plots()
