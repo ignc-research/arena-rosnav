@@ -18,12 +18,9 @@ from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.tools.train_agent_utils import *
 
 ### HYPERPARAMETERS ###
-AGENTS = ['AGENT_1_2021_04_02__22_03', 'AGENT_2_2021_03_30__23_10', 'AGENT_3_2021_04_01__08_06', 'AGENT_4_2021_04_02__01_07', 
-    'AGENT_5_2021_03_31__18_52', 'AGENT_6_2021_04_04__02_12', 'AGENT_7_2021_04_06__07_00', 'AGENT_8_2021_04_05__22_11', 'AGENT_9_2021_04_04__11_09', 
-    'AGENT_10_2021_04_03__16_57', 'AGENT_11_2021_04_14__20_13', 'AGENT_12_2021_04_05__12_08', 'AGENT_13_2021_04_04__18_04', 'AGENT_14_2021_04_07__01_17', 
-    'AGENT_15_2021_04_08__01_27', 'AGENT_16_2021_04_09__22_24', 'AGENT_17_2021_04_10__15_36', 'AGENT_18_2021_04_11__13_54', 'AGENT_19_2021_04_12__13_17']
+AGENTS = ['MLP_ARENA2D_2021_11_06__17_45']
 max_steps_per_episode = np.inf
-eval_episodes = 1000
+eval_episodes = 1
 
 def get_paths(args: dict, AGENT: str):
     dir = rospkg.RosPack().get_path('arena_local_planner_drl')
@@ -58,7 +55,7 @@ def make_env(with_ns: bool,
 
         env = FlatlandEnv(
             ns, PARAMS['reward_fnc'], PARAMS['discrete_action_space'], 
-            goal_radius=0.05, max_steps_per_episode=max_steps_per_episode, train_mode=False, task_mode='scenario', PATHS=PATHS, curr_stage=4,
+            goal_radius=0.6, max_steps_per_episode=max_steps_per_episode, train_mode=False, task_mode='staged', PATHS=PATHS, curr_stage=4,
             extended_eval=True)
         if log:
             # eval env
