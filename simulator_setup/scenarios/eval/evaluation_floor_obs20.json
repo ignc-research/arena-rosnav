@@ -8,7 +8,7 @@
                 -3.06
             ],
             "type": "adult",
-            "yaml_file": "/home/ducanor/catkin_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
+            "yaml_file": "/home/ducanor/arena_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
             "number_of_peds": 1,
             "vmax": 1.0,
             "start_up_mode": "default",
@@ -53,7 +53,7 @@
                 1.52
             ],
             "type": "adult",
-            "yaml_file": "/home/ducanor/catkin_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
+            "yaml_file": "/home/ducanor/arena_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
             "number_of_peds": 1,
             "vmax": 1.0,
             "start_up_mode": "default",
@@ -98,7 +98,7 @@
                 4.66
             ],
             "type": "adult",
-            "yaml_file": "/home/ducanor/catkin_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
+            "yaml_file": "/home/ducanor/arena_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
             "number_of_peds": 1,
             "vmax": 1.0,
             "start_up_mode": "default",
@@ -134,7 +134,7 @@
                 3.77
             ],
             "type": "adult",
-            "yaml_file": "/home/ducanor/catkin_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
+            "yaml_file": "/home/ducanor/arena_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
             "number_of_peds": 1,
             "vmax": 1.0,
             "start_up_mode": "default",
@@ -170,7 +170,7 @@
                 -6.61
             ],
             "type": "adult",
-            "yaml_file": "/home/ducanor/catkin_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
+            "yaml_file": "/home/ducanor/arena_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
             "number_of_peds": 1,
             "vmax": 1.0,
             "start_up_mode": "default",
@@ -215,7 +215,7 @@
                 -6.61
             ],
             "type": "adult",
-            "yaml_file": "/home/ducanor/catkin_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
+            "yaml_file": "/home/ducanor/arena_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
             "number_of_peds": 1,
             "vmax": 1.0,
             "start_up_mode": "default",
@@ -260,7 +260,7 @@
                 -4.33
             ],
             "type": "adult",
-            "yaml_file": "/home/ducanor/catkin_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
+            "yaml_file": "/home/ducanor/arena_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
             "number_of_peds": 1,
             "vmax": 1.0,
             "start_up_mode": "default",
@@ -305,7 +305,7 @@
                 -1.47
             ],
             "type": "adult",
-            "yaml_file": "/home/ducanor/catkin_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
+            "yaml_file": "/home/ducanor/arena_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
             "number_of_peds": 1,
             "vmax": 1.0,
             "start_up_mode": "default",
@@ -341,7 +341,7 @@
                 -3.06
             ],
             "type": "adult",
-            "yaml_file": "/home/ducanor/catkin_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
+            "yaml_file": "/home/ducanor/arena_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
             "number_of_peds": 1,
             "vmax": 1.0,
             "start_up_mode": "default",
@@ -377,7 +377,7 @@
                 -2.41
             ],
             "type": "adult",
-            "yaml_file": "/home/ducanor/catkin_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
+            "yaml_file": "/home/ducanor/arena_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
             "number_of_peds": 1,
             "vmax": 1.0,
             "start_up_mode": "default",
@@ -422,7 +422,7 @@
                 -2.33
             ],
             "type": "adult",
-            "yaml_file": "/home/ducanor/catkin_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
+            "yaml_file": "/home/ducanor/arena_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
             "number_of_peds": 1,
             "vmax": 1.0,
             "start_up_mode": "default",
@@ -458,7 +458,7 @@
                 5.85
             ],
             "type": "adult",
-            "yaml_file": "/home/ducanor/catkin_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
+            "yaml_file": "/home/ducanor/arena_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
             "number_of_peds": 1,
             "vmax": 1.0,
             "start_up_mode": "default",
@@ -494,7 +494,7 @@
                 5.11
             ],
             "type": "adult",
-            "yaml_file": "/home/ducanor/catkin_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
+            "yaml_file": "/home/ducanor/arena_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
             "number_of_peds": 1,
             "vmax": 1.0,
             "start_up_mode": "default",
@@ -539,7 +539,7 @@
                 5.9
             ],
             "type": "adult",
-            "yaml_file": "/home/ducanor/catkin_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
+            "yaml_file": "/home/ducanor/arena_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
             "number_of_peds": 1,
             "vmax": 1.0,
             "start_up_mode": "default",
@@ -575,7 +575,7 @@
                 0.41
             ],
             "type": "adult",
-            "yaml_file": "/home/ducanor/catkin_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
+            "yaml_file": "/home/ducanor/arena_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
             "number_of_peds": 1,
             "vmax": 1.0,
             "start_up_mode": "default",
@@ -611,7 +611,7 @@
                 1.14
             ],
             "type": "adult",
-            "yaml_file": "/home/ducanor/catkin_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
+            "yaml_file": "/home/ducanor/arena_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
             "number_of_peds": 1,
             "vmax": 1.0,
             "start_up_mode": "default",
@@ -664,7 +664,7 @@
                 0.99
             ],
             "type": "adult",
-            "yaml_file": "/home/ducanor/catkin_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
+            "yaml_file": "/home/ducanor/arena_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
             "number_of_peds": 1,
             "vmax": 1.0,
             "start_up_mode": "default",
@@ -700,7 +700,7 @@
                 -6.58
             ],
             "type": "adult",
-            "yaml_file": "/home/ducanor/catkin_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
+            "yaml_file": "/home/ducanor/arena_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
             "number_of_peds": 1,
             "vmax": 1.0,
             "start_up_mode": "default",
@@ -736,7 +736,7 @@
                 -6.73
             ],
             "type": "adult",
-            "yaml_file": "/home/ducanor/catkin_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
+            "yaml_file": "/home/ducanor/arena_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
             "number_of_peds": 1,
             "vmax": 1.0,
             "start_up_mode": "default",
@@ -781,7 +781,7 @@
                 5.06
             ],
             "type": "adult",
-            "yaml_file": "/home/ducanor/catkin_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
+            "yaml_file": "/home/ducanor/arena_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
             "number_of_peds": 1,
             "vmax": 1.0,
             "start_up_mode": "default",
@@ -828,6 +828,6 @@
         8.34,
         4.85
     ],
-    "map_path": "/home/ducanor/catkin_ws/src/arena-rosnav/simulator_setup/maps/evaluation_floor/map.yaml",
+    "map_path": "/home/ducanor/arena_ws/src/arena-rosnav/simulator_setup/maps/evaluation_floor/map.yaml",
     "format": "arena-tools"
 }

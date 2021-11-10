@@ -32,7 +32,7 @@ python <path_to_script/ods.eval.py> <path_to_parent_directory_to_ods_file_direct
 
 Example:
 ```
-$HOME/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/eval_johannes/ods_files_210913
+$HOME/arena_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/eval_johannes/ods_files_210913
 ```
 
 You need to specify the subdirectory names, e.g. indoor and outdoor, in the subdirectory_names section. Labels for the pie charts must also be defined in the pie_labels section of the `eval_config.yaml`. 

@@ -53,7 +53,7 @@ sudo docker run \
 ```
 for example
 ```
-sudo docker run -v "/yourhome/arena-rosnav/docker:/root/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/agents"  -it --rm arena_rosnav
+sudo docker run -v "/yourhome/arena-rosnav/docker:/root/arena_ws/src/arena-rosnav/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/agents"  -it --rm arena_rosnav
 ```
 # woking with docker
 1.clone this repro

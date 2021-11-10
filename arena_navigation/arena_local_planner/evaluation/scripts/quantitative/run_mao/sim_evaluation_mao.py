@@ -1,5 +1,5 @@
 # example 
-# python sim_evaluation_v2.py $HOME/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/run_3 --quantity vel --base cadrl --metrics time path collision success
+# python sim_evaluation_v2.py $HOME/arena_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/run_3 --quantity vel --base cadrl --metrics time path collision success
 
 
 import matplotlib.pyplot as plt

@@ -31,7 +31,7 @@ docker run -d \
 --name ros \
 --network=x11 \
 -e DISPLAY=novnc:0.0 \
--v $PWD:/root/catkin_ws/src/arena-rosnav \
+-v $PWD:/root/arena_ws/src/arena-rosnav \
 llalal/docker:arena-rosnav \
 tail -f /dev/null
 ```

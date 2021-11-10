@@ -4,7 +4,7 @@ services:
     build: ./
     command: tail -f /dev/null
     volumes: 
-      - .:/root/catkin_ws/src/arena-rosnav
+      - .:/root/arena_ws/src/arena-rosnav
     environment:
       - DISPLAY=novnc:0.0
     image: arena_rosnav

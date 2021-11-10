@@ -109,10 +109,10 @@ pip install stable-baselines3
 ```
 
 #### 1.3. Install arena-rosnav repo
-* Create a catkin_ws and clone this repo into your catkin_ws 
+* Create a arena_ws and clone this repo into your arena_ws 
 ````
 cd $HOME
-mkdir -p catkin_ws/src && cd catkin_ws/src
+mkdir -p arena_ws/src && cd arena_ws/src
 git clone https://github.com/ignc-research/arena-rosnav
 
 cd arena-rosnav && rosws update
@@ -128,7 +128,7 @@ Note: if you use bash replace zsh with bash in the commands
 The official ros only support tf2 with python2. In order to make the *tf* work in python3, its necessary to compile it with python3. We provided a script to automately install this
 and do some additional configurations for the convenience . You can simply run it with 
 ```
-cd $HOME/catkin_ws/src/arena-rosnav
+cd $HOME/arena_ws/src/arena-rosnav
 ./geometry2_install.sh
 ```
 
@@ -144,8 +144,8 @@ nano ~/.zshrc
 ```
 Add these lines below "source/opt/ros/melodic/setup.zsh"
 ```
-source /$HOME/catkin_ws/devel/setup.zsh
-export PYTHONPATH=$HOME/catkin_ws/src/arena-rosnav:${PYTHONPATH}
+source /$HOME/arena_ws/devel/setup.zsh
+export PYTHONPATH=$HOME/arena_ws/src/arena-rosnav:${PYTHONPATH}
 export PYTHONPATH=$HOME/geometry2_ws/devel/lib/python3/dist-packages:${PYTHONPATH}
 ```
 Add this line above "source/opt/ros/melodic/setup.zsh"
@@ -156,7 +156,7 @@ export PYTHONPATH=""
 * Install CADRL dependencies (venv always activated!) 
 ```
 workon rosnav
-cd $HOME/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/model_based/cadrl_ros
+cd $HOME/arena_ws/src/arena-rosnav/arena_navigation/arena_local_planner/model_based/cadrl_ros
 pip install -r requirements_cadrl.txt
 ```
 If you encounter errors, e.g. specific versions not found, please manually install the packages with an available version.
@@ -168,7 +168,7 @@ You only need this to run our cadrl node, if you dont plan to use it, skip this 
 pip install -e .
 
 ```
-* inside catkin_ws:
+* inside arena_ws:
 ```
 catkin_make -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=/usr/bin/python3
 ```
@@ -176,12 +176,12 @@ catkin_make -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=/usr/bin/python3
 ## Update after developing flatland code
 After changes inside the forks/flatland folder you should do the following steps to fetch the latest version:
 ```
-cd $HOME/catkin_ws/src/arena-rosnav
+cd $HOME/arena_ws/src/arena-rosnav
 rosws update
 ```
 pull latest ignc-flatland version 
 ```
-cd $HOME/catkin_ws/src/forks/flatland
+cd $HOME/arena_ws/src/forks/flatland
 git pull
 ```
 # Error Handling 
