@@ -7,7 +7,7 @@
   <arg name="record_only_planner"       default="true"/>
   
   <arg name="local_planner"   default="teb"/>
-  <arg name="waypoint_generator"   default="spatial_horizon"/>
+  <arg name="waypoint_generator"   default="classic"/>
   <arg name="rviz_file"       default="nav"/>
   <arg name="disable_scenario"    default="true"/>
   <arg name="scenario_file"   default="empty_map.json"/>
