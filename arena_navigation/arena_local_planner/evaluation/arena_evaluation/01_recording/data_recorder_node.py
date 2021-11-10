@@ -21,14 +21,23 @@ class recorder():
     def __init__(self) -> None:
         # create rawdata csv file
         self.local_planner = rospy.get_param("local_planner")
+        self.waypoint_generator = rospy.get_param("waypoint_generator")
+        self.record_only_planner = rospy.get_param("record_only_planner")
         self.scenario = rospy.get_param("scenario_file").replace(".json","").replace("eval/","")
         self.now = time.strftime("%y-%m-%d_%H:%M:%S")
         self.dir_path = os.path.dirname(os.path.abspath(__file__)) # get path for current file, does not work if os.chdir() was used
-        with open(self.dir_path+"/{0}_{1}_{2}.csv".format(self.local_planner,self.scenario,self.now), "w+", newline = "") as file:
-            writer = csv.writer(file, delimiter = ',')
-            header = [["episode","time","laser_scan","robot_lin_vel_x","robot_lin_vel_y","robot_ang_vel","robot_orientation","robot_pos_x","robot_pos_y","action"]]
-            writer.writerows(header)
-            file.close()
+        if self.record_only_planner:
+            with open(self.dir_path+"/{0}_{1}_{2}.csv".format(self.local_planner,self.scenario,self.now), "w+", newline = "") as file:
+                writer = csv.writer(file, delimiter = ',')
+                header = [["episode","time","laser_scan","robot_lin_vel_x","robot_lin_vel_y","robot_ang_vel","robot_orientation","robot_pos_x","robot_pos_y","action"]]
+                writer.writerows(header)
+                file.close()
+        else:
+            with open(self.dir_path+"/{0}_{1}_{2}_{3}.csv".format(self.local_planner,self.waypoint_generator,self.scenario,self.now), "w+", newline = "") as file:
+                writer = csv.writer(file, delimiter = ',')
+                header = [["episode","time","laser_scan","robot_lin_vel_x","robot_lin_vel_y","robot_ang_vel","robot_orientation","robot_pos_x","robot_pos_y","action"]]
+                writer.writerows(header)
+                file.close()
         
         # initialize variables to be recorded with default values, NOTE: time is recorded as well, but no need for seperate variable
         self.episode = 0
