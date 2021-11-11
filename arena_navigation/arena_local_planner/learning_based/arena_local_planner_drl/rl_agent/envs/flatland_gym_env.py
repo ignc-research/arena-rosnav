@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 from operator import is_
 from random import randint
 import gym
@@ -8,7 +8,7 @@ from typing import Union
 from stable_baselines3.common.env_checker import check_env
 import yaml
 from rl_agent.utils.observation_collector import ObservationCollector
-from rl_agent.utils.CSVWriter import CSVWriter
+# from rl_agent.utils.CSVWriter import CSVWriter # TODO: @Elias: uncomment when csv-writer exists
 from rl_agent.utils.reward import RewardCalculator
 from rl_agent.utils.debug import timeit
 from task_generator.tasks import ABSTask
@@ -97,11 +97,11 @@ class FlatlandEnv(gym.Env):
             self.observation_collector.get_observation_space()
         )
 
-        #csv writer
-        self.csv_writer=CSVWriter()
-        rospy.loginfo("======================================================")
-        rospy.loginfo("CSVWriter initialized.")
-        rospy.loginfo("======================================================")        
+        #csv writer # TODO: @Elias: uncomment when csv-writer exists
+        # self.csv_writer=CSVWriter()
+        # rospy.loginfo("======================================================")
+        # rospy.loginfo("CSVWriter initialized.")
+        # rospy.loginfo("======================================================")        
 
         # reward calculator
         if safe_dist is None:
@@ -259,12 +259,14 @@ class FlatlandEnv(gym.Env):
             info["done_reason"] = reward_info["done_reason"]
             info["is_success"] = reward_info["is_success"]
 
+
         if self._steps_curr_episode > self._max_steps_per_episode:
             done = True
             info["done_reason"] = 0
             info["is_success"] = 0
+
         history_evaluation  = [self._episode]
-        history_evaluation +=[info['done_reason']]
+        if 'done_reason' in info: history_evaluation +=[info['done_reason']] # Added by Elias since the info is empty in the first round
         history_evaluation +=[time.time()]
         history_evaluation +=[obs_dict["laser_scan"]]        
         history_evaluation +=[np.sqrt((obs_dict['robot_pose'].x)**2+(obs_dict['robot_pose'].y)**2)] # robot_velocity
@@ -273,7 +275,7 @@ class FlatlandEnv(gym.Env):
         history_evaluation +=[obs_dict['robot_pose'].y] # robot_pos_y
         history_evaluation +=[action] # action np.array
         
-        self.csv_writer.addData(np.array(history_evaluation))
+        # self.csv_writer.addData(np.array(history_evaluation)) # TODO: @Elias: uncomment when csv-writer exists
         # for logging
         if self._extended_eval and done:
             info["collisions"] = self._collisions
