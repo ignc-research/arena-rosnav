@@ -8,7 +8,6 @@ from typing import Union
 from stable_baselines3.common.env_checker import check_env
 import yaml
 from rl_agent.utils.observation_collector import ObservationCollector
-from rl_agent.utils.CSVWriter import CSVWriter
 from rl_agent.utils.reward import RewardCalculator
 from rl_agent.utils.debug import timeit
 from task_generator.tasks import ABSTask
@@ -97,12 +96,6 @@ class FlatlandEnv(gym.Env):
             self.observation_collector.get_observation_space()
         )
 
-        #csv writer
-        self.csv_writer=CSVWriter()
-        rospy.loginfo("======================================================")
-        rospy.loginfo("CSVWriter initialized.")
-        rospy.loginfo("======================================================")        
-
         # reward calculator
         if safe_dist is None:
             safe_dist = 1.6 * self._robot_radius
@@ -138,7 +131,6 @@ class FlatlandEnv(gym.Env):
         )
 
         self._steps_curr_episode = 0
-        self._episode = 0
         self._max_steps_per_episode = max_steps_per_episode
 
         # for extended eval
@@ -263,17 +255,7 @@ class FlatlandEnv(gym.Env):
             done = True
             info["done_reason"] = 0
             info["is_success"] = 0
-        history_evaluation  = [self._episode]
-        history_evaluation +=[info['done_reason']]
-        history_evaluation +=[time.time()]
-        history_evaluation +=[obs_dict["laser_scan"]]        
-        history_evaluation +=[np.sqrt((obs_dict['robot_pose'].x)**2+(obs_dict['robot_pose'].y)**2)] # robot_velocity
-        history_evaluation +=[obs_dict['robot_pose'].theta] # robot_orientation
-        history_evaluation +=[obs_dict['robot_pose'].x] # robot_pos_x
-        history_evaluation +=[obs_dict['robot_pose'].y] # robot_pos_y
-        history_evaluation +=[action] # action np.array
-        
-        self.csv_writer.addData(np.array(history_evaluation))
+
         # for logging
         if self._extended_eval and done:
             info["collisions"] = self._collisions
@@ -287,7 +269,6 @@ class FlatlandEnv(gym.Env):
     def reset(self):
         # set task
         # regenerate start position end goal position of the robot and change the obstacles accordingly
-        self._episode += 1
         self.agent_action_pub.publish(Twist())
         if self._is_train_mode:
             self._sim_step_client()
@@ -350,9 +331,6 @@ if __name__ == "__main__":
     print("start")
 
     flatland_env = FlatlandEnv()
-    rospy.loginfo("======================================================")
-    rospy.loginfo("CSVWriter initialized.")
-    rospy.loginfo("======================================================")      
     check_env(flatland_env, warn=True)
 
     # init env
