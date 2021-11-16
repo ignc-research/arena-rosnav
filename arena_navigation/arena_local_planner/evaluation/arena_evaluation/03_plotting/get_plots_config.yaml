@@ -20,38 +20,72 @@ goal_point_color: tab:brown
 goal_size: 20
 labels:
   drl: DRL
-  drl_spatial_horizon: DRL_spatial_horizon
+  drl_spatial_horizon: DRL Spatial Horizon
   dwa: DWA
-  dwa_spatial_horizon: DWA_spatial_horizon
+  dwa_spatial_horizon: DWA Spatial Horizon
   ego: EGO
-  ego_spatial_horizon: EGO_spatial_horizon
+  ego_spatial_horizon: EGO Spatial Horizon
   mpc: MPC
-  mpc_spatial_horizon: MPC_spatial_horizon
+  mpc_spatial_horizon: MPC Spatial Horizon
   rlca: RLCA
-  rlca_spatial_horizon: RLCA_spatial_horizon
+  rlca_spatial_horizon: RLCA Spatial Horizon
   teb: TEB
-  teb_spatial_horizon: TEB_spatial_horizon
+  teb_spatial_horizon: TEB Spatial Horizon
+leave_out_metric:
+- cusps
 leave_out_planner:
 - rlca_subsampling
 - drl_subsampling
-legend_position: upper left
-most_recent_file: data_21-11-10_15:21:37.json
+most_recent_file: data_21-11-08_22:41:45.json
 obstacle_color: black
 obstacle_radius: 0.3
 path_alpha: 0.3
 path_arrow_color: black
 path_arrow_size: 5
-path_size: 0.5
+path_size: 0.1
 plot_collision_zones: true
 plot_collisions: true
-plot_legend: true
 plot_progression: false
 plot_qualitative: true
+plot_qualitative_axes: true
+plot_qualitative_axes_size: 8
+plot_qualitative_legend: true
+plot_qualitative_legend_location: upper left
+plot_qualitative_title: true
+plot_qualitative_title_size: 16
 plot_quantitative: true
+plot_quantitative_axes_label_size: 12
+plot_quantitative_axes_tick_size: 10
+plot_quantitative_labels:
+  angle_over_length: Angle over Length
+  collision: Collisions
+  computation_time: Computation Time in [s]
+  cusps: Cusps
+  jerk: Robot Movement Roughness
+  max_clearing_distance: Max. Clearing Distance in [m]
+  max_curvature: Max. Curvature
+  mean_clearing_distance: Mean Clearing Distance in [m]
+  median_clearing_distance: Median Clearing Distance in [m]
+  min_clearing_distance: Min. Clearing Distance in [m]
+  normalized_curvature: Normalized Curvature
+  path_length: Path Length in [m]
+  planner: Planner
+  roughness: Path Roughness
+  success: Success, Collision and Timeout Rate
+  time: Time Traveled in [s]
+plot_quantitative_title: true
+plot_quantitative_title_size: 16
+plot_success_barwidth: 0.5
+plot_success_collision_color: red
+plot_success_legend: true
+plot_success_legend_location: upper left
+plot_success_success_color: green
+plot_success_time_out_color: blue
 progression_size: 3
 progression_steps: 20
 specified_data_filename: null
-specify_data: true
+specify_data: false
 start_marker: ^
 start_point_color: tab:grey
 start_size: 20
+violin_inner: point
