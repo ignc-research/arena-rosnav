@@ -168,3 +168,6 @@ policy_kwargs_agent_12 = dict(net_arch=[512, dict(pi=[512, 256, 128], vf=[512, 2
 
 policy_kwargs_agent_13 = dict(net_arch=[dict(pi=[128, 128], vf=[128, 128])],
                               activation_fn=th.nn.ReLU)
+
+policy_kwargs_agent_14 = dict(net_arch=[dict(pi=[256, 256], vf=[256, 256])],
+                              activation_fn=th.nn.ReLU)
