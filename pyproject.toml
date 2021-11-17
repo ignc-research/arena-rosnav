@@ -1,0 +1,33 @@
+[tool.poetry]
+name = "arena-rosnav"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+
+[[tool.poetry.source]]
+name = "ros"
+url = "https://rospypi.github.io/simple/"
+secondary = true
+
+[tool.poetry.dependencies]
+python = ">=3.8,<3.10"
+rospy = "^1.15.7"
+rosbag = "^1.15.7"
+tf = "^1.12.1"
+tf2-ros = "^0.6.5"
+PyYAML = "^5.4.1"
+catkin-pkg = "^0.4.23"
+netifaces = "^0.10.9"
+pathlib = "^1.0.1"
+empy = "^3.3.4"
+setuptools = "^56.2.0"
+filelock = "^3.0.12"
+PyQt5 = "^5.15.4"
+scipy = "^1.7.1"
+stable-baselines3 = {git = "https://github.com/ignc-research/stable-baselines3"}
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

@@ -13,6 +13,7 @@ https://docs.docker.com/docker-for-windows/install/
 
 
 ## Create containers
+
 1. Clone the repository
 ```
 git clone https://github.com/ignc-research/arena-rosnav
@@ -21,6 +22,18 @@ git clone https://github.com/ignc-research/arena-rosnav
 ```
 cd arena-rosnav
 ```
+
+Now you may use docker-compose to simplify the container creation or use Docker directly. In the first case you need docker-compose installed and may continue in the paragraph `Start using Docker-Compose`. In the second case please continue following the instructions in the paragraph `Start using only Docker`. 
+
+### Start using Docker-Compose 
+
+3. Create network and run containers
+```
+docker-compose up --build
+```
+
+### Start using only Docker
+
 3. Create network for two containers
 ```
 docker network create -d bridge x11

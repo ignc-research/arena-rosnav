@@ -23,7 +23,7 @@ Train DRL agents on ROS compatible simulations for autonomous navigation in high
 # Start Guide
 We recommend starting with the [start guide](https://github.com/ignc-research/arena-rosnav/blob/local_planner_subgoalmode/docs/guide.md) which contains all information you need to know to start off with this project including installation on **Linux and Windows** as well as tutorials to start with. 
 
-* For Mac, please refer to our [Docker](https://github.com/ignc-research/arena-rosnav/blob/local_planner_subgoalmode/docs/Docker.md).
+* For Mac, please refer to our [Docker](docs/Docker.md).
 
 
 ## 1. Installation

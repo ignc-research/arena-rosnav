@@ -1,6 +1,26 @@
 ## 1. Installation
-#### 1.1. Standard ROS setup
-(Code has been tested with ROS-melodic on Ubuntu 18.04 and Python 3.6)
+
+#### Installation on Ubuntu 20 and ROS Noetic using the installation script
+
+##### Prerequisites
+
+In order to use the install script you need to have [Poetry](https://python-poetry.org/docs/), Python 3.8+ and the correct `python-dev` library for your Python version installed and available in your shell. It is important that your activated Python version is the one which you want to use for the Poetry virtual environment.
+
+#### Installation
+
+ Navigate to the directory, where you want your code to reside and execute our install script which sets everything up:
+
+```
+. <(curl -sSL https://raw.githubusercontent.com/wittenator/arena-rosnav/local_planner_subgoalmode/install.sh)
+```
+
+
+If you have troubles with the installation we recommend to step through the installation script by hand or follow the manual installation procedure below and replacing `melodic` by `noetic` in the respective places. Pay attention to selecting the correct `.rosinstall` in the project root directory as well.
+
+#### Manual Installation (Melodic or Noetic)
+
+##### 1.1. Standard ROS setup
+(Code has been tested with ROS-melodic on Ubuntu 18.04 and Python 3.6, and ROS-Noetic on Ubuntu 20.04)
 
 * Configure your Ubuntu repositories
 ```
@@ -33,8 +53,13 @@ source ~/.zshrc
 ```
 
 *	Dependencies for building packages
+Melodic:
 ```
 sudo apt install python-rosdep python-rosinstall python-rosinstall-generator python-wstool build-essential
+```
+Noetic:
+```
+sudo apt install python3-rosdep python3-rosinstall python3-rosinstall-generator python3-wstool build-essential
 ```
 
 * Initialize rosdep
@@ -50,13 +75,7 @@ libqt4-dev \
 libopencv-dev \
 liblua5.2-dev \
 screen \
-python3.6 \
-python3.6-dev \
-libpython3.6-dev \
-python3-catkin-pkg-modules \
 python3-rospkg-modules \
-python3-empy \
-python3-setuptools \
 ros-melodic-navigation \
 ros-melodic-teb-local-planner \
 ros-melodic-mpc-local-planner \
@@ -64,63 +83,36 @@ libarmadillo-dev \
 ros-melodic-nlopt \
 ```
 
-#### 1.2. Prepare virtual environment & install python packages
-To be able to use python3 with ROS, you need an virtual environment. We recommend using virtualenv & virtualenvwrapper. 
-
-* Install virtual environment and wrapper (as root or admin! with sudo) on your local pc (without conda activated. Deactivate conda env, if you have one active)
-```
-sudo pip3 install --upgrade pip
-sudo pip3 install virtualenv
-sudo pip3 install virtualenvwrapper
-which virtualenv   # should output /usr/local/bin/virtualenv  
-```
-
-* Create venv folder inside your home directory
-```
-cd $HOME
-mkdir python_env   # create a venv folder in your home directory 
-```
-
-* Add exports into your .zshrc (if you use bash change the last line to bashrc instead of zshrc):
-```
-echo "export WORKON_HOME=$HOME/python_env   #path to your venv folder
-export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python3   #path to your python3 
-export VIRTUALENVWRAPPER_VIRTUALENV=/usr/local/bin/virtualenv
-source /usr/local/bin/virtualenvwrapper.sh" >> ~/.zshrc
-```
-
-* Create a new venv
-
-Note: You might need to restart your terminal at this point.
-```
-mkvirtualenv --python=python3.6 rosnav
-workon rosnav
-```
-
-* Install packages inside your venv (venv always activated!):
-```
-pip install --extra-index-url https://rospypi.github.io/simple/ rospy rosbag tf tf2_ros --ignore-installed
-pip install pyyaml catkin_pkg netifaces pathlib
-```     
-
-* Install stable_baselines3 for training DRL into your venv (venv always activated!)
-```
-pip install stable-baselines3
-```
-
-#### 1.3. Install arena-rosnav repo
+##### 1.3. Install arena-rosnav repo
 * Create a catkin_ws and clone this repo into your catkin_ws 
 ````
 cd $HOME
 mkdir -p catkin_ws/src && cd catkin_ws/src
 git clone https://github.com/ignc-research/arena-rosnav
 
-cd arena-rosnav && rosws update
+cd arena-rosnav 
+````
+To be able to use python3 with ROS, you need an virtual environment. We recommend using poetry. 
+
+```
+poetry install
+```
+
+* Activate the virtual environment
+```
+poetry shell
+```
+
+* Build the project
+
+```
+rosws update
 source $HOME/.zshrc
 cd ../.. 
 catkin_make -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=/usr/bin/python3
 source devel/setup.zsh
-````
+```
+
 Note: if you use bash replace zsh with bash in the commands
 
 * Install ros geometry2 from source(compiled with python3) 
