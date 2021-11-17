@@ -1,6 +1,6 @@
 ## 1. Installation
 
-#### Installation on Ubuntu 20 and ROS Noetic using the installation script
+#### Installation on Ubuntu 20 with ROS Noetic OR Ubuntu 16 with ROS Melodic using the installation script
 
 ##### Prerequisites
 
