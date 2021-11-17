@@ -36,7 +36,7 @@ leave_out_metric:
 leave_out_planner:
 - rlca_subsampling
 - drl_subsampling
-most_recent_file: data_21-11-08_22:41:45.json
+most_recent_file: data_21-11-17_16:31:00.json
 obstacle_color: black
 obstacle_radius: 0.3
 path_alpha: 0.3
@@ -61,7 +61,7 @@ plot_quantitative_labels:
   collision: Collisions
   computation_time: Computation Time in [s]
   cusps: Cusps
-  jerk: Robot Movement Roughness
+  jerk: Movement Jerk in [$\frac{m}{s^{3}}$]
   max_clearing_distance: Max. Clearing Distance in [m]
   max_curvature: Max. Curvature
   mean_clearing_distance: Mean Clearing Distance in [m]

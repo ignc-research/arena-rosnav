@@ -36,13 +36,13 @@ class get_metrics():
             df = self.extend_df(pd.read_csv(file, converters = {"laser_scan":self.string_to_float_list, "action": self.string_to_float_list}))
             df = self.drop_last_episode(df)
             data[file_name] = {
-                # "df": df.to_dict(orient = "list"),
+                # "df": df.to_dict(orient = "list"), # dont safe original data from csv file
                 "summary_df": self.get_summary_df(df).to_dict(orient = "list"),
                 "paths_travelled": self.get_paths_travelled(df),
                 "collision_zones": self.get_collision_zones(df)
             }
             print("INFO: Data tranformation and evaluation finished for: {}".format(file_name))
-        self.grab_data(files) # TODO: activate
+        self.grab_data(files)
         with open(self.dir_path+"/data_{}.json".format(self.now), "w") as outfile:
             json.dump(data, outfile)
         print("-------------------------------------------------------------------------------------------------")
@@ -70,6 +70,7 @@ class get_metrics():
             df["median_clearing_distance"] = [np.nanmedian(x) for x in df["laser_scan"]]
             df["curvature"],df["normalized_curvature"] = self.get_curvature(df)
             df["roughness"] = self.get_roughness(df)
+            df["jerk"] = self.get_jerk(df)
         return df
 
     def get_action_type(self,df):
@@ -143,6 +144,32 @@ class get_metrics():
             triangle_area = 0.5 * np.abs(x[0]*(y[1]-z[1]) + y[0]*(z[1]-x[1]) + z[0]*(x[1]-y[1]))
             roughness = 2 * triangle_area / np.abs(np.linalg.norm(z-x))**2 # basically height / base (relative height)
         return roughness
+
+    def get_jerk(self,df):
+        jerk_list = []
+        episodes = np.unique(df["episode"])
+        for episode in episodes:
+            velocities = [list(x) for x in zip(df.loc[df["episode"]==episode,"robot_lin_vel_x"],df.loc[df["episode"]==episode,"robot_lin_vel_y"])]
+            for i,vel in enumerate(velocities):
+                try:
+                    v1 = np.array(vel)
+                    v2 = np.array(velocities[i+1])
+                    v3 = np.array(velocities[i+2])
+                    jerk_list.append(self.calc_roughness(v1,v2,v3))
+                    continue
+                except:
+                    jerk_list.append(np.nan)
+                    continue
+        return jerk_list
+
+    def calc_jerk(self,v1,v2,v3):
+        v1 = (v1[0]**2 + v1[1]**2)**0.5 # total velocity
+        v2 = (v2[0]**2 + v2[1]**2)**0.5
+        v3 = (v3[0]**2 + v3[1]**2)**0.5            
+        a1 = v2-v1 # acceleration
+        a2 = v3-v2
+        jerk = a2-a1
+        return jerk
 
     def drop_last_episode(self,df):
         episodes = np.unique(df["episode"])
