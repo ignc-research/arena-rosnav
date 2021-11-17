@@ -16,6 +16,8 @@
   "all_in_one_planner_frequency": 5,
   "observation_space": {
     "laser_range": "reduced",
-    "size_laser_vector": 16
+    "size_laser_vector": 16,
+    "laser_stack_size": 3,
+    "add_robot_velocity": true
   }
 }
