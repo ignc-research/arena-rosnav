@@ -73,8 +73,10 @@ plot_quantitative_labels:
   roughness: Path Roughness
   success: Success, Collision and Timeout Rate
   time: Time Traveled in [s]
+plot_quantitative_suptitle: true
+plot_quantitative_suptitle_size: 16
 plot_quantitative_title: true
-plot_quantitative_title_size: 16
+plot_quantitative_title_size: 10
 plot_success_barwidth: 0.5
 plot_success_collision_color: red
 plot_success_legend: true

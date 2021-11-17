@@ -2,8 +2,6 @@ import numpy as np
 import glob # usefull for listing all files of a type in a directory
 import os
 import time
-from numpy.core.fromnumeric import size
-from scipy.ndimage.measurements import label
 import yaml
 import json
 import matplotlib.pyplot as plt
@@ -22,7 +20,7 @@ class plotter():
         self.grab_data()
         self.load_data()
         self.plot_dir = self.dir_path + "/plots_{}".format(self.now)
-        # os.mkdir(self.plot_dir)
+        os.mkdir(self.plot_dir)
 
 ### load data ###
     def read_config(self):
@@ -177,7 +175,7 @@ class plotter():
                             "-",
                             color = self.config["color_scheme"][planner],
                             alpha = self.config["path_alpha"],
-                            linewidth = self.config["path_size"]/map_resolution)
+                            linewidth = self.config["path_size"]/map_resolution,zorder=1)
 
                             if self.config["plot_progression"]:
                                 x_progression = x[0::self.config["progression_steps"]]
@@ -185,7 +183,7 @@ class plotter():
                                 plt.scatter(x_progression,y_progression,
                                 color = self.config["color_scheme"][planner],
                                 alpha = self.config["path_alpha"],
-                                s = self.config["progression_size"]/map_resolution)
+                                s = self.config["progression_size"]/map_resolution,zorder=1)
 
                         # plot collisions
                         if self.config["plot_collisions"]:
@@ -195,7 +193,7 @@ class plotter():
                                 plt.scatter(x,y,
                                     color = self.config["color_scheme"][planner],
                                     alpha = self.config["collision_alpha"],
-                                    s = self.config["collision_size"]/map_resolution)
+                                    s = self.config["collision_size"]/map_resolution,zorder=2)
                         # plot collision zones and centroids
                         if self.config["plot_collision_zones"]:
                             centroids = self.data[key]["collision_zones"]["centroids"]
@@ -205,19 +203,19 @@ class plotter():
                                 plt.scatter(x,y,
                                     color = self.config["color_scheme"][planner],
                                     alpha = self.config["collision_alpha"],
-                                    s = self.config["collision_size"]/map_resolution)
+                                    s = self.config["collision_size"]/map_resolution,zorder=2)
                                 for i,centroid in enumerate(centroids):
                                     # plot circle for collision zone
                                     ax.add_patch(plt.Circle(tuple(to_ros_coords(centroid, img, map_resolution, map_origin)),
                                     radius = self.config["collision_zone_base_diameter"]*counts[i]/map_resolution,
                                     color=self.config["color_scheme"][planner],
-                                    fill=False))
+                                    fill=False,zorder=2))
                                     # plot transparent circle as background of zone
                                     ax.add_patch(plt.Circle(tuple(to_ros_coords(centroid, img, map_resolution, map_origin)),
                                     radius = self.config["collision_zone_base_diameter"]*counts[i]/map_resolution,
                                     color=self.config["color_scheme"][planner],
                                     fill=True,
-                                    alpha = self.config["collision_zone_alpha"]))
+                                    alpha = self.config["collision_zone_alpha"],zorder=2))
 
                     # plot scenario properties (start, goal, dynamic obstacles)
                     self.plot_scenario(obs_keys, img,  map_resolution, map_origin)
@@ -227,13 +225,13 @@ class plotter():
                         plt.legend(loc=self.config["plot_qualitative_legend_location"])
                     if self.config["plot_qualitative_title"]:
                         if obstacle_number == "base_obstacle_number" and velocity == "base_velocity":
-                            plt.title("Map: {0}".format(map), fontsize = self.config["plot_qualitative_title_size"])
+                            plt.suptitle("Map: {0}".format(map), fontsize = self.config["plot_qualitative_title_size"], fontweight = "bold")
                         elif obstacle_number == "base_obstacle_number":
-                            plt.title("Map: {0} Velocity: {1}.{2}".format(map, velocity.replace("vel","")[0], velocity.replace("vel","")[1]), fontsize = self.config["plot_qualitative_title_size"])
+                            plt.suptitle("Map: {0} Velocity: {1}.{2}".format(map, velocity.replace("vel","")[0], velocity.replace("vel","")[1]), fontsize = self.config["plot_qualitative_title_size"], fontweight = "bold")
                         elif velocity == "base_velocity":
-                            plt.title("Map: {0} Obstacles: {1}".format(map, int(obstacle_number.replace("obs",""))), fontsize = self.config["plot_qualitative_title_size"])
+                            plt.suptitle("Map: {0} Obstacles: {1}".format(map, int(obstacle_number.replace("obs",""))), fontsize = self.config["plot_qualitative_title_size"], fontweight = "bold")
                         else:
-                            plt.title("Map: {0} Obstacles: {1} Velocity: {1}.{2} ".format(map, int(obstacle_number.replace("obs","")), velocity.replace("vel","")[0], velocity.replace("vel","")[1]), fontsize = self.config["plot_qualitative_title_size"])
+                            plt.suptitle("Map: {0} Obstacles: {1} Velocity: {1}.{2} ".format(map, int(obstacle_number.replace("obs","")), velocity.replace("vel","")[0], velocity.replace("vel","")[1]), fontsize = self.config["plot_qualitative_title_size"], fontweight = "bold")
                     if self.config["plot_qualitative_axes"]:
                         plt.xlabel("x in [m]")
                         plt.ylabel("y in [m]")
@@ -252,9 +250,8 @@ class plotter():
                         ax.set_xticklabels([])
                         ax.set_yticks(y_locs)
                         ax.set_yticklabels([])
-
-                    plt.tight_layout()
                     plt.savefig(self.plot_dir + "/qualitative_plot_{0}_{1}_{2}_{3}".format(map,obstacle_number,velocity,self.now))
+                    plt.close()
 
     def plot_scenario(self, keys, img,  map_resolution, map_origin):
         scenario_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))) + "/simulator_setup/scenarios/eval"
@@ -284,8 +281,8 @@ class plotter():
         plt.scatter([],[], marker = self.config["start_marker"], label = "Start", color = self.config["start_point_color"])
         plt.scatter([],[], marker = self.config["goal_marker"], label = "Goal", color = self.config["goal_point_color"])
         # start and goal point
-        plt.scatter(start_x,start_y, marker = self.config["start_marker"], s = self.config["start_size"]/map_resolution, color = self.config["start_point_color"])
-        plt.scatter(goal_x,goal_y, marker = self.config["goal_marker"], s = self.config["goal_size"]/map_resolution, color = self.config["goal_point_color"])
+        plt.scatter(start_x,start_y, marker = self.config["start_marker"], s = self.config["start_size"]/map_resolution, color = self.config["start_point_color"],zorder=5)
+        plt.scatter(goal_x,goal_y, marker = self.config["goal_marker"], s = self.config["goal_size"]/map_resolution, color = self.config["goal_point_color"],zorder=5)
 
         # plot dynamic obstacle path
         for path in obstacle_paths:
@@ -294,10 +291,10 @@ class plotter():
                 plt.gca().add_patch(plt.Circle(waypoint,
                     radius = self.config["obstacle_radius"]/map_resolution,
                     color=self.config["obstacle_color"],
-                    fill=False))
+                    fill=False,zorder=5))
                 if i == len(path)-1:
                     continue
-                plt.gca().add_patch(patches.FancyArrowPatch(waypoint, path[i+1], arrowstyle='<->', mutation_scale = self.config["path_arrow_size"], color = self.config["path_arrow_color"]))
+                plt.gca().add_patch(patches.FancyArrowPatch(waypoint, path[i+1], arrowstyle='<->', mutation_scale = self.config["path_arrow_size"], color = self.config["path_arrow_color"],zorder=5))
 ### end of block qualitative plots ###
 
 ### quantitative plots ###
@@ -331,8 +328,8 @@ class plotter():
                             continue
                         if metric in ["done_reason", "curvature"]:
                             continue
+                        fig, ax = plt.subplots()
                         if metric == "success": # bar plots for success metric
-                            fig, ax = plt.subplots()
                             planner_list = []
                             success_list = []
                             collision_list = []
@@ -356,7 +353,10 @@ class plotter():
                             ax.set_ylabel(self.config["plot_quantitative_labels"][metric], fontsize = self.config["plot_quantitative_axes_label_size"])
                             ax.set_xticklabels([self.config["labels"][x.get_text()] for x in ax.get_xticklabels()], {"fontsize": self.config["plot_quantitative_axes_tick_size"]})
 
-                        # legend
+                        # title 
+                        if self.config["plot_quantitative_suptitle"]:
+                            plt.suptitle("{0}".format(self.config["plot_quantitative_labels"][metric]), fontsize = self.config["plot_quantitative_suptitle_size"], fontweight = "bold")
+                        # subtitle
                         if self.config["plot_quantitative_title"]:
                             if obstacle_number == "base_obstacle_number" and velocity == "base_velocity":
                                 plt.title("Map: {0}".format(map), fontsize = self.config["plot_quantitative_title_size"])
@@ -366,7 +366,6 @@ class plotter():
                                 plt.title("Map: {0} Obstacles: {1}".format(map, int(obstacle_number.replace("obs",""))), fontsize = self.config["plot_quantitative_title_size"])
                             else:
                                 plt.title("Map: {0} Obstacles: {1} Velocity: {1}.{2} ".format(map, int(obstacle_number.replace("obs","")), velocity.replace("vel","")[0], velocity.replace("vel","")[1]), fontsize = self.config["plot_quantitative_title_size"])
-                        plt.tight_layout()
                         plt.savefig(self.plot_dir + "/quantitative_plots/{0}_{1}_{2}_{3}_{4}".format(metric,map,obstacle_number,velocity,self.now))
                         plt.close()
 ### end of block quantitative plots ###
@@ -397,7 +396,7 @@ def transform_waypoints(obstacle_paths, img, map_resolution, map_origin, ped_sim
 
 if __name__=="__main__":
     Plotter = plotter()
-    # if Plotter.config["plot_qualitative"]:
-    #     Plotter.get_qualitative_plots()
+    if Plotter.config["plot_qualitative"]:
+        Plotter.get_qualitative_plots()
     if Plotter.config["plot_quantitative"]:
         Plotter.get_quantitative_plots()
