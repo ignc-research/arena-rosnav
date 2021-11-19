@@ -358,6 +358,8 @@ class plotter():
                                 labels = [self.config["labels"][x] for x in data.groupby(by="planner").mean().index]
                                 colors = [self.config["color_scheme"][x] for x in data.groupby(by="planner").mean().index]
                                 ax.bar(x = labels, height = data.groupby(by="planner").mean()[metric], yerr = data.groupby(by="planner").std()[metric], color = colors, ecolor = self.config["plot_barplot_errorcolor"], capsize=self.config["plot_barplot_capsize"], alpha = self.config["plot_barplot_alpha"], zorder=5)
+                                ax.set_xlabel(self.config["plot_quantitative_labels"]["planner"], fontsize = self.config["plot_quantitative_axes_label_size"])
+                                ax.set_ylabel(self.config["plot_quantitative_labels"][metric], fontsize = self.config["plot_quantitative_axes_label_size"])
 
                         # title 
                         if self.config["plot_quantitative_suptitle"]:

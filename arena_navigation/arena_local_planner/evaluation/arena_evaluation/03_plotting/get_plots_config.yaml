@@ -81,7 +81,7 @@ plot_quantitative_suptitle: true
 plot_quantitative_suptitle_size: 16
 plot_quantitative_title: true
 plot_quantitative_title_size: 10
-plot_quantitative_violin: true
+plot_quantitative_violin: false
 plot_quantitative_violin_inner: point
 plot_quantitative_ygrid: true
 plot_success_alpha: 1.0
