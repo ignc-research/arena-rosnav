@@ -340,18 +340,24 @@ class plotter():
                                 success_list.append(self.data[obs_key]["summary_df"]["done_reason"].count("goal_reached")/len_df)
                                 collision_list.append((self.data[obs_key]["summary_df"]["done_reason"].count("goal_reached")+self.data[obs_key]["summary_df"]["done_reason"].count("collision"))/len_df)
                             planner_list = [self.config["labels"][x] for x in planner_list]
-                            ax.bar(planner_list, timeout_list, color = self.config["plot_success_time_out_color"], width = self.config["plot_success_barwidth"], label = "Timeout")
-                            ax.bar(planner_list, collision_list, color = self.config["plot_success_collision_color"], width = self.config["plot_success_barwidth"], label = "Collision")
-                            ax.bar(planner_list, success_list, color = self.config["plot_success_success_color"], width = self.config["plot_success_barwidth"], label = "Success")
+                            ax.bar(planner_list, timeout_list, color = self.config["plot_success_time_out_color"], width = self.config["plot_success_width"], label = "Timeout", alpha = self.config["plot_success_alpha"])
+                            ax.bar(planner_list, collision_list, color = self.config["plot_success_collision_color"], width = self.config["plot_success_width"], label = "Collision", alpha = self.config["plot_success_alpha"])
+                            ax.bar(planner_list, success_list, color = self.config["plot_success_success_color"], width = self.config["plot_success_width"], label = "Success", alpha = self.config["plot_success_alpha"])
                             if self.config["plot_success_legend"]:
                                 ax.legend(loc=self.config["plot_success_legend_location"])
                             ax.set_xlabel(self.config["plot_quantitative_labels"]["planner"], fontsize = self.config["plot_quantitative_axes_label_size"])
                             ax.set_ylabel(self.config["plot_quantitative_labels"][metric], fontsize = self.config["plot_quantitative_axes_label_size"])
-                        else: # violin plots for all other metrics
-                            ax = sns.violinplot(x="planner", y=metric, data = data, inner = self.config["violin_inner"], palette = self.config["color_scheme"])
-                            ax.set_xlabel(self.config["plot_quantitative_labels"]["planner"], fontsize = self.config["plot_quantitative_axes_label_size"])
-                            ax.set_ylabel(self.config["plot_quantitative_labels"][metric], fontsize = self.config["plot_quantitative_axes_label_size"])
-                            ax.set_xticklabels([self.config["labels"][x.get_text()] for x in ax.get_xticklabels()], {"fontsize": self.config["plot_quantitative_axes_tick_size"]})
+                        else:
+                            if self.config["plot_quantitative_violin"]:
+                                ax = sns.violinplot(x="planner", y=metric, data = data, inner = self.config["plot_quantitative_violin_inner"], palette = self.config["color_scheme"])
+                                ax.set_xlabel(self.config["plot_quantitative_labels"]["planner"], fontsize = self.config["plot_quantitative_axes_label_size"])
+                                ax.set_ylabel(self.config["plot_quantitative_labels"][metric], fontsize = self.config["plot_quantitative_axes_label_size"])
+                                ax.set_xticklabels([self.config["labels"][x.get_text()] for x in ax.get_xticklabels()], {"fontsize": self.config["plot_quantitative_axes_tick_size"]})
+                                ax.zorder = 5
+                            else:
+                                labels = [self.config["labels"][x] for x in data.groupby(by="planner").mean().index]
+                                colors = [self.config["color_scheme"][x] for x in data.groupby(by="planner").mean().index]
+                                ax.bar(x = labels, height = data.groupby(by="planner").mean()[metric], yerr = data.groupby(by="planner").std()[metric], color = colors, ecolor = self.config["plot_barplot_errorcolor"], capsize=self.config["plot_barplot_capsize"], alpha = self.config["plot_barplot_alpha"], zorder=5)
 
                         # title 
                         if self.config["plot_quantitative_suptitle"]:
@@ -366,6 +372,14 @@ class plotter():
                                 plt.title("Map: {0} Obstacles: {1}".format(map, int(obstacle_number.replace("obs",""))), fontsize = self.config["plot_quantitative_title_size"])
                             else:
                                 plt.title("Map: {0} Obstacles: {1} Velocity: {1}.{2} ".format(map, int(obstacle_number.replace("obs","")), velocity.replace("vel","")[0], velocity.replace("vel","")[1]), fontsize = self.config["plot_quantitative_title_size"])
+
+                        # grid
+                        if self.config["plot_quantitative_ygrid"]:
+                            if self.config["plot_quantitative_violin"]:
+                                sns.set_style("whitegrid")
+                            else:
+                                plt.grid(axis="y", zorder = 1)
+
                         plt.savefig(self.plot_dir + "/quantitative_plots/{0}_{1}_{2}_{3}_{4}".format(metric,map,obstacle_number,velocity,self.now))
                         plt.close()
 ### end of block quantitative plots ###

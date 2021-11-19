@@ -43,6 +43,10 @@ path_alpha: 0.3
 path_arrow_color: black
 path_arrow_size: 5
 path_size: 0.1
+plot_barplot_alpha: 1.0
+plot_barplot_capsize: 10
+plot_barplot_errorcolor: black
+plot_barplot_width: 0.5
 plot_collision_zones: true
 plot_collisions: true
 plot_progression: false
@@ -77,12 +81,16 @@ plot_quantitative_suptitle: true
 plot_quantitative_suptitle_size: 16
 plot_quantitative_title: true
 plot_quantitative_title_size: 10
-plot_success_barwidth: 0.5
+plot_quantitative_violin: true
+plot_quantitative_violin_inner: point
+plot_quantitative_ygrid: true
+plot_success_alpha: 1.0
 plot_success_collision_color: red
 plot_success_legend: true
 plot_success_legend_location: upper left
 plot_success_success_color: green
 plot_success_time_out_color: blue
+plot_success_width: 0.5
 progression_size: 3
 progression_steps: 20
 specified_data_filename: null
@@ -90,4 +98,3 @@ specify_data: false
 start_marker: ^
 start_point_color: tab:grey
 start_size: 20
-violin_inner: point
