@@ -1,8 +1,8 @@
 <launch>
   <param name="use_sim_time" value="true"/>
 
-  <arg name="train_mode"       default="true"/>
-  <arg name="model" default="burger"      doc = "model type [burger, jackal, husky, ridgeback]"/>
+  <arg name="train_mode"       default="false"/>
+  <arg name="model" default="jackal"      doc = "model type [burger, jackal, husky, ridgeback]"/>
   <param name="train_mode" value="$(arg train_mode)" />
   <arg name="use_recorder"       default="false"/>
   <arg name="record_only_planner"       default="true"/>
@@ -10,10 +10,11 @@
   <arg name="local_planner"   default="teb"   doc = "local-planer type [teb, dwa, mpc, rlca, cadrl]"/>
   <arg name="waypoint_generator"   default="classic"/>
   <arg name="rviz_file"       default="nav"/>
-  <arg name="disable_scenario"    default="true"/>
-  <arg name="scenario_file"   default="empty_map.json"/>
+  <arg name="disable_scenario"    default="false"/>
+  <arg name="scenario_file"   default="eval/obstacle_map1_obs10.json" doc="[scenario2.json, empty_map.json, test_scenario.json (pesim)]"/>
   <arg name="reset"   default="true"/>
-  <arg name="enable_pedsim" default="false"/>
+  <arg name="enable_pedsim" default="true"/>
+  <arg name="task_mode" default="scenario"  doc="[random, manual, staged, scenario]"/>
 
   <!-- To make the training more efficient make sure this step_size*laser_update_rate == 1  -->
   <arg name="step_size" default="0.01"/>
@@ -31,7 +32,7 @@
   <param name="single_env"       value="true"/>
 
   <!-- the folder name under the path simulator_setup/maps  -->
-  <arg name="map_file"        default="floor"   doc="[floor, indoor, indoor_map1, map_small, map_empty]"/>
+  <arg name="map_file"        default="map1"   doc="[map1, floor, indoor, indoor_map1, map_small, map_empty]"/>
   <!-- <arg name="map_folder_name" default="map_empty" /> -->
   <arg name="map_path" default="$(find simulator_setup)/maps/$(arg map_file)/map.yaml" />
   <param name="world_path" value="$(find simulator_setup)/maps/$(arg map_file)/map.world.yaml" />
@@ -93,6 +94,7 @@
    <arg name="scenarios_json_path"  value="$(find simulator_setup)/scenarios/$(arg scenario_file)"/>
    <arg name="auto_reset"           value="$(arg reset)"/>
    <arg name="timeout"              value="$(arg timeout)"/>
+   <arg name="task_mode"            value="$(arg task_mode)"/>
   </include>
 
   <!-- <include file="$(find arena_bringup)/launch/sublaunch_testing/sensor_sim.launch" unless="$(eval arg('disable_scenario') or arg('train_mode'))">
