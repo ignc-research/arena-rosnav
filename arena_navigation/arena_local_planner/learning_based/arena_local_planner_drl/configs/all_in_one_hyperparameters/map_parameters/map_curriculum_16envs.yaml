@@ -1,64 +1,64 @@
 1:
     "type": "outdoor"
-    "numb_dynamic_obstacles": 10
+    "numb_dynamic_obstacles": 12
     "numb_static_obstacles": 0
 2:
     "type": "outdoor"
-    "numb_dynamic_obstacles": 20
+    "numb_dynamic_obstacles": 18
     "numb_static_obstacles": 0
 3:
     "type": "indoor"
-    "numb_dynamic_obstacles": 5
+    "numb_dynamic_obstacles": 10
     "numb_static_obstacles": 0
 4:
     "type": "indoor"
-    "numb_dynamic_obstacles": 5
+    "numb_dynamic_obstacles": 10
     "numb_static_obstacles": 0
 5:
     "type": "indoor"
-    "numb_dynamic_obstacles": 5
+    "numb_dynamic_obstacles": 12
     "numb_static_obstacles": 0
 6:
     "type": "indoor"
-    "numb_dynamic_obstacles": 10
+    "numb_dynamic_obstacles": 12
     "numb_static_obstacles": 0
 7:
     "type": "indoor"
-    "numb_dynamic_obstacles": 10
+    "numb_dynamic_obstacles": 14
     "numb_static_obstacles": 0
 8:
     "type": "indoor"
-    "numb_dynamic_obstacles": 10
+    "numb_dynamic_obstacles": 14
     "numb_static_obstacles": 0
 9:
     "type": "indoor"
-    "numb_dynamic_obstacles": 15
+    "numb_dynamic_obstacles": 14
     "numb_static_obstacles": 0
 10:
     "type": "indoor"
-    "numb_dynamic_obstacles": 15
+    "numb_dynamic_obstacles": 16
     "numb_static_obstacles": 0
 11:
     "type": "indoor"
-    "numb_dynamic_obstacles": 15
+    "numb_dynamic_obstacles": 16
     "numb_static_obstacles": 0
 12:
     "type": "indoor"
-    "numb_dynamic_obstacles": 20
+    "numb_dynamic_obstacles": 16
     "numb_static_obstacles": 0
 13:
     "type": "indoor"
-    "numb_dynamic_obstacles": 20
+    "numb_dynamic_obstacles": 18
     "numb_static_obstacles": 0
 14:
     "type": "indoor"
-    "numb_dynamic_obstacles": 20
+    "numb_dynamic_obstacles": 18
     "numb_static_obstacles": 0
 15:
     "type": "indoor"
-    "numb_dynamic_obstacles": 25
+    "numb_dynamic_obstacles": 20
     "numb_static_obstacles": 0
 16:
     "type": "indoor"
-    "numb_dynamic_obstacles": 25
+    "numb_dynamic_obstacles": 20
     "numb_static_obstacles": 0

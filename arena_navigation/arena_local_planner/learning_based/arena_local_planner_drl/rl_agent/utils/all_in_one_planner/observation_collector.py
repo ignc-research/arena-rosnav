@@ -114,7 +114,7 @@ class ObservationCollectorAllInOne:
         # TODO make this a parameter --> Also dependant on map resolution (?)
         self._planning_horizon = 6
 
-        self._reward_subgoal_horizon = 0.5
+        self._reward_subgoal_horizon = 0.7
 
         # synchronization parameters
         self._first_sync_obs = True  # whether to return first sync'd obs or most recent

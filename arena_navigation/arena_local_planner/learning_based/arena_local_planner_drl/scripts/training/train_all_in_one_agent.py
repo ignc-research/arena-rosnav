@@ -37,7 +37,7 @@ def make_all_in_one_envs(rank: int, paths: dict, params: dict, train: bool = Tru
                                          max_steps_per_episode=params['train_max_steps_per_episode'],
                                          drl_server=drl_server_url_ind)
         else:
-            paths['map_parameters'] = os.path.join(paths['map_folder'], "indoor_obs16.json")
+            paths['map_parameters'] = os.path.join(paths['map_folder'], "indoor_obs15.json")
             seed = random.randint(1, 1000)
             all_in_one_env = Monitor(
                 AllInOneEnv("eval_sim", paths['robot_setting'], paths['robot_as'], params['reward_fnc'],
