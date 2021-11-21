@@ -4,13 +4,13 @@
             "name": "1",
             "id": 0,
             "pos": [
-                8.51,
-                7.55
+                6.84,
+                6.11
             ],
             "type": "adult",
             "yaml_file": "/home/ducanor/catkin_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
             "number_of_peds": 1,
-            "vmax": 1.0,
+            "vmax": 0.5,
             "start_up_mode": "default",
             "wait_time": 0.0,
             "trigger_zone_radius": 0.0,
@@ -35,12 +35,12 @@
             "force_factor_robot": 0.0,
             "waypoints": [
                 [
-                    11.5,
-                    16.88
+                    10.24,
+                    14.02
                 ],
                 [
-                    8.57,
-                    7.54
+                    6.92,
+                    6.29
                 ]
             ],
             "waypoint_mode": 0
@@ -49,13 +49,13 @@
             "name": "2",
             "id": 0,
             "pos": [
-                14.28,
-                4.63
+                20.47,
+                10.67
             ],
             "type": "adult",
             "yaml_file": "/home/ducanor/catkin_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
             "number_of_peds": 1,
-            "vmax": 1.0,
+            "vmax": 0.5,
             "start_up_mode": "default",
             "wait_time": 0.0,
             "trigger_zone_radius": 0.0,
@@ -80,20 +80,20 @@
             "force_factor_robot": 0.0,
             "waypoints": [
                 [
-                    14.07,
-                    7.19
+                    15.41,
+                    15.23
                 ],
                 [
-                    27.72,
-                    7.11
+                    11.82,
+                    19.78
                 ],
                 [
-                    14.11,
-                    7.23
+                    15.26,
+                    15.23
                 ],
                 [
-                    14.27,
-                    4.58
+                    20.68,
+                    10.61
                 ]
             ],
             "waypoint_mode": 0
@@ -102,13 +102,13 @@
             "name": "3",
             "id": 0,
             "pos": [
-                17.26,
-                20.37
+                3.42,
+                17.41
             ],
             "type": "adult",
             "yaml_file": "/home/ducanor/catkin_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
             "number_of_peds": 1,
-            "vmax": 1.0,
+            "vmax": 0.5,
             "start_up_mode": "default",
             "wait_time": 0.0,
             "trigger_zone_radius": 0.0,
@@ -133,12 +133,12 @@
             "force_factor_robot": 0.0,
             "waypoints": [
                 [
-                    27.23,
-                    11.97
+                    14.97,
+                    20.59
                 ],
                 [
-                    17.05,
-                    20.68
+                    3.44,
+                    17.29
                 ]
             ],
             "waypoint_mode": 0
@@ -147,13 +147,13 @@
             "name": "4",
             "id": 0,
             "pos": [
-                17.11,
-                11.82
+                11.84,
+                8.33
             ],
             "type": "adult",
             "yaml_file": "/home/ducanor/catkin_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
             "number_of_peds": 1,
-            "vmax": 1.0,
+            "vmax": 0.5,
             "start_up_mode": "default",
             "wait_time": 0.0,
             "trigger_zone_radius": 0.0,
@@ -178,20 +178,12 @@
             "force_factor_robot": 0.0,
             "waypoints": [
                 [
-                    21.4,
-                    17.02
+                    6.31,
+                    12.3
                 ],
                 [
-                    28.72,
-                    17.56
-                ],
-                [
-                    21.35,
-                    16.97
-                ],
-                [
-                    17.1,
-                    11.87
+                    11.83,
+                    8.14
                 ]
             ],
             "waypoint_mode": 0
@@ -200,13 +192,13 @@
             "name": "5",
             "id": 0,
             "pos": [
-                26.35,
-                15.87
+                19.66,
+                12.98
             ],
             "type": "adult",
             "yaml_file": "/home/ducanor/catkin_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
             "number_of_peds": 1,
-            "vmax": 1.0,
+            "vmax": 0.5,
             "start_up_mode": "default",
             "wait_time": 0.0,
             "trigger_zone_radius": 0.0,
@@ -231,20 +223,20 @@
             "force_factor_robot": 0.0,
             "waypoints": [
                 [
-                    25.11,
-                    22.7
+                    12.97,
+                    11.43
                 ],
                 [
-                    19.07,
-                    26.12
+                    14.48,
+                    17.38
                 ],
                 [
-                    25.06,
-                    22.8
+                    13.03,
+                    11.37
                 ],
                 [
-                    26.49,
-                    15.88
+                    19.65,
+                    12.88
                 ]
             ],
             "waypoint_mode": 0
@@ -252,12 +244,12 @@
     ],
     "static_obstacles": [],
     "robot_position": [
-        2.83,
-        9.97
+        21.06,
+        20.18
     ],
     "robot_goal": [
-        25.89,
-        24.54
+        3.34,
+        3.03
     ],
     "map_path": "/home/ducanor/catkin_ws/src/arena-rosnav/simulator_setup/maps/eval_indoor/map.yaml",
     "format": "arena-tools"
