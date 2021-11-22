@@ -11,6 +11,8 @@ from rl_agent.envs.all_in_one_models.drl.drl_agent import DrlAgentClient, DrlAge
 from rl_agent.envs.all_in_one_models.rlca.rlca_agent import RLCAAgent
 from rl_agent.envs.all_in_one_models.teb.teb_all_in_one_interface_agent import TebAllinOneInterfaceAgent
 
+from rl_agent.envs.all_in_one_models.arena_ros.arena_ros_agent import ArenaRosAgent
+
 
 class LocalPlannerManager:
 
@@ -82,6 +84,11 @@ class LocalPlannerManager:
         if 'rlca' in config_model and config_model['rlca']:
             rlca_model = RLCAAgent()
             models.append(rlca_model)
+
+        # set up arena_ros agent
+        if 'arena_ros' in config_model and config_model['arena_ros']:
+            arena_ros_model = ArenaRosAgent()
+            models.append(arena_ros_model)
 
         # set up drl agents
         if 'drl' in config_model:

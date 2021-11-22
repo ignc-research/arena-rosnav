@@ -17,17 +17,20 @@ from tools.train_agent_utils import check_hyperparam_format, print_hyperparamete
 base_Agent1 = 'mixed_teb_drl4_rule06_policy2'
 base_Agent2 = 'mixed_teb_drl4_rule07_policy3'
 base_Agent3 = 'teb_drl4_rule07_policy2'
+base_Agent4 = "2xteb_drl4_rule07_policy2"
+base_Agent5 = "teb_drl4_rule07_nn13_16ls"
+
 primitive_agents = ['rlca_only', 'teb_only', 'drl_only', 'drl03_only', 'mpc_only', 'dwa_only',
-                    'teb_large_min_dist_only', 'teb_dyn_obst_only']
+                    'teb_large_min_dist_only', 'teb_dyn_obst_only', 'arena_ros_only']
 simple_all_in_one_switches = ['simple_all_in_one', 'random']
 
-AGENTS = ['teb_dyn_obst_only']
+AGENTS = ['arena_ros_only']
 eval_episodes = 100
 #  seed = random.randint(1, 1000)
 seed = 2
-map_config = "indoor_obs20.json"
+map_config = "indoor_obs15.json"
 
-evaluation_name = "test"
+evaluation_name = "indoor_15_aio"
 
 
 def get_paths(AGENT: str, primitive_agent=False, is_random_agent=False):
