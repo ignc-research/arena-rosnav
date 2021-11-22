@@ -30,14 +30,15 @@ def make_all_in_one_envs(rank: int, paths: dict, params: dict, train: bool = Tru
             drl_server_url_ind = None
 
         if train:
-            paths['map_parameters'] = os.path.join(paths['map_folder'], 'tmp', "map_" + str(rank) + ".json")
+            # paths['map_parameters'] = os.path.join(paths['map_folder'], 'tmp', "map_" + str(rank) + ".json")
+            paths['map_parameters'] = os.path.join(paths['map_folder'], "indoor_obs14.json")
             all_in_one_env = AllInOneEnv(f"sim_{rank + 1}", paths['robot_setting'], paths['robot_as'],
                                          params['reward_fnc'],
                                          goal_radius=params['goal_radius'], paths=paths,
                                          max_steps_per_episode=params['train_max_steps_per_episode'],
                                          drl_server=drl_server_url_ind)
         else:
-            paths['map_parameters'] = os.path.join(paths['map_folder'], "indoor_obs15.json")
+            paths['map_parameters'] = os.path.join(paths['map_folder'], "indoor_obs14.json")
             seed = random.randint(1, 1000)
             all_in_one_env = Monitor(
                 AllInOneEnv("eval_sim", paths['robot_setting'], paths['robot_as'], params['reward_fnc'],
@@ -198,7 +199,7 @@ def parse_all_in_one_args():
 if __name__ == '__main__':
 
     # make unique agent version description based on @version
-    eval_episodes = 80
+    eval_episodes = 100
 
     args = parse_all_in_one_args()
 
@@ -260,7 +261,7 @@ if __name__ == '__main__':
                 tensorboard_log=paths.get('tb'), verbose=1
             )
 
-        elif args.agent in ['AGENT_11', 'AGENT_12', 'AGENT_13', 'AGENT_14']:
+        elif args.agent in ['AGENT_11', 'AGENT_12', 'AGENT_13', 'AGENT_14', 'AGENT_15']:
             if args.agent == 'AGENT_11':
                 policy_kwargs = policy_kwargs_agent_11
             if args.agent == 'AGENT_12':
@@ -269,6 +270,8 @@ if __name__ == '__main__':
                 policy_kwargs = policy_kwargs_agent_13
             if args.agent == 'AGENT_14':
                 policy_kwargs = policy_kwargs_agent_14
+            if args.agent == 'AGENT_15':
+                policy_kwargs = policy_kwargs_agent_15
             model = PPO(
                 "MlpPolicy", env,
                 policy_kwargs=policy_kwargs,
@@ -294,13 +297,13 @@ if __name__ == '__main__':
 
     eval_cb = EvalCallback(
         eval_env=eval_env, train_env=env,
-        n_eval_episodes=eval_episodes, eval_freq=30000,
+        n_eval_episodes=eval_episodes, eval_freq=40000,
         log_path=paths['eval'], best_model_save_path=paths['model'], deterministic=True)
 
     print("Start training...")
 
     if args.n is None:
-        n_timesteps = 10000000
+        n_timesteps = 20000000
     else:
         n_timesteps = args.n
 
