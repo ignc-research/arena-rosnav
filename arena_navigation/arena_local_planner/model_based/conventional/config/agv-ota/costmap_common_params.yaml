@@ -1,0 +1,21 @@
+#common
+obstacle_range: 2.5 #default = 2.5
+raytrace_range: 3.0 #default = 3.0
+footprint: [[0.513, 0.364], [0.513, -0.364], [-0.513, -0.364], [-0.513, 0.364]]
+footprint_padding: 0.01
+
+inflation_radius: 0.2
+
+observation_sources: laser
+
+laser:
+  {
+    topic: scan,
+    sensor_frame: scan_link,
+    data_type: LaserScan,
+    clearing: true,
+    marking: true,
+    inf_is_valid: true,
+    max_obstacle_height: 2.0,
+    min_obstacle_height: 0.0,
+  }
