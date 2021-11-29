@@ -4,19 +4,15 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded:
-        - /Global Options1
         - /robot1/my_robot1
-        - /Map1
         - /Map1/static_layer1
         - /Map1/Map1
         - /Map1/Global_costmap1
         - /Map1/Local_costmap1
+        - /Local plan1
         - /Local plan1/teb1
         - /Local plan1/mpc1
-        - /Sensors1
         - /Sensors1/LaserScan1
-        - /LaserScan1
-        - /LaserScan2
         - /obstacles1/static1/01
         - /obstacles1/static1/11
         - /obstacles1/static1/21
@@ -47,7 +43,7 @@ Panels:
         - /obstacles1/dynamic1/171
         - /obstacles1/dynamic1/181
         - /obstacles1/dynamic1/191
-        - /Map2
+        - /Path1
       Splitter Ratio: 0.5411764979362488
     Tree Height: 1156
   - Class: rviz/Selection
@@ -77,45 +73,29 @@ Visualization Manager:
   Class: ""
   Displays:
     - Class: rviz/Marker
-      Enabled: true
+      Enabled: false
       Marker Topic: /visualizer/path
       Name: Path_Marker
       Namespaces:
         {}
       Queue Size: 100
-      Value: true
+      Value: false
     - Class: rviz/Group
       Displays:
         - Class: rviz/TF
-          Enabled: true
+          Enabled: false
           Frame Timeout: 15
           Frames:
             All Enabled: false
-            eval_sim_base_footprint:
-              Value: true
-            eval_sim_laser_link:
-              Value: true
-            eval_sim_odom:
-              Value: true
-            map:
-              Value: true
-            sim_1_odom:
-              Value: true
           Marker Scale: 1
           Name: TF
           Show Arrows: true
           Show Axes: true
           Show Names: true
           Tree:
-            map:
-              eval_sim_odom:
-                eval_sim_base_footprint:
-                  eval_sim_laser_link:
-                    {}
-              sim_1_odom:
-                {}
+            {}
           Update Interval: 0
-          Value: true
+          Value: false
         - Class: rviz/MarkerArray
           Enabled: true
           Marker Topic: /eval_sim/flatland_server/debug/model/myrobot
@@ -208,13 +188,13 @@ Visualization Manager:
         - Alpha: 1
           Buffer Length: 1
           Class: rviz/Path
-          Color: 255; 0; 0
+          Color: 252; 233; 79
           Enabled: true
           Head Diameter: 0.30000001192092896
           Head Length: 0.20000000298023224
           Length: 0.30000001192092896
           Line Style: Billboards
-          Line Width: 0.05000000074505806
+          Line Width: 0.15000000596046448
           Name: teb
           Offset:
             X: 0
@@ -444,13 +424,13 @@ Visualization Manager:
       Use rainbow: true
       Value: true
     - Class: rviz/Marker
-      Enabled: true
+      Enabled: false
       Marker Topic: /action
       Name: Marker
       Namespaces:
         {}
       Queue Size: 100
-      Value: true
+      Value: false
     - Class: rviz/Group
       Displays:
         - Class: rviz/Group
@@ -776,7 +756,7 @@ Visualization Manager:
               Marker Topic: /eval_sim/flatland_server/debug/model/obstacle__random_dynamic_15
               Name: 14
               Namespaces:
-                "": true
+                {}
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -784,7 +764,7 @@ Visualization Manager:
               Marker Topic: /eval_sim/flatland_server/debug/model/obstacle__random_dynamic_16
               Name: 15
               Namespaces:
-                "": true
+                {}
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -792,7 +772,7 @@ Visualization Manager:
               Marker Topic: /eval_sim/flatland_server/debug/model/obstacle__random_dynamic_17
               Name: 16
               Namespaces:
-                "": true
+                {}
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -1001,7 +981,7 @@ Visualization Manager:
             {}
           Queue Size: 100
           Value: true
-      Enabled: true
+      Enabled: false
       Name: crowdnav
     - Class: rviz/Group
       Displays:
@@ -1064,7 +1044,7 @@ Visualization Manager:
           Marker Topic: /eval_sim/vis_subgoal
           Name: subgoal
           Namespaces:
-            "": true
+            {}
           Queue Size: 100
           Value: true
         - Class: rviz/Marker
@@ -1233,7 +1213,7 @@ Visualization Manager:
           Use Fixed Frame: true
           Use rainbow: true
           Value: false
-      Enabled: true
+      Enabled: false
       Name: Plan Manager
     - Alpha: 1
       Axes Length: 1
@@ -1251,13 +1231,13 @@ Visualization Manager:
       Unreliable: false
       Value: true
     - Class: rviz/Marker
-      Enabled: true
+      Enabled: false
       Marker Topic: /time_space/vis_visted_samples
       Name: samples
       Namespaces:
         {}
       Queue Size: 1
-      Value: true
+      Value: false
     - Class: rviz/Marker
       Enabled: false
       Marker Topic: /eval_sim/teb/teb_markers
@@ -1269,7 +1249,7 @@ Visualization Manager:
     - Alpha: 1
       Buffer Length: 1
       Class: rviz/Path
-      Color: 173; 127; 168
+      Color: 114; 159; 207
       Enabled: true
       Head Diameter: 0.30000001192092896
       Head Length: 0.20000000298023224
@@ -1290,37 +1270,37 @@ Visualization Manager:
       Unreliable: false
       Value: true
     - Class: rviz/Marker
-      Enabled: true
+      Enabled: false
       Marker Topic: /eval_sim/all_in_one_action_vis
       Name: Marker
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
-      Value: true
+      Value: false
     - Class: rviz/Marker
-      Enabled: true
+      Enabled: false
       Marker Topic: /eval_sim/all_in_one_action_trajectory_vis
       Name: Marker
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
-      Value: true
+      Value: false
     - Class: rviz/Marker
-      Enabled: true
+      Enabled: false
       Marker Topic: /eval_sim/collision_vis
       Name: Marker
       Namespaces:
         {}
       Queue Size: 100
-      Value: true
+      Value: false
     - Class: rviz/Marker
-      Enabled: true
+      Enabled: false
       Marker Topic: /eval_sim/all_in_one_action_prob_vis
       Name: Marker
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
-      Value: true
+      Value: false
     - Alpha: 1
       Class: rviz/Map
       Color Scheme: map
@@ -1371,7 +1351,7 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 32.41031265258789
+      Scale: 50.998252868652344
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
       X: 11.092154502868652

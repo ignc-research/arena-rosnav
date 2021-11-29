@@ -9,8 +9,10 @@ Panels:
         - /Map1/Map1
         - /Map1/Global_costmap1
         - /Map1/Local_costmap1
+        - /Local plan1
         - /Local plan1/teb1
         - /Local plan1/mpc1
+        - /Local plan1/dwa1
         - /Sensors1
         - /Sensors1/LaserScan1
         - /LaserScan1
@@ -178,12 +180,12 @@ Visualization Manager:
           Class: rviz/Map
           Color Scheme: costmap
           Draw Behind: false
-          Enabled: false
+          Enabled: true
           Name: Local_costmap
           Topic: /eval_sim/teb/local_costmap/costmap
           Unreliable: false
           Use Timestamp: false
-          Value: false
+          Value: true
       Enabled: true
       Name: Map
     - Class: rviz/Group
@@ -274,7 +276,7 @@ Visualization Manager:
           Radius: 0.029999999329447746
           Shaft Diameter: 0.10000000149011612
           Shaft Length: 0.10000000149011612
-          Topic: /move_base/DWAPlannerROS/local_plan
+          Topic: /eval_sim/dwa/dwa_local_planner/local_plan
           Unreliable: false
           Value: true
       Enabled: true
@@ -366,7 +368,7 @@ Visualization Manager:
           Color: 255; 0; 0
           Color Transformer: FlatColor
           Decay Time: 0
-          Enabled: false
+          Enabled: true
           Invert Rainbow: false
           Max Color: 255; 255; 255
           Max Intensity: 4096
@@ -383,7 +385,7 @@ Visualization Manager:
           Unreliable: false
           Use Fixed Frame: true
           Use rainbow: true
-          Value: false
+          Value: true
       Enabled: true
       Name: Sensors
     - Alpha: 1
@@ -398,7 +400,7 @@ Visualization Manager:
       Color: 255; 0; 0
       Color Transformer: FlatColor
       Decay Time: 0
-      Enabled: true
+      Enabled: false
       Invert Rainbow: false
       Max Color: 255; 255; 255
       Max Intensity: 4096
@@ -415,7 +417,7 @@ Visualization Manager:
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
-      Value: true
+      Value: false
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
@@ -779,7 +781,7 @@ Visualization Manager:
               Marker Topic: /eval_sim/flatland_server/debug/model/obstacle__random_dynamic_15
               Name: 14
               Namespaces:
-                "": true
+                {}
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -787,7 +789,7 @@ Visualization Manager:
               Marker Topic: /eval_sim/flatland_server/debug/model/obstacle__random_dynamic_16
               Name: 15
               Namespaces:
-                "": true
+                {}
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -795,7 +797,7 @@ Visualization Manager:
               Marker Topic: /eval_sim/flatland_server/debug/model/obstacle__random_dynamic_17
               Name: 16
               Namespaces:
-                "": true
+                {}
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -803,7 +805,7 @@ Visualization Manager:
               Marker Topic: /eval_sim/flatland_server/debug/model/obstacle__random_dynamic_18
               Name: 17
               Namespaces:
-                "": true
+                {}
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -811,7 +813,7 @@ Visualization Manager:
               Marker Topic: /eval_sim/flatland_server/debug/model/obstacle__random_dynamic_19
               Name: 18
               Namespaces:
-                "": true
+                {}
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -1067,7 +1069,7 @@ Visualization Manager:
           Marker Topic: /eval_sim/vis_subgoal
           Name: subgoal
           Namespaces:
-            "": true
+            {}
           Queue Size: 100
           Value: true
         - Class: rviz/Marker
@@ -1297,7 +1299,7 @@ Visualization Manager:
       Marker Topic: /eval_sim/all_in_one_action_vis
       Name: Marker
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/Marker
@@ -1305,7 +1307,7 @@ Visualization Manager:
       Marker Topic: /eval_sim/all_in_one_action_trajectory_vis
       Name: Marker
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/Marker
@@ -1321,7 +1323,7 @@ Visualization Manager:
       Marker Topic: /eval_sim/all_in_one_action_prob_vis
       Name: Marker
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/Marker
@@ -1329,7 +1331,7 @@ Visualization Manager:
       Marker Topic: /eval_sim/all_in_one_action_forced
       Name: Marker
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
   Enabled: true
@@ -1372,7 +1374,7 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 33.27402877807617
+      Scale: 44.112552642822266
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
       X: 10.861687660217285
