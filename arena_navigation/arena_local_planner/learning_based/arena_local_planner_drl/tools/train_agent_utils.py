@@ -4,7 +4,7 @@ import argparse
 from datetime import datetime as dt
 import gym
 import json
-import os
+import os, rospy
 import rosnode
 import rospkg
 import time
@@ -296,6 +296,7 @@ def get_paths(agent_name: str, args: argparse.Namespace) -> dict:
     :param args (argparse.Namespace): Object containing the program arguments
     """
     dir = rospkg.RosPack().get_path("arena_local_planner_drl")
+    robot_model = rospy.get_param("model")
 
     PATHS = {
         "model": os.path.join(dir, "agents", agent_name),
@@ -304,7 +305,7 @@ def get_paths(agent_name: str, args: argparse.Namespace) -> dict:
         "robot_setting": os.path.join(
             rospkg.RosPack().get_path("simulator_setup"),
             "robot",
-            "myrobot" + ".model.yaml",
+            f"{robot_model}.model.yaml",
         ),
         "hyperparams": os.path.join(dir, "configs", "hyperparameters"),
         "robot_as": os.path.join(dir, "configs", "default_settings.yaml"),

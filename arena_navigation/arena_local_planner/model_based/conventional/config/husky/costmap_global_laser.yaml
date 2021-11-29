@@ -1,8 +1,0 @@
-# This could be used if static_map=false -> this feature is with arena-rosnav not yet supported
-global_frame: odom
-rolling_window: true
-track_unknown_space: true
-
-plugins:
-  - {name: obstacles_laser,           type: "costmap_2d::ObstacleLayer"}
-  - {name: inflation,                 type: "costmap_2d::InflationLayer"}

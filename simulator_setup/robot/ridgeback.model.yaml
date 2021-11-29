@@ -2,12 +2,10 @@ bodies:  # List of named bodies
   - name: base_footprint
     pose: [0, 0, 0] 
     type: dynamic  
-    color: [0.2, 0.8, 0.2, 1.0] 
+    color: [0.8, 0.8, 0.8, 1.0] 
     footprints:
-      - type: circle
-        radius: 0.3
-        # radius: 0.116042
-        center: [0.0,0.0]
+      - type: polygon
+        points: [[0.48, -0.40], [0.48, 0.40], [-0.48, 0.40], [-0.48, -0.40]]
         layers: ["all"]
         collision: true
         density: 1
