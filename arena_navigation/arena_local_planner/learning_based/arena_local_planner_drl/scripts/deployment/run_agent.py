@@ -50,7 +50,7 @@ def get_paths(args: dict, AGENT: str):
         "robot_setting": os.path.join(
             rospkg.RosPack().get_path("simulator_setup"), f"{robot_model}.model.yaml"
         ),
-        "robot_as": os.path.join(dir, "configs", "default_settings.yaml"),
+        "robot_as": os.path.join(dir, "configs", f"default_settings_{robot_model}.yaml"),
         "scenario": os.path.join(
             rospkg.RosPack().get_path("simulator_setup"),
             "scenarios",

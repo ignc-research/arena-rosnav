@@ -308,7 +308,7 @@ def get_paths(agent_name: str, args: argparse.Namespace) -> dict:
             f"{robot_model}.model.yaml",
         ),
         "hyperparams": os.path.join(dir, "configs", "hyperparameters"),
-        "robot_as": os.path.join(dir, "configs", "default_settings.yaml"),
+        "robot_as": os.path.join(dir, "configs", f"default_settings_{robot_model}.yaml"),
         "curriculum": os.path.join(
             dir, "configs", "training_curriculum_map1small.yaml"
         ),

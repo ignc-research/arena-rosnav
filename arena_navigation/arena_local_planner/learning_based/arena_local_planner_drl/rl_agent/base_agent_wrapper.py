@@ -15,14 +15,14 @@ from geometry_msgs.msg import Twist
 from rl_agent.utils.observation_collector import ObservationCollector
 from rl_agent.utils.reward import RewardCalculator
 
-
+robot_model = rospy.get_param("model")
 ROOT_ROBOT_PATH = os.path.join(
     rospkg.RosPack().get_path("simulator_setup"), "robot"
 )
 DEFAULT_ACTION_SPACE = os.path.join(
     rospkg.RosPack().get_path("arena_local_planner_drl"),
     "configs",
-    "default_settings.yaml",
+    f"default_settings_{robot_model}.yaml",
 )
 DEFAULT_HYPERPARAMETER = os.path.join(
     rospkg.RosPack().get_path("arena_local_planner_drl"),

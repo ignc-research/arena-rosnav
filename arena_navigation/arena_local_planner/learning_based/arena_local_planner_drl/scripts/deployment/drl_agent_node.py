@@ -13,7 +13,7 @@ from std_msgs.msg import Bool
 
 from rl_agent.base_agent_wrapper import BaseDRLAgent
 
-
+robot_model = rospy.get_param("model")
 """ TEMPORARY GLOBAL CONSTANTS """
 NS_PREFIX = ""
 TRAINED_MODELS_DIR = os.path.join(
@@ -22,7 +22,7 @@ TRAINED_MODELS_DIR = os.path.join(
 DEFAULT_ACTION_SPACE = os.path.join(
     rospkg.RosPack().get_path("arena_local_planner_drl"),
     "configs",
-    "default_settings.yaml",
+    f"default_settings_{robot_model}.yaml",
 )
 
 
