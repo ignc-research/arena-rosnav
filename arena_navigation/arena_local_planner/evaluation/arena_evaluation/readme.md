@@ -123,4 +123,4 @@ There are many configurations that can be set int `get_plots_config.yaml`. They 
 - `progression_steps`: number of timesteps between each progression point (QUALI)
 - `start_marker`: marker for start point (QUALI)
 - `start_point_color`: color for start point (QUALI)
-- `start_size`: size of start point
+- `start_size`: size of start point (QUALI)
