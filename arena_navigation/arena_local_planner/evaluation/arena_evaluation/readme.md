@@ -54,6 +54,8 @@ specify_data: true
 specified_data_filename: <your_dataset>.json
 ```
 
+NOTE: Do NOT change the `get_plots_config_default.yaml`!
+
 We recommend using the code below:
 ```
 workon rosnav
