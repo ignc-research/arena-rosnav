@@ -15,6 +15,8 @@ roslaunch arena_bringup start_arena_flatland.launch disable_scenario:="false" ma
 The data will be recorded in `.../catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/arena_evaluation/01_recording`.
 The script stops recording as soon as the agent finishes the scenario and stops moving. After doing all evaluation runs please remember to push your csv files or gather them in `/01_recording`.
 
+NOTE: Leaving the simulation running for a long time after finishing the set number of repetitions does not influence the evaluation results as long as the agent stops running. Also, the last episode of every evaluation run is pruned before evaluating the recorded data.
+
 Note: Sometimes csv files will be ignored by git so you have to use git add -f <file>. We recommend using the code below.
 ```
 roscd arena_evaluation
