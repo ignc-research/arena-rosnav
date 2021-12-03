@@ -86,15 +86,16 @@ class RobotManager:
             robot_yaml_path ([type]): [description]
         """
         self.ROBOT_NAME = os.path.basename(robot_yaml_path).split('.')[0]
+        self.ROBOT_RADIUS = rospy.get_param('radius')
         with open(robot_yaml_path, 'r') as f:
             robot_data = yaml.safe_load(f)
             # get robot radius
-            for body in robot_data['bodies']:
-                if body['name'] == "base_footprint":
-                    for footprint in body['footprints']:
-                        if footprint['type'] == 'circle':
-                            self.ROBOT_RADIUS = footprint.setdefault(
-                                'radius', 0.2)
+            # for body in robot_data['bodies']:
+            #     if body['name'] == "base_footprint":
+            #         for footprint in body['footprints']:
+            #             if footprint['type'] == 'circle':
+            #                 self.ROBOT_RADIUS = footprint.setdefault(
+            #                     'radius', 0.2)
             # get laser_update_rate
             for plugin in robot_data['plugins']:
                 if plugin['type'] == 'Laser':

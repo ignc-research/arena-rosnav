@@ -3,6 +3,7 @@ raytrace_range: 3.0
 
 
 footprint: [[0.48, -0.40], [0.48, 0.40], [-0.48, 0.40], [-0.48, -0.40]]
+# RADIUS: 0.625 from (0.48**2 + 0.4**2)**(1/2)
 footprint_padding: 0.1
 
 inflater_layer:

@@ -1,5 +1,5 @@
 <launch>
-	<arg name="tb3_speed" default="0.3"/>
+	<arg name="speed" default="0.3"/>
     <!-- Launch neural net ros wrapper -->
     <node pkg="arena_ros" type="arena_node_tb3.py" name="arena_node" output="screen" ns="/arena">
         
@@ -23,7 +23,7 @@
         <remap from="~peds" to="ped_manager/ped_recent"/>
         
         <!-- Parameters -->
-        <param name="~tb3_speed" value="$(arg tb3_speed)"/>
+        <param name="~speed" value="$(arg speed)"/>
 
     </node>
 
