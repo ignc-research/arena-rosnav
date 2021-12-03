@@ -157,18 +157,10 @@ class FlatlandEnv(gym.Env):
         Args:
             robot_yaml_path (str): [description]
         """
+        self._robot_radius = rospy.get_param('radius') * 1.05
         with open(robot_yaml_path, "r") as fd:
             robot_data = yaml.safe_load(fd)
-            # get robot radius
-            for body in robot_data["bodies"]:
-                if body["name"] == "base_footprint":
-                    for footprint in body["footprints"]:
-                        if footprint["type"] == "circle":
-                            self._robot_radius = (
-                                footprint.setdefault("radius", 0.3) * 1.05
-                            )
-                        if footprint["radius"]:
-                            self._robot_radius = footprint["radius"] * 1.05
+
             # get laser related information
             for plugin in robot_data["plugins"]:
                 if plugin["type"] == "Laser":
