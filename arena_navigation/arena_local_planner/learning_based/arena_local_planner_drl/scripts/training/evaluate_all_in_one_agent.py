@@ -19,12 +19,15 @@ base_Agent2 = 'mixed_teb_drl4_rule07_policy3'
 base_Agent3 = 'teb_drl4_rule07_policy2'
 base_Agent4 = "2xteb_drl4_rule07_policy2"
 base_Agent5 = "teb_drl4_rule07_nn13_16ls"
+base_Agent6 = "teb_drl4_rule07_nn14_16x3ls"
+base_Agent7 = "teb_drl4_rule07_nn15_8x3ls"
+base_Agent8 = "teb_drl4_rule07_nn16_32x3ls"
 
 primitive_agents = ['rlca_only', 'teb_only', 'drl_only', 'drl03_only', 'mpc_only', 'dwa_only',
                     'teb_large_min_dist_only', 'teb_dyn_obst_only', 'arena_ros_only', 'eband_only']
 simple_all_in_one_switches = ['simple_all_in_one', 'random']
 
-AGENTS = ['eband_only']
+AGENTS = [base_Agent6]
 eval_episodes = 100
 #  seed = random.randint(1, 1000)
 seed = 2
