@@ -49,10 +49,10 @@ class DeploymentDRLAgent(BaseDRLAgent):
                 Path to yaml file containing action space settings.
                 Defaults to DEFAULT_ACTION_SPACE.
         """
+        self._is_train_mode = rospy.get_param("/train_mode")
         if not self._is_train_mode:
             rospy.init_node("DRL_local_planner", anonymous=True)
 
-        self._is_train_mode = rospy.get_param("/train_mode")
         self.name = agent_name
 
         hyperparameter_path = os.path.join(
@@ -156,5 +156,5 @@ def main(agent_name: str) -> None:
 
 
 if __name__ == "__main__":
-    AGENT_NAME = sys.argv[1]
+    AGENT_NAME = "AGENT_21_2021_12_02__22_56"
     main(agent_name=AGENT_NAME)
