@@ -49,22 +49,24 @@ class DeploymentDRLAgent(BaseDRLAgent):
                 Path to yaml file containing action space settings.
                 Defaults to DEFAULT_ACTION_SPACE.
         """
-        self._is_train_mode = rospy.get_param("/train_mode")
         if not self._is_train_mode:
-            rospy.init_node(f"DRL_local_planner", anonymous=True)
+            rospy.init_node("DRL_local_planner", anonymous=True)
 
+        self._is_train_mode = rospy.get_param("/train_mode")
         self.name = agent_name
-        self.setup_agent()
 
         hyperparameter_path = os.path.join(
             TRAINED_MODELS_DIR, self.name, "hyperparameters.json"
         )
+
         super().__init__(
             ns,
             robot_name,
             hyperparameter_path,
             action_space_path,
         )
+
+        self.setup_agent()
 
         if self._is_train_mode:
             # step world to fast forward simulation time
@@ -85,15 +87,16 @@ class DeploymentDRLAgent(BaseDRLAgent):
         assert os.path.isfile(
             model_file
         ), f"Compressed model cannot be found at {model_file}!"
-        assert os.path.isfile(
-            vecnorm_file
-        ), f"VecNormalize file cannot be found at {vecnorm_file}!"
-
-        with open(vecnorm_file, "rb") as file_handler:
-            vec_normalize = pickle.load(file_handler)
-
         self._agent = PPO.load(model_file).policy
-        self._obs_norm_func = vec_normalize.normalize_obs
+
+        if self._agent_params["normalize"]:
+            assert os.path.isfile(
+                vecnorm_file
+            ), f"VecNormalize file cannot be found at {vecnorm_file}!"
+
+            with open(vecnorm_file, "rb") as file_handler:
+                vec_normalize = pickle.load(file_handler)
+            self._obs_norm_func = vec_normalize.normalize_obs
 
     def run(self) -> None:
         """Loop for running the agent until ROS is shutdown.
