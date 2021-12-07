@@ -17,7 +17,7 @@ import rospy
 from geometry_msgs.msg import Twist
 from std_msgs.msg import String
 from flatland_msgs.srv import StepWorld, StepWorldRequest
-from std_msgs.msg import Bool
+from std_msgs.msg import Bool   
 import time
 import math
 
@@ -267,7 +267,6 @@ class FlatlandEnv(gym.Env):
         history_evaluation +=[obs_dict['robot_pose'].y] # robot_pos_y
         history_evaluation +=[action] # action np.array
         
-        # self.csv_writer.addData(np.array(history_evaluation)) # TODO: @Elias: uncomment when csv-writer exists
         # for logging
         if self._extended_eval and done:
             info["collisions"] = self._collisions
