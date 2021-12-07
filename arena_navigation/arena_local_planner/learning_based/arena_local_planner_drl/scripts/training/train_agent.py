@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 from typing import Type, Union
 
 import os, sys, rospy, time

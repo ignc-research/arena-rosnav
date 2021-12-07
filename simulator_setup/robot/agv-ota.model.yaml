@@ -7,6 +7,7 @@ bodies: # List of named bodies
       - type: polygon
         points:
           [[0.513, 0.364], [0.513, -0.364], [-0.513, -0.364], [-0.513, 0.364]]
+          # radius: 0.629 from (0.513**2 + 0.364**2)**(1/2)
         layers: ["all"]
         collision: true
         density: 1
