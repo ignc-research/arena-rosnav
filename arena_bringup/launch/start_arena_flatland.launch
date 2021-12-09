@@ -23,7 +23,8 @@
   <arg name="show_viz" default="true"/>
   <arg name="viz_pub_rate" default="30" />
   <arg name="use_rviz" default="true"/>
-
+  
+  <param name="local_planner" value="$(arg local_planner)"/>
   <param name="model" value="$(arg model)" />
   <param name="update_rate" value="$(arg update_rate)" />
   <param name="step_size" value="$(arg step_size)" />
