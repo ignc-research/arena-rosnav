@@ -1,3 +1,20 @@
+
+---
+---
+Major differences to `main` branch are:
++ Usage of `ros-noetic`
++ Full support of the following robots with realistic parameters: `turtlebot3_burger`, `ridgeback`, `jackal`, `agv-ota` _(see [here](docs/Simulation#Robots) for detailed description of their usage)_
+
+    THIS INCLUDES:
+    - Full support of the planers `teb`, `dwa`, `mpc`, `cadrl`, `rlca`, `arena`
+    - Realistic flatland models for each robot
+    - Defined action space for each Robot (for _rl-training_)
++ Support of the planer `arena`
++ Setting of navigation goal automatically for all planers in `testing` mode
+
+---
+---
+
 # Arena-Rosnav (IROS 21)
 A flexible, high-performance 2D simulator with configurable agents, multiple sensors, and benchmark scenarios for testing robotic navigation. 
 
