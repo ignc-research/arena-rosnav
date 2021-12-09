@@ -1,1 +1,0 @@
-vector saved (x,y): 635.0,481.0
