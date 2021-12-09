@@ -1,0 +1,121 @@
+<launch>
+    <arg name="max_vel"         value="3.0" />
+    <arg name="max_acc"         value="2.0" />
+    <arg name="max_jerk"        value="4.0" />
+    <arg name="lambda_heu"      value="0.1" />
+    
+    <arg name="plan_horizon"    value=""/>
+    
+
+    <!-- arena_plan_manager -->
+    <node pkg="arena_intermediate_planner" name="inter_planner" type="arena_intermediate_planner" output="screen">
+        <!-- <param name="$(arg plan_horizon)/train_mode" value="$(arg train_mode)"/> -->
+         <!-- Global plan: flags -->
+        <param name="$(arg plan_horizon)/global_planner/use_astar"              value="true"/>
+        <param name="$(arg plan_horizon)/global_planner/use_kino_astar"         value="true" />
+        <param name="$(arg plan_horizon)/global_planner/use_oneshot"            value="true" />
+        <param name="$(arg plan_horizon)/global_planner/use_optimization_esdf"  value="true" />
+        <param name="$(arg plan_horizon)/global_planner/use_optimization_astar" value="true" />
+        
+
+        <!-- Global plan: Landmark -->
+        <param name="$(arg plan_horizon)/global_planner/rou_thresh"             value="15.0" />
+        <param name="$(arg plan_horizon)/global_planner/dist_tolerance"         value="1.0" />
+        <param name="$(arg plan_horizon)/global_planner/dist_next_wp"           value="3.0" />
+       
+        
+        <!-- b-spline -->
+        <param name="$(arg plan_horizon)/b_spline/max_vel"                      value="$(arg max_vel)"/>
+        <param name="$(arg plan_horizon)/b_spline/max_acc"                      value="$(arg max_acc)"/>
+        <param name="$(arg plan_horizon)/b_spline/max_jerk"                     value="$(arg max_jerk)"/>
+        <param name="$(arg plan_horizon)/b_spline/control_points_distance"      value="0.5"             type="double"/>
+        <param name="$(arg plan_horizon)/b_spline/feasibility_tolerance"        value="0.05"             type="double"/>
+        <param name="$(arg plan_horizon)/b_spline/planning_horizon"             value="7.5"             type="double"/>
+
+
+         <!-- trajectory optimization: bspline Astar -->
+        <param name="$(arg plan_horizon)/optimization_astar/lambda_smooth"            value="1.0" type="double"/>
+        <param name="$(arg plan_horizon)/optimization_astar/lambda_collision"         value="0.5" type="double"/>
+        <param name="$(arg plan_horizon)/optimization_astar/lambda_feasibility"       value="0.1" type="double"/>
+        <param name="$(arg plan_horizon)/optimization_astar/lambda_fitness"           value="1.0" type="double"/>
+        
+        <param name="$(arg plan_horizon)/optimization_astar/dist0"                    value="0.5" type="double"/>
+        <param name="$(arg plan_horizon)/optimization_astar/max_vel"                  value="$(arg max_vel)" type="double"/>
+        <param name="$(arg plan_horizon)/optimization_astar/max_acc"                  value="$(arg max_acc)" type="double"/>
+        <param name="$(arg plan_horizon)/optimization_astar/order"                    value="3" type="int"/>
+        
+
+        <!-- trajectory optimization: bspline ESDF -->
+        <param name="$(arg plan_horizon)/optimization_ESDF/lambda1"                  value="10.0" type="double"/>
+        <param name="$(arg plan_horizon)/optimization_ESDF/lambda2"                  value="5.0" type="double"/>
+        <param name="$(arg plan_horizon)/optimization_ESDF/lambda3"                  value="0.00001" type="double"/>
+        <param name="$(arg plan_horizon)/optimization_ESDF/lambda4"                  value="0.01" type="double"/>
+        <param name="$(arg plan_horizon)/optimization_ESDF/lambda5"                  value="1.5" type="double"/>
+        <param name="$(arg plan_horizon)/optimization_ESDF/lambda6"                  value="10.0" type="double"/>
+        <param name="$(arg plan_horizon)/optimization_ESDF/lambda7"                  value="100.0" type="double"/>
+        <param name="$(arg plan_horizon)/optimization_ESDF/dist0"                    value="0.4" type="double"/>
+        <param name="$(arg plan_horizon)/optimization_ESDF/max_vel"                  value="$(arg max_vel)" type="double"/>
+        <param name="$(arg plan_horizon)/optimization_ESDF/max_acc"                  value="$(arg max_acc)" type="double"/>
+
+        <param name="$(arg plan_horizon)/optimization_ESDF/algorithm1"               value="15" type="int"/>
+        <param name="$(arg plan_horizon)/optimization_ESDF/algorithm2"               value="11" type="int"/>
+
+        <param name="$(arg plan_horizon)/optimization_ESDF/max_iteration_num1"       value="2" type="int"/>
+        <param name="$(arg plan_horizon)/optimization_ESDF/max_iteration_num2"       value="300" type="int"/>
+        <param name="$(arg plan_horizon)/optimization_ESDF/max_iteration_num3"       value="200" type="int"/>
+        <param name="$(arg plan_horizon)/optimization_ESDF/max_iteration_num4"       value="200" type="int"/>
+
+        <param name="$(arg plan_horizon)/optimization_ESDF/max_iteration_time1"      value="0.0001" type="double"/>
+        <param name="$(arg plan_horizon)/optimization_ESDF/max_iteration_time2"      value="0.005" type="double"/>
+        <param name="$(arg plan_horizon)/optimization_ESDF/max_iteration_time3"      value="0.003" type="double"/>
+        <param name="$(arg plan_horizon)/optimization_ESDF/max_iteration_time4"      value="0.003" type="double"/>
+
+        <param name="$(arg plan_horizon)/optimization_ESDF/order"                    value="3" type="int"/>
+
+
+        <!-- astar -->
+        <param name="$(arg plan_horizon)/astar/resolution_astar"                value="0.1"/>
+        <param name="$(arg plan_horizon)/astar/time_resolution"                 value="0.8" />
+        <param name="$(arg plan_horizon)/astar/lambda_heu"                      value="$(arg lambda_heu)"/>
+        <param name="$(arg plan_horizon)/astar/allocate_num"                    value="100000" />
+
+        <!-- kino astar -->
+        <param name="$(arg plan_horizon)/kino_astar/max_tau"                    value="0.6"/>
+        <param name="$(arg plan_horizon)/kino_astar/init_max_tau"               value="0.8"/>
+        <param name="$(arg plan_horizon)/kino_astar/max_vel"                    value="$(arg max_vel)"/>
+        <param name="$(arg plan_horizon)/kino_astar/max_acc"                    value="$(arg max_acc)"/>
+        <param name="$(arg plan_horizon)/kino_astar/w_time"                     value="10.0"/>
+        
+        <param name="$(arg plan_horizon)/kino_astar/horizon"                    value="30" />
+        <param name="$(arg plan_horizon)/kino_astar/resolution_astar"           value="0.10"/>
+        <param name="$(arg plan_horizon)/kino_astar/time_resolution"            value="0.8" />
+        <param name="$(arg plan_horizon)/kino_astar/lambda_heu"                 value="$(arg lambda_heu)" />
+        <param name="$(arg plan_horizon)/kino_astar/allocate_num"               value="100000"/>
+        <param name="$(arg plan_horizon)/kino_astar/check_num"                  value="5"/>         
+        
+
+        <!-- map size -->
+        <param name="$(arg plan_horizon)/sdf_map/use_occ_esdf"                  value="true"/>
+        <param name="$(arg plan_horizon)/sdf_map/frame_id"                      value="map"/>
+        <param name="$(arg plan_horizon)/sdf_map/resolution"                    value="0.05" />   <!-- provide by map_server: static_map -->
+        
+        <param name="$(arg plan_horizon)/sdf_map/local_update_range_x"          value="10.0" />    <!-- update range -->
+        <param name="$(arg plan_horizon)/sdf_map/local_update_range_y"          value="10.0" />    <!-- update range -->
+        <param name="$(arg plan_horizon)/sdf_map/local_map_margin"              value="50.0"/>     <!-- Keep in history range -->
+
+        <param name="$(arg plan_horizon)/sdf_map/obstacles_inflation"           value="0.3" /> 
+        <param name="$(arg plan_horizon)/sdf_map/local_bound_inflate"           value="0.0"/>
+        
+        <!-- local fusion -->
+        <param name="$(arg plan_horizon)/sdf_map/p_hit"                         value="0.55"/>     <!-- 0.65   0.55    -->
+        <param name="$(arg plan_horizon)/sdf_map/p_miss"                        value="0.2"/>      <!-- 0.35   0.20    -->
+        <param name="$(arg plan_horizon)/sdf_map/p_min"                         value="0.12"/>     <!-- 0.12   0.12    -->
+        <param name="$(arg plan_horizon)/sdf_map/p_max"                         value="0.80"/>     <!-- 0.90   0.80    -->
+        <param name="$(arg plan_horizon)/sdf_map/p_occ"                         value="0.70"/>     <!-- 0.80   0.70    -->
+        <param name="$(arg plan_horizon)/sdf_map/min_ray_length"                value="0.5"/>
+        <param name="$(arg plan_horizon)/sdf_map/max_ray_length"                value="10.0"/>
+
+        <param name="$(arg plan_horizon)/sdf_map/show_occ_time"                 value="false"/>
+        <param name="$(arg plan_horizon)/sdf_map/show_esdf_time"                value="false"/>
+    </node>
+</launch>

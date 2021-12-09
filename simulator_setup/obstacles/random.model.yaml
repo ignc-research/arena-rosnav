@@ -1,0 +1,16 @@
+bodies:
+- color: [1, 0.2, 0.1, 1.0]
+  footprints:
+  - collision: 'true'
+    density: 0
+    layers: [all]
+    points:
+    - [0.7607740402134184, 0.0]
+    - [-0.38038702010670905, 0.6588496453645445]
+    - [-0.38038702010670955, -0.6588496453645443]
+    sensor: 'false'
+    type: polygon
+  name: random
+  pose: [0, 0, 0]
+  type: dynamic
+plugins: []

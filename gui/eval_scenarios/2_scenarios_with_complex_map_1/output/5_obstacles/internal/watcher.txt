@@ -1,0 +1,5 @@
+watcher (x,y,radius): 363.0,356.0,33.0
+watcher (x,y,radius): 391.0,446.0,29.0
+watcher (x,y,radius): 428.0,349.0,31.0
+watcher (x,y,radius): 229.0,251.0,29.0
+watcher (x,y,radius): 207.0,482.0,21.0

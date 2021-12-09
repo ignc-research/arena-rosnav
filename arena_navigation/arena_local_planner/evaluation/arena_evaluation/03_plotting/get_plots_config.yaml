@@ -1,0 +1,57 @@
+collision_alpha: 0.1
+collision_size: 1.0
+collision_zone_alpha: 0.075
+collision_zone_base_diameter: 0.025
+color_scheme:
+  drl: tab:blue
+  drl_spatial_horizon: tab:blue
+  dwa: tab:green
+  dwa_spatial_horizon: tab:green
+  ego: tab:grey
+  ego_spatial_horizon: tab:grey
+  mpc: tab:red
+  mpc_spatial_horizon: tab:red
+  rlca: tab:purple
+  rlca_spatial_horizon: tab:purple
+  teb: tab:orange
+  teb_spatial_horizon: tab:orange
+goal_marker: '*'
+goal_point_color: tab:brown
+goal_size: 20
+labels:
+  drl: DRL
+  drl_spatial_horizon: DRL_spatial_horizon
+  dwa: DWA
+  dwa_spatial_horizon: DWA_spatial_horizon
+  ego: EGO
+  ego_spatial_horizon: EGO_spatial_horizon
+  mpc: MPC
+  mpc_spatial_horizon: MPC_spatial_horizon
+  rlca: RLCA
+  rlca_spatial_horizon: RLCA_spatial_horizon
+  teb: TEB
+  teb_spatial_horizon: TEB_spatial_horizon
+leave_out_planner:
+- rlca_subsampling
+- drl_subsampling
+legend_position: upper left
+most_recent_file: data_21-11-10_15:21:37.json
+obstacle_color: black
+obstacle_radius: 0.3
+path_alpha: 0.3
+path_arrow_color: black
+path_arrow_size: 5
+path_size: 0.5
+plot_collision_zones: true
+plot_collisions: true
+plot_legend: true
+plot_progression: false
+plot_qualitative: true
+plot_quantitative: true
+progression_size: 3
+progression_steps: 20
+specified_data_filename: null
+specify_data: true
+start_marker: ^
+start_point_color: tab:grey
+start_size: 20

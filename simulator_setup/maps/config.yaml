@@ -1,0 +1,17 @@
+# general map parameters
+height: 200
+width: 200
+resolution: 0.25
+# indoor map parameters
+corridor_radius: 7 # total corridor diameter = 1+2*corridor_radius
+iterations: 50 # number of nodes for the indoor map algorithm
+room_number: 10
+room_width: 60
+room_height: 50
+no_overlap: True # whether or not rooms are allowed to overlap
+# outdoor map parameters
+obstacle_number: 20 # number of outdoor obstacles
+obstacle_extra_radius: 2 # total obstacle diameter = 1+2*obstacle_extra_radius
+# define maptype to be generated
+maptype: "indoor"
+map_name: ""

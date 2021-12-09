@@ -1,0 +1,23 @@
+# Training Curriculum 
+# this yaml serves as container of the learning curriculum for the agent
+# by determining the number of static/dynamic obstacles per stage
+# (will carry on training on last stage when threshhold reached)
+
+1:
+  static: 0
+  dynamic: 0
+2:
+  static: 0
+  dynamic: 4
+3:
+  static: 1
+  dynamic: 4
+4:
+  static: 1
+  dynamic: 6
+5:
+  static: 1
+  dynamic: 8
+6:
+  static: 2
+  dynamic: 7

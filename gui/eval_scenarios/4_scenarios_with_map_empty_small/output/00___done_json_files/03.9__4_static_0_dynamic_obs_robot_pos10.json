@@ -1,0 +1,116 @@
+{
+	"scenerios": [
+		{
+			"scene_name": "new_scenario",
+			"repeats": 5,
+			"dynamic_obstacles": {
+				"dynamic_obs_0": {
+					"obstacle_radius": 0.5,
+					"linear_velocity": 0.01,
+					"type": "circle",
+					"start_pos": [
+						-2.4,
+						-2.6999999999999997,
+						0
+					],
+					"waypoints": [
+						[
+							0.01,
+							0.01,
+							0
+						]
+					],
+					"is_waypoint_relative": true,
+					"mode": "yoyo",
+					"triggers": [
+						
+					]
+				},
+				"dynamic_obs_1": {
+					"obstacle_radius": 0.5,
+					"linear_velocity": 0.01,
+					"type": "circle",
+					"start_pos": [
+						0.5500000000000007,
+						0.40000000000000036,
+						0
+					],
+					"waypoints": [
+						[
+							0.01,
+							0.01,
+							0
+						]
+					],
+					"is_waypoint_relative": true,
+					"mode": "yoyo",
+					"triggers": [
+						
+					]
+				},
+				"dynamic_obs_2": {
+					"obstacle_radius": 0.5,
+					"linear_velocity": 0.01,
+					"type": "circle",
+					"start_pos": [
+						4.600000000000001,
+						0.4500000000000002,
+						0
+					],
+					"waypoints": [
+						[
+							0.01,
+							0.01,
+							0
+						]
+					],
+					"is_waypoint_relative": true,
+					"mode": "yoyo",
+					"triggers": [
+						
+					]
+				},
+				"dynamic_obs_3": {
+					"obstacle_radius": 0.5,
+					"linear_velocity": 0.01,
+					"type": "circle",
+					"start_pos": [
+						-2.4,
+						3.450000000000001,
+						0
+					],
+					"waypoints": [
+						[
+							0.01,
+							0.01,
+							0
+						]
+					],
+					"is_waypoint_relative": true,
+					"mode": "yoyo",
+					"triggers": [
+						
+					]
+				}
+			},
+			"static_obstacles": {
+
+			},
+			"robot": {
+				"start_pos": [
+					-4.95,
+					-4.85,
+					0.0
+				],
+				"goal_pos": [
+					5.9,
+					5.700000000000001,
+					0.0
+				]
+			},
+			"watchers": {
+
+			}
+		}
+	]
+}

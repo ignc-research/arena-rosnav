@@ -1,0 +1,248 @@
+{
+    "pedsim_agents": [
+        {
+            "name": "1",
+            "id": 0,
+            "pos": [
+                14.08,
+                18.95
+            ],
+            "type": "adult",
+            "yaml_file": "/home/ducanor/arena_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
+            "number_of_peds": 1,
+            "vmax": 0.5,
+            "start_up_mode": "default",
+            "wait_time": 0.0,
+            "trigger_zone_radius": 0.0,
+            "chatting_probability": 0.0,
+            "tell_story_probability": 0.0,
+            "group_talking_probability": 0.0,
+            "talking_and_walking_probability": 0.0,
+            "requesting_service_probability": 0.0,
+            "requesting_guide_probability": 0.0,
+            "requesting_follower_probability": 0.0,
+            "max_talking_distance": 5.0,
+            "max_servicing_radius": 5.0,
+            "talking_base_time": 10.0,
+            "tell_story_base_time": 0.0,
+            "group_talking_base_time": 10.0,
+            "talking_and_walking_base_time": 6.0,
+            "receiving_service_base_time": 20.0,
+            "requesting_service_base_time": 30.0,
+            "force_factor_desired": 1.0,
+            "force_factor_obstacle": 1.0,
+            "force_factor_social": 5.0,
+            "force_factor_robot": 0.0,
+            "waypoints": [
+                [
+                    16.5,
+                    8.21
+                ],
+                [
+                    14.1,
+                    18.56
+                ]
+            ],
+            "waypoint_mode": 0
+        },
+        {
+            "name": "2",
+            "id": 0,
+            "pos": [
+                2.25,
+                14.59
+            ],
+            "type": "adult",
+            "yaml_file": "/home/ducanor/arena_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
+            "number_of_peds": 1,
+            "vmax": 0.5,
+            "start_up_mode": "default",
+            "wait_time": 0.0,
+            "trigger_zone_radius": 0.0,
+            "chatting_probability": 0.0,
+            "tell_story_probability": 0.0,
+            "group_talking_probability": 0.0,
+            "talking_and_walking_probability": 0.0,
+            "requesting_service_probability": 0.0,
+            "requesting_guide_probability": 0.0,
+            "requesting_follower_probability": 0.0,
+            "max_talking_distance": 5.0,
+            "max_servicing_radius": 5.0,
+            "talking_base_time": 10.0,
+            "tell_story_base_time": 0.0,
+            "group_talking_base_time": 10.0,
+            "talking_and_walking_base_time": 6.0,
+            "receiving_service_base_time": 20.0,
+            "requesting_service_base_time": 30.0,
+            "force_factor_desired": 1.0,
+            "force_factor_obstacle": 1.0,
+            "force_factor_social": 5.0,
+            "force_factor_robot": 0.0,
+            "waypoints": [
+                [
+                    11.6,
+                    13.44
+                ],
+                [
+                    2.14,
+                    14.62
+                ]
+            ],
+            "waypoint_mode": 0
+        },
+        {
+            "name": "3",
+            "id": 0,
+            "pos": [
+                11.46,
+                3.99
+            ],
+            "type": "adult",
+            "yaml_file": "/home/ducanor/arena_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
+            "number_of_peds": 1,
+            "vmax": 0.5,
+            "start_up_mode": "default",
+            "wait_time": 0.0,
+            "trigger_zone_radius": 0.0,
+            "chatting_probability": 0.0,
+            "tell_story_probability": 0.0,
+            "group_talking_probability": 0.0,
+            "talking_and_walking_probability": 0.0,
+            "requesting_service_probability": 0.0,
+            "requesting_guide_probability": 0.0,
+            "requesting_follower_probability": 0.0,
+            "max_talking_distance": 5.0,
+            "max_servicing_radius": 5.0,
+            "talking_base_time": 10.0,
+            "tell_story_base_time": 0.0,
+            "group_talking_base_time": 10.0,
+            "talking_and_walking_base_time": 6.0,
+            "receiving_service_base_time": 20.0,
+            "requesting_service_base_time": 30.0,
+            "force_factor_desired": 1.0,
+            "force_factor_obstacle": 1.0,
+            "force_factor_social": 5.0,
+            "force_factor_robot": 0.0,
+            "waypoints": [
+                [
+                    6.15,
+                    12.63
+                ],
+                [
+                    11.45,
+                    3.88
+                ]
+            ],
+            "waypoint_mode": 0
+        },
+        {
+            "name": "4",
+            "id": 0,
+            "pos": [
+                10.35,
+                18.87
+            ],
+            "type": "adult",
+            "yaml_file": "/home/ducanor/arena_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
+            "number_of_peds": 1,
+            "vmax": 0.5,
+            "start_up_mode": "default",
+            "wait_time": 0.0,
+            "trigger_zone_radius": 0.0,
+            "chatting_probability": 0.0,
+            "tell_story_probability": 0.0,
+            "group_talking_probability": 0.0,
+            "talking_and_walking_probability": 0.0,
+            "requesting_service_probability": 0.0,
+            "requesting_guide_probability": 0.0,
+            "requesting_follower_probability": 0.0,
+            "max_talking_distance": 5,
+            "max_servicing_radius": 5,
+            "talking_base_time": 10,
+            "tell_story_base_time": 0.0,
+            "group_talking_base_time": 10,
+            "talking_and_walking_base_time": 6,
+            "receiving_service_base_time": 20,
+            "requesting_service_base_time": 30,
+            "force_factor_desired": 1,
+            "force_factor_obstacle": 1,
+            "force_factor_social": 5,
+            "force_factor_robot": 0,
+            "waypoints": [
+                [
+                    15.25,
+                    15.46
+                ],
+                [
+                    19.13,
+                    12.3
+                ],
+                [
+                    15.06,
+                    15.57
+                ],
+                [
+                    10.12,
+                    18.93
+                ]
+            ],
+            "waypoint_mode": 0
+        },
+        {
+            "name": "5",
+            "id": 0,
+            "pos": [
+                2.82,
+                11.17
+            ],
+            "type": "adult",
+            "yaml_file": "/home/ducanor/arena_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
+            "number_of_peds": 1,
+            "vmax": 0.5,
+            "start_up_mode": "default",
+            "wait_time": 0.0,
+            "trigger_zone_radius": 0.0,
+            "chatting_probability": 0.0,
+            "tell_story_probability": 0.0,
+            "group_talking_probability": 0.0,
+            "talking_and_walking_probability": 0.0,
+            "requesting_service_probability": 0.0,
+            "requesting_guide_probability": 0.0,
+            "requesting_follower_probability": 0.0,
+            "max_talking_distance": 5.0,
+            "max_servicing_radius": 5.0,
+            "talking_base_time": 10.0,
+            "tell_story_base_time": 0.0,
+            "group_talking_base_time": 10.0,
+            "talking_and_walking_base_time": 6.0,
+            "receiving_service_base_time": 20.0,
+            "requesting_service_base_time": 30.0,
+            "force_factor_desired": 1.0,
+            "force_factor_obstacle": 1.0,
+            "force_factor_social": 5.0,
+            "force_factor_robot": 0.0,
+            "waypoints": [
+                [
+                    12.58,
+                    8.21
+                ],
+                [
+                    2.76,
+                    11.16
+                ]
+            ],
+            "waypoint_mode": 0
+        }
+    ],
+    "static_obstacles": [],
+    "robot_position": [
+        20.86,
+        20.22
+    ],
+    "robot_goal": [
+        3.18,
+        3.59
+    ],
+    "map_path": "/home/ducanor/arena_ws/src/arena-rosnav/simulator_setup/maps/eval_outdoor/map.yaml",
+    "format": "arena-tools"
+}

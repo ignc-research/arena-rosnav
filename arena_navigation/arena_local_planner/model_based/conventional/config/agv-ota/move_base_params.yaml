@@ -1,0 +1,30 @@
+base_global_planner: global_planner/GlobalPlanner
+base_local_planner: dwa_local_planner/DWAPlannerROS
+recovery_behavior_enabled: false
+recovery_behaviour_enabled: false
+
+controller_patience: 15.0
+#	default:15.0   	How long the controller will wait in seconds without receiving a valid control before space-clearing operations are performed. 
+controller_frequency: 5.0
+planner_frequency: 1.0
+
+#	default:0.0    The rate in Hz at which to run the global planning loop. If the frequency is set to 0.0, the global planner will only run when a new goal is received
+# global planner
+
+conservative_reset_dist: 3.0
+planner_frequency: 5.0
+oscillation_timeout: 10.0
+oscillation_distance: 0.2
+
+
+GlobalPlanner:
+  allow_unknown: true
+  default_tolerance: 0.01
+  visualize_potential: true
+  
+  use_dijkstra: true
+  use_quadratic: true
+  use_grid_path: false
+  old_navfn_behavior: false
+  orientation_mode: 2
+  orientation_window_size: 2

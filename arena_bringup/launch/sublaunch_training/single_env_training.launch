@@ -1,0 +1,53 @@
+<launch>
+    <arg name="ns" />
+
+    <!-- Don't change it if you don't know what does it mean! -->
+    <arg name="global_frame_id"   value="map"/>
+    <arg name="odom_frame_id"     value="$(arg ns)_odom"/>
+    <arg name="base_frame_id"     value="$(arg ns)_footprint"/>
+
+    <!-- use fake localization-->
+    <include file="$(find arena_bringup)/launch/sublaunch_training/fake_localization.launch">
+      <arg name="ns"                value="$(arg ns)"/>
+      <arg name="global_frame_id"   value="$(arg global_frame_id)"/>
+      <arg name="odom_frame_id"     value="$(arg odom_frame_id)"/>
+    </include>
+
+    <!-- use move base-->
+    <!-- <include file="$(find arena_bringup)/launch/sublaunch_training/move_base.launch">
+      <arg name="ns"                value="$(arg ns)"/>
+    </include> -->
+
+    <!-- start time space plan fsm-->
+    <!-- <include file="$(find arena_bringup)/launch/sublaunch_training/timed_space_planner_fsm.launch">
+      <arg name="ns"                value="$(arg ns)"/>
+    </include> -->
+
+
+    <include file="$(find arena_bringup)/launch/sublaunch_training/plan_manager.launch">
+      <!-- only train_mode is false, otherwise subgoal is identical with global goal
+            which is not wanted for training the waypoint generator.
+      -->
+      <arg name="ns"                value="$(arg ns)"/>
+      <arg name="train_mode"        value="true"/>
+      <arg name="global_frame_id"   value="$(arg global_frame_id)"/>
+      <arg name="odom_frame_id"     value="$(arg odom_frame_id)"/>
+      <arg name="base_frame_id"     value="$(arg base_frame_id)"/>
+      <!-- make use also make the modification in the file start_arena_flatland_waypoint.launch -->
+      <!-- look_ahead_distance + outer ring circle < len_laser_beam -->
+      <arg name="look_ahead_distance"     default="2.3"/>   <!--meter, double -->
+      <arg name="tolerance_approach"      default="0.6"/>   <!--meter, double -->
+      <arg name="timeout_goal"            default="330."/>  <!--sec, double -->
+      <arg name="timeout_subgoal"         default="20"/>   <!--sec, double -->
+    </include>
+    <include file="$(find arena_bringup)/launch/sublaunch_training/intermediate_planner.launch">
+      <arg name="ns"                value="$(arg ns)"/>
+    </include> -->
+  
+    
+    <!-- use simulator and rviz-->
+    <include file="$(find arena_bringup)/launch/sublaunch_training/flatland_simulator.launch">
+        <arg name="ns" value="$(arg ns)"/>
+    </include>
+
+  </launch>

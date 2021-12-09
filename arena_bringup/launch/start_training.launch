@@ -1,0 +1,164 @@
+<launch>
+<!-- map folder -->
+  <!-- <arg name="ns_prefix"       value="sim" />
+
+  <arg name="train_mode"      default="true" />
+  <arg name="num_envs"        default="1" />
+  <arg name="map_folder_name" default="map_empty" />
+
+  <rosparam file="$(find arena_bringup)/launch/start_flatland.yaml" command="load" />
+  <arg name="map_path" default="$(find simulator_setup)/maps/$(arg map_folder_name)/map.yaml" />
+  <param name="world_path" value="$(find simulator_setup)/maps/$(arg map_folder_name)/map.world.yaml" /> -->
+
+
+
+
+  <!-- Here are the argument that may be frequently changed -->
+  <arg name="ns_prefix" default="sim" />
+  <arg name="num_envs" default="1" />
+  
+  <!-- train mode  -->
+  <arg name="train_mode"       default="true"/>
+
+  <!-- To make the training more efficient make sure this step_size*laser_update_rate == 1  -->
+  <arg name="step_size" default="0.01"/>
+  <arg name="update_rate" default="250"/>
+  <arg name="show_viz"  default="true"/>
+  <arg name="viz_pub_rate" default="30" />
+
+  <!-- the folder name under the path simulator_setup/maps  -->
+  <arg name="map_folder_name" default="map_empty" />
+
+  <!-- the velocity of randomly genelized obstacles  -->
+  <arg name="obs_vel" default="0.3" />
+  <!-- if it's false flatland server will not publish any debug related infomation and you will not able to visuzalize e.g robot, dynamic obstacles  -->
+
+
+  <!--  PARAMS DON'T CHANGE THEM  -->
+  <param name="update_rate" value="$(arg update_rate)" />
+  <param name="use_sim_time" value="true" />
+  <param name="train_mode" value="$(arg train_mode)" />
+  <param name="num_envs" value="$(arg num_envs)" />
+  <param name="step_size" value="$(arg step_size)" /> 
+  <param name="obs_vel" value="$(arg obs_vel)" /> 
+  <arg name="map_path" default="$(find simulator_setup)/maps/$(arg map_folder_name)/map.yaml" />
+  <param name="world_path" value="$(find simulator_setup)/maps/$(arg map_folder_name)/map.world.yaml" />
+  <param name="show_viz" value="$(arg show_viz)"/>
+  <param name="viz_pub_rate" value="$(arg viz_pub_rate)"/>
+  <param name="robot_action_rate"     value="10"/>
+  <param name="laser_update_rate"     value="10"/>
+
+
+  <!-- map server-->
+  <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_path)">
+    <!-- In multi-env training /clock not available, since we only want one map_server, it's clock topic is remapped to /clock -->
+    <remap from="/clock" to="/$(arg ns_prefix)_1/clock" />
+  </node>
+
+  <group if="$(eval arg('train_mode') == false)">
+  <!-- makes sure that action's will be published according to sim time in eval mode-->
+    <node name="action_publisher" pkg="arena_local_planner_drl" type="action_publisher.py"/>
+  </group>
+
+  <!-- set the log format -->
+  <env name="ROSCONSOLE_FORMAT" value="[${severity} ${time} ${logger}]: ${message}" />
+  <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch">
+    <arg name="ns" value="eval_sim" />
+  </include>
+  <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=1)">
+    <arg name="ns" value="$(arg ns_prefix)_1" />
+  </include>
+  <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=2)">
+    <arg name="ns" value="$(arg ns_prefix)_2" />
+  </include>
+  <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=3)">
+    <arg name="ns" value="$(arg ns_prefix)_3" />
+  </include>
+  <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=4)">
+    <arg name="ns" value="$(arg ns_prefix)_4" />
+  </include>
+  <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=5)">
+    <arg name="ns" value="$(arg ns_prefix)_5" />
+  </include>
+  <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=6)">
+    <arg name="ns" value="$(arg ns_prefix)_6" />
+  </include>
+  <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=7)">
+    <arg name="ns" value="$(arg ns_prefix)_7" />
+  </include>
+  <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=8)">
+    <arg name="ns" value="$(arg ns_prefix)_8" />
+  </include>
+  <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=9)">
+    <arg name="ns" value="$(arg ns_prefix)_9" />
+  </include>
+  <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=10)">
+    <arg name="ns" value="$(arg ns_prefix)_10" />
+  </include>
+  <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=11)">
+    <arg name="ns" value="$(arg ns_prefix)_11" />
+  </include>
+  <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=12)">
+    <arg name="ns" value="$(arg ns_prefix)_12" />
+  </include>
+  <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=13)">
+    <arg name="ns" value="$(arg ns_prefix)_13" />
+  </include>
+  <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=14)">
+    <arg name="ns" value="$(arg ns_prefix)_14" />
+  </include>
+  <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=15)">
+    <arg name="ns" value="$(arg ns_prefix)_15" />
+  </include>
+  <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=16)">
+    <arg name="ns" value="$(arg ns_prefix)_16" />
+  </include>
+  <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=17)">
+    <arg name="ns" value="$(arg ns_prefix)_17" />
+  </include>
+  <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=18)">
+    <arg name="ns" value="$(arg ns_prefix)_18" />
+  </include>
+  <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=19)">
+    <arg name="ns" value="$(arg ns_prefix)_19" />
+  </include>
+  <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=20)">
+    <arg name="ns" value="$(arg ns_prefix)_20" />
+  </include>
+  <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=21)">
+    <arg name="ns" value="$(arg ns_prefix)_21" />
+  </include>
+  <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=22)">
+    <arg name="ns" value="$(arg ns_prefix)_22" />
+  </include>
+  <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=23)">
+    <arg name="ns" value="$(arg ns_prefix)_23" />
+  </include>
+  <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=24)">
+    <arg name="ns" value="$(arg ns_prefix)_24" />
+  </include>
+  <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=25)">
+    <arg name="ns" value="$(arg ns_prefix)_25" />
+  </include>
+  <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=26)">
+    <arg name="ns" value="$(arg ns_prefix)_26" />
+  </include>
+  <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=27)">
+    <arg name="ns" value="$(arg ns_prefix)_27" />
+  </include>
+  <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=28)">
+    <arg name="ns" value="$(arg ns_prefix)_28" />
+  </include>
+  <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=29)">
+    <arg name="ns" value="$(arg ns_prefix)_29" />
+  </include>
+  <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=30)">
+    <arg name="ns" value="$(arg ns_prefix)_30" />
+  </include>
+  <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=31)">
+    <arg name="ns" value="$(arg ns_prefix)_31" />
+  </include>
+  <include file="$(find arena_bringup)/launch/sublaunch_training/single_env_training.launch" if="$(eval num_envs>=32)">
+    <arg name="ns" value="$(arg ns_prefix)_32" />
+  </include>
+</launch>

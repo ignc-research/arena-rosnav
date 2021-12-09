@@ -1,0 +1,49 @@
+
+safety distance factor:
+  None: 1.0
+  Waiting: 1.0
+  Queueing: 1.0
+  Walking: 1.0
+  GroupWalking: 1.0
+  Shopping: 1.0
+  Talking: 1.0
+  Working: 1.0
+  LiftingForks: 1.0
+  Loading: 1.0
+  LoweringForks: 1.0
+  Driving: 1.0
+  TellStory: 1.0
+  GroupTalking: 1.0
+  Listening: 1.0
+  TalkingAndWalking: 1.0
+  ListeningAndWalking: 1.0
+  ReachedShelf: 1.0
+  Running: 1.0
+  BackUp: 1.0
+  StateRequestingService: 1.0
+  StateReceivingService: 1.0
+  StateDrivingToInteraction: 1.0
+  StateProvidingService: 1.0
+  StateRequestingGuide: 1.0
+  StateFollowingGuide: 1.0
+  StateRequestingFollower: 1.0
+  StateGuideToGoal: 1.0
+  StateClearingGoal: 1.0
+  StateWaitForTrigger: 1.0
+  StateWaitForTimer: 1.0
+human obstacle safety distance radius:
+  adult: 0.32
+  child: 0.25
+  elder: 0.3
+  forklift: 0.7
+  servicerobot: 0.6
+robot obstacle safety distance radius:
+  random_wanderer: 0.3
+obstacle radius:
+  adult: 0.32
+  child: 0.25
+  elder: 0.3
+  forklift : 0.7
+  servicerobot : 0.6
+  random_wanderer: 0.4
+  

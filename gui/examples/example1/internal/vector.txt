@@ -1,0 +1,6 @@
+vector start (x,y): 337.0,357.0
+vector end (x,y): 433.0,354.00000000000006
+vector start (x,y): 393.0,388.00000000000006
+vector end (x,y): 331.0,389.0
+vector start (x,y): 332.0,434.00000000000006
+vector end (x,y): 405.0,434.00000000000006

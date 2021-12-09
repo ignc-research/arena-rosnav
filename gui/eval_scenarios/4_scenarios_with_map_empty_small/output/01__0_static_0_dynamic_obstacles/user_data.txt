@@ -1,0 +1,5 @@
+Map resolution:
+0.05
+Map origin:
+[-6.0, -6.0, 0.0]
+ObstacleID - ObstacleType - Velocity - WatchersIDs(triggered-/+/?) - WaypointsIDs - Motion:

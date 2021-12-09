@@ -1,0 +1,4 @@
+# parameters for the calculation of the performance metrics
+robot_radius: 0.3
+time_out_treshold: 180
+collision_treshold: 2

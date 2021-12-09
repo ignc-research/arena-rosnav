@@ -1,0 +1,99 @@
+# Each yml file should start with the default cfg block, these parameters will apply to all
+# figures below in order to prevent redundant parameter definitions:
+
+# ------------ default config block ------------
+# 1: will plot, 0: will not plot
+default_cfg:
+    plot_trj:        1        # plot agent trajectory
+    plot_zones:      1        # plot collision zones
+    plot_grid:       0        # zone grid
+    plot_obst:       1        # plot obstacles (start, end, direction)
+    plot_collisions: 1        # plot a circle where agent collided
+    plot_sm:         1        # plot static map
+    plot_gp:         0        # plot global plan
+    plot_subgoals:   0        # plot subgoals
+    folder:          "run_4/" # folder containing the planners
+
+
+
+# ------------ figure block ------------
+# Each figure name needs to be unique
+# naming convention: $map_obs$n_vel$v_$name (unique)
+# $map             : name of the map 
+# $n               : number of obstacles
+# $v               : obstacle velocity
+# $name            : an arbitary name
+# ---------------------------------------
+
+# fig 1
+# in figure 1 we want to have the map1 map with 20 obstacles and vel of 0.2
+# The script will generate a "map1_obs20_vel02_testplot1.pdf" file inside plots/
+# We can include any amount of plots to this figure by adding them to "planner"
+# In figure 1 we want to compare three wpg's for the cadrl model
+map1_obs20_vel02:            
+    planner:                                
+        MPC:                          # name of the planner (will be used in plot legend)
+            model:     "MPC"             # folder name containing the bags for desired model
+            linestyle: "tab:red,-"         # linestyle and color for all plots related to this planner
+        TEB:
+            model:     "TEB"
+            linestyle: "tab:blue,--"
+
+        R2:
+            model:     "R2"
+            linestyle: "tab:orange,--"
+        R4:
+            model:     "R4"
+            linestyle: "tab:cyan,-."
+
+       
+
+map1_obs20_vel03:            
+    planner:                                
+        MPC:                          # name of the planner (will be used in plot legend)
+            model:     "MPC"             # folder name containing the bags for desired model
+            linestyle: "tab:red,-"         # linestyle and color for all plots related to this planner
+        TEB:
+            model:     "TEB"
+            linestyle: "tab:blue,--"
+
+        R2:
+            model:     "R2"
+            linestyle: "tab:orange,--"
+        R4:
+            model:     "R4"
+            linestyle: "tab:cyan,-."
+
+
+map1_obs10_vel02:            
+    planner:                                
+        MPC:                          # name of the planner (will be used in plot legend)
+            model:     "MPC"             # folder name containing the bags for desired model
+            linestyle: "tab:red,-"         # linestyle and color for all plots related to this planner
+        TEB:
+            model:     "TEB"
+            linestyle: "tab:blue,--"
+
+        R2:
+            model:     "R2"
+            linestyle: "tab:orange,--"
+        R4:
+            model:     "R4"
+            linestyle: "tab:cyan,-."
+
+
+map1_obs10_vel03:            
+    planner:                                
+        MPC:                          # name of the planner (will be used in plot legend)
+            model:     "MPC"             # folder name containing the bags for desired model
+            linestyle: "tab:red,-"         # linestyle and color for all plots related to this planner
+        TEB:
+            model:     "TEB"
+            linestyle: "tab:blue,--"
+
+        R2:
+            model:     "R2"
+            linestyle: "tab:orange,--"
+        R4:
+            model:     "R4"
+            linestyle: "tab:cyan,-."

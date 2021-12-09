@@ -1,0 +1,234 @@
+default_cfg: 
+    plot_trj: 1
+    plot_zones: 1
+    plot_obst: 1
+    plot_collisions: 1
+    plot_grid: 0
+    plot_sm: 1
+    plot_gp: 0
+    plot_subgoals: 0
+    folder: "run_3/" 
+
+# all wpg       --------------
+
+# fig 1
+custom_cfg_1: 
+    plot_zones: 1
+    plot_sm: 1
+    plot_obst: 1
+
+# each drl planner with all wpg
+
+map1_obs20_vel02_Cadrl:
+            
+    planner:
+
+        cadrl_sh:
+            model:     "cadrl"
+            linestyle: "tab:red,-"
+            wpg:       "spatialhorizon"
+        cadrl_ts:
+            model:     "cadrl"
+            linestyle: "tab:blue,--"
+            wpg:       "timespace"
+        cadrl_ss:
+            model:     "cadrl"
+            linestyle: "tab:grey,-."
+            wpg:       "subsampling"
+
+map1_obs20_vel02_drl1:
+            
+    planner:
+
+        drl1_sh:
+            model:     "drl1"
+            linestyle: "tab:red,-"
+            wpg:       "spatialhorizon"
+        drl1_ts:
+            model:     "drl1"
+            linestyle: "tab:blue,--"
+            wpg:       "timespace"
+        drl1_ss:
+            model:     "drl1"
+            linestyle: "tab:grey,-."
+            wpg:       "subsampling"
+
+map1_obs20_vel02_drl2:
+            
+    planner:
+
+        drl2_sh:
+            model:     "drl1"
+            linestyle: "tab:red,-"
+            wpg:       "spatialhorizon"
+        drl2_ts:
+            model:     "drl2"
+            linestyle: "tab:blue,--"
+            wpg:       "timespace"
+        drl2_ss:
+            model:     "drl2"
+            linestyle: "tab:grey,-."
+            wpg:       "subsampling"
+
+map1_obs20_vel02_drl3:
+            
+    planner:
+        drl3_sh:
+            model:     "drl3"
+            linestyle: "red,-"
+            wpg:       "spatialhorizon"
+        drl3_ts:
+            model:     "drl3"
+            linestyle: "blue,--"
+            wpg:       "timespace"
+        drl3_ss:
+            model:     "drl3"
+            linestyle: "grey,-."
+            wpg:       "subsampling"
+
+map1_obs20_vel02_rlca:
+    planner:
+
+        rlca_sh:
+            model:     "rlca"
+            linestyle: "tab:red,-"
+            wpg:       "spatialhorizon"
+        rlca_ts:
+            model:     "rlca"
+            linestyle: "tab:blue,--"
+            wpg:       "timespace"
+        rlca_ss:
+            model:     "rlca"
+            linestyle: "tab:grey,-."
+            wpg:       "subsampling"
+
+# each drl planner with all wpg + classic planner
+
+map1_obs20_vel02_Cadrl_Classic:
+            
+    planner:
+
+        cadrl_sh:
+            model:     "cadrl"
+            linestyle: "tab:red,-"
+            wpg:       "spatialhorizon"
+        cadrl_ts:
+            model:     "cadrl"
+            linestyle: "tab:blue,--"
+            wpg:       "timespace"
+        cadrl_ss:
+            model:     "cadrl"
+            linestyle: "tab:grey,-."
+            wpg:       "subsampling"
+        teb:
+            model:     "teb"
+            linestyle: "tab:orange,-"
+        mpc: 
+            model:     "mpc"
+            linestyle: "tab:green,-"
+        ego:
+            model:      "ego"
+            linestyle:  "tab:olive,-"
+
+map1_obs20_vel02_drl1_Classic:
+            
+    planner:
+
+        drl1_sh:
+            model:     "drl1"
+            linestyle: "tab:red,-"
+            wpg:       "spatialhorizon"
+        drl1_ts:
+            model:     "drl1"
+            linestyle: "tab:blue,--"
+            wpg:       "timespace"
+        drl1_ss:
+            model:     "drl1"
+            linestyle: "tab:grey,-."
+            wpg:       "subsampling"
+        teb:
+            model:     "teb"
+            linestyle: "tab:orange,-"
+        mpc: 
+            model:     "mpc"
+            linestyle: "tab:green,-"
+        ego:
+            model:      "ego"
+            linestyle:  "tab:olive,-"
+
+map1_obs20_vel02_drl2_Classic:
+            
+    planner:
+
+        drl2_sh:
+            model:     "drl1"
+            linestyle: "tab:red,-"
+            wpg:       "spatialhorizon"
+        drl2_ts:
+            model:     "drl2"
+            linestyle: "tab:blue,--"
+            wpg:       "timespace"
+        drl2_ss:
+            model:     "drl2"
+            linestyle: "tab:grey,-."
+            wpg:       "subsampling"
+        teb:
+            model:     "teb"
+            linestyle: "tab:orange,-"
+        mpc: 
+            model:     "mpc"
+            linestyle: "tab:green,-"
+        ego:
+            model:      "ego"
+            linestyle:  "tab:olive,-"
+
+map1_obs20_vel02_drl3_Classic:
+            
+    planner:
+        drl3_sh:
+            model:     "drl3"
+            linestyle: "red,-"
+            wpg:       "spatialhorizon"
+        drl3_ts:
+            model:     "drl3"
+            linestyle: "blue,--"
+            wpg:       "timespace"
+        drl3_ss:
+            model:     "drl3"
+            linestyle: "grey,-."
+            wpg:       "subsampling"
+        teb:
+            model:     "teb"
+            linestyle: "tab:orange,-"
+        mpc: 
+            model:     "mpc"
+            linestyle: "tab:green,-"
+        ego:
+            model:      "ego"
+            linestyle:  "tab:olive,-"
+
+map1_obs20_vel02_rlca_Classic:
+    planner:
+
+        rlca_sh:
+            model:     "rlca"
+            linestyle: "tab:red,-"
+            wpg:       "spatialhorizon"
+        rlca_ts:
+            model:     "rlca"
+            linestyle: "tab:blue,--"
+            wpg:       "timespace"
+        rlca_ss:
+            model:     "rlca"
+            linestyle: "tab:grey,-."
+            wpg:       "subsampling"
+        teb:
+            model:     "teb"
+            linestyle: "tab:orange,-"
+        mpc: 
+            model:     "mpc"
+            linestyle: "tab:green,-"
+        ego:
+            model:      "ego"
+            linestyle:  "tab:olive,-"
+

@@ -1,0 +1,86 @@
+{
+    "scenarios": [
+      {
+            "scene_name": "empty_map_2",
+            "repeats": 5,
+            "dynamic_obstacles": {
+
+                "dynamic_obs_2": {
+                    "obstacle_radius": 0.3,
+                    "linear_velocity": 0.1,
+                    "start_pos": [
+                        21,
+                        7,
+                        0
+                    ],
+                    "waypoints": [
+                        [
+                            -2,
+                            -2,
+                            0
+                        ],
+                        [
+                            -4,
+                            0,
+                            0
+                        ],
+                        [
+                            -6,
+                            -2,
+                            0
+                        ],
+                        [
+                            -8,
+                            0,
+                            0
+                        ],
+                        [
+                            -10,
+                            -3,
+                            0
+                        ]
+                    ],
+                    "is_waypoint_relative": true,
+                    "mode": "yoyo",
+                    "triggers": [
+                        "watcher_2"
+                    ]
+                }
+
+
+
+
+
+
+
+            },
+            "static_obstacles": {
+
+            },
+            "robot": {
+                "start_pos": [
+                    0.0,
+                    7.0,
+                    0.0
+                ],
+                "goal_pos": [
+                    24,
+                    7,
+                    0
+                ]
+            },
+            "watchers": {
+
+                "watcher_2": {
+                    "pos": [
+                        10,
+                        7
+                    ],
+                    "range": 7
+                }
+
+            }
+        }
+    ]
+
+}

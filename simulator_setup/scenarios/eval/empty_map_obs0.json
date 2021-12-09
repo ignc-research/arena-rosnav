@@ -1,0 +1,23 @@
+{
+    "scenarios": [
+        {
+            "scene_name": "scenario_1",
+            "repeats": 30,
+            "dynamic_obstacles": {},
+            "static_obstacles": {},
+            "robot": {
+                "start_pos": [
+                    -1,
+                    0.0,
+                    0.2
+                ],
+                "goal_pos": [
+                    24,
+                    16,
+                    0
+                ]
+            },
+            "watchers": {}
+        }
+    ]
+}

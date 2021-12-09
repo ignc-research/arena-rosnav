@@ -1,0 +1,287 @@
+{
+    "scenarios": [
+        {
+            "scene_name": "obstacle_map_0",
+            "repeats": 5,
+            "dynamic_obstacles": {
+                "dynamic_obs_0": {
+                    "obstacle_radius": 0.3,
+                    "linear_velocity": 0.1,
+                    "start_pos": [
+                        3,
+                        9,
+                        0
+                    ],
+                    "waypoints": [
+                        [
+                            -6,
+                            4.75,
+                            0
+                        ]
+                    ],
+                    "is_waypoint_relative": true,
+                    "mode": "yoyo",
+                    "triggers": [
+                        "watcher_0"
+                    ]
+                },
+                "dynamic_obs_1": {
+                    "obstacle_radius": 0.3,
+                    "linear_velocity": 0.1,
+                    "start_pos": [
+                        3.5,
+                        -1.75,
+                        0
+                    ],
+                    "waypoints": [
+                        [
+                            5,
+                            5,
+                            0
+                        ]
+                    ],
+                    "is_waypoint_relative": true,
+                    "mode": "yoyo",
+                    "triggers": [
+                        "watcher_1"
+                    ]
+                },
+                "dynamic_obs_2": {
+                    "obstacle_radius": 0.3,
+                    "linear_velocity": 0.1,
+                    "start_pos": [
+                        7,
+                        5.5,
+                        0
+                    ],
+                    "waypoints": [
+                        [
+                            -1,
+                            4,
+                            0
+                        ]
+                    ],
+                    "is_waypoint_relative": true,
+                    "mode": "yoyo",
+                    "triggers": [
+                        "watcher_2"
+                    ]
+                },
+
+                "dynamic_obs_3": {
+                    "obstacle_radius": 0.3,
+                    "linear_velocity": 0.1,
+                    "start_pos": [
+                        11,
+                        10,
+                        0
+                    ],
+                    "waypoints": [
+                        [
+                            -3.5,
+                            0,
+                            0
+                        ]
+                    ],
+                    "is_waypoint_relative": true,
+                    "mode": "yoyo",
+                    "triggers": [
+                        "watcher_3"
+                    ]
+                },
+
+                "dynamic_obs_4": {
+                    "obstacle_radius": 0.3,
+                    "linear_velocity": 0.1,
+                    "start_pos": [
+                        10,
+                        14.75,
+                        0
+                    ],
+                    "waypoints": [
+                        [
+                            -2,
+                            -4,
+                            0
+                        ]
+                    ],
+                    "is_waypoint_relative": true,
+                    "mode": "yoyo",
+                    "triggers": [
+                        "watcher_4"
+                    ]
+                },
+                "dynamic_obs_5": {
+                    "obstacle_radius": 0.3,
+                    "linear_velocity": 0.1,
+                    "start_pos": [
+                        12.5,
+                        4.5,
+                        0
+                    ],
+                    "waypoints": [
+                        [
+                            -3,
+                            2,
+                            0
+                        ]
+                    ],
+                    "is_waypoint_relative": true,
+                    "mode": "yoyo",
+                    "triggers": [
+                        "watcher_5"
+                    ]
+                },
+                "dynamic_obs_6": {
+                    "obstacle_radius": 0.3,
+                    "linear_velocity": 0.1,
+                    "start_pos": [
+                        12.5,
+                        1,
+                        0
+                    ],
+                    "waypoints": [
+                        [
+                            -3,
+                            3,
+                            0
+                        ]
+                    ],
+                    "is_waypoint_relative": true,
+                    "mode": "yoyo",
+                    "triggers": [
+                        "watcher_6"
+                    ]
+                },
+                "dynamic_obs_7": {
+                    "obstacle_radius": 0.3,
+                    "linear_velocity": 0.1,
+                    "start_pos": [
+                        15,
+                        -1.75,
+                        0
+                    ],
+                    "waypoints": [
+                        [
+                            -1,
+                            3,
+                            0
+                        ]
+                    ],
+                    "is_waypoint_relative": true,
+                    "mode": "yoyo",
+                    "triggers": [
+                        "watcher_7"
+                    ]
+                },
+                "dynamic_obs_8": {
+                    "obstacle_radius": 0.3,
+                    "linear_velocity": 0.1,
+                    "start_pos": [
+                        16.5,
+                        6,
+                        0
+                    ],
+                    "waypoints": [
+                        [
+                            1.75,
+                            3,
+                            0
+                        ]
+                    ],
+                    "is_waypoint_relative": true,
+                    "mode": "yoyo",
+                    "triggers": [
+                        "watcher_8"
+                    ]
+                }
+
+
+
+
+
+
+            },
+            "static_obstacles": {
+
+            },
+            "robot": {
+                "start_pos": [
+                    -3,
+                    12.0,
+                    0.0
+                ],
+                "goal_pos": [
+                    23,
+                    1,
+                    0
+                ]
+            },
+            "watchers": {
+                "watcher_0": {
+                    "pos": [
+                        1,
+                        9
+                    ],
+                    "range": 4.5
+                },
+                "watcher_1": {
+                    "pos": [
+                        6,
+                        0.75
+                    ],
+                    "range": 5
+                },
+                "watcher_2": {
+                    "pos": [
+                        7,
+                        6.5
+                    ],
+                    "range": 3
+                },
+                "watcher_3": {
+                    "pos": [
+                        10,
+                        10
+                    ],
+                    "range": 2.5
+                },
+                "watcher_4": {
+                    "pos": [
+                        9.5,
+                        14.25
+                    ],
+                    "range": 3
+                },
+                "watcher_5": {
+                    "pos": [
+                        12,
+                        5
+                    ],
+                    "range": 3
+                },
+                "watcher_6": {
+                    "pos": [
+                        12,
+                        1.5
+                    ],
+                    "range": 3
+                },
+                "watcher_7": {
+                    "pos": [
+                        15,
+                        -1
+                    ],
+                    "range": 3.5
+                },
+                "watcher_8": {
+                    "pos": [
+                        16,
+                        5.5
+                    ],
+                    "range": 3.5
+                }
+            }
+        }
+    ]
+}
