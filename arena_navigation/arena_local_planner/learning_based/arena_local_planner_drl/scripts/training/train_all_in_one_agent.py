@@ -7,16 +7,19 @@ import time
 import warnings
 from multiprocessing import Process
 
+import numpy as np
 import rosnode
 from rl_agent.envs.all_in_one_flatland_gym_env import AllInOneEnv
 from rl_agent.envs.all_in_one_models.drl.drl_agent import setup_and_start_drl_server
 from stable_baselines3 import PPO
 from stable_baselines3.common.callbacks import EvalCallback
+from stable_baselines3.common.evaluation import evaluate_policy
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.utils import set_random_seed
 from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv, VecNormalize
 
 from scripts.all_in_one_policies import *
+from scripts.training.pretrain_agent import pretrain_agent
 from tools.train_agent_utils import initialize_hyperparameters, update_hyperparam_model
 
 
@@ -129,6 +132,10 @@ def get_paths(agent_version: str, args, all_in_one_config: str = "all_in_one_def
             os.makedirs(paths['tb'])
     else:
         paths['tb'] = None
+
+    if not os.path.exists(paths['eval']):
+        os.makedirs(paths['eval'])
+
     return paths
 
 
@@ -199,7 +206,8 @@ def parse_all_in_one_args():
 if __name__ == '__main__':
 
     # make unique agent version description based on @version
-    eval_episodes = 100
+    eval_episodes = 80
+    pretrain_iterations = 100000
 
     args = parse_all_in_one_args()
 
@@ -239,7 +247,7 @@ if __name__ == '__main__':
             os.path.join(paths['model'], "best_model"), env)
         update_hyperparam_model(model, paths, params, args.n_envs)
     elif args.agent is not None:
-        if args.agent in ['AGENT_1', 'AGENT_2', 'AGENT_3', 'AGENT_4', 'AGENT_5']:
+        if args.agent in ['AGENT_1', 'AGENT_2', 'AGENT_3', 'AGENT_4', 'AGENT_5', 'AGENT_6', 'AGENT_7']:
             if args.agent == 'AGENT_1':
                 policy_kwargs = policy_kwargs_agent_1
             elif args.agent == 'AGENT_2':
@@ -250,6 +258,10 @@ if __name__ == '__main__':
                 policy_kwargs = policy_kwargs_agent_4
             elif args.agent == 'AGENT_5':
                 policy_kwargs = policy_kwargs_agent_5
+            elif args.agent == 'AGENT_6':
+                policy_kwargs = policy_kwargs_agent_6
+            elif args.agent == 'AGENT_7':
+                policy_kwargs = policy_kwargs_agent_7
             model = PPO(
                 "CnnPolicy", env,
                 policy_kwargs=policy_kwargs,
@@ -297,15 +309,30 @@ if __name__ == '__main__':
         env = VecNormalize(env, training=True, norm_obs=True, norm_reward=False)
         eval_env = VecNormalize(eval_env, training=True, norm_obs=True, norm_reward=False)
 
+
+    # pretrain
+    base_dir = rospkg.RosPack().get_path('arena_local_planner_drl')
+    save_path = os.path.join(base_dir, "agents", "pretrained_aio_agents", "data_250000.npz")
+    policy, test_loss, train_loss = pretrain_agent(model.policy, env, pretrain_iterations, 0.05, save_path)
+    model.policy = policy
+    eval_env.obs_rms = env.obs_rms
+
+    # Save pretraining logs
+    np.savez(
+        os.path.join(paths['eval'], 'pretrain_loss.npz'),
+        test_loss=test_loss,
+        train_loss=train_loss,
+    )
+
     eval_cb = EvalCallback(
         eval_env=eval_env, train_env=env,
-        n_eval_episodes=eval_episodes, eval_freq=40000,
+        n_eval_episodes=eval_episodes, eval_freq=30000,
         log_path=paths['eval'], best_model_save_path=paths['model'], deterministic=True)
 
-    print("Start training...")
+    print("Start DRL training...")
 
     if args.n is None:
-        n_timesteps = 20000000
+        n_timesteps = 10000000
     else:
         n_timesteps = args.n
 
