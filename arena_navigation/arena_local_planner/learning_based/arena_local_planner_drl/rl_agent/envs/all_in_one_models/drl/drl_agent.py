@@ -9,6 +9,9 @@ import zmq
 from rl_agent.envs.all_in_one_models.model_base_class import ModelBase
 from stable_baselines3 import PPO
 
+# NOTE: Is is assumed that the input laser for the drl planner is:
+# angle: {min: -1.5707963267948966, max: 4.694936014, increment:  0.017453292}
+
 
 class DrlAgent(ModelBase):
 
@@ -20,21 +23,31 @@ class DrlAgent(ModelBase):
         model_save_path = os.path.join(save_path, "best_model")
         vec_norm_save_path = os.path.join(save_path, "vec_normalize.pkl")
 
-        # vec_normalize = VecNormalize.load(vec_norm_save_path, DummyVecEnv([lambda: env]))
-        with open(vec_norm_save_path, "rb") as file_handler:
-            vec_normalize = pickle.load(file_handler)
-        self._obs_norm_func = vec_normalize.normalize_obs
+        if os.path.exists(vec_norm_save_path):
+            with open(vec_norm_save_path, "rb") as file_handler:
+                vec_normalize = pickle.load(file_handler)
+            self._obs_norm_func = vec_normalize.normalize_obs
+            self._obs_normalize = True
+        else:
+            self._obs_normalize = False
 
         self._model = PPO.load(model_save_path).policy
 
     def get_next_action(self, observation_dict, observation_array=None) -> np.ndarray:
+        # merge observation
         if observation_array is None:
             merged_obs = np.hstack([observation_dict['laser_scan'], np.array(observation_dict['goal_in_robot_frame'])])
         else:
-            merged_obs = observation_array
+            merged_obs = np.copy(observation_array)
 
-        merged_obs_normalized = self._obs_norm_func(merged_obs)
-        return self._model.predict(merged_obs_normalized, deterministic=True)[0]
+        # shift laser scan measurement
+        merged_obs[:360] = self._shift_scan(merged_obs[:360])
+
+        # normalize
+        if self._obs_normalize:
+            merged_obs = self._obs_norm_func(merged_obs)
+
+        return self._model.predict(merged_obs, deterministic=True)[0]
 
     def wait_for_agent(self):
         return True
@@ -42,6 +55,12 @@ class DrlAgent(ModelBase):
     def reset(self):
         pass
 
+    def _shift_scan(self, scan:np.ndarray):
+        # old angle: {min: 0, max: 6.28318977356, increment: 0.0175019223243}
+        # new angle: {min: -1.5707963267948966, max: 4.694936014, increment:  0.017453292}
+        sub_array = np.hsplit(scan, 4)
+        new_scan = np.concatenate((sub_array[3], sub_array[0], sub_array[1], sub_array[2]))
+        return new_scan
 
 class DrlAgentServer:
 

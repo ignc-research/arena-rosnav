@@ -59,6 +59,8 @@ class AllInOneEnv(gym.Env):
 
         self._setup_robot_configuration(robot_yaml_path, settings_yaml_path)
 
+        rospy.set_param("/laser_num_beams", self._laser_num_beams)
+
         self._action_bounds = [self._linear_low, self._linear_high, self._angular_low, self._angular_high]
 
         # define safe distance based on robot radius if not defined
@@ -76,11 +78,11 @@ class AllInOneEnv(gym.Env):
                 self._service_name_step, StepWorld)
 
         # instantiate task manager
-        # TODO make reset interval parameter
         if self._evaluation:
             map_update_freq = 1
         else:
-            map_update_freq = 20
+            map_update_freq = 5
+
         self.task_manager = TaskManager(self.ns, map_update_freq, paths, run_scenario)
         self._seed = seed
 
@@ -201,33 +203,37 @@ class AllInOneEnv(gym.Env):
         return self._all_in_one_planner_frequency
 
     def _setup_robot_configuration(self, robot_yaml_path: str, settings_yaml_path: str):
-        """get the configuration from the yaml file, including robot radius.
-
+        """get the configuration from the yaml file, including robot radius, discrete action space and continuous action space.
         Args:
             robot_yaml_path (str): [description]
         """
-        with open(robot_yaml_path, 'r') as fd:
+        with open(robot_yaml_path, "r") as fd:
             robot_data = yaml.safe_load(fd)
             # get robot radius
-            for body in robot_data['bodies']:
-                if body['name'] == "base_footprint":
-                    for footprint in body['footprints']:
-                        if footprint['type'] == 'circle':
-                            self._robot_radius = footprint.setdefault(
-                                'radius', 0.3) * 1.05
-                        if footprint['radius']:
-                            self._robot_radius = footprint['radius'] * 1.05
+            for body in robot_data["bodies"]:
+                if body["name"] in ["base_footprint", "shell"]:
+                    for footprint in body["footprints"]:
+                        if footprint["type"] == "circle":
+                            self._robot_radius = (
+                                    footprint.setdefault("radius", 0.3) * 1.15
+                            )
+                        if "radius" in footprint and footprint["radius"]:
+                            self._robot_radius = footprint["radius"] * 1.15
+
             # get laser related information
-            for plugin in robot_data['plugins']:
-                if plugin['type'] == 'Laser':
-                    laser_angle_min = plugin['angle']['min']
-                    laser_angle_max = plugin['angle']['max']
-                    laser_angle_increment = plugin['angle']['increment']
+            for plugin in robot_data["plugins"]:
+                if plugin["type"] == "Laser":
+                    laser_angle_min = plugin["angle"]["min"]
+                    laser_angle_max = plugin["angle"]["max"]
+                    laser_angle_increment = plugin["angle"]["increment"]
                     self._laser_num_beams = int(
-                        round((laser_angle_max - laser_angle_min) / laser_angle_increment) + 1)
-                    # set rosparam
-                    rospy.set_param("/laser_num_beams", self._laser_num_beams)
-                    self._laser_max_range = plugin['range']
+                        round(
+                            (laser_angle_max - laser_angle_min)
+                            / laser_angle_increment
+                        )
+                        + 1
+                    )
+                    self._laser_max_range = plugin["range"]
 
         # set up velocity limits
         with open(settings_yaml_path, 'r') as fd:

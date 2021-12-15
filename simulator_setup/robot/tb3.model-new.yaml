@@ -1,8 +1,10 @@
+# Turtlebot
+
 bodies:  # List of named bodies
   - name: base_footprint
-    pose: [0, 0, 0]
-    type: dynamic
-    color: [1, 1, 1, 0.75]
+    pose: [0, 0, 0] 
+    type: dynamic  
+    color: [1, 1, 1, 0.75] 
     footprints:
       - type: polygon  # wheel
         sensor: true
@@ -17,16 +19,16 @@ bodies:  # List of named bodies
         layers: []
 
   - name: laser_mount
-    pose: [0, 0, 0]
-    type: dynamic
-    color: [1, 0, 0, 0.75]
+    pose: [0, 0, 0] 
+    type: dynamic  
+    color: [1, 0, 0, 0.75] 
     footprints:
       - type: polygon  # Laser model
         sensor: true
         points: [[.025, -.025], [.025, 0.025], [-.025, 0.025], [-.025, -0.025]]
         layers: []
         density: 1
-
+        
   - name: shell
     pose: [0,0,0]
     type: dynamic
@@ -41,30 +43,29 @@ bodies:  # List of named bodies
 joints:
   - type: weld
     name: laser_mount_weld
-    bodies:
+    bodies: 
       - name: laser_mount
         anchor: [0, 0]
       - name: base_footprint
         anchor: [0, 0]
   - type: weld
     name: shell_mount_weld
-    bodies:
+    bodies: 
       - name: shell
         anchor: [0, 0]
       - name: base_footprint
         anchor: [0, 0]
 
-
 plugins:
-  - type: DiffDrive
-    name: diff_drive
+  - type: DiffDrive 
+    name: diff_drive 
     body: base_footprint
     odom_frame_id: odom
     odom_pub: odom  # topic odom is published on
     pub_rate: 25
 
   - type: Laser
-    name: dynamic_laser
+    name: laser_front
     frame: laser_mount
     topic: scan
     body: laser_mount
@@ -72,24 +73,22 @@ plugins:
     origin: [0, 0, 0]
     range: 3.5
     angle: {min: 0, max: 6.28318977356, increment:  0.0175019223243}
-    # angle: {min: -1.5707963267948966, max: 4.694936014, increment:  0.017453292}
     noise_std_dev: 0.01
-    update_rate: 20
-    layers: ["dynamic"]
+    update_rate: 10
+    layers: ["2d"]
 
-  - type: Laser
-    name: static_laser
-    frame: laser_mount
-    topic: scan_static
-    body: laser_mount
-    broadcast_tf: false
-    origin: [0, 0, 0]
-    range: 3.5
-    angle: {min: 0, max: 6.28318977356, increment:  0.0175019223243}
-    # angle: {min: -1.5707963267948966, max: 4.694936014, increment:  0.017453292}
-    update_rate: 20
-    layers: ["static"]
-
+  # - type: Laser
+  #   name: laser_3d
+  #   frame: laser_mount
+  #   topic: scan_3d
+  #   body: laser_mount
+  #   broadcast_tf: false
+  #   origin: [0, 0, 0]
+  #   range: 3
+  #   angle: {min: -0.61, max: 0.61, increment: 0.05}
+  #   noise_std_dev: 0.04
+  #   update_rate: 10
+  #   layers: ["2d", "3d"]
 
   - type: ModelTfPublisher
     name: tf_publisher
