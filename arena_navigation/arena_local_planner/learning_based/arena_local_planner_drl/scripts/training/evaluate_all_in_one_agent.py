@@ -27,10 +27,10 @@ primitive_agents = ['rlca_only', 'teb_only', 'drl_only', 'drl03_only', 'mpc_only
                     'teb_large_min_dist_only', 'teb_dyn_obst_only', 'arena_ros_only', 'eband_only']
 simple_all_in_one_switches = ['simple_all_in_one', 'random']
 
-AGENTS = [base_Agent6]
+AGENTS = ['teb_only']
 eval_episodes = 100
 #  seed = random.randint(1, 1000)
-seed = 2
+seed = 42
 map_config = "indoor_obs15.json"
 
 evaluation_name = "indoor_15_aio"
@@ -116,9 +116,10 @@ def random_action_probs(numb_models: int):
 def simple_all_in_one(obs):
     _RS = 4  # robot state size
     _L = 360  # laser scan size
-    switch_distance = 1.1
-    laser_scan_dynamic = obs[_L:-_RS]
+    switch_distance = 1.2
+    laser_scan_dynamic = obs[_L:2*_L]
     min_dist = np.min(laser_scan_dynamic)
+
     if min_dist <= switch_distance:
         return 0
     else:

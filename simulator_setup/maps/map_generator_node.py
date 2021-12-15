@@ -30,7 +30,7 @@ class MapGenerator:
         self.no_overlap = True
 
         # outdoor map parameter
-        self.obstacle_number = 25
+        self.obstacle_number = 15
         self.obstacle_extra_radius = 6
 
         # initialize occupancy grid

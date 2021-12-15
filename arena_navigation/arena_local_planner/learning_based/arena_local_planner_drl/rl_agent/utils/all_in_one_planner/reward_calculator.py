@@ -196,14 +196,11 @@ class RewardCalculator:
                             *args, **kwargs):
         if not laser_scan.min() > self.safe_dist:
             self.last_dist_to_path = None
-        self._reward_goal_reached(
-            goal_in_robot_frame, reward=3)
-        self._reward_safe_dist(
-            laser_scan, punishment=0.02)
-        self._reward_goal_approached(kwargs['sub_goal'], kwargs['new_global_plan'], reward_factor=0.05,
-                                     penalty_factor=0.1)
-        self._reward_collision(
-            laser_scan, punishment=2)
+        self._reward_goal_reached(goal_in_robot_frame, reward=1.5)
+        self._reward_goal_approached(kwargs['sub_goal'], kwargs['sub_goal_old'], kwargs['new_global_plan'],
+                                     reward_factor=0.1,
+                                     penalty_factor=0.2)
+        self._reward_collision(laser_scan, punishment=2)
 
     def _cal_reward_rule_07(self,
                             laser_scan: np.ndarray,

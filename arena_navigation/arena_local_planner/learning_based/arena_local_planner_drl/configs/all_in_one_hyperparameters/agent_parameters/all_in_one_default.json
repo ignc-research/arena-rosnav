@@ -14,8 +14,7 @@
   "update_global_plan_frequency": 9,
   "all_in_one_planner_frequency": 3,
   "observation_space": {
-    "laser_range": "reduced",
-    "size_laser_vector": 32,
+    "laser_range": "full",
     "laser_stack_size": 3,
     "add_robot_velocity": true,
     "use_dynamic_scan": false

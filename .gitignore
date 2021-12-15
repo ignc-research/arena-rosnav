@@ -79,3 +79,5 @@ simulator_setup/cmake-build-debug/
 arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/configs/all_in_one_hyperparameters/map_parameters/tmp/
 
 *.iml
+
+*.bak
