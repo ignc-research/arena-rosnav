@@ -242,6 +242,13 @@ def create_indoor_map(height, width, corridor_radius, iterations, room_number, r
         insert_new_node(random_position, tree, map)
         create_path(random_position, nearest_node, corridor_radius, map)
     create_rooms(map, tree, room_number, room_width, room_height, no_overlap)
+
+    # create border around map
+    map[0, :] = 1
+    map[-1, :] = 1
+    map[:, 0] = 1
+    map[:, -1] = 1
+
     return map
 
 

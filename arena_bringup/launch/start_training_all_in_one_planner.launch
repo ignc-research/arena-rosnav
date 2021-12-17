@@ -27,7 +27,7 @@
   <arg name="viz_pub_rate" default="30" />
 
   <!-- the velocity of randomly genelized obstacles  -->
-  <arg name="obs_vel" default="0.3" />
+  <arg name="obs_vel" default="0.25" />
   <!-- if it's false flatland server will not publish any debug related infomation and you will not able to visuzalize e.g robot, dynamic obstacles  -->
 
 

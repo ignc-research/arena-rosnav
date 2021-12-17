@@ -1,36 +1,22 @@
 # All-in-One Planner
 In this branch a drl planner called All-In-One Planner is developed which chooses from a given list of local planners in each iteration. The goal is to combine the strengths of drl planners and classical planners like TEB / MPC.
 
-In order to use it ZeroMQ needs to be installed into the virtual environment.
+In order to use it ZeroMQ and TQDM needs to be installed into the virtual environment.
 
 ```bash
 workon rosnav
 pip install pyzmq
-```
-Adapt flatland for training with multiple maps:
-Open "/catkin_ws/src/forks/flatland/flatland_server/src/simulation_manager.cpp" and change in line 126
-```c++
-ros::NodeHandle n("");
-```
-to
-```c++
-ros::NodeHandle n("~");
+pip install tqdm
 ```
 
-Then open "/catkin_ws/src/forks/flatland/flatland_server/src/flatland_server_node.cpp" and change line 83-93 to
-```c++
-if (!node_handle.getParam("world_path", world_path)) {
-    ROS_FATAL_NAMED("Node", "No world_path parameter given!");
-    ros::shutdown();
-    return 1;
-  }
-  std::string map_layer_path;
+Check if Flatland is in the right branch "drl_all_in_one_planner_johannes":
+```bash
+cd catkin_ws/src/forks/Flatland
+git checkout drl_all_in_one_planner_johannes
 
-  node_handle.getParam("map_layer_path", map_layer_path);
-
-  std::string map_file;
-  node_handle.getParam("map_file", map_file);
 ```
+Don't forget to execute catkin_make again.
+
 
 # Training an agent
 1. In the first terminal execute
