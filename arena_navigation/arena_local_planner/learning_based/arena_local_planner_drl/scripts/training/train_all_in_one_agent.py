@@ -2,24 +2,19 @@ import argparse
 import json
 import os.path
 import random
-import sys
 import time
 import warnings
 from multiprocessing import Process
 
-import numpy as np
 import rosnode
 from rl_agent.envs.all_in_one_flatland_gym_env import AllInOneEnv
 from rl_agent.envs.all_in_one_models.drl.drl_agent import setup_and_start_drl_server
+from scripts.all_in_one_policies import *
+from scripts.training.pretrain_agent import pretrain_agent
 from stable_baselines3 import PPO
-from stable_baselines3.common.callbacks import EvalCallback
-from stable_baselines3.common.evaluation import evaluate_policy
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.utils import set_random_seed
 from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv, VecNormalize
-
-from scripts.all_in_one_policies import *
-from scripts.training.pretrain_agent import pretrain_agent
 from tools.train_agent_utils import initialize_hyperparameters, update_hyperparam_model
 
 
@@ -34,14 +29,14 @@ def make_all_in_one_envs(rank: int, paths: dict, params: dict, train: bool = Tru
 
         if train:
             # paths['map_parameters'] = os.path.join(paths['map_folder'], 'tmp', "map_" + str(rank) + ".json")
-            paths['map_parameters'] = os.path.join(paths['map_folder'], "indoor_obs14.json")
+            paths['map_parameters'] = os.path.join(paths['map_folder'], "indoor_obs10.json")
             all_in_one_env = AllInOneEnv(f"sim_{rank + 1}", paths['robot_setting'], paths['robot_as'],
                                          params['reward_fnc'],
                                          goal_radius=params['goal_radius'], paths=paths,
                                          max_steps_per_episode=params['train_max_steps_per_episode'],
                                          drl_server=drl_server_url_ind)
         else:
-            paths['map_parameters'] = os.path.join(paths['map_folder'], "indoor_obs14.json")
+            paths['map_parameters'] = os.path.join(paths['map_folder'], "indoor_obs10.json")
             seed = random.randint(1, 1000)
             all_in_one_env = Monitor(
                 AllInOneEnv("eval_sim", paths['robot_setting'], paths['robot_as'], params['reward_fnc'],
@@ -145,7 +140,7 @@ def unzip_map_parameters(paths: dict, numb_envs: int):
     with open(paths['map_parameters'], "r") as map_yaml:
         map_data = yaml.safe_load(map_yaml)
         for i in range(numb_envs):
-            env_map_data = map_data[i+1]
+            env_map_data = map_data[i + 1]
             map_env_path = os.path.join(paths['map_folder'], 'tmp', "map_" + str(i) + ".json")
             with open(map_env_path, "w") as map_json:
                 json.dump(env_map_data, map_json)
@@ -207,7 +202,6 @@ if __name__ == '__main__':
 
     # make unique agent version description based on @version
     eval_episodes = 80
-    pretrain_iterations = 100000
 
     args = parse_all_in_one_args()
 
@@ -247,7 +241,8 @@ if __name__ == '__main__':
             os.path.join(paths['model'], "best_model"), env)
         update_hyperparam_model(model, paths, params, args.n_envs)
     elif args.agent is not None:
-        if args.agent in ['AGENT_1', 'AGENT_2', 'AGENT_3', 'AGENT_4', 'AGENT_5', 'AGENT_6', 'AGENT_7']:
+        if args.agent in ['AGENT_1', 'AGENT_2', 'AGENT_3', 'AGENT_4', 'AGENT_5', 'AGENT_6', 'AGENT_7', 'AGENT_8',
+                          'AGENT_9']:
             if args.agent == 'AGENT_1':
                 policy_kwargs = policy_kwargs_agent_1
             elif args.agent == 'AGENT_2':
@@ -262,6 +257,10 @@ if __name__ == '__main__':
                 policy_kwargs = policy_kwargs_agent_6
             elif args.agent == 'AGENT_7':
                 policy_kwargs = policy_kwargs_agent_7
+            elif args.agent == 'AGENT_8':
+                policy_kwargs = policy_kwargs_agent_8
+            elif args.agent == 'AGENT_9':
+                policy_kwargs = policy_kwargs_agent_9
             model = PPO(
                 "CnnPolicy", env,
                 policy_kwargs=policy_kwargs,
@@ -309,11 +308,10 @@ if __name__ == '__main__':
         env = VecNormalize(env, training=True, norm_obs=True, norm_reward=False)
         eval_env = VecNormalize(eval_env, training=True, norm_obs=True, norm_reward=False)
 
-
     # pretrain
     base_dir = rospkg.RosPack().get_path('arena_local_planner_drl')
-    save_path = os.path.join(base_dir, "agents", "pretrained_aio_agents", "data_250000.npz")
-    policy, test_loss, train_loss = pretrain_agent(model.policy, env, pretrain_iterations, 0.05, save_path)
+    save_path = os.path.join(base_dir, "agents", "pretrained_aio_agents", "data_1000000.npz")
+    policy, test_loss, train_loss = pretrain_agent(model.policy, env, save_path, 0.05)
     model.policy = policy
     eval_env.obs_rms = env.obs_rms
 
@@ -332,7 +330,7 @@ if __name__ == '__main__':
     print("Start DRL training...")
 
     if args.n is None:
-        n_timesteps = 10000000
+        n_timesteps = 20000000
     else:
         n_timesteps = args.n
 
