@@ -8,6 +8,7 @@ from typing import Union
 from stable_baselines3.common.env_checker import check_env
 import yaml
 from rl_agent.utils.observation_collector import ObservationCollector
+
 # from rl_agent.utils.CSVWriter import CSVWriter # TODO: @Elias: uncomment when csv-writer exists
 from rl_agent.utils.reward import RewardCalculator
 from rl_agent.utils.debug import timeit
@@ -17,7 +18,7 @@ import rospy
 from geometry_msgs.msg import Twist
 from std_msgs.msg import String
 from flatland_msgs.srv import StepWorld, StepWorldRequest
-from std_msgs.msg import Bool   
+from std_msgs.msg import Bool
 import time
 import math
 
@@ -97,11 +98,11 @@ class FlatlandEnv(gym.Env):
             self.observation_collector.get_observation_space()
         )
 
-        #csv writer # TODO: @Elias: uncomment when csv-writer exists
+        # csv writer # TODO: @Elias: uncomment when csv-writer exists
         # self.csv_writer=CSVWriter()
         # rospy.loginfo("======================================================")
         # rospy.loginfo("CSVWriter initialized.")
-        # rospy.loginfo("======================================================")        
+        # rospy.loginfo("======================================================")
 
         # reward calculator
         if safe_dist is None:
@@ -157,13 +158,16 @@ class FlatlandEnv(gym.Env):
         Args:
             robot_yaml_path (str): [description]
         """
-        self._robot_radius = rospy.get_param('radius') * 1.05
+        self._robot_radius = rospy.get_param("radius") * 1.05
         with open(robot_yaml_path, "r") as fd:
             robot_data = yaml.safe_load(fd)
 
             # get laser related information
             for plugin in robot_data["plugins"]:
-                if plugin["type"] == "Laser":
+                if (
+                    plugin["type"] == "Laser"
+                    and plugin["name"] == "static_laser"
+                ):
                     laser_angle_min = plugin["angle"]["min"]
                     laser_angle_max = plugin["angle"]["max"]
                     laser_angle_increment = plugin["angle"]["increment"]
@@ -251,22 +255,31 @@ class FlatlandEnv(gym.Env):
             info["done_reason"] = reward_info["done_reason"]
             info["is_success"] = reward_info["is_success"]
 
-
         if self._steps_curr_episode > self._max_steps_per_episode:
             done = True
             info["done_reason"] = 0
             info["is_success"] = 0
 
-        history_evaluation  = [self._episode]
-        if 'done_reason' in info: history_evaluation +=[info['done_reason']] # Added by Elias since the info is empty in the first round
-        history_evaluation +=[time.time()]
-        history_evaluation +=[obs_dict["laser_scan"]]        
-        history_evaluation +=[np.sqrt((obs_dict['robot_pose'].x)**2+(obs_dict['robot_pose'].y)**2)] # robot_velocity
-        history_evaluation +=[obs_dict['robot_pose'].theta] # robot_orientation
-        history_evaluation +=[obs_dict['robot_pose'].x] # robot_pos_x
-        history_evaluation +=[obs_dict['robot_pose'].y] # robot_pos_y
-        history_evaluation +=[action] # action np.array
-        
+        history_evaluation = [self._episode]
+        if "done_reason" in info:
+            history_evaluation += [
+                info["done_reason"]
+            ]  # Added by Elias since the info is empty in the first round
+        history_evaluation += [time.time()]
+        history_evaluation += [obs_dict["laser_scan"]]
+        history_evaluation += [
+            np.sqrt(
+                (obs_dict["robot_pose"].x) ** 2
+                + (obs_dict["robot_pose"].y) ** 2
+            )
+        ]  # robot_velocity
+        history_evaluation += [
+            obs_dict["robot_pose"].theta
+        ]  # robot_orientation
+        history_evaluation += [obs_dict["robot_pose"].x]  # robot_pos_x
+        history_evaluation += [obs_dict["robot_pose"].y]  # robot_pos_y
+        history_evaluation += [action]  # action np.array
+
         # for logging
         if self._extended_eval and done:
             info["collisions"] = self._collisions
@@ -345,7 +358,7 @@ if __name__ == "__main__":
     flatland_env = FlatlandEnv()
     rospy.loginfo("======================================================")
     rospy.loginfo("CSVWriter initialized.")
-    rospy.loginfo("======================================================")      
+    rospy.loginfo("======================================================")
     check_env(flatland_env, warn=True)
 
     # init env

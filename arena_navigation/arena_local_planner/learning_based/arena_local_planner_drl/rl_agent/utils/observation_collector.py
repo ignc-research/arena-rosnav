@@ -242,14 +242,14 @@ class ObservationCollector:
             for i in range(timeout):
                 response = self._sim_step_client(request)
                 rospy.logdebug("step service=", response)
-                print('took step')
+                # print('took step')
                 if response.success:
                     break
                 if i == timeout - 1:
                     raise TimeoutError(
                         f"Timeout while trying to call '{self.ns_prefix}step_world'"
                     )
-                print('took step')
+                # print("took step")
                 time.sleep(0.33)
 
         except rospy.ServiceException as e:
@@ -265,7 +265,7 @@ class ObservationCollector:
 
     def callback_subgoal(self, msg_Subgoal):
         self._subgoal = self.process_subgoal_msg(msg_Subgoal)
-        return  
+        return
 
     def callback_global_plan(self, msg_global_plan):
         self._globalplan = ObservationCollector.process_global_plan_msg(
