@@ -265,7 +265,7 @@ class ObservationCollector:
 
     def callback_subgoal(self, msg_Subgoal):
         self._subgoal = self.process_subgoal_msg(msg_Subgoal)
-        return  
+        return
 
     def callback_global_plan(self, msg_global_plan):
         self._globalplan = ObservationCollector.process_global_plan_msg(

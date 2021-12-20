@@ -8,6 +8,7 @@ from typing import Union
 from stable_baselines3.common.env_checker import check_env
 import yaml
 from rl_agent.utils.observation_collector import ObservationCollector
+
 # from rl_agent.utils.CSVWriter import CSVWriter # TODO: @Elias: uncomment when csv-writer exists
 from rl_agent.utils.reward import RewardCalculator
 from rl_agent.utils.debug import timeit
@@ -17,7 +18,7 @@ import rospy
 from geometry_msgs.msg import Twist
 from std_msgs.msg import String
 from flatland_msgs.srv import StepWorld, StepWorldRequest
-from std_msgs.msg import Bool   
+from std_msgs.msg import Bool
 import time
 import math
 
@@ -157,7 +158,7 @@ class FlatlandEnv(gym.Env):
         Args:
             robot_yaml_path (str): [description]
         """
-        self._robot_radius = rospy.get_param("radius") * 1.05
+        self._robot_radius = rospy.get_param("radius") + 0.025
         with open(robot_yaml_path, "r") as fd:
             robot_data = yaml.safe_load(fd)
 
@@ -253,7 +254,6 @@ class FlatlandEnv(gym.Env):
         if done:
             info["done_reason"] = reward_info["done_reason"]
             info["is_success"] = reward_info["is_success"]
-
 
         if self._steps_curr_episode > self._max_steps_per_episode:
             done = True

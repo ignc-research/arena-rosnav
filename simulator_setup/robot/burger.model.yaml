@@ -5,7 +5,7 @@ bodies:  # List of named bodies
     color: [0.2, 0.8, 0.2, 1.0] 
     footprints:
       - type: circle
-        radius: 0.113 # (0.105**2+0.041**2)**(1/2)
+        radius: 0.105 # (0.105**2+0.041**2)**(1/2)
         # radius: 0.116042
         center: [0.0,0.0]
         layers: ["all"]
@@ -42,27 +42,27 @@ plugins:
     # noise_std_dev: 0.015
     # arena
     noise_std_dev: 0.0
-    update_rate: 50
+    update_rate: 10
 
-  - type: Laser
-    name: emergency_laser
-    frame: emergency_laser_link
-    topic: emergency_laser
-    body: base_footprint
-    broadcast_tf: true
-    origin: [0.0, 0.0, 0.0]
-    # range: 3
-    #arena
-    range: 1
-    # angle: {min: -3.12413936, max: 3.14159265359, increment: 0.01745}
-    # shifted for arena
-    # angle: {min: 0, max: 6.28319, increment: 0.01745330555}
-    angle: {min: 0, max: 6.283, increment:  0.0175019223243} # to calculate number of laser beams 
+  # - type: Laser
+  #   name: emergency_laser
+  #   frame: emergency_laser_link
+  #   topic: emergency_laser
+  #   body: base_footprint
+  #   broadcast_tf: true
+  #   origin: [0.0, 0.0, 0.0]
+  #   # range: 3
+  #   #arena
+  #   range: 1
+  #   # angle: {min: -3.12413936, max: 3.14159265359, increment: 0.01745}
+  #   # shifted for arena
+  #   # angle: {min: 0, max: 6.28319, increment: 0.01745330555}
+  #   angle: {min: 0, max: 6.283, increment:  0.0175019223243} # to calculate number of laser beams 
 
-    # noise_std_dev: 0.015
-    # arena
-    noise_std_dev: 0.0
-    update_rate: 50
+  #   # noise_std_dev: 0.015
+  #   # arena
+  #   noise_std_dev: 0.0
+  #   update_rate: 50
 
 
   - type: ModelTfPublisher

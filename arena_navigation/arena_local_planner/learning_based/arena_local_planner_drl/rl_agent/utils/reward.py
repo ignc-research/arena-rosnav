@@ -31,6 +31,7 @@ class RewardCalculator:
         self.last_goal_dist = None
         self.last_dist_to_path = None
         self.last_action = None
+        self._curr_dist_to_path = None
         self.safe_dist = safe_dist
         self._extended_eval = extended_eval
 
@@ -53,6 +54,7 @@ class RewardCalculator:
         self.last_dist_to_path = None
         self.last_action = None
         self.kdtree = None
+        self._curr_dist_to_path = None
 
     def _reset(self):
         """
@@ -99,7 +101,9 @@ class RewardCalculator:
         *args,
         **kwargs
     ):
-        self._reward_distance_traveled(kwargs["action"], consumption_factor=0.0075)
+        self._reward_distance_traveled(
+            kwargs["action"], consumption_factor=0.0075
+        )
         self._reward_goal_reached(goal_in_robot_frame, reward=15)
         self._reward_safe_dist(laser_scan, punishment=0.25)
         self._reward_collision(laser_scan, punishment=10)
@@ -114,8 +118,15 @@ class RewardCalculator:
         *args,
         **kwargs
     ):
-        self._reward_distance_traveled(kwargs["action"], consumption_factor=0.0075)
-        self._reward_following_global_plan(kwargs["global_plan"], kwargs["robot_pose"])
+        self._set_current_dist_to_globalplan(
+            kwargs["global_plan"], kwargs["robot_pose"]
+        )
+        self._reward_distance_traveled(
+            kwargs["action"], consumption_factor=0.0075
+        )
+        self._reward_following_global_plan(
+            reward_factor=0.2, penalty_factor=0.3
+        )
         self._reward_goal_reached(goal_in_robot_frame, reward=15)
         self._reward_safe_dist(laser_scan, punishment=0.25)
         self._reward_collision(laser_scan, punishment=10)
@@ -130,13 +141,12 @@ class RewardCalculator:
         *args,
         **kwargs
     ):
-        self._reward_following_global_plan(
-            kwargs["global_plan"], kwargs["robot_pose"], kwargs["action"]
+        self._set_current_dist_to_globalplan(
+            kwargs["global_plan"], kwargs["robot_pose"]
         )
+        self._reward_following_global_plan(kwargs["action"])
         if laser_scan.min() > self.safe_dist:
             self._reward_distance_global_plan(
-                kwargs["global_plan"],
-                kwargs["robot_pose"],
                 reward_factor=0.2,
                 penalty_factor=0.3,
             )
@@ -156,14 +166,13 @@ class RewardCalculator:
         *args,
         **kwargs
     ):
-        self._reward_abrupt_direction_change(kwargs["action"])
-        self._reward_following_global_plan(
-            kwargs["global_plan"], kwargs["robot_pose"], kwargs["action"]
+        self._set_current_dist_to_globalplan(
+            kwargs["global_plan"], kwargs["robot_pose"]
         )
+        self._reward_abrupt_direction_change(kwargs["action"])
+        self._reward_following_global_plan(kwargs["action"])
         if laser_scan.min() > self.safe_dist:
             self._reward_distance_global_plan(
-                kwargs["global_plan"],
-                kwargs["robot_pose"],
                 reward_factor=0.2,
                 penalty_factor=0.3,
             )
@@ -175,6 +184,14 @@ class RewardCalculator:
         self._reward_goal_approached(
             goal_in_robot_frame, reward_factor=0.3, penalty_factor=0.4
         )
+
+    def _set_current_dist_to_globalplan(
+        self, global_plan: np.ndarray, robot_pose: Pose2D
+    ):
+        if global_plan is not None and len(global_plan) != 0:
+            self._curr_dist_to_path, idx = self.get_min_dist2global_kdtree(
+                global_plan, robot_pose
+            )
 
     def _reward_goal_reached(
         self, goal_in_robot_frame=Tuple[float, float], reward: float = 15
@@ -238,7 +255,9 @@ class RewardCalculator:
             else:
                 self.info["crash"] = True
 
-    def _reward_safe_dist(self, laser_scan: np.ndarray, punishment: float = 0.15):
+    def _reward_safe_dist(
+        self, laser_scan: np.ndarray, punishment: float = 0.15
+    ):
         """
         Reward for undercutting safe distance.
 
@@ -251,7 +270,9 @@ class RewardCalculator:
             if self._extended_eval:
                 self.info["safe_dist"] = True
 
-    def _reward_not_moving(self, action: np.ndarray = None, punishment: float = 0.01):
+    def _reward_not_moving(
+        self, action: np.ndarray = None, punishment: float = 0.01
+    ):
         """
         Reward for not moving. Only applies half of the punishment amount
         when angular velocity is larger than zero.
@@ -260,7 +281,9 @@ class RewardCalculator:
         :param punishment (float, optional): punishment for not moving. defaults to 0.01
         """
         if action is not None and action[0] == 0.0:
-            self.curr_reward -= punishment if action[1] == 0.0 else punishment / 2
+            self.curr_reward -= (
+                punishment if action[1] == 0.0 else punishment / 2
+            )
 
     def _reward_distance_traveled(
         self,
@@ -285,8 +308,6 @@ class RewardCalculator:
 
     def _reward_distance_global_plan(
         self,
-        global_plan: np.array,
-        robot_pose: Pose2D,
         reward_factor: float = 0.1,
         penalty_factor: float = 0.15,
     ):
@@ -299,24 +320,20 @@ class RewardCalculator:
         :param reward_factor (float, optional): positive factor when approaching global plan. defaults to 0.1
         :param penalty_factor (float, optional): negative factor when veering away from global plan. defaults to 0.15
         """
-        if global_plan is not None and len(global_plan) != 0:
-            curr_dist_to_path, idx = self.get_min_dist2global_kdtree(
-                global_plan, robot_pose
-            )
-
+        if self._curr_dist_to_path:
             if self.last_dist_to_path is not None:
-                if curr_dist_to_path < self.last_dist_to_path:
+                if self._curr_dist_to_path < self.last_dist_to_path:
                     w = reward_factor
                 else:
                     w = penalty_factor
 
-                self.curr_reward += w * (self.last_dist_to_path - curr_dist_to_path)
-            self.last_dist_to_path = curr_dist_to_path
+                self.curr_reward += w * (
+                    self.last_dist_to_path - self._curr_dist_to_path
+                )
+            self.last_dist_to_path = self._curr_dist_to_path
 
     def _reward_following_global_plan(
         self,
-        global_plan: np.array,
-        robot_pose: Pose2D,
         action: np.array = None,
         dist_to_path: float = 0.5,
     ):
@@ -328,15 +345,16 @@ class RewardCalculator:
         :param action (np.ndarray (,2)): [0] = linear velocity, [1] = angular velocity
         :param dist_to_path (float, optional): applies reward within this distance
         """
-        if global_plan is not None and len(global_plan) != 0 and action is not None:
-            curr_dist_to_path, idx = self.get_min_dist2global_kdtree(
-                global_plan, robot_pose
-            )
+        if (
+            self._curr_dist_to_path
+            and action is not None
+            and self._curr_dist_to_path <= dist_to_path
+        ):
+            self.curr_reward += 0.1 * action[0]
 
-            if curr_dist_to_path <= dist_to_path:
-                self.curr_reward += 0.1 * action[0]
-
-    def get_min_dist2global_kdtree(self, global_plan: np.array, robot_pose: Pose2D):
+    def get_min_dist2global_kdtree(
+        self, global_plan: np.array, robot_pose: Pose2D
+    ):
         """
         Calculates minimal distance to global plan using kd tree search.
 

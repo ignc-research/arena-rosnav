@@ -34,13 +34,13 @@ void PlanManager::init(ros::NodeHandle &nh)
   //safety_timer_ = nh.createTimer(ros::Duration(0.05), &PlanManager::checkCollisionCallback, this);
 
   // subscriber
-  goal_sub_ = nh.subscribe("/" + ns + "/" + "goal", 1, &PlanManager::goalCallback, this);
-  odom_sub_ = nh.subscribe("/" + ns + "/" +"odometry/ground_truth", 1, &PlanManager::odometryCallback, this,ros::TransportHints().tcpNoDelay()); // odom  //odometry/ground_truth
+  goal_sub_ = nh.subscribe("goal", 1, &PlanManager::goalCallback, this);
+  odom_sub_ = nh.subscribe("odometry/ground_truth", 1, &PlanManager::odometryCallback, this,ros::TransportHints().tcpNoDelay()); // odom  //odometry/ground_truth
 
   // publisher
-  global_plan_pub_  = nh.advertise<nav_msgs::Path>("/" + ns + "/" +"globalPlan",10); // relative name:/ns/node_name/globalPlan
-  subgoal_pub_ = nh.advertise<geometry_msgs::PoseStamped>("/" + ns + "/" + "subgoal", 10); // relative name:/ns/subgoal
-  robot_state_pub_ = nh.advertise<arena_plan_msgs::RobotStateStamped>("/" + ns + "/" + "robot_state", 10);
+  global_plan_pub_  = nh.advertise<nav_msgs::Path>("globalPlan",10); // relative name:/ns/node_name/globalPlan
+  subgoal_pub_ = nh.advertise<geometry_msgs::PoseStamped>("subgoal", 10); // relative name:/ns/subgoal
+  robot_state_pub_ = nh.advertise<arena_plan_msgs::RobotStateStamped>("robot_state", 10);
   /* test purpose*/
 }
 
