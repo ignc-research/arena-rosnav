@@ -5,15 +5,12 @@ using namespace std;
 void PlanManager::init(ros::NodeHandle &nh)
 {
   std::string ns = nh.getNamespace();
-  std::cout<<"========================================================="<<std::endl;
-  std::cout<<":\tPlan manager successfully loaded for namespace\t"<<ns<<std::endl;
-  std::cout<<"========================================================="<<std::endl;
 
   /*  plan param  */
   bool train_mode;
   ros::NodeHandle n;
   // not global param, because we want to set it in the launch file
-  n.param("train_mode", train_mode, false);
+  n.param("/train_mode", train_mode, true);
   mode_ = train_mode ? TRAIN : TEST;
 
   nh.param("/look_ahead_distance", look_ahead_distance_, 1.5);
