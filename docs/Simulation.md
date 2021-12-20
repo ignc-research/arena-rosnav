@@ -11,7 +11,7 @@ Arena rosnav incluedes four different robots.
 All robots are equipt with a laser scanner. The robots differ in size, laser-range etc. See below tabel for more detailed information on each robot:
 
 
-| Name  | Max Speed (v_x) [_m/s_]  | Max Speed (v_y) [_m/s_]  | Max Rotational Speed (θ_y) [_rad/s_]  | Radius [_m_] | Emergency-Stop¹ | Laser-range [_m_] | Holonomic² |
+| Name  | Max Speed (v_x) [_m/s_]  | Max Speed (v_y) [_m/s_]  | Max Rotational Speed (_θ_) [_rad/s_]  | Radius [_m_] | Emergency-Stop¹ | Laser-range [_m_] | Holonomic² |
 | :--- | :---:|  :---: |:---: |:---: |:---:|   :---:| :---:| 
 | *turtlebot3-burger* | 0.22 | 0.0  | 2.84  | 0.113 | False | 3.5  | False |
 | *jackal*            | 2.0  | 0.0  | 4.0  | 0.267 | False | 30.0 | False |

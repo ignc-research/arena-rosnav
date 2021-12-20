@@ -23,7 +23,6 @@
       <arg name="ns"                value="$(arg ns)"/>
     </include> -->
 
-
     <include file="$(find arena_bringup)/launch/sublaunch_training/plan_manager.launch">
       <!-- only train_mode is false, otherwise subgoal is identical with global goal
             which is not wanted for training the waypoint generator.
@@ -40,9 +39,10 @@
       <arg name="timeout_goal"            default="330."/>  <!--sec, double -->
       <arg name="timeout_subgoal"         default="20"/>   <!--sec, double -->
     </include>
+
     <include file="$(find arena_bringup)/launch/sublaunch_training/intermediate_planner.launch">
       <arg name="ns"                value="$(arg ns)"/>
-    </include> -->
+    </include>
   
     
     <!-- use simulator and rviz-->

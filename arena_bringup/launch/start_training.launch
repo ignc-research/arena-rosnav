@@ -11,7 +11,23 @@
   <param name="world_path" value="$(find simulator_setup)/maps/$(arg map_folder_name)/map.world.yaml" /> -->
 
 
+  <arg name="model" default="burger"      doc="model type [burger, jackal, ridgeback, agv-ota]"/>
+  <param name="model" value="$(arg model)" />
 
+  <arg name="local_planner" default="rosnav"   doc="local-planer type [teb, dwa, mpc, rlca, cadrl, arena, rosnav]"/>
+  <param name="local_planner" value="$(arg local_planner)"/>
+  
+  <!-- Robot specific args -->
+  <arg name='radius' default='0.113' if="$(eval arg('model') == 'burger')"/>
+  <arg name='speed' default='0.22' if="$(eval arg('model') == 'burger')"/>
+  <arg name='radius' default='0.267' if="$(eval arg('model') == 'jackal')"/>
+  <arg name='speed' default='2.0' if="$(eval arg('model') == 'jackal')"/>
+  <arg name='radius' default='0.625' if="$(eval arg('model') == 'ridgeback')"/>
+  <arg name='speed' default='1.1' if="$(eval arg('model') == 'ridgeback')"/>
+  <arg name='radius' default='0.629' if="$(eval arg('model') == 'agv-ota')"/>
+  <arg name='speed' default='0.5' if="$(eval arg('model') == 'agv-ota')"/>
+  <param name="radius" value="$(arg radius)"/>
+  <param name="speed" value="$(arg speed)"/>
 
   <!-- Here are the argument that may be frequently changed -->
   <arg name="ns_prefix" default="sim" />

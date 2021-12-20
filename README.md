@@ -1,9 +1,9 @@
 
 ---
 ---
-Major differences to `main` branch are:
+Major differences to `local_planner_subgoalmode` branch are:
 + Usage of `ros-noetic`
-+ Full support of the following robots with realistic parameters: `turtlebot3_burger`, `ridgeback`, `jackal`, `agv-ota` _(see [here](docs/Simulation#Robots) for detailed description of their usage)_
++ Full support of the following robots with realistic parameters: `turtlebot3_burger`, `ridgeback`, `jackal`, `agv-ota` _(see [here](docs/Simulation.md#Robots) for detailed description of their usage)_
 
     THIS INCLUDES:
     - Full support of the planers `teb`, `dwa`, `mpc`, `cadrl`, `rlca`, `arena`
