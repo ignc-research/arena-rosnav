@@ -182,8 +182,14 @@ class FlatlandEnv(gym.Env):
 
         with open(settings_yaml_path, "r") as fd:
             setting_data = yaml.safe_load(fd)
+
+            self._holonomic = setting_data["robot"]["holonomic"]
+
             if self._is_action_space_discrete:
                 # self._discrete_actions is a list, each element is a dict with the keys ["name", 'linear','angular']
+                assert (
+                    not self._holonomic
+                ), "Discrete action space currently not supported for holonomic robots"
                 self._discrete_acitons = setting_data["robot"][
                     "discrete_actions"
                 ]
@@ -195,19 +201,63 @@ class FlatlandEnv(gym.Env):
                 angular_range = setting_data["robot"]["continuous_actions"][
                     "angular_range"
                 ]
-                self.action_space = spaces.Box(
-                    low=np.array([linear_range[0], angular_range[0]]),
-                    high=np.array([linear_range[1], angular_range[1]]),
-                    dtype=np.float,
-                )
 
-    def _pub_action(self, action):
+                if not self._holonomic:
+                    self.action_space = spaces.Box(
+                        low=np.array([linear_range[0], angular_range[0]]),
+                        high=np.array([linear_range[1], angular_range[1]]),
+                        dtype=np.float,
+                    )
+                else:
+                    linear_range_x, linear_range_y = (
+                        linear_range["x"],
+                        linear_range["y"],
+                    )
+                    self.action_space = spaces.Box(
+                        low=np.array(
+                            [
+                                linear_range_x[0],
+                                linear_range_y[0],
+                                angular_range[0],
+                            ]
+                        ),
+                        high=np.array(
+                            [
+                                linear_range_x[1],
+                                linear_range_y[1],
+                                angular_range[1],
+                            ]
+                        ),
+                        dtype=np.float,
+                    )
+
+    def _pub_action(self, action: np.ndarray) -> None:
+        action_msg = (
+            self._get_hol_action_msg(action)
+            if self._holonomic
+            else self._get_nonhol_action_msg(action)
+        )
+        self.agent_action_pub.publish(action_msg)
+
+    def _get_hol_action_msg(self, action: np.ndarray):
+        assert len(action) == 3
+        action_msg = Twist()
+        action_msg.linear.x = action[0]
+        action_msg.linear.y = action[1]
+        action_msg.angular.z = action[2]
+        return action_msg
+
+    def _get_nonhol_action_msg(self, action: np.ndarray):
+        assert len(action) == 2
         action_msg = Twist()
         action_msg.linear.x = action[0]
         action_msg.angular.z = action[1]
-        self.agent_action_pub.publish(action_msg)
+        return action_msg
 
     def _translate_disc_action(self, action):
+        assert (
+            not self._holonomic
+        ), "Discrete action space currently not supported for holonomic robots"
         new_action = np.array([])
         new_action = np.append(
             new_action, self._discrete_acitons[action]["linear"]
