@@ -153,5 +153,6 @@ def main(agent_name: str) -> None:
 
 
 if __name__ == "__main__":
-    AGENT_NAME = sys.argv[1]
+    # AGENT_NAME = sys.argv[1]
+    AGENT_NAME = "AGENT_21_2021_12_02__22_55"
     main(agent_name=AGENT_NAME)
