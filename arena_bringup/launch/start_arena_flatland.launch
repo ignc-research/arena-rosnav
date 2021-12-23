@@ -120,7 +120,7 @@
   <!-- move_base plan manager: which provide basic global planner and cost map -->
   <include file="$(find arena_bringup)/launch/sublaunch_testing/move_base/move_base_$(arg local_planner).launch">
     <arg name="model" value="$(arg model)"/>
-    <arg name="speed" value="$(arg speed)"/>
+    <!-- <arg name="speed" value="$(arg speed)"/> -->
   </include>
 
 
