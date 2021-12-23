@@ -36,7 +36,7 @@ plugins:
     # DRL4 : angle: {min: -1.5707963267948966, max: 4.694936014, increment:  0.017453292}
     # RLCA: angle: {min: 0, max: 6.28318977356, increment:  0.0175019223243}
     # Real Turtlebot3/Gazebo:
-    angle: {min: -2.35619, max: 2.35619, increment:  0.01}
+    angle: {min: -2.35619, max: 2.35619, increment:  0.00654497222}
 
     # noise_std_dev: 0.015
     # arena

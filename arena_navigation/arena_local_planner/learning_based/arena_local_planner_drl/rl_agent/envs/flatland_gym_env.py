@@ -106,11 +106,11 @@ class FlatlandEnv(gym.Env):
 
         # reward calculator
         if safe_dist is None:
-            safe_dist = 1.6 * self._robot_radius
+            safe_dist = self._robot_radius + 0.5
 
         self.reward_calculator = RewardCalculator(
             robot_radius=self._robot_radius,
-            safe_dist=1.6 * self._robot_radius,
+            safe_dist=safe_dist,
             goal_radius=goal_radius,
             rule=reward_fnc,
             extended_eval=self._extended_eval,
@@ -176,7 +176,6 @@ class FlatlandEnv(gym.Env):
                             (laser_angle_max - laser_angle_min)
                             / laser_angle_increment
                         )
-                        + 1
                     )
                     self._laser_max_range = plugin["range"]
 

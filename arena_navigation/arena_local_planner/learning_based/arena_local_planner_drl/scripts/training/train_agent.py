@@ -44,7 +44,10 @@ def main():
 
     # initialize hyperparameters (save to/ load from json)
     params = initialize_hyperparameters(
-        PATHS=PATHS, load_target=args.load, config_name=args.config, n_envs=args.n_envs
+        PATHS=PATHS,
+        load_target=args.load,
+        config_name=args.config,
+        n_envs=args.n_envs,
     )
 
     # instantiate train environment
@@ -85,7 +88,16 @@ def main():
     # take task_manager from first sim (currently evaluation only provided for single process)
     if ns_for_nodes:
         eval_env = DummyVecEnv(
-            [make_envs(args, ns_for_nodes, 0, params=params, PATHS=PATHS, train=False)]
+            [
+                make_envs(
+                    args,
+                    ns_for_nodes,
+                    0,
+                    params=params,
+                    PATHS=PATHS,
+                    train=False,
+                )
+            ]
         )
     else:
         eval_env = env
@@ -131,9 +143,9 @@ def main():
             verbose=1,
         )
     elif args.agent is not None:
-        agent: Union[Type[BaseAgent], Type[ActorCriticPolicy]] = AgentFactory.instantiate(
-            args.agent
-        )
+        agent: Union[
+            Type[BaseAgent], Type[ActorCriticPolicy]
+        ] = AgentFactory.instantiate(args.agent)
         if isinstance(agent, BaseAgent):
             model = PPO(
                 agent.type.value,
@@ -188,7 +200,9 @@ def main():
     start = time.time()
     try:
         model.learn(
-            total_timesteps=n_timesteps, callback=eval_cb, reset_num_timesteps=True
+            total_timesteps=n_timesteps,
+            callback=eval_cb,
+            reset_num_timesteps=True,
         )
     except KeyboardInterrupt:
         print("KeyboardInterrupt..")
