@@ -112,7 +112,7 @@ def main():
         eval_env=eval_env,
         train_env=env,
         n_eval_episodes=40,
-        eval_freq=20000,
+        eval_freq=22500,
         log_path=PATHS["eval"],
         best_model_save_path=PATHS["model"],
         deterministic=True,

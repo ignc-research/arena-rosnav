@@ -11,10 +11,22 @@
   dynamic: 4
 3:
   static: 0
-  dynamic: 6
+  dynamic: 8
 4:
   static: 0
-  dynamic: 8
+  dynamic: 12
 5:
   static: 0
-  dynamic: 10
+  dynamic: 16
+6:
+  static: 0
+  dynamic: 20
+7:
+  static: 0
+  dynamic: 24
+8:
+  static: 0
+  dynamic: 28
+9:
+  static: 0
+  dynamic: 32
