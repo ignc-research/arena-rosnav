@@ -155,7 +155,7 @@ class get_metrics():
                     v1 = np.array(vel)
                     v2 = np.array(velocities[i+1])
                     v3 = np.array(velocities[i+2])
-                    jerk_list.append(self.calc_roughness(v1,v2,v3))
+                    jerk_list.append(self.calc_jerk(v1,v2,v3))
                     continue
                 except:
                     jerk_list.append(np.nan)
