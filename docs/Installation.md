@@ -6,6 +6,25 @@
 
 In order to use the install script you need to have [Poetry](https://python-poetry.org/docs/), Python 3.8+ and the correct `python-dev` library for your Python version installed and available in your shell. It is important that your activated Python version is the one which you want to use for the Poetry virtual environment.
 
+
+**NLOPT (TODO: add to the one-line install script):**
+
+For Ubuntu 18 - ROS melodic
+```
+sudo apt update
+sudo apt install python-nlopt
+```
+
+For Ubuntu 20, this needs to be manually compiled 
+```
+git clone https://github.com/stevengj/nlopt
+cd nlopt
+mkdir build
+cd build
+cmake ..
+make
+sudo make install
+```
 #### Installation
 
  Navigate to the directory, where you want your code to reside and execute our install script which sets everything up:
