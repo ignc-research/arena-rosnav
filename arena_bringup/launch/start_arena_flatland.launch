@@ -5,7 +5,7 @@
   <param name="train_mode" value="$(arg train_mode)" />
   <arg name="use_recorder"       default="false"/>
   <arg name="record_only_planner"       default="true"/>
-  <arg name="request_ID"       default="user1"/>
+  <arg name="requestID"       default="user1"/>
   
   <arg name="local_planner"   default="teb"/>
   <arg name="waypoint_generator"   default="classic"/>
@@ -64,7 +64,7 @@
       <param name="waypoint_generator"  value="$(arg waypoint_generator)"/>
       <param name="record_only_planner"  value="$(arg record_only_planner)"/>
       <param name="scenario_file"  value="$(arg scenario_file)"/>
-      <param name="request_ID"  value="$(arg request_ID)"/>
+      <param name="requestID"  value="$(arg requestID)"/>
   </group>
 
  <!-- use simulator-->
