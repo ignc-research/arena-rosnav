@@ -5,7 +5,7 @@ Arena rosnav incluedes four different robots.
 + [*turtlebot3-burger*](https://emanual.robotis.com/docs/en/platform/turtlebot3/simulation/#gazebo-simulation)
 + [*jackal*](https://www.clearpathrobotics.com/assets/guides/melodic/jackal/simulation.html)
 + [*ridgeback*](https://www.clearpathrobotics.com/assets/guides/melodic/ridgeback/simulation.html)
-+ [*agv-ota*](https://github.com/inomuh/agv)
++ [*agvota*](https://github.com/inomuh/agv)
 
 
 All robots are equipt with a laser scanner. The robots differ in size, laser-range etc. See below tabel for more detailed information on each robot:
@@ -16,7 +16,7 @@ All robots are equipt with a laser scanner. The robots differ in size, laser-ran
 | *turtlebot3-burger* | 0.22 | 0.0  | 2.84  | 0.113 | False | 3.5  | False |
 | *jackal*            | 2.0  | 0.0  | 4.0  | 0.267 | False | 30.0 | False |
 | *ridgeback*         | 1.1  | 0.5  | 2.0  | 0.625 | False | 10.0 | True  |
-| *agv-ota*           | 0.5  | 0.0  | 0.4  | 0.629 | False | 5.0  | False |
+| *agvota*           | 0.5  | 0.0  | 0.4  | 0.629 | False | 5.0  | False |
 
 For additional / more detailed information about each robot:
 

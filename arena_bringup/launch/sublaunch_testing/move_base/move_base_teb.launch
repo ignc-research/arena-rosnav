@@ -26,11 +26,11 @@
   <arg name="TebLocalPlannerROS/acc_lim_theta" value="20.0" if="$(eval model == 'ridgeback')"/>
   <arg name="TebLocalPlannerROS/max_vel_x_backwards" value="0.5" if="$(eval model == 'ridgeback')"/>
 
-  <arg name="TebLocalPlannerROS/max_vel_y" value="0.0" if="$(eval model == 'agv-ota')"/>
-  <arg name="TebLocalPlannerROS/max_vel_theta" value="0.08" if="$(eval model == 'agv-ota')"/>
-  <arg name="TebLocalPlannerROS/acc_lim_x" value="0.12" if="$(eval model == 'agv-ota')"/>
-  <arg name="TebLocalPlannerROS/acc_lim_y" value="0.12" if="$(eval model == 'agv-ota')"/>
-  <arg name="TebLocalPlannerROS/acc_lim_theta" value="0.02" if="$(eval model == 'agv-ota')"/>
+  <arg name="TebLocalPlannerROS/max_vel_y" value="0.0" if="$(eval model == 'agvota')"/>
+  <arg name="TebLocalPlannerROS/max_vel_theta" value="0.08" if="$(eval model == 'agvota')"/>
+  <arg name="TebLocalPlannerROS/acc_lim_x" value="0.12" if="$(eval model == 'agvota')"/>
+  <arg name="TebLocalPlannerROS/acc_lim_y" value="0.12" if="$(eval model == 'agvota')"/>
+  <arg name="TebLocalPlannerROS/acc_lim_theta" value="0.02" if="$(eval model == 'agvota')"/>
 
   <!-- move_base -->
   <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
