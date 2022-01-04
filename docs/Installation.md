@@ -1,6 +1,6 @@
 ## 1. Installation
 #### 1.1. Standard ROS setup
-(Code has been tested with ROS-melodic on Ubuntu 18.04 and Python 3.6)
+(Code has been tested with ROS-noetic on Ubuntu 20.04 and Python 3.8)
 
 * Configure your Ubuntu repositories
 ```
@@ -23,13 +23,13 @@ sudo apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31
 *	Installation
 ```
 sudo apt update
-sudo apt install ros-melodic-desktop-full
+sudo apt install ros-noetic-desktop-full
 ```
 
 * Environment Setup
 ```
-echo "source /opt/ros/melodic/setup.zsh" >> ~/.zshrc
-source ~/.zshrc
+echo "source /opt/ros/noetic/setup.bash" >> ~/.bashrc
+source ~/.bashrc
 ```
 
 *	Dependencies for building packages
@@ -50,18 +50,18 @@ libqt4-dev \
 libopencv-dev \
 liblua5.2-dev \
 screen \
-python3.6 \
-python3.6-dev \
-libpython3.6-dev \
+python3.8 \
+python3.8-dev \
+libpython3.8-dev \
 python3-catkin-pkg-modules \
 python3-rospkg-modules \
 python3-empy \
 python3-setuptools \
-ros-melodic-navigation \
-ros-melodic-teb-local-planner \
-ros-melodic-mpc-local-planner \
+ros-noetic-navigation \
+ros-noetic-teb-local-planner \
+ros-noetic-mpc-local-planner \
 libarmadillo-dev \
-ros-melodic-nlopt \
+ros-noetic-nlopt \
 ```
 
 #### 1.2. Prepare virtual environment & install python packages
@@ -81,19 +81,19 @@ cd $HOME
 mkdir python_env   # create a venv folder in your home directory 
 ```
 
-* Add exports into your .zshrc (if you use bash change the last line to bashrc instead of zshrc):
+* Add exports into your .bashrc (if you use zsh change the last line to bashrc instead of bashrc):
 ```
 echo "export WORKON_HOME=$HOME/python_env   #path to your venv folder
 export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python3   #path to your python3 
 export VIRTUALENVWRAPPER_VIRTUALENV=/usr/local/bin/virtualenv
-source /usr/local/bin/virtualenvwrapper.sh" >> ~/.zshrc
+source /usr/local/bin/virtualenvwrapper.sh" >> ~/.bashrc
 ```
 
 * Create a new venv
 
 Note: You might need to restart your terminal at this point.
 ```
-mkvirtualenv --python=python3.6 rosnav
+mkvirtualenv --python=python3.8 rosnav
 workon rosnav
 ```
 
@@ -116,12 +116,12 @@ mkdir -p arena_ws/src && cd arena_ws/src
 git clone https://github.com/ignc-research/arena-rosnav
 
 cd arena-rosnav && rosws update
-source $HOME/.zshrc
+source $HOME/.bashrc
 cd ../.. 
 catkin_make -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=/usr/bin/python3
-source devel/setup.zsh
+source devel/setup.bash
 ````
-Note: if you use bash replace zsh with bash in the commands
+Note: if you use bash replace bash with bash in the commands
 
 * Install ros geometry2 from source(compiled with python3) 
 
@@ -138,17 +138,17 @@ cd $HOME/geometry2_ws
 catkin_make -DPYTHON_EXECUTABLE=/usr/bin/python3
 ```
 
-* Set python path in .zshrc (or .bashrc if you use that)
+* Set python path in .bashrc (or .zshrc if you use that)
 ```
-nano ~/.zshrc
+nano ~/.bashrc
 ```
-Add these lines below "source/opt/ros/melodic/setup.zsh"
+Add these lines below "source/opt/ros/noetic/setup.bash"
 ```
-source /$HOME/arena_ws/devel/setup.zsh
+source /$HOME/arena_ws/devel/setup.bash
 export PYTHONPATH=$HOME/arena_ws/src/arena-rosnav:${PYTHONPATH}
 export PYTHONPATH=$HOME/geometry2_ws/devel/lib/python3/dist-packages:${PYTHONPATH}
 ```
-Add this line above "source/opt/ros/melodic/setup.zsh"
+Add this line above "source/opt/ros/noetic/setup.bash"
 ```
 export PYTHONPATH=""
 ```
