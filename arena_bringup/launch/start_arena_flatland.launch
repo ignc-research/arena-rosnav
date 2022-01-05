@@ -8,7 +8,7 @@
   <arg name="use_recorder" default="false"/>
   <arg name="record_only_planner" default="true"/>
 
-  <arg name="local_planner" default="arena"   doc="local-planer type [teb, dwa, mpc, rlca, cadrl, arena]"/>
+  <arg name="local_planner" default="teb"   doc="local-planer type [teb, dwa, mpc, rlca, cadrl, arena]"/>
   <arg name="waypoint_generator" default="classic"/>
   <arg name="rviz_file" default="nav"/>
   <arg name="disable_scenario" default="false"/>
