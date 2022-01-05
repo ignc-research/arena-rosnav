@@ -12,7 +12,7 @@ from std_msgs.msg import ColorRGBA
 import fc2 as fc
 import math
 from torch.nn.utils.rnn import pack_sequence
-import torch
+import torch, rospkg
 import numpy as np
 
 class NN_tb3():
@@ -28,7 +28,7 @@ class NN_tb3():
         # else:
         #     return True
         goal_reached = rospy.get_param("/bool_goal_reached")        
-        print(goal_reached)
+
         if not goal_reached:
             return False
         else:
@@ -53,7 +53,6 @@ class NN_tb3():
             net.train(False)
             #load NN
 
-                rospack = 
             current_dir_path = rospkg.RosPack().get_path('arena_ros') + "/scripts/"
             model_name = "advanced_agent2_best.dat"
             # model_name = "dqn_agent_best_fc_l2.dat"
