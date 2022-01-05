@@ -68,6 +68,10 @@ class RobotManager:
         self._global_path_con = threading.Condition()
         self._static_obstacle_name_list = []
 
+        # Incl. for direct goal publishing in test mode
+        self.pub_mvb_goal = rospy.Publisher("/move_base_simple/goal", PoseStamped, queue_size=1, latch=True)
+        self.planner = rospy.get_param("/local_planner")
+
     def _spawn_robot(self, robot_yaml_path: str):
         request = SpawnModelRequest()
         request.yaml_path = robot_yaml_path
@@ -227,6 +231,8 @@ class RobotManager:
         goal.pose.orientation.z = quaternion[3]
         self._goal_pub.publish(goal)
         # self._validate_path()
+        if self.planner in ["teb", "dwa", "mpc"]:
+            self.pub_mvb_goal.publish(goal)
 
     def _global_path_callback(self, global_path: Path):
         with self._global_path_con:

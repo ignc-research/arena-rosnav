@@ -58,13 +58,13 @@
   <arg name="odom_ground_truth" default="/odometry/ground_truth"/>
 
   <!-- data recorder -->
+  <param name="local_planner"  value="$(arg local_planner)"/>
+  <param name="waypoint_generator"  value="$(arg waypoint_generator)"/>
+  <param name="record_only_planner"  value="$(arg record_only_planner)"/>
+  <param name="scenario_file"  value="$(arg scenario_file)"/>
+  <param name="requestID"  value="$(arg requestID)"/>
   <group if="$(eval arg('use_recorder') == true)">
     <node pkg="arena_evaluation" name="data_recorder_node" type="data_recorder_node.py" />
-      <param name="local_planner"  value="$(arg local_planner)"/>
-      <param name="waypoint_generator"  value="$(arg waypoint_generator)"/>
-      <param name="record_only_planner"  value="$(arg record_only_planner)"/>
-      <param name="scenario_file"  value="$(arg scenario_file)"/>
-      <param name="requestID"  value="$(arg requestID)"/>
   </group>
 
  <!-- use simulator-->
