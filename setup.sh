@@ -12,6 +12,17 @@ echo "IF YOU WANT TO CANCEL, PRESS [CTRL] + [C]"
 read
 
 echo "[Set the target OS, ROS version and name of catkin workspace]"
+
+if test -n "$ZSH_VERSION"; then
+  CURSHELL=zsh
+elif test -n "$BASH_VERSION"; then
+  CURSHELL=bash
+else
+  echo "Currently only Bash and ZSH are supported for an automatic install. Please refer to the manual installation if you use any other shell."
+  exit 1
+fi
+
+
 name_os_version=${name_os_version:="focal"}
 name_ros_version=${name_ros_version:="noetic"}
 name_catkin_workspace=${name_catkin_workspace:="arena_ws"}
@@ -64,11 +75,11 @@ sudo sh -c "rosdep init"
 rosdep update
 
 echo "[Set the ROS evironment]"
-sh -c "echo \"source /opt/ros/$name_ros_version/setup.bash\" >> ~/.bashrc"
-sh -c "echo \"export ROS_MASTER_URI=http://localhost:11311\" >> ~/.bashrc"
-sh -c "echo \"export ROS_HOSTNAME=localhost\" >> ~/.bashrc"
+sh -c "echo \"source /opt/ros/$name_ros_version/setup.${CURSHELL}\" >> ~/.${CURSHELL}rc"
+sh -c "echo \"export ROS_MASTER_URI=http://localhost:11311\" >> ~/.${CURSHELL}rc"
+sh -c "echo \"export ROS_HOSTNAME=localhost\" >> ~/.${CURSHELL}rc"
 
-source $HOME/.bashrc
+source $HOME/.${CURSHELL}rc
 
 
 
@@ -98,8 +109,8 @@ cd $HOME && mkdir python_env   # create a venv folder in your home directory
 echo "export WORKON_HOME=$HOME/python_env   #path to your venv folder
 export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python3   #path to your python3
 export VIRTUALENVWRAPPER_VIRTUALENV=/usr/local/bin/virtualenv
-source /usr/local/bin/virtualenvwrapper.sh" >> ~/.bashrc
-source ~/.bashrc
+source /usr/local/bin/virtualenvwrapper.sh" >> ~/.${CURSHELL}rc
+source ~/.${CURSHELL}rc
 
 mkvirtualenv --python=python3.8 rosnav
 
@@ -111,8 +122,8 @@ pip install PyQt5 --upgrade
 cd $HOME && mkdir -p arena_ws/src && cd arena_ws/src
 git clone https://github.com/ignc-research/arena-rosnav -b noetic-devel
 cd arena-rosnav && rosws update
-source $HOME/.bashrc && workon rosnav && cd $HOME/arena_ws
+source $HOME/.${CURSHELL}rc && workon rosnav && cd $HOME/arena_ws
 catkin_make -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=/usr/bin/python3 -DCMAKE_CXX_STANDARD=14
 
 echo "source $HOME/arena_ws/devel/setup.bash
-export PYTHONPATH=$HOME/arena_ws/src/arena-rosnav:${PYTHONPATH}:/opt/ros/noetic/lib/python3/dist-packages" >> ~/.bashrc
+export PYTHONPATH=$HOME/arena_ws/src/arena-rosnav:${PYTHONPATH}:/opt/ros/noetic/lib/python3/dist-packages" >> ~/.${CURSHELL}rc

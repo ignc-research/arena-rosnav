@@ -50,10 +50,21 @@ In order to check the details of the easy installation script, please refer to t
 ```bash
 sudo apt-get update
 sudo apt-get upgrade
-cd && wget https://raw.githubusercontent.com/ignc-research/arena-rosnav/noetic-devel/setup.sh
-chmod 755 ./setup.sh
-bash ./setup.sh
+wget https://raw.githubusercontent.com/ignc-research/arena-rosnav/noetic-devel/setup.sh -O - | bash
+
 ```
+Create a virtual environment 
+```bash
+mkvirtualenv --python=python3.8 rosnav
+workon rosnav
+```
+Install further dependencies:
+```bash
+sudo apt-get update
+sudo apt-get upgrade
+wget https://raw.githubusercontent.com/ignc-research/arena-rosnav/noetic-devel/setup2.sh -O - | bash
+
+
 
 Alternatively, refer to [Installation.md](docs/Installation.md) for detailed explanations about the installation process.
 
