@@ -46,22 +46,23 @@ rosdep update
 * Install additional pkgs 
 ```
 sudo apt-get update && sudo apt-get install -y \
-libqt4-dev \
 libopencv-dev \
 liblua5.2-dev \
 screen \
-python3.8 \
-python3.8-dev \
-libpython3.8-dev \
-python3-catkin-pkg-modules \
+python3-rosdep \
+python3-rosinstall \
+python3-rosinstall-generator \
+build-essential \
 python3-rospkg-modules \
-python3-empy \
-python3-setuptools \
 ros-noetic-navigation \
 ros-noetic-teb-local-planner \
 ros-noetic-mpc-local-planner \
 libarmadillo-dev \
 ros-noetic-nlopt \
+ros-noetic-turtlebot3-description \
+ros-noetic-turtlebot3-navigation \
+ros-noetic-lms1xx \
+ros-noetic-velodyne-description 
 ```
 
 #### 1.2. Prepare virtual environment & install python packages
@@ -99,21 +100,17 @@ workon rosnav
 
 * Install packages inside your venv (venv always activated!):
 ```
-pip install --extra-index-url https://rospypi.github.io/simple/ rospy rosbag tf tf2_ros --ignore-installed
-pip install pyyaml catkin_pkg netifaces pathlib
+pip3 install --extra-index-url https://rospypi.github.io/simple/ rospy rosbag tf tf2_ros --ignore-installed
+pip3 install pyyaml catkin_pkg netifaces pathlib filelock pyqt5 mpi4py torch lxml scipy defusedxml aliyun-fc2
 ```     
 
-* Install stable_baselines3 for training DRL into your venv (venv always activated!)
-```
-pip install stable-baselines3
-```
 
 #### 1.3. Install arena-rosnav repo
 * Create a arena_ws and clone this repo into your arena_ws 
 ````
 cd $HOME
 mkdir -p arena_ws/src && cd arena_ws/src
-git clone https://github.com/ignc-research/arena-rosnav
+git clone https://github.com/ignc-research/arena-rosnav -b noetic-devel
 
 cd arena-rosnav && rosws update
 source $HOME/.bashrc
