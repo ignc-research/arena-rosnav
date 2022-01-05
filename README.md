@@ -55,8 +55,7 @@ wget https://raw.githubusercontent.com/ignc-research/arena-rosnav/noetic-devel/s
 ```
 Create a virtual environment 
 ```bash
-mkvirtualenv --python=python3.8 rosnav
-workon rosnav
+source ~/.bashrc && mkvirtualenv --python=python3.8 rosnav
 ```
 Install further dependencies:
 ```bash
