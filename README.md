@@ -44,7 +44,18 @@ We recommend starting with the [start guide](https://github.com/ignc-research/ar
 
 
 ## 1. Installation
-Please refer to [Installation.md](docs/Installation.md) for detailed explanations about the installation process.
+Open the terminal with Ctrl+Alt+T and enter below commands one at a time.
+
+In order to check the details of the easy installation script, please refer to the [script file](https://raw.githubusercontent.com/ignc-research/arena-rosnav/noetic-devel/setup.sh).
+```bash
+sudo apt-get update
+sudo apt-get upgrade
+cd && wget https://raw.githubusercontent.com/ignc-research/arena-rosnav/noetic-devel/setup.sh
+chmod 755 ./setup.sh
+bash ./setup.sh
+```
+
+Alternatively, refer to [Installation.md](docs/Installation.md) for detailed explanations about the installation process.
 
 ## 1.1. Docker
 We provide a Docker file to run our code on other operating systems. Please refer to [Docker.md](docs/Docker.md) for more information.

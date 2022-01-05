@@ -1,15 +1,4 @@
 ## 1. Installation
-Open the terminal with Ctrl+Alt+T and enter below commands one at a time.
-In order to check the details of the easy installation script, please refer to the [script file](https://raw.githubusercontent.com/ignc-research/arena-rosnav/noetic-devel/setup.sh).
-```bash
-sudo apt-get update
-sudo apt-get upgrade
-cd && wget https://raw.githubusercontent.com/ignc-research/arena-rosnav/noetic-devel/setup.sh
-chmod 755 ./setup.sh
-bash ./setup.sh
-```
-
-If this install option does not work refer to the manuel version bellow.
 #### 1.1. Standard ROS setup
 (Code has been tested with ROS-noetic on Ubuntu 20.04 and Python 3.8)
 
