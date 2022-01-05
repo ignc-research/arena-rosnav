@@ -60,9 +60,8 @@ workon rosnav
 ```
 Install further dependencies:
 ```bash
-sudo apt-get update
-sudo apt-get upgrade
 wget https://raw.githubusercontent.com/ignc-research/arena-rosnav/noetic-devel/setup2.sh -O - | bash
+```
 
 
 
