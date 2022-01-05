@@ -102,7 +102,7 @@ ros-noetic-turtlebot3-description \
 ros-noetic-turtlebot3-navigation \
 ros-noetic-lms1xx \
 ros-noetic-velodyne-description 
-sudo apt install python3-pip
+sudo apt install -y python3-pip
 sudo pip3 install --upgrade pip
 sudo pip3 install virtualenv virtualenvwrapper
 cd $HOME && mkdir python_env   # create a venv folder in your home directory
