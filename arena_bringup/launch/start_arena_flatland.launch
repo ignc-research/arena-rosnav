@@ -2,13 +2,13 @@
   <param name="use_sim_time" value="true"/>
 
   <arg name="train_mode" default="false"/>
-  <arg name="model" default="burger"      doc="model type [burger, jackal, ridgeback, agvota]"/>
+  <arg name="model" default="jackal"      doc="model type [burger, jackal, ridgeback, agvota]"/>
   <!--husy does not yet work-->
   <param name="train_mode" value="$(arg train_mode)" />
   <arg name="use_recorder" default="false"/>
   <arg name="record_only_planner" default="true"/>
 
-  <arg name="local_planner" default="arena"   doc="local-planer type [teb, dwa, mpc, rlca, cadrl, arena]"/>
+  <arg name="local_planner" default="teb"   doc="local-planer type [teb, dwa, mpc, rlca, cadrl, arena]"/>
   <arg name="waypoint_generator" default="classic"/>
   <arg name="rviz_file" default="nav"/>
   <arg name="disable_scenario" default="false"/>

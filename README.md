@@ -61,7 +61,11 @@ Install further dependencies (you can take a look at the script [here](https://r
 
 ```bash
 wget https://raw.githubusercontent.com/ignc-research/arena-rosnav/noetic-devel/setup2.sh -O - | bash
-source ~/.bashrc
+source ~/.bashrc && workon rosnav
+```
+Now everything should be set up. You can start the simulation with: 
+```bash
+roslaunch arena_bringup start_arena_flatland.launch
 ```
 
 

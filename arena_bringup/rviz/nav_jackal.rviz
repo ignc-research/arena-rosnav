@@ -4,9 +4,8 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded:
-        - /robot1
-        - /robot1/my_robot1
         - /robot1/Goal Pose1
+        - /Map1
         - /Global Plan1/teb1
         - /Sensors1/LaserScan1
         - /obstacles1
@@ -31,7 +30,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: ""
+    SyncSource: LaserScan
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -124,24 +123,24 @@ Visualization Manager:
           Value: true
         - Alpha: 0.699999988079071
           Class: rviz/Map
-          Color Scheme: map
+          Color Scheme: costmap
           Draw Behind: false
-          Enabled: false
+          Enabled: true
           Name: Global_costmap
           Topic: /move_base/global_costmap/costmap
           Unreliable: false
           Use Timestamp: false
-          Value: false
+          Value: true
         - Alpha: 0.699999988079071
           Class: rviz/Map
           Color Scheme: costmap
           Draw Behind: false
-          Enabled: false
+          Enabled: true
           Name: Local_costmap
           Topic: /move_base/local_costmap/costmap
           Unreliable: false
           Use Timestamp: false
-          Value: false
+          Value: true
       Enabled: true
       Name: Map
     - Class: rviz/Group
@@ -1212,6 +1211,34 @@ Visualization Manager:
       Topic: /subgoal
       Unreliable: false
       Value: true
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/LaserScan
+      Color: 255; 255; 255
+      Color Transformer: Intensity
+      Decay Time: 0
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Min Color: 0; 0; 0
+      Name: LaserScan
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.009999999776482582
+      Style: Points
+      Topic: /scan
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 0; 0; 0
@@ -1252,10 +1279,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 46.09282302856445
+      Scale: 48.8828125
       Target Frame: <Fixed Frame>
-      X: 3.297379970550537
-      Y: 2.1553478240966797
+      X: 10.861047744750977
+      Y: 7.581085205078125
     Saved: ~
 Window Geometry:
   Displays:
