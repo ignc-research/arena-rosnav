@@ -44,7 +44,7 @@ We recommend starting with the [start guide](https://github.com/ignc-research/ar
 
 
 ## 1. Installation
-Open the terminal with Ctrl+Alt+T and enter below commands one at a time.
+Open the terminal with `Ctrl`+`Alt`+`T` and enter below commands one at a time.
 
 In order to check the details of the easy installation script, please refer to the [script file](https://raw.githubusercontent.com/ignc-research/arena-rosnav/noetic-devel/setup.sh).
 ```bash
