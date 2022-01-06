@@ -26,7 +26,7 @@ cd $HOME/arena_ws
 catkin_make -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=/usr/bin/python3 -DCMAKE_CXX_STANDARD=14
 
 echo "source $HOME/arena_ws/devel/setup.bash
-export PYTHONPATH=$HOME/arena_ws/src/arena-rosnav:${PYTHONPATH}:/opt/ros/noetic/lib/python3/dist-packages" >> ~/.${CURSHELL}rc
+export PYTHONPATH=$HOME/arena_ws/src/arena-rosnav:$HOME/arena_ws/devel/lib/python3/dist-packages:/opt/ros/noetic/lib/python3/dist-packages" >> ~/.${CURSHELL}rc
 source $HOME/.${CURSHELL}rc 
 
 echo "[Complete!!!]"
