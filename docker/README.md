@@ -15,7 +15,7 @@ Docker version 20.10.7, build f0df350
 ```
 1. clone this repro
 ```
-sudo git clone -b docker_new --depth 1 https://github.com/Ann-Rachel/arena-rosnav /the/folder/you/want
+sudo git clone -b docker_new --depth 1 https://github.com/ignc-research/arena-rosnav /the/folder/you/want
 ```
 2. go to the docker folder ../arena-rosnav/docker
 ```
@@ -58,7 +58,7 @@ sudo docker run -v "/yourhome/arena-rosnav/docker:/root/catkin_ws/src/arena-rosn
 # woking with docker
 1.clone this repro
 ```
-sudo git clone -b docker_new --depth 1 https://github.com/Ann-Rachel/arena-rosnav /the/folder/you/want
+sudo git clone -b docker_new --depth 1 https://github.com/ignc-research/arena-rosnav /the/folder/you/want
 ```
 2.go to the right folder ../arena-rosnav/docker
 ```
@@ -79,8 +79,8 @@ cd ..
 6. start docker-compose
 
 ```
-docker-compose up -d \
-docker-compose start \
+docker-compose up -d 
+docker-compose start 
 ```
 7. enter the contaier
 ```
@@ -91,3 +91,19 @@ docker exec -it arena-rosnav bash
 roslaunch arena_bringup start_arena_flatland.launch  train_mode:=true 	use_viz:=true  task_mode:=random
 ```
 9. open http://localhost:8080/vnc.html you will see the rviz window in browser
+
+# troubleshooting
+Error message:
+```c++ fatail error: Killed signal terminated program cc1plus
+...
+Invoking "make -j8 -l8" failes
+```
+Solution
+in Dockerfile change
+```
+catkin_make -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=/usr/bin/python3
+```
+to
+```
+catkin_make -j1 -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=/usr/bin/python3
+```
