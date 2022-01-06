@@ -48,16 +48,17 @@ Open the terminal with `Ctrl`+`Alt`+`T` and enter below commands one at a time.
 
 In order to check the details of the easy installation script, please refer to the [script file](https://raw.githubusercontent.com/ignc-research/arena-rosnav/noetic-devel/setup.sh).
 ```bash
-sudo apt-get update
-sudo apt-get upgrade
+sudo apt-get update && sudo apt-get upgrade
 wget https://raw.githubusercontent.com/ignc-research/arena-rosnav/noetic-devel/setup.sh -O - | bash
-
 ```
+
 Create a virtual environment 
 ```bash
 source ~/.bashrc && mkvirtualenv --python=python3.8 rosnav
 ```
-Install further dependencies:
+
+Install further dependencies (you can take a look at the script [here](https://raw.githubusercontent.com/ignc-research/arena-rosnav/noetic-devel/setup2.sh))
+
 ```bash
 wget https://raw.githubusercontent.com/ignc-research/arena-rosnav/noetic-devel/setup2.sh -O - | bash
 ```
