@@ -27,9 +27,8 @@ echo "source $HOME/arena_ws/devel/setup.bash
 export PYTHONPATH=$HOME/arena_ws/src/arena-rosnav:${PYTHONPATH}:/opt/ros/noetic/lib/python3/dist-packages" >> ~/.${CURSHELL}rc
 source $HOME/.${CURSHELL}rc 
 
-cd $HOME/arena_ws/src/forks/arena-tools && git clone https://gitlab.com/LIRS_Projects/LIRS-WCT lirs-wct && cd lirs-wct && ./deploy.sh
+cd $HOME/arena_ws/src/forks/arena-tools && git clone https://gitlab.com/LIRS_Projects/LIRS-WCT lirs-wct && cd lirs-wct && sudo ./deploy.sh
 cd $HOME/arena_ws/src/forks/arena-tools && mv lirs-wct/lirs_wct_console/build/lirs_wct_console .
 
-cd $HOME/arena_ws/src/forks && cd .. && cd navigation/local_planner
-git clone https://github.com/rst-tu-dortmund/mpc_local_planner.git 
+cd $HOME/arena_ws/src/forks/navigation/local_planner && git clone https://github.com/rst-tu-dortmund/mpc_local_planner.git -b noetic-devel
 cd $HOME/arena_ws && catkin_make
