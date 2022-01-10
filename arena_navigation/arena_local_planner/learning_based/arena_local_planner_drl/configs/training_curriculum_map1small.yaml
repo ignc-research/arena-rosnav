@@ -18,9 +18,9 @@
 5:
   static: 0
   dynamic: 14
-# 6:
-#   static: 0
-#   dynamic: 20
+6:
+  static: 0
+  dynamic: 16
 # 7:
 #   static: 0
 #   dynamic: 24

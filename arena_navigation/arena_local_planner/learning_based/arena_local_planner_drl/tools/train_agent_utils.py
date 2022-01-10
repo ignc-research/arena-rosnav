@@ -96,6 +96,7 @@ def initialize_hyperparameters(
         hyperparams = load_hyperparameters_json(
             PATHS=PATHS, from_scratch=True, config_name=config_name
         )
+        hyperparams["robot"] = rospy.get_param("model", "not specified")
         hyperparams["agent_name"] = PATHS["model"].split("/")[-1]
     else:
         hyperparams = load_hyperparameters_json(PATHS=PATHS)

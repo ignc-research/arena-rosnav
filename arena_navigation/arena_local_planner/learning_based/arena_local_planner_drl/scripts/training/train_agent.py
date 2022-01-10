@@ -73,15 +73,15 @@ def main():
     trainstage_cb = InitiateNewTrainStage(
         n_envs=args.n_envs,
         treshhold_type="succ",
-        upper_threshold=0.85,
-        lower_threshold=0.6,
+        upper_threshold=0.9,
+        lower_threshold=0.7,
         task_mode=params["task_mode"],
         verbose=1,
     )
 
     # stop training on reward threshold callback
     stoptraining_cb = StopTrainingOnRewardThreshold(
-        treshhold_type="succ", threshold=0.9, verbose=1
+        treshhold_type="succ", threshold=0.95, verbose=1
     )
 
     # instantiate eval environment
@@ -111,7 +111,7 @@ def main():
     eval_cb = EvalCallback(
         eval_env=eval_env,
         train_env=env,
-        n_eval_episodes=40,
+        n_eval_episodes=70,
         eval_freq=22500,
         log_path=PATHS["eval"],
         best_model_save_path=PATHS["model"],
