@@ -92,7 +92,7 @@ class FlatlandEnv(gym.Env):
             self.ns,
             self._laser_num_beams,
             self._laser_max_range,
-            external_time_sync=True,
+            external_time_sync=False,
         )
         self.observation_space = (
             self.observation_collector.get_observation_space()
