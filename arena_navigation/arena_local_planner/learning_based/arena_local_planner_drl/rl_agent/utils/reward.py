@@ -302,7 +302,7 @@ class RewardCalculator:
             self.curr_reward -= punishment
         else:
             lin_vel = action[0]
-            ang_vel = action[1]
+            ang_vel = action[-1]
             reward = (lin_vel + (ang_vel * 0.001)) * consumption_factor
         self.curr_reward -= reward
 
@@ -374,8 +374,8 @@ class RewardCalculator:
         :param action: (np.ndarray (,2)): [0] = linear velocity, [1] = angular velocity
         """
         if self.last_action is not None:
-            curr_ang_vel = action[1]
-            last_ang_vel = self.last_action[1]
+            curr_ang_vel = action[-1]
+            last_ang_vel = self.last_action[-1]
 
             vel_diff = abs(curr_ang_vel - last_ang_vel)
             self.curr_reward -= (vel_diff ** 4) / 2500
