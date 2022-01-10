@@ -21,12 +21,21 @@
 6:
   static: 0
   dynamic: 16
-# 7:
-#   static: 0
-#   dynamic: 24
-# 8:
-#   static: 0
-#   dynamic: 28
-# 9:
-#   static: 0
-#   dynamic: 32
+7:
+  static: 0
+  dynamic: 24
+8:
+  static: 0
+  dynamic: 28
+9:
+  static: 0
+  dynamic: 32
+10:
+  static: 0
+  dynamic: 32
+11:
+  static: 0
+  dynamic: 36
+12:
+  static: 0
+  dynamic: 40
