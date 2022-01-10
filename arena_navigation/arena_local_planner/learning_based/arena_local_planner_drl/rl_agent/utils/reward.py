@@ -378,5 +378,5 @@ class RewardCalculator:
             last_ang_vel = self.last_action[-1]
 
             vel_diff = abs(curr_ang_vel - last_ang_vel)
-            self.curr_reward -= (vel_diff ** 4) / 4000
+            self.curr_reward -= (vel_diff ** 4) / 2500
         self.last_action = action
