@@ -169,15 +169,15 @@ class RewardCalculator:
         self._set_current_dist_to_globalplan(
             kwargs["global_plan"], kwargs["robot_pose"]
         )
-        self._reward_abrupt_direction_change(kwargs["action"])
         self._reward_following_global_plan(kwargs["action"])
-        if laser_scan.min() > self.safe_dist:
+        if laser_scan.min() > self.safe_dist + 0.5:
             self._reward_distance_global_plan(
                 reward_factor=0.2,
                 penalty_factor=0.3,
             )
         else:
             self.last_dist_to_path = None
+            self._reward_abrupt_direction_change(kwargs["action"])
         self._reward_goal_reached(goal_in_robot_frame, reward=15)
         self._reward_safe_dist(laser_scan, punishment=0.25)
         self._reward_collision(laser_scan, punishment=10)
@@ -378,5 +378,5 @@ class RewardCalculator:
             last_ang_vel = self.last_action[-1]
 
             vel_diff = abs(curr_ang_vel - last_ang_vel)
-            self.curr_reward -= (vel_diff ** 4) / 2500
+            self.curr_reward -= (vel_diff ** 4) / 1500
         self.last_action = action
