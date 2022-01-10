@@ -24,8 +24,8 @@ void SpacialHorizon::init(ros::NodeHandle &nh)
     /* ros communication with public node */
     ros::NodeHandle public_nh;  // sim1/goal
     goal_sub_ = public_nh.subscribe("goal", 1, &SpacialHorizon::goalCallback,this);
-    // odom_sub_ = public_nh.subscribe("odom", 1, &SpacialHorizon::odomCallback, this);
-    amcl_pose_sub_ = public_nh.subscribe("amcl_pose", 1, &SpacialHorizon::amcl_poseCallback, this);
+    odom_sub_ = public_nh.subscribe("odom", 1, &SpacialHorizon::odomCallback, this);
+    // amcl_pose_sub_ = public_nh.subscribe("amcl_pose", 1, &SpacialHorizon::amcl_poseCallback, this);
     initialPose_sub_ = public_nh.subscribe("initialpose", 0, &SpacialHorizon::handle_initial_pose, this);
 
     subgoal_DRL_pub_  = public_nh.advertise<geometry_msgs::PoseStamped>("subgoal",10);
@@ -47,7 +47,7 @@ void SpacialHorizon::amcl_poseCallback(const geometry_msgs::PoseWithCovarianceSt
 }
 
 void SpacialHorizon::odomCallback(const nav_msgs::OdometryConstPtr& msg){
-    odom_pos_=Eigen::Vector2d(initial_pose_[0] + msg->pose.pose.position.x, initial_pose_[1] + msg->pose.pose.position.y);
+    odom_pos_=Eigen::Vector2d(msg->pose.pose.position.x, msg->pose.pose.position.y);
     odom_vel_=Eigen::Vector2d(msg->twist.twist.linear.x,msg->twist.twist.linear.y);
 
     odom_orient_.w() = msg->pose.pose.orientation.w;

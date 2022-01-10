@@ -44,26 +44,6 @@ plugins:
     noise_std_dev: 0.0
     update_rate: 10
 
-  # - type: Laser
-  #   name: emergency_laser
-  #   frame: emergency_laser_link
-  #   topic: emergency_laser
-  #   body: base_footprint
-  #   broadcast_tf: true
-  #   origin: [0.0, 0.0, 0.0]
-  #   # range: 3
-  #   #arena
-  #   range: 1
-  #   # angle: {min: -3.12413936, max: 3.14159265359, increment: 0.01745}
-  #   # shifted for arena
-  #   # angle: {min: 0, max: 6.28319, increment: 0.01745330555}
-  #   angle: {min: 0, max: 6.283, increment:  0.0175019223243} # to calculate number of laser beams 
-
-  #   # noise_std_dev: 0.015
-  #   # arena
-  #   noise_std_dev: 0.0
-  #   update_rate: 50
-
 
   - type: ModelTfPublisher
     name: tf_publisher

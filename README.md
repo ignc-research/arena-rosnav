@@ -3,7 +3,7 @@
 ---
 Major differences to `local_planner_subgoalmode` branch are:
 + Usage of `ros-noetic`
-+ Full support of the following robots with realistic parameters: `turtlebot3_burger`, `ridgeback`, `jackal`, `agv-ota` _(see [here](docs/Simulation.md#Robots) for detailed description of their usage)_
++ Full support of the following robots with realistic parameters: `turtlebot3_burger`, `ridgeback`, `jackal`, `agvota` _(see [here](docs/Simulation.md#Robots) for detailed description of their usage)_
 
     THIS INCLUDES:
     - Full support of the planers `teb`, `dwa`, `mpc`, `cadrl`, `rlca`, `arena`
@@ -44,7 +44,33 @@ We recommend starting with the [start guide](https://github.com/ignc-research/ar
 
 
 ## 1. Installation
-Please refer to [Installation.md](docs/Installation.md) for detailed explanations about the installation process.
+Open the terminal with `Ctrl`+`Alt`+`T` and enter below commands one at a time.
+
+In order to check the details of the easy installation script, please refer to the [script file](https://raw.githubusercontent.com/ignc-research/arena-rosnav/noetic-devel/setup.sh).
+```bash
+sudo apt-get update && sudo apt-get upgrade
+wget https://raw.githubusercontent.com/ignc-research/arena-rosnav/noetic-devel/setup.sh -O - | bash
+```
+
+Create a virtual environment 
+```bash
+source ~/.bashrc && mkvirtualenv --python=python3.8 rosnav
+```
+
+Install further dependencies (you can take a look at the script [here](https://raw.githubusercontent.com/ignc-research/arena-rosnav/noetic-devel/setup2.sh))
+
+```bash
+wget https://raw.githubusercontent.com/ignc-research/arena-rosnav/noetic-devel/setup2.sh -O - | bash
+source ~/.bashrc && workon rosnav
+```
+Now everything should be set up. You can start the simulation with: 
+```bash
+roslaunch arena_bringup start_arena_flatland.launch
+```
+
+
+
+Alternatively, refer to [Installation.md](docs/Installation.md) for detailed explanations about the installation process.
 
 ## 1.1. Docker
 We provide a Docker file to run our code on other operating systems. Please refer to [Docker.md](docs/Docker.md) for more information.

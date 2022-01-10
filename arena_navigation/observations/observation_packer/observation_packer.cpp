@@ -103,6 +103,7 @@ void updateRelativeWithAbsoluteGoal(){
 
 void odom_callback(const nav_msgs::Odometry::ConstPtr & msg){
 	odom_transform.setFromMsg(msg->pose.pose);
+	robot_state.setFromMsg(msg->pose.pose);
 	odom_callback_called = true;
 }
 
@@ -160,10 +161,10 @@ int main(int argc, char ** argv)
 	// ros::Subscriber sub_obj = n.subscribe("goal", 1, &goal_callback);
 	puts("Subscribing to /scan ...");
 	ros::Subscriber sub_scan = n.subscribe<sensor_msgs::LaserScan>("scan", 1, laser_callback);
-	// puts("Subscribing to /odom ...");
-	// ros::Subscriber sub_odom = n.subscribe<nav_msgs::Odometry>("odom", 1, odom_callback);
-	puts("Subscribing to /amcl_pose ...");
-	ros::Subscriber sub_odom = n.subscribe("amcl_pose", 1, amcl_callback);
+	puts("Subscribing to /odom ...");
+	ros::Subscriber sub_odom = n.subscribe<nav_msgs::Odometry>("odom", 1, odom_callback);
+	// puts("Subscribing to /amcl_pose ...");
+	// ros::Subscriber sub_odom = n.subscribe("amcl_pose", 1, amcl_callback);
 	puts("Advertising /observation ...");
 	ros::Publisher pub = n.advertise<observations::Observation>("observation", 1);
 	ros::Rate publish_rate(10);
