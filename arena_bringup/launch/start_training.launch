@@ -61,7 +61,7 @@
   <param name="world_path" value="$(find simulator_setup)/maps/$(arg map_folder_name)/map.world.yaml" />
   <param name="show_viz" value="$(arg show_viz)"/>
   <param name="viz_pub_rate" value="$(arg viz_pub_rate)"/>
-  <param name="robot_action_rate"     value="10"/>
+  <param name="robot_action_rate"     value="5"/>
   <param name="laser_update_rate"     value="10"/>
 
 
