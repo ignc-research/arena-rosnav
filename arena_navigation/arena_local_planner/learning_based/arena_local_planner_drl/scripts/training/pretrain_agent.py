@@ -6,6 +6,7 @@ from multiprocessing import Process, Manager
 import numpy as np
 import rospkg
 import torch as th
+import yaml
 from joblib._multiprocessing_helpers import mp
 from rl_agent.envs.all_in_one_flatland_gym_env import AllInOneEnv
 from stable_baselines3.common.vec_env import VecNormalize
@@ -14,38 +15,63 @@ from torch.optim.lr_scheduler import StepLR
 from torch.utils.data import Dataset, random_split
 from tqdm import tqdm
 
-# PARAMETERS
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.rl_agent.envs.all_in_one_models.drl.drl_agent import \
     setup_and_start_drl_server
 
 ### NOTE: This pretraining procedures is based on https://github.com/Stable-Baselines-Team/rl-colab-notebooks/blob/sb3/pretraining.ipynb
 
+
+# PARAMETERS
 batch_size = 64
-epochs = 10
+epochs = 6
 scheduler_gamma = 0.5
 learning_rate = 0.2
-weight_decay = 5e-5
-seed = 1
+weight_decay = 5e-6
+seed = 42
 test_batch_size = 64
 
 
-def pretrain_agent(policy, env_vec: VecNormalize, expert_dataset_file, test_portion: float = 0.05):
+def pretrain_agent(policy, env_vec: VecNormalize, expert_dataset_file, test_portion: float = 0.05,
+                   normalize_obs: bool = False):
+    print("\n\n_________________________")
+    print("\nStart pretraining...\n")
+    print("\nLoad expert dataset...\n")
+
     # 1. Load dataset
     with np.load(expert_dataset_file) as expert_data:
         expert_actions = expert_data['expert_actions']
         expert_observations = expert_data['expert_observations']
 
-    print("\n\n_________________________")
-    print("\nStart pretraining...\n")
-
     # 2.1 Train observation normalization
     print("Tune observation normalization...")
-    for obs in expert_observations:
-        env_vec.obs_rms.update(obs)
+
+    if expert_observations.size > 150000:
+        env_vec.obs_rms.update(expert_observations[:150000])
+    else:
+        env_vec.obs_rms.update(expert_observations)
+
+    print("\nApply observation normalization...\n")
 
     # 2.2 Apply normalization to observation vector
-    expert_observations_normalized = np.array(list(map(env_vec.normalize_obs, expert_observations)))
-    expert_dataset = ExpertDataSet(expert_observations_normalized, expert_actions)
+    if normalize_obs:
+        # split array to decrease memory overhead
+        split_size = 4
+        expert_observations = np.split(expert_observations, split_size)
+
+        # apply obs normalization
+        for j in range(split_size):
+            expert_observations[j] = np.clip(
+                (expert_observations[j] - env_vec.obs_rms.mean) / np.sqrt(env_vec.obs_rms.var + env_vec.epsilon),
+                -env_vec.clip_obs, env_vec.clip_obs)
+            print("Applied to " + str((j + 1) * (100.0 / split_size)) + "% of observations!")
+
+        # save normalized obs dataset
+        print("\nSave normalized dataset...\n")
+        expert_dataset_file_new = ''.join(expert_dataset_file.split())[:-4] + "_normalized.npz"
+        save_dataset(expert_dataset_file_new, expert_actions, np.concatenate(expert_observations))
+        expert_dataset = ExpertDataSet(np.concatenate(expert_observations), expert_actions)
+    else:
+        expert_dataset = ExpertDataSet(expert_observations, expert_actions)
 
     print("Done!\n")
 
@@ -168,7 +194,7 @@ def _get_paths(all_in_one_config: str = "all_in_one_default.json") -> dict:
                 dir, 'agents'),
         'map_folder': os.path.join(dir, 'configs', 'all_in_one_hyperparameters', 'map_parameters'),
         'map_parameters': os.path.join(dir, 'configs', 'all_in_one_hyperparameters', 'map_parameters',
-                                       "indoor_obs10.json")
+                                       "map_curriculum_12envs.yaml")
     }
     return paths
 
@@ -177,11 +203,23 @@ def _make_env(paths: dict, rank: int):
     params_path = os.path.join(paths['hyperparams'], 'all_in_one_default.json')
     with open(params_path) as f:
         params = json.load(f)
-
+    paths['map_parameters'] = os.path.join(paths['map_folder'], 'tmp', "map_" + str(rank) + ".json")
     return AllInOneEnv("sim_{}".format(rank + 1), paths['robot_setting'], paths['robot_as'],
                        params['reward_fnc'],
                        goal_radius=params['goal_radius'], paths=paths,
                        max_steps_per_episode=params['train_max_steps_per_episode'], drl_server="tcp://localhost:5555")
+
+
+def unzip_map_parameters(paths: dict, numb_envs: int):
+    if not os.path.exists(os.path.join(paths['map_folder'], 'tmp')):
+        os.makedirs(os.path.join(paths['map_folder'], 'tmp'))
+    with open(paths['map_parameters'], "r") as map_yaml:
+        map_data = yaml.safe_load(map_yaml)
+        for i in range(numb_envs):
+            env_map_data = map_data[i + 1]
+            map_env_path = os.path.join(paths['map_folder'], 'tmp', "map_" + str(i) + ".json")
+            with open(map_env_path, "w") as map_json:
+                json.dump(env_map_data, map_json)
 
 
 class ExpertDataSet(Dataset):
@@ -196,17 +234,24 @@ class ExpertDataSet(Dataset):
         return len(self.observations)
 
 
-def _create_expert_dataset(shared_array_actions, shared_array_obs, iterations: int, rank: int):
+def _create_expert_dataset(shared_array_actions,
+                           shared_array_obs,
+                           paths: dict,
+                           iterations: int,
+                           rank: int,
+                           use_dynamic_scan: bool,
+                           laser_stack_size: int,
+                           scan_size: int,
+                           robot_state_size: int):
     print("Create expert dataset for {} iterations.".format(iterations))
 
     # 1. Create Gym Env
-    paths = _get_paths("all_in_one_pretrain.json")
     env = _make_env(paths, rank)
 
     # 2. Define expert based on fully observable dynamic scan
     def simple_all_in_one(obs):
-        _L = 360  # laser scan size
-        switch_distance = 1.4
+        _L = scan_size  # laser scan size
+        switch_distance = 2.4
         last_laser_scan_dynamic = obs[_L:2 * _L]
         min_dist = np.min(last_laser_scan_dynamic)
         if min_dist <= switch_distance:
@@ -215,17 +260,30 @@ def _create_expert_dataset(shared_array_actions, shared_array_obs, iterations: i
             return 1
 
     # 3. Create expert trajectory
-    expert_observations = np.empty((iterations,) + (env.observation_space.shape[0] - 3 * 360,))
+    if use_dynamic_scan:
+        obs_space_size = 2 * laser_stack_size * scan_size + robot_state_size
+    else:
+        obs_space_size = laser_stack_size * scan_size + robot_state_size
+    expert_observations = np.empty((iterations,) + (obs_space_size,))
     expert_actions = np.empty((iterations,), dtype=np.int)
+    obs = env.reset()
+
+    # do one empty iteration to load everything
+    action = simple_all_in_one(obs)
+    env.step(action)
     obs = env.reset()
 
     for i in tqdm(range(iterations)):
         action = simple_all_in_one(obs)
 
-        # strap dynamic laser scan from observation vector
-        _L = 360  # laser scan size
-        dynamic_scan_indices = list(range(_L, 2 * _L)) + list(range(3 * _L, 4 * _L)) + list(range(5 * _L, 6 * _L))
-        obs = np.delete(obs, dynamic_scan_indices)
+        if not use_dynamic_scan:
+            # strap dynamic laser scan from observation vector
+            _L = scan_size  # laser scan size
+            dynamic_scan_indices = []
+            for j in range(laser_stack_size):
+                dynamic_scan_indices += list(range(_L * (2 * j + 1), _L * (2 * j + 2)))
+
+            obs = np.delete(obs, dynamic_scan_indices)
 
         expert_observations[i] = obs
         expert_actions[i] = action
@@ -250,32 +308,80 @@ def save_dataset(save_path: str, expert_actions: np.ndarray, expert_observations
     return expert_dataset
 
 
+def get_aio_parameters(all_in_one_config_path: str):
+    with open(all_in_one_config_path, 'r') as config_json:
+        all_in_one_config = json.load(config_json)
+    assert all_in_one_config is not None, "All in one parameter file cannot be found!"
+    obs_info = all_in_one_config['observation_space']
+    if obs_info['laser_range'] == 'full':
+        reduced_laser_size = -1
+    else:
+        assert 'size_laser_vector' in obs_info, "Please specify the size_laser_vector parameter in the " \
+                                                "aoi config file or use laser_range=full setting otherwise!"
+        reduced_laser_size = obs_info['size_laser_vector']
+
+    assert 'laser_stack_size' in obs_info, "Please specify the laser_stack_size parameter in the aoi " \
+                                           "config file!"
+
+    laser_stack_size = obs_info['laser_stack_size']
+
+    if 'add_robot_velocity' in obs_info and obs_info['add_robot_velocity']:
+        add_robot_velocity = True
+    else:
+        add_robot_velocity = False
+
+    return reduced_laser_size, laser_stack_size, add_robot_velocity
+
+
 if __name__ == '__main__':
     args = sys.argv
     iterations = int(args[1])
-    name = args[2]
+    save_file_name = args[2]
     num_envs = int(args[3])
+    aio_config = args[4]
+    use_dynamic_scan = args[5].lower() == 'true'
 
     iterations_per_worker = int(iterations / num_envs)
 
+    paths = _get_paths(aio_config)
+    unzip_map_parameters(paths, num_envs)
+
+    # read parameters from aio config file
+    all_in_one_config_path = paths['all_in_one_parameters']
+    reduced_laser_size, laser_stack_size, add_robot_velocity = get_aio_parameters(all_in_one_config_path)
+    if reduced_laser_size < 0:
+        scan_size = 360
+    else:
+        scan_size = reduced_laser_size
+
+    if add_robot_velocity:
+        robot_state_size = 6
+    else:
+        robot_state_size = 4
+
     # create drl server for env
-    paths = _get_paths("all_in_one_pretrain.json")
     server_base_url = "tcp://*:5555"
     client_base_url = "tcp://localhost:5555"
     drl_server = Process(target=setup_and_start_drl_server, args=(server_base_url, paths))
     drl_server.start()
 
     processes = []
-    obs_space_size = 3 * 360 + 6
+
+    if use_dynamic_scan:
+        obs_space_size = 2 * laser_stack_size * scan_size + robot_state_size
+    else:
+        obs_space_size = laser_stack_size * scan_size + robot_state_size
+
     expert_obs = np.empty((num_envs, iterations_per_worker, obs_space_size))
     expert_actions = np.empty((num_envs, iterations_per_worker), dtype=np.int)
 
     for i in range(num_envs):
         manager = Manager()
         shared_array_actions = mp.RawArray('i', iterations_per_worker)
-        shared_array_obs = mp.RawArray('f', iterations_per_worker * (obs_space_size))
+        shared_array_obs = mp.RawArray('f', iterations_per_worker * obs_space_size)
         p = Process(target=_create_expert_dataset,
-                    args=(shared_array_actions, shared_array_obs, iterations_per_worker, i))
+                    args=(shared_array_actions, shared_array_obs, paths, iterations_per_worker, i, use_dynamic_scan,
+                          laser_stack_size, scan_size, robot_state_size))
         p.start()
         processes.append((p, shared_array_actions, shared_array_obs))
 
@@ -284,7 +390,7 @@ if __name__ == '__main__':
         p.join()
         shared_array_actions_np = np.reshape(np.frombuffer(shared_array_actions, dtype=np.uint32), -1)
         shared_array_obs_np = np.reshape(np.frombuffer(shared_array_obs, dtype=np.float32),
-                                         (iterations_per_worker, 360 * 3 + 6))
+                                         (iterations_per_worker, obs_space_size))
         expert_obs[i, :, :] = shared_array_obs_np[:, :]
         expert_actions[i, :] = shared_array_actions_np[:]
 
@@ -295,7 +401,7 @@ if __name__ == '__main__':
     del processes
 
     base_dir = rospkg.RosPack().get_path('arena_local_planner_drl')
-    save_path = os.path.join(base_dir, "agents", "pretrained_aio_agents", name + ".npz")
+    save_path = os.path.join(base_dir, "agents", "pretrained_aio_agents", save_file_name + ".npz")
     save_dataset(save_path, expert_actions.flatten(), expert_obs.reshape(-1, expert_obs.shape[-1]))
 
     print("Dataset saved!")

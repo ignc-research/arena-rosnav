@@ -14,26 +14,30 @@ from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 from tools.all_in_one_utils import Evaluator
 from tools.train_agent_utils import check_hyperparam_format, print_hyperparameters
 
-base_Agent1 = 'mixed_teb_drl4_rule06_policy2'
+base_Agent1 = 'mixed_teb_drl4_rule06_policy2'  # 0.87
 base_Agent2 = 'mixed_teb_drl4_rule07_policy3'
-base_Agent3 = 'teb_drl4_rule07_policy2'
-base_Agent4 = "2xteb_drl4_rule07_policy2"
-base_Agent5 = "teb_drl4_rule07_nn13_16ls"
-base_Agent6 = "teb_drl4_rule07_nn14_16x3ls"
-base_Agent7 = "teb_drl4_rule07_nn15_8x3ls"
-base_Agent8 = "teb_drl4_rule07_nn16_32x3ls"
+base_Agent3 = 'teb_drl4_rule07_policy2'  # 0.86
+base_Agent4 = "2xteb_drl4_rule07_policy2"  # 88
+base_agent_13 = "teb_drl4_rule07_nn13_16+d_mixed_5M_2"  # 0.93
 
-primitive_agents = ['rlca_only', 'teb_only', 'drl_only', 'drl03_only', 'mpc_only', 'dwa_only',
+base_Agent11 = "teb_drl4_rule06_nn7_fx3_10M"  # 86
+base_Agent12 = "tebx2_drl4_rule06_nn7_fx3_10obst_20M"  # 81
+base_agent_14 = "teb_drl4_rule07_nn21_fx3_mixed_5M_2"  # 0.84
+base_agent_15 = "teb_drl4_rule06_nn22_fx3_mixed_5M"  # 0.88
+
+primitive_agents = ['teb_only',  # 0.76
+                    'drl_only',  # 0.82
+                    'drl03_only', 'rlca_only', 'mpc_only', 'dwa_only',
                     'teb_large_min_dist_only', 'teb_dyn_obst_only', 'arena_ros_only', 'eband_only']
 simple_all_in_one_switches = ['simple_all_in_one', 'random']
 
-AGENTS = ['teb_only']
-eval_episodes = 100
+AGENTS = ['drl_only', 'teb_only', 'simple_all_in_one', base_agent_15, base_Agent11, base_agent_13]
+eval_episodes = 200
 #  seed = random.randint(1, 1000)
-seed = 42
+seed = 21
 map_config = "indoor_obs15.json"
 
-evaluation_name = "indoor_15_aio"
+evaluation_name = "indoor_15_full_comp"
 
 
 def get_paths(AGENT: str, primitive_agent=False, is_random_agent=False):
@@ -116,7 +120,7 @@ def random_action_probs(numb_models: int):
 def simple_all_in_one(obs):
     _RS = 4  # robot state size
     _L = 360  # laser scan size
-    switch_distance = 1.2
+    switch_distance = 1.4
     laser_scan_dynamic = obs[_L:2*_L]
     min_dist = np.min(laser_scan_dynamic)
 

@@ -5,6 +5,7 @@ import random
 import sys
 import time
 import warnings
+from copy import copy
 from multiprocessing import Process
 
 import numpy as np
@@ -15,6 +16,7 @@ from scripts.all_in_one_policies import *
 from scripts.training.pretrain_agent import pretrain_agent
 from stable_baselines3 import PPO
 from stable_baselines3.common.callbacks import EvalCallback
+from stable_baselines3.common.evaluation import evaluate_policy
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.utils import set_random_seed
 from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv, VecNormalize
@@ -31,8 +33,8 @@ def make_all_in_one_envs(rank: int, paths: dict, params: dict, train: bool = Tru
             drl_server_url_ind = None
 
         if train:
-            # paths['map_parameters'] = os.path.join(paths['map_folder'], 'tmp', "map_" + str(rank) + ".json")
-            paths['map_parameters'] = os.path.join(paths['map_folder'], "indoor_obs10.json")
+            paths['map_parameters'] = os.path.join(paths['map_folder'], 'tmp', "map_" + str(rank) + ".json")
+            # paths['map_parameters'] = os.path.join(paths['map_folder'], "indoor_obs10.json")
             all_in_one_env = AllInOneEnv(f"sim_{rank + 1}", paths['robot_setting'], paths['robot_as'],
                                          params['reward_fnc'],
                                          goal_radius=params['goal_radius'], paths=paths,
@@ -40,7 +42,7 @@ def make_all_in_one_envs(rank: int, paths: dict, params: dict, train: bool = Tru
                                          drl_server=drl_server_url_ind)
         else:
             paths['map_parameters'] = os.path.join(paths['map_folder'], "indoor_obs10.json")
-            seed = random.randint(1, 1000)
+            seed = random.randint(1, 100000)
             all_in_one_env = Monitor(
                 AllInOneEnv("eval_sim", paths['robot_setting'], paths['robot_as'], params['reward_fnc'],
                             goal_radius=params['goal_radius'],
@@ -53,31 +55,6 @@ def make_all_in_one_envs(rank: int, paths: dict, params: dict, train: bool = Tru
 
     set_random_seed(seed)
     return _init
-
-
-def wait_for_nodes(n_envs: int, timeout: int = 30, nodes_per_ns: int = 3):
-    """
-    Checks for timeout seconds if all nodes to corresponding namespace are online.
-
-    :param n_envs: (int) number of virtual environments
-    :param timeout: (int) seconds to wait for each ns
-    :param nodes_per_ns: (int) usual number of nodes per ns
-    """
-    for i in range(n_envs):
-        for k in range(timeout):
-            ns = rosnode.get_node_names(namespace='sim_' + str(i + 1))
-
-            if len(ns) < nodes_per_ns:
-                warnings.warn(
-                    f"Check if all simulation parts of namespace '{'/sim_' + str(i + 1)}' are running properly")
-                warnings.warn(f"Trying to connect again..")
-            else:
-                break
-
-            assert (k < timeout - 1
-                    ), f"Timeout while trying to connect to nodes of '{'/sim_' + str(i + 1)}'"
-
-            time.sleep(1)
 
 
 def get_paths(agent_version: str, args, all_in_one_config: str = "all_in_one_default.json") -> dict:
@@ -118,7 +95,7 @@ def get_paths(agent_version: str, args, all_in_one_config: str = "all_in_one_def
             os.path.join(
                 dir, 'agents'),
         'map_parameters': os.path.join(dir, 'configs', 'all_in_one_hyperparameters', 'map_parameters',
-                                       "map_curriculum_16envs.yaml"),
+                                       "map_curriculum_12envs.yaml"),
         'map_folder': os.path.join(dir, 'configs', 'all_in_one_hyperparameters', 'map_parameters')
     }
 
@@ -188,7 +165,8 @@ def parse_all_in_one_args():
     group.add_argument('--agent', type=str, default="AGENT_13",
                        choices=['MLP_ARENA2D', 'AGENT_1', 'AGENT_2', 'AGENT_3', 'AGENT_4', 'AGENT_5', 'AGENT_6',
                                 'AGENT_7', 'AGENT_8', 'AGENT_9', 'AGENT_10', 'AGENT_11', 'AGENT_12', 'AGENT_13',
-                                'AGENT_14', 'AGENT_15', 'AGENT_16', 'AGENT_17', 'AGENT_18', 'AGENT_19', 'AGENT_20'],
+                                'AGENT_14', 'AGENT_15', 'AGENT_16', 'AGENT_17', 'AGENT_18', 'AGENT_19', 'AGENT_20',
+                                'AGENT_21', 'AGENT_22'],
                        help='predefined agent to train')
     group.add_argument('--custom-mlp', action='store_true', help='enables training with custom multilayer perceptron')
     parser.add_argument('--config', type=str, metavar='[config name]', default='default',
@@ -204,7 +182,7 @@ def parse_all_in_one_args():
 if __name__ == '__main__':
 
     # make unique agent version description based on @version
-    eval_episodes = 80
+    eval_episodes = 100
 
     args = parse_all_in_one_args()
 
@@ -214,9 +192,6 @@ if __name__ == '__main__':
     paths = get_paths(version, args, all_in_one_config=all_in_one_config)
 
     socket_url_client_array = set_up_drl_server(paths['all_in_one_parameters'])
-
-    # check if simulations are booted
-    # wait_for_nodes(n_envs=args.n_envs, timeout=10)
 
     params = initialize_hyperparameters(paths, None, n_envs=args.n_envs, config_name='all_in_one_default')
 
@@ -236,6 +211,18 @@ if __name__ == '__main__':
         [make_all_in_one_envs(0, params=params, paths=paths, train=False, drl_server_url=socket_url_client_array,
                               num_envs=args.n_envs, eval_episodes=eval_episodes)])
 
+    # Use VecNormalize
+    load_path = os.path.join(paths['model'], 'vec_normalize.pkl')
+    if os.path.isfile(load_path):
+        env = VecNormalize.load(
+            load_path=load_path, venv=env)
+        eval_env = VecNormalize.load(
+            load_path=load_path, venv=eval_env)
+        print("Succesfully loaded VecNormalize object from pickle file..")
+    else:
+        env = VecNormalize(env, training=True, norm_obs=True, norm_reward=False)
+        eval_env = VecNormalize(eval_env, training=True, norm_obs=True, norm_reward=False)
+
     # determine mode
     if args.load and os.path.isfile(os.path.join(paths['model'], "best_model.zip")):
         print("Load model " + args.agent_name + " !")
@@ -245,7 +232,7 @@ if __name__ == '__main__':
         update_hyperparam_model(model, paths, params, args.n_envs)
     elif args.agent is not None:
         if args.agent in ['AGENT_1', 'AGENT_2', 'AGENT_3', 'AGENT_4', 'AGENT_5', 'AGENT_6', 'AGENT_7', 'AGENT_8',
-                          'AGENT_9']:
+                          'AGENT_9', 'AGENT_21', 'AGENT_22']:
             if args.agent == 'AGENT_1':
                 policy_kwargs = policy_kwargs_agent_1
             elif args.agent == 'AGENT_2':
@@ -264,6 +251,10 @@ if __name__ == '__main__':
                 policy_kwargs = policy_kwargs_agent_8
             elif args.agent == 'AGENT_9':
                 policy_kwargs = policy_kwargs_agent_9
+            elif args.agent == 'AGENT_21':
+                policy_kwargs = policy_kwargs_agent_21
+            elif args.agent == 'AGENT_22':
+                policy_kwargs = policy_kwargs_agent_22
             model = PPO(
                 "CnnPolicy", env,
                 policy_kwargs=policy_kwargs,
@@ -299,24 +290,12 @@ if __name__ == '__main__':
                 tensorboard_log=paths['tb'], verbose=1
             )
 
-    # Use VecNormalize
-    load_path = os.path.join(paths['model'], 'vec_normalize.pkl')
-    if os.path.isfile(load_path):
-        env = VecNormalize.load(
-            load_path=load_path, venv=env)
-        eval_env = VecNormalize.load(
-            load_path=load_path, venv=eval_env)
-        print("Succesfully loaded VecNormalize object from pickle file..")
-    else:
-        env = VecNormalize(env, training=True, norm_obs=True, norm_reward=False)
-        eval_env = VecNormalize(eval_env, training=True, norm_obs=True, norm_reward=False)
-
     # pretrain
     base_dir = rospkg.RosPack().get_path('arena_local_planner_drl')
-    save_path = os.path.join(base_dir, "agents", "pretrained_aio_agents", "data_1000000.npz")
-    policy, test_loss, train_loss = pretrain_agent(model.policy, env, save_path, 0.05)
+    save_path = os.path.join(base_dir, "agents", "pretrained_aio_agents", "data_fx3_1000000_normalized.npz")
+    policy, test_loss, train_loss = pretrain_agent(model.policy, env, save_path, 0.05, False)
     model.policy = policy
-    eval_env.obs_rms = env.obs_rms
+    eval_env.obs_rms = copy(env.obs_rms)
 
     # Save pretraining logs
     np.savez(
@@ -325,15 +304,19 @@ if __name__ == '__main__':
         train_loss=train_loss,
     )
 
+    # save pretrained model
+    model.save(os.path.join(paths['model'], 'pretrained_model'))
+    env.save(os.path.join(paths['model'], 'pretrained_vecnorm.pkl'))
+
     eval_cb = EvalCallback(
         eval_env=eval_env, train_env=env,
-        n_eval_episodes=eval_episodes, eval_freq=30000,
+        n_eval_episodes=eval_episodes, eval_freq=35000,
         log_path=paths['eval'], best_model_save_path=paths['model'], deterministic=True)
 
-    print("Start DRL training...")
+    print("\nStart DRL training...\n")
 
     if args.n is None:
-        n_timesteps = 20000000
+        n_timesteps = 5000000
     else:
         n_timesteps = args.n
 

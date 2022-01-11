@@ -70,10 +70,9 @@ class RLCAAgent(ModelBase):
     def _transform_scan_data(self, scan):
         # Note: Taken from rl_collision_avoidance_tb3.py
         scan = copy.deepcopy(scan)
-        sub_array = np.hsplit(scan,
-                              4)  # adapt scan info when min and max angel equal to [-1.57,4.69] (rlca is [-3.14,3.14])
-        scan = np.concatenate((sub_array[3], sub_array[0], sub_array[1], sub_array[
-            2]))  # adapt scan info when min and max angel equal to [-1.57,4.69] (rlca is [-3.14,3.14])
+        sub_array = np.hsplit(scan,4)  # adapt scan info when min and max angel equal to [0, 7.28] (rlca is [-3.14,3.14])
+        scan = np.concatenate((sub_array[2], sub_array[3], sub_array[0], sub_array[
+            1]))  # adapt scan info when min and max angel equal to [-1.57,4.69] (rlca is [-3.14,3.14])
 
         scan[np.isnan(scan)] = 6.0
         scan[np.isinf(scan)] = 6.0
