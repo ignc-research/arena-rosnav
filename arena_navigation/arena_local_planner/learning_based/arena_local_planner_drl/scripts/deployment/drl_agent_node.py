@@ -54,7 +54,6 @@ class DeploymentDRLAgent(BaseDRLAgent):
             rospy.init_node(f"DRL_local_planner", anonymous=True)
 
         self.name = agent_name
-        self.setup_agent()
 
         hyperparameter_path = os.path.join(
             TRAINED_MODELS_DIR, self.name, "hyperparameters.json"
@@ -65,6 +64,7 @@ class DeploymentDRLAgent(BaseDRLAgent):
             hyperparameter_path,
             action_space_path,
         )
+        self.setup_agent()
 
         if self._is_train_mode:
             # step world to fast forward simulation time
@@ -85,15 +85,17 @@ class DeploymentDRLAgent(BaseDRLAgent):
         assert os.path.isfile(
             model_file
         ), f"Compressed model cannot be found at {model_file}!"
-        assert os.path.isfile(
-            vecnorm_file
-        ), f"VecNormalize file cannot be found at {vecnorm_file}!"
 
-        with open(vecnorm_file, "rb") as file_handler:
-            vec_normalize = pickle.load(file_handler)
+        if self._agent_params["normalize"]:
+            assert os.path.isfile(
+                vecnorm_file
+            ), f"VecNormalize file cannot be found at {vecnorm_file}!"
+
+            with open(vecnorm_file, "rb") as file_handler:
+                vec_normalize = pickle.load(file_handler)
+            self._obs_norm_func = vec_normalize.normalize_obs
 
         self._agent = PPO.load(model_file).policy
-        self._obs_norm_func = vec_normalize.normalize_obs
 
     def run(self) -> None:
         """Loop for running the agent until ROS is shutdown.
@@ -153,6 +155,6 @@ def main(agent_name: str) -> None:
 
 
 if __name__ == "__main__":
-    # AGENT_NAME = sys.argv[1]
-    AGENT_NAME = "AGENT_21_2021_12_02__22_55"
+    AGENT_NAME = sys.argv[1]
+    # AGENT_NAME = "AGENT_21_2021_12_02__22_55"
     main(agent_name=AGENT_NAME)

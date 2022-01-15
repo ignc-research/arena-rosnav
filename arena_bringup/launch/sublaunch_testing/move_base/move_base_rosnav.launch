@@ -6,7 +6,7 @@
   <arg name="odom_topic" default="odom" />
   <!-- <arg name="speed" default="0.22"/> -->
 
-  <!-- <arg name="agent_name" default="rule_05"/> -->
+  <arg name="agent_name" default="rule_05"/>
 
   <!-- move_base -->
   <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
@@ -22,9 +22,9 @@
   </include> -->
 
   <!-- spacial_horizon -->
-  <node pkg="arena_spacial_horizon" type="spacial_horizon_node" name="spacial_horizon_node" output="screen">
-    <rosparam file="$(find arena_bringup)/launch/plan_fsm_param.yaml" command="load" /> <!-- ns="fsm"-->
-  </node>
+  <!-- <node pkg="arena_spacial_horizon" type="spacial_horizon_node" name="spacial_horizon_node" output="screen"> -->
+    <!-- <rosparam file="$(find arena_bringup)/launch/plan_fsm_param.yaml" command="load" /> ns="fsm" -->
+  <!-- </node> -->
 
   <!-- scan mapping, because training and real scan calibration may differ
   <include file="$(find arena_bringup)/launch/map_scan.launch">
@@ -35,10 +35,10 @@
 
   <!-- run_agent -->
   <!-- <node name="DRL_local_planner" pkg="arena_local_planner_drl" type="drl_agent_real_node.py" args="$(arg agent_name)" output="screen"/> -->
-  <!-- <node name="DRL_local_planner" pkg="arena_local_planner_drl" type="drl_agent_node.py" args="$(arg agent_name)" output="screen"/> -->
+  <node name="DRL_local_planner" pkg="arena_local_planner_drl" type="drl_agent_node.py" args="$(arg agent_name)" output="screen"/>
 
   <!-- action_publisher -->
   <!-- makes sure that drl actions will be published according to sim time in eval mode-->
-  <!-- <node name="action_publisher" pkg="arena_local_planner_drl" type="action_publisher.py"/> -->
+  <node name="action_publisher" pkg="arena_local_planner_drl" type="action_publisher.py"/>
 
 </launch>
