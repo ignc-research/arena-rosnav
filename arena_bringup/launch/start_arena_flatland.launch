@@ -2,13 +2,15 @@
   <param name="use_sim_time" value="true"/>
 
   <arg name="train_mode" default="false"/>
-  <arg name="model" default="burger"      doc="model type [burger, jackal, ridgeback, agv-ota]"/>
+  <arg name="model" default="burger"      doc="model type [burger, jackal, ridgeback, agvota]"/>
   <!--husy does not yet work-->
   <param name="train_mode" value="$(arg train_mode)" />
   <arg name="use_recorder" default="false"/>
   <arg name="record_only_planner" default="true"/>
 
-  <arg name="local_planner" default="teb"   doc="local-planer type [teb, dwa, mpc, rlca, cadrl, arena]"/>
+  <arg name="local_planner" default="teb"   doc="local-planer type [teb, dwa, mpc, rlca, cadrl, arena, rosnav]"/>
+  <!-- Rosnav agent name -->
+  <arg name="agent_name" default="$(arg model)"     doc = "DRL agent name to be deployed" unless="$(eval arg('local_planner') == 'rosnav')"/>
   <arg name="waypoint_generator" default="classic"/>
   <arg name="rviz_file" default="nav"/>
   <arg name="disable_scenario" default="false"/>
@@ -26,6 +28,7 @@
   
   <param name="local_planner" value="$(arg local_planner)"/>
   <param name="model" value="$(arg model)" />
+  <param name="agent_name" value="$(arg agent_name)" />
   <param name="update_rate" value="$(arg update_rate)" />
   <param name="step_size" value="$(arg step_size)" />
   <param name="show_viz" value="$(arg show_viz)"/>
@@ -47,7 +50,7 @@
 
 
   <!--  PARAMS DON'T CHANGE THEM  -->
-  <param name="robot_action_rate" value="10"/>
+  <param name="robot_action_rate" value="5"/>
   <param name="laser_update_rate" value="10"/>
 
 
@@ -68,8 +71,8 @@
   <arg name='speed' default='2.0' if="$(eval arg('model') == 'jackal')"/>
   <arg name='radius' default='0.625' if="$(eval arg('model') == 'ridgeback')"/>
   <arg name='speed' default='1.1' if="$(eval arg('model') == 'ridgeback')"/>
-  <arg name='radius' default='0.629' if="$(eval arg('model') == 'agv-ota')"/>
-  <arg name='speed' default='0.5' if="$(eval arg('model') == 'agv-ota')"/>
+  <arg name='radius' default='0.629' if="$(eval arg('model') == 'agvota')"/>
+  <arg name='speed' default='0.5' if="$(eval arg('model') == 'agvota')"/>
   <param name="radius" value="$(arg radius)"/>
   <param name="speed" value="$(arg speed)"/>
 
@@ -120,6 +123,7 @@
   <!-- move_base plan manager: which provide basic global planner and cost map -->
   <include file="$(find arena_bringup)/launch/sublaunch_testing/move_base/move_base_$(arg local_planner).launch">
     <arg name="model" value="$(arg model)"/>
+    <arg name="agent_name" value="$(arg agent_name)" if="$(eval arg('local_planner') == 'rosnav')" />
     <!-- <arg name="speed" value="$(arg speed)"/> -->
   </include>
 
@@ -151,9 +155,9 @@
 
 
   <!-- makes sure that drl actions will be published according to sim time in eval mode-->
-  <group if="$(eval arg('train_mode') == false)">
+  <!-- <group if="$(eval arg('train_mode') == false)">
     <node name="action_publisher" pkg="arena_local_planner_drl" type="action_publisher.py"/>
-  </group>
+  </group> -->
 
   <!-- Pedsim -->
   <arg name="simulation_factor" default="1"/>
