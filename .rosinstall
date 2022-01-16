@@ -1,7 +1,7 @@
-# - git:
-#     local-name: ../forks/flatland
-#     uri: https://github.com/ignc-research/flatland
-#     version: dev_multi_lei
+- git:
+    local-name: ../forks/flatland
+    uri: https://github.com/ignc-research/flatland
+    version: dev_multi_lei
 
 #- git:
 #    local-name: ../forks/navigation
@@ -21,7 +21,7 @@
 - git:
     local-name: ../forks/navigation/local_planner/teb
     uri: https://github.com/rst-tu-dortmund/teb_local_planner
-    version: noetic-devel
+    version: melodic-devel
 - git:
     local-name: ../forks/navigation/local_planner/mpc
     uri: https://github.com/rst-tu-dortmund/mpc_local_planner
@@ -33,16 +33,16 @@
 
 - git:
     local-name: ../forks/pedsim_ros
-    uri: https://github.com/Jacenty00/pedsim_ros
+    uri: https://github.com/ignc-research/pedsim_ros
     version: master
 
 - git:
     local-name: ../forks/arena-tools
     uri: https://github.com/Jacenty00/arena-tools
     version: main
-- git:
-    local-name: ../forks/gazebo_ros_2Dmap_plugin
-    uri: https://github.com/Jacenty00/gazebo_ros_2Dmap_plugin
+# - git:
+#     local-name: ../forks/gazebo_ros_2Dmap_plugin
+#     uri: https://github.com/Jacenty00/gazebo_ros_2Dmap_plugin
 - git:
     local-name: ../forks/jackal
     uri: https://github.com/jackal/jackal.git
