@@ -7,6 +7,7 @@
   <param name="train_mode" value="$(arg train_mode)" />
   <arg name="use_recorder" default="false"/>
   <arg name="record_only_planner" default="true"/>
+  <arg name="requestID"       default="user1"/>
 
   <arg name="local_planner" default="teb"   doc="local-planer type [teb, dwa, mpc, rlca, cadrl, arena, rosnav]"/>
   <!-- Rosnav agent name -->
