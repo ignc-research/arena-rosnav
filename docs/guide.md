@@ -94,6 +94,13 @@ plugins=(git zsh-autosuggestions)
 ```
 source $HOME/.zshrc
 ```
+Install Powerlevel10k Theme (optional)
+```
+git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
+```
+- In your zshrc, set ZSH_THEME="powerlevel10k/powerlevel10k" and follow install wizard.
+
+
 
 ## Installation of Arena-Rosnav
 Please install Arena-Rosnav according to the step-by-step instruction in [Installation.md](https://github.com/ignc-research/arena-rosnav/blob/local_planner_subgoalmode/docs/Installation.md).

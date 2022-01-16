@@ -25,7 +25,7 @@ class recorder():
         self.record_only_planner = rospy.get_param("record_only_planner")
         self.scenario = rospy.get_param("scenario_file").replace(".json","").replace("eval/","")
         self.now = time.strftime("%y-%m-%d_%H:%M:%S")
-        self.dir_path = os.path.dirname(os.path.abspath(__file__)) # get path for current file, does not work if os.chdir() was used
+        self.dir_path = "/root/mount/" # get path for current file, does not work if os.chdir() was used
         if self.record_only_planner:
             with open(self.dir_path+"/{0}_{1}_{2}.csv".format(self.local_planner,self.scenario,self.now), "w+", newline = "") as file:
                 writer = csv.writer(file, delimiter = ',')

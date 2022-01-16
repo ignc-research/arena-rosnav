@@ -27,6 +27,10 @@
     uri: https://github.com/rst-tu-dortmund/mpc_local_planner
     version: master
 - git:
+   local-name: ../forks/navigation/local_planner/mpc
+   uri: https://github.com/rst-tu-dortmund/mpc_local_planner
+   version: master
+- git:
     local-name: ../forks/navigation/msgs/ford
     uri: https://bitbucket.org/acl-swarm/ford_msgs/src/master/
     version: master
