@@ -4,12 +4,13 @@ using namespace std;
 
 void PlanManager::init(ros::NodeHandle &nh)
 {
+  std::string ns = nh.getNamespace();
 
   /*  plan param  */
   bool train_mode;
   ros::NodeHandle n;
   // not global param, because we want to set it in the launch file
-  n.param("train_mode", train_mode, false);
+  n.param("/train_mode", train_mode, true);
   mode_ = train_mode ? TRAIN : TEST;
 
   nh.param("/look_ahead_distance", look_ahead_distance_, 1.5);
@@ -180,7 +181,7 @@ void PlanManager::execFSMCallback(const ros::TimerEvent &e)
   {
     if (mode_ == TRAIN)
     {
-      cout<<"EXEC_LOCAL"<<"Train mode"<<endl;
+      // cout<<"EXEC_LOCAL"<<"Train mode"<<endl;
       // start_state_.reset(new RobotState(cur_state_->pose2d, cur_state_->theta, cur_state_->vel2d, cur_state_->w));
       // bool global_plan_success = planner_collector_->generate_global_plan(*start_state_, *end_state_);
       // if(global_plan_success){

@@ -4,12 +4,15 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded:
-        - /Map1
-        - /Sensors1
-        - /obstacles1/dynamic1
-        - /Plan Manager1/subgoal1
+        - /robot1
+        - /robot1/my_robot1
+        - /robot1/Goal Pose1
+        - /Global Plan1/teb1
+        - /Sensors1/LaserScan1
+        - /obstacles1
+        - /obstacles1/dynamic1/301
       Splitter Ratio: 0.4374079406261444
-    Tree Height: 545
+    Tree Height: 787
   - Class: rviz/Selection
     Name: Selection
   - Class: rviz/Tool Properties
@@ -51,14 +54,59 @@ Visualization Manager:
           Frame Timeout: 15
           Frames:
             All Enabled: false
-            base_footprint:
-              Value: true
-            laser_link:
+            eval_sim_odom:
               Value: true
             map:
               Value: true
-            odom:
+            sim_1_base_footprint:
               Value: true
+            sim_1_laser_link:
+              Value: true
+            sim_1_odom:
+              Value: true
+            sim_2_base_footprint:
+              Value: true
+            sim_2_laser_link:
+              Value: true
+            sim_2_odom:
+              Value: true
+            sim_3_base_footprint:
+              Value: true
+            sim_3_laser_link:
+              Value: true
+            sim_3_odom:
+              Value: true
+            sim_4_base_footprint:
+              Value: true
+            sim_4_laser_link:
+              Value: true
+            sim_4_odom:
+              Value: true
+            sim_5_base_footprint:
+              Value: true
+            sim_5_laser_link:
+              Value: true
+            sim_5_odom:
+              Value: true
+            sim_6_base_footprint:
+              Value: true
+            sim_6_laser_link:
+              Value: true
+            sim_6_odom:
+              Value: true
+            sim_7_base_footprint:
+              Value: true
+            sim_7_laser_link:
+              Value: true
+            sim_7_odom:
+              Value: true
+            sim_8_base_footprint:
+              Value: true
+            sim_8_laser_link:
+              Value: true
+            sim_8_odom:
+              Value: true
+          Marker Alpha: 1
           Marker Scale: 1
           Name: TF
           Show Arrows: true
@@ -66,15 +114,45 @@ Visualization Manager:
           Show Names: true
           Tree:
             map:
-              odom:
-                base_footprint:
-                  laser_link:
+              eval_sim_odom:
+                {}
+              sim_1_odom:
+                sim_1_base_footprint:
+                  sim_1_laser_link:
+                    {}
+              sim_2_odom:
+                sim_2_base_footprint:
+                  sim_2_laser_link:
+                    {}
+              sim_3_odom:
+                sim_3_base_footprint:
+                  sim_3_laser_link:
+                    {}
+              sim_4_odom:
+                sim_4_base_footprint:
+                  sim_4_laser_link:
+                    {}
+              sim_5_odom:
+                sim_5_base_footprint:
+                  sim_5_laser_link:
+                    {}
+              sim_6_odom:
+                sim_6_base_footprint:
+                  sim_6_laser_link:
+                    {}
+              sim_7_odom:
+                sim_7_base_footprint:
+                  sim_7_laser_link:
+                    {}
+              sim_8_odom:
+                sim_8_base_footprint:
+                  sim_8_laser_link:
                     {}
           Update Interval: 0
           Value: true
         - Class: rviz/MarkerArray
           Enabled: true
-          Marker Topic: /flatland_server/debug/model/myrobot
+          Marker Topic: /sim_1/flatland_server/debug/model/burger
           Name: my_robot
           Namespaces:
             "": true
@@ -85,16 +163,17 @@ Visualization Manager:
           Axes Radius: 0.10000000149011612
           Class: rviz/Pose
           Color: 0; 255; 0
-          Enabled: false
+          Enabled: true
           Head Length: 0.10000000149011612
           Head Radius: 0.15000000596046448
           Name: Goal Pose
+          Queue Size: 10
           Shaft Length: 0.5
           Shaft Radius: 0.029999999329447746
           Shape: Arrow
-          Topic: /move_base_simple/goal
+          Topic: /sim_1/subgoal
           Unreliable: false
-          Value: false
+          Value: true
       Enabled: true
       Name: robot
     - Class: rviz/Group
@@ -104,7 +183,7 @@ Visualization Manager:
           Marker Topic: /flatland_server/debug/layer/static
           Name: static_layer
           Namespaces:
-            "": true
+            {}
           Queue Size: 100
           Value: true
         - Alpha: 0.699999988079071
@@ -178,6 +257,7 @@ Visualization Manager:
             Z: 0
           Pose Color: 255; 0; 0
           Pose Style: None
+          Queue Size: 10
           Radius: 0.029999999329447746
           Shaft Diameter: 0.10000000149011612
           Shaft Length: 0.10000000149011612
@@ -201,6 +281,7 @@ Visualization Manager:
             Z: 0
           Pose Color: 255; 85; 255
           Pose Style: None
+          Queue Size: 10
           Radius: 0.029999999329447746
           Shaft Diameter: 0.10000000149011612
           Shaft Length: 0.10000000149011612
@@ -224,6 +305,7 @@ Visualization Manager:
             Z: 0
           Pose Color: 255; 85; 255
           Pose Style: None
+          Queue Size: 10
           Radius: 0.029999999329447746
           Shaft Diameter: 0.10000000149011612
           Shaft Length: 0.10000000149011612
@@ -251,17 +333,18 @@ Visualization Manager:
             Z: 0
           Pose Color: 255; 0; 0
           Pose Style: None
+          Queue Size: 10
           Radius: 0.029999999329447746
           Shaft Diameter: 0.10000000149011612
           Shaft Length: 0.10000000149011612
-          Topic: /move_base/TebLocalPlannerROS/global_plan
+          Topic: /eval_sim/globalPlan
           Unreliable: false
           Value: true
         - Alpha: 1
           Buffer Length: 1
           Class: rviz/Path
           Color: 0; 170; 0
-          Enabled: true
+          Enabled: false
           Head Diameter: 0.30000001192092896
           Head Length: 0.20000000298023224
           Length: 0.30000001192092896
@@ -274,12 +357,13 @@ Visualization Manager:
             Z: 0
           Pose Color: 255; 85; 255
           Pose Style: None
+          Queue Size: 10
           Radius: 0.029999999329447746
           Shaft Diameter: 0.10000000149011612
           Shaft Length: 0.10000000149011612
           Topic: /move_base/MpcLocalPlannerROS/global_plan
           Unreliable: false
-          Value: true
+          Value: false
         - Alpha: 1
           Buffer Length: 1
           Class: rviz/Path
@@ -297,6 +381,7 @@ Visualization Manager:
             Z: 0
           Pose Color: 255; 85; 255
           Pose Style: None
+          Queue Size: 10
           Radius: 0.029999999329447746
           Shaft Diameter: 0.10000000149011612
           Shaft Length: 0.10000000149011612
@@ -322,9 +407,7 @@ Visualization Manager:
           Enabled: true
           Invert Rainbow: false
           Max Color: 255; 255; 255
-          Max Intensity: 4096
           Min Color: 0; 0; 0
-          Min Intensity: 0
           Name: LaserScan
           Position Transformer: XYZ
           Queue Size: 10
@@ -332,7 +415,7 @@ Visualization Manager:
           Size (Pixels): 8
           Size (m): 0.009999999776482582
           Style: Points
-          Topic: /scan
+          Topic: /sim_1/scan
           Unreliable: false
           Use Fixed Frame: true
           Use rainbow: true
@@ -557,42 +640,42 @@ Visualization Manager:
           Displays:
             - Class: rviz/MarkerArray
               Enabled: true
-              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_00
+              Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_00
               Name: 0
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
-              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_01
+              Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_01
               Name: 1
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
-              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_02
+              Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_02
               Name: 2
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
-              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_03
+              Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_03
               Name: 3
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
-              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_04
+              Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_04
               Name: 4
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -605,23 +688,23 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
-              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_06
+              Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_06
               Name: 6
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
-              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_07
+              Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_07
               Name: 7
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
-              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_08
+              Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_08
               Name: 8
               Namespaces:
                 {}
@@ -629,7 +712,7 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
-              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_09
+              Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_09
               Name: 9
               Namespaces:
                 {}
@@ -637,7 +720,7 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
-              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_10
+              Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_10
               Name: 10
               Namespaces:
                 {}
@@ -645,7 +728,7 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
-              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_11
+              Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_11
               Name: 11
               Namespaces:
                 {}
@@ -653,7 +736,7 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
-              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_12
+              Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_13
               Name: 12
               Namespaces:
                 {}
@@ -661,7 +744,7 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
-              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_13
+              Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_13
               Name: 13
               Namespaces:
                 {}
@@ -669,7 +752,7 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
-              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_15
+              Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_15
               Name: 14
               Namespaces:
                 {}
@@ -677,7 +760,7 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
-              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_05
+              Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_14
               Name: 15
               Namespaces:
                 {}
@@ -685,7 +768,7 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
-              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_16
+              Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_16
               Name: 16
               Namespaces:
                 {}
@@ -693,7 +776,7 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
-              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_17
+              Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_17
               Name: 17
               Namespaces:
                 {}
@@ -701,7 +784,7 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
-              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_18
+              Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_18
               Name: 18
               Namespaces:
                 {}
@@ -709,7 +792,7 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
-              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_19
+              Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_19
               Name: 19
               Namespaces:
                 {}
@@ -717,7 +800,7 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
-              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_20
+              Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_20
               Name: 20
               Namespaces:
                 {}
@@ -725,7 +808,7 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
-              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_21
+              Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_21
               Name: 21
               Namespaces:
                 {}
@@ -733,7 +816,7 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
-              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_22
+              Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_22
               Name: 22
               Namespaces:
                 {}
@@ -741,7 +824,7 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
-              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_23
+              Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_23
               Name: 23
               Namespaces:
                 {}
@@ -749,7 +832,7 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
-              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_24
+              Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_24
               Name: 24
               Namespaces:
                 {}
@@ -757,7 +840,7 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
-              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_25
+              Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_25
               Name: 25
               Namespaces:
                 {}
@@ -765,7 +848,7 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
-              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_26
+              Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_26
               Name: 26
               Namespaces:
                 {}
@@ -773,7 +856,7 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
-              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_27
+              Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_27
               Name: 27
               Namespaces:
                 {}
@@ -781,7 +864,7 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
-              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_28
+              Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_28
               Name: 28
               Namespaces:
                 {}
@@ -789,7 +872,7 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
-              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_29
+              Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_29
               Name: 29
               Namespaces:
                 {}
@@ -797,7 +880,7 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
-              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_30
+              Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_30
               Name: 30
               Namespaces:
                 {}
@@ -918,10 +1001,11 @@ Visualization Manager:
             Z: 0
           Pose Color: 255; 85; 255
           Pose Style: None
+          Queue Size: 10
           Radius: 0.029999999329447746
           Shaft Diameter: 0.10000000149011612
           Shaft Length: 0.10000000149011612
-          Topic: /vis_global_path
+          Topic: /sim_1/globalPlan
           Unreliable: false
           Value: true
         - Alpha: 1
@@ -941,6 +1025,7 @@ Visualization Manager:
             Z: 0
           Pose Color: 255; 85; 255
           Pose Style: None
+          Queue Size: 10
           Radius: 0.029999999329447746
           Shaft Diameter: 0.10000000149011612
           Shaft Length: 0.10000000149011612
@@ -948,21 +1033,21 @@ Visualization Manager:
           Unreliable: false
           Value: true
         - Class: rviz/Marker
-          Enabled: true
+          Enabled: false
           Marker Topic: /vis_goal
           Name: goal
           Namespaces:
             {}
           Queue Size: 100
-          Value: true
+          Value: false
         - Class: rviz/Marker
-          Enabled: true
+          Enabled: false
           Marker Topic: /planning_vis/subgoal
           Name: subgoal
           Namespaces:
             {}
           Queue Size: 100
-          Value: true
+          Value: false
         - Class: rviz/Marker
           Enabled: true
           Marker Topic: /vis_landmarks_
@@ -994,9 +1079,7 @@ Visualization Manager:
           Enabled: false
           Invert Rainbow: false
           Max Color: 255; 255; 255
-          Max Intensity: 4096
           Min Color: 0; 0; 0
-          Min Intensity: 0
           Name: occmap_local_only
           Position Transformer: XYZ
           Queue Size: 10
@@ -1024,9 +1107,7 @@ Visualization Manager:
           Enabled: false
           Invert Rainbow: false
           Max Color: 255; 255; 255
-          Max Intensity: 4096
           Min Color: 0; 0; 0
-          Min Intensity: 0
           Name: occmap_dynamic_only
           Position Transformer: XYZ
           Queue Size: 10
@@ -1054,9 +1135,7 @@ Visualization Manager:
           Enabled: false
           Invert Rainbow: false
           Max Color: 255; 255; 255
-          Max Intensity: 4096
           Min Color: 0; 0; 0
-          Min Intensity: 0
           Name: occmap_static_only
           Position Transformer: XYZ
           Queue Size: 10
@@ -1084,9 +1163,7 @@ Visualization Manager:
           Enabled: false
           Invert Rainbow: false
           Max Color: 255; 255; 255
-          Max Intensity: 0.7902179956436157
           Min Color: 0; 0; 0
-          Min Intensity: 0
           Name: esdfmap_local_fused
           Position Transformer: XYZ
           Queue Size: 10
@@ -1114,9 +1191,7 @@ Visualization Manager:
           Enabled: false
           Invert Rainbow: false
           Max Color: 255; 255; 255
-          Max Intensity: 1
           Min Color: 0; 0; 0
-          Min Intensity: 0
           Name: esdfmap_static_only
           Position Transformer: XYZ
           Queue Size: 10
@@ -1140,6 +1215,7 @@ Visualization Manager:
       Head Length: 0.30000001192092896
       Head Radius: 0.10000000149011612
       Name: Goal Pose
+      Queue Size: 10
       Shaft Length: 1
       Shaft Radius: 0.05000000074505806
       Shape: Axes
@@ -1147,21 +1223,21 @@ Visualization Manager:
       Unreliable: false
       Value: false
     - Class: rviz/Marker
-      Enabled: true
+      Enabled: false
       Marker Topic: /time_space/vis_visted_samples
       Name: samples
       Namespaces:
         {}
       Queue Size: 1
-      Value: true
+      Value: false
     - Class: rviz/Marker
-      Enabled: true
+      Enabled: false
       Marker Topic: /planning_vis/goal
       Name: Marker
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
-      Value: true
+      Value: false
     - Alpha: 1
       Buffer Length: 1
       Class: rviz/Path
@@ -1179,10 +1255,11 @@ Visualization Manager:
         Z: 0
       Pose Color: 255; 85; 255
       Pose Style: None
+      Queue Size: 10
       Radius: 0.029999999329447746
       Shaft Diameter: 0.10000000149011612
       Shaft Length: 0.10000000149011612
-      Topic: /globalPlan
+      Topic: /sim_1/globalPlan
       Unreliable: false
       Value: true
     - Class: rviz/Marker
@@ -1202,6 +1279,7 @@ Visualization Manager:
       Head Length: 0.30000001192092896
       Head Radius: 0.10000000149011612
       Name: Pose
+      Queue Size: 10
       Shaft Length: 1
       Shaft Radius: 0.05000000074505806
       Shape: Arrow
@@ -1248,19 +1326,18 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 24.489818572998047
+      Scale: 68.62535095214844
       Target Frame: <Fixed Frame>
-      Value: TopDownOrtho (rviz)
-      X: 11.036187171936035
-      Y: 7.0563249588012695
+      X: 3.297379970550537
+      Y: 2.1553478240966797
     Saved: ~
 Window Geometry:
   Displays:
     collapsed: false
-  Height: 774
+  Height: 1016
   Hide Left Dock: false
   Hide Right Dock: false
-  QMainWindow State: 000000ff00000000fd000000040000000000000156000002acfc0200000005fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f00700065007200740069006500730200000f19000004b000000198000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000003d000002ac000000c900ffffff000000010000010f00000270fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000002800000270000000a400fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004a00000003efc0100000002fb0000000800540069006d00650000000000000004a0000002eb00fffffffb0000000800540069006d006501000000000000045000000000000000000000039b000002ac00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd0000000400000000000002120000039efc0200000005fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000003be0000025d00000198000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000003d0000039e000000c900ffffff000000010000010f00000270fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000002800000270000000a400fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004a00000003efc0100000002fb0000000800540069006d00650000000000000004a0000004f300fffffffb0000000800540069006d00650100000000000004500000000000000000000005680000039e00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Time:
@@ -1269,6 +1346,6 @@ Window Geometry:
     collapsed: false
   Views:
     collapsed: false
-  Width: 1271
-  X: 3865
-  Y: 1227
+  Width: 1920
+  X: 1920
+  Y: 27

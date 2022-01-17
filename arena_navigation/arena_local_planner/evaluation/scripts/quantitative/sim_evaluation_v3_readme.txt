@@ -71,16 +71,16 @@ python sim_evaluation_v2.py [path] --metrics time success path collision --quant
 python sim_evaluation_v2.py [path] --metrics time success path collision --quantity vel --byplanner --withclassic --allplot_quantity vel
 
 example:
-python sim_evaluation_v2.py $HOME/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/run_3 --metrics time success path collision --quantity obs
-python sim_evaluation_v2.py $HOME/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/run_3 --metrics time success path collision --quantity vel
-python sim_evaluation_v2.py $HOME/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/run_3 --metrics time success path collision --quantity obs --withclassic
-python sim_evaluation_v2.py $HOME/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/run_3 --metrics time success path collision --quantity obs --withclassic
-python sim_evaluation_v2.py $HOME/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/run_3 --metrics time success path collision --quantity obs --byplanner
-python sim_evaluation_v2.py $HOME/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/run_3 --metrics time success path collision --quantity vel --byplanner
-python sim_evaluation_v2.py $HOME/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/run_3 --metrics time success path collision --quantity obs --byplanner --withclassic
-python sim_evaluation_v2.py $HOME/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/run_3 --metrics time success path collision --quantity vel --byplanner --withclassic
-python sim_evaluation_v2.py $HOME/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/run_3 --metrics time success path collision --quantity vel --byplanner --withclassic --allplot_quantity obs
-python sim_evaluation_v2.py $HOME/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/run_3 --metrics time success path collision --quantity vel --byplanner --withclassic --allplot_quantity vel
+python sim_evaluation_v2.py $HOME/arena_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/run_3 --metrics time success path collision --quantity obs
+python sim_evaluation_v2.py $HOME/arena_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/run_3 --metrics time success path collision --quantity vel
+python sim_evaluation_v2.py $HOME/arena_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/run_3 --metrics time success path collision --quantity obs --withclassic
+python sim_evaluation_v2.py $HOME/arena_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/run_3 --metrics time success path collision --quantity obs --withclassic
+python sim_evaluation_v2.py $HOME/arena_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/run_3 --metrics time success path collision --quantity obs --byplanner
+python sim_evaluation_v2.py $HOME/arena_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/run_3 --metrics time success path collision --quantity vel --byplanner
+python sim_evaluation_v2.py $HOME/arena_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/run_3 --metrics time success path collision --quantity obs --byplanner --withclassic
+python sim_evaluation_v2.py $HOME/arena_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/run_3 --metrics time success path collision --quantity vel --byplanner --withclassic
+python sim_evaluation_v2.py $HOME/arena_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/run_3 --metrics time success path collision --quantity vel --byplanner --withclassic --allplot_quantity obs
+python sim_evaluation_v2.py $HOME/arena_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/run_3 --metrics time success path collision --quantity vel --byplanner --withclassic --allplot_quantity vel
 
 
 Colors for planners:

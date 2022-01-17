@@ -53,7 +53,7 @@ For more shortcuts, see https://tmuxcheatsheet.com/
 The first terminal (the simulation session, if using Screen) is needed to run arena.
 Run these four commands:
 ```                     
-source $HOME/catkin_ws/devel/setup.zsh    
+source $HOME/arena_ws/devel/setup.zsh    
 workon rosnav
 roslaunch arena_bringup start_training.launch train_mode:=true use_viz:=false task_mode:=random map_file:=map_small num_envs:=24
 ```
@@ -62,7 +62,7 @@ roslaunch arena_bringup start_training.launch train_mode:=true use_viz:=false ta
 A second terminal (the training session if using Screen) is needed to run the training script.
 Run these four commands:
 ```                 
-source $HOME/catkin_ws/devel/setup.zsh   
+source $HOME/arena_ws/devel/setup.zsh   
 workon rosnav
 roscd arena_local_planner_drl
 ```

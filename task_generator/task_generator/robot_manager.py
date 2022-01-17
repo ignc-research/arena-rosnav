@@ -6,7 +6,12 @@ import threading
 from typing import Union
 import rospy
 import tf
-from flatland_msgs.srv import MoveModel, MoveModelRequest, SpawnModelRequest, SpawnModel
+from flatland_msgs.srv import (
+    MoveModel,
+    MoveModelRequest,
+    SpawnModelRequest,
+    SpawnModel,
+)
 from flatland_msgs.srv import StepWorld
 from geometry_msgs.msg import Pose2D, PoseWithCovarianceStamped, PoseStamped
 
@@ -21,7 +26,9 @@ class RobotManager:
     is managed
     """
 
-    def __init__(self, ns: str, map_: OccupancyGrid, robot_yaml_path: str, timeout=20):
+    def __init__(
+        self, ns: str, map_: OccupancyGrid, robot_yaml_path: str, timeout=20
+    ):
         """[summary]
 
         Args:
@@ -31,29 +38,33 @@ class RobotManager:
 
         """
         self.ns = ns
-        self.ns_prefix = "" if ns == "" else "/"+ns+"/"
+        self.ns_prefix = "" if ns == "" else "/" + ns + "/"
 
         self.is_training_mode = rospy.get_param("/train_mode")
         self.step_size = rospy.get_param("step_size")
         self._get_robot_configration(robot_yaml_path)
         # setup proxy to handle  services provided by flatland
-        rospy.wait_for_service(f'{self.ns_prefix}move_model', timeout=timeout)
-        rospy.wait_for_service(f'{self.ns_prefix}spawn_model', timeout=timeout)
-        #rospy.wait_for_service('step_world', timeout=20)
+        rospy.wait_for_service(f"{self.ns_prefix}move_model", timeout=timeout)
+        rospy.wait_for_service(f"{self.ns_prefix}spawn_model", timeout=timeout)
+        # rospy.wait_for_service('step_world', timeout=20)
         self._srv_move_model = rospy.ServiceProxy(
-            f'{self.ns_prefix}move_model', MoveModel)
+            f"{self.ns_prefix}move_model", MoveModel
+        )
         self._srv_spawn_model = rospy.ServiceProxy(
-            f'{self.ns_prefix}spawn_model', SpawnModel)
+            f"{self.ns_prefix}spawn_model", SpawnModel
+        )
         # it's only needed in training mode to send the clock signal.
         self._step_world = rospy.ServiceProxy(
-            f'{self.ns_prefix}step_world', StepWorld)
+            f"{self.ns_prefix}step_world", StepWorld
+        )
 
         # publisher
         # publish the start position of the robot
         # self._initialpose_pub = rospy.Publisher(
         #     'initialpose', PoseWithCovarianceStamped, queue_size=1)
         self._goal_pub = rospy.Publisher(
-            f'{self.ns_prefix}goal', PoseStamped, queue_size=1, latch=True)
+            f"{self.ns_prefix}goal", PoseStamped, queue_size=1, latch=True
+        )
 
         self.update_map(map_)
         self._spawn_robot(robot_yaml_path)
@@ -69,13 +80,15 @@ class RobotManager:
         self._static_obstacle_name_list = []
 
         # Incl. for direct goal publishing in test mode
-        self.pub_mvb_goal = rospy.Publisher("/move_base_simple/goal", PoseStamped, queue_size=1, latch=True)
-        self.planner = rospy.get_param("/local_planner")
+        self.pub_mvb_goal = rospy.Publisher(
+            "/move_base_simple/goal", PoseStamped, queue_size=1, latch=True
+        )
+        self.planer = rospy.get_param("local_planner")
 
     def _spawn_robot(self, robot_yaml_path: str):
         request = SpawnModelRequest()
         request.yaml_path = robot_yaml_path
-        request.name = "myrobot"
+        request.name = os.path.basename(robot_yaml_path).split(".")[0]
         request.ns = self.ns
         self._srv_spawn_model(request)
 
@@ -85,21 +98,15 @@ class RobotManager:
         Args:
             robot_yaml_path ([type]): [description]
         """
-        self.ROBOT_NAME = os.path.basename(robot_yaml_path).split('.')[0]
-        with open(robot_yaml_path, 'r') as f:
+        self.ROBOT_NAME = os.path.basename(robot_yaml_path).split(".")[0]
+        self.ROBOT_RADIUS = rospy.get_param("radius")
+        with open(robot_yaml_path, "r") as f:
             robot_data = yaml.safe_load(f)
-            # get robot radius
-            for body in robot_data['bodies']:
-                if body['name'] == "base_footprint":
-                    for footprint in body['footprints']:
-                        if footprint['type'] == 'circle':
-                            self.ROBOT_RADIUS = footprint.setdefault(
-                                'radius', 0.2)
+
             # get laser_update_rate
-            for plugin in robot_data['plugins']:
-                if plugin['type'] == 'Laser':
-                    self.LASER_UPDATE_RATE = plugin.setdefault(
-                        'update_rate', 1)
+            for plugin in robot_data["plugins"]:
+                if plugin["type"] == "Laser":
+                    self.LASER_UPDATE_RATE = plugin.setdefault("update_rate", 1)
 
     def update_map(self, new_map: OccupancyGrid):
         self.map = new_map
@@ -127,17 +134,24 @@ class RobotManager:
             # assert self.step_size * \
             #     self.LASER_UPDATE_RATE == 1, f"TO run the traning successfully, make sure the laser_update_rate*step_size == 1 \
             #     \n\tcurrent step_size:\t {self.step_size}\n\tcurrent laser's update rate:\t {self.LASER_UPDATE_RATE} "
-            for _ in range(math.ceil(1/(self.step_size*self.LASER_UPDATE_RATE))):
+            for _ in range(
+                math.ceil(1 / (self.step_size * self.LASER_UPDATE_RATE))
+            ):
                 self._step_world()
 
     def set_start_pos_random(self):
         start_pos = Pose2D()
         start_pos.x, start_pos, start_pos.theta = get_random_pos_on_map(
-            self._free_space_indices, self.map, self.ROBOT_RADIUS)
+            self._free_space_indices, self.map, self.ROBOT_RADIUS
+        )
         self.move_robot(start_pos)
 
-    def set_start_pos_goal_pos(self, start_pos: Union[Pose2D, None]
-                               = None, goal_pos: Union[Pose2D, None] = None, min_dist=1):
+    def set_start_pos_goal_pos(
+        self,
+        start_pos: Union[Pose2D, None] = None,
+        goal_pos: Union[Pose2D, None] = None,
+        min_dist=1,
+    ):
         """set up start position and the goal postion. Path validation checking will be conducted. If it failed, an
         exception will be raised.
 
@@ -150,7 +164,7 @@ class RobotManager:
         """
 
         def dist(x1, y1, x2, y2):
-            return math.sqrt((x1 - x2)**2 + (y1 - y2)**2)
+            return math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
 
         if start_pos is None or goal_pos is None:
             # if any of them need to be random generated, we set a higher threshold,otherwise only try once
@@ -165,18 +179,31 @@ class RobotManager:
 
             if start_pos is None:
                 start_pos_ = Pose2D()
-                start_pos_.x, start_pos_.y, start_pos_.theta = get_random_pos_on_map(
-                    self._free_space_indices, self.map, self.ROBOT_RADIUS * 2)
+                (
+                    start_pos_.x,
+                    start_pos_.y,
+                    start_pos_.theta,
+                ) = get_random_pos_on_map(
+                    self._free_space_indices, self.map, self.ROBOT_RADIUS * 2
+                )
             else:
                 start_pos_ = start_pos
             if goal_pos is None:
                 goal_pos_ = Pose2D()
-                goal_pos_.x, goal_pos_.y, goal_pos_.theta = get_random_pos_on_map(
-                    self._free_space_indices, self.map, self.ROBOT_RADIUS * 2)
+                (
+                    goal_pos_.x,
+                    goal_pos_.y,
+                    goal_pos_.theta,
+                ) = get_random_pos_on_map(
+                    self._free_space_indices, self.map, self.ROBOT_RADIUS * 2
+                )
             else:
                 goal_pos_ = goal_pos
 
-            if dist(start_pos_.x, start_pos_.y, goal_pos_.x, goal_pos_.y) < min_dist:
+            if (
+                dist(start_pos_.x, start_pos_.y, goal_pos_.x, goal_pos_.y)
+                < min_dist
+            ):
                 i_try += 1
                 continue
             # move the robot to the start pos
@@ -190,12 +217,13 @@ class RobotManager:
         if i_try == max_try_times:
             # TODO Define specific type of Exception
             raise rospy.ServiceException(
-                "can not generate a path with the given start position and the goal position of the robot")
+                "can not generate a path with the given start position and the goal position of the robot"
+            )
         else:
             return start_pos_, goal_pos_
 
     def _validate_path(self):
-        """ after publish the goal, the global planner should publish path. If it's not published within 0.1s, an exception will
+        """after publish the goal, the global planner should publish path. If it's not published within 0.1s, an exception will
         be raised.
 
         Raises:
@@ -204,10 +232,12 @@ class RobotManager:
 
         with self._global_path_con:
             self._global_path_con.wait_for(
-                predicate=self._new_global_path_generated, timeout=0.1)
+                predicate=self._new_global_path_generated, timeout=0.1
+            )
             if not self._new_global_path_generated:
                 raise rospy.ServiceException(
-                    "can not generate a path with the given start position and the goal position of the robot")
+                    "can not generate a path with the given start position and the goal position of the robot"
+                )
             else:
                 self._new_global_path_generated = False  # reset it
 
@@ -231,13 +261,16 @@ class RobotManager:
         goal.pose.orientation.z = quaternion[3]
         self._goal_pub.publish(goal)
         # self._validate_path()
-        if self.planner in ["teb", "dwa", "mpc"]:
+        if self.planer in ["teb", "dwa", "mpc"]:
             self.pub_mvb_goal.publish(goal)
 
     def _global_path_callback(self, global_path: Path):
         with self._global_path_con:
             self._global_path = global_path
-            if self._old_global_path_timestamp is None or global_path.header.stamp > self._old_global_path_timestamp:
+            if (
+                self._old_global_path_timestamp is None
+                or global_path.header.stamp > self._old_global_path_timestamp
+            ):
                 self._new_global_path_generated = True
             self._global_path_con.notify()
 

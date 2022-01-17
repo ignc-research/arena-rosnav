@@ -114,24 +114,24 @@ workon rosnav
 ```
 - Update git repository
 ```
-cd $HOME/catkin_ws/src/arena-rosnav
+cd $HOME/arena_ws/src/arena-rosnav
 git pull
 ```
 - Update ROS workspace
 ```
-cd $HOME/catkin_ws/src/arena-rosnav
+cd $HOME/arena_ws/src/arena-rosnav
 rosws update
 ```
 - Build your workspace
 ```
-cd $HOME/catkin_ws
+cd $HOME/arena_ws
 catkin_make -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=/usr/bin/python3
 ```
 
 Another source of error could be your ```PYTHONPATH```. Please check it with ```echo $PYTHONPATH```. The output should look like this:
 ```
-/home/user/catkin_ws/devel/lib/python3/dist-packages:
-/home/user/catkin_ws/src/arena-rosnav:
+/home/user/arena_ws/devel/lib/python3/dist-packages:
+/home/user/arena_ws/src/arena-rosnav:
 /home/user/geometry2_ws/devel/lib/python3/dist-packages:
 /opt/ros/melodic/lib/python2.7/dist-packages
 ```
@@ -176,15 +176,15 @@ TypeError: __init__() got an unexpected keyword argument 'treshhold_type'
 ```
 This error can be resolved by updating your stable baselines and your workspace. Therefore run the following commands:
 ```
-cd $HOME/catkin_ws/src/forks/stable-baselines3
+cd $HOME/arena_ws/src/forks/stable-baselines3
 pip install -e.
 ```
 ```
-cd $HOME/catkin_ws/src/arena-rosnav
+cd $HOME/arena_ws/src/arena-rosnav
 rosws update
 ```
 ```
-cd $HOME/catkin_ws
+cd $HOME/arena_ws
 catkin_make -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=/usr/bin/python3
 ```
 

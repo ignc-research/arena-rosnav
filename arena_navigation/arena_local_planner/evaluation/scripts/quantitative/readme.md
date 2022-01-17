@@ -99,16 +99,16 @@ python sim_evaluation_v2.py [path] --metrics time success path collision --quant
 ``` 
 - example:
 ```
-python sim_evaluation_v2.py $HOME/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/run_3 --metrics time success path collision --quantity obs
-python sim_evaluation_v2.py $HOME/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/run_3 --metrics time success path collision --quantity vel
-python sim_evaluation_v2.py $HOME/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/run_3 --metrics time success path collision --quantity obs --withclassic
-python sim_evaluation_v2.py $HOME/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/run_3 --metrics time success path collision --quantity obs --withclassic
-python sim_evaluation_v2.py $HOME/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/run_3 --metrics time success path collision --quantity obs --byplanner
-python sim_evaluation_v2.py $HOME/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/run_3 --metrics time success path collision --quantity vel --byplanner
-python sim_evaluation_v2.py $HOME/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/run_3 --metrics time success path collision --quantity obs --byplanner --withclassic
-python sim_evaluation_v2.py $HOME/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/run_3 --metrics time success path collision --quantity vel --byplanner --withclassic
-python sim_evaluation_v2.py $HOME/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/run_3 --metrics time success path collision --quantity vel --byplanner --withclassic --allplot_quantity obs
-python sim_evaluation_v2.py $HOME/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/run_3 --metrics time success path collision --quantity vel --byplanner --withclassic --allplot_quantity vel
+python sim_evaluation_v2.py $HOME/arena_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/run_3 --metrics time success path collision --quantity obs
+python sim_evaluation_v2.py $HOME/arena_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/run_3 --metrics time success path collision --quantity vel
+python sim_evaluation_v2.py $HOME/arena_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/run_3 --metrics time success path collision --quantity obs --withclassic
+python sim_evaluation_v2.py $HOME/arena_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/run_3 --metrics time success path collision --quantity obs --withclassic
+python sim_evaluation_v2.py $HOME/arena_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/run_3 --metrics time success path collision --quantity obs --byplanner
+python sim_evaluation_v2.py $HOME/arena_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/run_3 --metrics time success path collision --quantity vel --byplanner
+python sim_evaluation_v2.py $HOME/arena_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/run_3 --metrics time success path collision --quantity obs --byplanner --withclassic
+python sim_evaluation_v2.py $HOME/arena_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/run_3 --metrics time success path collision --quantity vel --byplanner --withclassic
+python sim_evaluation_v2.py $HOME/arena_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/run_3 --metrics time success path collision --quantity vel --byplanner --withclassic --allplot_quantity obs
+python sim_evaluation_v2.py $HOME/arena_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/run_3 --metrics time success path collision --quantity vel --byplanner --withclassic --allplot_quantity vel
 ```
 # Color convention for plots
 
@@ -129,9 +129,9 @@ The following error is caused by having multiple json with the same simulation s
 
 ```
 Traceback (most recent call last):
-  File "/home/ducanor/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/sim_evaluation_v3.py", line 606, in <module>
+  File "/home/ducanor/arena_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/sim_evaluation_v3.py", line 606, in <module>
     plot_metrics(data,labels,colors,wpgen,planner,maps,param_list,quantity,metrics,legendsoff,show,classic,withclassic,byplanner,nosubtitle)
-  File "/home/ducanor/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/sim_evaluation_v3.py", line 325, in plot_metrics
+  File "/home/ducanor/arena_ws/src/arena-rosnav/arena_navigation/arena_local_planner/evaluation/scripts/quantitative/sim_evaluation_v3.py", line 325, in plot_metrics
     ax.bar(r[plan], oq_data[metric], width=barwidth, label=labels[plan],  color=colors[plan], alpha=1-a/l)
   File "/home/ducanor/python_env/rosnav/lib/python3.6/site-packages/matplotlib/__init__.py", line 1565, in inner
     return func(ax, *map(sanitize_sequence, args), **kwargs)

@@ -15,14 +15,14 @@ from geometry_msgs.msg import Twist
 from rl_agent.utils.observation_collector import ObservationCollector
 from rl_agent.utils.reward import RewardCalculator
 
-
+robot_model = rospy.get_param("model")
 ROOT_ROBOT_PATH = os.path.join(
     rospkg.RosPack().get_path("simulator_setup"), "robot"
 )
 DEFAULT_ACTION_SPACE = os.path.join(
     rospkg.RosPack().get_path("arena_local_planner_drl"),
     "configs",
-    "default_settings.yaml",
+    f"default_settings_{robot_model}.yaml",
 )
 DEFAULT_HYPERPARAMETER = os.path.join(
     rospkg.RosPack().get_path("arena_local_planner_drl"),
@@ -133,20 +133,9 @@ class BaseDRLAgent(ABC):
         """
         self._num_laser_beams = None
         self._laser_range = None
-
+        self._robot_radius = rospy.get_param("radius") * 1.05
         with open(robot_setting_yaml, "r") as fd:
             robot_data = yaml.safe_load(fd)
-
-            # get robot radius
-            for body in robot_data["bodies"]:
-                if body["name"] == "base_footprint":
-                    for footprint in body["footprints"]:
-                        if footprint["type"] == "circle":
-                            self._robot_radius = (
-                                footprint.setdefault("radius", 0.3) * 1.05
-                            )
-                        if footprint["radius"]:
-                            self._robot_radius = footprint["radius"] * 1.05
 
             # get laser related information
             for plugin in robot_data["plugins"]:
@@ -181,6 +170,7 @@ class BaseDRLAgent(ABC):
         with open(action_space_yaml, "r") as fd:
             setting_data = yaml.safe_load(fd)
 
+            self._holonomic = setting_data["robot"]["holonomic"]
             self._discrete_actions = setting_data["robot"]["discrete_actions"]
             self._cont_actions = {
                 "linear_range": setting_data["robot"]["continuous_actions"][
@@ -205,25 +195,45 @@ class BaseDRLAgent(ABC):
             self._agent_params and "discrete_action_space" in self._agent_params
         )
 
-        self._action_space = (
-            spaces.Discrete(len(self._discrete_actions))
-            if self._agent_params["discrete_action_space"]
-            else spaces.Box(
-                low=np.array(
-                    [
-                        self._cont_actions["linear_range"][0],
-                        self._cont_actions["angular_range"][0],
-                    ]
-                ),
-                high=np.array(
-                    [
-                        self._cont_actions["linear_range"][1],
-                        self._cont_actions["angular_range"][1],
-                    ]
-                ),
-                dtype=np.float,
-            )
-        )
+        if self._agent_params["discrete_action_space"]:
+            # self._discrete_actions is a list, each element is a dict with the keys ["name", 'linear','angular']
+            assert (
+                not self._holonomic
+            ), "Discrete action space currently not supported for holonomic robots"
+
+            self.action_space = spaces.Discrete(len(self._discrete_actions))
+        else:
+            linear_range = self._cont_actions["linear_range"].copy()
+            angular_range = self._cont_actions["angular_range"].copy()
+
+            if not self._holonomic:
+                self._action_space = spaces.Box(
+                    low=np.array([linear_range[0], angular_range[0]]),
+                    high=np.array([linear_range[1], angular_range[1]]),
+                    dtype=np.float32,
+                )
+            else:
+                linear_range_x, linear_range_y = (
+                    linear_range["x"],
+                    linear_range["y"],
+                )
+                self._action_space = spaces.Box(
+                    low=np.array(
+                        [
+                            linear_range_x[0],
+                            linear_range_y[0],
+                            angular_range[0],
+                        ]
+                    ),
+                    high=np.array(
+                        [
+                            linear_range_x[1],
+                            linear_range_y[1],
+                            angular_range[1],
+                        ]
+                    ),
+                    dtype=np.float,
+                )
 
     def setup_reward_calculator(self) -> None:
         """Sets up the reward calculator."""
@@ -330,9 +340,11 @@ class BaseDRLAgent(ABC):
             action (np.ndarray):
                 Action in [linear velocity, angular velocity]
         """
-        action_msg = Twist()
-        action_msg.linear.x = action[0]
-        action_msg.angular.z = action[1]
+        action_msg = (
+            self._get_hol_action_msg(action)
+            if self._holonomic
+            else self._get_nonhol_action_msg(action)
+        )
         self._action_pub.publish(action_msg)
 
     def _get_disc_action(self, action: int) -> np.ndarray:
@@ -351,3 +363,22 @@ class BaseDRLAgent(ABC):
                 self._discrete_actions[action]["angular"],
             ]
         )
+
+    def _get_hol_action_msg(self, action: np.ndarray):
+        assert (
+            len(action) == 3
+        ), "Holonomic robots require action arrays to have 3 entries."
+        action_msg = Twist()
+        action_msg.linear.x = action[0]
+        action_msg.linear.y = action[1]
+        action_msg.angular.z = action[2]
+        return action_msg
+
+    def _get_nonhol_action_msg(self, action: np.ndarray):
+        assert (
+            len(action) == 2
+        ), "Non-holonomic robots require action arrays to have 2 entries."
+        action_msg = Twist()
+        action_msg.linear.x = action[0]
+        action_msg.angular.z = action[1]
+        return action_msg

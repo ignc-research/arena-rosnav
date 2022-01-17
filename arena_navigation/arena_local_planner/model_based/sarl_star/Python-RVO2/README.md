@@ -38,7 +38,7 @@ Example code
 ------------
 
 ```python
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import rvo2
 

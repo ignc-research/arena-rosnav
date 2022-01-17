@@ -222,7 +222,7 @@ train_agent.py --custom-mlp --body 256-128 --pi 256 --vf 16 --act_fn relu
 
 You can modify the hyperparameters in the upper section of the training script which is located at:
 ```
-/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/scripts/training/train_agent.py
+/arena_ws/src/arena-rosnav/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/scripts/training/train_agent.py
 ```
 
 Following hyperparameters can be adapted:

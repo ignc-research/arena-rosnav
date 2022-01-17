@@ -10,7 +10,7 @@ void PlanCollector::initPlanModules(ros::NodeHandle &nh){
 
     goal_=geometry_msgs::PoseStamped();
     
-    std::string global_plan_service_name = "/move_base/NavfnROS/make_plan";
+    std::string global_plan_service_name = "global_kino_make_plan"; //"/move_base/NavfnROS/make_plan";
     std::string ns = ros::this_node::getNamespace();
     std::string fullName = ns + "/"+global_plan_service_name;
     ros::service::waitForService(fullName);   

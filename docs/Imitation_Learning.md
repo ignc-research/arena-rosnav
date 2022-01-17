@@ -33,7 +33,7 @@ The first terminal (the simulation session, if using Screen) is needed to run ar
 Run these four commands:
 ```
 source $HOME/.zshrc                         
-source $HOME/catkin_ws/devel/setup.zsh    
+source $HOME/arena_ws/devel/setup.zsh    
 workon rosnav
 roslaunch arena_bringup start_training.launch train_mode:=true use_viz:=false task_mode:=staged map_file:=map4 num_envs:=24
 ```
@@ -43,7 +43,7 @@ A second terminal (the training session if using Screen) is needed to run the tr
 Run these four commands:
 ```
 source $HOME/.zshrc                        
-source $HOME/catkin_ws/devel/setup.zsh   
+source $HOME/arena_ws/devel/setup.zsh   
 workon rosnav
 roscd arena_local_planner_drl
 ```

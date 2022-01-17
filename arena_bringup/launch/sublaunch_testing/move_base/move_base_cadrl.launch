@@ -2,14 +2,14 @@
     <!-- move base -->
     <arg name="model" default="burger"/>
     <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
-        <rosparam file="$(find conventional)/config/costmap_common_params_$(arg model).yaml" command="load" ns="global_costmap" />
-        <rosparam file="$(find conventional)/config/costmap_common_params_$(arg model).yaml" command="load" ns="local_costmap" />   
-        <rosparam file="$(find conventional)/config/local_costmap_params.yaml" command="load" />
-        <rosparam file="$(find conventional)/config/global_costmap_params.yaml" command="load" />
+        <rosparam file="$(find conventional)/config/$(arg model)/costmap_common_params.yaml" command="load" ns="global_costmap" />
+        <rosparam file="$(find conventional)/config/$(arg model)/costmap_common_params.yaml" command="load" ns="local_costmap" />   
+        <rosparam file="$(find conventional)/config/$(arg model)/local_costmap_params.yaml" command="load" />
+        <rosparam file="$(find conventional)/config/$(arg model)/global_costmap_params.yaml" command="load" />
     </node>
     
     
-    <arg name="tb3_speed" default="1.5"/>
+    <arg name="speed" default="1.5"/>
     <arg name="file" default="cadrl_node_tb3.py"/>
     <!-- Launch neural net ros wrapper -->
     <node pkg="cadrl_ros" type="cadrl_node_tb3.py" name="cadrl_node" output="screen" ns="/cadrl">
@@ -34,7 +34,7 @@
         <remap from="~peds" to="ped_manager/ped_recent"/>
         
         <!-- Parameters -->
-        <param name="~tb3_speed" value="$(arg tb3_speed)"/>
+        <param name="~speed" value="$(arg speed)"/>
 
     </node>
 

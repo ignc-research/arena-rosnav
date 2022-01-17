@@ -43,13 +43,14 @@ build/
 *.swp
 
 # python
-__pycache__
-
-# bags
-.bag
-*.csv
+__pycache__/
+*.py[cod]
 
 #vscode
 .vscode/
 .env
 **/.vscode
+
+#dolphin
+.directory
+

@@ -8,7 +8,7 @@
                 6.91
             ],
             "type": "forklift",
-            "yaml_file": "/home/daniel/catkin_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/big_forklift.model.yaml",
+            "yaml_file": "/home/daniel/arena_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/big_forklift.model.yaml",
             "number_of_peds": 1,
             "vmax": 1.0,
             "start_up_mode": "default",
@@ -53,7 +53,7 @@
                 1.77
             ],
             "type": "adult",
-            "yaml_file": "/home/daniel/catkin_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
+            "yaml_file": "/home/daniel/arena_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
             "number_of_peds": 1,
             "vmax": 1.0,
             "start_up_mode": "default",
@@ -98,7 +98,7 @@
     "static_obstacles": [
         {
             "name": "obstacle_0",
-            "model_path": "/home/daniel/catkin_ws/src/arena-rosnav/simulator_setup/obstacles/shelf.yaml",
+            "model_path": "/home/daniel/arena_ws/src/arena-rosnav/simulator_setup/obstacles/shelf.yaml",
             "pos": [
                 11.88,
                 14.05
@@ -107,7 +107,7 @@
         },
         {
             "name": "obstacle_1",
-            "model_path": "/home/daniel/catkin_ws/src/arena-rosnav/simulator_setup/obstacles/shelf.yaml",
+            "model_path": "/home/daniel/arena_ws/src/arena-rosnav/simulator_setup/obstacles/shelf.yaml",
             "pos": [
                 20.86,
                 16.87
@@ -116,7 +116,7 @@
         },
         {
             "name": "obstacle_2",
-            "model_path": "/home/daniel/catkin_ws/src/arena-rosnav/simulator_setup/obstacles/shelf.yaml",
+            "model_path": "/home/daniel/arena_ws/src/arena-rosnav/simulator_setup/obstacles/shelf.yaml",
             "pos": [
                 21.73,
                 15.15
@@ -125,7 +125,7 @@
         },
         {
             "name": "obstacle_3",
-            "model_path": "/home/daniel/catkin_ws/src/arena-rosnav/simulator_setup/obstacles/shelf.yaml",
+            "model_path": "/home/daniel/arena_ws/src/arena-rosnav/simulator_setup/obstacles/shelf.yaml",
             "pos": [
                 14.13,
                 14.04
@@ -141,6 +141,6 @@
         22.35,
         16.46
     ],
-    "map_path": "/home/daniel/catkin_ws/src/arena-rosnav/simulator_setup/maps/map3/map.yaml",
+    "map_path": "/home/daniel/arena_ws/src/arena-rosnav/simulator_setup/maps/map3/map.yaml",
     "format": "arena-tools"
 }

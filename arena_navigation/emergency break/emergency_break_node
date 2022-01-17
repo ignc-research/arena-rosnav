@@ -1,0 +1,37 @@
+#! /usr/bin/env python3
+# see as resource for goal position http://wiki.ros.org/move_base
+import rospy
+from sensor_msgs.msg import LaserScan
+from geometry_msgs.msg import Pose, PoseWithCovarianceStamped, PoseStamped
+
+global stopped, current_goal
+
+pub_mvb_goal = rospy.Publisher(
+            '/move_base_simple/goal', PoseStamped, queue_size=1, latch=True)
+
+def callback(data):
+    '''When laser spots obstacle (sum(data) > 0) navigation goal gets cancelled. When laser range clear again goal gets re-postet
+    '''
+    laser_data =  data.ranges
+    if sum(laser_data) > 0: 
+        current_goal = rospy.Subscriber(
+            '/move_base_simple/goal', PoseStamped, queue_size=1, latch=True)
+
+        stopped = True
+
+    if sum(laser_data) == 0: 
+        pub_mvb_goal(current_goal)
+        stopped = False
+
+
+def main():
+    rospy.init_node('emergency-break', anonymous=True)
+    sub = rospy.Subscriber('/emergency_laser', LaserScan, callback)
+    rospy.spin()
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except rospy.ROSInterruptException:
+        pass

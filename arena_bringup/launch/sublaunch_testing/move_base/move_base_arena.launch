@@ -1,0 +1,50 @@
+<launch>
+	<arg name="speed" default="0.22"/>
+    <arg name="model" default="burger"/>
+    <param name="bool_goal_reached" value="true" />
+
+    <!-- move_base -->
+    <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+        <rosparam file="$(find conventional)/config/$(arg model)/costmap_common_params.yaml" command="load" ns="global_costmap" />
+        <rosparam file="$(find conventional)/config/$(arg model)/costmap_common_params.yaml" command="load" ns="local_costmap" />
+        <rosparam file="$(find conventional)/config/$(arg model)/local_costmap_params.yaml" command="load" />
+        <rosparam file="$(find conventional)/config/$(arg model)/global_costmap_params.yaml" command="load" />
+    </node>
+
+    <!-- spacial_horizon -->
+    <node pkg="arena_spacial_horizon" type="spacial_horizon_node" name="spacial_horizon_node" output="screen">
+        <rosparam file="$(find conventional)/config/$(arg model)/plan_fsm_param.yaml" command="load" /> <!-- ns="fsm"-->
+    </node>
+
+    <!-- observation_packer -->
+    <node pkg="observations" name="observation_packer" type="observation_packer" output="screen"/>
+
+    <!-- Launch neural net ros wrapper -->
+    <!-- <node pkg="arena_ros" type="arena_node_tb3.py" name="arena_node" output="screen" ns="/arena"> -->
+    <node pkg="arena_ros" type="play_agent.py" name="arena_node" output="screen">
+        
+        <!-- Publications -->
+        <!-- <remap from="~other_vels" to="other_vels"/>
+        <remap from="~nn_cmd_vel" to="/cmd_vel"/>
+        <remap from="~pose_marker" to="pose_marker"/>
+        <remap from="~path_marker" to="path_marker"/>
+        <remap from="~goal_path_marker" to="goal_path_marker"/>
+        <remap from="~agent_marker" to="other_agents_marker"/>
+        <remap from="~agent_markers" to="other_agents_markers"/> -->
+        
+        <!-- Subscriptions -->
+        <!-- <remap from="~pose" to="/odom"/>
+        <remap from="~velocity" to="velocity"/>
+        <remap from="~safe_actions" to="local_path_finder/safe_actions"/>
+        <remap from="~planner_mode" to="planner_fsm/mode"/>
+        <remap from="~goal" to="/goal"/>
+        <remap from="~subgoal" to="/plan_manager/subgoal"/>
+        <remap from="~clusters" to="/obst_odom"/>
+        <remap from="~peds" to="ped_manager/ped_recent"/> -->
+        
+        <!-- Parameters -->
+        <param name="~speed" value="$(arg speed)"/>
+
+    </node>
+
+</launch>

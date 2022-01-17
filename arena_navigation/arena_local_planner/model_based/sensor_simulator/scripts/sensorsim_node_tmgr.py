@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 from visualization_msgs.msg import MarkerArray
 import rosnode
 import rospy

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import rospy
 import sys
@@ -471,7 +471,7 @@ def run():
 
     rospy.init_node('nn_tb3',anonymous=False)
     veh_name = 'tb3_01'
-    pref_speed = rospy.get_param("~tb3_speed")
+    pref_speed = rospy.get_param("~speed")
     veh_data = {'goal':np.zeros((2,)),'radius':0.3,'pref_speed':pref_speed,'kw':10.0,'kp':1.0,'name':'tb3_01'}
 
     print('==================================\ncadrl node started')

@@ -207,7 +207,7 @@ Training script will be terminated
 You can modify the hyperparameters in the upper section of the training script which is located at:
 
 ```
-/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/scripts/training/train_agent.py
+/arena_ws/src/arena-rosnav/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/scripts/training/train_agent.py
 ```
 
 Following hyperparameters can be adapted:

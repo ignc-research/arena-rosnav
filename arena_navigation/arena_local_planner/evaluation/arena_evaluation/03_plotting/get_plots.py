@@ -8,8 +8,6 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from matplotlib import image
 import scipy.ndimage as ndimage
-import seaborn as sns
-import pandas as pd
 
 class plotter():
     def __init__(self):
@@ -63,12 +61,119 @@ class plotter():
         with open(self.dir_path+"/get_plots_config.yaml", 'w') as file: # update most_recent_file in config
             yaml.dump(self.config, file)
         self.keys = list(self.data.keys())
+### end of block load data ###
 
+### qualitative plots ###
+    def get_qualitative_plots(self):
         ### get scenario properties ###
         self.get_map() # self.maps
         self.get_obstacle_number() # self.obstacle_numbers
         self.get_velocity() # self.velocities
         self.get_planner() # self.planners
+
+        ### iteration part ###
+        for map in self.maps:
+            map_keys = [] # list of keys with current map
+            map_path = self.maps_dict[map]
+            with open(map_path+"/map.yaml") as file: # get map file from map.yaml in map directory
+                map_yaml = yaml.safe_load(file)
+                map_file = map_yaml["image"]
+                map_resolution = map_yaml["resolution"]
+                map_origin = map_yaml["origin"]
+            for key in self.keys:
+                if self.data[key]["map"] == map:
+                    map_keys.append(key) # append key if map matches current map
+            for velocity in self.velocities:
+                vel_keys = [] # list of keys with current velocity
+                for key in map_keys:
+                    if self.data[key]["velocity"] == velocity:
+                        vel_keys.append(key) # append key if velocity matches current velocity
+                for obstacle_number in self.obstacle_numbers:
+                    obs_keys = [] # list of keys with the current obstacle number
+                    for key in vel_keys:
+                        if self.data[key]["obstacle_number"] == obstacle_number:
+                            obs_keys.append(key) # append key if obstacle_number matches current obstacle_number
+                    
+                    ### plotting part ###
+                    plt.figure()
+
+                    # plot map image
+                    img= image.imread("{0}/{1}".format(map_path,map_file))
+                    img_rotated = ndimage.rotate(img, 90, reshape=True) # rotate by 90 degree to get rviz konvention
+                    plt.imshow(img_rotated)
+
+                    # plot each planners path and if flag given collisions and zones
+                    for key in sorted(obs_keys):
+                        # plot paths for every episode
+                        planner = self.data[key]["planner"]
+                        if planner in self.config["leave_out_planner"]:
+                            continue
+                        paths = self.data[key]["paths_travelled"]
+                        episodes = paths.keys()
+                        for i,episode in enumerate(episodes):
+                            if i == 0:
+                                plt.plot([],[], # plot legend only with empty lines
+                                "-",
+                                label = self.config["labels"][planner],
+                                color = self.config["color_scheme"][planner],
+                                linewidth = 2)
+
+                            x,y = to_ros_coords(paths[episode], img, map_resolution, map_origin)
+                            x = x[1:-1] # NOTE: sometimes episode is wrongly assigned _> skip first and last coordinates
+                            y = y[1:-1]
+                            plt.plot(x,y,
+                            "-",
+                            color = self.config["color_scheme"][planner],
+                            alpha = self.config["path_alpha"],
+                            linewidth = self.config["path_size"]/map_resolution)
+
+                            if self.config["plot_progression"]:
+                                x_progression = x[0::self.config["progression_steps"]]
+                                y_progression = y[0::self.config["progression_steps"]]
+                                plt.scatter(x_progression,y_progression,
+                                color = self.config["color_scheme"][planner],
+                                alpha = self.config["path_alpha"],
+                                s = self.config["progression_size"]/map_resolution)
+
+                        # plot collisions
+                        if self.config["plot_collisions"]:
+                            collisions = self.data[key]["collision_zones"]["collisions"]
+                            if len(collisions) != 0:
+                                x,y = to_ros_coords(collisions, img, map_resolution, map_origin)
+                                plt.scatter(x,y,
+                                    color = self.config["color_scheme"][planner],
+                                    alpha = self.config["collision_alpha"],
+                                    s = self.config["collision_size"]/map_resolution)
+                        # plot collision zones and centroids
+                        if self.config["plot_collision_zones"]:
+                            centroids = self.data[key]["collision_zones"]["centroids"]
+                            if len(centroids) != 0:
+                                counts = self.data[key]["collision_zones"]["counts"]
+                                x,y = to_ros_coords(centroids, img, map_resolution, map_origin)
+                                plt.scatter(x,y,
+                                    color = self.config["color_scheme"][planner],
+                                    alpha = self.config["collision_alpha"],
+                                    s = self.config["collision_size"]/map_resolution)
+                                for i,centroid in enumerate(centroids):
+                                    # plot circle for collision zone
+                                    plt.gca().add_patch(plt.Circle(tuple(to_ros_coords(centroid, img, map_resolution, map_origin)),
+                                    radius = self.config["collision_zone_base_diameter"]*counts[i]/map_resolution,
+                                    color=self.config["color_scheme"][planner],
+                                    fill=False))
+                                    # plot transparent circle as background of zone
+                                    plt.gca().add_patch(plt.Circle(tuple(to_ros_coords(centroid, img, map_resolution, map_origin)),
+                                    radius = self.config["collision_zone_base_diameter"]*counts[i]/map_resolution,
+                                    color=self.config["color_scheme"][planner],
+                                    fill=True,
+                                    alpha = self.config["collision_zone_alpha"]))
+
+                    # plot scenario properties (start, goal, dynamic obstacles)
+                    self.plot_scenario(obs_keys, img,  map_resolution, map_origin)
+
+                    if self.config["plot_legend"]:
+                        plt.legend(loc=self.config["legend_position"])
+                    plt.tight_layout()
+                    plt.savefig(self.plot_dir + "/qualitative_plot_{0}_{1}_{2}_{3}".format(map,obstacle_number,velocity,self.now))
 
     def get_map(self): # get map from df file name
         self.map_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))) + "/simulator_setup/maps"
@@ -117,141 +222,6 @@ class plotter():
             for key in self.keys:
                 self.data[key]["planner"] = "base_planner"
         self.planners = np.unique([self.data[key]["planner"] for key in self.keys])
-### end of block load data ###
-
-### qualitative plots ###
-    def get_qualitative_plots(self):
-        ### iteration part ###
-        for map in self.maps:
-            map_keys = [] # list of keys with current map
-            map_path = self.maps_dict[map]
-            with open(map_path+"/map.yaml") as file: # get map file from map.yaml in map directory
-                map_yaml = yaml.safe_load(file)
-                map_file = map_yaml["image"]
-                map_resolution = map_yaml["resolution"]
-                map_origin = map_yaml["origin"]
-            for key in self.keys:
-                if self.data[key]["map"] == map:
-                    map_keys.append(key) # append key if map matches current map
-            for velocity in self.velocities:
-                vel_keys = [] # list of keys with current velocity
-                for key in map_keys:
-                    if self.data[key]["velocity"] == velocity:
-                        vel_keys.append(key) # append key if velocity matches current velocity
-                for obstacle_number in self.obstacle_numbers:
-                    obs_keys = [] # list of keys with the current obstacle number
-                    for key in vel_keys:
-                        if self.data[key]["obstacle_number"] == obstacle_number:
-                            obs_keys.append(key) # append key if obstacle_number matches current obstacle_number
-                    
-                    ### plotting part ###
-                    fig, ax = plt.subplots()
-
-                    # plot map image
-                    img= image.imread("{0}/{1}".format(map_path,map_file))
-                    img_rotated = ndimage.rotate(img, 90, reshape=True) # rotate by 90 degree to get rviz konvention
-                    plt.imshow(img_rotated)
-
-                    # plot each planners path and if flag given collisions and zones
-                    for key in sorted(obs_keys):
-                        # plot paths for every episode
-                        planner = self.data[key]["planner"]
-                        if planner in self.config["leave_out_planner"]:
-                            continue
-                        paths = self.data[key]["paths_travelled"]
-                        episodes = paths.keys()
-                        for i,episode in enumerate(episodes):
-                            if i == 0:
-                                plt.plot([],[], # plot legend only with empty lines
-                                "-",
-                                label = self.config["labels"][planner],
-                                color = self.config["color_scheme"][planner],
-                                linewidth = 2)
-
-                            x,y = to_ros_coords(paths[episode], img, map_resolution, map_origin)
-                            x = x[1:-1] # NOTE: sometimes episode is wrongly assigned _> skip first and last coordinates
-                            y = y[1:-1]
-                            plt.plot(x,y,
-                            "-",
-                            color = self.config["color_scheme"][planner],
-                            alpha = self.config["path_alpha"],
-                            linewidth = self.config["path_size"]/map_resolution,zorder=1)
-
-                            if self.config["plot_progression"]:
-                                x_progression = x[0::self.config["progression_steps"]]
-                                y_progression = y[0::self.config["progression_steps"]]
-                                plt.scatter(x_progression,y_progression,
-                                color = self.config["color_scheme"][planner],
-                                alpha = self.config["path_alpha"],
-                                s = self.config["progression_size"]/map_resolution,zorder=1)
-
-                        # plot collisions
-                        if self.config["plot_collisions"]:
-                            collisions = self.data[key]["collision_zones"]["collisions"]
-                            if len(collisions) != 0:
-                                x,y = to_ros_coords(collisions, img, map_resolution, map_origin)
-                                plt.scatter(x,y,
-                                    color = self.config["color_scheme"][planner],
-                                    alpha = self.config["collision_alpha"],
-                                    s = self.config["collision_size"]/map_resolution,zorder=2)
-                        # plot collision zones and centroids
-                        if self.config["plot_collision_zones"]:
-                            centroids = self.data[key]["collision_zones"]["centroids"]
-                            if len(centroids) != 0:
-                                counts = self.data[key]["collision_zones"]["counts"]
-                                x,y = to_ros_coords(centroids, img, map_resolution, map_origin)
-                                plt.scatter(x,y,
-                                    color = self.config["color_scheme"][planner],
-                                    alpha = self.config["collision_alpha"],
-                                    s = self.config["collision_size"]/map_resolution,zorder=2)
-                                for i,centroid in enumerate(centroids):
-                                    # plot circle for collision zone
-                                    ax.add_patch(plt.Circle(tuple(to_ros_coords(centroid, img, map_resolution, map_origin)),
-                                    radius = self.config["collision_zone_base_diameter"]*counts[i]/map_resolution,
-                                    color=self.config["color_scheme"][planner],
-                                    fill=False,zorder=2))
-                                    # plot transparent circle as background of zone
-                                    ax.add_patch(plt.Circle(tuple(to_ros_coords(centroid, img, map_resolution, map_origin)),
-                                    radius = self.config["collision_zone_base_diameter"]*counts[i]/map_resolution,
-                                    color=self.config["color_scheme"][planner],
-                                    fill=True,
-                                    alpha = self.config["collision_zone_alpha"],zorder=2))
-
-                    # plot scenario properties (start, goal, dynamic obstacles)
-                    self.plot_scenario(obs_keys, img,  map_resolution, map_origin)
-
-                    # plot legend, title, axes labels
-                    if self.config["plot_qualitative_legend"]:
-                        plt.legend(loc=self.config["plot_qualitative_legend_location"])
-                    if self.config["plot_qualitative_title"]:
-                        if obstacle_number == "base_obstacle_number" and velocity == "base_velocity":
-                            plt.suptitle("Map: {0}".format(map), fontsize = self.config["plot_qualitative_title_size"], fontweight = "bold")
-                        elif obstacle_number == "base_obstacle_number":
-                            plt.suptitle("Map: {0} Velocity: {1}.{2}".format(map, velocity.replace("vel","")[0], velocity.replace("vel","")[1]), fontsize = self.config["plot_qualitative_title_size"], fontweight = "bold")
-                        elif velocity == "base_velocity":
-                            plt.suptitle("Map: {0} Obstacles: {1}".format(map, int(obstacle_number.replace("obs",""))), fontsize = self.config["plot_qualitative_title_size"], fontweight = "bold")
-                        else:
-                            plt.suptitle("Map: {0} Obstacles: {1} Velocity: {1}.{2} ".format(map, int(obstacle_number.replace("obs","")), velocity.replace("vel","")[0], velocity.replace("vel","")[1]), fontsize = self.config["plot_qualitative_title_size"], fontweight = "bold")
-                    if self.config["plot_qualitative_axes"]:
-                        plt.xlabel("x in [m]")
-                        plt.ylabel("y in [m]")
-                        x_locs = ax.get_xticks()[1:-1]
-                        y_locs = ax.get_yticks()[1:-1]
-                        ax.set_xticks(x_locs)
-                        ax.set_xticklabels([int(x*map_resolution) for x in x_locs])
-                        ax.set_yticks(y_locs)
-                        ax.set_yticklabels([int(y*map_resolution) for y in y_locs])
-                        ax.tick_params(axis='both', which='major', labelsize=self.config["plot_qualitative_axes_size"])
-                    else:
-                        x_locs = ax.get_xticks()[1:-1]
-                        y_locs = ax.get_yticks()[1:-1]
-                        ax.set_xticks(x_locs)
-                        ax.set_yticks(y_locs)
-                        ax.set_xticklabels([])
-                        ax.set_yticks(y_locs)
-                        ax.set_yticklabels([])
-                    plt.savefig(self.plot_dir + "/qualitative_plot_{0}_{1}_{2}_{3}".format(map,obstacle_number,velocity,self.now))
-                    plt.close()
 
     def plot_scenario(self, keys, img,  map_resolution, map_origin):
         scenario_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))) + "/simulator_setup/scenarios/eval"
@@ -281,8 +251,8 @@ class plotter():
         plt.scatter([],[], marker = self.config["start_marker"], label = "Start", color = self.config["start_point_color"])
         plt.scatter([],[], marker = self.config["goal_marker"], label = "Goal", color = self.config["goal_point_color"])
         # start and goal point
-        plt.scatter(start_x,start_y, marker = self.config["start_marker"], s = self.config["start_size"]/map_resolution, color = self.config["start_point_color"],zorder=5)
-        plt.scatter(goal_x,goal_y, marker = self.config["goal_marker"], s = self.config["goal_size"]/map_resolution, color = self.config["goal_point_color"],zorder=5)
+        plt.scatter(start_x,start_y, marker = self.config["start_marker"], s = self.config["start_size"]/map_resolution, color = self.config["start_point_color"])
+        plt.scatter(goal_x,goal_y, marker = self.config["goal_marker"], s = self.config["goal_size"]/map_resolution, color = self.config["goal_point_color"])
 
         # plot dynamic obstacle path
         for path in obstacle_paths:
@@ -291,103 +261,18 @@ class plotter():
                 plt.gca().add_patch(plt.Circle(waypoint,
                     radius = self.config["obstacle_radius"]/map_resolution,
                     color=self.config["obstacle_color"],
-                    fill=False,zorder=5))
+                    fill=False))
                 if i == len(path)-1:
                     continue
-                plt.gca().add_patch(patches.FancyArrowPatch(waypoint, path[i+1], arrowstyle='<->', mutation_scale = self.config["path_arrow_size"], color = self.config["path_arrow_color"],zorder=5))
+                plt.gca().add_patch(patches.FancyArrowPatch(waypoint, path[i+1], arrowstyle='<->', mutation_scale = self.config["path_arrow_size"], color = self.config["path_arrow_color"]))
 ### end of block qualitative plots ###
 
 ### quantitative plots ###
     def get_quantitative_plots(self):
-        os.mkdir(self.plot_dir + "/quantitative_plots")
-        metrics = list(self.data[self.keys[0]]["summary_df"].keys())
-        ### iteration part ###
-        for map in self.maps:
-            map_keys = [] # list of keys with current map
-            for key in self.keys:
-                if self.data[key]["map"] == map:
-                    map_keys.append(key) # append key if map matches current map
-            for velocity in self.velocities:
-                vel_keys = [] # list of keys with current velocity
-                for key in map_keys:
-                    if self.data[key]["velocity"] == velocity:
-                        vel_keys.append(key) # append key if velocity matches current velocity
-                for obstacle_number in self.obstacle_numbers:
-                    obs_keys = [] # list of keys with the current obstacle number
-                    data = pd.DataFrame() # concat all summary_df of the planners into one and save planner in column
-                    for key in sorted(vel_keys):
-                        if self.data[key]["obstacle_number"] == obstacle_number:
-                            obs_keys.append(key) # append key if obstacle_number matches current obstacle_number
-                            dat = pd.DataFrame(self.data[key]["summary_df"]) # concat the summary_df of that key (planner)
-                            dat["planner"] = self.data[key]["planner"]
-                            data = pd.concat([data,dat])
-
-                    # plotting part
-                    for metric in metrics:
-                        if metric in self.config["leave_out_metric"]:
-                            continue
-                        if metric in ["done_reason", "curvature"]:
-                            continue
-                        fig, ax = plt.subplots()
-                        if metric == "success": # bar plots for success metric
-                            planner_list = []
-                            success_list = []
-                            collision_list = []
-                            timeout_list = [1.0]*len(obs_keys)
-                            for obs_key in sorted(obs_keys):
-                                len_df = len(self.data[obs_key]["summary_df"]["done_reason"])
-                                planner_list.append(self.data[obs_key]["planner"])
-                                success_list.append(self.data[obs_key]["summary_df"]["done_reason"].count("goal_reached")/len_df)
-                                collision_list.append((self.data[obs_key]["summary_df"]["done_reason"].count("goal_reached")+self.data[obs_key]["summary_df"]["done_reason"].count("collision"))/len_df)
-                            planner_list = [self.config["labels"][x] for x in planner_list]
-                            ax.bar(planner_list, timeout_list, color = self.config["plot_success_time_out_color"], width = self.config["plot_success_width"], label = "Timeout", alpha = self.config["plot_success_alpha"])
-                            ax.bar(planner_list, collision_list, color = self.config["plot_success_collision_color"], width = self.config["plot_success_width"], label = "Collision", alpha = self.config["plot_success_alpha"])
-                            ax.bar(planner_list, success_list, color = self.config["plot_success_success_color"], width = self.config["plot_success_width"], label = "Success", alpha = self.config["plot_success_alpha"])
-                            if self.config["plot_success_legend"]:
-                                ax.legend(loc=self.config["plot_success_legend_location"])
-                            ax.set_xlabel(self.config["plot_quantitative_labels"]["planner"], fontsize = self.config["plot_quantitative_axes_label_size"])
-                            ax.set_ylabel(self.config["plot_quantitative_labels"][metric], fontsize = self.config["plot_quantitative_axes_label_size"])
-                        else:
-                            if self.config["plot_quantitative_violin"]:
-                                ax = sns.violinplot(x="planner", y=metric, data = data, inner = self.config["plot_quantitative_violin_inner"], palette = self.config["color_scheme"])
-                                ax.set_xlabel(self.config["plot_quantitative_labels"]["planner"], fontsize = self.config["plot_quantitative_axes_label_size"])
-                                ax.set_ylabel(self.config["plot_quantitative_labels"][metric], fontsize = self.config["plot_quantitative_axes_label_size"])
-                                ax.set_xticklabels([self.config["labels"][x.get_text()] for x in ax.get_xticklabels()], {"fontsize": self.config["plot_quantitative_axes_tick_size"]})
-                                ax.zorder = 5
-                            else:
-                                labels = [self.config["labels"][x] for x in data.groupby(by="planner").mean().index]
-                                colors = [self.config["color_scheme"][x] for x in data.groupby(by="planner").mean().index]
-                                ax.bar(x = labels, height = data.groupby(by="planner").mean()[metric], yerr = data.groupby(by="planner").std()[metric], color = colors, ecolor = self.config["plot_barplot_errorcolor"], capsize=self.config["plot_barplot_capsize"], alpha = self.config["plot_barplot_alpha"], zorder=5)
-                                ax.set_xlabel(self.config["plot_quantitative_labels"]["planner"], fontsize = self.config["plot_quantitative_axes_label_size"])
-                                ax.set_ylabel(self.config["plot_quantitative_labels"][metric], fontsize = self.config["plot_quantitative_axes_label_size"])
-
-                        # title 
-                        if self.config["plot_quantitative_suptitle"]:
-                            plt.suptitle("{0}".format(self.config["plot_quantitative_labels"][metric]), fontsize = self.config["plot_quantitative_suptitle_size"], fontweight = "bold")
-                        # subtitle
-                        if self.config["plot_quantitative_title"]:
-                            if obstacle_number == "base_obstacle_number" and velocity == "base_velocity":
-                                plt.title("Map: {0}".format(map), fontsize = self.config["plot_quantitative_title_size"])
-                            elif obstacle_number == "base_obstacle_number":
-                                plt.title("Map: {0} Velocity: {1}.{2}".format(map, velocity.replace("vel","")[0], velocity.replace("vel","")[1]), fontsize = self.config["plot_quantitative_title_size"])
-                            elif velocity == "base_velocity":
-                                plt.title("Map: {0} Obstacles: {1}".format(map, int(obstacle_number.replace("obs",""))), fontsize = self.config["plot_quantitative_title_size"])
-                            else:
-                                plt.title("Map: {0} Obstacles: {1} Velocity: {1}.{2} ".format(map, int(obstacle_number.replace("obs","")), velocity.replace("vel","")[0], velocity.replace("vel","")[1]), fontsize = self.config["plot_quantitative_title_size"])
-
-                        # grid
-                        if self.config["plot_quantitative_ygrid"]:
-                            if self.config["plot_quantitative_violin"]:
-                                sns.set_style("whitegrid")
-                            else:
-                                plt.grid(axis="y", zorder = 1)
-
-                        plt.savefig(self.plot_dir + "/quantitative_plots/{0}_{1}_{2}_{3}_{4}".format(metric,map,obstacle_number,velocity,self.now))
-                        plt.close()
-### end of block quantitative plots ###
+        print(self.data[self.keys[0]]["summary_df"].keys())
 
 
-# additional functions
+
 # x,y coordinate transformations needed for qualitative plots
 def to_ros_coords(coords, img, map_resolution, map_origin):
     if type(coords) == tuple:
@@ -408,6 +293,9 @@ def transform_waypoints(obstacle_paths, img, map_resolution, map_origin, ped_sim
             waypoint = list(to_ros_coords((np.array(path[0]) + np.array(path[1])).tolist(),img, map_resolution, map_origin))
             transformed_paths.append([start,waypoint])
     return transformed_paths
+
+
+
 
 
 if __name__=="__main__":

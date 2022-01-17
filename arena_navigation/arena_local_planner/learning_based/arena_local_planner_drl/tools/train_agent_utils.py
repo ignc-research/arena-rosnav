@@ -4,7 +4,7 @@ import argparse
 from datetime import datetime as dt
 import gym
 import json
-import os
+import os, rospy
 import rosnode
 import rospkg
 import time
@@ -96,13 +96,16 @@ def initialize_hyperparameters(
         hyperparams = load_hyperparameters_json(
             PATHS=PATHS, from_scratch=True, config_name=config_name
         )
+        hyperparams["robot"] = rospy.get_param("model", "not specified")
         hyperparams["agent_name"] = PATHS["model"].split("/")[-1]
     else:
         hyperparams = load_hyperparameters_json(PATHS=PATHS)
 
     # dynamically adapt n_steps according to batch size and n envs
     # then update .json
-    check_batch_size(n_envs, hyperparams["batch_size"], hyperparams["m_batch_size"])
+    check_batch_size(
+        n_envs, hyperparams["batch_size"], hyperparams["m_batch_size"]
+    )
     hyperparams["n_steps"] = int(hyperparams["batch_size"] / n_envs)
     write_hyperparameters_json(hyperparams, PATHS)
     print_hyperparameters(hyperparams)
@@ -134,7 +137,9 @@ def load_hyperparameters_json(
     :param config_name: file name of json file when training from scratch
     """
     if from_scratch:
-        doc_location = os.path.join(PATHS.get("hyperparams"), config_name + ".json")
+        doc_location = os.path.join(
+            PATHS.get("hyperparams"), config_name + ".json"
+        )
     else:
         doc_location = os.path.join(PATHS.get("model"), "hyperparameters.json")
 
@@ -146,7 +151,8 @@ def load_hyperparameters_json(
     else:
         if from_scratch:
             raise FileNotFoundError(
-                "Found no '%s.json' in %s" % (config_name, PATHS.get("hyperparams"))
+                "Found no '%s.json' in %s"
+                % (config_name, PATHS.get("hyperparams"))
             )
         else:
             raise FileNotFoundError(
@@ -202,7 +208,9 @@ def check_hyperparam_format(loaded_hyperparams: dict, PATHS: dict) -> None:
         raise TypeError("Parameter 'task_mode' has unknown value")
 
 
-def update_hyperparam_model(model: PPO, PATHS: dict, params: dict, n_envs: int = 1) -> None:
+def update_hyperparam_model(
+    model: PPO, PATHS: dict, params: dict, n_envs: int = 1
+) -> None:
     """
     Updates parameter of loaded PPO agent when it was manually changed in the configs yaml.
 
@@ -296,18 +304,23 @@ def get_paths(agent_name: str, args: argparse.Namespace) -> dict:
     :param args (argparse.Namespace): Object containing the program arguments
     """
     dir = rospkg.RosPack().get_path("arena_local_planner_drl")
+    robot_model = rospy.get_param("model")
 
     PATHS = {
         "model": os.path.join(dir, "agents", agent_name),
         "tb": os.path.join(dir, "training_logs", "tensorboard", agent_name),
-        "eval": os.path.join(dir, "training_logs", "train_eval_log", agent_name),
+        "eval": os.path.join(
+            dir, "training_logs", "train_eval_log", agent_name
+        ),
         "robot_setting": os.path.join(
             rospkg.RosPack().get_path("simulator_setup"),
             "robot",
-            "myrobot" + ".model.yaml",
+            f"{robot_model}.model.yaml",
         ),
         "hyperparams": os.path.join(dir, "configs", "hyperparameters"),
-        "robot_as": os.path.join(dir, "configs", "default_settings.yaml"),
+        "robot_as": os.path.join(
+            dir, "configs", f"default_settings_{robot_model}.yaml"
+        ),
         "curriculum": os.path.join(
             dir, "configs", "training_curriculum_map1small.yaml"
         ),
@@ -445,7 +458,9 @@ from stable_baselines3.common.vec_env import VecNormalize
 from stable_baselines3.common.vec_env.base_vec_env import VecEnv
 
 
-def load_vec_normalize(params: dict, PATHS: dict, env: VecEnv, eval_env: VecEnv):
+def load_vec_normalize(
+    params: dict, PATHS: dict, env: VecEnv, eval_env: VecEnv
+):
     if params["normalize"]:
         load_path = os.path.join(PATHS["model"], "vec_normalize.pkl")
         if os.path.isfile(load_path):
@@ -454,7 +469,11 @@ def load_vec_normalize(params: dict, PATHS: dict, env: VecEnv, eval_env: VecEnv)
             print("Succesfully loaded VecNormalize object from pickle file..")
         else:
             env = VecNormalize(
-                env, training=True, norm_obs=True, norm_reward=False, clip_reward=15
+                env,
+                training=True,
+                norm_obs=True,
+                norm_reward=False,
+                clip_reward=15,
             )
             eval_env = VecNormalize(
                 eval_env,
@@ -463,4 +482,4 @@ def load_vec_normalize(params: dict, PATHS: dict, env: VecEnv, eval_env: VecEnv)
                 norm_reward=False,
                 clip_reward=15,
             )
-        return env, eval_env
+    return env, eval_env

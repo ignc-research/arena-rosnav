@@ -1,18 +1,18 @@
 from typing import Tuple
 
 import numpy as np
-import os
+import os, rospy
 import rospkg
 
 from rl_agent.base_agent_wrapper import BaseDRLAgent
 
 from geometry_msgs.msg import Twist
 
-
+robot_model = rospy.get_param("model")
 DEFAULT_ACTION_SPACE = os.path.join(
     rospkg.RosPack().get_path("arena_local_planner_drl"),
     "configs",
-    "default_settings.yaml",
+    f"default_settings_{robot_model}.yaml",
 )
 
 

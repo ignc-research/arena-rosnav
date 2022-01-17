@@ -12,6 +12,6 @@ int main(int argc, char** argv) {
     //ros::WallRate r(100);
     PlanManager plan_manager;
     plan_manager.init(node_handle);
-    ROS_INFO_STREAM(":\tPlan manager successfully loaded for namespace\t"<<ns);
+    
     ros::spin();
 }

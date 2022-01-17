@@ -1,0 +1,44 @@
+<launch>
+
+  <!-- Arguments -->
+  <arg name="model" default="burger"/>
+  <arg name="cmd_vel_topic" default="cmd_vel" />
+  <arg name="odom_topic" default="odom" />
+  <!-- <arg name="speed" default="0.22"/> -->
+
+  <arg name="agent_name" default="rule_05"/>
+
+  <!-- move_base -->
+  <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+    <rosparam file="$(find conventional)/config/$(arg model)/costmap_common_params.yaml" command="load" ns="global_costmap" />
+    <rosparam file="$(find conventional)/config/$(arg model)/costmap_common_params.yaml" command="load" ns="local_costmap" />   
+    <rosparam file="$(find conventional)/config/$(arg model)/local_costmap_params.yaml" command="load" />
+    <rosparam file="$(find conventional)/config/$(arg model)/global_costmap_params.yaml" command="load" />
+  </node>
+
+  <!-- AMCL -->
+  <!-- <include file="$(find arena_bringup)/launch/amcl.launch">
+    <arg name="drl" value="true"/>
+  </include> -->
+
+  <!-- spacial_horizon -->
+  <!-- <node pkg="arena_spacial_horizon" type="spacial_horizon_node" name="spacial_horizon_node" output="screen"> -->
+    <!-- <rosparam file="$(find arena_bringup)/launch/plan_fsm_param.yaml" command="load" /> ns="fsm" -->
+  <!-- </node> -->
+
+  <!-- scan mapping, because training and real scan calibration may differ
+  <include file="$(find arena_bringup)/launch/map_scan.launch">
+  </include> -->
+
+  <!-- observation_packer- to compare calculated distances from robot to goal -->
+  <!-- <node pkg="observations" name="observation_packer" type="observation_packer" output="screen"/> -->
+
+  <!-- run_agent -->
+  <!-- <node name="DRL_local_planner" pkg="arena_local_planner_drl" type="drl_agent_real_node.py" args="$(arg agent_name)" output="screen"/> -->
+  <node name="DRL_local_planner" pkg="arena_local_planner_drl" type="drl_agent_node.py" args="$(arg agent_name)" output="screen"/>
+
+  <!-- action_publisher -->
+  <!-- makes sure that drl actions will be published according to sim time in eval mode-->
+  <node name="action_publisher" pkg="arena_local_planner_drl" type="action_publisher.py"/>
+
+</launch>

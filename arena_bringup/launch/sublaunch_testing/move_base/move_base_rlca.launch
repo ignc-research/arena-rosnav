@@ -1,4 +1,4 @@
-<!-- -->
+<!-- TODO this is not yet working since this file: dwa_local_planner_params_burger does not exist for the new models-->
 <launch>
   <!-- Arguments -->
   <arg name="model" default="burger"/>
@@ -9,14 +9,14 @@
   <!-- move_base -->
   <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
     <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS" />
-    <rosparam file="$(find conventional)/config/tb3/costmap_common_params_$(arg model).yaml" command="load" ns="global_costmap" />
-    <rosparam file="$(find conventional)/config/tb3/costmap_common_params_$(arg model).yaml" command="load" ns="local_costmap" />
-    <rosparam file="$(find conventional)/config/tb3/local_costmap_params.yaml" command="load" />
-    <rosparam file="$(find conventional)/config/tb3/global_costmap_params.yaml" command="load" />
-    <rosparam file="$(find conventional)/config/tb3/move_base_params.yaml" command="load" /> 
- 
+    <rosparam file="$(find conventional)/config/$(arg model)/costmap_common_params.yaml" command="load" ns="global_costmap" />
+    <rosparam file="$(find conventional)/config/$(arg model)/costmap_common_params.yaml" command="load" ns="local_costmap" />
+    <rosparam file="$(find conventional)/config/$(arg model)/local_costmap_params.yaml" command="load" />
+    <rosparam file="$(find conventional)/config/$(arg model)/global_costmap_params.yaml" command="load" />
+    <rosparam file="$(find conventional)/config/$(arg model)/move_base_params.yaml" command="load" /> 
 
-    <rosparam file="$(find conventional)/config/tb3/dwa_local_planner_params_burger.yaml" command="load" />
+    <rosparam file="$(find conventional)/config/$(arg model)/dwa_local_planner_params_burger.yaml" command="load" if="$(eval arg('model') == 'burger')"/>
+    <rosparam file="$(find conventional)/config/$(arg model)/base_local_planner_params.yaml" command="load" unless="$(eval arg('model') == 'burger')"/>
     <!-- <remap from="cmd_vel" to="$(arg cmd_vel_topic)"/> -->
     <remap from="cmd_vel" to="foo"/>
     <remap from="odom" to="$(arg odom_topic)"/>

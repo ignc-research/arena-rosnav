@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 from operator import is_
 from random import randint
 import gym
@@ -8,6 +8,8 @@ from typing import Union
 from stable_baselines3.common.env_checker import check_env
 import yaml
 from rl_agent.utils.observation_collector import ObservationCollector
+
+# from rl_agent.utils.CSVWriter import CSVWriter # TODO: @Elias: uncomment when csv-writer exists
 from rl_agent.utils.reward import RewardCalculator
 from rl_agent.utils.debug import timeit
 from task_generator.tasks import ABSTask
@@ -90,19 +92,25 @@ class FlatlandEnv(gym.Env):
             self.ns,
             self._laser_num_beams,
             self._laser_max_range,
-            external_time_sync=True,
+            external_time_sync=False,
         )
         self.observation_space = (
             self.observation_collector.get_observation_space()
         )
 
+        # csv writer # TODO: @Elias: uncomment when csv-writer exists
+        # self.csv_writer=CSVWriter()
+        # rospy.loginfo("======================================================")
+        # rospy.loginfo("CSVWriter initialized.")
+        # rospy.loginfo("======================================================")
+
         # reward calculator
         if safe_dist is None:
-            safe_dist = 1.6 * self._robot_radius
+            safe_dist = self._robot_radius + 0.5
 
         self.reward_calculator = RewardCalculator(
             robot_radius=self._robot_radius,
-            safe_dist=1.6 * self._robot_radius,
+            safe_dist=safe_dist,
             goal_radius=goal_radius,
             rule=reward_fnc,
             extended_eval=self._extended_eval,
@@ -131,6 +139,7 @@ class FlatlandEnv(gym.Env):
         )
 
         self._steps_curr_episode = 0
+        self._episode = 0
         self._max_steps_per_episode = max_steps_per_episode
 
         # for extended eval
@@ -149,28 +158,25 @@ class FlatlandEnv(gym.Env):
         Args:
             robot_yaml_path (str): [description]
         """
+        self._robot_radius = rospy.get_param("radius") + 0.025
         with open(robot_yaml_path, "r") as fd:
             robot_data = yaml.safe_load(fd)
-            # get robot radius
-            for body in robot_data["bodies"]:
-                if body["name"] == "base_footprint":
-                    for footprint in body["footprints"]:
-                        if footprint["type"] == "circle":
-                            self._robot_radius = (
-                                footprint.setdefault("radius", 0.3) * 1.05
-                            )
-                        if footprint["radius"]:
-                            self._robot_radius = footprint["radius"] * 1.05
+
             # get laser related information
             for plugin in robot_data["plugins"]:
-                if plugin["type"] == "Laser":
+                if (
+                    plugin["type"] == "Laser"
+                    and plugin["name"] == "static_laser"
+                ):
                     laser_angle_min = plugin["angle"]["min"]
                     laser_angle_max = plugin["angle"]["max"]
                     laser_angle_increment = plugin["angle"]["increment"]
-                    self._laser_num_beams = int(
-                        round(
-                            (laser_angle_max - laser_angle_min)
-                            / laser_angle_increment
+                    self._laser_num_beams = (
+                        int(
+                            round(
+                                (laser_angle_max - laser_angle_min)
+                                / laser_angle_increment
+                            )
                         )
                         + 1
                     )
@@ -178,8 +184,14 @@ class FlatlandEnv(gym.Env):
 
         with open(settings_yaml_path, "r") as fd:
             setting_data = yaml.safe_load(fd)
+
+            self._holonomic = setting_data["robot"]["holonomic"]
+
             if self._is_action_space_discrete:
                 # self._discrete_actions is a list, each element is a dict with the keys ["name", 'linear','angular']
+                assert (
+                    not self._holonomic
+                ), "Discrete action space currently not supported for holonomic robots"
                 self._discrete_acitons = setting_data["robot"][
                     "discrete_actions"
                 ]
@@ -191,19 +203,63 @@ class FlatlandEnv(gym.Env):
                 angular_range = setting_data["robot"]["continuous_actions"][
                     "angular_range"
                 ]
-                self.action_space = spaces.Box(
-                    low=np.array([linear_range[0], angular_range[0]]),
-                    high=np.array([linear_range[1], angular_range[1]]),
-                    dtype=np.float,
-                )
 
-    def _pub_action(self, action):
+                if not self._holonomic:
+                    self.action_space = spaces.Box(
+                        low=np.array([linear_range[0], angular_range[0]]),
+                        high=np.array([linear_range[1], angular_range[1]]),
+                        dtype=np.float,
+                    )
+                else:
+                    linear_range_x, linear_range_y = (
+                        linear_range["x"],
+                        linear_range["y"],
+                    )
+                    self.action_space = spaces.Box(
+                        low=np.array(
+                            [
+                                linear_range_x[0],
+                                linear_range_y[0],
+                                angular_range[0],
+                            ]
+                        ),
+                        high=np.array(
+                            [
+                                linear_range_x[1],
+                                linear_range_y[1],
+                                angular_range[1],
+                            ]
+                        ),
+                        dtype=np.float,
+                    )
+
+    def _pub_action(self, action: np.ndarray) -> None:
+        action_msg = (
+            self._get_hol_action_msg(action)
+            if self._holonomic
+            else self._get_nonhol_action_msg(action)
+        )
+        self.agent_action_pub.publish(action_msg)
+
+    def _get_hol_action_msg(self, action: np.ndarray):
+        assert len(action) == 3
+        action_msg = Twist()
+        action_msg.linear.x = action[0]
+        action_msg.linear.y = action[1]
+        action_msg.angular.z = action[2]
+        return action_msg
+
+    def _get_nonhol_action_msg(self, action: np.ndarray):
+        assert len(action) == 2
         action_msg = Twist()
         action_msg.linear.x = action[0]
         action_msg.angular.z = action[1]
-        self.agent_action_pub.publish(action_msg)
+        return action_msg
 
     def _translate_disc_action(self, action):
+        assert (
+            not self._holonomic
+        ), "Discrete action space currently not supported for holonomic robots"
         new_action = np.array([])
         new_action = np.append(
             new_action, self._discrete_acitons[action]["linear"]
@@ -256,6 +312,26 @@ class FlatlandEnv(gym.Env):
             info["done_reason"] = 0
             info["is_success"] = 0
 
+        history_evaluation = [self._episode]
+        if "done_reason" in info:
+            history_evaluation += [
+                info["done_reason"]
+            ]  # Added by Elias since the info is empty in the first round
+        history_evaluation += [time.time()]
+        history_evaluation += [obs_dict["laser_scan"]]
+        history_evaluation += [
+            np.sqrt(
+                (obs_dict["robot_pose"].x) ** 2
+                + (obs_dict["robot_pose"].y) ** 2
+            )
+        ]  # robot_velocity
+        history_evaluation += [
+            obs_dict["robot_pose"].theta
+        ]  # robot_orientation
+        history_evaluation += [obs_dict["robot_pose"].x]  # robot_pos_x
+        history_evaluation += [obs_dict["robot_pose"].y]  # robot_pos_y
+        history_evaluation += [action]  # action np.array
+
         # for logging
         if self._extended_eval and done:
             info["collisions"] = self._collisions
@@ -269,6 +345,7 @@ class FlatlandEnv(gym.Env):
     def reset(self):
         # set task
         # regenerate start position end goal position of the robot and change the obstacles accordingly
+        self._episode += 1
         self.agent_action_pub.publish(Twist())
         if self._is_train_mode:
             self._sim_step_client()
@@ -331,6 +408,9 @@ if __name__ == "__main__":
     print("start")
 
     flatland_env = FlatlandEnv()
+    rospy.loginfo("======================================================")
+    rospy.loginfo("CSVWriter initialized.")
+    rospy.loginfo("======================================================")
     check_env(flatland_env, warn=True)
 
     # init env

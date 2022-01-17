@@ -4,33 +4,58 @@
   <arg name="model" default="burger"/>
   <arg name="cmd_vel_topic" default="/cmd_vel" />
   <arg name="odom_topic" default="odom" />
+  <arg name="speed" default="0.22"/>
 
- 
+  <arg name="TebLocalPlannerROS/max_vel_theta" value="0.52" if="$(eval model == 'burger')"/>
+  <arg name="TebLocalPlannerROS/max_vel_y" value="2.0" if="$(eval model == 'burger')"/>
+  <arg name="TebLocalPlannerROS/acc_lim_x" value="2.0" if="$(eval model == 'burger')"/>
+  <arg name="TebLocalPlannerROS/acc_lim_y" value="2.0" if="$(eval model == 'burger')"/>
+  <arg name="TebLocalPlannerROS/acc_lim_theta" value="0.8" if="$(eval model == 'burger')"/>
+  <arg name="TebLocalPlannerROS/max_vel_x_backwards" value="1.0" if="$(eval model == 'burger')"/>
+
+  <arg name="TebLocalPlannerROS/max_vel_theta" value="4.0" if="$(eval model == 'jackal')"/>
+  <arg name="TebLocalPlannerROS/max_vel_y" value="0.0" if="$(eval model == 'jackal')"/>
+  <arg name="TebLocalPlannerROS/acc_lim_x" value="20.0" if="$(eval model == 'jackal')"/>
+  <arg name="TebLocalPlannerROS/acc_lim_y" value="0.0" if="$(eval model == 'jackal')"/>
+  <arg name="TebLocalPlannerROS/acc_lim_theta" value="1.57" if="$(eval model == 'jackal')"/>
+
+  <arg name="TebLocalPlannerROS/max_vel_y" value="0.5" if="$(eval model == 'ridgeback')"/>
+  <arg name="TebLocalPlannerROS/max_vel_theta" value="1.57" if="$(eval model == 'ridgeback')"/>
+  <arg name="TebLocalPlannerROS/acc_lim_x" value="10.0" if="$(eval model == 'ridgeback')"/>
+  <arg name="TebLocalPlannerROS/acc_lim_y" value="10.0" if="$(eval model == 'ridgeback')"/>
+  <arg name="TebLocalPlannerROS/acc_lim_theta" value="20.0" if="$(eval model == 'ridgeback')"/>
+  <arg name="TebLocalPlannerROS/max_vel_x_backwards" value="0.5" if="$(eval model == 'ridgeback')"/>
+
+  <arg name="TebLocalPlannerROS/max_vel_y" value="0.0" if="$(eval model == 'agvota')"/>
+  <arg name="TebLocalPlannerROS/max_vel_theta" value="0.08" if="$(eval model == 'agvota')"/>
+  <arg name="TebLocalPlannerROS/acc_lim_x" value="0.12" if="$(eval model == 'agvota')"/>
+  <arg name="TebLocalPlannerROS/acc_lim_y" value="0.12" if="$(eval model == 'agvota')"/>
+  <arg name="TebLocalPlannerROS/acc_lim_theta" value="0.02" if="$(eval model == 'agvota')"/>
+
   <!-- move_base -->
   <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
-    <rosparam file="$(find conventional)/config/costmap_common_params_$(arg model).yaml" command="load" ns="global_costmap" />
-    <rosparam file="$(find conventional)/config/costmap_common_params_$(arg model).yaml" command="load" ns="local_costmap" />   
-    <rosparam file="$(find conventional)/config/local_costmap_params.yaml" command="load" />
-    <rosparam file="$(find conventional)/config/global_costmap_params.yaml" command="load" />
- 
-    <!-- planner params --> 
-    <rosparam file="$(find conventional)/config/base_local_planner_params.yaml" command="load" />
+    <rosparam file="$(find conventional)/config/$(arg model)/costmap_common_params.yaml" command="load" ns="local_costmap" />
+    <rosparam file="$(find conventional)/config/$(arg model)/costmap_common_params.yaml" command="load" ns="global_costmap" />
+    <rosparam file="$(find conventional)/config/$(arg model)/local_costmap_params.yaml" command="load" />
+    <rosparam file="$(find conventional)/config/$(arg model)/global_costmap_params.yaml" command="load" />
+
+
+    <!-- planner params -->
+    <rosparam file="$(find conventional)/config/$(arg model)/base_local_planner_params.yaml" command="load" />
     <remap from="cmd_vel" to="$(arg cmd_vel_topic)"/>
-    <remap from="odom" to="$(arg odom_topic)"/>
+    <remap from="odom" to="$(arg  odom_topic)"/>
 
 
     <!-- teb -->
     <param name="base_local_planner" value="teb_local_planner/TebLocalPlannerROS" />
+    <param name="TebLocalPlannerROS/max_vel_x" value="$(arg speed)" />
     <param name="controller_frequency" value="5.0" />
     <param name="controller_patience" value="15.0" />
     <param name="planner_frequency" value="1.0" />
-    <param name="TebLocalPlannerROS/max_vel_x" value="2.0" />
-    <param name="TebLocalPlannerROS/max_vel_y" value="2.0" />
-    <param name="TebLocalPlannerROS/max_vel_theta" value="0.52" />
-    <param name="TebLocalPlannerROS/acc_lim_x" value="2.0" />
-    <param name="TebLocalPlannerROS/acc_lim_y" value="2.0" />
-    <param name="TebLocalPlannerROS/acc_lim_theta" value="0.8" />
-    <param name="TebLocalPlannerROS/max_vel_x_backwards" value="1.0" />
-
+    <param name="TebLocalPlannerROS/max_vel_y" value="$(arg TebLocalPlannerROS/max_vel_y)" />
+    <param name="TebLocalPlannerROS/max_vel_theta" value="$(arg TebLocalPlannerROS/max_vel_theta)" />
+    <param name="TebLocalPlannerROS/acc_lim_x" value="$(arg TebLocalPlannerROS/acc_lim_x)" />
+    <param name="TebLocalPlannerROS/acc_lim_y" value="$(arg TebLocalPlannerROS/acc_lim_y)" />
+    <param name="TebLocalPlannerROS/acc_lim_theta" value="$(arg TebLocalPlannerROS/acc_lim_theta)" />
   </node>
 </launch>

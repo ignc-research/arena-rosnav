@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import os
 import pickle
 import rospy
@@ -13,7 +13,7 @@ from std_msgs.msg import Bool
 
 from rl_agent.base_agent_wrapper import BaseDRLAgent
 
-
+robot_model = rospy.get_param("model")
 """ TEMPORARY GLOBAL CONSTANTS """
 NS_PREFIX = ""
 TRAINED_MODELS_DIR = os.path.join(
@@ -22,7 +22,7 @@ TRAINED_MODELS_DIR = os.path.join(
 DEFAULT_ACTION_SPACE = os.path.join(
     rospkg.RosPack().get_path("arena_local_planner_drl"),
     "configs",
-    "default_settings.yaml",
+    f"default_settings_{robot_model}.yaml",
 )
 
 
@@ -51,21 +51,19 @@ class DeploymentDRLAgent(BaseDRLAgent):
         """
         self._is_train_mode = rospy.get_param("/train_mode")
         if not self._is_train_mode:
-            rospy.init_node("DRL_local_planner", anonymous=True)
+            rospy.init_node(f"DRL_local_planner", anonymous=True)
 
         self.name = agent_name
 
         hyperparameter_path = os.path.join(
             TRAINED_MODELS_DIR, self.name, "hyperparameters.json"
         )
-
         super().__init__(
             ns,
             robot_name,
             hyperparameter_path,
             action_space_path,
         )
-
         self.setup_agent()
 
         if self._is_train_mode:
@@ -87,7 +85,6 @@ class DeploymentDRLAgent(BaseDRLAgent):
         assert os.path.isfile(
             model_file
         ), f"Compressed model cannot be found at {model_file}!"
-        self._agent = PPO.load(model_file).policy
 
         if self._agent_params["normalize"]:
             assert os.path.isfile(
@@ -97,6 +94,8 @@ class DeploymentDRLAgent(BaseDRLAgent):
             with open(vecnorm_file, "rb") as file_handler:
                 vec_normalize = pickle.load(file_handler)
             self._obs_norm_func = vec_normalize.normalize_obs
+
+        self._agent = PPO.load(model_file).policy
 
     def run(self) -> None:
         """Loop for running the agent until ROS is shutdown.
@@ -156,5 +155,6 @@ def main(agent_name: str) -> None:
 
 
 if __name__ == "__main__":
-    AGENT_NAME = "AGENT_21_2021_12_02__22_56"
+    AGENT_NAME = sys.argv[1]
+    # AGENT_NAME = "agvota"
     main(agent_name=AGENT_NAME)
