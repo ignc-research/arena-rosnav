@@ -250,7 +250,9 @@ class StagedRandomTask(RandomTask):
             self._stages[self._curr_stage]["static"]
         )
         self.obstacles_manager.register_random_dynamic_obstacles(
-            self._stages[self._curr_stage]["dynamic"]
+            self._stages[self._curr_stage]["dynamic"],
+            min_obstacle_radius=0.1,
+            max_obstacle_radius=0.3,
         )
 
         print(
