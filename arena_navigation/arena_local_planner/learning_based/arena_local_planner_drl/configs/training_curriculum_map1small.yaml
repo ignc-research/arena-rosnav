@@ -17,11 +17,21 @@
   dynamic: 12
 5:
   static: 0
-  dynamic: 14
+  dynamic: 16
 6:
   static: 0
-  dynamic: 16
+  dynamic: 20
 7:
   static: 0
-  dynamic: 20
+  dynamic: 24
+8:
+  static: 2
+  dynamic: 28
+9:
+  static: 2
+  dynamic: 32
+10:
+  static: 2
+  dynamic: 40
+
 
