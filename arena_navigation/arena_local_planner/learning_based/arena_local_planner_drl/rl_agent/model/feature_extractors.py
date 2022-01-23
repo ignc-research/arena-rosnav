@@ -335,7 +335,7 @@ class EXTRACTOR_6(BaseFeaturesExtractor):
     def __init__(
         self, observation_space: gym.spaces.Box, features_dim: int = 32
     ):
-        super(EXTRACTOR_5, self).__init__(observation_space, features_dim + _RS)
+        super(EXTRACTOR_6, self).__init__(observation_space, features_dim + _RS)
 
         self.cnn = nn.Sequential(
             nn.Conv1d(1, 32, 8, 4),
