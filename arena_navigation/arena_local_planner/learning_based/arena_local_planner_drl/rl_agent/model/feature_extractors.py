@@ -29,7 +29,10 @@ with open(yaml_ROBOT_SETTING_PATH, "r") as fd:
             laser_angle_max = plugin["angle"]["max"]
             laser_angle_increment = plugin["angle"]["increment"]
             _L = int(
-                round((laser_angle_max - laser_angle_min) / laser_angle_increment) + 1
+                round(
+                    (laser_angle_max - laser_angle_min) / laser_angle_increment
+                )
+                + 1
             )  # num of laser beams
             break
 
@@ -58,7 +61,10 @@ class MLP_ARENA2D(nn.Module):
 
         # Body network
         self.body_net = nn.Sequential(
-            nn.Linear(_L + _RS, 64), nn.ReLU(), nn.Linear(64, feature_dim), nn.ReLU()
+            nn.Linear(_L + _RS, 64),
+            nn.ReLU(),
+            nn.Linear(64, feature_dim),
+            nn.ReLU(),
         )
 
         # Policy network
@@ -90,7 +96,9 @@ class EXTRACTOR_1(BaseFeaturesExtractor):
         This corresponds to the number of unit for the last layer.
     """
 
-    def __init__(self, observation_space: gym.spaces.Box, features_dim: int = 128):
+    def __init__(
+        self, observation_space: gym.spaces.Box, features_dim: int = 128
+    ):
         super(EXTRACTOR_1, self).__init__(observation_space, features_dim + _RS)
 
         self.cnn = nn.Sequential(
@@ -133,7 +141,9 @@ class EXTRACTOR_2(BaseFeaturesExtractor):
         This corresponds to the number of unit for the last layer.
     """
 
-    def __init__(self, observation_space: gym.spaces.Box, features_dim: int = 128):
+    def __init__(
+        self, observation_space: gym.spaces.Box, features_dim: int = 128
+    ):
         super(EXTRACTOR_2, self).__init__(observation_space, features_dim + _RS)
 
         self.cnn = nn.Sequential(
@@ -176,7 +186,9 @@ class EXTRACTOR_3(BaseFeaturesExtractor):
         This corresponds to the number of unit for the last layer.
     """
 
-    def __init__(self, observation_space: gym.spaces.Box, features_dim: int = 128):
+    def __init__(
+        self, observation_space: gym.spaces.Box, features_dim: int = 128
+    ):
         super(EXTRACTOR_3, self).__init__(observation_space, features_dim + _RS)
 
         self.cnn = nn.Sequential(
@@ -224,7 +236,9 @@ class EXTRACTOR_4(BaseFeaturesExtractor):
         This corresponds to the number of unit for the last layer.
     """
 
-    def __init__(self, observation_space: gym.spaces.Box, features_dim: int = 32):
+    def __init__(
+        self, observation_space: gym.spaces.Box, features_dim: int = 32
+    ):
         super(EXTRACTOR_4, self).__init__(observation_space, features_dim + _RS)
 
         self.cnn = nn.Sequential(
@@ -269,7 +283,9 @@ class EXTRACTOR_5(BaseFeaturesExtractor):
         This corresponds to the number of unit for the last layer.
     """
 
-    def __init__(self, observation_space: gym.spaces.Box, features_dim: int = 32):
+    def __init__(
+        self, observation_space: gym.spaces.Box, features_dim: int = 32
+    ):
         super(EXTRACTOR_5, self).__init__(observation_space, features_dim + _RS)
 
         self.cnn = nn.Sequential(
@@ -280,6 +296,53 @@ class EXTRACTOR_5(BaseFeaturesExtractor):
             nn.Conv1d(64, 64, 3, 1),
             nn.ReLU(),
             nn.Conv1d(128, 256, 4, 4),
+            nn.ReLU(),
+            nn.Flatten(),
+        )
+
+        # Compute shape by doing one forward pass
+        with th.no_grad():
+            tensor_forward = th.randn(1, 1, _L)
+            n_flatten = self.cnn(tensor_forward).shape[1]
+
+        self.fc = nn.Sequential(
+            nn.Linear(n_flatten, features_dim),
+            nn.ReLU(),
+        )
+
+    def forward(self, observations: th.Tensor) -> th.Tensor:
+        """
+        :return: (th.Tensor) features,
+            extracted features by the network
+        """
+
+        laser_scan = th.unsqueeze(observations[:, :-_RS], 1)
+        robot_state = observations[:, -_RS:]
+
+        extracted_features = self.fc(self.cnn(laser_scan))
+        return th.cat((extracted_features, robot_state), 1)
+
+
+class EXTRACTOR_6(BaseFeaturesExtractor):
+    """
+    Custom Convolutional Neural Network (Nature CNN) to serve as feature extractor ahead of the policy and value head.
+
+    :param observation_space: (gym.Space)
+    :param features_dim: (int) Number of features extracted.
+        This corresponds to the number of unit for the last layer.
+    """
+
+    def __init__(
+        self, observation_space: gym.spaces.Box, features_dim: int = 32
+    ):
+        super(EXTRACTOR_5, self).__init__(observation_space, features_dim + _RS)
+
+        self.cnn = nn.Sequential(
+            nn.Conv1d(1, 32, 8, 4),
+            nn.ReLU(),
+            nn.Conv1d(32, 64, 4, 2),
+            nn.ReLU(),
+            nn.Conv1d(64, 64, 4, 2),
             nn.ReLU(),
             nn.Flatten(),
         )
