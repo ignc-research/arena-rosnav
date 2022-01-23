@@ -170,7 +170,7 @@ class RewardCalculator:
             kwargs["global_plan"], kwargs["robot_pose"]
         )
         self._reward_following_global_plan(kwargs["action"])
-        if laser_scan.min() > self.safe_dist + self.safe_dist * 0.3:
+        if laser_scan.min() > self.safe_dist + 0.35:
             self._reward_distance_global_plan(
                 reward_factor=0.2,
                 penalty_factor=0.3,
@@ -379,7 +379,7 @@ class RewardCalculator:
             last_ang_vel = self.last_action[-1]
 
             vel_diff = abs(curr_ang_vel - last_ang_vel)
-            self.curr_reward -= (vel_diff ** 4) / 1500
+            self.curr_reward -= (vel_diff ** 4) / 100
         self.last_action = action
 
     def _reward_reverse_drive(
