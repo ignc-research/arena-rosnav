@@ -206,10 +206,10 @@ class RewardCalculator:
                 reward_factor=0.2,
                 penalty_factor=0.3,
             )
-            self._reward_abrupt_vel_change(vel_idx=0, factor=0.75)
-            self._reward_abrupt_vel_change(vel_idx=-1, factor=1.25)
+            self._reward_abrupt_vel_change(vel_idx=0, factor=0.50)
+            self._reward_abrupt_vel_change(vel_idx=-1, factor=1.20)
             if self.holonomic:
-                self._reward_abrupt_vel_change(vel_idx=1, factor=0.75)
+                self._reward_abrupt_vel_change(vel_idx=1, factor=0.50)
             self._reward_reverse_drive(self._curr_action, 0.0001)
         else:
             self.last_dist_to_path = None
