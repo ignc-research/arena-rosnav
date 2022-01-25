@@ -1,0 +1,41 @@
+bodies:  # List of named bodies
+  - name: base_footprint
+    pose: [0, 0, 0] 
+    type: dynamic  
+    color: [0.2, 0.8, 0.2, 1.0] 
+    footprints:
+      - type: circle
+        radius: 0.208 
+        center: [0.0,0.0]
+        layers: ["all"]
+        collision: true
+        density: 1
+        friction: 0.1
+        restitution: 0
+        sensor: false
+      
+
+plugins:
+  - type: DiffDrive 
+    name: diff_drive 
+    body: base_footprint
+    odom_frame_id: odom
+    odom_pub: odom  # topic odom is published on
+    pub_rate: 10
+  
+  - type: Laser
+    name: static_laser
+    frame: laser_link
+    topic: scan
+    body: base_footprint
+    broadcast_tf: true
+    origin: [0.0, 0.0, 0.0]
+    range: 3.5
+    angle: {min: 0, max: 6.28318977356, increment:  0.0175019223243} # to calculate number of laser beams 
+    noise_std_dev: 0.0
+    update_rate: 10
+
+
+  - type: ModelTfPublisher
+    name: tf_publisher
+    publish_tf_world: false

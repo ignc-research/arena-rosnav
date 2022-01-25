@@ -1,8 +1,9 @@
+# TODO: The discrete actions have not been changed (from burger here)
 robot:
-  holonomic: True
+  holonomic: False
   discrete_actions:
     - name: move_forward
-      linear: 1.1
+      linear: 0.26
       angular: 0.0
     - name: move_backward
       linear: -0.15
@@ -23,7 +24,5 @@ robot:
       linear: 0.0
       angular: 0.0
   continuous_actions:
-    linear_range: 
-      x: [-1.1, 1.1] # Maximum translational velocity in m/s
-      y: [-0.5, 0.5]
-    angular_range: [-2.0, 2.0] # Maximum rotational velocity in rad/s
+    linear_range: [-0.26, 0.26] # Maximum translational velocity in m/s
+    angular_range: [-1.82, 1.82] # Maximum rotational velocity in rad/s
