@@ -109,6 +109,7 @@ class FlatlandEnv(gym.Env):
             safe_dist = self._robot_radius + 0.5
 
         self.reward_calculator = RewardCalculator(
+            holonomic=self._holonomic,
             robot_radius=self._robot_radius,
             safe_dist=safe_dist,
             goal_radius=goal_radius,
@@ -141,6 +142,7 @@ class FlatlandEnv(gym.Env):
         self._steps_curr_episode = 0
         self._episode = 0
         self._max_steps_per_episode = max_steps_per_episode
+        self._last_action = np.array([0, 0, 0])  # linear x, linear y, angular z
 
         # for extended eval
         self._action_frequency = 1 / rospy.get_param("/robot_action_rate")
@@ -158,7 +160,7 @@ class FlatlandEnv(gym.Env):
         Args:
             robot_yaml_path (str): [description]
         """
-        self._robot_radius = rospy.get_param("radius") + 0.025
+        self._robot_radius = rospy.get_param("radius") + 0.075
         with open(robot_yaml_path, "r") as fd:
             robot_data = yaml.safe_load(fd)
 
@@ -233,28 +235,13 @@ class FlatlandEnv(gym.Env):
                         dtype=np.float,
                     )
 
-    def _pub_action(self, action: np.ndarray) -> None:
-        action_msg = (
-            self._get_hol_action_msg(action)
-            if self._holonomic
-            else self._get_nonhol_action_msg(action)
-        )
-        self.agent_action_pub.publish(action_msg)
-
-    def _get_hol_action_msg(self, action: np.ndarray):
+    def _pub_action(self, action: np.ndarray) -> Twist:
         assert len(action) == 3
         action_msg = Twist()
         action_msg.linear.x = action[0]
         action_msg.linear.y = action[1]
         action_msg.angular.z = action[2]
-        return action_msg
-
-    def _get_nonhol_action_msg(self, action: np.ndarray):
-        assert len(action) == 2
-        action_msg = Twist()
-        action_msg.linear.x = action[0]
-        action_msg.angular.z = action[1]
-        return action_msg
+        self.agent_action_pub.publish(action_msg)
 
     def _translate_disc_action(self, action):
         assert (
@@ -270,7 +257,19 @@ class FlatlandEnv(gym.Env):
 
         return new_action
 
-    def step(self, action):
+    def _extend_action_array(self, action: np.ndarray) -> np.ndarray:
+        if self._holonomic:
+            assert (
+                self._holonomic and len(action) == 3
+            ), "Robot is holonomic but action with only two freedoms of movement provided"
+            return action
+        else:
+            assert (
+                not self._holonomic and len(action) == 2
+            ), "Robot is non-holonomic but action with more than two freedoms of movement provided"
+            return np.array([action[0], 0, action[1]])
+
+    def step(self, action: np.ndarray):
         """
         done_reasons:   0   -   exceeded max steps
                         1   -   collision with obstacle
@@ -278,12 +277,17 @@ class FlatlandEnv(gym.Env):
         """
         if self._is_action_space_discrete:
             action = self._translate_disc_action(action)
+        action = self._extend_action_array(action)
+
         self._pub_action(action)
         # print(f"Linear: {action[0]}, Angular: {action[1]}")
         self._steps_curr_episode += 1
 
         # wait for new observations
-        merged_obs, obs_dict = self.observation_collector.get_observations()
+        merged_obs, obs_dict = self.observation_collector.get_observations(
+            last_action=self._last_action
+        )
+        self._last_action = action
 
         # calculate reward
         reward, reward_info = self.reward_calculator.get_reward(
@@ -352,6 +356,7 @@ class FlatlandEnv(gym.Env):
         self.task.reset()
         self.reward_calculator.reset()
         self._steps_curr_episode = 0
+        self._last_action = np.array([0, 0, 0])
 
         # extended eval info
         if self._extended_eval:

@@ -239,6 +239,7 @@ class BaseDRLAgent(ABC):
         """Sets up the reward calculator."""
         assert self._agent_params and "reward_fnc" in self._agent_params
         self.reward_calculator = RewardCalculator(
+            holonomic=self._holonomic,
             robot_radius=self._robot_radius,
             safe_dist=1.6 * self._robot_radius,
             goal_radius=GOAL_RADIUS,
