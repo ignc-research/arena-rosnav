@@ -206,10 +206,10 @@ class RewardCalculator:
                 reward_factor=0.2,
                 penalty_factor=0.3,
             )
-            self._reward_abrupt_vel_change(vel_idx=0, factor=0.50)
-            self._reward_abrupt_vel_change(vel_idx=-1, factor=1.20)
+            self._reward_abrupt_vel_change(vel_idx=0, factor=0.33)
+            self._reward_abrupt_vel_change(vel_idx=-1, factor=1.5)
             if self.holonomic:
-                self._reward_abrupt_vel_change(vel_idx=1, factor=0.50)
+                self._reward_abrupt_vel_change(vel_idx=1, factor=0.33)
             self._reward_reverse_drive(self._curr_action, 0.0001)
         else:
             self.last_dist_to_path = None
@@ -414,7 +414,7 @@ class RewardCalculator:
             last_ang_vel = self.last_action[-1]
 
             vel_diff = abs(curr_ang_vel - last_ang_vel)
-            self.curr_reward -= (vel_diff ** 4) / 250
+            self.curr_reward -= (vel_diff ** 4) / 50
         self.last_action = action
 
     def _reward_reverse_drive(
@@ -439,4 +439,4 @@ class RewardCalculator:
             last_vel = self.last_action[vel_idx]
 
             vel_diff = abs(curr_vel - last_vel)
-            self.curr_reward -= ((vel_diff ** 4) / 100) * 1
+            self.curr_reward -= ((vel_diff ** 4) / 500) * 1
