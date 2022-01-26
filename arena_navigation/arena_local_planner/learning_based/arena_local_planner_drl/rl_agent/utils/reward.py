@@ -206,11 +206,11 @@ class RewardCalculator:
                 reward_factor=0.2,
                 penalty_factor=0.3,
             )
-            self._reward_abrupt_vel_change(vel_idx=0, factor=0.33)
+            self._reward_abrupt_vel_change(vel_idx=0, factor=1.0)
             self._reward_abrupt_vel_change(vel_idx=-1, factor=1.5)
             if self.holonomic:
-                self._reward_abrupt_vel_change(vel_idx=1, factor=0.33)
-            self._reward_reverse_drive(self._curr_action, 0.0001)
+                self._reward_abrupt_vel_change(vel_idx=1, factor=1.0)
+            self._reward_reverse_drive(self._curr_action, 0.00001)
         else:
             self.last_dist_to_path = None
         self._reward_goal_reached(goal_in_robot_frame, reward=15)
@@ -439,4 +439,4 @@ class RewardCalculator:
             last_vel = self.last_action[vel_idx]
 
             vel_diff = abs(curr_vel - last_vel)
-            self.curr_reward -= ((vel_diff ** 4) / 500) * 1
+            self.curr_reward -= ((vel_diff ** 4) / 250) * 1
