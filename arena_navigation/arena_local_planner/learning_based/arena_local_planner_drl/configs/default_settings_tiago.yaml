@@ -1,3 +1,4 @@
+#  TODO: @Tuan adjust the discrete actions
 robot:
   holonomic: False
   discrete_actions:
