@@ -35,6 +35,8 @@ from std_msgs.msg import Bool
 
 from rl_agent.utils.debug import timeit
 
+EXT_RS = False
+
 
 class ObservationCollector:
     def __init__(
@@ -57,20 +59,53 @@ class ObservationCollector:
             self.ns_prefix = "/" + ns + "/"
 
         # define observation_space
-        self.observation_space = ObservationCollector._stack_spaces(
-            (
-                spaces.Box(
-                    low=0,
-                    high=lidar_range,
-                    shape=(num_lidar_beams,),
-                    dtype=np.float32,
-                ),
-                spaces.Box(low=0, high=10, shape=(1,), dtype=np.float32),
-                spaces.Box(
-                    low=-np.pi, high=np.pi, shape=(1,), dtype=np.float32
-                ),
+        if not EXT_RS:
+            self.observation_space = ObservationCollector._stack_spaces(
+                (
+                    spaces.Box(
+                        low=0,
+                        high=lidar_range,
+                        shape=(num_lidar_beams,),
+                        dtype=np.float32,
+                    ),
+                    spaces.Box(low=0, high=10, shape=(1,), dtype=np.float32),
+                    spaces.Box(
+                        low=-np.pi, high=np.pi, shape=(1,), dtype=np.float32
+                    ),
+                )
             )
-        )
+        else:
+            self.observation_space = ObservationCollector._stack_spaces(
+                (
+                    spaces.Box(
+                        low=0,
+                        high=lidar_range,
+                        shape=(num_lidar_beams,),
+                        dtype=np.float32,
+                    ),
+                    spaces.Box(
+                        low=0, high=15, shape=(1,), dtype=np.float32
+                    ),  # rho
+                    spaces.Box(
+                        low=-np.pi,
+                        high=np.pi,
+                        shape=(1,),
+                        dtype=np.float32,  # theta
+                    ),
+                    spaces.Box(
+                        low=-2.0,
+                        high=2.0,
+                        shape=(2,),
+                        dtype=np.float32,  # linear vel
+                    ),
+                    spaces.Box(
+                        low=-4.0,
+                        high=4.0,
+                        shape=(1,),
+                        dtype=np.float32,  # angular vel
+                    ),
+                )
+            )
 
         self._laser_num_beams = num_lidar_beams
         # for frequency controlling
@@ -151,7 +186,7 @@ class ObservationCollector:
     def get_observation_space(self):
         return self.observation_space
 
-    def get_observations(self):
+    def get_observations(self, *args, **kwargs):
         # apply action time horizon
         if self._is_train_mode:
             self.call_service_takeSimStep(self._action_frequency)
@@ -179,13 +214,25 @@ class ObservationCollector:
         rho, theta = ObservationCollector._get_goal_pose_in_robot_frame(
             self._subgoal, self._robot_pose
         )
-        merged_obs = np.hstack([scan, np.array([rho, theta])])
+
+        merged_obs = (
+            np.hstack([scan, np.array([rho, theta])])
+            if not EXT_RS
+            else np.hstack(
+                [
+                    scan,
+                    np.array([rho, theta]),
+                    kwargs.get("last_action", np.array([0, 0, 0])),
+                ]
+            )
+        )
 
         obs_dict = {
             "laser_scan": scan,
             "goal_in_robot_frame": [rho, theta],
             "global_plan": self._globalplan,
             "robot_pose": self._robot_pose,
+            "last_action": kwargs.get("last_action", np.array([0, 0, 0])),
         }
 
         self._laser_deque.clear()

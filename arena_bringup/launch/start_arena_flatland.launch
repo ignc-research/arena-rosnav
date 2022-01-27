@@ -2,7 +2,7 @@
   <param name="use_sim_time" value="true"/>
 
   <arg name="train_mode" default="false"/>
-  <arg name="model" default="jackal"      doc="model type [burger, jackal, ridgeback, agvota]"/>
+  <arg name="model" default="jackal"      doc="model type [burger, jackal, ridgeback, agvota, rto]"/>
   <!--husy does not yet work-->
   <param name="train_mode" value="$(arg train_mode)" />
   <arg name="use_recorder" default="false"/>
@@ -73,6 +73,8 @@
   <arg name='speed' default='1.1' if="$(eval arg('model') == 'ridgeback')"/>
   <arg name='radius' default='0.629' if="$(eval arg('model') == 'agvota')"/>
   <arg name='speed' default='0.5' if="$(eval arg('model') == 'agvota')"/>
+  <arg name='radius' default='0.225' if="$(eval arg('model') == 'rto')"/>
+  <arg name='speed' default='2.78' if="$(eval arg('model') == 'rto')"/>
   <param name="radius" value="$(arg radius)"/>
   <param name="speed" value="$(arg speed)"/>
 
