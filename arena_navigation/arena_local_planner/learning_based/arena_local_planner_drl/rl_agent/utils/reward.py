@@ -201,7 +201,7 @@ class RewardCalculator:
             kwargs["global_plan"], kwargs["robot_pose"]
         )
         self._reward_following_global_plan(self._curr_action)
-        if laser_scan.min() > self.safe_dist:
+        if laser_scan.min() > self.safe_dist + 1.0:
             self._reward_distance_global_plan(
                 reward_factor=0.2,
                 penalty_factor=0.3,
