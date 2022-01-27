@@ -11,7 +11,7 @@
   <param name="world_path" value="$(find simulator_setup)/maps/$(arg map_folder_name)/map.world.yaml" /> -->
 
 
-  <arg name="model" default="burger"      doc="model type [burger, jackal, ridgeback, agvota]"/>
+  <arg name="model" default="burger"      doc="model type [burger, jackal, ridgeback, agvota, rto]"/>
   <param name="model" value="$(arg model)" />
 
   <arg name="local_planner" default="rosnav"   doc="local-planer type [teb, dwa, mpc, rlca, cadrl, arena, rosnav]"/>
@@ -26,6 +26,8 @@
   <arg name='speed' default='1.1' if="$(eval arg('model') == 'ridgeback')"/>
   <arg name='radius' default='0.629' if="$(eval arg('model') == 'agvota')"/>
   <arg name='speed' default='0.5' if="$(eval arg('model') == 'agvota')"/>
+  <arg name='radius' default='0.225' if="$(eval arg('model') == 'rto')"/>
+  <arg name='speed' default='2.78' if="$(eval arg('model') == 'rto')"/>
   <param name="radius" value="$(arg radius)"/>
   <param name="speed" value="$(arg speed)"/>
 
