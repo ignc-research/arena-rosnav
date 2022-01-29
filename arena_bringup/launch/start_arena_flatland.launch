@@ -75,6 +75,8 @@
   <arg name='speed' default='0.5' if="$(eval arg('model') == 'agvota')"/>
   <arg name='radius' default='0.225' if="$(eval arg('model') == 'rto')"/>
   <arg name='speed' default='2.78' if="$(eval arg('model') == 'rto')"/>
+  <arg name='radius' default='0.27' if="$(eval arg('model') == 'tiago')"/>
+  <arg name='radius' default='0.36' if="$(eval arg('model') == 'cob4')"/>
   <param name="radius" value="$(arg radius)"/>
   <param name="speed" value="$(arg speed)"/>
 
