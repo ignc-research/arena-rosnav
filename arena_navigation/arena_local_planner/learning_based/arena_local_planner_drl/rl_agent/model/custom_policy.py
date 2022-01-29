@@ -12,11 +12,17 @@ from stable_baselines3.common.policies import ActorCriticPolicy
 from rl_agent.model.agent_factory import AgentFactory
 
 
+__all__ = ["MLP_ARENA2D_POLICY"]
+
+
 """ 
 _RS: Robot state size - placeholder for robot related inputs to the NN
 _L: Number of laser beams - placeholder for the laser beam data 
 """
-_RS = 2  # robot state size
+if not rospy.get_param("action_in_obs", default=False):
+    _RS = 2  # robot state size
+else:
+    _RS = 2 + 3  # rho, theta, linear x, linear y, angular z
 
 robot_model = rospy.get_param("model")
 
