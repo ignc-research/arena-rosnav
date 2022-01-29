@@ -35,8 +35,6 @@ from std_msgs.msg import Bool
 
 from rl_agent.utils.debug import timeit
 
-EXT_RS = False
-
 
 class ObservationCollector:
     def __init__(
@@ -58,8 +56,10 @@ class ObservationCollector:
         else:
             self.ns_prefix = "/" + ns + "/"
 
+        self._action_in_obs = rospy.get_param("action_in_obs", default=False)
+
         # define observation_space
-        if not EXT_RS:
+        if not self._action_in_obs:
             self.observation_space = ObservationCollector._stack_spaces(
                 (
                     spaces.Box(
@@ -217,7 +217,7 @@ class ObservationCollector:
 
         merged_obs = (
             np.hstack([scan, np.array([rho, theta])])
-            if not EXT_RS
+            if not self._action_in_obs
             else np.hstack(
                 [
                     scan,
