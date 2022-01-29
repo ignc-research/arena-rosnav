@@ -117,6 +117,10 @@ class BaseDRLAgent(ABC):
 
         self._agent_params = hyperparams
         self._get_robot_name_from_params()
+        rospy.set_param(
+            "action_in_obs",
+            self._agent_params.get("actions_in_observationspace", False),
+        )
 
     def read_setting_files(
         self, robot_setting_yaml: str, action_space_yaml: str
