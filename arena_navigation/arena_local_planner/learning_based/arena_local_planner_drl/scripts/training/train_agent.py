@@ -9,12 +9,10 @@ from stable_baselines3.common.callbacks import (
     EvalCallback,
     StopTrainingOnRewardThreshold,
 )
-from stable_baselines3.common.policies import BasePolicy
+from stable_baselines3.common.policies import ActorCriticPolicy, BasePolicy
 
 from rl_agent.model.agent_factory import AgentFactory
 from rl_agent.model.base_agent import BaseAgent
-from rl_agent.model.custom_policy import *
-from rl_agent.model.custom_sb3_policy import *
 from tools.argsparser import parse_training_args
 from tools.custom_mlp_utils import *
 from tools.train_agent_utils import *
@@ -49,6 +47,9 @@ def main():
         config_name=args.config,
         n_envs=args.n_envs,
     )
+
+    import rl_agent.model.custom_policy
+    import rl_agent.model.custom_sb3_policy
 
     # instantiate train environment
     # when debug run on one process only
