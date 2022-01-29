@@ -207,7 +207,7 @@ class RewardCalculator:
                 penalty_factor=0.3,
             )
             self._reward_abrupt_vel_change(vel_idx=0, factor=3)
-            self._reward_abrupt_vel_change(vel_idx=-1, factor=1.8)
+            self._reward_abrupt_vel_change(vel_idx=-1, factor=2)
             if self.holonomic:
                 self._reward_abrupt_vel_change(vel_idx=1, factor=3)
             self._reward_reverse_drive(self._curr_action, 0.000001)
