@@ -156,5 +156,4 @@ def main(agent_name: str) -> None:
 
 if __name__ == "__main__":
     AGENT_NAME = sys.argv[1]
-    # AGENT_NAME = "agvota"
     main(agent_name=AGENT_NAME)
