@@ -173,14 +173,11 @@ class FlatlandEnv(gym.Env):
                     laser_angle_min = plugin["angle"]["min"]
                     laser_angle_max = plugin["angle"]["max"]
                     laser_angle_increment = plugin["angle"]["increment"]
-                    self._laser_num_beams = (
-                        int(
-                            round(
-                                (laser_angle_max - laser_angle_min)
-                                / laser_angle_increment
-                            )
+                    self._laser_num_beams = int(
+                        round(
+                            (laser_angle_max - laser_angle_min)
+                            / laser_angle_increment
                         )
-                        + 1
                     )
                     self._laser_max_range = plugin["range"]
 

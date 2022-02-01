@@ -51,12 +51,12 @@ class ObservationCollector:
             lidar_range (float): [description]
         """
         self.ns = ns
-        if ns is None or ns == "":
+        if ns is None or not ns:
             self.ns_prefix = ""
         else:
             self.ns_prefix = "/" + ns + "/"
 
-        self._action_in_obs = rospy.get_param("action_in_obs", default=False)
+        self._action_in_obs = rospy.get_param("actions_in_obs", default=False)
 
         # define observation_space
         if not self._action_in_obs:
