@@ -42,7 +42,6 @@ with open(yaml_ROBOT_SETTING_PATH, "r") as fd:
                 round(
                     (laser_angle_max - laser_angle_min) / laser_angle_increment
                 )
-                + 1
             )  # num of laser beams
             break
 
