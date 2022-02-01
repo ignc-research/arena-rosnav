@@ -297,8 +297,6 @@ class EXTRACTOR_5(BaseFeaturesExtractor):
             nn.ReLU(),
             nn.Conv1d(64, 64, 3, 1),
             nn.ReLU(),
-            nn.Conv1d(128, 256, 4, 4),
-            nn.ReLU(),
             nn.Flatten(),
         )
 
