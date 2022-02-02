@@ -8,7 +8,7 @@
     "task_mode": "staged",
     "train_max_steps_per_episode": 200,
     "eval_max_steps_per_episode": 300,
-    "goal_radius": 0.25,
+    "goal_radius": 0.5,
     "curr_stage": 1,
     "batch_size": 19200,
     "gamma": 0.99,
