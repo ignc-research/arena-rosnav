@@ -330,7 +330,7 @@ class FlatlandEnv(gym.Env):
             info["time"] = self._steps_curr_episode * self._action_frequency
 
         if done:
-            if sum(self._done_reasons) == 10:
+            if sum(self._done_hist) == 10:
                 print(
                     f"[ns: {self.ns_prefix}] Last 10 Episodes: "
                     f"{self._done_hist[0]}x - {self._done_reasons[str(0)]}, "
