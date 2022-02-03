@@ -330,12 +330,12 @@ class FlatlandEnv(gym.Env):
             info["time"] = self._steps_curr_episode * self._action_frequency
 
         if done:
-            if sum(self._done_hist) == 10:
+            if sum(self._done_hist) == 10 and self.ns_prefix != "/eval_sim/":
                 print(
                     f"[ns: {self.ns_prefix}] Last 10 Episodes: "
                     f"{self._done_hist[0]}x - {self._done_reasons[str(0)]}, "
-                    f"{self._done_hist[0]}x - {self._done_reasons[str(0)]}, "
-                    f"{self._done_hist[0]}x - {self._done_reasons[str(0)]}, "
+                    f"{self._done_hist[1]}x - {self._done_reasons[str(1)]}, "
+                    f"{self._done_hist[2]}x - {self._done_reasons[str(2)]}, "
                 )
                 self._done_hist = [0] * 3
             self._done_hist[int(info["done_reason"])] += 1
