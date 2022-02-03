@@ -153,10 +153,11 @@ class FlatlandEnv(gym.Env):
         self._in_crash = False
 
         self._done_reasons = {
-            "0": "Exceeded max steps per episode.",
-            "1": "Agent crashed.",
-            "2": "Agent reached goal.",
+            "0": "Exc. Max Steps",
+            "1": "Crash",
+            "2": "Goal Reached",
         }
+        self._done_hist = 3 * [0]
 
     def setup_by_configuration(
         self, robot_yaml_path: str, settings_yaml_path: str
@@ -328,11 +329,16 @@ class FlatlandEnv(gym.Env):
             )
             info["time"] = self._steps_curr_episode * self._action_frequency
 
-        if done and self.ns_prefix == "/sim_1/":
-            done_reason = info["done_reason"]
-            print(
-                f"[ns: {self.ns_prefix}] Episode ended with: {self._done_reasons[str(done_reason)]}"
-            )
+        if done:
+            if sum(self._done_reasons) == 10:
+                print(
+                    f"[ns: {self.ns_prefix}] Last 10 Episodes: "
+                    f"{self._done_hist[0]}x - {self._done_reasons[str(0)]}, "
+                    f"{self._done_hist[0]}x - {self._done_reasons[str(0)]}, "
+                    f"{self._done_hist[0]}x - {self._done_reasons[str(0)]}, "
+                )
+                self._done_hist = [0] * 3
+            self._done_hist[int(info["done_reason"])] += 1
         return merged_obs, reward, done, info
 
     def reset(self):
