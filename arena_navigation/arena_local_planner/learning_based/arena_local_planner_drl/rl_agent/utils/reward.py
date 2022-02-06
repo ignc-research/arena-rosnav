@@ -209,7 +209,7 @@ class RewardCalculator:
             self._reward_abrupt_vel_change(vel_idx=0, factor=1.0)
             self._reward_abrupt_vel_change(vel_idx=-1, factor=0.5)
             if self.holonomic:
-                self._reward_abrupt_vel_change(vel_idx=1, factor=1.0)
+                self._reward_abrupt_vel_change(vel_idx=1, factor=0.5)
             self._reward_reverse_drive(self._curr_action, 0.0001)
         else:
             self.last_dist_to_path = None
