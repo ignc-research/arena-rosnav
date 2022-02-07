@@ -19,7 +19,7 @@ __all__ = ["MLP_ARENA2D_POLICY"]
 _RS: Robot state size - placeholder for robot related inputs to the NN
 _L: Number of laser beams - placeholder for the laser beam data 
 """
-if not rospy.get_param("action_in_obs", default=False):
+if not rospy.get_param("actions_in_obs", default=False):
     _RS = 2  # robot state size
 else:
     _RS = 2 + 3  # rho, theta, linear x, linear y, angular z
@@ -42,7 +42,6 @@ with open(yaml_ROBOT_SETTING_PATH, "r") as fd:
                 round(
                     (laser_angle_max - laser_angle_min) / laser_angle_increment
                 )
-                + 1
             )  # num of laser beams
             break
 

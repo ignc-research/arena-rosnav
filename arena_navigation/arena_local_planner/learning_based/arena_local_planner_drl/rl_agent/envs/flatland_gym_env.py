@@ -152,6 +152,13 @@ class FlatlandEnv(gym.Env):
         self._collisions = 0
         self._in_crash = False
 
+        self._done_reasons = {
+            "0": "Exc. Max Steps",
+            "1": "Crash",
+            "2": "Goal Reached",
+        }
+        self._done_hist = 3 * [0]
+
     def setup_by_configuration(
         self, robot_yaml_path: str, settings_yaml_path: str
     ):
@@ -173,14 +180,11 @@ class FlatlandEnv(gym.Env):
                     laser_angle_min = plugin["angle"]["min"]
                     laser_angle_max = plugin["angle"]["max"]
                     laser_angle_increment = plugin["angle"]["increment"]
-                    self._laser_num_beams = (
-                        int(
-                            round(
-                                (laser_angle_max - laser_angle_min)
-                                / laser_angle_increment
-                            )
+                    self._laser_num_beams = int(
+                        round(
+                            (laser_angle_max - laser_angle_min)
+                            / laser_angle_increment
                         )
-                        + 1
                     )
                     self._laser_max_range = plugin["range"]
 
@@ -316,26 +320,6 @@ class FlatlandEnv(gym.Env):
             info["done_reason"] = 0
             info["is_success"] = 0
 
-        history_evaluation = [self._episode]
-        if "done_reason" in info:
-            history_evaluation += [
-                info["done_reason"]
-            ]  # Added by Elias since the info is empty in the first round
-        history_evaluation += [time.time()]
-        history_evaluation += [obs_dict["laser_scan"]]
-        history_evaluation += [
-            np.sqrt(
-                (obs_dict["robot_pose"].x) ** 2
-                + (obs_dict["robot_pose"].y) ** 2
-            )
-        ]  # robot_velocity
-        history_evaluation += [
-            obs_dict["robot_pose"].theta
-        ]  # robot_orientation
-        history_evaluation += [obs_dict["robot_pose"].x]  # robot_pos_x
-        history_evaluation += [obs_dict["robot_pose"].y]  # robot_pos_y
-        history_evaluation += [action]  # action np.array
-
         # for logging
         if self._extended_eval and done:
             info["collisions"] = self._collisions
@@ -344,6 +328,17 @@ class FlatlandEnv(gym.Env):
                 self._safe_dist_counter * self._action_frequency
             )
             info["time"] = self._steps_curr_episode * self._action_frequency
+
+        if done:
+            if sum(self._done_hist) == 10 and self.ns_prefix != "/eval_sim/":
+                print(
+                    f"[ns: {self.ns_prefix}] Last 10 Episodes: "
+                    f"{self._done_hist[0]}x - {self._done_reasons[str(0)]}, "
+                    f"{self._done_hist[1]}x - {self._done_reasons[str(1)]}, "
+                    f"{self._done_hist[2]}x - {self._done_reasons[str(2)]}, "
+                )
+                self._done_hist = [0] * 3
+            self._done_hist[int(info["done_reason"])] += 1
         return merged_obs, reward, done, info
 
     def reset(self):
