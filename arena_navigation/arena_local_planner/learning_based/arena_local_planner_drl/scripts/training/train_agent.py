@@ -112,8 +112,8 @@ def main():
     eval_cb = EvalCallback(
         eval_env=eval_env,
         train_env=env,
-        n_eval_episodes=70,
-        eval_freq=25000,
+        n_eval_episodes=100,
+        eval_freq=22500,
         log_path=PATHS["eval"],
         best_model_save_path=PATHS["model"],
         deterministic=True,
