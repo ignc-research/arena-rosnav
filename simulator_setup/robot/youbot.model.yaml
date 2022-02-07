@@ -31,7 +31,7 @@ plugins:
     broadcast_tf: true
     origin: [0.0, 0.0, 0.0]
     range: 5.6
-    angle: {min: -1.57079637051, max: 1.56466042995, increment: 0.00612393906} # 512  # 1.5700000524520874 * 2 / 150 # from `rostopic echo scan` of the original robot
+    angle: {min: -1.57079637051, max: 1.56466042995, increment: 0.00612393906} # 512  # (1.56466042995 + 1.57079637051) / 512 # from `rostopic echo scan` of the original robot
     noise_std_dev: 0.0
     update_rate: 10
 
