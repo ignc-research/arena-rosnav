@@ -34,6 +34,8 @@
   <arg name='speed' default='1.5' if="$(eval arg('model') == 'tiago')"/>
   <arg name='radius' default='0.36' if="$(eval arg('model') == 'cob4')"/>
   <arg name='speed' default='1.1' if="$(eval arg('model') == 'cob4')"/>
+  <arg name='radius' default='0.347' if="$(eval arg('model') == 'youbot')"/>
+  <arg name='speed' default='0.8' if="$(eval arg('model') == 'youbot')"/>  
   <param name="radius" value="$(arg radius)"/>
   <param name="speed" value="$(arg speed)"/>
 
