@@ -1,7 +1,7 @@
 # All-in-One Planner
 In this branch a drl planner called All-In-One Planner is developed which chooses from a given list of local planners in each iteration. The goal is to combine the strengths of drl planners and classical planners like TEB / MPC.
 
-In order to use it ZeroMQ, TQDM and joblib needs to be installed into the virtual environment.
+In order to use it ZeroMQ, TQDM, joblib and cython needs to be installed into the virtual environment.
 
 ```bash
 workon rosnav
