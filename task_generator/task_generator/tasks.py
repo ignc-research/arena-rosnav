@@ -607,36 +607,40 @@ class ScenarioTask(ABSTask):
         self.reset_count = 0
 
     def reset(self):
-        self.reset_count += 1
-        info = {}
-        with self._map_lock:
-            # reset pedsim agents
-            if self.pedsim_manager != None:
-                self.pedsim_manager.resetAllPeds()
+        if self.scenario.resets >= self.reset_count:
+            self.reset_count += 1
+            info = {}
+            with self._map_lock:
+                # reset pedsim agents
+                if self.pedsim_manager != None:
+                    self.pedsim_manager.resetAllPeds()
 
-            # reset robot
-            self.robot_manager.set_start_pos_goal_pos(
-                Pose2D(
-                    self.scenario.robotPosition[0],
-                    self.scenario.robotPosition[1],
-                    0,
-                ),
-                Pose2D(
-                    self.scenario.robotGoal[0], self.scenario.robotGoal[1], 0
-                ),
-            )
+                # reset robot
+                self.robot_manager.set_start_pos_goal_pos(
+                    Pose2D(
+                        self.scenario.robotPosition[0],
+                        self.scenario.robotPosition[1],
+                        0,
+                    ),
+                    Pose2D(
+                        self.scenario.robotGoal[0], self.scenario.robotGoal[1], 0
+                    ),
+                )
 
-            # fill info dict
-            if self.reset_count == 1:
-                info["new_scenerio_loaded"] = True
-            else:
-                info["new_scenerio_loaded"] = False
-            info["robot_goal_pos"] = self.scenario.robotGoal
-            info["num_repeats_curr_scene"] = self.reset_count
-            info[
-                "max_repeats_curr_scene"
-            ] = 1000  # todo: implement max number of repeats for scenario
-        return info
+                # fill info dict
+                if self.reset_count == 1:
+                    info["new_scenerio_loaded"] = True
+                else:
+                    info["new_scenerio_loaded"] = False
+                info["robot_goal_pos"] = self.scenario.robotGoal
+                info["num_repeats_curr_scene"] = self.reset_count
+                info[
+                    "max_repeats_curr_scene"
+                ] = 1000  # todo: implement max number of repeats for scenario
+            return info
+            
+        else:
+            return 'End'
 
 
 def get_scenario_file_format(path: str):

@@ -6,7 +6,7 @@ import time
 from std_srvs.srv import Empty, EmptyResponse
 from nav_msgs.msg import Odometry
 from task_generator.tasks import get_predefined_task
-from std_msgs.msg import Int16
+from std_msgs.msg import Int16, Bool
 # for clearing costmap
 from clear_costmap import clear_costmaps
 class TaskGenerator:
@@ -39,9 +39,11 @@ class TaskGenerator:
         
         auto_reset = auto_reset and mode == "scenario"
         self.curr_goal_pos_ = None
+        rospy.sleep(5)
         
         
         if auto_reset:
+
             rospy.loginfo(
                 "Task Generator is set to auto_reset mode, Task will be automatically reset as the robot approaching the goal_pos")
             self.reset_task()
@@ -88,7 +90,15 @@ class TaskGenerator:
         
         # clear_costmaps()
         if info is not None:
-            self.curr_goal_pos_ = info['robot_goal_pos']
+            if info == "End":
+                # communicates to launch_arena (if used) the end of the simulation
+                
+                self.end_msg = Bool()
+                self.end_msg.data = True
+                self.pub.publish(self.end_msg)
+                rospy.signal_shutdown("Finished all episodes of the current scenario")
+            else:
+                self.curr_goal_pos_ = info['robot_goal_pos']
         rospy.loginfo("".join(["="]*80))
         rospy.loginfo("goal reached and task reset!")
         rospy.loginfo("".join(["="]*80))

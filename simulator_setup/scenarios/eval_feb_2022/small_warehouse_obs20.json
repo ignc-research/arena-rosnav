@@ -1,0 +1,948 @@
+{
+    "pedsim_agents": [
+        {
+            "name": "1",
+            "id": 0,
+            "pos": [
+                -3.37,
+                -0.56
+            ],
+            "type": "adult",
+            "yaml_file": "/home/jacek/catkin_ws/src/arena-rosnav-3D/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
+            "number_of_peds": 1,
+            "vmax": 0.2,
+            "start_up_mode": "default",
+            "wait_time": 0.0,
+            "trigger_zone_radius": 0.0,
+            "chatting_probability": 0.0,
+            "tell_story_probability": 0.0,
+            "group_talking_probability": 0.0,
+            "talking_and_walking_probability": 0.0,
+            "requesting_service_probability": 0.0,
+            "requesting_guide_probability": 0.0,
+            "requesting_follower_probability": 0.0,
+            "max_talking_distance": 5,
+            "max_servicing_radius": 5,
+            "talking_base_time": 10,
+            "tell_story_base_time": 0.0,
+            "group_talking_base_time": 10,
+            "talking_and_walking_base_time": 6,
+            "receiving_service_base_time": 20,
+            "requesting_service_base_time": 30,
+            "force_factor_desired": 1,
+            "force_factor_obstacle": 1,
+            "force_factor_social": 5,
+            "force_factor_robot": 0,
+            "waypoints": [
+                [
+                    -4.65,
+                    5.57
+                ],
+                [
+                    -3.47,
+                    -0.56
+                ]
+            ],
+            "waypoint_mode": 0
+        },
+        {
+            "name": "2",
+            "id": 0,
+            "pos": [
+                0.0,
+                0.0
+            ],
+            "type": "adult",
+            "yaml_file": "/home/jacek/catkin_ws/src/arena-rosnav-3D/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
+            "number_of_peds": 1,
+            "vmax": 0.2,
+            "start_up_mode": "default",
+            "wait_time": 0.0,
+            "trigger_zone_radius": 0.0,
+            "chatting_probability": 0.0,
+            "tell_story_probability": 0.0,
+            "group_talking_probability": 0.0,
+            "talking_and_walking_probability": 0.0,
+            "requesting_service_probability": 0.0,
+            "requesting_guide_probability": 0.0,
+            "requesting_follower_probability": 0.0,
+            "max_talking_distance": 5,
+            "max_servicing_radius": 5,
+            "talking_base_time": 10,
+            "tell_story_base_time": 0.0,
+            "group_talking_base_time": 10,
+            "talking_and_walking_base_time": 6,
+            "receiving_service_base_time": 20,
+            "requesting_service_base_time": 30,
+            "force_factor_desired": 1,
+            "force_factor_obstacle": 1,
+            "force_factor_social": 5,
+            "force_factor_robot": 0,
+            "waypoints": [
+                [
+                    -4.46,
+                    -3.36
+                ],
+                [
+                    0.23,
+                    -0.44
+                ]
+            ],
+            "waypoint_mode": 0
+        },
+        {
+            "name": "3",
+            "id": 0,
+            "pos": [
+                1.32,
+                1.15
+            ],
+            "type": "adult",
+            "yaml_file": "/home/jacek/catkin_ws/src/arena-rosnav-3D/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
+            "number_of_peds": 1,
+            "vmax": 0.2,
+            "start_up_mode": "default",
+            "wait_time": 0.0,
+            "trigger_zone_radius": 0.0,
+            "chatting_probability": 0.0,
+            "tell_story_probability": 0.0,
+            "group_talking_probability": 0.0,
+            "talking_and_walking_probability": 0.0,
+            "requesting_service_probability": 0.0,
+            "requesting_guide_probability": 0.0,
+            "requesting_follower_probability": 0.0,
+            "max_talking_distance": 5,
+            "max_servicing_radius": 5,
+            "talking_base_time": 10,
+            "tell_story_base_time": 0.0,
+            "group_talking_base_time": 10,
+            "talking_and_walking_base_time": 6,
+            "receiving_service_base_time": 20,
+            "requesting_service_base_time": 30,
+            "force_factor_desired": 1,
+            "force_factor_obstacle": 1,
+            "force_factor_social": 5,
+            "force_factor_robot": 0,
+            "waypoints": [
+                [
+                    -0.33,
+                    -3.04
+                ],
+                [
+                    1.39,
+                    1.08
+                ]
+            ],
+            "waypoint_mode": 0
+        },
+        {
+            "name": "5",
+            "id": 0,
+            "pos": [
+                -0.47,
+                -8.29
+            ],
+            "type": "adult",
+            "yaml_file": "/home/jacek/catkin_ws/src/arena-rosnav-3D/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
+            "number_of_peds": 1,
+            "vmax": 0.2,
+            "start_up_mode": "default",
+            "wait_time": 0.0,
+            "trigger_zone_radius": 0.0,
+            "chatting_probability": 0.0,
+            "tell_story_probability": 0.0,
+            "group_talking_probability": 0.0,
+            "talking_and_walking_probability": 0.0,
+            "requesting_service_probability": 0.0,
+            "requesting_guide_probability": 0.0,
+            "requesting_follower_probability": 0.0,
+            "max_talking_distance": 5,
+            "max_servicing_radius": 5,
+            "talking_base_time": 10,
+            "tell_story_base_time": 0.0,
+            "group_talking_base_time": 10,
+            "talking_and_walking_base_time": 6,
+            "receiving_service_base_time": 20,
+            "requesting_service_base_time": 30,
+            "force_factor_desired": 1,
+            "force_factor_obstacle": 1,
+            "force_factor_social": 5,
+            "force_factor_robot": 0,
+            "waypoints": [
+                [
+                    2.29,
+                    -5.03
+                ],
+                [
+                    -0.68,
+                    -5.23
+                ],
+                [
+                    -0.57,
+                    -8.42
+                ]
+            ],
+            "waypoint_mode": 0
+        },
+        {
+            "name": "6",
+            "id": 0,
+            "pos": [
+                -3.52,
+                -5.15
+            ],
+            "type": "adult",
+            "yaml_file": "/home/jacek/catkin_ws/src/arena-rosnav-3D/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
+            "number_of_peds": 1,
+            "vmax": 0.2,
+            "start_up_mode": "default",
+            "wait_time": 0.0,
+            "trigger_zone_radius": 0.0,
+            "chatting_probability": 0.0,
+            "tell_story_probability": 0.0,
+            "group_talking_probability": 0.0,
+            "talking_and_walking_probability": 0.0,
+            "requesting_service_probability": 0.0,
+            "requesting_guide_probability": 0.0,
+            "requesting_follower_probability": 0.0,
+            "max_talking_distance": 5,
+            "max_servicing_radius": 5,
+            "talking_base_time": 10,
+            "tell_story_base_time": 0.0,
+            "group_talking_base_time": 10,
+            "talking_and_walking_base_time": 6,
+            "receiving_service_base_time": 20,
+            "requesting_service_base_time": 30,
+            "force_factor_desired": 1,
+            "force_factor_obstacle": 1,
+            "force_factor_social": 5,
+            "force_factor_robot": 0,
+            "waypoints": [
+                [
+                    -1.49,
+                    0.74
+                ],
+                [
+                    2.36,
+                    -2.88
+                ],
+                [
+                    -3.51,
+                    -5.18
+                ]
+            ],
+            "waypoint_mode": 0
+        },
+        {
+            "name": "7",
+            "id": 0,
+            "pos": [
+                -4.03,
+                -2.17
+            ],
+            "type": "adult",
+            "yaml_file": "/home/jacek/catkin_ws/src/arena-rosnav-3D/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
+            "number_of_peds": 1,
+            "vmax": 0.2,
+            "start_up_mode": "default",
+            "wait_time": 0.0,
+            "trigger_zone_radius": 0.0,
+            "chatting_probability": 0.0,
+            "tell_story_probability": 0.0,
+            "group_talking_probability": 0.0,
+            "talking_and_walking_probability": 0.0,
+            "requesting_service_probability": 0.0,
+            "requesting_guide_probability": 0.0,
+            "requesting_follower_probability": 0.0,
+            "max_talking_distance": 5,
+            "max_servicing_radius": 5,
+            "talking_base_time": 10,
+            "tell_story_base_time": 0.0,
+            "group_talking_base_time": 10,
+            "talking_and_walking_base_time": 6,
+            "receiving_service_base_time": 20,
+            "requesting_service_base_time": 30,
+            "force_factor_desired": 1,
+            "force_factor_obstacle": 1,
+            "force_factor_social": 5,
+            "force_factor_robot": 0,
+            "waypoints": [
+                [
+                    2.05,
+                    -2.04
+                ],
+                [
+                    -4.23,
+                    -2.14
+                ]
+            ],
+            "waypoint_mode": 0
+        },
+        {
+            "name": "8",
+            "id": 0,
+            "pos": [
+                -4.02,
+                -6.78
+            ],
+            "type": "adult",
+            "yaml_file": "/home/jacek/catkin_ws/src/arena-rosnav-3D/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
+            "number_of_peds": 1,
+            "vmax": 0.2,
+            "start_up_mode": "default",
+            "wait_time": 0.0,
+            "trigger_zone_radius": 0.0,
+            "chatting_probability": 0.0,
+            "tell_story_probability": 0.0,
+            "group_talking_probability": 0.0,
+            "talking_and_walking_probability": 0.0,
+            "requesting_service_probability": 0.0,
+            "requesting_guide_probability": 0.0,
+            "requesting_follower_probability": 0.0,
+            "max_talking_distance": 5,
+            "max_servicing_radius": 5,
+            "talking_base_time": 10,
+            "tell_story_base_time": 0.0,
+            "group_talking_base_time": 10,
+            "talking_and_walking_base_time": 6,
+            "receiving_service_base_time": 20,
+            "requesting_service_base_time": 30,
+            "force_factor_desired": 1,
+            "force_factor_obstacle": 1,
+            "force_factor_social": 5,
+            "force_factor_robot": 0,
+            "waypoints": [
+                [
+                    2.06,
+                    2.37
+                ],
+                [
+                    -0.04,
+                    0.71
+                ],
+                [
+                    -3.99,
+                    0.59
+                ],
+                [
+                    -4.11,
+                    -6.88
+                ]
+            ],
+            "waypoint_mode": 0
+        },
+        {
+            "name": "9",
+            "id": 0,
+            "pos": [
+                0.38,
+                6.73
+            ],
+            "type": "adult",
+            "yaml_file": "/home/jacek/catkin_ws/src/arena-rosnav-3D/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
+            "number_of_peds": 1,
+            "vmax": 0.2,
+            "start_up_mode": "default",
+            "wait_time": 0.0,
+            "trigger_zone_radius": 0.0,
+            "chatting_probability": 0.0,
+            "tell_story_probability": 0.0,
+            "group_talking_probability": 0.0,
+            "talking_and_walking_probability": 0.0,
+            "requesting_service_probability": 0.0,
+            "requesting_guide_probability": 0.0,
+            "requesting_follower_probability": 0.0,
+            "max_talking_distance": 5,
+            "max_servicing_radius": 5,
+            "talking_base_time": 10,
+            "tell_story_base_time": 0.0,
+            "group_talking_base_time": 10,
+            "talking_and_walking_base_time": 6,
+            "receiving_service_base_time": 20,
+            "requesting_service_base_time": 30,
+            "force_factor_desired": 1,
+            "force_factor_obstacle": 1,
+            "force_factor_social": 5,
+            "force_factor_robot": 0,
+            "waypoints": [
+                [
+                    0.3,
+                    -8.46
+                ],
+                [
+                    0.42,
+                    6.57
+                ]
+            ],
+            "waypoint_mode": 0
+        },
+        {
+            "name": "10",
+            "id": 0,
+            "pos": [
+                -5.07,
+                7.26
+            ],
+            "type": "adult",
+            "yaml_file": "/home/jacek/catkin_ws/src/arena-rosnav-3D/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
+            "number_of_peds": 1,
+            "vmax": 0.2,
+            "start_up_mode": "default",
+            "wait_time": 0.0,
+            "trigger_zone_radius": 0.0,
+            "chatting_probability": 0.0,
+            "tell_story_probability": 0.0,
+            "group_talking_probability": 0.0,
+            "talking_and_walking_probability": 0.0,
+            "requesting_service_probability": 0.0,
+            "requesting_guide_probability": 0.0,
+            "requesting_follower_probability": 0.0,
+            "max_talking_distance": 5,
+            "max_servicing_radius": 5,
+            "talking_base_time": 10,
+            "tell_story_base_time": 0.0,
+            "group_talking_base_time": 10,
+            "talking_and_walking_base_time": 6,
+            "receiving_service_base_time": 20,
+            "requesting_service_base_time": 30,
+            "force_factor_desired": 1,
+            "force_factor_obstacle": 1,
+            "force_factor_social": 5,
+            "force_factor_robot": 0,
+            "waypoints": [
+                [
+                    -2.49,
+                    3.8
+                ],
+                [
+                    1.67,
+                    3.72
+                ],
+                [
+                    -2.53,
+                    3.65
+                ],
+                [
+                    -5.02,
+                    7.12
+                ]
+            ],
+            "waypoint_mode": 0
+        },
+        {
+            "name": "11",
+            "id": 0,
+            "pos": [
+                -4.35,
+                -4.39
+            ],
+            "type": "adult",
+            "yaml_file": "/home/jacek/catkin_ws/src/arena-rosnav-3D/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
+            "number_of_peds": 1,
+            "vmax": 0.2,
+            "start_up_mode": "default",
+            "wait_time": 0.0,
+            "trigger_zone_radius": 0.0,
+            "chatting_probability": 0.0,
+            "tell_story_probability": 0.0,
+            "group_talking_probability": 0.0,
+            "talking_and_walking_probability": 0.0,
+            "requesting_service_probability": 0.0,
+            "requesting_guide_probability": 0.0,
+            "requesting_follower_probability": 0.0,
+            "max_talking_distance": 5,
+            "max_servicing_radius": 5,
+            "talking_base_time": 10,
+            "tell_story_base_time": 0.0,
+            "group_talking_base_time": 10,
+            "talking_and_walking_base_time": 6,
+            "receiving_service_base_time": 20,
+            "requesting_service_base_time": 30,
+            "force_factor_desired": 1,
+            "force_factor_obstacle": 1,
+            "force_factor_social": 5,
+            "force_factor_robot": 0,
+            "waypoints": [
+                [
+                    2.62,
+                    -4.12
+                ],
+                [
+                    -4.54,
+                    -4.56
+                ]
+            ],
+            "waypoint_mode": 0
+        },
+        {
+            "name": "12",
+            "id": 0,
+            "pos": [
+                2.0,
+                0.43
+            ],
+            "type": "adult",
+            "yaml_file": "/home/jacek/catkin_ws/src/arena-rosnav-3D/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
+            "number_of_peds": 1,
+            "vmax": 0.2,
+            "start_up_mode": "default",
+            "wait_time": 0.0,
+            "trigger_zone_radius": 0.0,
+            "chatting_probability": 0.0,
+            "tell_story_probability": 0.0,
+            "group_talking_probability": 0.0,
+            "talking_and_walking_probability": 0.0,
+            "requesting_service_probability": 0.0,
+            "requesting_guide_probability": 0.0,
+            "requesting_follower_probability": 0.0,
+            "max_talking_distance": 5,
+            "max_servicing_radius": 5,
+            "talking_base_time": 10,
+            "tell_story_base_time": 0.0,
+            "group_talking_base_time": 10,
+            "talking_and_walking_base_time": 6,
+            "receiving_service_base_time": 20,
+            "requesting_service_base_time": 30,
+            "force_factor_desired": 1,
+            "force_factor_obstacle": 1,
+            "force_factor_social": 5,
+            "force_factor_robot": 0,
+            "waypoints": [
+                [
+                    1.97,
+                    -4.57
+                ],
+                [
+                    1.97,
+                    0.4
+                ]
+            ],
+            "waypoint_mode": 0
+        },
+        {
+            "name": "14",
+            "id": 0,
+            "pos": [
+                -2.37,
+                6.83
+            ],
+            "type": "adult",
+            "yaml_file": "/home/jacek/catkin_ws/src/arena-rosnav-3D/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
+            "number_of_peds": 1,
+            "vmax": 0.2,
+            "start_up_mode": "default",
+            "wait_time": 0.0,
+            "trigger_zone_radius": 0.0,
+            "chatting_probability": 0.0,
+            "tell_story_probability": 0.0,
+            "group_talking_probability": 0.0,
+            "talking_and_walking_probability": 0.0,
+            "requesting_service_probability": 0.0,
+            "requesting_guide_probability": 0.0,
+            "requesting_follower_probability": 0.0,
+            "max_talking_distance": 5,
+            "max_servicing_radius": 5,
+            "talking_base_time": 10,
+            "tell_story_base_time": 0.0,
+            "group_talking_base_time": 10,
+            "talking_and_walking_base_time": 6,
+            "receiving_service_base_time": 20,
+            "requesting_service_base_time": 30,
+            "force_factor_desired": 1,
+            "force_factor_obstacle": 1,
+            "force_factor_social": 5,
+            "force_factor_robot": 0,
+            "waypoints": [
+                [
+                    1.78,
+                    6.84
+                ],
+                [
+                    -2.13,
+                    6.86
+                ]
+            ],
+            "waypoint_mode": 0
+        },
+        {
+            "name": "15",
+            "id": 0,
+            "pos": [
+                -4.78,
+                -0.57
+            ],
+            "type": "adult",
+            "yaml_file": "/home/jacek/catkin_ws/src/arena-rosnav-3D/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
+            "number_of_peds": 1,
+            "vmax": 0.2,
+            "start_up_mode": "default",
+            "wait_time": 0.0,
+            "trigger_zone_radius": 0.0,
+            "chatting_probability": 0.0,
+            "tell_story_probability": 0.0,
+            "group_talking_probability": 0.0,
+            "talking_and_walking_probability": 0.0,
+            "requesting_service_probability": 0.0,
+            "requesting_guide_probability": 0.0,
+            "requesting_follower_probability": 0.0,
+            "max_talking_distance": 5,
+            "max_servicing_radius": 5,
+            "talking_base_time": 10,
+            "tell_story_base_time": 0.0,
+            "group_talking_base_time": 10,
+            "talking_and_walking_base_time": 6,
+            "receiving_service_base_time": 20,
+            "requesting_service_base_time": 30,
+            "force_factor_desired": 1,
+            "force_factor_obstacle": 1,
+            "force_factor_social": 5,
+            "force_factor_robot": 0,
+            "waypoints": [
+                [
+                    -2.75,
+                    3.04
+                ],
+                [
+                    -4.93,
+                    -0.72
+                ]
+            ],
+            "waypoint_mode": 0
+        },
+        {
+            "name": "16",
+            "id": 0,
+            "pos": [
+                -2.94,
+                -9.4
+            ],
+            "type": "adult",
+            "yaml_file": "/home/jacek/catkin_ws/src/arena-rosnav-3D/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
+            "number_of_peds": 1,
+            "vmax": 0.2,
+            "start_up_mode": "default",
+            "wait_time": 0.0,
+            "trigger_zone_radius": 0.0,
+            "chatting_probability": 0.0,
+            "tell_story_probability": 0.0,
+            "group_talking_probability": 0.0,
+            "talking_and_walking_probability": 0.0,
+            "requesting_service_probability": 0.0,
+            "requesting_guide_probability": 0.0,
+            "requesting_follower_probability": 0.0,
+            "max_talking_distance": 5,
+            "max_servicing_radius": 5,
+            "talking_base_time": 10,
+            "tell_story_base_time": 0.0,
+            "group_talking_base_time": 10,
+            "talking_and_walking_base_time": 6,
+            "receiving_service_base_time": 20,
+            "requesting_service_base_time": 30,
+            "force_factor_desired": 1,
+            "force_factor_obstacle": 1,
+            "force_factor_social": 5,
+            "force_factor_robot": 0,
+            "waypoints": [
+                [
+                    -3.48,
+                    -3.09
+                ],
+                [
+                    -2.78,
+                    -9.49
+                ]
+            ],
+            "waypoint_mode": 0
+        },
+        {
+            "name": "17",
+            "id": 0,
+            "pos": [
+                -1.72,
+                -5.51
+            ],
+            "type": "adult",
+            "yaml_file": "/home/jacek/catkin_ws/src/arena-rosnav-3D/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
+            "number_of_peds": 1,
+            "vmax": 0.2,
+            "start_up_mode": "default",
+            "wait_time": 0.0,
+            "trigger_zone_radius": 0.0,
+            "chatting_probability": 0.0,
+            "tell_story_probability": 0.0,
+            "group_talking_probability": 0.0,
+            "talking_and_walking_probability": 0.0,
+            "requesting_service_probability": 0.0,
+            "requesting_guide_probability": 0.0,
+            "requesting_follower_probability": 0.0,
+            "max_talking_distance": 5,
+            "max_servicing_radius": 5,
+            "talking_base_time": 10,
+            "tell_story_base_time": 0.0,
+            "group_talking_base_time": 10,
+            "talking_and_walking_base_time": 6,
+            "receiving_service_base_time": 20,
+            "requesting_service_base_time": 30,
+            "force_factor_desired": 1,
+            "force_factor_obstacle": 1,
+            "force_factor_social": 5,
+            "force_factor_robot": 0,
+            "waypoints": [
+                [
+                    -1.82,
+                    0.98
+                ],
+                [
+                    -1.79,
+                    -5.58
+                ],
+                [
+                    -4.98,
+                    -0.18
+                ]
+            ],
+            "waypoint_mode": 0
+        },
+        {
+            "name": "12",
+            "id": 0,
+            "pos": [
+                -4.99,
+                2.96
+            ],
+            "type": "adult",
+            "yaml_file": "/home/jacek/catkin_ws/src/arena-rosnav-3D/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
+            "number_of_peds": 1,
+            "vmax": 0.2,
+            "start_up_mode": "default",
+            "wait_time": 0.0,
+            "trigger_zone_radius": 0.0,
+            "chatting_probability": 0.0,
+            "tell_story_probability": 0.0,
+            "group_talking_probability": 0.0,
+            "talking_and_walking_probability": 0.0,
+            "requesting_service_probability": 0.0,
+            "requesting_guide_probability": 0.0,
+            "requesting_follower_probability": 0.0,
+            "max_talking_distance": 5,
+            "max_servicing_radius": 5,
+            "talking_base_time": 10,
+            "tell_story_base_time": 0.0,
+            "group_talking_base_time": 10,
+            "talking_and_walking_base_time": 6,
+            "receiving_service_base_time": 20,
+            "requesting_service_base_time": 30,
+            "force_factor_desired": 1,
+            "force_factor_obstacle": 1,
+            "force_factor_social": 5,
+            "force_factor_robot": 0,
+            "waypoints": [
+                [
+                    -4.58,
+                    0.4
+                ],
+                [
+                    -5.01,
+                    2.53
+                ]
+            ],
+            "waypoint_mode": 0
+        },
+        {
+            "name": "13",
+            "id": 0,
+            "pos": [
+                -0.78,
+                -6.68
+            ],
+            "type": "adult",
+            "yaml_file": "/home/jacek/catkin_ws/src/arena-rosnav-3D/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
+            "number_of_peds": 1,
+            "vmax": 0.2,
+            "start_up_mode": "default",
+            "wait_time": 0.0,
+            "trigger_zone_radius": 0.0,
+            "chatting_probability": 0.0,
+            "tell_story_probability": 0.0,
+            "group_talking_probability": 0.0,
+            "talking_and_walking_probability": 0.0,
+            "requesting_service_probability": 0.0,
+            "requesting_guide_probability": 0.0,
+            "requesting_follower_probability": 0.0,
+            "max_talking_distance": 5,
+            "max_servicing_radius": 5,
+            "talking_base_time": 10,
+            "tell_story_base_time": 0.0,
+            "group_talking_base_time": 10,
+            "talking_and_walking_base_time": 6,
+            "receiving_service_base_time": 20,
+            "requesting_service_base_time": 30,
+            "force_factor_desired": 1,
+            "force_factor_obstacle": 1,
+            "force_factor_social": 5,
+            "force_factor_robot": 0,
+            "waypoints": [
+                [
+                    0.84,
+                    -6.71
+                ],
+                [
+                    -0.7,
+                    -6.76
+                ]
+            ],
+            "waypoint_mode": 0
+        },
+        {
+            "name": "14",
+            "id": 0,
+            "pos": [
+                -3.14,
+                1.42
+            ],
+            "type": "adult",
+            "yaml_file": "/home/jacek/catkin_ws/src/arena-rosnav-3D/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
+            "number_of_peds": 1,
+            "vmax": 0.2,
+            "start_up_mode": "default",
+            "wait_time": 0.0,
+            "trigger_zone_radius": 0.0,
+            "chatting_probability": 0.0,
+            "tell_story_probability": 0.0,
+            "group_talking_probability": 0.0,
+            "talking_and_walking_probability": 0.0,
+            "requesting_service_probability": 0.0,
+            "requesting_guide_probability": 0.0,
+            "requesting_follower_probability": 0.0,
+            "max_talking_distance": 5,
+            "max_servicing_radius": 5,
+            "talking_base_time": 10,
+            "tell_story_base_time": 0.0,
+            "group_talking_base_time": 10,
+            "talking_and_walking_base_time": 6,
+            "receiving_service_base_time": 20,
+            "requesting_service_base_time": 30,
+            "force_factor_desired": 1,
+            "force_factor_obstacle": 1,
+            "force_factor_social": 5,
+            "force_factor_robot": 0,
+            "waypoints": [
+                [
+                    -5.04,
+                    1.36
+                ],
+                [
+                    -5.04,
+                    0.2
+                ],
+                [
+                    -2.91,
+                    1.36
+                ]
+            ],
+            "waypoint_mode": 0
+        },
+        {
+            "name": "15",
+            "id": 0,
+            "pos": [
+                -1.32,
+                -0.3
+            ],
+            "type": "adult",
+            "yaml_file": "/home/jacek/catkin_ws/src/arena-rosnav-3D/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
+            "number_of_peds": 1,
+            "vmax": 0.2,
+            "start_up_mode": "default",
+            "wait_time": 0.0,
+            "trigger_zone_radius": 0.0,
+            "chatting_probability": 0.0,
+            "tell_story_probability": 0.0,
+            "group_talking_probability": 0.0,
+            "talking_and_walking_probability": 0.0,
+            "requesting_service_probability": 0.0,
+            "requesting_guide_probability": 0.0,
+            "requesting_follower_probability": 0.0,
+            "max_talking_distance": 5,
+            "max_servicing_radius": 5,
+            "talking_base_time": 10,
+            "tell_story_base_time": 0.0,
+            "group_talking_base_time": 10,
+            "talking_and_walking_base_time": 6,
+            "receiving_service_base_time": 20,
+            "requesting_service_base_time": 30,
+            "force_factor_desired": 1,
+            "force_factor_obstacle": 1,
+            "force_factor_social": 5,
+            "force_factor_robot": 0,
+            "waypoints": [
+                [
+                    -2.23,
+                    -2.54
+                ],
+                [
+                    -1.27,
+                    -0.31
+                ]
+            ],
+            "waypoint_mode": 0
+        },
+        {
+            "name": "16",
+            "id": 0,
+            "pos": [
+                -2.23,
+                -4.51
+            ],
+            "type": "adult",
+            "yaml_file": "/home/jacek/catkin_ws/src/arena-rosnav-3D/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
+            "number_of_peds": 1,
+            "vmax": 0.2,
+            "start_up_mode": "default",
+            "wait_time": 0.0,
+            "trigger_zone_radius": 0.0,
+            "chatting_probability": 0.0,
+            "tell_story_probability": 0.0,
+            "group_talking_probability": 0.0,
+            "talking_and_walking_probability": 0.0,
+            "requesting_service_probability": 0.0,
+            "requesting_guide_probability": 0.0,
+            "requesting_follower_probability": 0.0,
+            "max_talking_distance": 5,
+            "max_servicing_radius": 5,
+            "talking_base_time": 10,
+            "tell_story_base_time": 0.0,
+            "group_talking_base_time": 10,
+            "talking_and_walking_base_time": 6,
+            "receiving_service_base_time": 20,
+            "requesting_service_base_time": 30,
+            "force_factor_desired": 1,
+            "force_factor_obstacle": 1,
+            "force_factor_social": 5,
+            "force_factor_robot": 0,
+            "waypoints": [
+                [
+                    -0.74,
+                    -2.45
+                ],
+                [
+                    -2.23,
+                    -4.53
+                ]
+            ],
+            "waypoint_mode": 0
+        }
+    ],
+    "static_obstacles": [],
+    "robot_position": [
+        -3.71,
+        9.21
+    ],
+    "robot_goal": [
+        1.73,
+        -9.57
+    ],
+    "resets": 4,
+    "map_path": "/home/jacek/catkin_ws/src/arena-rosnav-3D/simulator_setup/maps/small_warehouse/map.yaml",
+    "format": "arena-tools"
+}
