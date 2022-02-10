@@ -652,7 +652,7 @@ Visualization Manager:
       Value: true
     - Class: rviz/MarkerArray
       Enabled: true
-      Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_00
+      Marker Topic: /flatland_server/debug/model/person_0
       Name: MarkerArray
       Namespaces:
         "": true
@@ -660,7 +660,7 @@ Visualization Manager:
       Value: true
     - Class: rviz/MarkerArray
       Enabled: true
-      Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_01
+      Marker Topic: /flatland_server/debug/model/person_1
       Name: MarkerArray
       Namespaces:
         "": true
@@ -668,7 +668,7 @@ Visualization Manager:
       Value: true
     - Class: rviz/MarkerArray
       Enabled: true
-      Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_02
+      Marker Topic: /flatland_server/debug/model/person_2
       Name: MarkerArray
       Namespaces:
         "": true
@@ -676,7 +676,7 @@ Visualization Manager:
       Value: true
     - Class: rviz/MarkerArray
       Enabled: true
-      Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_03
+      Marker Topic: /flatland_server/debug/model/person_3
       Name: MarkerArray
       Namespaces:
         "": true
@@ -684,7 +684,7 @@ Visualization Manager:
       Value: true
     - Class: rviz/MarkerArray
       Enabled: true
-      Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_04
+      Marker Topic: /flatland_server/debug/model/person_4
       Name: MarkerArray
       Namespaces:
         "": true
@@ -692,7 +692,7 @@ Visualization Manager:
       Value: true
     - Class: rviz/MarkerArray
       Enabled: true
-      Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_05
+      Marker Topic: /flatland_server/debug/model/person_5
       Name: MarkerArray
       Namespaces:
         "": true
@@ -700,7 +700,7 @@ Visualization Manager:
       Value: true
     - Class: rviz/MarkerArray
       Enabled: true
-      Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_06
+      Marker Topic: /flatland_server/debug/model/person_6
       Name: MarkerArray
       Namespaces:
         "": true
@@ -708,7 +708,7 @@ Visualization Manager:
       Value: true
     - Class: rviz/MarkerArray
       Enabled: true
-      Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_07
+      Marker Topic: /flatland_server/debug/model/person_7
       Name: MarkerArray
       Namespaces:
         "": true
@@ -716,7 +716,7 @@ Visualization Manager:
       Value: true
     - Class: rviz/MarkerArray
       Enabled: true
-      Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_08
+      Marker Topic: /flatland_server/debug/model/person_8
       Name: MarkerArray
       Namespaces:
         "": true
@@ -724,7 +724,7 @@ Visualization Manager:
       Value: true
     - Class: rviz/MarkerArray
       Enabled: true
-      Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_09
+      Marker Topic: /flatland_server/debug/model/person_9
       Name: MarkerArray
       Namespaces:
         "": true

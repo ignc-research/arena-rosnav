@@ -39,7 +39,6 @@ class TaskGenerator:
         
         auto_reset = auto_reset and mode == "scenario"
         self.curr_goal_pos_ = None
-        rospy.sleep(5)
         
         
         if auto_reset:
