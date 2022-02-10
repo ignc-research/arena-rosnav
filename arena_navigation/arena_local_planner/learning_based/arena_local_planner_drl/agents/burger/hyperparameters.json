@@ -1,9 +1,10 @@
 {
-    "agent_name": "AGENT_21_2022_01_10__00_44",
+    "agent_name": "AGENT_24_2022_01_27__20_31",
     "robot": "burger",
+    "actions_in_observationspace": true,	
     "batch_size": 19200,
     "gamma": 0.99,
-    "n_steps": 1600,
+    "n_steps": 1200,
     "ent_coef": 0.005,
     "learning_rate": 0.0003,
     "vf_coef": 0.22,
@@ -12,12 +13,12 @@
     "m_batch_size": 15,
     "n_epochs": 3,
     "clip_range": 0.22,
-    "train_max_steps_per_episode": 150,
-    "eval_max_steps_per_episode": 350,
+    "train_max_steps_per_episode": 250,
+    "eval_max_steps_per_episode": 400,
     "goal_radius": 0.25,
-    "reward_fnc": "rule_04",
+    "reward_fnc": "rule_05",
     "discrete_action_space": false,
     "normalize": false,
     "task_mode": "staged",
-    "curr_stage": 4
+    "curr_stage": 6
 }
