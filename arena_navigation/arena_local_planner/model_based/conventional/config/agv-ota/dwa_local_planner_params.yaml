@@ -1,0 +1,67 @@
+#dwa_local_planner
+DWAPlannerROS:
+  holonomic_robot: false
+  dwa: true
+
+  heading_scoring: false
+  heading_lookahead: 1.0
+
+  acc_lim_x: 0.5
+  acc_lim_y: 0.0
+  acc_lim_th: 0.3
+  max_vel_trans: 0.5
+  min_vel_trans: 0.1
+  max_vel_x: 0.5 #0.12 0.3
+  min_vel_x: -0.5
+  max_vel_y: 0.0
+  min_vel_y: 0.0
+  max_vel_theta: 0.4
+  min_vel_theta: 0.1
+
+  yaw_goal_tolerance: 0.15
+  xy_goal_tolerance: 0.15 #0.10 # 0.50
+  latch_xy_goal_tolerance: false
+
+  sim_time: 2.0 #4.0 #2.0
+  sim_granularity: 0.025 #0.25 #0.025
+  vx_samples: 5 #20  #3
+  vy_samples: 0
+  vth_samples: 10 #40 #5
+  controller_frequency: 5 #20.0  #5
+
+  # Trajectory Scoring Parameters
+
+  # cost =
+  #  path_distance_bias * (distance to path from the endpoint of the trajectory in meters)
+  #  + goal_distance_bias * (distance to local goal from the endpoint of the trajectory in meters)
+  #  + occdist_scale * (maximum obstacle cost along the trajectory in obstacle cost (0-254))
+
+  path_distance_bias: 32.0
+  #    The weighting for how much the controller should stay close to the path it was given. default: 32.0
+  goal_distance_bias: 24.0
+  #    The weighting for how much the controller should attempt to reach its local goal, also controls speed. default: 24.0
+  occdist_scale: 0.5
+  #    The weighting for how much the controller should attempt to avoid obstacles. default 0.01
+  forward_point_distance: 0.325
+  #    The weighting for how much the controller should attempt to avoid obstacles. default: 0.325
+  stop_time_buffer: 1.0
+  #    The amount of time that the robot must stop before a collision in order for a trajectory to be considered valid in seconds. default 0.2
+  scaling_speed: 0.25
+  #    The absolute value of the velocity at which to start scaling the robot's footprint, in m/s.  default: 0.25
+  max_scaling_factor: 0.2
+  #    The maximum factor to scale the robot's footprint by. default: 0.2
+
+  # Oscillation Prevention Parameters
+  oscillation_reset_dist: 0.05
+  #    How far the robot must travel in meters before oscillation flags are reset. default: 0.05
+  oscillation_reset_angle: 0.1
+
+  # Debugging
+  publish_cost_grid: true
+  #	Whether or not to publish the cost grid that the planner will use when planning. When true, a sensor_msgs/PointCloud2 will be available on the ~<name>/cost_cloud topic. Each point cloud represents the cost grid and has a field for each individual scoring function component as well as the overall cost for each cell, taking the scoring parameters into account.
+  publish_cost_grid_pc: true
+  publish_traj_pc: true
+
+  prune_plan: true
+  #	Defines whether or not to eat up the plan as the robot moves along the path. If set to true, points will fall off the end of the plan once the robot moves 1 meter past them.  default: true
+  global_frame_id: map

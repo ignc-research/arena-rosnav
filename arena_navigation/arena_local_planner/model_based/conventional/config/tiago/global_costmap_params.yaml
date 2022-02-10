@@ -1,0 +1,10 @@
+global_costmap:
+  global_frame: map
+  robot_base_frame: base_footprint
+
+  # params are from https://github.com/pal-robotics/pal_navigation_cfg_public/blob/master/pal_navigation_cfg_pmb2/config/base/common/global_costmap_public_sim.yaml
+  update_frequency: 10.0
+  publish_frequency: 1.0
+  transform_tolerance: 0.2
+
+  static_map: true

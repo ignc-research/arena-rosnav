@@ -1,0 +1,7 @@
+global_costmap:
+    publish_voxel_map: true
+    global_frame: map
+    robot_base_frame: base_link
+    publish_frequency: 0.0
+    static_map: true
+    rolling_window: false

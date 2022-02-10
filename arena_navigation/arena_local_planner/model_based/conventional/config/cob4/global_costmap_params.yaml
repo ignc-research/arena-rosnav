@@ -1,0 +1,9 @@
+#global
+global_costmap:
+  global_frame: map
+  robot_base_frame: base_footprint
+  static_map: true
+  width: 25.0
+  height: 25.0
+  inflation_layer:
+    inflation_radius: 0.2 #0.01    # Global pathteki mesafeyi genisletiyor

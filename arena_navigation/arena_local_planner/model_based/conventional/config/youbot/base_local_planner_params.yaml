@@ -1,0 +1,32 @@
+# from https://github.com/youbot/youbot_navigation/blob/hydro-devel/youbot_navigation_common/config/base_local_planner_params.yaml
+# Robot Configuration Parameters
+TrajectoryPlannerROS:
+    acc_lim_x: 1.25
+    acc_lim_y: 1.25
+    acc_lim_th: 1.6
+    max_vel_x: 0.8
+    min_vel_x: 0.1
+    max_rotational_vel: 1.2
+    min_in_place_rotational_vel: 0.1
+    escape_vel: -0.1
+    holonomic_robot: true
+
+    # Goal Tolerance Parameters
+    xy_goal_tolerance: 0.1
+    yaw_goal_tolerance: 0.1
+
+    # Forward Simulation Parameters
+    sim_time: 1.7
+    sim_granularity: 0.025
+    vx_samples: 3
+    vtheta_samples: 6
+
+    # Trajectory Scoring Parameters
+    goal_distance_bias: 0.8
+    path_distance_bias: 0.6
+    occdist_scale: 0.01
+    heading_lookahead: 0.325
+    dwa: false
+
+    # Oscillation Prevention Parameters
+    oscillation_reset_dist: 0.01

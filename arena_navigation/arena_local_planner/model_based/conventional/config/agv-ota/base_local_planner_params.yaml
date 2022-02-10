@@ -1,0 +1,17 @@
+#base_local_planner
+TrajectoryPlannerROS:
+  holonomic_robot: false
+  dwa: true
+
+  heading_scoring: false
+  heading_lookahead: 1.0
+
+  max_vel_x: 0.5 #0.12
+  min_vel_x: 0.09
+  max_vel_theta: 0.4
+  min_in_place_vel_theta: 0.04
+  escape_vel: -0.5
+
+  acc_lim_theta: 0.3
+  acc_lim_x: 0.5
+  acc_lim_y: 0.0

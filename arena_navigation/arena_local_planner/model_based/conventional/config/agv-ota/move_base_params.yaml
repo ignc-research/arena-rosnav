@@ -1,0 +1,10 @@
+
+controller_patience: 15.0
+#	default:15.0   	How long the controller will wait in seconds without receiving a valid control before space-clearing operations are performed. 
+controller_frequency: 5.0
+planner_frequency: 1.0
+
+conservative_reset_dist: 3.0
+planner_frequency: 1.0
+oscillation_timeout: 10.0
+oscillation_distance: 0.2
