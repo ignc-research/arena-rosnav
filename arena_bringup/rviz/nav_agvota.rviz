@@ -7,9 +7,7 @@ Panels:
         - /robot1/Goal Pose1
         - /Global Plan1/teb1
         - /Sensors1/LaserScan1
-        - /obstacles1
         - /obstacles1/dynamic1/301
-        - /LaserScan1
       Splitter Ratio: 0.4374079406261444
     Tree Height: 787
   - Class: rviz/Selection
@@ -125,22 +123,22 @@ Visualization Manager:
           Class: rviz/Map
           Color Scheme: map
           Draw Behind: false
-          Enabled: false
+          Enabled: true
           Name: Global_costmap
           Topic: /move_base/global_costmap/costmap
           Unreliable: false
           Use Timestamp: false
-          Value: false
+          Value: true
         - Alpha: 0.699999988079071
           Class: rviz/Map
           Color Scheme: costmap
           Draw Behind: false
-          Enabled: false
+          Enabled: true
           Name: Local_costmap
           Topic: /move_base/local_costmap/costmap
           Unreliable: false
           Use Timestamp: false
-          Value: false
+          Value: true
       Enabled: true
       Name: Map
     - Class: rviz/Group

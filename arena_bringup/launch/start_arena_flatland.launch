@@ -83,6 +83,8 @@
   <arg name='speed' default='1.1' if="$(eval arg('model') == 'cob4')"/>
   <arg name='radius' default='0.347' if="$(eval arg('model') == 'youbot')"/>
   <arg name='speed' default='0.8' if="$(eval arg('model') == 'youbot')"/>  
+  <arg name='radius' default='0.208' if="$(eval arg('model') == 'waffle_pi')"/>
+  <arg name='speed' default='0.26' if="$(eval arg('model') == 'waffle_pi')"/>  
   <param name="radius" value="$(arg radius)"/>
   <param name="speed" value="$(arg speed)"/>
 

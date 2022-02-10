@@ -1,7 +1,7 @@
 local_costmap:
   map_type: costmap
 
-  global_frame: map
+  global_frame: odom
   robot_base_frame: base_footprint
 
   # params are from https://github.com/pal-robotics/pal_navigation_cfg_public/blob/master/pal_navigation_cfg_pmb2/config/base/common/local_costmap_public_sim.yaml
@@ -16,39 +16,6 @@ local_costmap:
   resolution: 0.025
 
   robot_radius: 0.275
-
-  plugins:
-    - name: obstacle_laser_layer
-      type: "costmap_2d::ObstacleLayer"
-    - name: obstacle_sonar_layer
-      type: "costmap_2d::ObstacleLayer"
-    - name: obstacle_ir_layer
-      type: "costmap_2d::ObstacleLayer"
-    - name: obstacle_bumper_layer
-      type: "costmap_2d::ObstacleLayer"
-    - name: obstacle_vo_layer
-      type: "costmap_2d::ObstacleLayer"
-    - name: inflation_layer
-      type: "costmap_2d::InflationLayer"
-
-  #plugins are loaded on a separate file
-  # TODO: this area may need to be adjusted or removed
-  obstacle_laser_layer:
-    enabled: true
-    observation_sources: base_scan
-    combination_method: 0 # can erase static layer
-
-    base_scan:
-      sensor_frame: base_laser_link
-      data_type: LaserScan
-      topic: scan
-      expected_update_rate: 0.3
-      observation_persistence: 0.0
-      inf_is_valid: true
-      marking: true
-      clearing: true
-      raytrace_range: 6.0
-      obstacle_range: 5.5
 
   inflation_layer:
     enabled: true
