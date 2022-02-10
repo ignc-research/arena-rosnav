@@ -3,6 +3,7 @@
 from logging import setLogRecordFactory
 import rospy
 import time
+import subprocess
 from std_srvs.srv import Empty, EmptyResponse
 from nav_msgs.msg import Odometry
 from task_generator.tasks import get_predefined_task
@@ -40,6 +41,7 @@ class TaskGenerator:
         auto_reset = auto_reset and mode == "scenario"
         self.curr_goal_pos_ = None
         
+        self.pub = rospy.Publisher('End_of_scenario', Bool, queue_size=10)
         
         if auto_reset:
 
@@ -86,15 +88,12 @@ class TaskGenerator:
     def reset_task(self):
         self.start_time_=time.time()
         info = self.task.reset()
-        
         # clear_costmaps()
         if info is not None:
             if info == "End":
                 # communicates to launch_arena (if used) the end of the simulation
                 
-                self.end_msg = Bool()
-                self.end_msg.data = True
-                self.pub.publish(self.end_msg)
+                subprocess.Popen("rosnode kill --all", shell=True)
                 rospy.signal_shutdown("Finished all episodes of the current scenario")
             else:
                 self.curr_goal_pos_ = info['robot_goal_pos']
