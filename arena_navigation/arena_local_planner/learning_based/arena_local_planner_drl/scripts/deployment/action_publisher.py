@@ -22,18 +22,13 @@ class ActionPublisher():
         # apply rate in sim time
         rate = (1/self._action_publish_rate)/self._real_second_in_sim
 
-        ns_prefix = "" if '/single_env' in rospy.get_param_names() else "/eval_sim/"
+        ns_prefix = "/" if '/single_env' in rospy.get_param_names() else "/eval_sim/"
         self._pub_cmd_vel = rospy.Publisher(
             f"{ns_prefix}cmd_vel", Twist, queue_size=1)
         self._pub_cycle_trigger = rospy.Publisher(
             f"{ns_prefix}next_cycle", Bool, queue_size=1)
         self._sub = rospy.Subscriber(
             f"{ns_prefix}cmd_vel_pub", Twist, self.callback_receive_cmd_vel, queue_size=1)
-
-        # to measure sim time
-        # self._clock_sub = rospy.Subscriber(
-        #     f"{ns_prefix}clock", Clock, self.callback_clock)
-        # last = 0
 
         self._action = Twist()
         self._signal = Bool()
@@ -52,17 +47,11 @@ class ActionPublisher():
             
             print(f"Published same action: {last_action==self._action}")
             last_action = self._action
-            
+            rospy.loginfo("Test")
             time.sleep(rate)
-            
-            # print(f"sim time between cmd_vel: {self._clock - last}")
-            # last = self._clock
 
     def callback_receive_cmd_vel(self, msg_cmd_vel: Twist):
         self._action = msg_cmd_vel
-
-    def callback_clock(self, msg_clock: Clock):
-        self._clock = msg_clock.clock.to_sec()
         
 if __name__ == '__main__':
     try:

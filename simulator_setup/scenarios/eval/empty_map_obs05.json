@@ -89,7 +89,7 @@
                         "watcher_3"
                     ]
                 },
-               
+
                 "dynamic_obs_4": {
                     "obstacle_radius": 0.3,
                      "linear_velocity": 0.2,
@@ -118,7 +118,7 @@
 
             },
             "static_obstacles": {
-                
+
             },
             "robot": {
                 "start_pos": [

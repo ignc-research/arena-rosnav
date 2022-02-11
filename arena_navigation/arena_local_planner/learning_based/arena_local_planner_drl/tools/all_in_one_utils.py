@@ -1,13 +1,13 @@
 import csv
 import math
 import time
-from shutil import copyfile
 
 import numpy as np
-import rospy
 import torch
-import visualization_msgs
 from stable_baselines3.common.vec_env import VecNormalize
+
+import rospy
+import visualization_msgs
 from visualization_msgs.msg import Marker
 
 
@@ -35,6 +35,15 @@ class Evaluator:
         model_distribution_medium_obst_dist = np.zeros((episodes, env.env_method("get_number_models")[0]))
         model_distribution_large_obst_dist = np.zeros((episodes, env.env_method("get_number_models")[0]))
 
+        policy_switching_prob_close_dist = np.zeros((episodes,))
+        close_dist_iterations = 0
+        policy_switching_prob_medium_dist = np.zeros((episodes,))
+        medium_dist_iterations = 0
+        policy_switching_prob_large_dist = np.zeros((episodes,))
+        large_dist_iterations = 0
+        policy_switching_prob_avg = np.zeros((episodes,))
+        overall_iterations = 0
+
         model_names = env.env_method('get_model_names')[0]
 
         env.reset()
@@ -47,6 +56,8 @@ class Evaluator:
             current_reward = 0
             current_iteration = 0
             while not done:
+                if log_statistics:
+                    start_time = time.time()
                 action = np.array([policy(obs)])
                 obs_forward = torch.as_tensor([obs]).to("cuda")
                 possible_actions = [i for i in range(env.env_method("get_number_models")[0])]
@@ -59,10 +70,7 @@ class Evaluator:
                     action_probs = np.array(action_probs_tensor)
                 self.visualize_action_probs(action_probs, model_names)
 
-                if log_statistics:
-                    start_time = time.time()
-
-                time.sleep(0.05)
+                # time.sleep(0.05)
                 obs, reward, done, info = env.step(action)
 
                 if log_statistics:
@@ -89,10 +97,26 @@ class Evaluator:
                             distance_travelled.append(info['distance_travelled'])
                             travel_time.append(info['time'])
 
-                        model_distribution[i, :] = info['model_distribution']
-                        model_distribution_close_obst_dist[i, :] = info['model_distribution_close_obst_dist']
-                        model_distribution_medium_obst_dist[i, :] = info['model_distribution_medium_obst_dist']
-                        model_distribution_large_obst_dist[i, :] = info['model_distribution_large_obst_dist']
+                        overall_iterations += info['action_iterations']
+                        close_dist_iterations += info['action_iterations_close_obst_dist']
+                        medium_dist_iterations += info['action_iterations_medium_obst_dist']
+                        large_dist_iterations += info['action_iterations_large_obst_dist']
+
+                        model_distribution[i, :] = info['model_distribution'] * info['action_iterations']
+                        model_distribution_close_obst_dist[i, :] = info['model_distribution_close_obst_dist'] * info[
+                            'action_iterations_close_obst_dist']
+                        model_distribution_medium_obst_dist[i, :] = info['model_distribution_medium_obst_dist'] * info[
+                            'action_iterations_medium_obst_dist']
+                        model_distribution_large_obst_dist[i, :] = info['model_distribution_large_obst_dist'] * info[
+                            'action_iterations_large_obst_dist']
+
+                        policy_switching_prob_avg[i] = info['action_change_prob'] * info['action_iterations']
+                        policy_switching_prob_close_dist[i] = info['action_change_prob_close_obst_dist'] * info[
+                            'action_iterations_close_obst_dist']
+                        policy_switching_prob_medium_dist[i] = info['action_change_prob_medium_obst_dist'] * info[
+                            'action_iterations_medium_obst_dist']
+                        policy_switching_prob_large_dist[i] = info['action_change_prob_large_obst_dist'] * info[
+                            'action_iterations_large_obst_dist']
 
         if log_statistics:
             # remove empty entries
@@ -109,6 +133,24 @@ class Evaluator:
                 for i in range(episodes - 1):
                     writer.writerow(["{:.2f}".format(rewards[i]), collisions[i], is_success[i]])
 
+            mean_model_distribution = np.sum(model_distribution, axis=0) / overall_iterations
+            mean_model_distribution_close_dist = np.sum(model_distribution_close_obst_dist,
+                                                        axis=0) / close_dist_iterations
+            mean_model_distribution_medium_dist = np.sum(model_distribution_medium_obst_dist,
+                                                         axis=0) / medium_dist_iterations
+            mean_model_distribution_large_dist = np.sum(model_distribution_large_obst_dist,
+                                                        axis=0) / large_dist_iterations
+
+            mean_policy_switching_prob_avg = np.sum(policy_switching_prob_avg, axis=0) / overall_iterations
+            mean_policy_switching_prob_close_dist = np.sum(policy_switching_prob_close_dist,
+                                                           axis=0) / close_dist_iterations
+            mean_policy_switching_prob_medium_dist = np.sum(policy_switching_prob_medium_dist,
+                                                            axis=0) / medium_dist_iterations
+            mean_policy_switching_prob_large_dist = np.sum(policy_switching_prob_large_dist,
+                                                           axis=0) / large_dist_iterations
+
+            mean_time_out = 1 - np.mean(collisions) - np.mean(is_success)
+
             with open(log_folder + "/evaluation_summary.txt", 'w') as file:
                 file.write("Mean reward: " + str(np.mean(rewards)) + "\n")
                 file.write("Mean global path reward: " + str(np.mean(global_path_rewards)) + "\n")
@@ -116,35 +158,53 @@ class Evaluator:
                 file.write("Mean distance travelled: " + str(np.mean(distance_travelled)) + "\n")
                 file.write("Mean time: " + str(np.mean(travel_time)) + "\n")
                 file.write("Mean success rate: " + str(np.mean(is_success)) + "\n")
+                file.write("Mean time out: " + str(mean_time_out) + "\n")
                 file.write("Mean computation time per second simulation time " + str(comp_times_mean_per_second) + "\n")
                 file.write("Mean computation per local planner iteration " + str(
                     np.mean(computation_times_local_planner)) + "\n")
-                file.write("Mean model distribution: " + str(np.mean(model_distribution, axis=0)) + "\n")
+                file.write("Mean model distribution: " + str(mean_model_distribution) + "\n")
                 file.write("Mean model distribution close obstacle distance: " + str(
-                    np.mean(model_distribution_close_obst_dist, axis=0)) + "\n")
+                    mean_model_distribution_close_dist) + "\n")
                 file.write("Mean model distribution medium obstacle distance: " + str(
-                    np.mean(model_distribution_medium_obst_dist, axis=0)) + "\n")
+                    mean_model_distribution_medium_dist) + "\n")
                 file.write("Mean model distribution large obstacle distance: " + str(
-                    np.mean(model_distribution_large_obst_dist, axis=0)) + "\n")
+                    mean_model_distribution_large_dist) + "\n")
+
+                file.write("Mean policy switching prob: " + str(mean_policy_switching_prob_avg) + "\n")
+                file.write("Mean policy switching prob close obstacle distance: " + str(
+                    mean_policy_switching_prob_close_dist) + "\n")
+                file.write("Mean policy switching prob medium obstacle distance: " + str(
+                    mean_policy_switching_prob_medium_dist) + "\n")
+                file.write("Mean policy switching prob large obstacle distance: " + str(
+                    mean_policy_switching_prob_large_dist) + "\n")
+
                 file.write("With models: " + str(env.env_method("get_model_names")[0]))
 
-            summary_csv = [str(np.mean(is_success)), str(np.mean(collisions)), str(np.mean(travel_time)),
-                           str(np.mean(distance_travelled)), str(np.mean(rewards)),
+            summary_csv = [str(np.mean(is_success)), str(np.mean(collisions)), str(mean_time_out),
+                           str(np.mean(travel_time)), str(np.mean(distance_travelled)), str(np.mean(rewards)),
                            str(comp_times_mean_per_second), str(np.mean(computation_times_local_planner)),
-                           str(np.mean(model_distribution, axis=0))]
+                           str(mean_model_distribution), str(mean_model_distribution_close_dist),
+                           str(mean_model_distribution_medium_dist), str(mean_model_distribution_large_dist),
+                           str(mean_policy_switching_prob_avg), str(mean_policy_switching_prob_close_dist),
+                           str(mean_policy_switching_prob_medium_dist), str(mean_policy_switching_prob_large_dist)]
             with open(log_folder + '/evaluation_summary.csv', 'w', newline='') as file:
                 writer = csv.writer(file)
                 writer.writerow(["Mean success rate", summary_csv[0]])
                 writer.writerow(["Mean collisions", summary_csv[1]])
-                writer.writerow(["Mean time", summary_csv[2]])
-                writer.writerow(["Mean distance travelled", summary_csv[3]])
-                writer.writerow(["Mean reward", summary_csv[4]])
-                writer.writerow(["Mean computation time per second simulation time", summary_csv[5]])
-                writer.writerow(["Mean computation per local planner iteration", summary_csv[6]])
-                writer.writerow(["Mean model distribution", summary_csv[7]])
-
-            # copy config file
-            copyfile(all_in_config_file, log_folder + '/all_in_one_parameters.json')
+                writer.writerow(["Mean time outs", summary_csv[2]])
+                writer.writerow(["Mean time", summary_csv[3]])
+                writer.writerow(["Mean distance travelled", summary_csv[4]])
+                writer.writerow(["Mean reward", summary_csv[5]])
+                writer.writerow(["Mean computation time per second simulation time", summary_csv[6]])
+                writer.writerow(["Mean computation per local planner iteration", summary_csv[7]])
+                writer.writerow(["Mean model distribution", summary_csv[8]])
+                writer.writerow(["Mean model distribution close obstacle distance", summary_csv[9]])
+                writer.writerow(["Mean model distribution medium obstacle distance", summary_csv[10]])
+                writer.writerow(["Mean model distribution large obstacle distance", summary_csv[11]])
+                writer.writerow(["Mean policy switching prob", summary_csv[12]])
+                writer.writerow(["Mean policy switching prob close obstacle distance", summary_csv[13]])
+                writer.writerow(["Mean policy switching prob medium obstacle distance", summary_csv[14]])
+                writer.writerow(["Mean policy switching prob large obstacle distance", summary_csv[15]])
 
             return summary_csv
 

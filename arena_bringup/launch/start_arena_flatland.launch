@@ -3,6 +3,10 @@
 
   <arg name="train_mode"       default="false"/>
   <param name="train_mode" value="$(arg train_mode)" />
+  <arg name="use_recorder" default="false"/>
+  <arg name="record_only_planner" default="true"/>
+  <arg name="waypoint_generator" default="classic"/>
+  <arg name="requestID"       default="user1"/>
 
   <arg name="local_planner"   default="teb"/>
   <arg name="rviz_file"       default="nav_LP"/>
@@ -46,6 +50,16 @@
   <arg name="action_frequency" default="10"/>
   <param name="action_frequency" value="$(arg action_frequency)"/>
 
+  <!-- data recorder -->
+  <param name="local_planner"  value="$(arg local_planner)"/>
+  <param name="waypoint_generator"  value="$(arg waypoint_generator)"/>
+  <param name="record_only_planner"  value="$(arg record_only_planner)"/>
+  <param name="scenario_file"  value="$(arg scenario_file)"/>
+  <param name="requestID"  value="$(arg requestID)"/>
+  <group if="$(eval arg('use_recorder') == true)">
+    <node pkg="arena_evaluation" name="data_recorder_node" type="data_recorder_node.py" />
+  </group>
+
   <!-- Map parameters -->
   <arg name="global_frame_id"   value="map"/>
   <arg name="odom_frame_id"     value="odom"/>
@@ -74,7 +88,7 @@
   </include>
 
   <!-- start task_generator node -->
-  <arg name="timeout"        default="2.0"/>
+  <arg name="timeout"        default="1.0"/>
   <include file="$(find arena_bringup)/launch/sublaunch_testing/task_generator.launch" unless="$(eval arg('disable_scenario') or arg('train_mode'))">
    <arg name="scenarios_json_path"  value="$(find simulator_setup)/scenarios/$(arg scenario_file)"/>
    <arg name="auto_reset"           value="$(arg reset)"/>

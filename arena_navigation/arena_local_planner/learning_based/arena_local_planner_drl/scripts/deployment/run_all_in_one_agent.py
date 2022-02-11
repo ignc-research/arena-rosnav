@@ -19,9 +19,13 @@ from tools.all_in_one_utils import Evaluator
 from tools.argsparser import parse_run_agent_args
 from tools.train_agent_utils import print_hyperparameters
 
-PRIMITIVE_AGENTS = ['simple_all_in_one', 'random', 'drl_only', 'teb_only', 'rlca_only', 'mpc_only', 'dwa_only']
-AVAILABLE_AGENTS = ['mixed_teb_drl4_rule06_policy2', 'simple_all_in_one']
-AGENTS = ['mixed_teb_drl4_rule06_policy2']
+PRIMITIVE_AGENTS = ['teb_only',  # 0.76
+                    'drl_only',  # 0.82
+                    'drl03_only', 'rlca_only', 'mpc_only', 'dwa_only',
+                    'teb_large_min_dist_only', 'teb_dyn_obst_only', 'arena_ros_only', 'eband_only']
+AVAILABLE_AGENTS = ["teb_drl4_rule07_nn13_16+d_mixed_5M_2", "teb_drl4_rule06_nn22_fx3_mixed_5M"]
+AGENT_NAMES = ['aio_s+d', 'aio_fx3']
+AGENTS = ['teb_drl4_rule07_nn13_16+d_mixed_5M_2']
 max_steps_per_episode = np.inf
 eval_episodes = 1000
 
@@ -38,22 +42,22 @@ def get_paths(AGENT: str, args, primitive_agent=False, is_random_agent=False):
             'robot_as': os.path.join(rospkg.RosPack().get_path('arena_local_planner_drl'), 'configs',
                                      'default_settings.yaml'),
             'curriculum': os.path.join(dir, 'configs', 'training_curriculum_map1small.yaml'),
-            'drl_agents': os.path.join(dir, 'agents'),
+            'drl_agents': os.path.join(dir, 'agents', 'rosnav-agents'),
             'hyperparams': os.path.join(dir, 'configs', 'hyperparameters', 'all_in_one_default.json'),
         }
     else:
         paths = {
             'scenario': os.path.join(rospkg.RosPack().get_path('simulator_setup'), 'scenarios',
                                      args.scenario + '.json'),
-            'hyperparams': os.path.join(dir, 'agents', AGENT, 'hyperparameters.json'),
-            'model': os.path.join(dir, 'agents', AGENT),
-            'all_in_one_parameters': os.path.join(dir, 'agents', AGENT, 'all_in_one_parameters.json'),
-            'vecnorm': os.path.join(dir, 'agents', AGENT, 'vec_normalize.pkl'),
+            'hyperparams': os.path.join(dir, 'agents', 'aio-agents', AGENT, 'hyperparameters.json'),
+            'model': os.path.join(dir, 'agents', 'aio-agents', AGENT),
+            'all_in_one_parameters': os.path.join(dir, 'agents', 'aio-agents', AGENT, 'all_in_one_parameters.json'),
+            'vecnorm': os.path.join(dir, 'agents', 'aio-agents', AGENT, 'vec_normalize.pkl'),
             'robot_setting': os.path.join(rospkg.RosPack().get_path('simulator_setup'), 'robot', 'myrobot.model.yaml'),
             'robot_as': os.path.join(rospkg.RosPack().get_path('arena_local_planner_drl'), 'configs',
                                      'default_settings.yaml'),
             'curriculum': os.path.join(dir, 'configs', 'training_curriculum_map1small.yaml'),
-            'drl_agents': os.path.join(dir, 'agents'),
+            'drl_agents': os.path.join(dir, 'agents', 'rosnav-agents'),
         }
     if is_random_agent:
         AGENT = "random"
@@ -116,6 +120,8 @@ if __name__ == "__main__":
     while len(AGENTS) != 0:
         AGENT = AGENTS.pop(0)
         print(f"START RUNNING AGENT:    {AGENT}")
+        if AGENT in AGENT_NAMES:
+            AGENT = AVAILABLE_AGENTS[AGENT_NAMES.index(AGENT)]
         if AGENT in PRIMITIVE_AGENTS:
             if AGENT == "simple_all_in_one":
                 paths = get_paths(AGENT, args, primitive_agent=True)

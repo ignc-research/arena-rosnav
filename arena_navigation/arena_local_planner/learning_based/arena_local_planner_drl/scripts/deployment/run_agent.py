@@ -87,7 +87,7 @@ if __name__ == "__main__":
         PATHS = get_paths(args, AGENT)
 
         assert os.path.isfile(
-            os.path.join(PATHS['model'], "best_model.zip")), "No model file found in %s" % PATHS['model']
+            os.path.join(PATHS['model'], "best_model_2.zip")), "No model file found in %s" % PATHS['model']
         assert os.path.isfile(
             PATHS['scenario']), "No scenario file named %s" % PATHS['scenario']
 
@@ -105,7 +105,7 @@ if __name__ == "__main__":
             env = VecNormalize.load(PATHS['vecnorm'], env)
 
         # load agent
-        agent = PPO.load(os.path.join(PATHS['model'], "best_model.zip"), env)
+        agent = PPO.load(os.path.join(PATHS['model'], "best_model_2.zip"), env)
 
         try:
             evaluate_policy(

@@ -1,0 +1,48 @@
+collision_alpha: 0.1
+collision_size: 1.0
+collision_zone_alpha: 0.075
+collision_zone_base_diameter: 0.025
+color_scheme:
+  aio_fx3: tab:blue
+  aio_s+d: tab:orange
+  arena_ros_only: tab:cyan
+  drl_only: tab:red
+  dwa_only: tab:pink
+  mpc_only: tab:brown
+  rlca_only: tab:purple
+  teb_dyn_obst_only: tab:olive
+  teb_only: tab:green
+goal_marker: '*'
+goal_point_color: tab:brown
+goal_size: 20
+labels:
+  aio_fx3: AOI_fx3
+  aio_s+d: AIO_s+d
+  drl_only: Rosnav-DRL
+  dwa: DWA
+  dwa_only: DWA
+  teb_only: TEB
+leave_out_planner:
+- rlca_subsampling
+- drl_subsampling
+legend_position: upper right
+most_recent_file: data_aio.json
+obstacle_color: black
+obstacle_radius: 0.3
+path_alpha: 0.3
+path_arrow_color: black
+path_arrow_size: 5
+path_size: 0.5
+plot_collision_zones: true
+plot_collisions: true
+plot_legend: true
+plot_progression: false
+plot_qualitative: true
+plot_quantitative: true
+progression_size: 3
+progression_steps: 20
+specified_data_filename: null
+specify_data: true
+start_marker: ^
+start_point_color: tab:grey
+start_size: 20

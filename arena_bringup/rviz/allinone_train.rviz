@@ -4,16 +4,11 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded:
-        - /robot1
         - /robot1/my_robot1
-        - /Map1
         - /Map1/static_layer1
-        - /Map1/Map1
         - /Map1/Global_costmap1
         - /Local plan1/teb1
-        - /Sensors1
         - /Sensors1/LaserScan1
-        - /obstacles1
         - /obstacles1/static1/01
         - /obstacles1/static1/11
         - /obstacles1/static1/21
@@ -42,11 +37,6 @@ Panels:
         - /obstacles1/dynamic1/161
         - /obstacles1/dynamic1/171
         - /Plan Manager1/subgoal1
-        - /Goal Pose1
-        - /Marker2
-        - /Path1
-        - /Marker3
-        - /Marker5
       Splitter Ratio: 0.4374079406261444
     Tree Height: 1156
   - Class: rviz/Selection
@@ -67,7 +57,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: LaserScan
+    SyncSource: ""
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -90,109 +80,11 @@ Visualization Manager:
           Frame Timeout: 15
           Frames:
             All Enabled: false
-            eval_sim_base_footprint:
-              Value: true
-            eval_sim_laser_link:
-              Value: true
             eval_sim_odom:
               Value: true
             map:
               Value: true
-            sim_10_base_footprint:
-              Value: true
-            sim_10_laser_link:
-              Value: true
-            sim_10_odom:
-              Value: true
-            sim_11_base_footprint:
-              Value: true
-            sim_11_laser_link:
-              Value: true
-            sim_11_odom:
-              Value: true
-            sim_12_base_footprint:
-              Value: true
-            sim_12_laser_link:
-              Value: true
-            sim_12_odom:
-              Value: true
-            sim_13_base_footprint:
-              Value: true
-            sim_13_laser_link:
-              Value: true
-            sim_13_odom:
-              Value: true
-            sim_14_base_footprint:
-              Value: true
-            sim_14_laser_link:
-              Value: true
-            sim_14_odom:
-              Value: true
-            sim_15_base_footprint:
-              Value: true
-            sim_15_laser_link:
-              Value: true
-            sim_15_odom:
-              Value: true
-            sim_16_base_footprint:
-              Value: true
-            sim_16_laser_link:
-              Value: true
-            sim_16_odom:
-              Value: true
-            sim_1_base_footprint:
-              Value: true
-            sim_1_laser_link:
-              Value: true
             sim_1_odom:
-              Value: true
-            sim_2_base_footprint:
-              Value: true
-            sim_2_laser_link:
-              Value: true
-            sim_2_odom:
-              Value: true
-            sim_3_base_footprint:
-              Value: true
-            sim_3_laser_link:
-              Value: true
-            sim_3_odom:
-              Value: true
-            sim_4_base_footprint:
-              Value: true
-            sim_4_laser_link:
-              Value: true
-            sim_4_odom:
-              Value: true
-            sim_5_base_footprint:
-              Value: true
-            sim_5_laser_link:
-              Value: true
-            sim_5_odom:
-              Value: true
-            sim_6_base_footprint:
-              Value: true
-            sim_6_laser_link:
-              Value: true
-            sim_6_odom:
-              Value: true
-            sim_7_base_footprint:
-              Value: true
-            sim_7_laser_link:
-              Value: true
-            sim_7_odom:
-              Value: true
-            sim_8_base_footprint:
-              Value: true
-            sim_8_laser_link:
-              Value: true
-            sim_8_odom:
-              Value: true
-            sim_9_base_footprint:
-              Value: true
-            sim_9_laser_link:
-              Value: true
-            sim_9_odom:
               Value: true
           Marker Scale: 1
           Name: TF
@@ -202,73 +94,9 @@ Visualization Manager:
           Tree:
             map:
               eval_sim_odom:
-                eval_sim_base_footprint:
-                  eval_sim_laser_link:
-                    {}
-              sim_10_odom:
-                sim_10_base_footprint:
-                  sim_10_laser_link:
-                    {}
-              sim_11_odom:
-                sim_11_base_footprint:
-                  sim_11_laser_link:
-                    {}
-              sim_12_odom:
-                sim_12_base_footprint:
-                  sim_12_laser_link:
-                    {}
-              sim_13_odom:
-                sim_13_base_footprint:
-                  sim_13_laser_link:
-                    {}
-              sim_14_odom:
-                sim_14_base_footprint:
-                  sim_14_laser_link:
-                    {}
-              sim_15_odom:
-                sim_15_base_footprint:
-                  sim_15_laser_link:
-                    {}
-              sim_16_odom:
-                sim_16_base_footprint:
-                  sim_16_laser_link:
-                    {}
+                {}
               sim_1_odom:
-                sim_1_base_footprint:
-                  sim_1_laser_link:
-                    {}
-              sim_2_odom:
-                sim_2_base_footprint:
-                  sim_2_laser_link:
-                    {}
-              sim_3_odom:
-                sim_3_base_footprint:
-                  sim_3_laser_link:
-                    {}
-              sim_4_odom:
-                sim_4_base_footprint:
-                  sim_4_laser_link:
-                    {}
-              sim_5_odom:
-                sim_5_base_footprint:
-                  sim_5_laser_link:
-                    {}
-              sim_6_odom:
-                sim_6_base_footprint:
-                  sim_6_laser_link:
-                    {}
-              sim_7_odom:
-                sim_7_base_footprint:
-                  sim_7_laser_link:
-                    {}
-              sim_8_odom:
-                sim_8_base_footprint:
-                  sim_8_laser_link:
-                    {}
-              sim_9_odom:
-                sim_9_base_footprint:
-                  sim_9_laser_link:
-                    {}
+                {}
           Update Interval: 0
           Value: true
         - Class: rviz/MarkerArray
@@ -276,7 +104,7 @@ Visualization Manager:
           Marker Topic: /sim_1/flatland_server/debug/model/myrobot
           Name: my_robot
           Namespaces:
-            "": true
+            {}
           Queue Size: 100
           Value: true
         - Alpha: 1
@@ -839,7 +667,7 @@ Visualization Manager:
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_10
               Name: 10
               Namespaces:
-                "": true
+                {}
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -847,7 +675,7 @@ Visualization Manager:
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_11
               Name: 11
               Namespaces:
-                "": true
+                {}
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -855,7 +683,7 @@ Visualization Manager:
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_12
               Name: 12
               Namespaces:
-                "": true
+                {}
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -863,7 +691,7 @@ Visualization Manager:
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_13
               Name: 13
               Namespaces:
-                "": true
+                {}
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -871,7 +699,7 @@ Visualization Manager:
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_14
               Name: 14
               Namespaces:
-                "": true
+                {}
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -879,7 +707,7 @@ Visualization Manager:
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_15
               Name: 15
               Namespaces:
-                "": true
+                {}
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -887,7 +715,7 @@ Visualization Manager:
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_16
               Name: 16
               Namespaces:
-                "": true
+                {}
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -895,7 +723,7 @@ Visualization Manager:
               Marker Topic: /eval_sim/flatland_server/debug/model/obstacle__random_dynamic_17
               Name: 17
               Namespaces:
-                "": true
+                {}
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -1159,7 +987,7 @@ Visualization Manager:
           Marker Topic: /sim_1/vis_subgoal
           Name: subgoal
           Namespaces:
-            "": true
+            {}
           Queue Size: 100
           Value: true
         - Class: rviz/Marker
@@ -1389,7 +1217,7 @@ Visualization Manager:
       Marker Topic: /sim_1/all_in_one_action_vis
       Name: Marker
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/Marker
@@ -1397,7 +1225,7 @@ Visualization Manager:
       Marker Topic: /sim_1/all_in_one_action_trajectory_vis
       Name: Marker
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/Marker
@@ -1405,7 +1233,7 @@ Visualization Manager:
       Marker Topic: /sim_1/all_in_one_action_forced
       Name: Marker
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
   Enabled: true
@@ -1448,7 +1276,7 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 37.332122802734375
+      Scale: 19.701351165771484
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
       X: 11.092154502868652

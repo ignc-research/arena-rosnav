@@ -85,3 +85,7 @@ arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/conf
 arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/agents/pretrained_aio_agents/
 
 arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/agents/aio-agents/pretrained_aio_agents/
+
+arena_navigation/arena_local_planner/evaluation/bags/
+
+arena_navigation/arena_local_planner/evaluation/scripts/scenario_eval_linh.py

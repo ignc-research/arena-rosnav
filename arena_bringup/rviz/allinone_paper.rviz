@@ -189,7 +189,7 @@ Visualization Manager:
           Buffer Length: 1
           Class: rviz/Path
           Color: 252; 233; 79
-          Enabled: true
+          Enabled: false
           Head Diameter: 0.30000001192092896
           Head Length: 0.20000000298023224
           Length: 0.30000001192092896
@@ -207,7 +207,7 @@ Visualization Manager:
           Shaft Length: 0.10000000149011612
           Topic: /eval_sim/teb/teb_local_planner/local_plan
           Unreliable: false
-          Value: true
+          Value: false
         - Alpha: 1
           Buffer Length: 1
           Class: rviz/Path
@@ -724,7 +724,7 @@ Visualization Manager:
               Marker Topic: /eval_sim/flatland_server/debug/model/obstacle__random_dynamic_10
               Name: 10
               Namespaces:
-                "": true
+                {}
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -732,7 +732,7 @@ Visualization Manager:
               Marker Topic: /eval_sim/flatland_server/debug/model/obstacle__random_dynamic_11
               Name: 11
               Namespaces:
-                "": true
+                {}
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -740,7 +740,7 @@ Visualization Manager:
               Marker Topic: /eval_sim/flatland_server/debug/model/obstacle__random_dynamic_12
               Name: 12
               Namespaces:
-                "": true
+                {}
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -748,7 +748,7 @@ Visualization Manager:
               Marker Topic: /eval_sim/flatland_server/debug/model/obstacle__random_dynamic_13
               Name: 13
               Namespaces:
-                "": true
+                {}
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -796,7 +796,7 @@ Visualization Manager:
               Marker Topic: /eval_sim/flatland_server/debug/model/obstacle__random_dynamic_14
               Name: 19
               Namespaces:
-                "": true
+                {}
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -1311,6 +1311,22 @@ Visualization Manager:
       Unreliable: false
       Use Timestamp: false
       Value: true
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /eval_sim/all_in_one_action_prob_vis
+      Name: Marker
+      Namespaces:
+        "": true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /eval_sim/all_in_one_action_trajectory_vis
+      Name: Marker
+      Namespaces:
+        "": true
+      Queue Size: 100
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 255; 255; 255
@@ -1341,7 +1357,7 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Angle: -7.8449859619140625
+      Angle: -7.8499860763549805
       Class: rviz/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
@@ -1351,11 +1367,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 50.998252868652344
+      Scale: 39.49304962158203
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
-      X: 11.092154502868652
-      Y: 5.0976786613464355
+      X: 12.659225463867188
+      Y: 9.641511917114258
     Saved: ~
 Window Geometry:
   Displays:

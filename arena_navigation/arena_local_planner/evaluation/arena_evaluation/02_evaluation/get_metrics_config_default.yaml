@@ -1,0 +1,4 @@
+# default parameters for the calculation of the performance metrics
+robot_radius: 0.3
+time_out_treshold: 180 # 3 min (time is measured in seconds)
+collision_treshold: 2 # collision count greater than 3 equals a failure

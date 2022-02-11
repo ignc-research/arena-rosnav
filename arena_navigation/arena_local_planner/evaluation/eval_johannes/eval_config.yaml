@@ -1,0 +1,53 @@
+color_mapping:
+  drl_only: "tab:red"
+  teb_only: "tab:green"
+  teb_dyn_obst_only: "tab:olive"
+  arena_ros_only: "tab:cyan"
+  mpc_only: "tab:brown"
+  rlca_only: "tab:purple"
+  dwa_only: "tab:pink"
+  teb_drl4_rule07_nn13_16+d_mixed_5M_2: "tab:orange"
+  teb_drl4_rule06_nn22_fx3_mixed_5M: "tab:blue"
+label_mapping:
+  # labels for planners
+  drl_only: "Rosnav-DRL"
+  teb_only: "TEB"
+  teb_dyn_obst_only: "TEB OT"
+  mpc_only: "MPC"
+  rlca_only: "RLCA"
+  dwa_only: "DWA"
+  arena_ros_only: "Arena-DRL"
+  teb_drl4_rule07_nn13_16+d_mixed_5M_2: "AIO s+d"
+  teb_drl4_rule06_nn22_fx3_mixed_5M: "AIO fx3"
+  # labels for metrics
+  Mean success rate: "Success Rate"
+  Mean collisions: "Collisions"
+  Mean time outs: "Time Outs"
+  Mean time: "Time traveled [s]"
+  Mean distance travelled: "Distance Traveled [m]"
+  Mean reward: "Reward"
+  Mean computation time per second simulation time: " t Compute / t Simulation [ms]"
+  Mean computation per local planner iteration: "Compute Time Local Planner [ms]"
+  Mean model distribution: "Distribution DRL:TEB"
+  # labels for the ods_files, should be the obstacle number used
+  outdoor_obs05: "5"
+  outdoor_obs10: "10"
+  outdoor_obs15: "15"
+  indoor_obs05: "5"
+  indoor_obs10: "10"
+  indoor_obs15: "15"
+
+leave_out_planner:
+  - teb_drl4_rule06_nn7_fx3_10M
+
+subdirectory_names: # subdirectory names for plot_pies.py, if none leave empty
+  - indoor
+  - outdoor
+
+pie_labels:
+  outdoor_obs05: "Outdoor map 5 obs"
+  outdoor_obs10: "Outdoor map 10 obs"
+  outdoor_obs15: "Outdoor map 15 obs"
+  indoor_obs05: "Indoor map 5 obs"
+  indoor_obs10: "Indoor map 10 obs"
+  indoor_obs15: "Indoor map 15 obs"

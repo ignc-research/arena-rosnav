@@ -9,15 +9,10 @@ Panels:
         - /Map1/Map1
         - /Map1/Global_costmap1
         - /Map1/Local_costmap1
-        - /Local plan1
         - /Local plan1/teb1
         - /Local plan1/mpc1
         - /Local plan1/dwa1
-        - /Sensors1
         - /Sensors1/LaserScan1
-        - /LaserScan1
-        - /LaserScan2
-        - /obstacles1
         - /obstacles1/static1/01
         - /obstacles1/static1/11
         - /obstacles1/static1/21
@@ -47,7 +42,6 @@ Panels:
         - /obstacles1/dynamic1/161
         - /obstacles1/dynamic1/171
         - /obstacles1/dynamic1/181
-        - /obstacles1/dynamic1/191
         - /obstacles1/dynamic1/201
         - /obstacles1/dynamic1/211
         - /obstacles1/dynamic1/221
@@ -126,7 +120,7 @@ Visualization Manager:
           Marker Topic: /eval_sim/flatland_server/debug/model/myrobot
           Name: my_robot
           Namespaces:
-            "": true
+            {}
           Queue Size: 100
           Value: true
         - Alpha: 1
@@ -144,6 +138,14 @@ Visualization Manager:
           Topic: /move_base_simple/goal
           Unreliable: false
           Value: false
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /eval_sim/flatland_server/debug/model/jackal
+          Name: MarkerArray
+          Namespaces:
+            "": true
+          Queue Size: 100
+          Value: true
       Enabled: true
       Name: robot
     - Class: rviz/Group
@@ -749,7 +751,7 @@ Visualization Manager:
               Marker Topic: /eval_sim/flatland_server/debug/model/obstacle__random_dynamic_10
               Name: 10
               Namespaces:
-                "": true
+                {}
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -757,7 +759,7 @@ Visualization Manager:
               Marker Topic: /eval_sim/flatland_server/debug/model/obstacle__random_dynamic_11
               Name: 11
               Namespaces:
-                "": true
+                {}
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -765,7 +767,7 @@ Visualization Manager:
               Marker Topic: /eval_sim/flatland_server/debug/model/obstacle__random_dynamic_12
               Name: 12
               Namespaces:
-                "": true
+                {}
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -773,7 +775,7 @@ Visualization Manager:
               Marker Topic: /eval_sim/flatland_server/debug/model/obstacle__random_dynamic_13
               Name: 13
               Namespaces:
-                "": true
+                {}
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -821,7 +823,7 @@ Visualization Manager:
               Marker Topic: /eval_sim/flatland_server/debug/model/obstacle__random_dynamic_14
               Name: 19
               Namespaces:
-                "": true
+                {}
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -1323,7 +1325,7 @@ Visualization Manager:
       Marker Topic: /eval_sim/all_in_one_action_prob_vis
       Name: Marker
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
       Value: true
     - Class: rviz/Marker
