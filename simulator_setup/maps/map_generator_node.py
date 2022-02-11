@@ -16,8 +16,8 @@ class MapGenerator:
         self.nr = -1
 
         # general map parameter
-        self.height = 150
-        self.width = 150
+        self.height = 250
+        self.width = 250
 
         self.resolution = 0.11
 
@@ -25,8 +25,8 @@ class MapGenerator:
         self.corridor_radius = 8
         self.iterations = 50
         self.room_number = 3
-        self.room_width = 40
-        self.room_height = 45
+        self.room_width = 65
+        self.room_height = 60
         self.no_overlap = True
 
         # outdoor map parameter
