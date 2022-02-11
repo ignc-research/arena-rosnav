@@ -1,0 +1,49 @@
+1:
+    "type": "indoor"
+    "numb_dynamic_obstacles": 10
+    "numb_static_obstacles": 0
+2:
+    "type": "indoor"
+    "numb_dynamic_obstacles": 11
+    "numb_static_obstacles": 0
+3:
+    "type": "indoor"
+    "numb_dynamic_obstacles": 12
+    "numb_static_obstacles": 0
+4:
+    "type": "indoor"
+    "numb_dynamic_obstacles": 13
+    "numb_static_obstacles": 0
+5:
+    "type": "indoor"
+    "numb_dynamic_obstacles": 14
+    "numb_static_obstacles": 0
+6:
+    "type": "indoor"
+    "numb_dynamic_obstacles": 15
+    "numb_static_obstacles": 0
+7:
+    "type": "indoor"
+    "numb_dynamic_obstacles": 9
+    "numb_static_obstacles": 0
+8:
+    "type": "indoor"
+    "numb_dynamic_obstacles": 8
+    "numb_static_obstacles": 0
+9:
+    "type": "indoor"
+    "numb_dynamic_obstacles": 7
+    "numb_static_obstacles": 0
+10:
+    "type": "indoor"
+    "numb_dynamic_obstacles": 6
+    "numb_static_obstacles": 0
+
+11:
+    "type": "outdoor"
+    "numb_dynamic_obstacles": 8
+    "numb_static_obstacles": 0
+12:
+    "type": "outdoor"
+    "numb_dynamic_obstacles": 12
+    "numb_static_obstacles": 0

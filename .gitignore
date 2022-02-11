@@ -83,3 +83,5 @@ arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/conf
 *.bak
 
 arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/agents/pretrained_aio_agents/
+
+arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/agents/aio-agents/pretrained_aio_agents/

@@ -1,0 +1,14 @@
+{
+  "models": {
+    "drl": [
+      "rto_tlabs"
+    ],
+    "use_drl_servers": 1,
+    "drl_names": [
+      "rosnav-drl"
+    ]
+  },
+  "run_all_agents_each_iteration": false,
+  "update_global_plan_frequency": 10,
+  "all_in_one_planner_frequency": 5
+}

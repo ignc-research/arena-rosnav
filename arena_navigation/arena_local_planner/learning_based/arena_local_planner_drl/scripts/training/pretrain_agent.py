@@ -1,10 +1,12 @@
 import json
 import os
 import sys
+import time
 from multiprocessing import Process, Manager
 
 import numpy as np
 import rospkg
+import rospy
 import torch as th
 import yaml
 from joblib._multiprocessing_helpers import mp
@@ -23,9 +25,9 @@ from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl
 
 # PARAMETERS
 batch_size = 64
-epochs = 6
-scheduler_gamma = 0.5
-learning_rate = 0.2
+epochs = 8
+scheduler_gamma = 0.6
+learning_rate = 0.5
 weight_decay = 5e-6
 seed = 42
 test_batch_size = 64
@@ -45,7 +47,9 @@ def pretrain_agent(policy, env_vec: VecNormalize, expert_dataset_file, test_port
     # 2.1 Train observation normalization
     print("Tune observation normalization...")
 
-    if expert_observations.size > 150000:
+    print(expert_observations.size)
+
+    if expert_observations.shape[0] > 150000:
         env_vec.obs_rms.update(expert_observations[:150000])
     else:
         env_vec.obs_rms.update(expert_observations)
@@ -175,12 +179,10 @@ def _get_paths(all_in_one_config: str = "all_in_one_default.json") -> dict:
     :param args (argparse.Namespace): Object containing the program arguments
     """
     dir = rospkg.RosPack().get_path('arena_local_planner_drl')
-
+    robot_model = rospy.get_param('robot_model')
     paths = {
-        'robot_setting':
-            os.path.join(
-                rospkg.RosPack().get_path('simulator_setup'),
-                'robot', 'myrobot' + '.model.yaml'),
+        'robot_setting': os.path.join(rospkg.RosPack().get_path('simulator_setup'), 'robot', robot_model +
+                                          '.model.yaml'),
         'hyperparams':
             os.path.join(
                 dir, 'configs', 'hyperparameters'),
@@ -188,10 +190,11 @@ def _get_paths(all_in_one_config: str = "all_in_one_default.json") -> dict:
             os.path.join(
                 dir, 'configs', 'default_settings.yaml'),
         'all_in_one_parameters':
-            os.path.join(dir, 'configs', 'all_in_one_hyperparameters', 'agent_parameters', all_in_one_config),
+            os.path.join(dir, 'configs', 'all_in_one_hyperparameters', 'agent_parameters', 'pretrain_configs',
+                         all_in_one_config),
         'drl_agents':
             os.path.join(
-                dir, 'agents'),
+                dir, 'agents', 'rosnav-agents'),
         'map_folder': os.path.join(dir, 'configs', 'all_in_one_hyperparameters', 'map_parameters'),
         'map_parameters': os.path.join(dir, 'configs', 'all_in_one_hyperparameters', 'map_parameters',
                                        "map_curriculum_12envs.yaml")
@@ -200,7 +203,8 @@ def _get_paths(all_in_one_config: str = "all_in_one_default.json") -> dict:
 
 
 def _make_env(paths: dict, rank: int):
-    params_path = os.path.join(paths['hyperparams'], 'all_in_one_default.json')
+    robot_model = rospy.get_param("robot_model")
+    params_path = os.path.join(paths['hyperparams'], robot_model + '_default.json')
     with open(params_path) as f:
         params = json.load(f)
     paths['map_parameters'] = os.path.join(paths['map_folder'], 'tmp', "map_" + str(rank) + ".json")
@@ -251,7 +255,7 @@ def _create_expert_dataset(shared_array_actions,
     # 2. Define expert based on fully observable dynamic scan
     def simple_all_in_one(obs):
         _L = scan_size  # laser scan size
-        switch_distance = 2.4
+        switch_distance = 1.8
         last_laser_scan_dynamic = obs[_L:2 * _L]
         min_dist = np.min(last_laser_scan_dynamic)
         if min_dist <= switch_distance:
@@ -333,6 +337,22 @@ def get_aio_parameters(all_in_one_config_path: str):
     return reduced_laser_size, laser_stack_size, add_robot_velocity
 
 
+def get_numb_laser_beams(robot_yaml_path: str):
+    with open(robot_yaml_path, "r") as fd:
+        robot_data = yaml.safe_load(fd)
+        for plugin in robot_data["plugins"]:
+            if plugin["type"] == "Laser":
+                laser_angle_min = plugin["angle"]["min"]
+                laser_angle_max = plugin["angle"]["max"]
+                laser_angle_increment = plugin["angle"]["increment"]
+                laser_num_beams = int(
+                    round(
+                        (laser_angle_max - laser_angle_min)
+                        / laser_angle_increment
+                    )
+                )
+                return laser_num_beams
+
 if __name__ == '__main__':
     args = sys.argv
     iterations = int(args[1])
@@ -346,11 +366,13 @@ if __name__ == '__main__':
     paths = _get_paths(aio_config)
     unzip_map_parameters(paths, num_envs)
 
+    laser_num_beams = get_numb_laser_beams(paths['robot_setting'])
+
     # read parameters from aio config file
     all_in_one_config_path = paths['all_in_one_parameters']
     reduced_laser_size, laser_stack_size, add_robot_velocity = get_aio_parameters(all_in_one_config_path)
     if reduced_laser_size < 0:
-        scan_size = 360
+        scan_size = laser_num_beams
     else:
         scan_size = reduced_laser_size
 
@@ -401,7 +423,7 @@ if __name__ == '__main__':
     del processes
 
     base_dir = rospkg.RosPack().get_path('arena_local_planner_drl')
-    save_path = os.path.join(base_dir, "agents", "pretrained_aio_agents", save_file_name + ".npz")
+    save_path = os.path.join(base_dir, "agents", 'aio-agents', "pretrained_aio_agents", save_file_name + ".npz")
     save_dataset(save_path, expert_actions.flatten(), expert_obs.reshape(-1, expert_obs.shape[-1]))
 
     print("Dataset saved!")

@@ -2,15 +2,12 @@ reset_costmap_automatically: True
 reset_costmap_interval: 3
 global_planner_type: navfn/NavfnROS
 
-NavfnROS:
-  lethal_cost: 1
-
 global_costmap:
   update_frequency: 2.0
   publish_frequency: 1.0
   transform_tolerance: 0.3
 
-  resolution: 0.2
+  resolution: 0.1
 
 #  obstacle_layer:
 #    obstacle_range: 3.5
@@ -26,8 +23,8 @@ global_costmap:
 #    scan: { data_type: LaserScan, marking: true, topic: scan, clearing: true }
 
   inflation_layer:
-    inflation_radius: 0.7
-    cost_scaling_factor: 1.0
+    inflation_radius: 0.8
+    cost_scaling_factor: 3.0
 
   plugins:
     - { name: static_layer,        type: "costmap_2d::StaticLayer"}

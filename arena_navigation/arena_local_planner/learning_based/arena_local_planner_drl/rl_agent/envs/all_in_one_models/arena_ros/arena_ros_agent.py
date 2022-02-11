@@ -1,4 +1,3 @@
-import copy
 import math
 import os.path
 
@@ -35,12 +34,13 @@ class ArenaRosAgent(ModelBase):
         # goal
         sub_goal = observation_dict['goal_in_robot_frame']
         angle = sub_goal[1] + math.pi
-        angle = np.arctan2(np.sin(angle), np.cos(angle)) # normalize angle
+        angle = np.arctan2(np.sin(angle), np.cos(angle))  # normalize angle
         angle = math.degrees(angle)
         distance = sub_goal[0] + 0.5
 
         # lidar scan
         scan = observation_dict['laser_scan']
+        scan[:] = self._shift_scan(scan)
 
         observation = np.hstack([[distance, angle], scan])
 
@@ -58,3 +58,10 @@ class ArenaRosAgent(ModelBase):
 
     def reset(self):
         pass
+
+    def _shift_scan(self, scan: np.ndarray):
+        # old angle: {min: 0, max: 6.28318977356, increment: 0.0175019223243}
+        # new angle: {min: -1.5707963267948966, max: 4.694936014, increment:  0.017453292}
+        sub_array = np.hsplit(scan, 4)
+        new_scan = np.concatenate((sub_array[3], sub_array[0], sub_array[1], sub_array[2]))
+        return new_scan

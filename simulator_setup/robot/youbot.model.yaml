@@ -1,0 +1,40 @@
+# information is based on http://www.youbot-store.com/wiki/index.php/YouBot_Detailed_Specifications
+bodies:  # List of named bodies
+  - name: base_footprint
+    pose: [0, 0, 0] 
+    type: dynamic  
+    color: [0.2, 0.8, 0.2, 1.0] 
+    footprints:
+      - type: polygon
+        points: [[-0.19, -0.29], [-0.19, 0.29], [0.19, 0.29], [0.19, -0.29]]
+        layers: ["all"]
+        collision: true
+        density: 1
+        friction: 0.1
+        restitution: 0
+        sensor: false
+      
+
+plugins:
+  - type: DiffDrive 
+    name: diff_drive 
+    body: base_footprint
+    odom_frame_id: odom
+    odom_pub: odom  # topic odom is published on
+    pub_rate: 10
+  
+  - type: Laser
+    name: static_laser
+    frame: laser_link
+    topic: scan
+    body: base_footprint
+    broadcast_tf: true
+    origin: [0.0, 0.0, 0.0]
+    range: 5.6
+    angle: {min: -1.57079637051, max: 1.56466042995, increment: 0.00612393906} # 512  # (1.56466042995 + 1.57079637051) / 512 # from `rostopic echo scan` of the original robot
+    noise_std_dev: 0.0
+    update_rate: 10
+
+  - type: ModelTfPublisher
+    name: tf_publisher
+    publish_tf_world: false

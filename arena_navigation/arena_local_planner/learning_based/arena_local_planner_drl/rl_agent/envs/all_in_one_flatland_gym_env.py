@@ -207,19 +207,9 @@ class AllInOneEnv(gym.Env):
         Args:
             robot_yaml_path (str): [description]
         """
+        self._robot_radius = rospy.get_param("radius")
         with open(robot_yaml_path, "r") as fd:
             robot_data = yaml.safe_load(fd)
-            # get robot radius
-            for body in robot_data["bodies"]:
-                if body["name"] in ["base_footprint", "shell"]:
-                    for footprint in body["footprints"]:
-                        if footprint["type"] == "circle":
-                            self._robot_radius = (
-                                    footprint.setdefault("radius", 0.3) * 1.15
-                            )
-                        if "radius" in footprint and footprint["radius"]:
-                            self._robot_radius = footprint["radius"] * 1.15
-
             # get laser related information
             for plugin in robot_data["plugins"]:
                 if plugin["type"] == "Laser":
@@ -231,16 +221,15 @@ class AllInOneEnv(gym.Env):
                             (laser_angle_max - laser_angle_min)
                             / laser_angle_increment
                         )
-                        + 1
                     )
                     self._laser_max_range = plugin["range"]
 
         # set up velocity limits
         with open(settings_yaml_path, 'r') as fd:
             setting_data = yaml.safe_load(fd)
-            linear_range = setting_data['robot']['continuous_actions']['linear_range']
-            angular_range = setting_data['robot']['continuous_actions']['angular_range']
-            self._angular_low = angular_range[0]
-            self._angular_high = angular_range[1]
-            self._linear_low = linear_range[0]
-            self._linear_high = linear_range[1]
+            linear_range = rospy.get_param('speed')
+            angular_range = 4
+            self._angular_low = -angular_range
+            self._angular_high = angular_range
+            self._linear_low = -linear_range
+            self._linear_high = linear_range

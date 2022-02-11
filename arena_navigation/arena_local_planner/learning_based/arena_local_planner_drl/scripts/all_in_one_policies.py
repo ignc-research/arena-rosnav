@@ -2,26 +2,32 @@ import os
 
 import gym
 import rospkg
+import rospy
 import torch as th
 import yaml
 from stable_baselines3.common.torch_layers import BaseFeaturesExtractor
 from torch import nn
 
 _RS = 4  # robot state size
+robot_model = rospy.get_param("robot_model")
 
-ROBOT_SETTING_PATH = rospkg.RosPack().get_path('simulator_setup')
-yaml_ROBOT_SETTING_PATH = os.path.join(ROBOT_SETTING_PATH, 'robot', 'myrobot.model.yaml')
-
-with open(yaml_ROBOT_SETTING_PATH, 'r') as fd:
+ROBOT_SETTING_PATH = rospkg.RosPack().get_path("simulator_setup")
+yaml_ROBOT_SETTING_PATH = os.path.join(
+    ROBOT_SETTING_PATH, "robot", f"{robot_model}.model.yaml"
+)
+with open(yaml_ROBOT_SETTING_PATH, "r") as fd:
     robot_data = yaml.safe_load(fd)
-    for plugin in robot_data['plugins']:
-        if plugin['type'] == 'Laser':
-            laser_angle_min = plugin['angle']['min']
-            laser_angle_max = plugin['angle']['max']
-            laser_angle_increment = plugin['angle']['increment']
-            _L = int(round((laser_angle_max - laser_angle_min) / laser_angle_increment) + 1)  # num of laser beams
+    for plugin in robot_data["plugins"]:
+        if plugin["type"] == "Laser":
+            laser_angle_min = plugin["angle"]["min"]
+            laser_angle_max = plugin["angle"]["max"]
+            laser_angle_increment = plugin["angle"]["increment"]
+            _L = int(
+                round(
+                    (laser_angle_max - laser_angle_min) / laser_angle_increment
+                )
+            )  # num of laser beams
             break
-
 
 class AGENT_1(BaseFeaturesExtractor):
     """
@@ -181,7 +187,7 @@ class AGENT_3(BaseFeaturesExtractor):  # For 3x360 laser scan
             extracted features by the network
         """
         rs_3 = 6  # global goal + subgoal + velocity
-        ls_3 = 360
+        ls_3 = _L
 
         scan_t0 = th.unsqueeze(observations[:, :ls_3], 1)
         scan_t1 = th.unsqueeze(observations[:, ls_3:2 * ls_3], 1)
@@ -241,7 +247,7 @@ class AGENT_4(BaseFeaturesExtractor):  # For 3x360 laser scan
             extracted features by the network
         """
         rs_3 = 6  # global goal + subgoal + velocity
-        ls_3 = 360
+        ls_3 = _L
 
         scan_t0 = th.unsqueeze(observations[:, :ls_3], 1)
         scan_t1 = th.unsqueeze(observations[:, ls_3:2 * ls_3], 1)
@@ -370,7 +376,7 @@ class AGENT_5(BaseFeaturesExtractor):  # For 3x360 laser scan
             extracted features by the network
         """
         rs_3 = 6  # global goal + subgoal + velocity
-        ls_3 = 360
+        ls_3 = _L
 
         scan_t0 = th.unsqueeze(observations[:, :ls_3], 1)
         scan_t1 = th.unsqueeze(observations[:, ls_3:2 * ls_3], 1)
@@ -440,7 +446,7 @@ class AGENT_6(BaseFeaturesExtractor):  # For 3x360 laser scan
             extracted features by the network
         """
         rs_3 = 6  # global goal + subgoal + velocity
-        ls_3 = 360
+        ls_3 = _L
 
         scan_t0 = th.unsqueeze(observations[:, :ls_3], 1)
         scan_t1 = th.unsqueeze(observations[:, ls_3:2 * ls_3], 1)

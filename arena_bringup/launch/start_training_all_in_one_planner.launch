@@ -5,13 +5,35 @@
   <arg name="train_mode"      default="true" />
   <arg name="num_envs"        default="1" />
   <arg name="map_folder_name" default="map_empty" />
+  <arg name="robot_model" default="myrobot" />
+  
 
   <rosparam file="$(find arena_bringup)/launch/start_flatland.yaml" command="load" />
   <arg name="map_path" default="$(find simulator_setup)/maps/$(arg map_folder_name)/map.yaml" />
   <param name="world_path" value="$(find simulator_setup)/maps/$(arg map_folder_name)/map.world.yaml" /> -->
 
 
-
+   <!-- Robot specific args -->
+  <arg name='radius' default='0.113' if="$(eval arg('robot_model') == 'burger')"/>
+  <arg name='speed' default='0.22' if="$(eval arg('robot_model') == 'burger')"/>
+  <arg name='radius' default='0.267' if="$(eval arg('robot_model') == 'jackal')"/>
+  <arg name='speed' default='2.0' if="$(eval arg('robot_model') == 'jackal')"/>
+  <arg name='radius' default='0.625' if="$(eval arg('robot_model') == 'ridgeback')"/>
+  <arg name='speed' default='1.1' if="$(eval arg('robot_model') == 'ridgeback')"/>
+  <arg name='radius' default='0.629' if="$(eval arg('robot_model') == 'agvota')"/>
+  <arg name='speed' default='0.5' if="$(eval arg('robot_model') == 'agvota')"/>
+  <arg name='radius' default='0.225' if="$(eval arg('robot_model') == 'rto')"/>
+  <arg name='speed' default='2.78' if="$(eval arg('robot_model') == 'rto')"/>
+  <arg name='radius' default='0.225' if="$(eval arg('robot_model') == 'rto_real')"/>
+  <arg name='speed' default='2.78' if="$(eval arg('robot_model') == 'rto_real')"/>
+  <arg name='radius' default='0.27' if="$(eval arg('robot_model') == 'tiago')"/>
+  <arg name='speed' default='1.5' if="$(eval arg('robot_model') == 'tiago')"/>
+  <arg name='radius' default='0.36' if="$(eval arg('robot_model') == 'cob4')"/>
+  <arg name='speed' default='1.1' if="$(eval arg('robot_model') == 'cob4')"/>
+  <arg name='radius' default='0.347' if="$(eval arg('robot_model') == 'youbot')"/>
+  <arg name='speed' default='0.8' if="$(eval arg('robot_model') == 'youbot')"/>  
+  <param name="radius" value="$(arg radius)"/>
+  <param name="speed" value="$(arg speed)"/>
 
   <!-- Here are the argument that may be frequently changed -->
   <arg name="ns_prefix" default="sim" />
@@ -27,11 +49,12 @@
   <arg name="viz_pub_rate" default="30" />
 
   <!-- the velocity of randomly genelized obstacles  -->
-  <arg name="obs_vel" default="0.25" />
+  <arg name="obs_vel" default="0.3" />
   <!-- if it's false flatland server will not publish any debug related infomation and you will not able to visuzalize e.g robot, dynamic obstacles  -->
 
 
   <!--  PARAMS DON'T CHANGE THEM  -->
+  <param name="robot_model" value="$(arg robot_model)" />
   <param name="update_rate" value="$(arg update_rate)" />
   <param name="use_sim_time" value="true" />
   <param name="train_mode" value="$(arg train_mode)" />

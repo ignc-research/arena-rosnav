@@ -4,12 +4,11 @@ import os.path
 import random
 import sys
 import time
-import warnings
 from copy import copy
 from multiprocessing import Process
 
 import numpy as np
-import rosnode
+import rospy
 from rl_agent.envs.all_in_one_flatland_gym_env import AllInOneEnv
 from rl_agent.envs.all_in_one_models.drl.drl_agent import setup_and_start_drl_server
 from scripts.all_in_one_policies import *
@@ -34,7 +33,6 @@ def make_all_in_one_envs(rank: int, paths: dict, params: dict, train: bool = Tru
 
         if train:
             paths['map_parameters'] = os.path.join(paths['map_folder'], 'tmp', "map_" + str(rank) + ".json")
-            # paths['map_parameters'] = os.path.join(paths['map_folder'], "indoor_obs10.json")
             all_in_one_env = AllInOneEnv(f"sim_{rank + 1}", paths['robot_setting'], paths['robot_as'],
                                          params['reward_fnc'],
                                          goal_radius=params['goal_radius'], paths=paths,
@@ -57,7 +55,7 @@ def make_all_in_one_envs(rank: int, paths: dict, params: dict, train: bool = Tru
     return _init
 
 
-def get_paths(agent_version: str, args, all_in_one_config: str = "all_in_one_default.json") -> dict:
+def get_paths(agent_version: str, args, all_in_one_config: str) -> dict:
     """
     Function to generate agent specific paths
 
@@ -65,21 +63,19 @@ def get_paths(agent_version: str, args, all_in_one_config: str = "all_in_one_def
     :param args (argparse.Namespace): Object containing the program arguments
     """
     dir = rospkg.RosPack().get_path('arena_local_planner_drl')
-
+    robot_model = rospy.get_param('robot_model')
     paths = {
         'model':
             os.path.join(
-                dir, 'agents', agent_version),
+                dir, 'agents', 'aio-agents', agent_version),
         'tb':
             os.path.join(
                 dir, 'training_logs', 'tensorboard', agent_version),
         'eval':
             os.path.join(
                 dir, 'training_logs', 'train_eval_log', agent_version),
-        'robot_setting':
-            os.path.join(
-                rospkg.RosPack().get_path('simulator_setup'),
-                'robot', 'myrobot' + '.model.yaml'),
+        'robot_setting': os.path.join(rospkg.RosPack().get_path('simulator_setup'), 'robot', robot_model +
+                                          '.model.yaml'),
         'hyperparams':
             os.path.join(
                 dir, 'configs', 'hyperparameters'),
@@ -90,10 +86,11 @@ def get_paths(agent_version: str, args, all_in_one_config: str = "all_in_one_def
             os.path.join(
                 dir, 'configs', 'training_curriculum_map1small.yaml'),
         'all_in_one_parameters':
-            os.path.join(dir, 'configs', 'all_in_one_hyperparameters', 'agent_parameters', all_in_one_config),
+            os.path.join(dir, 'configs', 'all_in_one_hyperparameters', 'agent_parameters', 'aio_configs',
+                         all_in_one_config),
         'drl_agents':
             os.path.join(
-                dir, 'agents'),
+                dir, 'agents', 'rosnav-agents'),
         'map_parameters': os.path.join(dir, 'configs', 'all_in_one_hyperparameters', 'map_parameters',
                                        "map_curriculum_12envs.yaml"),
         'map_folder': os.path.join(dir, 'configs', 'all_in_one_hyperparameters', 'map_parameters')
@@ -176,12 +173,13 @@ def parse_all_in_one_args():
     parser.add_argument('-log', '--eval_log', action='store_true', help='enables storage of evaluation data')
     parser.add_argument('--tb', action='store_true', help='enables tensorboard logging')
     parser.add_argument('--load', action='store_true', help='Load an already trained agent')
+    parser.add_argument('--pretrain_file', type=str, default=None,
+                        help='File name of pretrain dataset. If empty no pretraining is done.')
     return parser.parse_args()
 
 
 if __name__ == '__main__':
 
-    # make unique agent version description based on @version
     eval_episodes = 100
 
     args = parse_all_in_one_args()
@@ -193,15 +191,18 @@ if __name__ == '__main__':
 
     socket_url_client_array = set_up_drl_server(paths['all_in_one_parameters'])
 
-    params = initialize_hyperparameters(paths, None, n_envs=args.n_envs, config_name='all_in_one_default')
+    params = initialize_hyperparameters(paths, None, n_envs=args.n_envs, config_name=args.config)
 
     unzip_map_parameters(paths, args.n_envs)
 
     if args.load:
         paths['all_in_one_parameters'] = os.path.join(paths['model'], 'all_in_one_parameters.json')
         assert (os.path.isfile(
-            os.path.join(paths['model'], "best_model.zip")) and os.path.isfile(paths['all_in_one_parameters'])), \
+            os.path.join(paths['model'], "best_model_2.zip")) and os.path.isfile(paths['all_in_one_parameters'])), \
             "Loading agent not successful as agent " + args.agent_name + " was not found!"
+
+    # wait for roslaunch
+    time.sleep(5)
 
     env = SubprocVecEnv(
         [make_all_in_one_envs(i, params=params, paths=paths, drl_server_url=socket_url_client_array,
@@ -224,7 +225,7 @@ if __name__ == '__main__':
         eval_env = VecNormalize(eval_env, training=True, norm_obs=True, norm_reward=False)
 
     # determine mode
-    if args.load and os.path.isfile(os.path.join(paths['model'], "best_model.zip")):
+    if args.load and os.path.isfile(os.path.join(paths['model'], "best_model_2.zip")):
         print("Load model " + args.agent_name + " !")
         # Load agent
         model = PPO.load(
@@ -291,22 +292,29 @@ if __name__ == '__main__':
             )
 
     # pretrain
-    base_dir = rospkg.RosPack().get_path('arena_local_planner_drl')
-    save_path = os.path.join(base_dir, "agents", "pretrained_aio_agents", "data_fx3_1000000_normalized.npz")
-    policy, test_loss, train_loss = pretrain_agent(model.policy, env, save_path, 0.05, False)
-    model.policy = policy
-    eval_env.obs_rms = copy(env.obs_rms)
+    if args.pretrain_file is not None and args.pretrain_file != "":
+        print("Start pretraining with dataset " + args.pretrain_file)
+        base_dir = rospkg.RosPack().get_path('arena_local_planner_drl')
+        save_path = os.path.join(base_dir, "agents", 'aio-agents', "pretrained_aio_agents",
+                                 args.pretrain_file)
+        policy, test_loss, train_loss = pretrain_agent(model.policy, env, save_path, 0.05, True)
+        model.policy = policy
+        eval_env.obs_rms = copy(env.obs_rms)
 
-    # Save pretraining logs
-    np.savez(
-        os.path.join(paths['eval'], 'pretrain_loss.npz'),
-        test_loss=test_loss,
-        train_loss=train_loss,
-    )
+        # Save pretraining logs
+        np.savez(
+            os.path.join(paths['eval'], 'pretrain_loss.npz'),
+            test_loss=test_loss,
+            train_loss=train_loss,
+        )
 
-    # save pretrained model
-    model.save(os.path.join(paths['model'], 'pretrained_model'))
-    env.save(os.path.join(paths['model'], 'pretrained_vecnorm.pkl'))
+        # save pretrained model
+        model.save(os.path.join(paths['model'], 'pretrained_model'))
+        env.save(os.path.join(paths['model'], 'pretrained_vecnorm.pkl'))
+
+        # evaluate_policy(model, eval_env, eval_episodes)
+    else:
+        print("No pretraining specified. Skip.")
 
     eval_cb = EvalCallback(
         eval_env=eval_env, train_env=env,

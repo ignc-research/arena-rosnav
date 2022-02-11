@@ -71,7 +71,7 @@ class RobotManager:
     def _spawn_robot(self, robot_yaml_path: str):
         request = SpawnModelRequest()
         request.yaml_path = robot_yaml_path
-        request.name = "myrobot"
+        request.name = os.path.basename(robot_yaml_path).split(".")[0]
         request.ns = self.ns
         self._srv_spawn_model(request)
 
@@ -82,14 +82,9 @@ class RobotManager:
             robot_yaml_path ([type]): [description]
         """
         self.ROBOT_NAME = os.path.basename(robot_yaml_path).split('.')[0]
+        self.ROBOT_RADIUS = rospy.get_param("radius") * 1.4
         with open(robot_yaml_path, 'r') as f:
             robot_data = yaml.safe_load(f)
-            # get robot radius
-            for body in robot_data['bodies']:
-                if body['name'] in ["base_footprint", "shell"]:
-                    for footprint in body['footprints']:
-                        if footprint['type'] == 'circle':
-                            self.ROBOT_RADIUS = footprint.setdefault("radius", 0.3) * 1.15
             # get laser_update_rate
             for plugin in robot_data['plugins']:
                 if plugin['type'] == 'Laser':
@@ -112,7 +107,6 @@ class RobotManager:
         srv_request = MoveModelRequest()
         srv_request.name = self.ROBOT_NAME
         srv_request.pose = pose
-
         # call service
         self._srv_move_model(srv_request)
         if self.is_training_mode:

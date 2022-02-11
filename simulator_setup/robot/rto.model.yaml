@@ -1,0 +1,40 @@
+bodies:  # List of named bodies
+  - name: base_footprint
+    pose: [0, 0, 0] 
+    type: dynamic  
+    color: [0.2, 0.8, 0.2, 1.0] 
+    footprints:
+      - type: circle
+        radius: 0.225
+        center: [0.0,0.0]
+        layers: ["all"]
+        collision: true
+        density: 1
+        friction: 0.1
+        restitution: 0
+        sensor: false
+      
+
+plugins:
+  - type: DiffDrive 
+    name: diff_drive 
+    body: base_footprint
+    odom_frame_id: odom
+    odom_pub: odom  # topic odom is published on
+    pub_rate: 10
+  
+  - type: Laser
+    name: static_laser
+    frame: laser_link
+    topic: scan
+    body: base_footprint
+    broadcast_tf: true
+    origin: [0.08, 0.0, 0.2015] # from: https://github.com/ignc-research/arena-rosnav-3D/blob/main/simulator_setup/robot/rto/urdf/rto.urdf.xacro
+    range: 5.6
+    angle: {min: -2.0944, max: 2.0944, increment:  0.00613294} # (2.0944*2/683); 683 = samples (from: https://github.com/ignc-research/arena-rosnav-3D/blob/476f3106a46390324749d41ca6e81d4ee4f462bb/simulator_setup/robot/rto/urdf/sensors/hokuyo.urdf.xacro#L54) 
+    noise_std_dev: 0.0
+    update_rate: 10
+
+  - type: ModelTfPublisher
+    name: tf_publisher
+    publish_tf_world: false

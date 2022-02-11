@@ -81,10 +81,10 @@ def get_paths(agent_name: str, args) -> dict:
         if (not os.path.isfile(
                 os.path.join(PATHS['model'], AGENT_NAME + ".zip")) 
             and not os.path.isfile(
-                os.path.join(PATHS['model'], "best_model.zip"))
+                os.path.join(PATHS['model'], "best_model_2.zip"))
             ):
             raise FileNotFoundError(
-                "Couldn't find model named %s.zip' or 'best_model.zip' in '%s'" 
+                "Couldn't find model named %s.zip' or 'best_model_2.zip' in '%s'"
                 % (AGENT_NAME, PATHS['model']))
     # evaluation log enabled
     if args.eval_log:
@@ -362,7 +362,7 @@ if __name__ == "__main__":
             model = PPO.load(
                 os.path.join(PATHS['model'], AGENT_NAME), env)
         elif os.path.isfile(
-                os.path.join(PATHS['model'], "best_model.zip")):
+                os.path.join(PATHS['model'], "best_model_2.zip")):
             model = PPO.load(
                 os.path.join(PATHS['model'], "best_model"), env)
         update_hyperparam_model(model, PATHS, params, args.n_envs)

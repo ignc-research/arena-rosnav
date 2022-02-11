@@ -31,17 +31,25 @@ class DrlAgent(ModelBase):
         else:
             self._obs_normalize = False
 
-        self._model = PPO.load(model_save_path).policy
+        # For python3.8+
+        custom_objects = {
+            "learning_rate": 0.0,
+            "lr_schedule": lambda _: 0.0,
+            "clip_range": lambda _: 0.0,
+        }
+        self._model = PPO.load(model_save_path, custom_objects=custom_objects).policy
 
     def get_next_action(self, observation_dict, observation_array=None) -> np.ndarray:
         # merge observation
         if observation_array is None:
-            merged_obs = np.hstack([observation_dict['laser_scan'], np.array(observation_dict['goal_in_robot_frame'])])
+            obs_twist = observation_dict['robot_twist']
+            merged_obs = np.hstack([observation_dict['laser_scan'], np.array(observation_dict['goal_in_robot_frame']),
+                                    np.array([obs_twist.linear.x, obs_twist.linear.y, obs_twist.angular.z])])
         else:
             merged_obs = np.copy(observation_array)
 
         # shift laser scan measurement
-        merged_obs[:360] = self._shift_scan(merged_obs[:360])
+        # merged_obs[:360] = self._shift_scan(merged_obs[:360])
 
         # normalize
         if self._obs_normalize:
@@ -97,7 +105,9 @@ class DrlAgentClient(ModelBase):
         self._socket.connect(server_socket_name)
 
     def get_next_action(self, observation_dict) -> np.ndarray:
-        merged_obs = np.hstack([observation_dict['laser_scan'], np.array(observation_dict['goal_in_robot_frame'])])
+        obs_twist = observation_dict['robot_twist']
+        merged_obs = np.hstack([observation_dict['laser_scan'], np.array(observation_dict['goal_in_robot_frame']),
+                                np.array([obs_twist.linear.x, obs_twist.linear.y, obs_twist.angular.z])])
 
         md = dict(
             dtype=str(merged_obs.dtype),

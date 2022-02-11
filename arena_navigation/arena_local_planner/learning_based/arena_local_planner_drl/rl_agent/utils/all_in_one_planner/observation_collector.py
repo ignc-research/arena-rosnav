@@ -18,6 +18,7 @@ from geometry_msgs.msg import Pose2D, PoseStamped, Pose
 from geometry_msgs.msg import Twist
 from gym import spaces
 from gym.spaces import Box
+from matplotlib import pyplot as plt
 from nav_msgs.msg import Odometry
 from rosgraph_msgs.msg import Clock
 # observation msgs
@@ -27,11 +28,18 @@ from std_msgs.msg import Bool
 from tf.transformations import *
 from visualization_msgs.msg import Marker
 
+from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.rl_agent.utils.all_in_one_planner.ring_converter import \
+    generate_rings
+
 
 class ObservationCollectorAllInOne:
     def __init__(self, ns: str, num_lidar_beams: int, lidar_range: float, numb_models: int, required_obs: dict,
                  all_in_one_config: str, include_model_actions: bool = False):
 
+        # Can be used for debugging
+        # self.visualize_rings = True
+        # if self.visualize_rings:
+        #     self._ring_figs = plt.figure("rings")
         self.ns = ns
         if ns is None or ns == "":
             self.ns_prefix = "/"
@@ -39,13 +47,20 @@ class ObservationCollectorAllInOne:
             self.ns_prefix = "/" + ns + "/"
 
         self._laser_num_beams = rospy.get_param("/laser_num_beams")
+        self._laser_max_range = lidar_range
+
         # for frequency controlling
         self._action_frequency = 1 / rospy.get_param("/robot_action_rate")
 
-        self._reduced_num_laser_beams, self._laser_stack_size, self._add_robot_velocity, self._use_dynamic_scan = \
-            self._extract_obs_space_info(all_in_one_config)
+        self._extract_obs_space_info(all_in_one_config)
+
+        if self.use_rings:
+            self._ring_converter = generate_rings()
         self._full_laser_range = self._reduced_num_laser_beams < 0
-        self._laser_vec_size = num_lidar_beams if self._full_laser_range else self._reduced_num_laser_beams
+        if self.use_rings:
+            self._laser_vec_size = 64 * 64
+        else:
+            self._laser_vec_size = num_lidar_beams if self._full_laser_range else self._reduced_num_laser_beams
         if self._use_dynamic_scan:
             self._laser_vec_size = 2 * self._laser_vec_size
 
@@ -61,6 +76,7 @@ class ObservationCollectorAllInOne:
             self._obs_stacked_empty = True
 
         # define observation_space
+
         laser_vec_size_full = self._laser_stack_size * self._laser_vec_size
 
         laser_space = spaces.Box(low=0,
@@ -115,9 +131,9 @@ class ObservationCollectorAllInOne:
         self._is_train_mode = rospy.get_param("/train_mode")
 
         # TODO make this a parameter --> Also dependant on map resolution (?)
-        self._planning_horizon = 6
+        self._planning_horizon = 5
 
-        self._reward_subgoal_horizon = 0.7
+        self._reward_subgoal_horizon = 1.1
 
         # synchronization parameters
         self._first_sync_obs = True  # whether to return first sync'd obs or most recent
@@ -231,7 +247,17 @@ class ObservationCollectorAllInOne:
             self._subgoal_reward_old, self._robot_pose)
 
         # If specified reduce number of laser beams
-        if self._full_laser_range:
+        if self.use_rings:
+            if self._use_dynamic_scan:
+                dyn_vec = self._ring_converter["lidar_to_rings"](dynamic_scan).flatten()
+                static_vec = self._ring_converter["lidar_to_rings"](scan_static).flatten()
+                laser_vec = np.hstack([static_vec, dyn_vec])
+            else:
+                laser_vec = self._ring_converter["lidar_to_rings"](np.array([scan_full]))
+                # if self.visualize_rings:
+                #     self._ring_converter["visualize_rings"](laser_vec[0,:,:,:], fig=self._ring_figs)
+                laser_vec = laser_vec.flatten()
+        elif self._full_laser_range:
             if self._use_dynamic_scan:
                 laser_vec = np.hstack([scan_static, dynamic_scan])
             else:
@@ -240,7 +266,7 @@ class ObservationCollectorAllInOne:
             if self._use_dynamic_scan:
                 dyn_vec = self._calc_reduced_laser_vec(dynamic_scan)
                 static_vec = self._calc_reduced_laser_vec(scan_static)
-                laser_vec = np.hstack([dyn_vec, static_vec])
+                laser_vec = np.hstack([static_vec, dyn_vec])
             else:
                 laser_vec = self._calc_reduced_laser_vec(scan_full)
 
@@ -257,7 +283,8 @@ class ObservationCollectorAllInOne:
             laser_vec = self._obs_stacked.flatten()
 
         merged_obs = np.float32(
-            np.hstack([laser_vec, np.array([rho_global, theta_global]), np.array([rho_local, theta_local])]))
+            np.hstack([laser_vec, np.array([rho_global, theta_global]),
+                       np.array([subgoal_reward_robot_frame_rho, subgoal_reward_robot_frame_theta])]))
 
         # If specified add robot twist to observation
         if self._add_robot_velocity:
@@ -318,7 +345,7 @@ class ObservationCollectorAllInOne:
 
     def get_dynamic_scan(self, static_scan: np.ndarray, scan: np.ndarray):
         diff_scan = np.abs(scan - static_scan)
-        dyanmic_scan = np.where(diff_scan < 0.1, 3.5, scan)
+        dyanmic_scan = np.where(diff_scan < 0.1, self._laser_max_range, scan)
 
         # self._dyn_scan_msg.ranges = dyanmic_scan
         # self._dyn_scan_msg.header.stamp = rospy.get_rostime()
@@ -374,6 +401,7 @@ class ObservationCollectorAllInOne:
         # print(f"Laser_stamp: {laser_stamp}, Static_stamp: {static_laser_stamp}")
 
         return laser_scan, static_scan, robot_pose, twist
+
 
     def call_service_takeSimStep(self, t=None):
         if t is None:
@@ -581,8 +609,7 @@ class ObservationCollectorAllInOne:
 
         return Pose2D(next_pose_xy[0], next_pose_xy[1], 0)
 
-    @staticmethod
-    def _extract_obs_space_info(all_in_one_config_path: str):
+    def _extract_obs_space_info(self, all_in_one_config_path: str):
         with open(all_in_one_config_path, 'r') as config_json:
             all_in_one_config = json.load(config_json)
 
@@ -590,17 +617,28 @@ class ObservationCollectorAllInOne:
 
         if 'observation_space' not in all_in_one_config:
             rospy.logwarn("No specification of the observation space found. Use default values!")
-            return -1, 1, False, True
+            reduced_laser_size = -1
+            laser_stack_size = 1
+            add_robot_velocity = False
+            use_dynamic_scan = True
+            use_rings = False
+            disentangle_scan = False
         else:
             obs_info = all_in_one_config['observation_space']
-            assert 'laser_range' in obs_info, "Please specify the laser_range parameter in the observation " \
-                                              "space section of the aio config file!"
-            if obs_info['laser_range'] == 'full':
+            if 'use_rings' in obs_info and obs_info['use_rings']:
+                use_rings = True
                 reduced_laser_size = -1
             else:
-                assert 'size_laser_vector' in obs_info, "Please specify the size_laser_vector parameter in the " \
-                                                        "aoi config file or use laser_range=full setting otherwise!"
-                reduced_laser_size = obs_info['size_laser_vector']
+                use_rings = False
+                assert 'laser_range' in obs_info, "Please specify the laser_range parameter in the observation " \
+                                                  "space section of the aio config file!"
+                if obs_info['laser_range'] == 'full':
+                    reduced_laser_size = -1
+                else:
+                    assert 'size_laser_vector' in obs_info, "Please specify the size_laser_vector parameter in the " \
+                                                            "aoi config file or use laser_range=full setting otherwise!"
+                    reduced_laser_size = obs_info['size_laser_vector']
+
             assert 'laser_stack_size' in obs_info, "Please specify the laser_stack_size parameter in the aoi " \
                                                    "config file!"
             laser_stack_size = obs_info['laser_stack_size']
@@ -615,7 +653,8 @@ class ObservationCollectorAllInOne:
             else:
                 use_dynamic_scan = False
 
-            return reduced_laser_size, laser_stack_size, add_robot_velocity, use_dynamic_scan
+        self._reduced_num_laser_beams, self._laser_stack_size, self._add_robot_velocity, self._use_dynamic_scan, self.use_rings = \
+            reduced_laser_size, laser_stack_size, add_robot_velocity, use_dynamic_scan, use_rings
 
     @staticmethod
     def process_global_plan_msg(globalplan):

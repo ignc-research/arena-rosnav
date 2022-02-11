@@ -215,8 +215,6 @@ class RewardCalculator:
             # case 2: global path following
             self._reward_goal_approached(kwargs['sub_goal'], kwargs['sub_goal_old'], kwargs['new_global_plan'],
                                          reward_factor=0.05, penalty_factor=0.5)
-            # Punish standing still
-            self._standing_still(kwargs['action'], punishment=0.0015)
 
         # check for final rewards
         self._reward_goal_reached(

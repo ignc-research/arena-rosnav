@@ -21,9 +21,8 @@ class TaskManager:
     def __init__(self, ns: str, reset_map_interval: int, paths: dict, run_scenario: bool):
         self.ns = ns
         self.run_scenario = run_scenario
-        if self.run_scenario:
-            self.task = get_predefined_task(ns, mode='scenario', start_stage=1, PATHS=paths)
-        else:
+        self._robot_model = rospy.get_param('robot_model')
+        if not self.run_scenario:
             self.task = self._get_random_task(paths)
             self.resetMap_interval = reset_map_interval
             self.current_iteration = 0
@@ -31,13 +30,13 @@ class TaskManager:
             self.new_map = False
 
     def reset(self, seed):
-        self.current_iteration += 1
         if not self.run_scenario:
+            self.current_iteration += 1
             if not self.new_map or self.current_iteration % self.resetMap_interval == 0:
                 self.current_iteration = 0
                 self._update_map(seed)
             random.seed(seed)
-        self.task.reset()
+            self.task.reset()
 
     def _get_random_task(self, paths: dict):
         config_path = paths['map_parameters']
@@ -70,7 +69,7 @@ class TaskManager:
         map_response = service_client_get_map()
         models_folder_path = rospkg.RosPack().get_path('simulator_setup')
         self.robot_manager = RobotManager(self.ns, map_response.map, os.path.join(
-            models_folder_path, 'robot', "myrobot.model.yaml"))
+            models_folder_path, 'robot', self._robot_model + ".model.yaml"))
         self.obstacles_manager = ObstaclesManager(self.ns, map_response.map)
         rospy.set_param("/task_mode", "random")
         numb_obst = numb_static_obst + numb_dyn_obst
