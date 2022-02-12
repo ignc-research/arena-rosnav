@@ -31,8 +31,8 @@ def make_all_in_one_envs(rank: int, paths: dict, params: dict, train: bool = Tru
         else:
             drl_server_url_ind = None
 
-        time.sleep(2 * rank)
-        
+        time.sleep(8 * rank)
+
         if train:
             paths['map_parameters'] = os.path.join(paths['map_folder'], 'tmp', "map_" + str(rank) + ".json")
             all_in_one_env = AllInOneEnv(f"sim_{rank + 1}", paths['robot_setting'], paths['robot_as'],
