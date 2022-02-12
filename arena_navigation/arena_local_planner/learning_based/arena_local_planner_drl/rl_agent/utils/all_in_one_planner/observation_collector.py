@@ -198,7 +198,14 @@ class ObservationCollectorAllInOne:
                 pass
 
         # try to retrieve sync'ed obs
-        laser_scan, laser_scan_static, robot_pose, twist = self.get_sync_obs()
+        obs = self.get_sync_obs()
+        if len(obs) == 4:
+            laser_scan, laser_scan_static, robot_pose, twist = obs
+        else:
+            laser_scan = None
+            laser_scan_static = None
+            robot_pose = None
+            twist = None
 
         if laser_scan is not None and robot_pose is not None and twist is not None and laser_scan_static is not None:
             self._scan = laser_scan

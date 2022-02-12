@@ -1,4 +1,5 @@
 import random
+import time
 
 import gym
 import numpy as np
@@ -55,7 +56,8 @@ class AllInOneEnv(gym.Env):
         self._debug = debug
         self._evaluation = evaluation
         self._extended_eval = extended_eval
-        self._is_train_mode = rospy.get_param("/train_mode")
+
+        self._is_train_mode = rospy.get_param("/train_mode", None)
 
         self._setup_robot_configuration(robot_yaml_path, settings_yaml_path)
 
@@ -207,7 +209,8 @@ class AllInOneEnv(gym.Env):
         Args:
             robot_yaml_path (str): [description]
         """
-        self._robot_radius = rospy.get_param("radius")
+        self._robot_radius = rospy.get_param("/radius", None)
+
         with open(robot_yaml_path, "r") as fd:
             robot_data = yaml.safe_load(fd)
             # get laser related information
@@ -225,11 +228,10 @@ class AllInOneEnv(gym.Env):
                     self._laser_max_range = plugin["range"]
 
         # set up velocity limits
-        with open(settings_yaml_path, 'r') as fd:
-            setting_data = yaml.safe_load(fd)
-            linear_range = rospy.get_param('speed')
-            angular_range = 4
-            self._angular_low = -angular_range
-            self._angular_high = angular_range
-            self._linear_low = -linear_range
-            self._linear_high = linear_range
+        linear_range = rospy.get_param('/speed', None)
+
+        angular_range = 4
+        self._angular_low = -angular_range
+        self._angular_high = angular_range
+        self._linear_low = -linear_range
+        self._linear_high = linear_range

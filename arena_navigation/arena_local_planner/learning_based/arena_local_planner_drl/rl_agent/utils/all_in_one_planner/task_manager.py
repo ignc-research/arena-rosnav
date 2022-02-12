@@ -21,7 +21,8 @@ class TaskManager:
     def __init__(self, ns: str, reset_map_interval: int, paths: dict, run_scenario: bool):
         self.ns = ns
         self.run_scenario = run_scenario
-        self._robot_model = rospy.get_param('robot_model')
+        self._robot_model = rospy.get_param('/robot_model', None)
+
         if not self.run_scenario:
             self.task = self._get_random_task(paths)
             self.resetMap_interval = reset_map_interval
