@@ -179,7 +179,7 @@ def _get_paths(all_in_one_config: str = "all_in_one_default.json") -> dict:
     :param args (argparse.Namespace): Object containing the program arguments
     """
     dir = rospkg.RosPack().get_path('arena_local_planner_drl')
-    robot_model = rospy.get_param('robot_model')
+    robot_model = rospy.get_param('/robot_model')
     paths = {
         'robot_setting': os.path.join(rospkg.RosPack().get_path('simulator_setup'), 'robot', robot_model +
                                           '.model.yaml'),
@@ -203,7 +203,8 @@ def _get_paths(all_in_one_config: str = "all_in_one_default.json") -> dict:
 
 
 def _make_env(paths: dict, rank: int):
-    robot_model = rospy.get_param("robot_model")
+    robot_model = rospy.get_param("/robot_model")
+
     params_path = os.path.join(paths['hyperparams'], robot_model + '_default.json')
     with open(params_path) as f:
         params = json.load(f)
@@ -247,7 +248,8 @@ def _create_expert_dataset(shared_array_actions,
                            laser_stack_size: int,
                            scan_size: int,
                            robot_state_size: int):
-    print("Create expert dataset for {} iterations.".format(iterations))
+
+    print("Start process " + str(rank))
 
     # 1. Create Gym Env
     env = _make_env(paths, rank)
@@ -405,6 +407,7 @@ if __name__ == '__main__':
                     args=(shared_array_actions, shared_array_obs, paths, iterations_per_worker, i, use_dynamic_scan,
                           laser_stack_size, scan_size, robot_state_size))
         p.start()
+        time.sleep(2)
         processes.append((p, shared_array_actions, shared_array_obs))
 
     for i in range(num_envs):
