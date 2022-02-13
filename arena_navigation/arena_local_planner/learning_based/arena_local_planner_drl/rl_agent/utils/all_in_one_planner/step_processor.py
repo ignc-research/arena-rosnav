@@ -163,7 +163,14 @@ class StepProcessor:
     def _pub_action(self, action):
         action_msg = Twist()
         action_msg.linear.x = action[0]
-        action_msg.angular.z = action[1]
+        if len(action == 2):
+            # non holonomic
+            action_msg.angular.z = action[1]
+        else:
+            # holonomic
+            action_msg.linear.y = action[1]
+            action_msg.angular.z = action[2]
+
         self.agent_action_pub.publish(action_msg)
 
     def _extract_step_parameters(self, config_path: str):
@@ -175,9 +182,7 @@ class StepProcessor:
         if 'run_all_agents_each_iteration' in config_data and config_data['run_all_agents_each_iteration']:
             self._run_all_agents_each_iteration = True
         elif 'run_all_agents_each_iteration' not in config_data:
-            rospy.logwarn(
-                "Parameter \"run_all_agents_each_iteration\" not found in config file. Use default value \"true\"")
-            self._run_all_agents_each_iteration = True
+            self._run_all_agents_each_iteration = False
         else:
             self._run_all_agents_each_iteration = False
         # extract update rate of global planner
@@ -186,14 +191,14 @@ class StepProcessor:
         else:
             rospy.logwarn(
                 "Parameter \"update_global_plan_frequency\" not found in config file. Use default value of 5!")
-            self._update_global_plan_frequency = 4
+            self._update_global_plan_frequency = 5
         # extract frequency of all in one planner
         if 'all_in_one_planner_frequency' in config_data:
             self._all_in_one_planner_frequency = config_data['all_in_one_planner_frequency']
         else:
             rospy.logwarn(
-                'Parameter \"all_in_one_planner_frequency\" not found in config file. Us edefault value of 5!')
-            self._all_in_one_planner_frequency = 4
+                'Parameter \"all_in_one_planner_frequency\" not found in config file. Us edefault value of 3!')
+            self._all_in_one_planner_frequency = 3
 
         if "stabilize with hard coding" in config_data:
             stabilize_data = config_data["stabilize with hard coding"]

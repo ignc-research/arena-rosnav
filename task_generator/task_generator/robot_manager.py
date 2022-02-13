@@ -33,8 +33,9 @@ class RobotManager:
         self.ns = ns
         self.ns_prefix = "" if ns == "" else "/"+ns+"/"
 
-        self.is_training_mode = rospy.get_param("/train_mode")
-        self.step_size = rospy.get_param("step_size")
+        self.is_training_mode = rospy.get_param("/train_mode", None)
+
+        self.step_size = rospy.get_param("/step_size")
         self._get_robot_configration(robot_yaml_path)
         # setup proxy to handle  services provided by flatland
         rospy.wait_for_service(f'{self.ns_prefix}move_model', timeout=timeout)
@@ -82,7 +83,7 @@ class RobotManager:
             robot_yaml_path ([type]): [description]
         """
         self.ROBOT_NAME = os.path.basename(robot_yaml_path).split('.')[0]
-        self.ROBOT_RADIUS = rospy.get_param("radius") * 1.4
+        self.ROBOT_RADIUS = rospy.get_param("/radius") * 1.4
         with open(robot_yaml_path, 'r') as f:
             robot_data = yaml.safe_load(f)
             # get laser_update_rate

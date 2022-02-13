@@ -47,9 +47,9 @@ class LocalPlannerManager:
 
     def execute_local_planner(self, model_numb: int, obs_dict: dict, clip: [int]) -> np.array:
         action_model = np.array(self._models[model_numb].get_next_action(obs_dict))
-        action_model[0] = np.clip(a=action_model[0], a_min=clip[0],
-                                  a_max=clip[1])
-        action_model[1] = np.clip(a=action_model[1], a_min=clip[2], a_max=clip[3])
+        # action_model[0] = np.clip(a=action_model[0], a_min=clip[0],
+        #                           a_max=clip[1])
+        # action_model[1] = np.clip(a=action_model[1], a_min=clip[2], a_max=clip[3])
         return action_model
 
     def execute_local_planners(self, obs_dict: dict, clip: [int]) -> np.array:

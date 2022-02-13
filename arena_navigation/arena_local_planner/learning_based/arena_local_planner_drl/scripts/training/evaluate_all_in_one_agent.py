@@ -35,7 +35,7 @@ primitive_agent_prefix = 'single_planners' + rospy.get_param('robot_model')
 simple_all_in_one_switches = ['simple_all_in_one', 'random']
 
 AGENTS_gv = ['simple_all_in_one', 'drl_only', 'teb_only']
-eval_episodes_gv = 200
+eval_episodes_gv = 50
 #  seed = random.randint(1, 1000)
 seed_gv = 21
 map_config_gv = "indoor_obs10.json"
@@ -58,7 +58,7 @@ def get_paths(AGENT: str, map_config: str, evaluation_name: str, primitive_agent
                                      'default_settings.yaml'),
             'curriculum': os.path.join(dir, 'configs', 'training_curriculum_map1small.yaml'),
             'drl_agents': os.path.join(dir, 'agents', 'rosnav-agents'),
-            'hyperparams': os.path.join(dir, 'configs', 'hyperparameters', 'all_in_one_default.json'),
+            'hyperparams': os.path.join(dir, 'configs', 'hyperparameters', robot_model + '_default.json'),
             'map_parameters': os.path.join(dir, 'configs', 'all_in_one_hyperparameters', 'map_parameters', map_config)
         }
     else:

@@ -1,11 +1,11 @@
 #!/bin/sh
+robot_model=$1
 
 tmux new-session \; \
 send-keys 'workon rosnav' C-m \; \
-send-keys "roslaunch arena_bringup start_training_all_in_one_planner.launch num_envs:=1" C-m\; \
+send-keys "roslaunch arena_bringup start_training_all_in_one_planner.launch num_envs:=1 robot_model:="$robot_model"" C-m\; \
 split-window -h \; \
 send-keys 'workon rosnav' C-m \; \
-send-keys 'source catkin_ws/devel/setup.zsh' C-m \; \
 send-keys 'roscd arena_local_planner_drl/' C-m \; \
 send-keys "python3 scripts/training/evaluate_all_in_one_agent.py --load all_in_one_0.6" C-m \; \
 split-window -h \; \

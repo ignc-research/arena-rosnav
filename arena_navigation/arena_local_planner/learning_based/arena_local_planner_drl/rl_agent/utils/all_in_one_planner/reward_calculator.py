@@ -293,7 +293,7 @@ class RewardCalculator:
         :param laser_scan (np.ndarray): laser scan data
         :param punishment (float, optional): punishment for collision. defaults to 10
         """
-        if laser_scan.min() <= self.robot_radius + 0.01:
+        if laser_scan.min() <= self.robot_radius * 0.02:
             self.curr_reward -= punishment
 
             if self._is_train_mode:

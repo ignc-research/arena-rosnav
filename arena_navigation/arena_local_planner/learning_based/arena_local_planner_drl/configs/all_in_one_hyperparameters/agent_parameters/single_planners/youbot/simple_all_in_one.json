@@ -1,0 +1,14 @@
+{
+  "models": {
+    "drl": ["youbot"],
+    "drl_names": ["rosnav-drl"],
+    "model_based": [
+      "teb_youbot.yaml"
+    ],
+    "model_based_names": [
+      "teb"
+    ]
+  },
+  "update_global_plan_frequency": 10,
+  "all_in_one_planner_frequency": 3
+}
