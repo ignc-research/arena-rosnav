@@ -15,16 +15,14 @@ from tools.train_agent_utils import check_hyperparam_format, print_hyperparamete
 
 import rospy
 
-base_Agent1 = 'mixed_teb_drl4_rule06_policy2'  # 0.87
-base_Agent2 = 'mixed_teb_drl4_rule07_policy3'
-base_Agent3 = 'teb_drl4_rule07_policy2'  # 0.86
-base_Agent4 = "2xteb_drl4_rule07_policy2"  # 88
-base_agent_13 = "teb_drl4_rule07_nn13_16+d_mixed_5M_2"  # 0.93
+# burger
+burger_1 = "teb_drl4_rule07_nn13_16+d_mixed_5M_2"  # 0.93
+burger_2 = "teb_drl4_rule06_nn7_fx3_10M"  # 86
+burger_3 = "teb_drl4_rule06_nn22_fx3_mixed_5M"  # 0.88
 
-base_Agent11 = "teb_drl4_rule06_nn7_fx3_10M"  # 86
-base_Agent12 = "tebx2_drl4_rule06_nn7_fx3_10obst_20M"  # 81
-base_agent_14 = "teb_drl4_rule07_nn21_fx3_mixed_5M_2"  # 0.84
-base_agent_15 = "teb_drl4_rule06_nn22_fx3_mixed_5M"  # 0.88
+jackal = "jackal_s+d"
+
+youbot = "youbot_s+d"
 
 primitive_agents = ['teb_only',  # 0.76
                     'drl_only',  # 0.82
@@ -34,13 +32,14 @@ primitive_agent_prefix = 'single_planners' + rospy.get_param('robot_model')
 
 simple_all_in_one_switches = ['simple_all_in_one', 'random']
 
-AGENTS_gv = ['simple_all_in_one', 'drl_only', 'teb_only']
-eval_episodes_gv = 50
+AGENTS_gv = ['drl_only']
+
+eval_episodes_gv = 100
 #  seed = random.randint(1, 1000)
 seed_gv = 21
 map_config_gv = "indoor_obs10.json"
 
-evaluation_name_gv = "jackal"
+evaluation_name_gv = "rto"
 
 max_episode_iterations_gv = 350
 
