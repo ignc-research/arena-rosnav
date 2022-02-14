@@ -3,7 +3,6 @@
     "drl": [
       "rto_tlabs"
     ],
-    "use_drl_servers": 1,
     "drl_names": [
       "rosnav-drl"
     ]

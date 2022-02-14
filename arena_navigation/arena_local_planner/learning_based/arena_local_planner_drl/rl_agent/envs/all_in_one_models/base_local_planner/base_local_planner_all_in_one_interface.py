@@ -63,6 +63,9 @@ class BaseLocalPlannerAgent(ModelBase):
         else:
             response_msg: all_in_one_local_planner_interface.srv.GetVelCmdResponse = self._getVelService()
 
+        if not response_msg.successful:
+            response_msg.vel.linear.x = 0.04
+
         return np.array([response_msg.vel.linear.x, response_msg.vel.angular.z])
 
     def wait_for_agent(self) -> bool:

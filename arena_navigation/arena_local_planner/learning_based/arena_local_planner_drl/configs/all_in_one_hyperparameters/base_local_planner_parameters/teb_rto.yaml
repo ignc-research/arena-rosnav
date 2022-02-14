@@ -7,10 +7,11 @@ reset_costmap_interval: 5  # Time between automatic costmap resets in seconds
 
 teb_local_planner:
   max_vel_x: 2.78
-  max_vel_x_backwards: 2.78
+  max_vel_x_backwards: 1.5
   max_vel_y: 2.78
   max_vel_theta: 1.0
   acc_lim_x: 2.5
+  acc_lim_y: 2.5
   acc_lim_theta: 3.2
   min_turning_radius: 0.0 # diff-drive robot (can turn on place!)
 

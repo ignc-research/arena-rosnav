@@ -163,14 +163,14 @@ class StepProcessor:
     def _pub_action(self, action):
         action_msg = Twist()
         action_msg.linear.x = action[0]
-        if len(action == 2):
+        print(len(action))
+        if len(action) == 2:
             # non holonomic
             action_msg.angular.z = action[1]
         else:
             # holonomic
             action_msg.linear.y = action[1]
             action_msg.angular.z = action[2]
-
         self.agent_action_pub.publish(action_msg)
 
     def _extract_step_parameters(self, config_path: str):
