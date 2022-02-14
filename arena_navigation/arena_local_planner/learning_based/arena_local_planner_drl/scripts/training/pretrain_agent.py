@@ -407,7 +407,7 @@ if __name__ == '__main__':
                     args=(shared_array_actions, shared_array_obs, paths, iterations_per_worker, i, use_dynamic_scan,
                           laser_stack_size, scan_size, robot_state_size))
         p.start()
-        time.sleep(8)
+        time.sleep(12)
         processes.append((p, shared_array_actions, shared_array_obs))
 
     for i in range(num_envs):
