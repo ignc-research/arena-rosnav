@@ -163,7 +163,6 @@ class StepProcessor:
     def _pub_action(self, action):
         action_msg = Twist()
         action_msg.linear.x = action[0]
-        print(len(action))
         if len(action) == 2:
             # non holonomic
             action_msg.angular.z = action[1]

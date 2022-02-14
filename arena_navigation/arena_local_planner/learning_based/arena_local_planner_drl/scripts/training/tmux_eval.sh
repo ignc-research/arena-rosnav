@@ -7,7 +7,7 @@ send-keys "roslaunch arena_bringup start_training_all_in_one_planner.launch num_
 split-window -h \; \
 send-keys 'workon rosnav' C-m \; \
 send-keys 'roscd arena_local_planner_drl/' C-m \; \
-send-keys "python3 scripts/training/evaluate_all_in_one_agent.py --load all_in_one_0.6" C-m \; \
+send-keys "python3 scripts/training/evaluate_all_in_one_agent.py" C-m \; \
 split-window -h \; \
 send-keys 'roslaunch arena_bringup visualization_training.launch use_rviz:=true ns:=eval_sim rviz_file:=allinone_evalsim' \; \
 select-layout even-horizontal \; \

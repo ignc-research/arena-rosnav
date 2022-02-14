@@ -320,7 +320,7 @@ if __name__ == '__main__':
 
     eval_cb = EvalCallback(
         eval_env=eval_env, train_env=env,
-        n_eval_episodes=eval_episodes, eval_freq=40000,
+        n_eval_episodes=eval_episodes, eval_freq=60000,
         log_path=paths['eval'], best_model_save_path=paths['model'], deterministic=True)
 
     print("\nStart DRL training...\n")
