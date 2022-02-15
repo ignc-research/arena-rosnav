@@ -354,6 +354,8 @@ class ObservationCollectorAllInOne:
         diff_scan = np.abs(scan - static_scan)
         dyanmic_scan = np.where(diff_scan < 0.1, self._laser_max_range, scan)
 
+        dyanmic_scan = np.where(dyanmic_scan > 3, self._laser_max_range, dyanmic_scan)
+
         # self._dyn_scan_msg.ranges = dyanmic_scan
         # self._dyn_scan_msg.header.stamp = rospy.get_rostime()
         # self._dynamic_scan_pub.publish(self._dyn_scan_msg)

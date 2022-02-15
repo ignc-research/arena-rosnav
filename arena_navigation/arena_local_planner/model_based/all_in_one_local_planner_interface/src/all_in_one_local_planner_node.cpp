@@ -105,7 +105,7 @@ bool AllInOneLocalPlannerNode::check_recovery(geometry_msgs::Twist &vel_cmd) {
     ros::Time current_time = ros::Time::now();
     ros::Duration time_diff = (current_time - _time_last_resetted);
 
-    bool vel_x_too_low = vel_cmd.linear.x < _minimum_x_vel;
+    bool vel_x_too_low = std::abs(vel_cmd.linear.x < _minimum_x_vel);
     bool time_diff_sufficient = time_diff.toSec() > _max_time_between_resets;
     bool automatic_reset = _reset_costmap_automatically && time_diff.toSec() >= _reset_costmap_interval;
 

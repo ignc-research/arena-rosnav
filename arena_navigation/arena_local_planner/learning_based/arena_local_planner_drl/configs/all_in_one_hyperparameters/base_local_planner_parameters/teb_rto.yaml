@@ -1,6 +1,6 @@
 local_planner_type: "teb_local_planner/TebLocalPlannerROS"
 local_planner_name: "teb_local_planner"
-min_tolerated_x_vel: -1 # If linear velocity is below this threshold costmap will be resetted as it assumed that the robot is stuck
+min_tolerated_x_vel: 0.1 # If linear velocity is below this threshold costmap will be resetted as it assumed that the robot is stuck
 max_time_between_resets: 1 # Max time in s between two costmap resets.
 reset_costmap_automatically: False
 reset_costmap_interval: 5  # Time between automatic costmap resets in seconds
