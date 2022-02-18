@@ -1,4 +1,4 @@
-<!-- -->
+<?xml version="1.0" encoding="UTF-8"?>
 <launch>
   <!-- Arguments -->
   <arg name="model" default="burger"/>
@@ -13,7 +13,7 @@
     <rosparam file="$(find conventional)/config/$(arg model)/local_costmap_params.yaml" command="load" />
     <rosparam file="$(find conventional)/config/$(arg model)/global_costmap_params.yaml" command="load" />
     <rosparam file="$(find conventional)/config/$(arg model)/move_base_params.yaml" command="load" />
- 
+
 
     <remap from="cmd_vel" to="$(arg cmd_vel_topic)"/>
     <remap from="odom" to="$(arg odom_topic)"/>

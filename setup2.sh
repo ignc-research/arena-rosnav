@@ -11,7 +11,7 @@ fi
 
 # NOTE: This script requires a pyten env called 'rosnav'
 pip3 install --extra-index-url https://rospypi.github.io/simple/ rospy rosbag tf tf2_ros --ignore-installed
-pip3 install pyyaml catkin_pkg netifaces pathlib filelock pyqt5 mpi4py torch lxml scipy defusedxml numpy scikit-image Pillow rospkg
+pip3 install pyyaml catkin_pkg netifaces pathlib filelock pyqt5 mpi4py torch lxml scipy defusedxml numpy scikit-image Pillow rospkg tensorflow
 pip install PyQt5 --upgrade
 
 # install the arena-rosnav-repo
@@ -22,7 +22,9 @@ source $HOME/.${CURSHELL}rc
 source `which virtualenvwrapper.sh` && workon rosnav 
 cd $HOME/arena_ws/src/forks/arena-tools && git clone https://gitlab.com/LIRS_Projects/LIRS-WCT lirs-wct && cd lirs-wct && sudo ./deploy.sh
 cd $HOME/arena_ws/src/forks/arena-tools && mv lirs-wct/lirs_wct_console/build/lirs_wct_console .
+cd $HOME/arena_ws/src/forks/stable-baselines3 && pip install e .
 cd $HOME/arena_ws
+
 catkin_make -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=/usr/bin/python3 -DCMAKE_CXX_STANDARD=14
 
 echo "source $HOME/arena_ws/devel/setup.bash

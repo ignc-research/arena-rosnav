@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <launch>
 
   <!-- Arguments -->
@@ -11,7 +12,7 @@
   <!-- move_base -->
   <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
     <rosparam file="$(find conventional)/config/$(arg model)/costmap_common_params.yaml" command="load" ns="global_costmap" />
-    <rosparam file="$(find conventional)/config/$(arg model)/costmap_common_params.yaml" command="load" ns="local_costmap" />   
+    <rosparam file="$(find conventional)/config/$(arg model)/costmap_common_params.yaml" command="load" ns="local_costmap" />
     <rosparam file="$(find conventional)/config/$(arg model)/local_costmap_params.yaml" command="load" />
     <rosparam file="$(find conventional)/config/$(arg model)/global_costmap_params.yaml" command="load" />
   </node>
@@ -23,7 +24,7 @@
 
   <!-- spacial_horizon -->
   <!-- <node pkg="arena_spacial_horizon" type="spacial_horizon_node" name="spacial_horizon_node" output="screen"> -->
-    <!-- <rosparam file="$(find arena_bringup)/launch/plan_fsm_param.yaml" command="load" /> ns="fsm" -->
+  <!-- <rosparam file="$(find arena_bringup)/launch/plan_fsm_param.yaml" command="load" /> ns="fsm" -->
   <!-- </node> -->
 
   <!-- scan mapping, because training and real scan calibration may differ
