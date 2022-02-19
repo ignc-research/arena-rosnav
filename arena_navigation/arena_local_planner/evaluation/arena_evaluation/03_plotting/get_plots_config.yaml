@@ -3,55 +3,147 @@ collision_size: 1.0
 collision_zone_alpha: 0.075
 collision_zone_base_diameter: 0.025
 color_scheme:
-  drl: tab:blue
-  drl_spatial_horizon: tab:blue
-  dwa: tab:green
-  dwa_spatial_horizon: tab:green
-  ego: tab:grey
-  ego_spatial_horizon: tab:grey
-  mpc: tab:red
-  mpc_spatial_horizon: tab:red
-  rlca: tab:purple
-  rlca_spatial_horizon: tab:purple
-  teb: tab:orange
-  teb_spatial_horizon: tab:orange
+  aio_jackal: tab:pink
+  aio_rto: tab:pink
+  aio_turtlebot3_burger: tab:pink
+  aio_youbot: tab:pink
+  arena_turtlebot3_burger: tab:grey
+  cadrl_jackal: tab:olive
+  cadrl_rto: tab:olive
+  cadrl_turtlebot3_burger: tab:olive
+  cadrl_youbot: tab:olive
+  dwa_jackal: tab:red
+  dwa_rto: tab:red
+  dwa_turtlebot3_burger: tab:red
+  dwa_youbot: tab:red
+  guldenring_jackal: tab:brown
+  guldenring_turtlebot3_burger: tab:brown
+  mpc_jackal: tab:green
+  mpc_rto: tab:green
+  mpc_turtlebot3_burger: tab:green
+  mpc_youbot: tab:green
+  navrep_jackal: tab:purple
+  navrep_rto: tab:purple
+  navrep_turtlebot3_burger: tab:purple
+  navrep_youbot: tab:purple
+  rlca_turtlebot3_burger: tab:blue
+  rosnav_jackal: tab:orange
+  rosnav_rto: tab:orange
+  rosnav_turtlebot3_burger: tab:orange
+  teb_jackal: tab:cyan
+  teb_rto: tab:cyan
+  teb_turtlebot3_burger: tab:cyan
+  teb_youbot: tab:cyan
 goal_marker: '*'
 goal_point_color: tab:brown
 goal_size: 20
 labels:
-  drl: DRL
-  drl_spatial_horizon: DRL_spatial_horizon
-  dwa: DWA
-  dwa_spatial_horizon: DWA_spatial_horizon
-  ego: EGO
-  ego_spatial_horizon: EGO_spatial_horizon
-  mpc: MPC
-  mpc_spatial_horizon: MPC_spatial_horizon
-  rlca: RLCA
-  rlca_spatial_horizon: RLCA_spatial_horizon
-  teb: TEB
-  teb_spatial_horizon: TEB_spatial_horizon
+  aio_jackal: AIO
+  aio_rto: AIO
+  aio_turtlebot3_burger: AIO
+  aio_youbot: AIO
+  arena_turtlebot3_burger: ARENA
+  cadrl_jackal: CADRL
+  cadrl_rto: CADRL
+  cadrl_turtlebot3_burger: CADRL
+  cadrl_youbot: CADRL
+  dwa_jackal: DWA
+  dwa_rto: DWA
+  dwa_turtlebot3_burger: DWA
+  dwa_youbot: DWA
+  guldenring_jackal: GUL
+  guldenring_turtlebot3_burger: GUL
+  mpc_jackal: MPC
+  mpc_rto: MPC
+  mpc_turtlebot3_burger: MPC
+  mpc_youbot: MPC
+  navrep_jackal: NAVREP
+  navrep_rto: NAVREP
+  navrep_turtlebot3_burger: NAVREP
+  navrep_youbot: NAVREP
+  rlca_turtlebot3_burger: RLCA
+  rosnav_jackal: ROSNAV
+  rosnav_rto: ROSNAV
+  rosnav_turtlebot3_burger: ROSNAV
+  teb_jackal: TEB
+  teb_rto: TEB
+  teb_turtlebot3_burger: TEB
+  teb_youbot: TEB
+latex: false
+leave_out_metric:
+- cusps
 leave_out_planner:
 - rlca_subsampling
 - drl_subsampling
-legend_position: upper left
-most_recent_file: data_21-11-10_15:21:37.json
+most_recent_file: data_22-02-19_16:21:45_turtlebot_incomplete.json
 obstacle_color: black
 obstacle_radius: 0.3
 path_alpha: 0.3
 path_arrow_color: black
 path_arrow_size: 5
-path_size: 0.5
+path_size: 0.1
+plot_barplot_alpha: 1.0
+plot_barplot_capsize: 0.3
+plot_barplot_errorbars: true
+plot_barplot_errorcolor: black
+plot_barplot_width: 0.5
 plot_collision_zones: true
 plot_collisions: true
-plot_legend: true
+plot_obs_in_one: true
+plot_obs_in_one_alpha: 1.0
+plot_obs_in_one_capsize: 0.1
+plot_obs_in_one_errorbars: true
+plot_obs_in_one_errorcolor: black
 plot_progression: false
 plot_qualitative: true
+plot_qualitative_axes: true
+plot_qualitative_axes_size: 16
+plot_qualitative_axes_ticks_size: 16
+plot_qualitative_legend: true
+plot_qualitative_legend_fontsize: 12
+plot_qualitative_legend_location: upper left
+plot_qualitative_title: true
+plot_qualitative_title_size: 18
 plot_quantitative: true
+plot_quantitative_axes_label_size: 16
+plot_quantitative_axes_tick_size: 10
+plot_quantitative_labels:
+  angle_over_length: Angle over Length
+  collision: Collisions
+  computation_time: Computation Time in [s]
+  cusps: Cusps
+  jerk: Movement Jerk in [$\frac{m}{s^{3}}$]
+  max_clearing_distance: Max. Clearing Distance in [m]
+  max_curvature: Max. Curvature
+  mean_clearing_distance: Mean Clearing Distance in [m]
+  median_clearing_distance: Median Clearing Distance in [m]
+  min_clearing_distance: Min. Clearing Distance in [m]
+  normalized_curvature: Normalized Curvature
+  obstacle_number: Obstacle Number
+  path_length: Path Length in [m]
+  planner: Planner
+  roughness: Path Roughness
+  success: Success Rate
+  time: Time Traveled in [s]
+plot_quantitative_legend: true
+plot_quantitative_legend_fontsize: 12
+plot_quantitative_legend_location: upper left
+plot_quantitative_suptitle: true
+plot_quantitative_suptitle_size: 18
+plot_quantitative_title: true
+plot_quantitative_title_size: 16
+plot_quantitative_violin: false
+plot_quantitative_violin_inner: point
+plot_quantitative_ygrid: true
+plot_success_alpha: 1.0
+plot_success_collision_color: tab:red
+plot_success_success_color: tab:green
+plot_success_time_out_color: tab:blue
+plot_success_width: 0.5
 progression_size: 3
 progression_steps: 20
 specified_data_filename: null
-specify_data: true
+specify_data: false
 start_marker: ^
 start_point_color: tab:grey
 start_size: 20

@@ -186,7 +186,7 @@
   "static_obstacles": [],
   "robot_position": [-3.71, 9.21],
   "robot_goal": [1.73, -9.57],
-  "resets": 3,
-  "map_path": "/home/reyk/Schreibtisch/Uni/VIS/arena-rosnav-3d/src/arena-rosnav-3D/simulator_setup/maps/small_warehouse/map.yaml",
+  "resets": 4,
+  "map_path": "/home/elias/arena_ws/src/arena-rosnav/simulator_setup/maps/small_warehouse/map.yaml",
   "format": "arena-tools"
 }

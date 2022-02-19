@@ -31,7 +31,7 @@
             "requesting_service_base_time": 30.0,
             "force_factor_desired": 1.0,
             "force_factor_obstacle": 1.0,
-            "force_factor_social": 5.0,
+            "force_factor_social": 0.0,
             "force_factor_robot": 0.0,
             "waypoints": [
                 [
@@ -96,7 +96,7 @@
             "requesting_service_base_time": 30.0,
             "force_factor_desired": 1.0,
             "force_factor_obstacle": 1.0,
-            "force_factor_social": 5.0,
+            "force_factor_social": 0.0,
             "force_factor_robot": 0.0,
             "waypoints": [],
             "waypoint_mode": 0
@@ -132,7 +132,7 @@
             "requesting_service_base_time": 30.0,
             "force_factor_desired": 1.0,
             "force_factor_obstacle": 1.0,
-            "force_factor_social": 5.0,
+            "force_factor_social": 0.0,
             "force_factor_robot": 0.0,
             "waypoints": [],
             "waypoint_mode": 0
@@ -168,7 +168,7 @@
             "requesting_service_base_time": 30.0,
             "force_factor_desired": 1.0,
             "force_factor_obstacle": 1.0,
-            "force_factor_social": 5.0,
+            "force_factor_social": 0.0,
             "force_factor_robot": 0.0,
             "waypoints": [],
             "waypoint_mode": 0
@@ -204,7 +204,7 @@
             "requesting_service_base_time": 30.0,
             "force_factor_desired": 1.0,
             "force_factor_obstacle": 1.0,
-            "force_factor_social": 5.0,
+            "force_factor_social": 0.0,
             "force_factor_robot": 0.0,
             "waypoints": [],
             "waypoint_mode": 0
@@ -240,7 +240,7 @@
             "requesting_service_base_time": 30.0,
             "force_factor_desired": 1.0,
             "force_factor_obstacle": 1.0,
-            "force_factor_social": 5.0,
+            "force_factor_social": 0.0,
             "force_factor_robot": 0.0,
             "waypoints": [],
             "waypoint_mode": 0
@@ -276,7 +276,7 @@
             "requesting_service_base_time": 30.0,
             "force_factor_desired": 1.0,
             "force_factor_obstacle": 1.0,
-            "force_factor_social": 5.0,
+            "force_factor_social": 0.0,
             "force_factor_robot": 0.0,
             "waypoints": [],
             "waypoint_mode": 0

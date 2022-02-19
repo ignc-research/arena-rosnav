@@ -29,7 +29,7 @@
             "talking_and_walking_base_time": 6,
             "receiving_service_base_time": 20,
             "requesting_service_base_time": 30,
-            "force_factor_desired": 1,
+            "force_factor_desired": 0,
             "force_factor_obstacle": 1,
             "force_factor_social": 5,
             "force_factor_robot": 0,

@@ -1,4 +1,10 @@
 # parameters for the calculation of the performance metrics
-robot_radius: 0.3
+robot_radius:
+  turtlebot3_burger: 0.113
+  jackal: 0.267
+  ridgeback: 0.625
+  agv-ota: 0.629
+  rto: 0.225
+  youbot: 0.347
 time_out_treshold: 180
 collision_treshold: 2
