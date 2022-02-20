@@ -100,6 +100,10 @@ void laser_callback(const sensor_msgs::LaserScan::ConstPtr &msg)
 		{
 			laser_data[i] = MAX_LASER_DISTANCE;
 		}
+		if (isnan(laser_data[i]))
+		{
+			laser_data[i] = MAX_LASER_DISTANCE;
+		}
 		// if (laser_data[i] > MAX_LASER_DISTANCE)
 		// {
 		// 	laser_data[i] = MAX_LASER_DISTANCE;

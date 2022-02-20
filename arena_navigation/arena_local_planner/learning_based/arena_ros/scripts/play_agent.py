@@ -8,17 +8,20 @@ from sensor_msgs.msg import LaserScan
 # viz
 from visualization_msgs.msg import Marker, MarkerArray
 from std_msgs.msg import ColorRGBA
-# arena 
+# arena
 import fc2 as fc
 import math
 from torch.nn.utils.rnn import pack_sequence
-import torch, rospkg
+import torch
+import rospkg
 import numpy as np
+
 
 class NN_tb3():
     def __init__(self):
         print("[play_agent]: in init")
-        self.sub_obs = rospy.Subscriber('/observation', Observation, self.cbObservation)
+        self.sub_obs = rospy.Subscriber(
+            '/observation', Observation, self.cbObservation)
         self.pub_twist = rospy.Publisher('/cmd_vel', Twist, queue_size=1)
 
     def goalReached(self):
@@ -27,7 +30,7 @@ class NN_tb3():
         #     return False
         # else:
         #     return True
-        goal_reached = rospy.get_param("/bool_goal_reached")        
+        goal_reached = rospy.get_param("/bool_goal_reached")
 
         if not goal_reached:
             return False
@@ -38,20 +41,20 @@ class NN_tb3():
         twist = Twist()
         # print(twist)
         self.pub_twist.publish(twist)
-            
+
     def cbObservation(self, msg):
         # print("[Play_agent]: in cbObservation")
         if not self.goalReached():
             # NUM_ACTIONS = 5
             NUM_ACTIONS = 7
-            num_observations=362
-            SEQ_LENGTH=64
-            SEQ_LENGTH_MAX=300
+            num_observations = 362
+            SEQ_LENGTH = 64
+            SEQ_LENGTH_MAX = 300
 
             device = torch.device('cpu')
             net = fc.FC_DQN(num_observations, NUM_ACTIONS)
             net.train(False)
-            #load NN
+            # load NN
 
             current_dir_path = rospkg.RosPack().get_path('arena_ros') + "/scripts/"
             model_name = "advanced_agent2_best.dat"
@@ -60,7 +63,7 @@ class NN_tb3():
             net.load_state_dict(torch.load(model_path, map_location=device))
             net.to(device)
 
-            ##output NN
+            # output NN
             # passing observation through net
             state_v = torch.FloatTensor([msg.observation]).to(device)
             q_vals_v = net(state_v)
@@ -78,7 +81,13 @@ class NN_tb3():
     def performAction(self, action):
 
         # action_space = {0: [0.2,0],1: [0.15,0.75],2: [0.15,-0.75],3: [0.0,1.5],4: [0.0,-1.5]}
-        action_space = {0: [0.2,0],1: [0.15,0.75],2: [0.15,-0.75],3: [0.0,1.5],4: [0.0,-1.5], 5: [0.0,0], 6: [-0.1,0]}
+        action_space = {0: [0.2, 0], 
+                        1: [0.15, 0.75], 
+                        2: [0.15, -0.75], 
+                        3: [0.0, 1.5], 
+                        4: [0.0, -1.5], 
+                        5: [0.0, 0], 
+                        6: [-0.1, 0]}
         # action_space = {0: [0.2,0], 1: [0.15,0.35], 2: [0.15,-0.35], 3: [0.0,0.75], 4: [0.0,-0.75]}
         # print(action)
         twist = Twist()
@@ -95,15 +104,17 @@ class NN_tb3():
         self.stop_moving()
         # rospy.loginfo("Stopped %s's velocity." %(self.veh_name))
 
+
 def run():
 
     rospy.init_node('arena_tb3', anonymous=False)
     print('==================================\narena node started\n==================================')
-    
+
     nn_tb3 = NN_tb3()
     rospy.on_shutdown(nn_tb3.on_shutdown)
 
     rospy.spin()
+
 
 if __name__ == '__main__':
     run()
