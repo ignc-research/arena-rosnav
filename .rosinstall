@@ -10,13 +10,13 @@
 
 - git:
     local-name: ../forks/navigation/local_planner/teb
-    uri: https://github.com/rst-tu-dortmund/teb_local_planner
-    version: melodic-devel
+    uri: https://github.com/eliastreis/teb
+    version: main
 
-# - git:
-#     local-name: ../forks/navigation/local_planner/mpc
-#     uri: https://github.com/rst-tu-dortmund/mpc_local_planner
-#     version: noetic-devel
+- git:
+    local-name: ../forks/navigation/local_planner/mpc
+    uri: https://github.com/rst-tu-dortmund/mpc_local_planner
+    version: noetic-devel
 
 - git:
     local-name: ../forks/navigation/msgs/ford

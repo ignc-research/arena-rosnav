@@ -345,7 +345,6 @@ class ObstaclesManager:
         move_with_traj['trigger_zones'] = trigger_zones
         move_with_traj['robot_odom_topic'] = self.ns_prefix + 'odom'
         dict_file['plugins'].append(move_with_traj)
-        print(dict_file)
         with open(yaml_path, 'w') as fd:
             yaml.dump(dict_file, fd)
         return yaml_path, move_to_start_pos_pub

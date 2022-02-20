@@ -93,9 +93,7 @@
 					]
 				}
 			},
-			"static_obstacles": {
-
-			},
+			"static_obstacles": {},
 			"robot": {
 				"start_pos": [
 					20.6895,

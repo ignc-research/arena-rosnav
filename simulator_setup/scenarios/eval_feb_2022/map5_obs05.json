@@ -1,241 +1,185 @@
 {
-    "pedsim_agents": [
+    "scenarios": [
         {
-            "name": "1",
-            "id": 0,
-            "pos": [
-                -5.58,
-                -1.31
-            ],
-            "type": "adult",
-            "yaml_file": "/home/linh/catkin_ws/src/arena-rosnav-3D/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
-            "number_of_peds": 1,
-            "vmax": 0.3,
-            "start_up_mode": "default",
-            "wait_time": 0.0,
-            "trigger_zone_radius": 0.0,
-            "chatting_probability": 0.0,
-            "tell_story_probability": 0.0,
-            "group_talking_probability": 0.0,
-            "talking_and_walking_probability": 0.0,
-            "requesting_service_probability": 0.0,
-            "requesting_guide_probability": 0.0,
-            "requesting_follower_probability": 0.0,
-            "max_talking_distance": 5.0,
-            "max_servicing_radius": 5.0,
-            "talking_base_time": 10.0,
-            "tell_story_base_time": 0.0,
-            "group_talking_base_time": 10.0,
-            "talking_and_walking_base_time": 6.0,
-            "receiving_service_base_time": 20.0,
-            "requesting_service_base_time": 30.0,
-            "force_factor_desired": 1.0,
-            "force_factor_obstacle": 1.0,
-            "force_factor_social": 5.0,
-            "force_factor_robot": 0.0,
-            "waypoints": [
-                [
-                    5.38,
-                    -4.4
+            "scene_name": "scenario_1",
+            "repeats": 4,
+            "dynamic_obstacles": {
+                "dynamic_obs_0": {
+                    "obstacle_radius": 0.3,
+                    "linear_velocity": 0.3,
+                    "type": "circle",
+                    "start_pos": [
+                        -5.58,
+                        -1.31,
+                        0.0
+                    ],
+                    "waypoints": [
+                        [
+                            10.96,
+                            -3.0900000000000003,
+                            0.0
+                        ],
+                        [
+                            -0.16000000000000014,
+                            0.0,
+                            0.0
+                        ]
+                    ],
+                    "is_waypoint_relative": true,
+                    "mode": "yoyo",
+                    "triggers": []
+                },
+                "dynamic_obs_1": {
+                    "obstacle_radius": 0.3,
+                    "linear_velocity": 0.3,
+                    "type": "circle",
+                    "start_pos": [
+                        -0.76,
+                        -4.65,
+                        0.0
+                    ],
+                    "waypoints": [
+                        [
+                            -0.53,
+                            -6.3100000000000005,
+                            0.0
+                        ],
+                        [
+                            0.07999999999999996,
+                            -0.05999999999999961,
+                            0.0
+                        ]
+                    ],
+                    "is_waypoint_relative": true,
+                    "mode": "yoyo",
+                    "triggers": []
+                },
+                "dynamic_obs_2": {
+                    "obstacle_radius": 0.3,
+                    "linear_velocity": 0.3,
+                    "type": "circle",
+                    "start_pos": [
+                        6.78,
+                        -9.84,
+                        0.0
+                    ],
+                    "waypoints": [
+                        [
+                            -12.4,
+                            1.17,
+                            0.0
+                        ],
+                        [
+                            0.7000000000000002,
+                            0.2400000000000002,
+                            0.0
+                        ]
+                    ],
+                    "is_waypoint_relative": true,
+                    "mode": "yoyo",
+                    "triggers": []
+                },
+                "dynamic_obs_3": {
+                    "obstacle_radius": 0.3,
+                    "linear_velocity": 0.3,
+                    "type": "circle",
+                    "start_pos": [
+                        -0.1,
+                        7.34,
+                        0.0
+                    ],
+                    "waypoints": [
+                        [
+                            9.19,
+                            -1.54,
+                            0.0
+                        ],
+                        [
+                            -0.7000000000000001,
+                            -0.05999999999999961,
+                            0.0
+                        ]
+                    ],
+                    "is_waypoint_relative": true,
+                    "mode": "yoyo",
+                    "triggers": []
+                },
+                "dynamic_obs_4": {
+                    "obstacle_radius": 0.3,
+                    "linear_velocity": 0.3,
+                    "type": "circle",
+                    "start_pos": [
+                        -2.6,
+                        4.19,
+                        0.0
+                    ],
+                    "waypoints": [
+                        [
+                            6.869999999999999,
+                            -3.2200000000000006,
+                            0.0
+                        ],
+                        [
+                            -0.2999999999999998,
+                            0.05999999999999961,
+                            0.0
+                        ]
+                    ],
+                    "is_waypoint_relative": true,
+                    "mode": "yoyo",
+                    "triggers": []
+                }
+            },
+            "static_obstacles": {},
+            "robot": {
+                "start_pos": [
+                    -8.52,
+                    -9.19,
+                    0.0
                 ],
-                [
-                    -5.74,
-                    -1.31
+                "goal_pos": [
+                    -5.36,
+                    7.62,
+                    0.0
                 ]
-            ],
-            "waypoint_mode": 0
-        },
-        {
-            "name": "2",
-            "id": 0,
-            "pos": [
-                -0.76,
-                -4.65
-            ],
-            "type": "adult",
-            "yaml_file": "/home/linh/catkin_ws/src/arena-rosnav-3D/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
-            "number_of_peds": 1,
-            "vmax": 0.3,
-            "start_up_mode": "default",
-            "wait_time": 0.0,
-            "trigger_zone_radius": 0.0,
-            "chatting_probability": 0.0,
-            "tell_story_probability": 0.0,
-            "group_talking_probability": 0.0,
-            "talking_and_walking_probability": 0.0,
-            "requesting_service_probability": 0.0,
-            "requesting_guide_probability": 0.0,
-            "requesting_follower_probability": 0.0,
-            "max_talking_distance": 5.0,
-            "max_servicing_radius": 5.0,
-            "talking_base_time": 10.0,
-            "tell_story_base_time": 0.0,
-            "group_talking_base_time": 10.0,
-            "talking_and_walking_base_time": 6.0,
-            "receiving_service_base_time": 20.0,
-            "requesting_service_base_time": 30.0,
-            "force_factor_desired": 1.0,
-            "force_factor_obstacle": 1.0,
-            "force_factor_social": 5.0,
-            "force_factor_robot": 0.0,
-            "waypoints": [
-                [
-                    -1.29,
-                    -10.96
-                ],
-                [
-                    -0.68,
-                    -4.71
-                ]
-            ],
-            "waypoint_mode": 0
-        },
-        {
-            "name": "3",
-            "id": 0,
-            "pos": [
-                6.78,
-                -9.84
-            ],
-            "type": "adult",
-            "yaml_file": "/home/linh/catkin_ws/src/arena-rosnav-3D/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
-            "number_of_peds": 1,
-            "vmax": 0.3,
-            "start_up_mode": "default",
-            "wait_time": 0.0,
-            "trigger_zone_radius": 0.0,
-            "chatting_probability": 0.0,
-            "tell_story_probability": 0.0,
-            "group_talking_probability": 0.0,
-            "talking_and_walking_probability": 0.0,
-            "requesting_service_probability": 0.0,
-            "requesting_guide_probability": 0.0,
-            "requesting_follower_probability": 0.0,
-            "max_talking_distance": 5.0,
-            "max_servicing_radius": 5.0,
-            "talking_base_time": 10.0,
-            "tell_story_base_time": 0.0,
-            "group_talking_base_time": 10.0,
-            "talking_and_walking_base_time": 6.0,
-            "receiving_service_base_time": 20.0,
-            "requesting_service_base_time": 30.0,
-            "force_factor_desired": 1.0,
-            "force_factor_obstacle": 1.0,
-            "force_factor_social": 5.0,
-            "force_factor_robot": 0.0,
-            "waypoints": [
-                [
-                    -5.62,
-                    -8.67
-                ],
-                [
-                    7.48,
-                    -9.6
-                ]
-            ],
-            "waypoint_mode": 0
-        },
-        {
-            "name": "4",
-            "id": 0,
-            "pos": [
-                -0.1,
-                7.34
-            ],
-            "type": "adult",
-            "yaml_file": "/home/linh/catkin_ws/src/arena-rosnav-3D/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
-            "number_of_peds": 1,
-            "vmax": 0.3,
-            "start_up_mode": "default",
-            "wait_time": 0.0,
-            "trigger_zone_radius": 0.0,
-            "chatting_probability": 0.0,
-            "tell_story_probability": 0.0,
-            "group_talking_probability": 0.0,
-            "talking_and_walking_probability": 0.0,
-            "requesting_service_probability": 0.0,
-            "requesting_guide_probability": 0.0,
-            "requesting_follower_probability": 0.0,
-            "max_talking_distance": 5.0,
-            "max_servicing_radius": 5.0,
-            "talking_base_time": 10.0,
-            "tell_story_base_time": 0.0,
-            "group_talking_base_time": 10.0,
-            "talking_and_walking_base_time": 6.0,
-            "receiving_service_base_time": 20.0,
-            "requesting_service_base_time": 30.0,
-            "force_factor_desired": 1.0,
-            "force_factor_obstacle": 1.0,
-            "force_factor_social": 5.0,
-            "force_factor_robot": 0.0,
-            "waypoints": [
-                [
-                    9.09,
-                    5.8
-                ],
-                [
-                    -0.8,
-                    7.28
-                ]
-            ],
-            "waypoint_mode": 0
-        },
-        {
-            "name": "5",
-            "id": 0,
-            "pos": [
-                -2.6,
-                4.19
-            ],
-            "type": "adult",
-            "yaml_file": "/home/linh/catkin_ws/src/arena-rosnav-3D/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
-            "number_of_peds": 1,
-            "vmax": 0.3,
-            "start_up_mode": "default",
-            "wait_time": 0.0,
-            "trigger_zone_radius": 0.0,
-            "chatting_probability": 0.0,
-            "tell_story_probability": 0.0,
-            "group_talking_probability": 0.0,
-            "talking_and_walking_probability": 0.0,
-            "requesting_service_probability": 0.0,
-            "requesting_guide_probability": 0.0,
-            "requesting_follower_probability": 0.0,
-            "max_talking_distance": 5.0,
-            "max_servicing_radius": 5.0,
-            "talking_base_time": 10.0,
-            "tell_story_base_time": 0.0,
-            "group_talking_base_time": 10.0,
-            "talking_and_walking_base_time": 6.0,
-            "receiving_service_base_time": 20.0,
-            "requesting_service_base_time": 30.0,
-            "force_factor_desired": 1.0,
-            "force_factor_obstacle": 1.0,
-            "force_factor_social": 5.0,
-            "force_factor_robot": 0.0,
-            "waypoints": [
-                [
-                    4.27,
-                    0.97
-                ],
-                [
-                    -2.9,
-                    4.25
-                ]
-            ],
-            "waypoint_mode": 0
+            },
+            "watchers": {
+                "watcher_0": {
+                    "pos": [
+                        -5.58,
+                        -1.31
+                    ],
+                    "range": 5
+                },
+                "watcher_1": {
+                    "pos": [
+                        -0.76,
+                        -4.65
+                    ],
+                    "range": 5
+                },
+                "watcher_2": {
+                    "pos": [
+                        6.78,
+                        -9.84
+                    ],
+                    "range": 5
+                },
+                "watcher_3": {
+                    "pos": [
+                        -0.1,
+                        7.34
+                    ],
+                    "range": 5
+                },
+                "watcher_4": {
+                    "pos": [
+                        -2.6,
+                        4.19
+                    ],
+                    "range": 5
+                }
+            }
         }
-    ],
-    "static_obstacles": [],
-    "robot_position": [
-        -8.52,
-        -9.19
-    ],
-    "robot_goal": [
-        -5.36,
-        7.62
-    ],
-    "resets": 4,
-    "map_path": "/home/linh/code/navigation/3d_ws/src/arena-rosnav-3D/simulator_setup/maps/map5/map.yaml",
-    "format": "arena-tools"
+    ]
 }
