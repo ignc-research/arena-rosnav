@@ -34,8 +34,7 @@ def main():
     print("________ STARTING TRAINING WITH:  %s ________\n" % AGENT_NAME)
 
     # for training with start_arena_flatland.launch
-    ros_params = rospy.get_param_names()
-    ns_for_nodes = "/single_env" not in ros_params
+    ns_for_nodes = "/single_env" not in rospy.get_param_names()
 
     # check if simulations are booted
     wait_for_nodes(with_ns=ns_for_nodes, n_envs=args.n_envs, timeout=5)
