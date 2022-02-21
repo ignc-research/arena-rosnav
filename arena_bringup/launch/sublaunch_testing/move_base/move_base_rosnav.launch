@@ -1,6 +1,7 @@
 <launch>
 
   <!-- Arguments -->
+  <arg name="train_mode" default="false"/>
   <arg name="model" default="burger"/>
   <arg name="cmd_vel_topic" default="cmd_vel" />
   <arg name="odom_topic" default="odom" />
@@ -33,12 +34,13 @@
   <!-- observation_packer- to compare calculated distances from robot to goal -->
   <!-- <node pkg="observations" name="observation_packer" type="observation_packer" output="screen"/> -->
 
-  <!-- run_agent -->
-  <!-- <node name="DRL_local_planner" pkg="arena_local_planner_drl" type="drl_agent_real_node.py" args="$(arg agent_name)" output="screen"/> -->
-  <node name="DRL_local_planner" pkg="arena_local_planner_drl" type="drl_agent_node.py" args="$(arg agent_name)" output="screen"/>
+  <group if="$(eval arg('train_mode') == true)">
+    <!-- run_agent -->
+    <!-- <node name="DRL_local_planner" pkg="arena_local_planner_drl" type="drl_agent_real_node.py" args="$(arg agent_name)" output="screen"/> -->
+    <node name="DRL_local_planner" pkg="arena_local_planner_drl" type="drl_agent_node.py" args="$(arg agent_name)" output="screen"/>
 
-  <!-- action_publisher -->
-  <!-- makes sure that drl actions will be published according to sim time in eval mode-->
-  <node name="action_publisher" pkg="arena_local_planner_drl" type="action_publisher.py"/>
-
+    <!-- action_publisher -->
+    <!-- makes sure that drl actions will be published according to sim time in eval mode-->
+    <node name="action_publisher" pkg="arena_local_planner_drl" type="action_publisher.py"/>
+  </group>
 </launch>

@@ -38,7 +38,7 @@
   <param name="single_env" value="true"/>
 
   <!-- the folder name under the path simulator_setup/maps  -->
-  <arg name="map_file" default="map1" doc="[map1, floor, indoor, indoor_map1, map_small, map_empty]"/>
+  <arg name="map_file" default="ignc" doc="[map1, floor, indoor, indoor_map1, map_small, map_empty]"/>
   <!-- <arg name="map_folder_name" default="map_empty" /> -->
   <arg name="map_path" default="$(find simulator_setup)/maps/$(arg map_file)/map.yaml" />
   <param name="world_path" value="$(find simulator_setup)/maps/$(arg map_file)/map.world.yaml" />
@@ -136,6 +136,7 @@
   <include file="$(find arena_bringup)/launch/sublaunch_testing/move_base/move_base_$(arg local_planner).launch">
     <arg name="model" value="$(arg model)"/>
     <arg name="agent_name" value="$(arg agent_name)" if="$(eval arg('local_planner') == 'rosnav')" />
+    <arg name="train_mode" value="$(arg train_mode)" if="$(eval arg('local_planner') == 'rosnav')" />
     <!-- <arg name="speed" value="$(arg speed)"/> -->
   </include>
 
