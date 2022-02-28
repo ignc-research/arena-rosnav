@@ -22,6 +22,6 @@
     <node pkg="observations" name="observation_packer" type="observation_packer" output="screen"/>
 
     <!-- Launch neural net ros wrapper -->
-    <node pkg="arena_ros" type="play_agent.py" name="arena_node"/>
+    <node pkg="arena_ros" type="play_agent.py" name="arena_node" output="screen"/>
 
 </launch>

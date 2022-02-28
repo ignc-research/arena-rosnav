@@ -128,8 +128,8 @@
     <arg name="task_mode" value="$(arg task_mode)"/>
   </include>
 
-  <!-- <include file="$(find arena_bringup)/launch/sublaunch_testing/sensor_sim.launch" unless="$(eval arg('disable_scenario') or arg('train_mode'))">
-  </include> -->
+  <include file="$(find arena_bringup)/launch/sublaunch_testing/sensor_sim.launch" unless="$(eval arg('train_mode'))">
+  </include>
 
 
 

@@ -13,14 +13,13 @@ import copy
 from std_msgs.msg import Int16
 # col
 from scenario_police import police
-import pedsim_msgs.msg as peds
+
 class sensor():
 
     def __init__(self):
         # tmgr
         # last updated topic
         self.update_cluster = True
-        self.n_reset = -1
 
 
         self.obstacles_dyn = {}
@@ -34,28 +33,23 @@ class sensor():
         self.pub_timer = rospy.Timer(rospy.Duration(0.1),self.pub_odom)
         # sub
         self.sub_reset = rospy.Subscriber('/scenario_reset',Int16, self.cb_reset)
-        self.cb_reset(0)
 
 
 
     def cb_reset(self,msg):
         # print(msg)
         # collect static and dynamic obstacles
-        self.n_reset += 1
         self.obst_topics_dyn = []
         self.obst_topics_static = []
         self.get_obstacle_topics()
   
 
     def update_obstacle_odom(self):
-        # subscriber
-        # debug objects have unique topics
+        # subscribe 
         for topic in self.obst_topics_dyn:
             rospy.Subscriber(topic,MarkerArray,self.cb_marker, topic) 
         for topic in self.obst_topics_static:
             rospy.Subscriber(topic,MarkerArray,self.cb_marker, topic) 
-        # pedsim agents are all collected in one topic
-        rospy.Subscriber("/pedsim_simulator/simulated_agents",peds.AgentStates,self.cb_marker) 
         
 
     def get_obstacle_topics(self):
@@ -64,11 +58,10 @@ class sensor():
             for t in t_list:
                 if "/debug/model/obstacle_dynamic" in t:
                    self.obst_topics_dyn.append(t)
-                   print('TEST\t', self.obst_topics_dyn)
                 elif "/debug/model/obstacle_circle" in t:
                     self.obst_topics_static.append(t)
-        # self.update_obstacle_odom()
-        print("======================================== " + "reset:" + str(self.n_reset))
+        self.update_obstacle_odom()
+        print("========================================")
         print("dynamic obstacles:", len(self.obst_topics_dyn))
         for topic in self.obst_topics_dyn:
             print(topic)
@@ -88,7 +81,6 @@ class sensor():
     def fill_cluster(self):
         
         for topic in self.obstacles_dyn:
-            
             if topic in self.obstacles_dyn:
                 tmp_point = Point()
                 tmp_point.x = self.obstacles_dyn[topic][0].x
@@ -118,40 +110,37 @@ class sensor():
         
         # print(self.cluster)
     
-    def cb_marker(self, msg):
+    def cb_marker(self, msg, topic):
 
         if self.update_cluster:
             # print(topic)
-            if type(msg)==MarkerArray:
-                v = Vector3()
-                m = msg.markers[0]
-                pos = m.pose.position
-                r = m.scale.x/2
-                label = 0
-                
+            v = Vector3()
+            m = msg.markers[0]
+            pos = m.pose.position
+            r = m.scale.x/2
+            label = 0
+            
 
-                if "dynamic" in topic: 
-                    if topic in self.obstacles_dyn:
-                        old_pos = self.obstacles_dyn[topic][0]
-                        old_time = self.obstacles_dyn[topic][3].nsecs
-                        curr_time = m.header.stamp.nsecs
-                        dt = (curr_time-old_time)*10**-9
-                        if dt>0:
-                            v.x = round((pos.x-old_pos.x)/dt,3)
-                            v.y = round((pos.y-old_pos.y)/dt,3)
-                        # update dyn obst
-                        label = topic.replace("/flatland_server/debug/model/obstacle_dynamic_with_traj_", "")
-                        label = int(label) + len(self.obst_topics_static) + 1
-                    self.obstacles_dyn[topic] = [pos, r, v, m.header.stamp,label]
-                
-                else:
-                    if topic in self.obstacles_static:
-                        # label = list(self.obstacles_static).index(topic)
-                        label = topic.replace("/flatland_server/debug/model/obstacle_circle_static_", "")
-                        label = int(label) 
-                    self.obstacles_static[topic] = [pos, r, v, label]
+            if "dynamic" in topic: 
+                if topic in self.obstacles_dyn:
+                    old_pos = self.obstacles_dyn[topic][0]
+                    old_time = self.obstacles_dyn[topic][3].nsecs
+                    curr_time = m.header.stamp.nsecs
+                    dt = (curr_time-old_time)*10**-9
+                    if dt>0:
+                        v.x = round((pos.x-old_pos.x)/dt,3)
+                        v.y = round((pos.y-old_pos.y)/dt,3)
+                    # update dyn obst
+                    label = topic.replace("/flatland_server/debug/model/obstacle_dynamic_with_traj_", "")
+                    label = int(label) + len(self.obst_topics_static) + 1
+                self.obstacles_dyn[topic] = [pos, r, v, m.header.stamp,label]
+            
             else:
-                print(msg)
+                if topic in self.obstacles_static:
+                    # label = list(self.obstacles_static).index(topic)
+                    label = topic.replace("/flatland_server/debug/model/obstacle_circle_static_", "")
+                    label = int(label) 
+                self.obstacles_static[topic] = [pos, r, v, label]
 
 
 

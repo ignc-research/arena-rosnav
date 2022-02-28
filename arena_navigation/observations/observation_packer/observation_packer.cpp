@@ -184,7 +184,7 @@ int main(int argc, char **argv)
 	puts("Subscribing to /scan ...");
 	ros::Subscriber sub_scan = n.subscribe<sensor_msgs::LaserScan>("scan", 1, laser_callback);
 	// puts("Subscribing to /odom ...");
-	ros::Subscriber sub_odom = n.subscribe<nav_msgs::Odometry>("odom", 1, odom_callback);
+	ros::Subscriber sub_odom = n.subscribe<nav_msgs::Odometry>("odometry/ground_truth", 1, odom_callback);
 	// puts("Subscribing to /amcl_pose ...");
 	// ros::Subscriber sub_odom = n.subscribe("amcl_pose", 1, amcl_callback);
 	puts("Advertising /observation ...");
