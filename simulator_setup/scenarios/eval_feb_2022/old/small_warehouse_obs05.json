@@ -1,192 +1,195 @@
 {
-  "pedsim_agents": [
-    {
-      "name": "1",
-      "id": 0,
-      "pos": [-3.37, -0.56],
-      "type": "adult",
-      "yaml_file": "/home/elias/arena_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
-      "number_of_peds": 1,
-      "vmax": 0.2,
-      "start_up_mode": "default",
-      "wait_time": 0.0,
-      "trigger_zone_radius": 0.0,
-      "chatting_probability": 0.0,
-      "tell_story_probability": 0.0,
-      "group_talking_probability": 0.0,
-      "talking_and_walking_probability": 0.0,
-      "requesting_service_probability": 0.0,
-      "requesting_guide_probability": 0.0,
-      "requesting_follower_probability": 0.0,
-      "max_talking_distance": 5,
-      "max_servicing_radius": 5,
-      "talking_base_time": 10,
-      "tell_story_base_time": 0.0,
-      "group_talking_base_time": 10,
-      "talking_and_walking_base_time": 6,
-      "receiving_service_base_time": 20,
-      "requesting_service_base_time": 30,
-      "force_factor_desired": 1,
-      "force_factor_obstacle": 1,
-      "force_factor_social": 5,
-      "force_factor_robot": 0,
-      "waypoints": [
-        [-4.65, 5.57],
-        [-3.47, -0.56]
-      ],
-      "waypoint_mode": 0
-    },
-    {
-      "name": "2",
-      "id": 0,
-      "pos": [0.0, 0.0],
-      "type": "adult",
-      "yaml_file": "/home/elias/arena_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
-      "number_of_peds": 1,
-      "vmax": 0.2,
-      "start_up_mode": "default",
-      "wait_time": 0.0,
-      "trigger_zone_radius": 0.0,
-      "chatting_probability": 0.0,
-      "tell_story_probability": 0.0,
-      "group_talking_probability": 0.0,
-      "talking_and_walking_probability": 0.0,
-      "requesting_service_probability": 0.0,
-      "requesting_guide_probability": 0.0,
-      "requesting_follower_probability": 0.0,
-      "max_talking_distance": 5,
-      "max_servicing_radius": 5,
-      "talking_base_time": 10,
-      "tell_story_base_time": 0.0,
-      "group_talking_base_time": 10,
-      "talking_and_walking_base_time": 6,
-      "receiving_service_base_time": 20,
-      "requesting_service_base_time": 30,
-      "force_factor_desired": 1,
-      "force_factor_obstacle": 1,
-      "force_factor_social": 5,
-      "force_factor_robot": 0,
-      "waypoints": [
-        [-4.46, -3.36],
-        [0.23, -0.44]
-      ],
-      "waypoint_mode": 0
-    },
-    {
-      "name": "3",
-      "id": 0,
-      "pos": [1.32, 1.15],
-      "type": "adult",
-      "yaml_file": "/home/elias/arena_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
-      "number_of_peds": 1,
-      "vmax": 0.2,
-      "start_up_mode": "default",
-      "wait_time": 0.0,
-      "trigger_zone_radius": 0.0,
-      "chatting_probability": 0.0,
-      "tell_story_probability": 0.0,
-      "group_talking_probability": 0.0,
-      "talking_and_walking_probability": 0.0,
-      "requesting_service_probability": 0.0,
-      "requesting_guide_probability": 0.0,
-      "requesting_follower_probability": 0.0,
-      "max_talking_distance": 5,
-      "max_servicing_radius": 5,
-      "talking_base_time": 10,
-      "tell_story_base_time": 0.0,
-      "group_talking_base_time": 10,
-      "talking_and_walking_base_time": 6,
-      "receiving_service_base_time": 20,
-      "requesting_service_base_time": 30,
-      "force_factor_desired": 1,
-      "force_factor_obstacle": 1,
-      "force_factor_social": 5,
-      "force_factor_robot": 0,
-      "waypoints": [
-        [-0.33, -3.04],
-        [1.39, 1.08]
-      ],
-      "waypoint_mode": 0
-    },
-    {
-      "name": "5",
-      "id": 0,
-      "pos": [-0.47, -8.29],
-      "type": "adult",
-      "yaml_file": "/home/elias/arena_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
-      "number_of_peds": 1,
-      "vmax": 0.2,
-      "start_up_mode": "default",
-      "wait_time": 0.0,
-      "trigger_zone_radius": 0.0,
-      "chatting_probability": 0.0,
-      "tell_story_probability": 0.0,
-      "group_talking_probability": 0.0,
-      "talking_and_walking_probability": 0.0,
-      "requesting_service_probability": 0.0,
-      "requesting_guide_probability": 0.0,
-      "requesting_follower_probability": 0.0,
-      "max_talking_distance": 5,
-      "max_servicing_radius": 5,
-      "talking_base_time": 10,
-      "tell_story_base_time": 0.0,
-      "group_talking_base_time": 10,
-      "talking_and_walking_base_time": 6,
-      "receiving_service_base_time": 20,
-      "requesting_service_base_time": 30,
-      "force_factor_desired": 1,
-      "force_factor_obstacle": 1,
-      "force_factor_social": 5,
-      "force_factor_robot": 0,
-      "waypoints": [
-        [2.29, -5.03],
-        [-0.68, -5.23],
-        [-0.57, -8.42]
-      ],
-      "waypoint_mode": 0
-    },
-    {
-      "name": "6",
-      "id": 0,
-      "pos": [-3.52, -5.15],
-      "type": "adult",
-      "yaml_file": "/home/elias/arena_ws/src/arena-rosnav/simulator_setup/dynamic_obstacles/person_two_legged.model.yaml",
-      "number_of_peds": 1,
-      "vmax": 0.3,
-      "start_up_mode": "default",
-      "wait_time": 0.0,
-      "trigger_zone_radius": 0.0,
-      "chatting_probability": 0.0,
-      "tell_story_probability": 0.0,
-      "group_talking_probability": 0.0,
-      "talking_and_walking_probability": 0.0,
-      "requesting_service_probability": 0.0,
-      "requesting_guide_probability": 0.0,
-      "requesting_follower_probability": 0.0,
-      "max_talking_distance": 5.0,
-      "max_servicing_radius": 5.0,
-      "talking_base_time": 10.0,
-      "tell_story_base_time": 0.0,
-      "group_talking_base_time": 10.0,
-      "talking_and_walking_base_time": 6.0,
-      "receiving_service_base_time": 20.0,
-      "requesting_service_base_time": 30.0,
-      "force_factor_desired": 1.0,
-      "force_factor_obstacle": 1.0,
-      "force_factor_social": 5.0,
-      "force_factor_robot": 0.0,
-      "waypoints": [
-        [-1.49, 0.74],
-        [2.36, -2.88],
-        [-3.51, -5.18]
-      ],
-      "waypoint_mode": 0
-    }
-  ],
-  "static_obstacles": [],
-  "robot_position": [-3.71, 9.21],
-  "robot_goal": [1.73, -9.57],
-  "resets": 4,
-  "map_path": "/home/elias/arena_ws/src/arena-rosnav/simulator_setup/maps/small_warehouse/map.yaml",
-  "format": "arena-tools"
+    "scenarios": [
+        {
+            "scene_name": "scenario_1",
+            "repeats": 50,
+            "dynamic_obstacles": {
+                "dynamic_obs_0": {
+                    "obstacle_radius": 0.3,
+                    "linear_velocity": 0.2,
+                    "type": "circle",
+                    "start_pos": [
+                        -3.37,
+                        -0.56,
+                        0.0
+                    ],
+                    "waypoints": [
+                        [
+                            -1.2800000000000002,
+                            6.130000000000001,
+                            0.0
+                        ],
+                        [
+                            -0.10000000000000009,
+                            0.0,
+                            0.0
+                        ]
+                    ],
+                    "is_waypoint_relative": true,
+                    "mode": "yoyo",
+                    "triggers": []
+                },
+                "dynamic_obs_1": {
+                    "obstacle_radius": 0.3,
+                    "linear_velocity": 0.2,
+                    "type": "circle",
+                    "start_pos": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "waypoints": [
+                        [
+                            -4.46,
+                            -3.36,
+                            0.0
+                        ],
+                        [
+                            0.23,
+                            -0.44,
+                            0.0
+                        ]
+                    ],
+                    "is_waypoint_relative": true,
+                    "mode": "yoyo",
+                    "triggers": []
+                },
+                "dynamic_obs_2": {
+                    "obstacle_radius": 0.3,
+                    "linear_velocity": 0.2,
+                    "type": "circle",
+                    "start_pos": [
+                        1.32,
+                        1.15,
+                        0.0
+                    ],
+                    "waypoints": [
+                        [
+                            -1.6500000000000001,
+                            -4.1899999999999995,
+                            0.0
+                        ],
+                        [
+                            0.06999999999999984,
+                            -0.06999999999999984,
+                            0.0
+                        ]
+                    ],
+                    "is_waypoint_relative": true,
+                    "mode": "yoyo",
+                    "triggers": []
+                },
+                "dynamic_obs_3": {
+                    "obstacle_radius": 0.3,
+                    "linear_velocity": 0.2,
+                    "type": "circle",
+                    "start_pos": [
+                        -0.47,
+                        -8.29,
+                        0.0
+                    ],
+                    "waypoints": [
+                        [
+                            2.76,
+                            3.259999999999999,
+                            0.0
+                        ],
+                        [
+                            -0.21000000000000008,
+                            3.0599999999999987,
+                            0.0
+                        ],
+                        [
+                            -0.09999999999999998,
+                            -0.13000000000000078,
+                            0.0
+                        ]
+                    ],
+                    "is_waypoint_relative": true,
+                    "mode": "yoyo",
+                    "triggers": []
+                },
+                "dynamic_obs_4": {
+                    "obstacle_radius": 0.3,
+                    "linear_velocity": 0.3,
+                    "type": "circle",
+                    "start_pos": [
+                        -3.52,
+                        -5.15,
+                        0.0
+                    ],
+                    "waypoints": [
+                        [
+                            2.0300000000000002,
+                            5.890000000000001,
+                            0.0
+                        ],
+                        [
+                            5.88,
+                            2.2700000000000005,
+                            0.0
+                        ],
+                        [
+                            0.010000000000000231,
+                            -0.02999999999999936,
+                            0.0
+                        ]
+                    ],
+                    "is_waypoint_relative": true,
+                    "mode": "yoyo",
+                    "triggers": []
+                }
+            },
+            "static_obstacles": {},
+            "robot": {
+                "start_pos": [
+                    -3.71,
+                    9.21,
+                    0.0
+                ],
+                "goal_pos": [
+                    1.73,
+                    -9.57,
+                    0.0
+                ]
+            },
+            "watchers": {
+                "watcher_0": {
+                    "pos": [
+                        -3.37,
+                        -0.56
+                    ],
+                    "range": 5
+                },
+                "watcher_1": {
+                    "pos": [
+                        0.0,
+                        0.0
+                    ],
+                    "range": 5
+                },
+                "watcher_2": {
+                    "pos": [
+                        1.32,
+                        1.15
+                    ],
+                    "range": 5
+                },
+                "watcher_3": {
+                    "pos": [
+                        -0.47,
+                        -8.29
+                    ],
+                    "range": 5
+                },
+                "watcher_4": {
+                    "pos": [
+                        -3.52,
+                        -5.15
+                    ],
+                    "range": 5
+                }
+            }
+        }
+    ]
 }
