@@ -10,7 +10,7 @@ import math
 
 
 from geometry_msgs.msg import Pose2D, PoseStamped
-from flatland_msgs.srv import StepWorld, StepWorldRequest
+#from flatland_msgs.srv import StepWorld, StepWorldRequest
 from std_srvs.srv import Empty, EmptyRequest
 
 from stable_baselines3.common.env_checker import check_env
