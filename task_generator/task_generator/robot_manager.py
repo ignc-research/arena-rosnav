@@ -260,8 +260,8 @@ class RobotManager:
         goal.pose.orientation.y = quaternion[2]
         goal.pose.orientation.z = quaternion[3]
 
-        rospy.wait_for_service("/move_base/make_plan")
-
+        if rospy.get_param("_dedicated_train_launch", default=False):
+            rospy.wait_for_service("/move_base/make_plan")
 
         self._goal_pub.publish(goal)
         # self._validate_path()
