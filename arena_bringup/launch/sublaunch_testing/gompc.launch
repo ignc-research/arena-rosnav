@@ -1,0 +1,8 @@
+
+<launch>
+    <arg name="train_mode"/>
+    
+    <node pkg="arena_gopmc" name="gompc" type="gompc_node.py" output="screen">
+    </node>
+    
+</launch>

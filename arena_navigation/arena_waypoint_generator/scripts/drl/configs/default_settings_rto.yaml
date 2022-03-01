@@ -1,0 +1,30 @@
+# TODO: The discrete actions have not been changed (from ridgeback here)
+robot:
+  holonomic: True
+  discrete_actions:
+    - name: move_forward
+      linear: 2.78
+      angular: 0.0
+    - name: move_backward
+      linear: -0.15
+      angular: 0.0
+    - name: turn_left
+      linear: 0.15
+      angular: 0.35
+    - name: turn_right
+      linear: 0.15
+      angular: -0.35
+    - name: turn_strong_left
+      linear: 0.0
+      angular: 0.75
+    - name: turn_strong_right
+      linear: 0.0
+      angular: -0.75
+    - name: stop
+      linear: 0.0
+      angular: 0.0
+  continuous_actions:
+    linear_range: 
+      x: [-2.78, 2.78] # Maximum translational velocity in m/s
+      y: [-2.78, 2.78]
+    angular_range: [-1.0, 1.0] # Maximum rotational velocity in rad/s

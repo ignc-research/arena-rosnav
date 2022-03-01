@@ -85,8 +85,8 @@ class NN_tb3():
         twist.linear.x = action_space[action][0]
         twist.angular.z = action_space[action][1]
 
-        print("action "+str(action)+": "+str(action_space[action]))
-        print("twist: "+str([twist.linear.x, twist.angular.z]))
+        #print("action "+str(action)+": "+str(action_space[action]))
+        #print("twist: "+str([twist.linear.x, twist.angular.z]))
         # print((sample))
         self.pub_twist.publish(twist)
 

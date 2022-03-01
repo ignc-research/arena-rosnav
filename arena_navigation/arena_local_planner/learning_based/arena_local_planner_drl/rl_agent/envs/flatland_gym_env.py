@@ -407,7 +407,7 @@ if __name__ == "__main__":
     rospy.init_node("flatland_gym_env", anonymous=True, disable_signals=False)
     print("start")
 
-    flatland_env = FlatlandEnv()
+    flatland_env = FlatlandEnv("", 720, 4)
     rospy.loginfo("======================================================")
     rospy.loginfo("CSVWriter initialized.")
     rospy.loginfo("======================================================")

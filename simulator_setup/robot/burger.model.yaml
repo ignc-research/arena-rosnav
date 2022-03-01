@@ -33,7 +33,7 @@ plugins:
     origin: [0.0, 0.0, 0.0]
     # range: 3
     #arena
-    range: 3.5
+    range: 4.0
     # angle: {min: -3.12413936, max: 3.14159265359, increment: 0.01745}
     # shifted for arena
     # angle: {min: 0, max: 6.28319, increment: 0.01745330555}

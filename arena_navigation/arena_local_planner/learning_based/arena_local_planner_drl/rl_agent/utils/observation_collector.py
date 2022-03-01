@@ -404,7 +404,7 @@ if __name__ == "__main__":
     rospy.init_node("states", anonymous=True)
     print("start")
 
-    state_collector = ObservationCollector("sim1/", 360, 10)
+    state_collector = ObservationCollector("", 360, 10)
     i = 0
     r = rospy.Rate(100)
     while i <= 1000:

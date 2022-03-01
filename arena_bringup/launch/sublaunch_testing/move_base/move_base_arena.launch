@@ -2,6 +2,7 @@
 	<arg name="speed" default="0.22"/>
     <arg name="model" default="burger"/>
     <param name="bool_goal_reached" value="true" />
+    <arg name="train_mode"/>
 
     <!-- move_base -->
     <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
@@ -9,11 +10,6 @@
         <rosparam file="$(find conventional)/config/$(arg model)/costmap_common_params.yaml" command="load" ns="local_costmap" />
         <rosparam file="$(find conventional)/config/$(arg model)/local_costmap_params.yaml" command="load" />
         <rosparam file="$(find conventional)/config/$(arg model)/global_costmap_params.yaml" command="load" />
-    </node>
-
-    <!-- spacial_horizon -->
-    <node pkg="arena_spacial_horizon" type="spacial_horizon_node" name="spacial_horizon_node" output="screen">
-        <rosparam file="$(find conventional)/config/$(arg model)/plan_fsm_param.yaml" command="load" /> <!-- ns="fsm"-->
     </node>
 
     <!-- observation_packer -->
