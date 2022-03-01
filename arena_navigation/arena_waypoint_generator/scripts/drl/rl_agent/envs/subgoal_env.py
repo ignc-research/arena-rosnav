@@ -28,7 +28,7 @@ class Subgoal_env(gym.Env):
         safe_dist: float = None,
         extended_eval: bool = False,
         task_mode: str = "staged",
-        max_steps_per_episode=100,
+        max_steps_per_episode=115,
         PATHS: dict = dict(),
         goal_radius: float = 0.7,
         *args,
