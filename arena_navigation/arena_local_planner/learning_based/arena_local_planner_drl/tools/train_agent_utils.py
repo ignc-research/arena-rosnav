@@ -112,6 +112,9 @@ def initialize_hyperparameters(
         hyperparams["actions_in_observationspace"],
     )
 
+    import rl_agent.model.custom_policy
+    import rl_agent.model.custom_sb3_policy
+
     # dynamically adapt n_steps according to batch size and n envs
     # then update .json
     check_batch_size(
