@@ -16,7 +16,7 @@ pip install PyQt5 --upgrade
 
 # install the arena-rosnav-repo
 cd $HOME && mkdir -p arena_ws/src && cd arena_ws/src
-git clone https://github.com/ignc-research/arena-rosnav -b noetic-devel
+git clone https://github.com/ignc-research/arena-rosnav -b waypoint
 cd arena-rosnav && rosws update
 source $HOME/.${CURSHELL}rc 
 source `which virtualenvwrapper.sh` && workon rosnav 
