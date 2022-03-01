@@ -55,6 +55,10 @@ class Reward():
         self.goal_pose = kwargs["goal"]
         self.robot_pose = kwargs["robot_pose"]
         actions = kwargs["actions"]
+
+        self._set_current_dist_to_globalplan(
+            kwargs["global_plan"], self.subgoal_pose
+        )
         
         self._reward_subgoal_not_reachable(laser_scan, kwargs["scan_angle"], action_in_radius, penalty_factor=0.2)
         self._reward_goal_reached(goal_in_robot_frame, reward=17.5)
@@ -63,16 +67,13 @@ class Reward():
         self._reward_collision(laser_scan, punishment=10)
         self._reward_nearby_global_plan(reward_factor = 0.1, penalty_factor = 0.125)
             
-        self._set_current_dist_to_globalplan(
-            kwargs["global_plan"], self.subgoal_pose
-        )
-        if laser_scan.min() > self.safe_dist:
-            self._reward_distance_global_plan(
-                reward_factor=0.2,
-                penalty_factor=0.3,
-            )
-        else:
-            self.last_dist_to_path = None
+        #if laser_scan.min() > self.safe_dist:
+         #   self._reward_distance_global_plan(
+         #       reward_factor=0.2,
+         #       penalty_factor=0.3,
+         #   )
+        #else:
+         #   self.last_dist_to_path = None
     
     def _reward_nearby_global_plan(self, reward_factor: float = 0.1, penalty_factor: float = 0.125):
         if self._curr_dist_to_path:
