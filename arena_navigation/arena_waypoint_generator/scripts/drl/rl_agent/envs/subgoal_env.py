@@ -28,7 +28,7 @@ class Subgoal_env(gym.Env):
         safe_dist: float = None,
         extended_eval: bool = False,
         task_mode: str = "staged",
-        max_steps_per_episode=75,
+        max_steps_per_episode=70,
         PATHS: dict = dict(),
         goal_radius: float = 0.7,
         *args,
@@ -106,8 +106,8 @@ class Subgoal_env(gym.Env):
             global_plan_length = self.obs_observation.get_global_plan_length()
             if global_plan_length != 0:
                 self._max_steps_per_episode = int(self._max_steps_per_episode_unit*global_plan_length/self.planing_horizon)
-            print(f"length = {global_plan_length:.2f}")
-            print(f"steps = {self._max_steps_per_episode}")
+            #print(f"length = {global_plan_length:.2f}")
+            #print(f"steps = {self._max_steps_per_episode}")
 
         self._steps_curr_episode += 1
 
@@ -172,7 +172,7 @@ class Subgoal_env(gym.Env):
         #self._sim_step_client()
         self.task.reset()
         self.obs_reward.reset_reward_()
-        print(self._steps_curr_episode)
+        #print(self._steps_curr_episode)
         self._steps_curr_episode = 0
         #self._last_action = None
 
