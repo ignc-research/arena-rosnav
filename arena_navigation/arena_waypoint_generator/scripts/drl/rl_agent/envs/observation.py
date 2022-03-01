@@ -6,6 +6,7 @@ from gym import spaces
 from gym.spaces import space
 import yaml
 from typing import Tuple
+from pathlib import Path
 import time
 
 from sensor_msgs.msg import LaserScan
@@ -19,6 +20,7 @@ from tf.transformations import *
 class Observation:
     def __init__(
         self,
+        PATHS: dict = dict(),
         ns: str="",
     ):
         self.ns = ns
@@ -40,10 +42,11 @@ class Observation:
         self._goal_sub = rospy.Subscriber(f"{self.ns_prefix}goal", PoseStamped, self.callback_goal)
         
         self._globalPlan_pub = rospy.Publisher(f"{self.ns_prefix}globalPlan", Path, queue_size=10)
-
-        with open('/home/baoduc/arena_ws/src/arena-rosnav/simulator_setup/robot/burger.model.yaml', "r") as fd:
+        
+        with open(PATHS["robot_setting"], "r") as fd:
             robot_data = yaml.safe_load(fd)
 
+            # get laser related information
             for plugin in robot_data["plugins"]:
                 if (
                     plugin["type"] == "Laser"

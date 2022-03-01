@@ -46,7 +46,7 @@ class Subgoal_env(gym.Env):
 
         #self.action_space = spaces.Discrete(self.n+1)
         self.action_space = spaces.MultiDiscrete([self.n,2]) #the first action for angle to get a subgoal, the second one for mode of subgoals
-        self.obs_observation = Observation(ns=ns)
+        self.obs_observation = Observation(ns=ns, PATHS=PATHS)
         self.observation_space = (self.obs_observation.get_observation_space())
         
         self.planing_horizon = self.obs_observation.get_lidar_range()
