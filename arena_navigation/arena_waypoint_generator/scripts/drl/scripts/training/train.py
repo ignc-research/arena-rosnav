@@ -14,9 +14,7 @@ from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.utils import set_random_seed
 
 
-from arena_navigation.arena_waypoint_generator.scripts.drl.rl_agent.envs.subgoal_env import (
-    Subgoal_env,
-)
+#from arena_navigation.arena_waypoint_generator.scripts.drl.rl_agent.envs.subgoal_env import (Subgoal_env)
 
 from stable_baselines3.common.vec_env import VecNormalize
 from stable_baselines3.common.vec_env.base_vec_env import VecEnv
