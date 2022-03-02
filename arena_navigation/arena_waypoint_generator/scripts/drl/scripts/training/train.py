@@ -46,8 +46,22 @@ def main():
         n_envs=args.n_envs,
     )
 
-    env = DummyVecEnv([make_envs(args, ns_for_nodes, i, PATHS=PATHS, params=params) for i in range(args.n_envs)]) 
-
+    if not args.debug and ns_for_nodes:
+        env = SubprocVecEnv(
+            [
+                make_envs(args, ns_for_nodes, i, params=params, PATHS=PATHS)
+                for i in range(args.n_envs)
+            ],
+            start_method="fork",
+        )
+    else:
+        env = DummyVecEnv(
+            [
+                make_envs(args, ns_for_nodes, i, params=params, PATHS=PATHS)
+                for i in range(args.n_envs)
+            ]
+        )
+        
     trainstage_cb = InitiateNewTrainStage(
         n_envs=args.n_envs,
         treshhold_type="succ",

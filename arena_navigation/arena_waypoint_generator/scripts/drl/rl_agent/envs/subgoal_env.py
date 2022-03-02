@@ -10,7 +10,7 @@ import math
 
 
 from geometry_msgs.msg import Pose2D, PoseStamped
-#from flatland_msgs.srv import StepWorld, StepWorldRequest
+from flatland_msgs.srv import StepWorld, StepWorldRequest
 from std_srvs.srv import Empty, EmptyRequest
 
 from stable_baselines3.common.env_checker import check_env
@@ -28,7 +28,7 @@ class Subgoal_env(gym.Env):
         safe_dist: float = None,
         extended_eval: bool = False,
         task_mode: str = "staged",
-        max_steps_per_episode=100,
+        max_steps_per_episode=50,
         PATHS: dict = dict(),
         goal_radius: float = 0.7,
         *args,
@@ -64,18 +64,11 @@ class Subgoal_env(gym.Env):
         )
 
         self.agent_action_pub = rospy.Publisher(f"{self.ns_prefix}subgoal", PoseStamped, queue_size=1)
-        #self._last_action = None
         self.action_in_radius = None
 
         self._steps_curr_episode = 0
         self._episode = 0
         self._max_steps_per_episode_unit = max_steps_per_episode
-        
-        #self.task = get_predefined_task(ns, mode=task_mode, start_stage=kwargs["curr_stage"], PATHS=PATHS)
-        
-        #scenarios_json_path = '/home/baoduc/arena_ws/src/arena-rosnav/simulator_setup/scenarios/empty_map.json'
-       
-        #paths = {"scenario": scenarios_json_path}
   
         self.task = get_predefined_task(ns, mode=task_mode, start_stage=kwargs["curr_stage"], PATHS=PATHS)
 
@@ -99,16 +92,15 @@ class Subgoal_env(gym.Env):
 
         self.clear_costmaps_srv = rospy.ServiceProxy('/move_base/clear_costmaps', Empty)
 
-        #self._service_name_step = f"{self.ns_prefix}step_world"
-        #self._sim_step_client = rospy.ServiceProxy(
-            #self._service_name_step, StepWorld
-        #)
+        self._service_name_step = f"{self.ns_prefix}step_world"
+        self._sim_step_client = rospy.ServiceProxy(
+            self._service_name_step, StepWorld
+        )
 
     def step(self, actions):
         self._pub_action(actions)
 
         obs, obs_dict = self.obs_observation.get_observations()
-        #self._last_action = actions
 
         if self._steps_curr_episode == 0:
             global_plan_length = obs_dict["global_plan_length"]
@@ -171,12 +163,12 @@ class Subgoal_env(gym.Env):
         action_msg.pose.position.x = self.obs_observation.get_goal_pose().x
         action_msg.pose.position.y = self.obs_observation.get_goal_pose().y
         self.agent_action_pub.publish(action_msg)
-        #self._sim_step_client()
+        self._sim_step_client()
         self.task.reset()
         self.obs_reward.reset_reward_()
         #print(self._steps_curr_episode)
         self._steps_curr_episode = 0
-        #self._last_action = None
+        self._subgoal = None
 
         if self._extended_eval:
             self._last_robot_pose = None
@@ -228,6 +220,9 @@ class Subgoal_env(gym.Env):
             alpha = np.arctan2(temp.y-robot_pose.y, temp.x-robot_pose.x)
             action_angle = alpha - self.angles
             points = np.array([robot_pose.x + dist*np.cos(action_angle), robot_pose.y + dist*np.sin(action_angle)])
+
+            if self._subgoal == None:
+                self._subgoal = temp
     
             if actions[1] == 0:
                 subgoal = self._subgoal

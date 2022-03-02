@@ -13,6 +13,7 @@ from sensor_msgs.msg import LaserScan
 from nav_msgs.msg import Odometry
 from nav_msgs.msg import Path
 from geometry_msgs.msg import Pose2D, PoseStamped
+from flatland_msgs.srv import StepWorld, StepWorldRequest
 from nav_msgs.srv import GetPlan, GetPlanRequest
 
 from tf.transformations import *
@@ -36,6 +37,7 @@ class Observation:
         self._robot_pose = Pose2D()
         self._goal = Pose2D()
         self._globalplan = np.array([])
+        self._action_frequency = 1 / rospy.get_param("/robot_action_rate")
 
         self._scan_sub = rospy.Subscriber(f"{self.ns_prefix}scan", LaserScan, self.callback_scan, tcp_nodelay=True)
         self._robot_state_sub = rospy.Subscriber(f"{self.ns_prefix}odom", Odometry, self.callback_robot_state, tcp_nodelay=True)
@@ -71,6 +73,11 @@ class Observation:
                                                             spaces.Box(low=0, high=50, shape=(1,), dtype=np.float32),))
                                                             #spaces.Box(low=-np.pi, high=np.pi, shape=(1,), dtype=np.float32)))
         self.global_plan_length = 0
+
+        self._service_name_step = f"{self.ns_prefix}step_world"
+        self._sim_step_client = rospy.ServiceProxy(
+            self._service_name_step, StepWorld
+        )
 
     def get_global_plan(self):
         service_getPath = "/move_base/NavfnROS/make_plan" 
@@ -116,6 +123,7 @@ class Observation:
         return self.observation_space
 
     def get_observations(self, *args, **kwargs):
+        self.call_service_takeSimStep(self._action_frequency)
         laser_scan, robot_pose = self.get_sync_obs()
         if laser_scan is not None and robot_pose is not None:
             self._scan = laser_scan
@@ -154,6 +162,26 @@ class Observation:
         self._laser_deque.clear()
         self._rs_deque.clear()
         return obs, obs_dict
+
+    def call_service_takeSimStep(self, t=None):
+        request = StepWorldRequest() if t is None else StepWorldRequest(t)
+        timeout = 12
+        try:
+            for i in range(timeout):
+                response = self._sim_step_client(request)
+                rospy.logdebug("step service=", response)
+                # print('took step')
+                if response.success:
+                    break
+                if i == timeout - 1:
+                    raise TimeoutError(
+                        f"Timeout while trying to call '{self.ns_prefix}step_world'"
+                    )
+                # print("took step")
+                time.sleep(0.33)
+
+        except rospy.ServiceException as e:
+            rospy.logdebug("step Service call failed: %s" % e)
 
     def get_lidar_range(self):
         return self._laser_max_range
