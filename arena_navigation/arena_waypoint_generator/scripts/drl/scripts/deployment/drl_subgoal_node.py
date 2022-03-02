@@ -11,16 +11,13 @@ from flatland_msgs.srv import StepWorld, StepWorldRequest
 from rospy.exceptions import ROSException
 from std_msgs.msg import Bool
 
-from arena_navigation.arena_waypoint_generator.scripts.drl.rl_agent.base_agent_wrapper import BaseDRLAgent
+from arena_navigation.arena_waypoint_generator.scripts.drl.rl_agent.envs import BaseDRLAgent
 
 robot_model = rospy.get_param("model")
 """ TEMPORARY GLOBAL CONSTANTS """
 NS_PREFIX = ""
 TRAINED_MODELS_DIR = os.path.join(
     rospkg.RosPack().get_path("arena_waypoint_generator"), "scripts/drl/agents"
-)
-DEFAULT_ACTION_SPACE = os.path.join(
-    rospkg.RosPack().get_path("arena_waypoint_generator"), "scripts/drl/configs", f"default_settings_{robot_model}.yaml",
 )
 
 class DeploymentDRLAgent(BaseDRLAgent):
@@ -29,7 +26,6 @@ class DeploymentDRLAgent(BaseDRLAgent):
         agent_name: str,
         ns: str = None,
         robot_name: str = None,
-        action_space_path: str = DEFAULT_ACTION_SPACE,
         *args,
         **kwargs,
     ) -> None:
@@ -44,14 +40,13 @@ class DeploymentDRLAgent(BaseDRLAgent):
             ns,
             robot_name,
             hyperparameter_path,
-            action_space_path,
         )
         self.setup_agent()
-
-        self._service_name_step = f"{self._ns}step_world"
-        self._sim_step_client = rospy.ServiceProxy(
-            self._service_name_step, StepWorld
-        )
+        if not self._is_train_mode:
+            self._service_name_step = f"{self._ns}step_world"
+            self._sim_step_client = rospy.ServiceProxy(
+                self._service_name_step, StepWorld
+            )
 
     def setup_agent(self) -> None:
         """Loads the trained policy and when required the VecNormalize object."""
@@ -78,44 +73,22 @@ class DeploymentDRLAgent(BaseDRLAgent):
         self._agent = PPO.load(model_file).policy
 
     def run(self) -> None:
-        """Loop for running the agent until ROS is shutdown.
-        
-        Note:
-            Calls the 'step_world'-service for fast-forwarding the \
-            simulation time in training mode. The simulation is forwarded \
-            by action_frequency seconds. Otherwise, communicates with \
-            the ActionPublisher node in order to comply with the specified \
-            action publishing rate.
-        """
         while not rospy.is_shutdown():
-            # if self._is_train_mode:
-            #     self.call_service_takeSimStep(self._action_frequency)
-            # else:
-            #     self._wait_for_next_action_cycle()
+            if self._is_train_mode:
+                self.call_service_takeSimStep(self._action_frequency)
+            else:
+                self._wait_for_next_action_cycle()
             obs = self.get_observations()[0]
             action = self.get_action(obs)
             self.publish_action(action)
 
     def _wait_for_next_action_cycle(self) -> None:
-        """Stops the loop until a trigger message is sent by the ActionPublisher
-
-        Note:
-            Only use this method in combination with the ActionPublisher node!
-            That node is only booted when training mode is off.
-        """
         try:
             rospy.wait_for_message(f"{self._ns_robot}next_cycle", Bool)
         except ROSException:
             pass
 
     def call_service_takeSimStep(self, t: float = None) -> None:
-        """Fast-forwards the simulation time.
-
-        Args:
-            t (float, optional):
-                Time in seconds. When t is None, time is forwarded by 'step_size' s.
-                Defaults to None.
-        """
         request = StepWorldRequest() if t is None else StepWorldRequest(t)
 
         try:
@@ -133,7 +106,11 @@ def main(agent_name: str) -> None:
     except rospy.ROSInterruptException:
         pass
 
+AGENTS = [
+    "MLP_ARENA2D_2021_12_04__15_36",
+]
 
 if __name__ == "__main__":
-    AGENT_NAME = sys.argv[1]
+    #AGENT_NAME = sys.argv[1]
+    AGENT_NAME = AGENTS[0]
     main(agent_name=AGENT_NAME)

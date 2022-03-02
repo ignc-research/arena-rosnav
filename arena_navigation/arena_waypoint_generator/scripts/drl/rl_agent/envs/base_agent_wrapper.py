@@ -20,6 +20,11 @@ robot_model = rospy.get_param("model")
 ROOT_ROBOT_PATH = os.path.join(
     rospkg.RosPack().get_path("simulator_setup"), "robot"
 )
+DEFAULT_ACTION_SPACE = os.path.join(
+    rospkg.RosPack().get_path("arena_waypoint_generator"),
+    "scripts/drl/configs",
+    f"default_settings_{robot_model}.yaml",
+)
 DEFAULT_HYPERPARAMETER = os.path.join(
     rospkg.RosPack().get_path("arena_waypoint_generator"),
     "scripts/drl/configs",
@@ -177,13 +182,7 @@ class BaseDRLAgent(ABC):
         global_plan = obs_dict["global_plan"]
 
         start = np.pi*self._agent_params["start"]
-        a = np.linspace(-start, start, self._agent_params["n"])
-        ind = int(self._agent_params["n"]/2)
-        l = np.flip(a[:ind])
-        r = np.array(a[ind+1:])
-        angles = a[ind]
-        for i, j in zip(l, r):
-            angles = np.hstack((angles, [i,j]))
+        angles = np.linspace(-start, start, self._agent_params["n"])
 
         if self.get_distance(goal_pose, robot_pose) <= self.planing_horizon:
             subgoal = goal_pose

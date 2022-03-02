@@ -26,34 +26,46 @@ class Subgoal_env(gym.Env):
         ns: str,
         reward_fnc: str,
         safe_dist: float = None,
-        extended_eval: bool = False,
-        task_mode: str = "staged",
+        goal_radius: float = 0.1,
         max_steps_per_episode=10,
+        train_mode: bool = True,
+        debug: bool = False,
+        task_mode: str = "staged",
         PATHS: dict = dict(),
-        goal_radius: float = 0.7,
+        extended_eval: bool = False,
         *args,
         **kwargs,
     ):
         super().__init__()
 
-        #self.degree = 180
-        #self.n = int(self.degree/10)
-        #self.radiant = (self.degree/180)*np.pi
-
         n = 3
         start = np.pi/4
         assert n % 2 != 0
-        self.angles = np.linspace(-start, start, n)
-
-        self.action_space = spaces.MultiDiscrete([n,2]) #the first action for angle to get a subgoal, the second one for mode of subgoals
-        self.obs_observation = Observation(ns=ns, PATHS=PATHS)
-        self.observation_space = (self.obs_observation.get_observation_space())
+        angles = np.linspace(-start, start, n)
+        ind = int(n/2)
+        l = np.flip(angles[:ind])
+        r = np.array(angles[ind+1:])
+        self.angles = angles[ind]
+        for i, j in zip(l, r):
+            self.angles = np.hstack((self.angles, [i,j]))
 
         self.ns = ns
         self.ns_prefix = "" if (ns == "" or ns is None) else "/" + ns + "/"
         self._extended_eval = extended_eval
+        self._is_train_mode = rospy.get_param("/train_mode")
+
+        self.setup_by_configuration(PATHS["robot_setting"])
+        self.planing_horizon = self._laser_max_range
+
+        self.action_space = spaces.MultiDiscrete([n,2]) #the first action for angle to get a subgoal, the second one for mode of subgoals
+        self.obs_observation = Observation(
+            self.ns,
+            self._laser_num_beams,
+            self._laser_max_range,
+            external_time_sync=False,
+        )
+        self.observation_space = (self.obs_observation.get_observation_space())
         
-        self.planing_horizon = self.obs_observation.get_lidar_range() - 0.5
         self.obs_reward = Reward(
             safe_dist=safe_dist, 
             goal_radius=goal_radius, 
@@ -83,8 +95,9 @@ class Subgoal_env(gym.Env):
             "0": "Exc. Max Steps",
             "1": "Crash",
             "2": "Goal Reached",
+            "3": "Be stuck"
         }
-        self._done_hist = 3 * [0]
+        self._done_hist = 4 * [0]
 
         self._subgoal = Pose2D()
         self.subgoal_tolerance = goal_radius/2
@@ -92,10 +105,32 @@ class Subgoal_env(gym.Env):
 
         self.clear_costmaps_srv = rospy.ServiceProxy('/move_base/clear_costmaps', Empty)
 
-        self._service_name_step = f"{self.ns_prefix}step_world"
-        self._sim_step_client = rospy.ServiceProxy(
-            self._service_name_step, StepWorld
-        )
+        if self._is_train_mode:
+            self._service_name_step = f"{self.ns_prefix}step_world"
+            self._sim_step_client = rospy.ServiceProxy(
+                self._service_name_step, StepWorld
+            )
+
+    def setup_by_configuration(self, robot_yaml_path: str):
+        self._robot_radius = rospy.get_param("radius") + 0.075
+        with open(robot_yaml_path, "r") as fd:
+            robot_data = yaml.safe_load(fd)
+
+            for plugin in robot_data["plugins"]:
+                if (
+                    plugin["type"] == "Laser"
+                    and plugin["name"] == "static_laser"
+                ):
+                    laser_angle_min = plugin["angle"]["min"]
+                    laser_angle_max = plugin["angle"]["max"]
+                    laser_angle_increment = plugin["angle"]["increment"]
+                    self._laser_num_beams = int(
+                        round(
+                            (laser_angle_max - laser_angle_min)
+                            / laser_angle_increment
+                        )
+                    )
+                    self._laser_max_range = plugin["range"]
 
     def step(self, actions):
         self._pub_action(actions)
@@ -150,8 +185,9 @@ class Subgoal_env(gym.Env):
                     f"{self._done_hist[0]}x - {self._done_reasons[str(0)]}, "
                     f"{self._done_hist[1]}x - {self._done_reasons[str(1)]}, "
                     f"{self._done_hist[2]}x - {self._done_reasons[str(2)]}, "
+                    f"{self._done_hist[3]}x - {self._done_reasons[str(3)]}, "
                 )
-                self._done_hist = [0] * 3
+                self._done_hist = [0] * 4
             self._done_hist[int(info["done_reason"])] += 1
         return obs, reward, done, info
 
@@ -224,9 +260,9 @@ class Subgoal_env(gym.Env):
             if self._subgoal == None:
                 self._subgoal = temp
     
-            if actions[1] == 0:
+            if actions[1] == 1:
                 subgoal = self._subgoal
-            elif actions[1] == 1:
+            elif actions[1] == 0:
                 subgoal.x = points[0][actions[0]]
                 subgoal.y = points[1][actions[0]]
                 self._subgoal = subgoal

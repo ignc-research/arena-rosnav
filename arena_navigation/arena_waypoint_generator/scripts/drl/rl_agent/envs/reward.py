@@ -68,8 +68,8 @@ class Reward():
             self._reward_collision(laser_scan, punishment=10)
             self._reward_safe_dist(laser_scan, punishment=0.25)
             self._reward_on_global_plan(actions, reward=0.05)
-            self._reward_subgoal_reached(self.subgoal_pose, self.robot_pose, reward=0.1)
-            self._reward_stop_too_long(punishment = 0.25)
+            self._reward_subgoal_reached(self.subgoal_pose, self.robot_pose, reward=0.25)
+            self._reward_stop_too_long(punishment = 7.5)
         except:
             pass
 
@@ -106,14 +106,19 @@ class Reward():
         else:
             self.curr_reward -= punishment
 
-    def _reward_subgoal_reached(self, subgoal: Pose2D, robot: Pose2D, reward: float = 0.1):
+    def _reward_subgoal_reached(self, subgoal: Pose2D, robot: Pose2D, reward: float = 0.25):
         distance = math.hypot(robot.x - subgoal.x, robot.y - subgoal.y)
         if distance < self.goal_radius/2:
-            self.curr_reward += reward    
             self.counter += 1
         else:
             self.counter = 0
 
-    def _reward_stop_too_long(self, punishment: float = 0.15):
-        if self.counter > 5:
+        if self.counter == 1:
+            self.curr_reward += reward    
+
+    def _reward_stop_too_long(self, punishment: float = 7.5):
+        if self.counter > 20:
             self.curr_reward -= punishment
+            self.info["is_done"] = True
+            self.info["done_reason"] = 3
+            self.info["is_success"] = 0

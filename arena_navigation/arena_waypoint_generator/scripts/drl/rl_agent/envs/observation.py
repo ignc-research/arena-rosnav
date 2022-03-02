@@ -21,14 +21,18 @@ from tf.transformations import *
 class Observation:
     def __init__(
         self,
-        PATHS: dict = dict(),
-        ns: str="",
+        ns: str,
+        num_lidar_beams: int,
+        lidar_range: float,
+        external_time_sync: bool = False,
     ):
         self.ns = ns
         self.ns_prefix = "" if (ns == "" or ns is None) else "/" + ns + "/"
 
         self._sync_slop = 0.05
+        self._ext_time_sync = external_time_sync
         self._first_sync_obs = (True)
+        self._is_train_mode = rospy.get_param("/train_mode")
 
         self.max_deque_size = 10
         self._laser_deque = deque()
@@ -44,40 +48,18 @@ class Observation:
         self._goal_sub = rospy.Subscriber(f"{self.ns_prefix}goal", PoseStamped, self.callback_goal)
         
         self._globalPlan_pub = rospy.Publisher(f"{self.ns_prefix}globalPlan", Path, queue_size=10)
+
+        self._laser_num_beams = num_lidar_beams
         
-        with open(PATHS["robot_setting"], "r") as fd:
-            robot_data = yaml.safe_load(fd)
-
-            # get laser related information
-            for plugin in robot_data["plugins"]:
-                if (
-                    plugin["type"] == "Laser"
-                    and plugin["name"] == "static_laser"
-                ):
-                    laser_angle_min = plugin["angle"]["min"]
-                    laser_angle_max = plugin["angle"]["max"]
-                    laser_angle_increment = plugin["angle"]["increment"]
-                    self._laser_num_beams = int(
-                        round(
-                            (laser_angle_max - laser_angle_min)
-                            / laser_angle_increment
-                        )
-                    )
-                    self._laser_max_range = plugin["range"]
-
-
-        # observation parameters
-        lidar_range = self._laser_max_range
-        num_lidar_beams = self._laser_num_beams
         self.observation_space = Observation._stack_spaces((spaces.Box(low=0, high=lidar_range, shape=(num_lidar_beams,), dtype=np.float32,),
-                                                            spaces.Box(low=0, high=50, shape=(1,), dtype=np.float32),))
-                                                            #spaces.Box(low=-np.pi, high=np.pi, shape=(1,), dtype=np.float32)))
+                                                            spaces.Box(low=0, high=50, shape=(1,), dtype=np.float32)))
         self.global_plan_length = 0
 
-        self._service_name_step = f"{self.ns_prefix}step_world"
-        self._sim_step_client = rospy.ServiceProxy(
-            self._service_name_step, StepWorld
-        )
+        if self._is_train_mode:
+            self._service_name_step = f"{self.ns_prefix}step_world"
+            self._sim_step_client = rospy.ServiceProxy(
+                self._service_name_step, StepWorld
+            )
 
     def get_global_plan(self):
         service_getPath = "/move_base/NavfnROS/make_plan" 
@@ -182,9 +164,6 @@ class Observation:
 
         except rospy.ServiceException as e:
             rospy.logdebug("step Service call failed: %s" % e)
-
-    def get_lidar_range(self):
-        return self._laser_max_range
 
     def get_goal_pose(self):
         return self._goal
