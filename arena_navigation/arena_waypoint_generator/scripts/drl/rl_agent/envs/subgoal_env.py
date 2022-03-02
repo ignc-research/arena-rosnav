@@ -28,7 +28,7 @@ class Subgoal_env(gym.Env):
         safe_dist: float = None,
         extended_eval: bool = False,
         task_mode: str = "staged",
-        max_steps_per_episode=70,
+        max_steps_per_episode=100,
         PATHS: dict = dict(),
         goal_radius: float = 0.7,
         *args,
@@ -45,11 +45,11 @@ class Subgoal_env(gym.Env):
         self._extended_eval = extended_eval
 
         #self.action_space = spaces.Discrete(self.n+1)
-        self.action_space = spaces.MultiDiscrete([self.n,2]) #the first action for angle to get a subgoal, the second one for mode of subgoals
+        self.action_space = spaces.MultiDiscrete([3,2]) #the first action for angle to get a subgoal, the second one for mode of subgoals
         self.obs_observation = Observation(ns=ns, PATHS=PATHS)
         self.observation_space = (self.obs_observation.get_observation_space())
         
-        self.planing_horizon = self.obs_observation.get_lidar_range()
+        self.planing_horizon = self.obs_observation.get_lidar_range() - 0.5
         self.obs_reward = Reward(safe_dist=safe_dist, goal_radius=goal_radius, extended_eval=self._extended_eval, planing_horizon=self.planing_horizon, n=self.n)
 
         self.agent_action_pub = rospy.Publisher(f"{self.ns_prefix}subgoal", PoseStamped, queue_size=1)
@@ -84,11 +84,10 @@ class Subgoal_env(gym.Env):
 
         self._subgoal = Pose2D()
         self.subgoal_tolerance = goal_radius/2
-        self.obs_dict = dict()
         self._episode_ref = 0
+        self.angles = np.array([-np.pi/4, 0, np.pi/4])
 
-        self.clear_costmaps_srv = rospy.ServiceProxy(
-            '/move_base/clear_costmaps', Empty)
+        self.clear_costmaps_srv = rospy.ServiceProxy('/move_base/clear_costmaps', Empty)
 
         #self._service_name_step = f"{self.ns_prefix}step_world"
         #self._sim_step_client = rospy.ServiceProxy(
@@ -98,12 +97,11 @@ class Subgoal_env(gym.Env):
     def step(self, actions):
         self._pub_action(actions)
 
-        obs, obs_dict = self.obs_observation.get_observations()#last_action=self._last_action)
-        self.obs_dict = obs_dict
+        obs, obs_dict = self.obs_observation.get_observations()
         #self._last_action = actions
 
         if self._steps_curr_episode == 0:
-            global_plan_length = self.obs_observation.get_global_plan_length()
+            global_plan_length = obs_dict["global_plan_length"]
             if global_plan_length != 0:
                 self._max_steps_per_episode = int(self._max_steps_per_episode_unit*global_plan_length/self.planing_horizon)
             #print(f"length = {global_plan_length:.2f}")
@@ -114,20 +112,14 @@ class Subgoal_env(gym.Env):
         reward, reward_info = self.obs_reward.get_reward(
                 obs_dict["laser_scan"], 
                 obs_dict["goal_in_robot_frame"], 
-                actions=actions, 
                 global_plan=obs_dict["global_plan"], 
                 robot_pose=obs_dict["robot_pose"],
                 scan_angle=obs_dict["scan_angle"],
-                action_in_radius=self.action_in_radius,
+                goal = obs_dict["goal_pose"],
                 subgoal=self._subgoal,
-                goal = self.obs_observation.get_goal_pose(),
+                actions=actions, 
             )
         done = reward_info["is_done"]
-
-        #if self._steps_curr_episode == 100:
-            #print(f"step = {self._steps_curr_episode}")
-            #print(f"reward = {reward}")
-            #print(self.obs_observation.get_global_plan())
 
         if self._extended_eval:
             self._update_eval_statistics(obs_dict, reward_info)
@@ -207,81 +199,62 @@ class Subgoal_env(gym.Env):
         self._last_robot_pose = obs_dict["robot_pose"]
 
     def _pub_action(self, actions: int) -> Pose2D:
+        subgoal = Pose2D()
         action_msg = PoseStamped()
         action_msg.header.stamp = rospy.Time.now()
         action_msg.header.frame_id = "map"
-        _robot_pose = self.obs_observation.get_robot_pose()
-        _robot_orientierung = _robot_pose.theta
-        _goal_pose = self.obs_observation.get_goal_pose()
 
-        action_in_radius = -self.radiant/2 + (self.radiant/self.n)*actions[0]
-        self.action_in_radius = action_in_radius
+        _, obs_dict = self.obs_observation.get_observations()
+        robot_pose = obs_dict["robot_pose"]
+        goal_pose = obs_dict["goal_pose"]
+        scan = obs_dict["laser_scan"]
+        global_plan = obs_dict["global_plan"]
 
-        if self.get_distance(_goal_pose, _robot_pose) <= self.planing_horizon:
-            action_msg.pose.position.x = self.obs_observation.get_goal_pose().x
-            action_msg.pose.position.y = self.obs_observation.get_goal_pose().y
-            self.agent_action_pub.publish(action_msg)
-            return
+        if self.get_distance(goal_pose, robot_pose) <= self.planing_horizon:
+            subgoal = goal_pose
+        elif min(scan) >= self.planing_horizon:
+            subgoal = self.updateSubgoalSpacialHorizon(robot_pose, global_plan)
+        else:
+            temp = self.updateSubgoalSpacialHorizon(robot_pose, global_plan)
+            dist = self.get_distance(temp, robot_pose)
+            alpha = np.arctan2(temp.y-robot_pose.y, temp.x-robot_pose.x)
+            action_angle = alpha - self.angles
+            points = np.array([robot_pose.x + dist*np.cos(action_angle), robot_pose.y + dist*np.sin(action_angle)])
+    
+            if actions[1] == 0:
+                if self._episode == self._episode_ref:
+                    subgoal = self._subgoal
+                else:
+                    self._episode_ref = self._episode
+                    subgoal = robot_pose
+            elif actions[1] == 1:
+                subgoal.x = points[0][actions[0]]
+                subgoal.y = points[1][actions[0]]
+            self._subgoal = subgoal
+        
+        action_msg.pose.position.x = subgoal.x
+        action_msg.pose.position.y = subgoal.y
+        self.agent_action_pub.publish(action_msg)
 
-        #if actions[1] == 0:
-         #   action_msg.pose.position.x = _robot_pose.x
-         #   action_msg.pose.position.y = _robot_pose.y
-
-         #   self._subgoal.x = action_msg.pose.position.x
-         #   self._subgoal.y = action_msg.pose.position.y
-         #   self.agent_action_pub.publish(action_msg)
-         #   return
-
-        if actions[1] == 0: #new subgoal won't be published 
-            if self.get_distance(self._subgoal, _robot_pose) > self.subgoal_tolerance:
-                if self.get_distance(self._subgoal, _robot_pose) <= self.planing_horizon:
-                    if self._episode == self._episode_ref:
-                        action_msg.pose.position.x = self._subgoal.x
-                        action_msg.pose.position.y = self._subgoal.y
-                        self.agent_action_pub.publish(action_msg)
-                        return
-                    else:
-                        self._episode_ref = self._episode
-                        action_msg.pose.position.x = _robot_pose.x
-                        action_msg.pose.position.y = _robot_pose.y
-
-                        self._subgoal.x = action_msg.pose.position.x
-                        self._subgoal.y = action_msg.pose.position.y
-                        self.agent_action_pub.publish(action_msg)
-                        return
-
-        try:
-            global_plan = self.obs_dict["global_plan"]
+    def updateSubgoalSpacialHorizon(self, robot_pose: Pose2D, global_plan):
+        subgoal = Pose2D()
+        if len(global_plan) > 0:
             subgoal_id = 0
             for i in range(len(global_plan)):
                 wp = Pose2D()
                 wp.x = global_plan[i][0]
                 wp.y = global_plan[i][1]
-                dist_to_robot = self.get_distance(wp, _robot_pose)
+                dist_to_robot = self.get_distance(wp, robot_pose)
                 if (dist_to_robot<self.planing_horizon+self.subgoal_tolerance) and (dist_to_robot>self.planing_horizon-self.subgoal_tolerance):
                     if i > subgoal_id:
                         subgoal_id = i
 
-            subgoal = global_plan[subgoal_id]
-            y_relative = subgoal[1] - _robot_pose.y
-            x_relative = subgoal[0] - _robot_pose.x
-            phi = (np.arctan2(y_relative, x_relative) - _robot_pose.theta + 4 * np.pi) % (2 * np.pi) - np.pi   
+            subgoal.x = global_plan[subgoal_id][0]
+            subgoal.y = global_plan[subgoal_id][1]
+        else:
+            subgoal = robot_pose
 
-            action_msg.pose.position.x = _robot_pose.x + self.planing_horizon*np.cos(_robot_orientierung+action_in_radius+phi-np.pi)
-            action_msg.pose.position.y = _robot_pose.y + self.planing_horizon*np.sin(_robot_orientierung+action_in_radius+phi-np.pi)
-
-            self._subgoal.x = action_msg.pose.position.x
-            self._subgoal.y = action_msg.pose.position.y
-
-            self.agent_action_pub.publish(action_msg)
-        except:
-            action_msg.pose.position.x = _robot_pose.x + self.planing_horizon*np.cos(_robot_orientierung+action_in_radius)
-            action_msg.pose.position.y = _robot_pose.y + self.planing_horizon*np.sin(_robot_orientierung+action_in_radius)
-
-            self._subgoal.x = action_msg.pose.position.x
-            self._subgoal.y = action_msg.pose.position.y
-
-            self.agent_action_pub.publish(action_msg)
+        return subgoal
 
     @staticmethod
     def get_distance(pose_1: Pose2D, pose_2: Pose2D):

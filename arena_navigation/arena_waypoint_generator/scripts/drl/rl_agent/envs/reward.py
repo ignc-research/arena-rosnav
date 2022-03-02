@@ -50,19 +50,19 @@ class Reward():
         return self.curr_reward, self.info
 
     def cal_func(self, laser_scan: np.ndarray, goal_in_robot_frame: Tuple[float, float], *args, **kwargs):
-        action_in_radius = kwargs["action_in_radius"]
+        #action_in_radius = kwargs["action_in_radius"]
         self.subgoal_pose = kwargs["subgoal"]
         self.goal_pose = kwargs["goal"]
         self.robot_pose = kwargs["robot_pose"]
-        actions = kwargs["actions"]
+        #actions = kwargs["actions"]
 
         self._set_current_dist_to_globalplan(
             kwargs["global_plan"], self.subgoal_pose
         )
         
-        self._reward_subgoal_not_reachable(laser_scan, kwargs["scan_angle"], action_in_radius, penalty_factor=0.2)
+        #self._reward_subgoal_not_reachable(laser_scan, kwargs["scan_angle"], action_in_radius, penalty_factor=0.2)
         self._reward_goal_reached(goal_in_robot_frame, reward=17.5)
-        self._reward_subgoal_reached(self.subgoal_pose, self.robot_pose, actions = actions, reward=0.1)
+        self._reward_subgoal_reached(self.subgoal_pose, self.robot_pose, reward=0.1)
         self._reward_safe_dist(laser_scan, punishment=0.25)
         self._reward_collision(laser_scan, punishment=10)
         self._reward_nearby_global_plan(reward_factor = 0.2, penalty_factor = 0.25)
@@ -113,7 +113,7 @@ class Reward():
         dist, index = self.kdtree.query([subgoal_pose.x, subgoal_pose.y])
         return dist, index
 
-    def _reward_subgoal_reached(self, subgoal: Pose2D, robot: Pose2D, actions: np.ndarray, reward: float = 0.125):
+    def _reward_subgoal_reached(self, subgoal: Pose2D, robot: Pose2D, reward: float = 0.125):
         distance = math.hypot(robot.x - subgoal.x, robot.y - subgoal.y)
         if distance < self.goal_radius/2:
             self.curr_reward += reward            

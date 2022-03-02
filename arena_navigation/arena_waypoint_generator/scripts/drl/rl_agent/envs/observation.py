@@ -146,6 +146,7 @@ class Observation:
             "goal_in_robot_frame": [rho, theta],
             "global_plan": self.get_global_plan(),
             "robot_pose": self._robot_pose,
+            "goal_pose": self._goal,
             "scan_angle": scan_angle,
             "global_plan_length": global_plan_length
         }
@@ -154,14 +155,8 @@ class Observation:
         self._rs_deque.clear()
         return obs, obs_dict
 
-    def get_global_plan_length(self):
-        return self.global_plan_length
-
     def get_lidar_range(self):
         return self._laser_max_range
-
-    def get_robot_pose(self):
-        return self._robot_pose
 
     def get_goal_pose(self):
         return self._goal
@@ -242,7 +237,6 @@ class Observation:
         yaw = euler[2]
         pose2d.theta = yaw
         return pose2d
-
 
     @staticmethod
     def _stack_spaces(ss: Tuple[spaces.Box]):
