@@ -36,21 +36,32 @@ class Subgoal_env(gym.Env):
     ):
         super().__init__()
 
-        self.degree = 180
-        self.n = int(self.degree/10)
-        self.radiant = (self.degree/180)*np.pi
+        #self.degree = 180
+        #self.n = int(self.degree/10)
+        #self.radiant = (self.degree/180)*np.pi
+
+        n = 3
+        start = np.pi/4
+        assert n % 2 != 0
+        self.angles = np.linspace(-start, start, n)
+
+        self.action_space = spaces.MultiDiscrete([n,2]) #the first action for angle to get a subgoal, the second one for mode of subgoals
+        self.obs_observation = Observation(ns=ns, PATHS=PATHS)
+        self.observation_space = (self.obs_observation.get_observation_space())
 
         self.ns = ns
         self.ns_prefix = "" if (ns == "" or ns is None) else "/" + ns + "/"
         self._extended_eval = extended_eval
-
-        #self.action_space = spaces.Discrete(self.n+1)
-        self.action_space = spaces.MultiDiscrete([3,2]) #the first action for angle to get a subgoal, the second one for mode of subgoals
-        self.obs_observation = Observation(ns=ns, PATHS=PATHS)
-        self.observation_space = (self.obs_observation.get_observation_space())
         
         self.planing_horizon = self.obs_observation.get_lidar_range() - 0.5
-        self.obs_reward = Reward(safe_dist=safe_dist, goal_radius=goal_radius, extended_eval=self._extended_eval, planing_horizon=self.planing_horizon, n=self.n)
+        self.obs_reward = Reward(
+            safe_dist=safe_dist, 
+            goal_radius=goal_radius, 
+            extended_eval=self._extended_eval, 
+            planing_horizon=self.planing_horizon, 
+            rule=reward_fnc,
+            length=n,
+        )
 
         self.agent_action_pub = rospy.Publisher(f"{self.ns_prefix}subgoal", PoseStamped, queue_size=1)
         #self._last_action = None
@@ -85,7 +96,6 @@ class Subgoal_env(gym.Env):
         self._subgoal = Pose2D()
         self.subgoal_tolerance = goal_radius/2
         self._episode_ref = 0
-        self.angles = np.array([-np.pi/4, 0, np.pi/4])
 
         self.clear_costmaps_srv = rospy.ServiceProxy('/move_base/clear_costmaps', Empty)
 
@@ -207,13 +217,11 @@ class Subgoal_env(gym.Env):
         _, obs_dict = self.obs_observation.get_observations()
         robot_pose = obs_dict["robot_pose"]
         goal_pose = obs_dict["goal_pose"]
-        scan = obs_dict["laser_scan"]
+        #scan = obs_dict["laser_scan"]
         global_plan = obs_dict["global_plan"]
 
         if self.get_distance(goal_pose, robot_pose) <= self.planing_horizon:
             subgoal = goal_pose
-        elif min(scan) >= self.planing_horizon:
-            subgoal = self.updateSubgoalSpacialHorizon(robot_pose, global_plan)
         else:
             temp = self.updateSubgoalSpacialHorizon(robot_pose, global_plan)
             dist = self.get_distance(temp, robot_pose)
@@ -222,15 +230,11 @@ class Subgoal_env(gym.Env):
             points = np.array([robot_pose.x + dist*np.cos(action_angle), robot_pose.y + dist*np.sin(action_angle)])
     
             if actions[1] == 0:
-                if self._episode == self._episode_ref:
-                    subgoal = self._subgoal
-                else:
-                    self._episode_ref = self._episode
-                    subgoal = robot_pose
+                subgoal = self._subgoal
             elif actions[1] == 1:
                 subgoal.x = points[0][actions[0]]
                 subgoal.y = points[1][actions[0]]
-            self._subgoal = subgoal
+                self._subgoal = subgoal
         
         action_msg.pose.position.x = subgoal.x
         action_msg.pose.position.y = subgoal.y
