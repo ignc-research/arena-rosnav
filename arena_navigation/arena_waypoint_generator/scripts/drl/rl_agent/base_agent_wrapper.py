@@ -64,7 +64,7 @@ class BaseDRLAgent(ABC):
 
         self._action_pub = rospy.Publisher(f"{self.ns_prefix}subgoal", PoseStamped, queue_size=1)
         self._subgoal = Pose2D()
-        self.planing_horizon = self._laser_range - 0.5
+        self.planing_horizon = 4.5
         self.subgoal_tolerance = self._agent_params["goal_radius"]
 
     @abstractmethod

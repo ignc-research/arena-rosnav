@@ -55,7 +55,7 @@ class Subgoal_env(gym.Env):
         self._is_train_mode = rospy.get_param("/train_mode")
 
         self.setup_by_configuration(PATHS["robot_setting"])
-        self.planing_horizon = self._laser_max_range
+        self.planing_horizon = 4.5
 
         self.action_space = spaces.MultiDiscrete([n,2]) #the first action for angle to get a subgoal, the second one for mode of subgoals
         self.obs_observation = Observation(
@@ -273,7 +273,7 @@ class Subgoal_env(gym.Env):
 
     def updateSubgoalSpacialHorizon(self, robot_pose: Pose2D, global_plan):
         subgoal = Pose2D()
-        if len(global_plan) > 0:
+        try:
             subgoal_id = 0
             for i in range(len(global_plan)):
                 wp = Pose2D()
@@ -286,7 +286,7 @@ class Subgoal_env(gym.Env):
 
             subgoal.x = global_plan[subgoal_id][0]
             subgoal.y = global_plan[subgoal_id][1]
-        else:
+        except:
             subgoal = robot_pose
 
         return subgoal
