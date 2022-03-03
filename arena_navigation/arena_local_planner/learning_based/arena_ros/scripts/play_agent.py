@@ -54,7 +54,7 @@ class NN_tb3():
             #load NN
 
             current_dir_path = rospkg.RosPack().get_path('arena_ros') + "/scripts/"
-            model_name = "dqn_agent_best_fc_l2.dat"
+            model_name = "advanced_agent2_best.dat"
             # model_name = "dqn_agent_best_fc_l2.dat"
             model_path = current_dir_path + model_name
             net.load_state_dict(torch.load(model_path, map_location=device))
