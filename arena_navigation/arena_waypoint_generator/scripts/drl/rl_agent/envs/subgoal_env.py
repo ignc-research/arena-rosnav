@@ -94,8 +94,8 @@ class Subgoal_env(gym.Env):
         self._done_reasons = {
             "0": "Exc. Max Steps",
             "1": "Crash",
-            "2": "Goal Reached",
-            "3": "Be stuck"
+            "2": "Stuck",
+            "3": "Goal Reached"
         }
         self._done_hist = 4 * [0]
 

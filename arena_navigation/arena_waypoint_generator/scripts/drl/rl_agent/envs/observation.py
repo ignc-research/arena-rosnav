@@ -52,7 +52,9 @@ class Observation:
         self._laser_num_beams = num_lidar_beams
         
         self.observation_space = Observation._stack_spaces((spaces.Box(low=0, high=lidar_range, shape=(num_lidar_beams,), dtype=np.float32,),
-                                                            spaces.Box(low=0, high=50, shape=(1,), dtype=np.float32)))
+                                                            spaces.Box(low=0, high=50, shape=(1,), dtype=np.float32),                       
+                                                            spaces.Box(low=0, high=50, shape=(1,), dtype=np.float32),
+                                                            spaces.Box(low=-np.pi, high=np.pi, shape=(1,), dtype=np.float32)))
         self.global_plan_length = 0
 
         if self._is_train_mode:
@@ -127,7 +129,7 @@ class Observation:
             global_plan_length = 0
 
         #obs = (np.hstack([scan, np.array([rho, theta]).astype(np.float32)]))
-        obs = (np.hstack([scan, np.array(global_plan_length).astype(np.float32)]))
+        obs = (np.hstack([scan, np.array([global_plan_length, rho, theta]).astype(np.float32)]))
 
         self.global_plan_length = global_plan_length
 

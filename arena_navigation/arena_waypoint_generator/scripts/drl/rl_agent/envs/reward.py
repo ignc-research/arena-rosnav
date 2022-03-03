@@ -77,7 +77,7 @@ class Reward():
         if goal_in_robot_frame[0] < self.goal_radius:
             self.curr_reward = reward
             self.info["is_done"] = True
-            self.info["done_reason"] = 2
+            self.info["done_reason"] = 3
             self.info["is_success"] = 1
         else:
             self.info["is_done"] = False        
@@ -117,8 +117,8 @@ class Reward():
             self.curr_reward += reward    
 
     def _reward_stop_too_long(self, punishment: float = 7.5):
-        if self.counter > 20:
+        if self.counter > 30:
             self.curr_reward -= punishment
             self.info["is_done"] = True
-            self.info["done_reason"] = 3
+            self.info["done_reason"] = 2
             self.info["is_success"] = 0
