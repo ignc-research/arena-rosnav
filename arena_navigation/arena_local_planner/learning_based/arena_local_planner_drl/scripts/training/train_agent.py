@@ -47,9 +47,6 @@ def main():
         n_envs=args.n_envs,
     )
 
-    import rl_agent.model.custom_policy
-    import rl_agent.model.custom_sb3_policy
-
     # instantiate train environment
     # when debug run on one process only
     if not args.debug and ns_for_nodes:

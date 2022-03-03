@@ -1,0 +1,92 @@
+local_planner: rosnav
+additionalArguments:
+  - value: guldenring
+    name: trainings_environment
+  - value: guldenring
+    name: network_type
+dockerName: guldenring
+scenarios:
+  # - robot: turtlebot3_burger
+  #   map_files:
+  #     - map_file: small_warehouse
+  #       scenario: eval_feb_2022/small_warehouse_obs05.json
+  #     - map_file: small_warehouse
+  #       scenario: eval_feb_2022/small_warehouse_obs10.json
+  #     - map_file: ignc
+  #       scenario: eval_feb_2022/ignc_obs05.json
+  #     - map_file: map2
+  #       scenario: eval_feb_2022/map2_obs05.json
+  #     - map_file: map5
+  #       scenario: eval_feb_2022/map5_obs05.json
+  #     - map_file: map7
+  #       scenario: eval_feb_2022/map7_obs05.json
+  #     - map_file: ignc
+  #       scenario: eval_feb_2022/ignc_obs10.json
+  #     - map_file: map2
+  #       scenario: eval_feb_2022/map2_obs10.json
+  #     - map_file: map5
+  #       scenario: eval_feb_2022/map5_obs10.json
+  #     - map_file: map7
+  #       scenario: eval_feb_2022/map7_obs10.json
+  - robot: rto
+    map_files:
+      - map_file: small_warehouse
+        scenario: eval_feb_2022/small_warehouse_obs05.json
+      - map_file: ignc
+        scenario: eval_feb_2022/ignc_obs05.json
+      - map_file: map2
+        scenario: eval_feb_2022/map2_obs05.json
+      - map_file: map5
+        scenario: eval_feb_2022/map5_obs05.json
+      - map_file: map7
+        scenario: eval_feb_2022/map7_obs05.json
+      - map_file: small_warehouse
+        scenario: eval_feb_2022/small_warehouse_obs10.json
+      - map_file: ignc
+        scenario: eval_feb_2022/ignc_obs10.json
+      - map_file: map2
+        scenario: eval_feb_2022/map2_obs10.json
+      - map_file: map5
+        scenario: eval_feb_2022/map5_obs10.json
+      - map_file: map7
+        scenario: eval_feb_2022/map7_obs10.json
+  # - robot: jackal
+  #   map_files:
+  #     # - map_file: ignc
+  #     #   scenario: eval_feb_2022/ignc_obs05.json
+  #     # - map_file: map2
+  #     #   scenario: eval_feb_2022/map2_obs05.json
+  #     # - map_file: map5
+  #     #   scenario: eval_feb_2022/map5_obs05.json
+  #     # - map_file: map7
+  #     #   scenario: eval_feb_2022/map7_obs05.json
+  #     # - map_file: ignc
+  #     #   scenario: eval_feb_2022/ignc_obs10.json
+  #     - map_file: map2
+  #       scenario: eval_feb_2022/map2_obs10.json
+  #     - map_file: map5
+  #       scenario: eval_feb_2022/map5_obs10.json
+  #     - map_file: map7
+  #       scenario: eval_feb_2022/map7_obs10.json
+  # - robot: youbot
+  #   map_files:
+  #     # - map_file: small_warehouse
+  #     #   scenario: eval_feb_2022/small_warehouse_obs05.json
+  #     - map_file: ignc
+  #       scenario: eval_feb_2022/ignc_obs05.json
+  #     # - map_file: map2
+  #     #   scenario: eval_feb_2022/map2_obs05.json
+  #     # - map_file: map5
+  #     #   scenario: eval_feb_2022/map5_obs05.json
+  #     # - map_file: map7
+  #     #   scenario: eval_feb_2022/map7_obs05.json
+  #     # - map_file: small_warehouse
+  #     #   scenario: eval_feb_2022/small_warehouse_obs10.json
+  #     # - map_file: ignc
+  #     # scenario: eval_feb_2022/ignc_obs10.json
+  #     # - map_file: map2
+  #     #   scenario: eval_feb_2022/map2_obs10.json
+  #     # - map_file: map5
+  #     #   scenario: eval_feb_2022/map5_obs10.json
+  #     # - map_file: map7
+  #     #   scenario: eval_feb_2022/map7_obs10.json
