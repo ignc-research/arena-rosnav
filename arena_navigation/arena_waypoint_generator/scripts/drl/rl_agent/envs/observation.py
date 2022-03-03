@@ -42,6 +42,7 @@ class Observation:
         self._goal = Pose2D()
         self._globalplan = np.array([])
         self._action_frequency = 1 / rospy.get_param("/robot_action_rate")
+        self.action_in_obs = False #rospy.get_param("actions_in_obs", default=False)
 
         self._scan_sub = rospy.Subscriber(f"{self.ns_prefix}scan", LaserScan, self.callback_scan, tcp_nodelay=True)
         self._robot_state_sub = rospy.Subscriber(f"{self.ns_prefix}odom", Odometry, self.callback_robot_state, tcp_nodelay=True)
@@ -51,10 +52,18 @@ class Observation:
 
         self._laser_num_beams = num_lidar_beams
         
-        self.observation_space = Observation._stack_spaces((spaces.Box(low=0, high=lidar_range, shape=(num_lidar_beams,), dtype=np.float32,),
-                                                            spaces.Box(low=0, high=50, shape=(1,), dtype=np.float32),                       
-                                                            spaces.Box(low=0, high=50, shape=(1,), dtype=np.float32),
-                                                            spaces.Box(low=-np.pi, high=np.pi, shape=(1,), dtype=np.float32)))
+        if not self.action_in_obs:
+            self.observation_space = Observation._stack_spaces((spaces.Box(low=0, high=lidar_range, shape=(num_lidar_beams,), dtype=np.float32,),
+                                                                spaces.Box(low=0, high=50, shape=(1,), dtype=np.float32),                       
+                                                                spaces.Box(low=0, high=50, shape=(1,), dtype=np.float32),
+                                                                spaces.Box(low=-np.pi, high=np.pi, shape=(1,), dtype=np.float32)))
+        else:
+            self.observation_space = Observation._stack_spaces((spaces.Box(low=0, high=lidar_range, shape=(num_lidar_beams,), dtype=np.float32,),
+                                                                spaces.Box(low=0, high=50, shape=(1,), dtype=np.float32),                       
+                                                                spaces.Box(low=0, high=50, shape=(1,), dtype=np.float32),
+                                                                spaces.Box(low=-np.pi, high=np.pi, shape=(1,), dtype=np.float32),
+                                                                spaces.Box(low=-1, high=10, shape=(1,), dtype=np.float32)))   
+
         self.global_plan_length = 0
 
         if self._is_train_mode:
@@ -128,8 +137,17 @@ class Observation:
         except:
             global_plan_length = 0
 
-        #obs = (np.hstack([scan, np.array([rho, theta]).astype(np.float32)]))
-        obs = (np.hstack([scan, np.array([global_plan_length, rho, theta]).astype(np.float32)]))
+        merged_obs = (
+            np.hstack([scan, np.array([global_plan_length, rho, theta]).astype(np.float32)])
+            if not self.action_in_obs
+            else np.hstack(
+                [
+                    scan,
+                    np.array([global_plan_length, rho, theta]).astype(np.float32),
+                    kwargs.get("last_action"),
+                ]
+            )
+        )
 
         self.global_plan_length = global_plan_length
 
@@ -140,12 +158,13 @@ class Observation:
             "robot_pose": self._robot_pose,
             "goal_pose": self._goal,
             "scan_angle": scan_angle,
-            "global_plan_length": global_plan_length
+            "global_plan_length": global_plan_length,
+            "last_action": kwargs.get("last_action")
         }
 
         self._laser_deque.clear()
         self._rs_deque.clear()
-        return obs, obs_dict
+        return merged_obs, obs_dict
 
     def call_service_takeSimStep(self, t=None):
         request = StepWorldRequest() if t is None else StepWorldRequest(t)

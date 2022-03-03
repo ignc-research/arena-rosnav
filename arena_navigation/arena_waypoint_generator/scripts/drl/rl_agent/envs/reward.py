@@ -61,13 +61,13 @@ class Reward():
         self.subgoal_pose = kwargs["subgoal"]
         self.goal_pose = kwargs["goal"]
         self.robot_pose = kwargs["robot_pose"]
-        actions = kwargs["actions"]
+        action = kwargs["action"]
 
         try:
             self._reward_goal_reached(goal_in_robot_frame, reward=17.5)
             self._reward_collision(laser_scan, punishment=10)
             self._reward_safe_dist(laser_scan, punishment=0.25)
-            self._reward_on_global_plan(actions, reward=0.1, punishment=0.125)
+            self._reward_on_global_plan(action, reward=0.1, punishment=0.125)
             self._reward_subgoal_reached(self.subgoal_pose, self.robot_pose, reward=0.25)
             self._reward_stop_too_long(punishment = 7.5)
         except:
@@ -100,15 +100,15 @@ class Reward():
             if self._extended_eval:
                 self.info["safe_dist"] = True
 
-    def _reward_on_global_plan(self, actions, reward: float = 0.1, punishment: float = 0.125):
-        if actions[0] == 0:
+    def _reward_on_global_plan(self, action, reward: float = 0.1, punishment: float = 0.125):
+        if action[0] == 0:
             self.curr_reward += reward
         else:
             self.curr_reward -= punishment
 
     def _reward_subgoal_reached(self, subgoal: Pose2D, robot: Pose2D, reward: float = 0.25):
         distance = math.hypot(robot.x - subgoal.x, robot.y - subgoal.y)
-        if distance < self.goal_radius/2:
+        if distance < self.goal_radius:
             self.counter += 1
         else:
             self.counter = 0

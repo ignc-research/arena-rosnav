@@ -90,6 +90,7 @@ class Subgoal_env(gym.Env):
         self._safe_dist_counter = 0
         self._collisions = 0
         self._in_crash = False
+        self._last_action = -1
 
         self._done_reasons = {
             "0": "Exc. Max Steps",
@@ -132,10 +133,11 @@ class Subgoal_env(gym.Env):
                     )
                     self._laser_max_range = plugin["range"]
 
-    def step(self, actions):
-        self._pub_action(actions)
+    def step(self, action):
+        self._pub_action(action)
 
-        obs, obs_dict = self.obs_observation.get_observations()
+        merged_obs, obs_dict = self.obs_observation.get_observations(last_action=self._last_action)
+        self._last_action = action[1]
 
         if self._steps_curr_episode == 0:
             global_plan_length = obs_dict["global_plan_length"]
@@ -154,7 +156,7 @@ class Subgoal_env(gym.Env):
                 scan_angle=obs_dict["scan_angle"],
                 goal = obs_dict["goal_pose"],
                 subgoal=self._subgoal,
-                actions=actions, 
+                action=action, 
             )
         done = reward_info["is_done"]
 
@@ -189,7 +191,7 @@ class Subgoal_env(gym.Env):
                 )
                 self._done_hist = [0] * 4
             self._done_hist[int(info["done_reason"])] += 1
-        return obs, reward, done, info
+        return merged_obs, reward, done, info
 
     def reset(self):
         self._episode += 1
@@ -202,7 +204,7 @@ class Subgoal_env(gym.Env):
         self._sim_step_client()
         self.task.reset()
         self.obs_reward.reset_reward_()
-        #print(self._steps_curr_episode)
+        self._last_action = -1
         self._steps_curr_episode = 0
         self._subgoal = None
 
@@ -212,10 +214,10 @@ class Subgoal_env(gym.Env):
             self._safe_dist_counter = 0
             self._collisions = 0
 
-        obs, _ = self.obs_observation.get_observations()
+        merged_obs, _ = self.obs_observation.get_observations()
 
         self.clear_costmaps_srv(EmptyRequest())
-        return obs
+        return merged_obs
 
     def close(self):
         pass
@@ -236,7 +238,7 @@ class Subgoal_env(gym.Env):
 
         self._last_robot_pose = obs_dict["robot_pose"]
 
-    def _pub_action(self, actions: int) -> Pose2D:
+    def _pub_action(self, action: int) -> Pose2D:
         subgoal = Pose2D()
         action_msg = PoseStamped()
         action_msg.header.stamp = rospy.Time.now()
@@ -260,11 +262,11 @@ class Subgoal_env(gym.Env):
             if self._subgoal == None:
                 self._subgoal = temp
     
-            if actions[1] == 1:
+            if action[1] == 1:
                 subgoal = self._subgoal
-            elif actions[1] in [0,2]:
-                subgoal.x = points[0][actions[0]]
-                subgoal.y = points[1][actions[0]]
+            elif action[1] in [0,2]:
+                subgoal.x = points[0][action[0]]
+                subgoal.y = points[1][action[0]]
                 self._subgoal = subgoal
         
         action_msg.pose.position.x = subgoal.x
