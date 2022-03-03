@@ -1,5 +1,5 @@
 {
-    "agent_name": "MLP_B__P__V__relu_2022_03_02__21_23",
+    "agent_name": "MLP_B__P__V__relu_2022_03_02__23_20",
     "robot": "burger",
     "actions_in_observationspace": true,
     "reward_fnc": "rule_00",

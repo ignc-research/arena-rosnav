@@ -9,7 +9,7 @@ from std_msgs.msg import Bool
 
 class ActionPublisher:
     def __init__(self):
-        if rospy.get_param("train_mode"):
+        if rospy.get_param("train_mode_local"):
             raise Exception("This node should be used solely in eval mode!")
 
         rospy.init_node("action_publisher", anonymous=True)

@@ -142,9 +142,9 @@ catkin_install_python(PROGRAMS scripts/hardcode/hardcode_node.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
-#catkin_install_python(PROGRAMS scripts/arena_subgoal_drl/train.py
- # DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-#)
+catkin_install_python(PROGRAMS scripts/drl/scripts/deployment/drl_subgoal_node.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
 add_executable(spacial_horizon_node
     src/spacial_horizon/spacial_horizon_node.cpp

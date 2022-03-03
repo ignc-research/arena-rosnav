@@ -1,9 +1,16 @@
 
 <launch>
-    <arg name="train_mode"/>
+    <arg name="train_mode" default="false"/>
     <arg name="global_frame_id"   />
     <arg name="odom_frame_id"     />
     <arg name="base_frame_id"    />
     <arg name="waypoint_generator" />
+    <arg name="agent_name" default="rule_00"/>
+
+    
+
+    <group if="$(eval arg('train_mode') == false)">
+        <node pkg="arena_waypoint_generator" name="drl" type="drl_subgoal_node.py" args="$(arg agent_name)" output="screen"/>
+    </group>
 
 </launch>

@@ -77,10 +77,10 @@ class InitiateNewTrainStage(BaseCallback):
         self._publishers_previous = []
 
         self._publishers_next.append(
-            rospy.Publisher(f"/eval_sim/next_stage", Bool, queue_size=1)
+            rospy.Publisher(f"next_stage", Bool, queue_size=1)
         )
         self._publishers_previous.append(
-            rospy.Publisher(f"/eval_sim/previous_stage", Bool, queue_size=1)
+            rospy.Publisher(f"previous_stage", Bool, queue_size=1)
         )
 
         for env_num in range(self.n_envs):

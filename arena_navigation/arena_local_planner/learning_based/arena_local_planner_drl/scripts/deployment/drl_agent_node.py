@@ -49,7 +49,7 @@ class DeploymentDRLAgent(BaseDRLAgent):
                 Path to yaml file containing action space settings.
                 Defaults to DEFAULT_ACTION_SPACE.
         """
-        self._is_train_mode = rospy.get_param("/train_mode")
+        self._is_train_mode = rospy.get_param("/train_mode_local")
         if not self._is_train_mode:
             rospy.init_node(f"DRL_local_planner", anonymous=True)
 
@@ -66,7 +66,7 @@ class DeploymentDRLAgent(BaseDRLAgent):
         )
         self.setup_agent()
 
-        if self._is_train_mode:
+        if not self._is_train_mode:
             # step world to fast forward simulation time
             self._service_name_step = f"{self._ns}step_world"
             self._sim_step_client = rospy.ServiceProxy(

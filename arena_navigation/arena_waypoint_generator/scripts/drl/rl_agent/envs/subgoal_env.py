@@ -262,7 +262,7 @@ class Subgoal_env(gym.Env):
     
             if actions[1] == 1:
                 subgoal = self._subgoal
-            elif actions[1] == 0:
+            elif actions[1] in [0,2]:
                 subgoal.x = points[0][actions[0]]
                 subgoal.y = points[1][actions[0]]
                 self._subgoal = subgoal

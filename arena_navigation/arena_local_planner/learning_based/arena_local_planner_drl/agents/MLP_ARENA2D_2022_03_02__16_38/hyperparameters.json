@@ -1,8 +1,8 @@
 {
-    "agent_name": "MLP_B__P__V__relu_2022_03_02__21_42",
+    "agent_name": "MLP_ARENA2D_2022_03_02__16_38",
     "robot": "burger",
     "actions_in_observationspace": true,
-    "reward_fnc": "rule_00",
+    "reward_fnc": "rule_05",
     "discrete_action_space": false,
     "normalize": false,
     "task_mode": "staged",
@@ -20,7 +20,5 @@
     "gae_lambda": 0.95,
     "m_batch_size": 15,
     "n_epochs": 3,
-    "clip_range": 0.22,
-    "n": 3,
-    "start": 0.25
+    "clip_range": 0.22
 }

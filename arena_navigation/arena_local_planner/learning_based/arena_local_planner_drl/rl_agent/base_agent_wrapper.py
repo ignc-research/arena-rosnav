@@ -58,7 +58,7 @@ class BaseDRLAgent(ABC):
                 Path to yaml file containing action space settings.
                 Defaults to DEFAULT_ACTION_SPACE.
         """
-        self._is_train_mode = rospy.get_param("/train_mode")
+        self._is_train_mode = rospy.get_param("/train_mode_local")
 
         self._ns = "" if ns is None or ns == "" else ns + "/"
         self._ns_robot = (

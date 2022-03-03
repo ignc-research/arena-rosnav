@@ -67,7 +67,7 @@ class Reward():
             self._reward_goal_reached(goal_in_robot_frame, reward=17.5)
             self._reward_collision(laser_scan, punishment=10)
             self._reward_safe_dist(laser_scan, punishment=0.25)
-            self._reward_on_global_plan(actions, reward=0.05)
+            self._reward_on_global_plan(actions, reward=0.1, punishment=0.125)
             self._reward_subgoal_reached(self.subgoal_pose, self.robot_pose, reward=0.25)
             self._reward_stop_too_long(punishment = 7.5)
         except:
@@ -100,8 +100,8 @@ class Reward():
             if self._extended_eval:
                 self.info["safe_dist"] = True
 
-    def _reward_on_global_plan(self, actions, reward: float = 0.05, punishment: float = 0.075):
-        if actions[0] == int(self.length/2):
+    def _reward_on_global_plan(self, actions, reward: float = 0.1, punishment: float = 0.125):
+        if actions[0] == 0:
             self.curr_reward += reward
         else:
             self.curr_reward -= punishment
