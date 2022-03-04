@@ -90,7 +90,7 @@ class Subgoal_env(gym.Env):
         self._safe_dist_counter = 0
         self._collisions = 0
         self._in_crash = False
-        self._last_action = -1
+        self._last_action = [-1, -1]
 
         self._done_reasons = {
             "0": "Exc. Max Steps",
@@ -136,8 +136,8 @@ class Subgoal_env(gym.Env):
     def step(self, action):
         self._pub_action(action)
 
-        merged_obs, obs_dict = self.obs_observation.get_observations(last_action=self._last_action)
-        self._last_action = action[1]
+        merged_obs, obs_dict = self.obs_observation.get_observations(last_action=np.array(self._last_action))
+        self._last_action = action
 
         if self._steps_curr_episode == 0:
             global_plan_length = obs_dict["global_plan_length"]
@@ -204,7 +204,7 @@ class Subgoal_env(gym.Env):
         self._sim_step_client()
         self.task.reset()
         self.obs_reward.reset_reward_()
-        self._last_action = -1
+        self._last_action = [-1, -1]
         self._steps_curr_episode = 0
         self._subgoal = None
 

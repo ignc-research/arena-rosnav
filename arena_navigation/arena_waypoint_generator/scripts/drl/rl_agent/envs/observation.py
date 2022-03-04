@@ -42,7 +42,7 @@ class Observation:
         self._goal = Pose2D()
         self._globalplan = np.array([])
         self._action_frequency = 1 / rospy.get_param("/robot_action_rate")
-        self.action_in_obs = False #rospy.get_param("actions_in_obs", default=False)
+        self.action_in_obs = rospy.get_param("actions_in_obs", default=False)
 
         self._scan_sub = rospy.Subscriber(f"{self.ns_prefix}scan", LaserScan, self.callback_scan, tcp_nodelay=True)
         self._robot_state_sub = rospy.Subscriber(f"{self.ns_prefix}odom", Odometry, self.callback_robot_state, tcp_nodelay=True)
@@ -62,6 +62,7 @@ class Observation:
                                                                 spaces.Box(low=0, high=50, shape=(1,), dtype=np.float32),                       
                                                                 spaces.Box(low=0, high=50, shape=(1,), dtype=np.float32),
                                                                 spaces.Box(low=-np.pi, high=np.pi, shape=(1,), dtype=np.float32),
+                                                                spaces.Box(low=-1, high=10, shape=(1,), dtype=np.float32),
                                                                 spaces.Box(low=-1, high=10, shape=(1,), dtype=np.float32)))   
 
         self.global_plan_length = 0
@@ -144,7 +145,7 @@ class Observation:
                 [
                     scan,
                     np.array([global_plan_length, rho, theta]).astype(np.float32),
-                    kwargs.get("last_action"),
+                    kwargs.get("last_action", np.array([-1,-1]))
                 ]
             )
         )

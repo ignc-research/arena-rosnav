@@ -101,7 +101,7 @@ class Reward():
                 self.info["safe_dist"] = True
 
     def _reward_on_global_plan(self, action, reward: float = 0.1, punishment: float = 0.125):
-        if action[0] == 0:
+        if action[0] == 0 and action[1] == 0:
             self.curr_reward += reward
         else:
             self.curr_reward -= punishment
