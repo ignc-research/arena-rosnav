@@ -65,7 +65,7 @@ class Reward():
             #self._reward_on_global_plan(action, reward=0.1, punishment=0.125)
             self._reward_subgoal_reached(self.subgoal_pose, self.robot_pose, reward=0.25)
             self._reward_stop_too_long(punishment = 10)
-            self._reward_dist_to_goal(global_plan_length, tolerance = self.goal_radius/2, reward=0.1, punishment=0.125)
+            self._reward_dist_to_goal(global_plan_length, factor = 0.15)
         except:
             pass
 
@@ -119,13 +119,11 @@ class Reward():
             self.info["done_reason"] = 2
             self.info["is_success"] = 0
 
-    def _reward_dist_to_goal(self, global_plan_length, tolerance, reward: float = 0.1, punishment: float = 0.125):
+    def _reward_dist_to_goal(self, global_plan_length, factor: float = 0.15):
         if self.last_dist_to_goal == None:
             self.last_dist_to_goal = global_plan_length
 
-        if global_plan_length <= self.last_dist_to_goal - tolerance:
-            self.curr_reward += reward
-        elif global_plan_length >= self.last_dist_to_goal + tolerance:
-            self.curr_reward -= punishment  
+        if abs(self.last_dist_to_goal-global_plan_length) >= self.goal_radius/4:
+            self.curr_reward += factor*(self.last_dist_to_goal-global_plan_length)
 
         self.last_dist_to_goal = global_plan_length
