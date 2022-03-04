@@ -22,10 +22,7 @@ class Reward():
         self.info = {}
         self.goal_radius = goal_radius
         self._robot_radius = rospy.get_param("radius") + 0.075
-        self.last_goal_dist = None
-        self.last_dist_to_path = None
-        self.kdtree = None
-        self._curr_dist_to_path = None
+        self.last_dist_to_goal = None
         self._extended_eval = extended_eval
         if safe_dist is None:
             self.safe_dist = self._robot_radius + 0.3
@@ -43,10 +40,7 @@ class Reward():
         self.counter = 0
 
     def reset_reward_(self):
-        self.last_goal_dist = None
-        self.last_dist_to_path = None
-        self.kdtree = None
-        self._curr_dist_to_path = None
+        self.last_dist_to_goal = None
 
     def reset_reward(self):
         self.curr_reward = 0
@@ -62,14 +56,16 @@ class Reward():
         self.goal_pose = kwargs["goal"]
         self.robot_pose = kwargs["robot_pose"]
         action = kwargs["action"]
+        global_plan_length = kwargs["global_plan_length"]
 
         try:
             self._reward_goal_reached(goal_in_robot_frame, reward=17.5)
             self._reward_collision(laser_scan, punishment=10)
             self._reward_safe_dist(laser_scan, punishment=0.25)
-            self._reward_on_global_plan(action, reward=0.1, punishment=0.125)
+            #self._reward_on_global_plan(action, reward=0.1, punishment=0.125)
             self._reward_subgoal_reached(self.subgoal_pose, self.robot_pose, reward=0.25)
-            self._reward_stop_too_long(punishment = 7.5)
+            self._reward_stop_too_long(punishment = 10)
+            self._reward_dist_to_goal(global_plan_length, tolerance = self.goal_radius/2, reward=0.1, punishment=0.125)
         except:
             pass
 
@@ -122,3 +118,14 @@ class Reward():
             self.info["is_done"] = True
             self.info["done_reason"] = 2
             self.info["is_success"] = 0
+
+    def _reward_dist_to_goal(self, global_plan_length, tolerance, reward: float = 0.1, punishment: float = 0.125):
+        if self.last_dist_to_goal == None:
+            self.last_dist_to_goal = global_plan_length
+
+        if global_plan_length <= self.last_dist_to_goal - tolerance:
+            self.curr_reward += reward
+        elif global_plan_length >= self.last_dist_to_goal + tolerance:
+            self.curr_reward -= punishment  
+
+        self.last_dist_to_goal = global_plan_length

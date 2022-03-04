@@ -151,7 +151,7 @@ class Subgoal_env(gym.Env):
         reward, reward_info = self.obs_reward.get_reward(
                 obs_dict["laser_scan"], 
                 obs_dict["goal_in_robot_frame"], 
-                global_plan=obs_dict["global_plan"], 
+                global_plan_length=obs_dict["global_plan_length"], 
                 robot_pose=obs_dict["robot_pose"],
                 scan_angle=obs_dict["scan_angle"],
                 goal = obs_dict["goal_pose"],
