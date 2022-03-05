@@ -75,10 +75,14 @@ class FlatlandEnv(gym.Env):
         # process specific namespace in ros system
         self.ns_prefix = "" if (ns == "" or ns is None) else "/" + ns + "/"
 
-        rospy.init_node(f"eval_env_{self.ns}", disable_signals=False)
+        if not debug:
+            if train_mode:
+                rospy.init_node(f"train_env_{self.ns}", disable_signals=False)
+            else:
+                rospy.init_node(f"eval_env_{self.ns}", disable_signals=False)
 
         self._extended_eval = extended_eval
-        self._is_train_mode = rospy.get_param("/train_mode")
+        self._is_train_mode = rospy.get_param("/train_mode_local")
         self._is_action_space_discrete = is_action_space_discrete
 
         self.setup_by_configuration(PATHS["robot_setting"], PATHS["robot_as"])
