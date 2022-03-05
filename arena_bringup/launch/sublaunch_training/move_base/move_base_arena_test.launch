@@ -1,0 +1,29 @@
+<launch>
+    <arg name="ns" />
+	<arg name="speed" default="0.22"/>
+    <arg name="model" default="burger"/>
+    <param name="bool_goal_reached" value="true" />
+    <arg name="train_mode"/>
+
+    <!-- move_base -->
+    <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen" ns="$(arg ns)">
+        <rosparam file="$(find conventional)/config/$(arg model)/costmap_common_params.yaml" command="load" ns="global_costmap" />
+        <rosparam file="$(find conventional)/config/$(arg model)/costmap_common_params.yaml" command="load" ns="local_costmap" />
+        <rosparam file="$(find conventional)/config/$(arg model)/local_costmap_params.yaml" command="load" />
+        <rosparam file="$(find conventional)/config/$(arg model)/global_costmap_params.yaml" command="load" />
+    </node>
+
+    <!-- observation_packer -->
+    <node pkg="observations" name="observation_packer" type="observation_packer" output="screen" ns="$(arg ns)"/>
+
+    <!-- Launch neural net ros wrapper -->
+    <!-- <node pkg="arena_ros" type="arena_node_tb3.py" name="arena_node" output="screen" ns="/arena"> -->
+    <node pkg="arena_ros" type="play_agent.py" name="arena_node" output="screen" ns="$(arg ns)">
+    
+        
+        <!-- Parameters -->
+        <param name="~speed" value="$(arg speed)"/>
+
+    </node>
+
+</launch>

@@ -56,7 +56,7 @@ class ObservationCollector:
         else:
             self.ns_prefix = "/" + ns + "/"
 
-        self._action_in_obs = rospy.get_param("actions_in_obs", default=False)
+        self._action_in_obs = rospy.get_param("/actions_in_obs", default=False)
 
         # define observation_space
         if not self._action_in_obs:

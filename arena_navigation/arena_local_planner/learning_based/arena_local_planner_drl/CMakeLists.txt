@@ -166,8 +166,11 @@ include_directories(
 
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
-catkin_install_python(PROGRAMS
-#    scripts/env/flatland_gym_env.py
+catkin_install_python(PROGRAMS scripts/deployment/drl_agent_node.py
+   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+catkin_install_python(PROGRAMS scripts/deployment/action_publisher.py
    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

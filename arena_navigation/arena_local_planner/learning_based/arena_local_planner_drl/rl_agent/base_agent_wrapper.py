@@ -15,7 +15,7 @@ from geometry_msgs.msg import Twist
 from rl_agent.utils.observation_collector import ObservationCollector
 from rl_agent.utils.reward import RewardCalculator
 
-robot_model = rospy.get_param("model")
+robot_model = rospy.get_param("/model")
 ROOT_ROBOT_PATH = os.path.join(
     rospkg.RosPack().get_path("simulator_setup"), "robot"
 )
@@ -118,7 +118,7 @@ class BaseDRLAgent(ABC):
         self._agent_params = hyperparams
         self._get_robot_name_from_params()
         rospy.set_param(
-            "action_in_obs",
+            "/action_in_obs",
             self._agent_params.get("actions_in_observationspace", False),
         )
 
@@ -137,7 +137,7 @@ class BaseDRLAgent(ABC):
         """
         self._num_laser_beams = None
         self._laser_range = None
-        self._robot_radius = rospy.get_param("radius") * 1.05
+        self._robot_radius = rospy.get_param("/radius") * 1.05
         with open(robot_setting_yaml, "r") as fd:
             robot_data = yaml.safe_load(fd)
 
@@ -152,7 +152,7 @@ class BaseDRLAgent(ABC):
                             (laser_angle_max - laser_angle_min)
                             / laser_angle_increment
                         )
-                        + 1
+                        #+ 1
                     )
                     self._laser_range = plugin["range"]
 

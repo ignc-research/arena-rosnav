@@ -675,7 +675,7 @@ def get_predefined_task(
     models_folder_path = rospkg.RosPack().get_path("simulator_setup")
 
     # robot's yaml file is needed to get its radius.
-    robot_model = rospy.get_param("model")
+    robot_model = rospy.get_param("/model")
     robot_manager = RobotManager(
         ns,
         map_response.map,

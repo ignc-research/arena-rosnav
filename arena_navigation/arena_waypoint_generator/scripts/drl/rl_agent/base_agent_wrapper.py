@@ -16,7 +16,7 @@ from geometry_msgs.msg import Pose2D, PoseStamped
 from arena_navigation.arena_waypoint_generator.scripts.drl.rl_agent.envs.observation import Observation
 from arena_navigation.arena_waypoint_generator.scripts.drl.rl_agent.envs.reward import Reward
 
-robot_model = rospy.get_param("model")
+robot_model = rospy.get_param("/model")
 ROOT_ROBOT_PATH = os.path.join(
     rospkg.RosPack().get_path("simulator_setup"), "robot"
 )
@@ -62,7 +62,7 @@ class BaseDRLAgent(ABC):
         # for time controlling in train mode
         self._action_frequency = 1 / rospy.get_param("/robot_action_rate")
 
-        self._action_pub = rospy.Publisher(f"{self.ns_prefix}subgoal", PoseStamped, queue_size=1)
+        self._action_pub = rospy.Publisher(f"{self._ns}subgoal", PoseStamped, queue_size=1)
         self._subgoal = Pose2D()
         self.planing_horizon = 4.5
         self.subgoal_tolerance = self._agent_params["goal_radius"]

@@ -6,7 +6,8 @@
     <arg name="odom_frame_id"     value="$(arg ns)_odom"/>
     <arg name="base_frame_id"     value="$(arg ns)_footprint"/>
     <arg name="model" default="burger"/>
-    <arg name="agent_name" default="rule_05"/> 
+    <arg name="agent_name" default="burger"/> 
+    <arg name="local_planner" default="rosnav"   doc="local-planer type [teb, dwa, mpc, rlca, cadrl, arena, rosnav]"/>
 
     <!-- use fake localization-->
     <include file="$(find arena_bringup)/launch/sublaunch_training/fake_localization.launch">
@@ -16,20 +17,11 @@
     </include>
 
 
-    <!-- start time space plan fsm-->
-    <!-- <include file="$(find arena_bringup)/launch/sublaunch_training/timed_space_planner_fsm.launch">
+    <include file="$(find arena_bringup)/launch/sublaunch_training/move_base/move_base_$(arg local_planner)_test.launch">
       <arg name="ns"                value="$(arg ns)"/>
-    </include> -->
-
-    <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
-      <arg name="ns"                value="$(arg ns)"/>
-      <rosparam file="$(find conventional)/config/$(arg model)/costmap_common_params.yaml" command="load" ns="global_costmap" />
-      <rosparam file="$(find conventional)/config/$(arg model)/costmap_common_params.yaml" command="load" ns="local_costmap" />   
-      <rosparam file="$(find conventional)/config/$(arg model)/local_costmap_params.yaml" command="load" />
-      <rosparam file="$(find conventional)/config/$(arg model)/global_costmap_params.yaml" command="load" />
-    </node>
-
-    <node name="DRL_local_planner" pkg="arena_local_planner_drl" type="drl_agent_node.py" args=["$(arg agent_name)", "$(arg ns)"] output="screen"/>
+      <arg name="model"   value="$(arg model)" if="$(eval arg('local_planner') == 'rosnav')" />
+      <arg name="agent_name"     value="$(arg agent_name)" if="$(eval arg('local_planner') == 'rosnav')" />
+    </include>
     
     <!-- use simulator and rviz-->
     <include file="$(find arena_bringup)/launch/sublaunch_training/flatland_simulator.launch">

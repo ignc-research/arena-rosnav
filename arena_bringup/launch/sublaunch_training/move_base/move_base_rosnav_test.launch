@@ -1,0 +1,19 @@
+<launch>
+    <arg name="ns" />
+    <arg name="agent_name" default="burger"/>
+    <arg name="model" default="burger"/>
+
+    <node name="action_publisher" pkg="arena_local_planner_drl" type="action_publisher.py" ns="$(arg ns)">
+    </node>
+
+    <node pkg="move_base" type="move_base" respawn="false" name="move_base" ns="$(arg ns)">
+        <rosparam file="$(find conventional)/config/$(arg model)/costmap_common_params.yaml" command="load" ns="global_costmap" />
+        <rosparam file="$(find conventional)/config/$(arg model)/costmap_common_params.yaml" command="load" ns="local_costmap" />   
+        <rosparam file="$(find conventional)/config/$(arg model)/local_costmap_params.yaml" command="load" />
+        <rosparam file="$(find conventional)/config/$(arg model)/global_costmap_params.yaml" command="load" />
+    </node>
+
+    <node name="DRL_local_planner" pkg="arena_local_planner_drl" type="drl_agent_node.py" args="$(arg agent_name)" ns="$(arg ns)">
+    </node>
+
+</launch>

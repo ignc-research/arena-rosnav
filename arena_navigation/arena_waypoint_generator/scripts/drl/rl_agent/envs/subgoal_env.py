@@ -50,6 +50,16 @@ class Subgoal_env(gym.Env):
             self.angles = np.hstack((self.angles, [i,j]))
 
         self.ns = ns
+        try:
+            # given every environment enough time to initialize, if we dont put sleep,
+            # the training script may crash.
+            ns_int = int(ns.split("_")[1])
+            time.sleep(ns_int * 2)
+        except Exception:
+            rospy.logwarn(
+                f"Can't not determinate the number of the environment, training script may crash!"
+            )
+
         self.ns_prefix = "" if (ns == "" or ns is None) else "/" + ns + "/"
         self._extended_eval = extended_eval
         self._is_train_mode = rospy.get_param("/train_mode")
@@ -82,7 +92,7 @@ class Subgoal_env(gym.Env):
         self._episode = 0
         self._max_steps_per_episode_unit = max_steps_per_episode
   
-        self.task = get_predefined_task(ns, mode=task_mode, start_stage=kwargs["curr_stage"], PATHS=PATHS)
+        self.task = get_predefined_task(self.ns_prefix, mode=task_mode, start_stage=kwargs["curr_stage"], PATHS=PATHS)
 
         self._action_frequency = 1 / rospy.get_param("/robot_action_rate")
         self._last_robot_pose = None

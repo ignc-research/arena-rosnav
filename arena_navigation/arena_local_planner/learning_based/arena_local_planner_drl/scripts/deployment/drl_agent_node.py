@@ -11,9 +11,9 @@ from flatland_msgs.srv import StepWorld, StepWorldRequest
 from rospy.exceptions import ROSException
 from std_msgs.msg import Bool
 
-from rl_agent.base_agent_wrapper import BaseDRLAgent
+from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.rl_agent.base_agent_wrapper import BaseDRLAgent
 
-robot_model = rospy.get_param("model")
+robot_model = rospy.get_param("/model")
 """ TEMPORARY GLOBAL CONSTANTS """
 NS_PREFIX = ""
 TRAINED_MODELS_DIR = os.path.join(
@@ -50,8 +50,9 @@ class DeploymentDRLAgent(BaseDRLAgent):
                 Defaults to DEFAULT_ACTION_SPACE.
         """
         self._is_train_mode = rospy.get_param("/train_mode_local")
+        self._ns = "" if ns is None or ns == "" else ns + "/"
         if not self._is_train_mode:
-            rospy.init_node(f"DRL_local_planner", anonymous=True)
+            rospy.init_node(f"{self._ns}DRL_local_planner", anonymous=True)
 
         self.name = agent_name
 
@@ -156,5 +157,4 @@ def main(agent_name: str, ns: str = "") -> None:
 
 if __name__ == "__main__":
     AGENT_NAME = sys.argv[1]
-    ns = sys.argv[2]
-    main(agent_name=AGENT_NAME, ns=ns)
+    main(agent_name=AGENT_NAME)

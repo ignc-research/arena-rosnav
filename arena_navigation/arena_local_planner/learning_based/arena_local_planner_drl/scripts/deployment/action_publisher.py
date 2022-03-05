@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import rospy
 import time
+import sys
 
 from geometry_msgs.msg import Twist
 from rosgraph_msgs.msg import Clock
@@ -9,13 +10,13 @@ from std_msgs.msg import Bool
 
 class ActionPublisher:
     def __init__(self):
-        if rospy.get_param("train_mode_local"):
+        if rospy.get_param("/train_mode_local"):
             raise Exception("This node should be used solely in eval mode!")
 
-        rospy.init_node("action_publisher", anonymous=True)
+        rospy.init_node(f"action_publisher", anonymous=True)
 
-        self._step_size = rospy.get_param("step_size")
-        self._update_rate = rospy.get_param("update_rate")
+        self._step_size = rospy.get_param("/step_size")
+        self._update_rate = rospy.get_param("/update_rate")
         # real time second in sim time
         self._real_second_in_sim = self._step_size * self._update_rate
         self._action_publish_rate = rospy.get_param("/robot_action_rate")
