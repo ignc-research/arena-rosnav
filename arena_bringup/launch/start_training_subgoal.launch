@@ -1,0 +1,116 @@
+<launch>
+  <arg name="train_mode" default="true"/>
+  <arg name="train_mode_local" default="false"/>
+
+  <param name="train_mode" value="$(arg train_mode)" />
+  <param name="train_mode_local" value="$(arg train_mode_local)" />
+
+  <arg name="model" default="burger"      doc="model type [burger, jackal, ridgeback, agvota, rto, rto_real]"/>
+
+  <arg name="local_planner" default="rosnav"   doc="local-planer type [teb, dwa, mpc, rlca, arena, rosnav]"/>
+  <arg name="agent_name" default="$(arg model)"     doc="DRL agent name to be deployed" unless="$(eval arg('local_planner') == 'rosnav')"/>
+  
+  <arg name="disable_scenario" default="false"/>
+  <arg name="scenario_file" default="empty_map.json" doc="[scenario2.json, empty_map.json, test_scenario.json (pesim), eval_feb_2022/small_warehouse_obs05.json]"/>
+  <arg name="reset" default="true"/>
+  <arg name="task_mode" default="staged" doc="[random, manual, staged, scenario]"/>
+
+  <!-- To make the training more efficient make sure this step_size*laser_update_rate == 1  -->
+  <arg name="step_size" default="0.002"/>
+  <arg name="update_rate" default="500"/>
+  <arg name="show_viz"  default="true"/>
+  <arg name="viz_pub_rate" default="30" />
+  
+  <param name="local_planner" value="$(arg local_planner)"/>
+  <param name="model" value="$(arg model)" />
+  <param name="agent_name" value="$(arg agent_name)" />
+  <param name="update_rate" value="$(arg update_rate)" />
+  <param name="step_size" value="$(arg step_size)" />
+  <param name="show_viz" value="$(arg show_viz)"/>
+  <param name="viz_pub_rate" value="$(arg viz_pub_rate)"/>
+
+  <!-- the folder name under the path simulator_setup/maps  -->
+  <arg name="map_file" default="map_empty" doc="[map1, floor, indoor, indoor_map1, map_small, map_empty]"/>
+  <!-- <arg name="map_folder_name" default="map_empty" /> -->
+  <arg name="map_path" default="$(find simulator_setup)/maps/$(arg map_file)/map.yaml" />
+  <param name="world_path" value="$(find simulator_setup)/maps/$(arg map_file)/map.world.yaml" />
+  <param name="map_layer_path" value="$(find simulator_setup)/maps/$(arg map_file)/map_layer.yaml" />
+  <param name="map_file" value="$(arg map_file)" />
+
+  <!-- the velocity of randomly genelized obstacles  -->
+  <arg name="obs_vel" default="0.3" />
+  <param name="obs_vel" value="$(arg obs_vel)" />
+
+
+  <!--  PARAMS DON'T CHANGE THEM  -->
+  <param name="robot_action_rate" value="5"/>
+  <param name="laser_update_rate" value="10"/>
+
+
+  <!-- DRL action frequency -->
+  <arg name="action_frequency" default="10"/>
+  <param name="action_frequency" value="$(arg action_frequency)"/>
+
+  <!-- Map parameters -->
+  <arg name="global_frame_id" value="map"/>
+  <arg name="odom_frame_id" value="odom"/>
+  <arg name="base_frame_id" value="base_footprint"/>
+  <arg name="odom_ground_truth" default="/odometry/ground_truth"/>
+
+  <!-- Robot specific args -->
+  <arg name='radius' default='0.113' if="$(eval arg('model') == 'burger')"/>
+  <arg name='speed' default='0.22' if="$(eval arg('model') == 'burger')"/>
+  <arg name='radius' default='0.267' if="$(eval arg('model') == 'jackal')"/>
+  <arg name='speed' default='2.0' if="$(eval arg('model') == 'jackal')"/>
+  <arg name='radius' default='0.625' if="$(eval arg('model') == 'ridgeback')"/>
+  <arg name='speed' default='1.1' if="$(eval arg('model') == 'ridgeback')"/>
+  <arg name='radius' default='0.629' if="$(eval arg('model') == 'agvota')"/>
+  <arg name='speed' default='0.5' if="$(eval arg('model') == 'agvota')"/>
+  <arg name='radius' default='0.225' if="$(eval arg('model') == 'rto')"/>
+  <arg name='speed' default='2.78' if="$(eval arg('model') == 'rto')"/>
+  <arg name='radius' default='0.225' if="$(eval arg('model') == 'rto_real')"/>
+  <arg name='speed' default='2.78' if="$(eval arg('model') == 'rto_real')"/>
+  <arg name='radius' default='0.27' if="$(eval arg('model') == 'tiago')"/>
+  <arg name='speed' default='1.5' if="$(eval arg('model') == 'tiago')"/>
+  <arg name='radius' default='0.36' if="$(eval arg('model') == 'cob4')"/>
+  <arg name='speed' default='1.1' if="$(eval arg('model') == 'cob4')"/>
+  <arg name='radius' default='0.347' if="$(eval arg('model') == 'youbot')"/>
+  <arg name='speed' default='0.8' if="$(eval arg('model') == 'youbot')"/>  
+  <arg name='radius' default='0.208' if="$(eval arg('model') == 'waffle_pi')"/>
+  <arg name='speed' default='0.26' if="$(eval arg('model') == 'waffle_pi')"/>  
+  <param name="radius" value="$(arg radius)"/>
+  <param name="speed" value="$(arg speed)"/>
+  
+  <param name="actions_in_obs" value="true"/>
+
+  <!-- data recorder -->
+  <param name="local_planner"  value="$(arg local_planner)"/>
+  <param name="scenario_file"  value="$(arg scenario_file)"/>
+
+  <arg name="ns_prefix" default="sim" />
+  <arg name="num_envs" default="1" />
+
+  <param name="use_sim_time" value="true"/>
+
+
+
+  <!-- map server-->
+  <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_path)">
+    <!-- In multi-env training /clock not available, since we only want one map_server, it's clock topic is remapped to /clock -->
+    <remap from="/clock" to="/$(arg ns_prefix)_1/clock" />
+  </node>
+
+  <include file="$(find arena_bringup)/launch/sublaunch_training_subgoal/single_env_training_subgoal.launch">
+    <arg name="ns" value="eval_sim" />
+    <arg name="local_planner" value="$(arg local_planner)" />
+    <arg name="model" value="$(arg model)" />
+    <arg name="agent_name" value="$(arg agent_name)" />
+  </include>
+  <include file="$(find arena_bringup)/launch/sublaunch_training_subgoal/single_env_training_subgoal.launch" if="$(eval num_envs>=1)">
+    <arg name="ns" value="$(arg ns_prefix)_1" />
+    <arg name="local_planner" value="$(arg local_planner)" />
+    <arg name="model" value="$(arg model)" />
+    <arg name="agent_name" value="$(arg agent_name)" />
+  </include>
+
+</launch>
