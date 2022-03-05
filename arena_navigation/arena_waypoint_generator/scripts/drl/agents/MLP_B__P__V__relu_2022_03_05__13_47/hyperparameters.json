@@ -1,5 +1,5 @@
 {
-    "agent_name": "MLP_B__P__V__relu_2022_03_03__22_05",
+    "agent_name": "MLP_B__P__V__relu_2022_03_05__13_47",
     "robot": "burger",
     "actions_in_observationspace": true,
     "reward_fnc": "rule_00",
@@ -12,7 +12,7 @@
     "curr_stage": 1,
     "batch_size": 19200,
     "gamma": 0.99,
-    "n_steps": 19200,
+    "n_steps": 9600,
     "ent_coef": 0.005,
     "learning_rate": 0.0003,
     "vf_coef": 0.22,

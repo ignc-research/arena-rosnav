@@ -25,10 +25,10 @@ from arena_navigation.arena_waypoint_generator.scripts.drl.tools.train_agent_uti
 from arena_navigation.arena_waypoint_generator.scripts.drl.tools.staged_train_callback import InitiateNewTrainStage
 
 def main():
-    
-    rospy.init_node("debug_node", disable_signals=False)
-
     args, _ = parse_training_args()
+    
+    if args.debug:
+        rospy.init_node("debug_node", disable_signals=False)
 
     AGENT_NAME = get_agent_name(args)
     PATHS = get_paths(AGENT_NAME, args)

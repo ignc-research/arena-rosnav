@@ -15,7 +15,7 @@ def training_args(parser):
     )
     parser.add_argument(
         "--debug",
-        action="store_false",
+        action="store_true",
         help="disables multiprocessing in order to debug",
     )
     group = parser.add_mutually_exclusive_group(required=True)

@@ -60,6 +60,12 @@ class Subgoal_env(gym.Env):
                 f"Can't not determinate the number of the environment, training script may crash!"
             )
 
+        if not debug:
+            if train_mode:
+                rospy.init_node(f"train_env_{self.ns}", disable_signals=False)
+            else:
+                rospy.init_node(f"eval_env_{self.ns}", disable_signals=False)
+
         self.ns_prefix = "" if (ns == "" or ns is None) else "/" + ns + "/"
         self._extended_eval = extended_eval
         self._is_train_mode = rospy.get_param("/train_mode")
@@ -92,7 +98,7 @@ class Subgoal_env(gym.Env):
         self._episode = 0
         self._max_steps_per_episode_unit = max_steps_per_episode
   
-        self.task = get_predefined_task(self.ns_prefix, mode=task_mode, start_stage=kwargs["curr_stage"], PATHS=PATHS)
+        self.task = get_predefined_task(ns, mode=task_mode, start_stage=kwargs["curr_stage"], PATHS=PATHS)
 
         self._action_frequency = 1 / rospy.get_param("/robot_action_rate")
         self._last_robot_pose = None
