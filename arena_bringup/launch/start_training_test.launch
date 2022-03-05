@@ -3,7 +3,7 @@
   <arg name="model" default="burger"      doc="model type [burger, jackal, ridgeback, agvota, rto, rto_real]"/>
   <param name="model" value="$(arg model)" />
 
-  <arg name="local_planner" default="rosnav"   doc="local-planer type [teb, dwa, mpc, rlca, cadrl, arena, rosnav]"/>
+  <arg name="local_planner" default="arena"   doc="local-planer type [teb, dwa, mpc, rlca, cadrl, arena, rosnav]"/>
   <param name="local_planner" value="$(arg local_planner)"/>
 
   <arg name="agent_name" default="$(arg model)"     doc="DRL agent name to be deployed" unless="$(eval arg('local_planner') == 'rosnav')"/>

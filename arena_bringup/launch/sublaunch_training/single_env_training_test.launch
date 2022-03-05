@@ -7,7 +7,7 @@
     <arg name="base_frame_id"     value="$(arg ns)_footprint"/>
     <arg name="model" default="burger"/>
     <arg name="agent_name" default="burger"/> 
-    <arg name="local_planner" default="rosnav"   doc="local-planer type [teb, dwa, mpc, rlca, cadrl, arena, rosnav]"/>
+    <arg name="local_planner" default="arena"   doc="local-planer type [teb, dwa, mpc, rlca, cadrl, arena, rosnav]"/>
 
     <!-- use fake localization-->
     <include file="$(find arena_bringup)/launch/sublaunch_training/fake_localization.launch">

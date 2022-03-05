@@ -42,7 +42,7 @@ class Observation:
         self._goal = Pose2D()
         self._globalplan = np.array([])
         self._action_frequency = 1 / rospy.get_param("/robot_action_rate")
-        self.action_in_obs = rospy.get_param("actions_in_obs", default=False)
+        self.action_in_obs = True #rospy.get_param("/actions_in_obs", default=False)
 
         self._scan_sub = rospy.Subscriber(f"{self.ns_prefix}scan", LaserScan, self.callback_scan, tcp_nodelay=True)
         self._robot_state_sub = rospy.Subscriber(f"{self.ns_prefix}odom", Odometry, self.callback_robot_state, tcp_nodelay=True)
