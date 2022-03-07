@@ -120,7 +120,7 @@ class Subgoal_env(gym.Env):
         self.subgoal_tolerance = goal_radius/2
         self._episode_ref = 0
 
-        self.clear_costmaps_srv = rospy.ServiceProxy('/move_base/clear_costmaps', Empty)
+        self.clear_costmaps_srv = rospy.ServiceProxy(f'{self.ns_prefix}move_base/clear_costmaps', Empty)
 
         if self._is_train_mode:
             self._service_name_step = f"{self.ns_prefix}step_world"

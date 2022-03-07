@@ -112,5 +112,11 @@
     <arg name="model" value="$(arg model)" />
     <arg name="agent_name" value="$(arg agent_name)" />
   </include>
+  <include file="$(find arena_bringup)/launch/sublaunch_training_subgoal/single_env_training_subgoal.launch" if="$(eval num_envs>=2)">
+    <arg name="ns" value="$(arg ns_prefix)_2" />
+    <arg name="local_planner" value="$(arg local_planner)" />
+    <arg name="model" value="$(arg model)" />
+    <arg name="agent_name" value="$(arg agent_name)" />
+  </include>
 
 </launch>

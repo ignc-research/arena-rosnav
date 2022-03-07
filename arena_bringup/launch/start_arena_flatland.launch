@@ -2,9 +2,11 @@
   <param name="use_sim_time" value="true"/>
 
   <arg name="train_mode" default="false"/>
+  <arg name="train_mode_local" default="false"/>
   <arg name="model" default="burger"      doc="model type [burger, jackal, ridgeback, agvota, rto, rto_real]"/>
   <!--husy does not yet work-->
   <param name="train_mode" value="$(arg train_mode)" />
+  <param name="train_mode_local" value="$(arg train_mode_local)" />
   <arg name="use_recorder" default="false"/>
   <arg name="record_only_planner" default="true"/>
   <arg name="requestID"       default="user1"/>
@@ -88,6 +90,8 @@
   <arg name='speed' default='0.26' if="$(eval arg('model') == 'waffle_pi')"/>  
   <param name="radius" value="$(arg radius)"/>
   <param name="speed" value="$(arg speed)"/>
+  
+  <param name="actions_in_obs" value="true"/>
 
   <!-- data recorder -->
   <param name="local_planner"  value="$(arg local_planner)"/>

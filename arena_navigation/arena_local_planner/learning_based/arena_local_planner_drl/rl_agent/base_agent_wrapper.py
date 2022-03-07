@@ -61,9 +61,7 @@ class BaseDRLAgent(ABC):
         self._is_train_mode = rospy.get_param("/train_mode_local")
 
         self._ns = "" if ns is None or ns == "" else ns + "/"
-        self._ns_robot = (
-            self._ns if robot_name is None else self._ns + robot_name + "/"
-        )
+        self._ns_robot = (self._ns if robot_name is None else self._ns + robot_name + "/")
         self._robot_sim_ns = robot_name
 
         self.load_hyperparameters(path=hyperparameter_path)

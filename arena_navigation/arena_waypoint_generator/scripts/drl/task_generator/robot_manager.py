@@ -81,7 +81,7 @@ class RobotManager:
 
         # Incl. for direct goal publishing in test mode
         self.pub_mvb_goal = rospy.Publisher(
-            "/move_base_simple/goal", PoseStamped, queue_size=1, latch=True
+            f"{self.ns_prefix}move_base_simple/goal", PoseStamped, queue_size=1, latch=True
         )
         self.planer = rospy.get_param("local_planner")
 

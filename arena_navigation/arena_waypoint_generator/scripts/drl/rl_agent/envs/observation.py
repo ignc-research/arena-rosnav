@@ -74,7 +74,7 @@ class Observation:
             )
 
     def get_global_plan(self):
-        service_getPath = "/move_base/NavfnROS/make_plan" 
+        service_getPath = f"{self.ns_prefix}move_base/NavfnROS/make_plan"
         rospy.wait_for_service(service_getPath)
         get_plan = rospy.ServiceProxy(service_getPath, GetPlan)
         if (not get_plan):

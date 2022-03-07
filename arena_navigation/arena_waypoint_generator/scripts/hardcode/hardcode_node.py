@@ -74,11 +74,11 @@ class Hardcode:
 
         self.safety_zone = 3
         self.goal_tolerance = 0.7
-        self.subgoal_tolerance = self.goal_tolerance/2
+        self.subgoal_tolerance = 0.1
         self.subgoal_togo = Pose2D()
         self.move_ref = 0
         self.alpha = 1
-        self.limit = 2.0
+        self.limit = 4.0
 
     def updateSubgoalDRLCallback(self, event=None):
         if(not self.have_goal_):

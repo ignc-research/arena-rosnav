@@ -146,8 +146,8 @@ class DeploymentDRLAgent(BaseDRLAgent):
             rospy.logdebug("step Service call failed: %s" % e)
 
 
-def main(agent_name: str, ns: str = "") -> None:
-    AGENT = DeploymentDRLAgent(agent_name=agent_name, ns=ns)
+def main(agent_name: str) -> None:
+    AGENT = DeploymentDRLAgent(agent_name=agent_name)
 
     try:
         AGENT.run()
