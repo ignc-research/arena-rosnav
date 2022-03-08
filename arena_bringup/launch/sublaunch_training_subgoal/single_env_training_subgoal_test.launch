@@ -1,30 +1,26 @@
 <launch>
-  <arg name="ns" />
-  <arg name="local_planner"/>
+  <arg name="ns"/>
   <arg name="model"/>
-  <arg name="agent_name"/> 
-
+  <arg name="local_planner"/>
   <arg name="global_frame_id"   value="map"/>
-  <arg name="odom_frame_id"     value="$(arg ns)_odom"/>
-  <arg name="base_frame_id"     value="$(arg ns)_footprint"/>
+  <arg name="odom_frame_id"     value="odom"/>
 
+  
+  <!-- -->
   <include file="$(find arena_bringup)/launch/sublaunch_training_subgoal/flatland_simulator.launch">
-    <arg name="ns"                value="$(arg ns)"/>
+    <arg name="ns" value="$(arg ns)"/>
     <arg name="model" value="$(arg model)"/>
   </include>
 
   <include file="$(find arena_bringup)/launch/sublaunch_training_subgoal/fake_localization.launch">
-    <arg name="ns"                value="$(arg ns)"/>
+    <arg name="ns" value="$(arg ns)"/>
     <arg name="global_frame_id" value="$(arg global_frame_id)"/>
     <arg name="odom_frame_id" value="$(arg odom_frame_id)"/>
   </include>
 
+
   <include file="$(find arena_bringup)/launch/sublaunch_training_subgoal/move_base/move_base_$(arg local_planner).launch">
-    <arg name="ns"                value="$(arg ns)"/>
+    <arg name="ns" value="$(arg ns)"/>
     <arg name="model" value="$(arg model)"/>
-    <arg name="agent_name" value="$(arg agent_name)" if="$(eval arg('local_planner') == 'rosnav')" />
-    <arg name="global_frame_id" value="$(arg global_frame_id)"/>
-    <arg name="odom_frame_id" value="$(arg odom_frame_id)"/>
-    <arg name="base_frame_id"     value="$(arg ns)_footprint"/>
   </include>
 </launch>

@@ -98,6 +98,7 @@
   <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_path)">
     <!-- In multi-env training /clock not available, since we only want one map_server, it's clock topic is remapped to /clock -->
     <remap from="/clock" to="/$(arg ns_prefix)_1/clock" />
+    <param name="frame_id" value="/map" />
   </node>
 
   <include file="$(find arena_bringup)/launch/sublaunch_training_subgoal/single_env_training_subgoal.launch">

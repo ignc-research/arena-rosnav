@@ -175,8 +175,7 @@
     <node name="action_publisher" pkg="arena_local_planner_drl" type="action_publisher.py"/>
   </group> -->
 
-  <!-- Pedsim -->
-  <arg name="simulation_factor" default="1"/>
+  <!-- <arg name="simulation_factor" default="1"/>
   <arg name="pedsim_update_rate" default="30.0"/>
   <arg name="scene_file" default="$(find simulator_setup)/scenarios/empty.xml"/>
 
@@ -185,7 +184,8 @@
     <param name="pedsim_update_rate" value="$(arg pedsim_update_rate)" type="double"/>
     <param name="scene_file" value="$(arg scene_file)" type="string"/>
   </node>
-
+ -->
+  
   <!-- launch map generator if training with random map-->
   <group if="$(eval arg('map_file') == 'random_map')">
     <node pkg="simulator_setup" name="map_generator_node" type="map_generator_node.py" />
