@@ -25,6 +25,6 @@ robot:
       angular: 0.0
   continuous_actions:
     linear_range: 
-      x: [-2.78, 2.78] # Maximum translational velocity in m/s
+      x: [0.0, 2.78] # Maximum translational velocity in m/s
       y: [-2.78, 2.78]
     angular_range: [-1.0, 1.0] # Maximum rotational velocity in rad/s
