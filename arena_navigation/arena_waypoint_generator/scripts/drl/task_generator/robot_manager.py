@@ -80,10 +80,10 @@ class RobotManager:
         self._static_obstacle_name_list = []
 
         # Incl. for direct goal publishing in test mode
-        self.pub_mvb_goal = rospy.Publisher(
-            f"{self.ns_prefix}move_base_simple/goal", PoseStamped, queue_size=1, latch=True
-        )
-        self.planer = rospy.get_param("local_planner")
+        #self.pub_mvb_goal = rospy.Publisher(
+         #   f"{self.ns_prefix}move_base_simple/goal", PoseStamped, queue_size=1, latch=True
+        #)
+        self.planer = rospy.get_param("/local_planner")
 
     def _spawn_robot(self, robot_yaml_path: str):
         request = SpawnModelRequest()
@@ -99,7 +99,7 @@ class RobotManager:
             robot_yaml_path ([type]): [description]
         """
         self.ROBOT_NAME = os.path.basename(robot_yaml_path).split(".")[0]
-        self.ROBOT_RADIUS = rospy.get_param("radius")
+        self.ROBOT_RADIUS = rospy.get_param("/radius")
         with open(robot_yaml_path, "r") as f:
             robot_data = yaml.safe_load(f)
 
@@ -265,8 +265,8 @@ class RobotManager:
 
         self._goal_pub.publish(goal)
         # self._validate_path()
-        if self.planer in ["teb", "dwa", "mpc"]:
-            self.pub_mvb_goal.publish(goal)
+        #if self.planer in ["teb", "dwa", "mpc"]:
+            #self.pub_mvb_goal.publish(goal)
 
     def _global_path_callback(self, global_path: Path):
         with self._global_path_con:

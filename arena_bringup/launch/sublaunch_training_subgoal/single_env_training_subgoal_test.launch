@@ -3,7 +3,7 @@
   <arg name="model"/>
   <arg name="local_planner"/>
   <arg name="global_frame_id"   value="map"/>
-  <arg name="odom_frame_id"     value="odom"/>
+  <arg name="odom_frame_id"     value="$(arg ns)_odom"/>
 
   
   <!-- -->

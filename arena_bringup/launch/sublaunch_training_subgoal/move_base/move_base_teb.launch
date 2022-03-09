@@ -2,8 +2,8 @@
   <!-- Arguments -->
   <arg name="ns"/>
   <arg name="model" default="burger"/>
-  <arg name="cmd_vel_topic" default="/cmd_vel" />
-  <arg name="odom_topic" default="odom" />
+  <arg name="cmd_vel_topic" default="/$(arg ns)/cmd_vel" />
+  <arg name="odom_topic" default="/$(arg ns)/odom" />
   <arg name="speed" default="0.22"/>
 
   <arg name="TebLocalPlannerROS/max_vel_theta" value="0.52" if="$(eval model == 'burger')"/>

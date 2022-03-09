@@ -1,7 +1,7 @@
 <launch>
   <param name="use_sim_time" value="true"/>
 
-  <arg name="train_mode" default="false"/>
+  <arg name="train_mode" default="true"/>
   <arg name="train_mode_local" default="false"/>
   <param name="train_mode" value="$(arg train_mode)" />
   <param name="train_mode_local" value="$(arg train_mode_local)" />
@@ -88,7 +88,7 @@
   <param name="requestID"  value="$(arg requestID)"/>
 
   <arg name="ns_prefix" default="sim" />
-  <arg name="num_envs" default="0" />
+  <arg name="num_envs" default="1" />
 
   <!-- map server-->
   <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_path)">

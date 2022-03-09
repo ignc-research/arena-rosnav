@@ -59,11 +59,11 @@ class Observation:
                                                                 spaces.Box(low=-np.pi, high=np.pi, shape=(1,), dtype=np.float32)))
         else:
             self.observation_space = Observation._stack_spaces((spaces.Box(low=0, high=lidar_range, shape=(num_lidar_beams,), dtype=np.float32,),
-                                                                spaces.Box(low=0, high=50, shape=(1,), dtype=np.float32),                       
-                                                                spaces.Box(low=0, high=50, shape=(1,), dtype=np.float32),
-                                                                spaces.Box(low=-np.pi, high=np.pi, shape=(1,), dtype=np.float32),
-                                                                spaces.Box(low=-1, high=10, shape=(1,), dtype=np.float32),
-                                                                spaces.Box(low=-1, high=10, shape=(1,), dtype=np.float32)))   
+                                                            spaces.Box(low=0, high=50, shape=(1,), dtype=np.float32),                       
+                                                            spaces.Box(low=0, high=50, shape=(1,), dtype=np.float32),
+                                                            spaces.Box(low=-np.pi, high=np.pi, shape=(1,), dtype=np.float32),
+                                                            spaces.Box(low=-1, high=10, shape=(1,), dtype=np.float32),
+                                                            spaces.Box(low=-1, high=10, shape=(1,), dtype=np.float32))) 
 
         self.global_plan_length = 0
 
@@ -138,17 +138,16 @@ class Observation:
         except:
             global_plan_length = 0
 
-        merged_obs = (
-            np.hstack([scan, np.array([global_plan_length, rho, theta]).astype(np.float32)])
-            if not self.action_in_obs
-            else np.hstack(
+        if not self.action_in_obs:
+            merged_obs = (np.hstack([scan, np.array([global_plan_length, rho, theta]).astype(np.float32)]))
+        else:
+            merged_obs = np.hstack(
                 [
                     scan,
                     np.array([global_plan_length, rho, theta]).astype(np.float32),
                     kwargs.get("last_action", np.array([-1,-1]))
                 ]
             )
-        )
 
         self.global_plan_length = global_plan_length
 

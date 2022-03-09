@@ -5,6 +5,7 @@ from gym import spaces
 from gym.spaces import space
 from stable_baselines3.common.env_checker import check_env
 import rospy
+import tf
 import time
 import math
 
@@ -69,11 +70,13 @@ class Subgoal_env(gym.Env):
         self.ns_prefix = "" if (ns == "" or ns is None) else "/" + ns + "/"
         self._extended_eval = extended_eval
         self._is_train_mode = rospy.get_param("/train_mode")
+        self._is_drl_local_planner = rospy.get_param("/local_planner") not in ["teb", "dwa", "mpc"]
 
         self.setup_by_configuration(PATHS["robot_setting"])
         self.planing_horizon = 4.5
 
-        self.action_space = spaces.MultiDiscrete([n,2]) #the first action for angle to get a subgoal, the second one for mode of subgoals
+        self.action_space = spaces.MultiDiscrete([n,2])
+
         self.obs_observation = Observation(
             self.ns,
             self._laser_num_beams,
@@ -91,7 +94,6 @@ class Subgoal_env(gym.Env):
             length=n,
         )
 
-        self.agent_action_pub = rospy.Publisher(f"{self.ns_prefix}subgoal", PoseStamped, queue_size=1)
         self.action_in_radius = None
 
         self._steps_curr_episode = 0
@@ -119,14 +121,22 @@ class Subgoal_env(gym.Env):
         self._subgoal = Pose2D()
         self.subgoal_tolerance = goal_radius/2
         self._episode_ref = 0
+        self.gotPlan = True
 
-        self.clear_costmaps_srv = rospy.ServiceProxy(f'{self.ns_prefix}move_base/clear_costmaps', Empty)
+        #self.clear_costmaps_srv = rospy.ServiceProxy(f'{self.ns_prefix}move_base/clear_costmaps', Empty)
 
         if self._is_train_mode:
             self._service_name_step = f"{self.ns_prefix}step_world"
             self._sim_step_client = rospy.ServiceProxy(
                 self._service_name_step, StepWorld
             )
+
+        if self._is_drl_local_planner:
+            self.agent_action_pub = rospy.Publisher(f"{self.ns_prefix}subgoal", PoseStamped, queue_size=1)
+        else:
+            self.agent_action_pub = rospy.Publisher(f"{self.ns_prefix}move_base_simple/goal", PoseStamped, queue_size=1, latch=True)
+        
+        #self.pub_mvb_goal = rospy.Publisher(f"{self.ns_prefix}move_base_simple/goal", PoseStamped, queue_size=1, latch=True)
 
     def setup_by_configuration(self, robot_yaml_path: str):
         self._robot_radius = rospy.get_param("radius") + 0.075
@@ -159,8 +169,6 @@ class Subgoal_env(gym.Env):
             global_plan_length = obs_dict["global_plan_length"]
             if global_plan_length != 0:
                 self._max_steps_per_episode = int(self._max_steps_per_episode_unit*global_plan_length/self.planing_horizon)
-            #print(f"length = {global_plan_length:.2f}")
-            #print(f"steps = {self._max_steps_per_episode}")
 
         self._steps_curr_episode += 1
 
@@ -173,6 +181,7 @@ class Subgoal_env(gym.Env):
                 goal = obs_dict["goal_pose"],
                 subgoal=self._subgoal,
                 action=action, 
+                gotPlan = self.gotPlan,
             )
         done = reward_info["is_done"]
 
@@ -196,6 +205,11 @@ class Subgoal_env(gym.Env):
             info["time_safe_dist"] = (self._safe_dist_counter * self._action_frequency)
             info["time"] = self._steps_curr_episode * self._action_frequency
 
+        if not self.gotPlan:
+            done = True
+            info["done_reason"] = 2
+            info["is_success"] = 0
+
         if done:
             if sum(self._done_hist) == 10 and self.ns_prefix != "/eval_sim/":
                 print(
@@ -211,12 +225,12 @@ class Subgoal_env(gym.Env):
 
     def reset(self):
         self._episode += 1
-        action_msg = PoseStamped()
-        action_msg.header.stamp = rospy.Time.now()
-        action_msg.header.frame_id = "map"
-        action_msg.pose.position.x = self.obs_observation.get_goal_pose().x
-        action_msg.pose.position.y = self.obs_observation.get_goal_pose().y
-        self.agent_action_pub.publish(action_msg)
+        #action_msg = PoseStamped()
+        #action_msg.header.stamp = rospy.Time.now()
+        #action_msg.header.frame_id = "map"
+        #action_msg.pose.position.x = self.obs_observation.get_goal_pose().x
+        #action_msg.pose.position.y = self.obs_observation.get_goal_pose().y
+        #self.agent_action_pub.publish(action_msg)
         self._sim_step_client()
         self.task.reset()
         self.obs_reward.reset_reward_()
@@ -232,7 +246,7 @@ class Subgoal_env(gym.Env):
 
         merged_obs, _ = self.obs_observation.get_observations()
 
-        self.clear_costmaps_srv(EmptyRequest())
+        #self.clear_costmaps_srv(EmptyRequest())
         return merged_obs
 
     def close(self):
@@ -257,13 +271,17 @@ class Subgoal_env(gym.Env):
     def _pub_action(self, action: int) -> Pose2D:
         subgoal = Pose2D()
         action_msg = PoseStamped()
-        action_msg.header.stamp = rospy.Time.now()
+        action_msg.header.stamp = rospy.get_rostime()
         action_msg.header.frame_id = "map"
+        quaternion = tf.transformations.quaternion_from_euler(0, 0, 0)
+        action_msg.pose.orientation.w = quaternion[0]
+        action_msg.pose.orientation.x = quaternion[1]
+        action_msg.pose.orientation.y = quaternion[2]
+        action_msg.pose.orientation.z = quaternion[3]
 
         _, obs_dict = self.obs_observation.get_observations()
         robot_pose = obs_dict["robot_pose"]
         goal_pose = obs_dict["goal_pose"]
-        #scan = obs_dict["laser_scan"]
         global_plan = obs_dict["global_plan"]
 
         if self.get_distance(goal_pose, robot_pose) <= self.planing_horizon:
@@ -277,17 +295,41 @@ class Subgoal_env(gym.Env):
 
             if self._subgoal == None:
                 self._subgoal = temp
-    
+
             if action[1] == 1:
                 subgoal = self._subgoal
             elif action[1] in [0,2]:
                 subgoal.x = points[0][action[0]]
                 subgoal.y = points[1][action[0]]
                 self._subgoal = subgoal
-        
+
+            if not self._is_drl_local_planner:
+                self.checkPlan(robot_pose, subgoal)
+
         action_msg.pose.position.x = subgoal.x
         action_msg.pose.position.y = subgoal.y
         self.agent_action_pub.publish(action_msg)
+
+    def checkPlan(self, robot_pose: Pose2D, goal_pose: Pose2D):
+        service_getPath = f"{self.ns_prefix}move_base/NavfnROS/make_plan"
+        rospy.wait_for_service(service_getPath)
+        get_plan = rospy.ServiceProxy(service_getPath, GetPlan)
+        if (not get_plan):
+            rospy.logfatal("[Hardocde - GET_PATH] Could not initialize get plan service from %s", get_plan.getService().c_str())
+        req = GetPlanRequest()
+        
+        req.start.header.frame_id ="map"
+        req.start.pose.position.x = robot_pose.x
+        req.start.pose.position.y = robot_pose.y
+        req.start.pose.orientation.w = 1.0
+        req.goal.header.frame_id = "map"
+        req.goal.pose.position.x = goal_pose.x
+        req.goal.pose.position.y = goal_pose.y
+        req.goal.pose.orientation.w = 1.0
+        req.tolerance = 0.7
+
+        resp = get_plan(req)
+        self.gotPlan = resp.plan.poses != []
 
     def updateSubgoalSpacialHorizon(self, robot_pose: Pose2D, global_plan):
         subgoal = Pose2D()

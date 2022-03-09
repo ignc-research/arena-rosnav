@@ -14,7 +14,7 @@
   <arg name="local_planner" default="rosnav"   doc="local-planer type [teb, dwa, mpc, rlca, arena, rosnav]"/>
   <!-- Rosnav agent name -->
   <arg name="agent_name" default="$(arg model)"     doc="DRL agent name to be deployed" unless="$(eval arg('local_planner') == 'rosnav')"/>
-  <arg name="waypoint_generator" default="classic" doc="waypoint_generator type [spacial_horizon, plan_manager, hardcode, drl]"/>
+  <arg name="waypoint_generator" default="drl" doc="waypoint_generator type [spacial_horizon, plan_manager, hardcode, drl]"/>
   <arg name="rviz_file" default="nav"/>
   <arg name="disable_scenario" default="false"/>
   <arg name="scenario_file" default="empty_map.json" doc="[scenario2.json, empty_map.json, test_scenario.json (pesim), eval_feb_2022/small_warehouse_obs05.json]"/>
@@ -100,9 +100,6 @@
   <param name="record_only_planner"  value="$(arg record_only_planner)"/>
   <param name="scenario_file"  value="$(arg scenario_file)"/>
   <param name="requestID"  value="$(arg requestID)"/>
-  <group if="$(eval arg('use_recorder') == true)">
-    <node pkg="arena_evaluation" name="data_recorder_node" type="data_recorder_node.py" />
-  </group>
 
   <!-- use simulator-->
   <include file="$(find arena_bringup)/launch/sublaunch_testing/flatland_simulator.launch">
@@ -120,49 +117,15 @@
 
   <!-- use fake localization-->
   <include file="$(find arena_bringup)/launch/sublaunch_testing/fake_localization.launch">
-
     <arg name="global_frame_id" value="$(arg global_frame_id)"/>
     <arg name="odom_frame_id" value="$(arg odom_frame_id)"/>
   </include>
-
-  <!-- start task_generator node -->
-  <group if="$(eval arg('waypoint_generator') != 'drl')">
-    <arg name="timeout" default="3.0"/>
-    <include file="$(find arena_bringup)/launch/sublaunch_testing/task_generator.launch" unless="$(eval arg('disable_scenario') or arg('train_mode'))">
-      <arg name="scenarios_json_path" value="$(find simulator_setup)/scenarios/$(arg scenario_file)"/>
-      <arg name="auto_reset" value="$(arg reset)"/>
-      <arg name="timeout" value="$(arg timeout)"/>
-      <arg name="task_mode" value="$(arg task_mode)"/>
-    </include>
-  </group>
 
   <include file="$(find arena_bringup)/launch/sublaunch_testing/move_base/move_base_$(arg local_planner).launch">
     <arg name="model" value="$(arg model)"/>
     <arg name="agent_name" value="$(arg agent_name)" if="$(eval arg('local_planner') == 'rosnav')" />
     <arg name="train_mode" value="$(arg train_mode_local)" if="$(eval arg('local_planner') == 'rosnav')" />
     <!-- <arg name="speed" value="$(arg speed)"/> -->
-  </include>
-
-
-  <include file="$(find arena_bringup)/launch/sublaunch_testing/waypoint/$(arg waypoint_generator).launch">
-    <arg name="train_mode" value="$(arg train_mode)"/>
-    <arg name="global_frame_id" value="$(arg global_frame_id)"/>
-    <arg name="odom_frame_id" value="$(arg odom_frame_id)"/>
-    <arg name="base_frame_id" value="$(arg base_frame_id)"/>
-    <arg name="waypoint_generator" value="$(arg waypoint_generator)"/>
-
-    <arg name="look_ahead_distance" default="2.3" if="$(eval arg('waypoint_generator') == 'plan_manager')" />
-    <arg name="tolerance_approach" default="0.6" if="$(eval arg('waypoint_generator') == 'plan_manager')" />
-    <arg name="timeout_goal" default="330." if="$(eval arg('waypoint_generator') == 'plan_manager')" />
-    <arg name="timeout_subgoal" default="20" if="$(eval arg('waypoint_generator') == 'plan_manager')" />
-    
-    <arg name="fsm/goal_tolerance" default="0.6" if="$(eval arg('waypoint_generator') == 'spacial_horizon')" />
-    <arg name="fsm/subgoal_tolerance" default="1.9" if="$(eval arg('waypoint_generator') == 'spacial_horizon')" />
-    <arg name="fsm/subgoal_pub_period" default="0.4" if="$(eval arg('waypoint_generator') == 'spacial_horizon')" />
-    <arg name="fsm/planning_horizen" default="2.9" if="$(eval arg('waypoint_generator') == 'spacial_horizon')" />
-
-    <arg name="agent_name" value="$(arg agent_name)" if="$(eval arg('waypoint_generator') == 'drl')" />
-    
   </include>
 
   <!-- launch map generator if training with random map-->

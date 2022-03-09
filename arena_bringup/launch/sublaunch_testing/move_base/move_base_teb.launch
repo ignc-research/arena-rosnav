@@ -1,12 +1,11 @@
-<!-- -->
 <launch>
   <!-- Arguments -->
   <arg name="model" default="burger"/>
   <arg name="cmd_vel_topic" default="/cmd_vel" />
   <arg name="odom_topic" default="odom" />
-  <arg name="speed" default="0.22"/>
+  <arg name="speed" default="0.75"/>
 
-  <arg name="TebLocalPlannerROS/max_vel_theta" value="0.52" if="$(eval model == 'burger')"/>
+  <arg name="TebLocalPlannerROS/max_vel_theta" value="0.75" if="$(eval model == 'burger')"/>
   <arg name="TebLocalPlannerROS/max_vel_y" value="2.0" if="$(eval model == 'burger')"/>
   <arg name="TebLocalPlannerROS/acc_lim_x" value="2.0" if="$(eval model == 'burger')"/>
   <arg name="TebLocalPlannerROS/acc_lim_y" value="2.0" if="$(eval model == 'burger')"/>

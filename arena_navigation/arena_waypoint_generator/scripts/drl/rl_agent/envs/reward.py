@@ -38,6 +38,7 @@ class Reward():
         self.cal_func = self._cal_funcs[rule]
 
         self.counter = 0
+        self._is_drl_local_planner = rospy.get_param("/local_planner") not in ["teb", "dwa", "mpc"]
 
     def reset_reward_(self):
         self.last_dist_to_goal = None
@@ -57,17 +58,17 @@ class Reward():
         self.robot_pose = kwargs["robot_pose"]
         action = kwargs["action"]
         global_plan_length = kwargs["global_plan_length"]
+        gotPlan = kwargs["gotPlan"]
 
-        try:
-            self._reward_goal_reached(goal_in_robot_frame, reward=17.5)
-            self._reward_collision(laser_scan, punishment=10)
-            self._reward_safe_dist(laser_scan, punishment=0.25)
-            self._reward_on_global_plan(action, reward=0.0125, punishment=0.0)
-            self._reward_subgoal_reached(self.subgoal_pose, self.robot_pose, reward=0.25)
-            self._reward_stop_too_long(punishment = 10)
-            self._reward_dist_to_goal(global_plan_length, factor = 0.15)
-        except:
-            pass
+        self._reward_goal_reached(goal_in_robot_frame, reward=17.5)
+        self._reward_collision(laser_scan, punishment=10)
+        self._reward_safe_dist(laser_scan, punishment=0.25)
+        self._reward_on_global_plan(action, reward=0.0125, punishment=0.0)
+        self._reward_subgoal_reached(self.subgoal_pose, self.robot_pose, reward=0.25)
+        self._reward_stop_too_long(punishment=10)
+        self._reward_dist_to_goal(global_plan_length, factor=0.15)
+        if self._is_drl_local_planner:    
+            self._reward_gotPlan(gotPlan, punishment=10)
 
     def _reward_goal_reached(self, goal_in_robot_frame, reward: float = 17.5):
         if goal_in_robot_frame[0] < self.goal_radius:
@@ -127,3 +128,7 @@ class Reward():
             self.curr_reward += factor*(self.last_dist_to_goal-global_plan_length)
 
         self.last_dist_to_goal = global_plan_length
+
+    def _reward_gotPlan(self, gotPlan: bool, punishment: float = 7.5):
+        if not gotPlan:
+            self.curr_reward -= punishment
