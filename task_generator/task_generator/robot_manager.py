@@ -208,6 +208,14 @@ class RobotManager:
                 continue
             # move the robot to the start pos
             self.move_robot(start_pos_)
+
+            # wait for aio global planner
+            if self.planer == 'aio':
+                rospy.wait_for_service("/global_planner/makeGlobalPlan")
+            else:
+                # Make sure move_base is ready to take goals/make plan
+                rospy.wait_for_service("/move_base/make_plan")
+                
             try:
                 # publish the goal, if the gobal plath planner can't generate a path, a, exception will be raised.
                 self.publish_goal(goal_pos_.x, goal_pos_.y, goal_pos_.theta)
