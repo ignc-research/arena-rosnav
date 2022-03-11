@@ -12,16 +12,12 @@
         <rosparam file="$(find conventional)/config/$(arg model)/global_costmap_params.yaml" command="load" />
     </node>
 
-    <!-- spacial_horizon -->
-    <node pkg="arena_spacial_horizon" type="spacial_horizon_node" name="spacial_horizon_node" output="screen">
-        <rosparam file="$(find conventional)/config/$(arg model)/plan_fsm_param.yaml" command="load" />
-        <!-- ns="fsm"-->
-    </node>
+
 
     <!-- observation_packer -->
-    <node pkg="observations" name="observation_packer" type="observation_packer" output="screen"/>
+    <!-- <node pkg="observations" name="observation_packer" type="observation_packer" output="screen"/> -->
 
     <!-- Launch neural net ros wrapper -->
-    <node pkg="arena_ros" type="play_agent.py" name="arena_node" output="screen"/>
-
+    <!-- <node pkg="arena_ros" type="play_agent.py" name="arena_node" output="screen"/> -->
+    <node pkg="arena_ros" type="arena_node_tb3.py" name="arena_node" output="screen" ns="/arena"/>
 </launch>

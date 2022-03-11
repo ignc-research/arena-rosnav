@@ -35,9 +35,9 @@ plugins:
     #arena
     range: 3.5
     # Note some planner take different laser definitions. Comment out the respective angle if needed
-    # angle: {min: -3.12413936, max: 3.14159265359, increment: 0.01745} # ARENA 
-    # angle: {min: -1.5707963267948966, max: 4.694936014, increment:  0.017453292} # DRL4 : 
-    angle: {min: 0, max: 6.28318977356, increment:  0.01745330492} # rosnav...
+    # angle: {min: -3.12413936, max: 3.14159265359, increment: 0.0174} # ARENA 
+    angle: {min: -1.5707963267948966, max: 4.694936014, increment:  0.017403292} # DRL4 : 
+    # angle: {min: 0, max: 6.28318977356, increment:  0.01745330492} # rosnav...
 
     # noise_std_dev: 0.015
     # arena

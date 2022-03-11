@@ -117,7 +117,7 @@ class NN_tb3():
             sample = np.asanyarray(self.scan.ranges)
 
             path = rospkg.RosPack().get_path("simulator_setup") + '/robot/' + \
-                f'{rospy.get_param("model")}.model.yaml'
+                f'{rospy.get_param("/model")}.model.yaml'
 
             with open(path, "r") as fd:
                 robot_data = yaml.safe_load(fd)
@@ -128,7 +128,6 @@ class NN_tb3():
 
             sample[np.isinf(sample)] = max_range
             sample[np.isnan(sample)] = max_range
-            print(sample)
             sample = sample.tolist()
             # print(len(sample))
 
@@ -139,13 +138,15 @@ class NN_tb3():
 
             observation = [distance]+[angle]+sample
             # load NN
+            current_dir_path = rospkg.RosPack().get_path('arena_ros') + "/scripts/"
             model_name = "dqn_agent_best_fc_l2.dat"
+            model_path = current_dir_path + model_name
             net = fc.FC_DQN(num_observations, NUM_ACTIONS)
             # set training mode to false to deactivate dropout layer
             net.train(False)
 
             net.load_state_dict(torch.load(
-                model_name, map_location=torch.device('cpu')))
+                model_path, map_location=torch.device('cpu')))
 
             # output NN
             # passing observation through net
@@ -157,8 +158,6 @@ class NN_tb3():
             self.update_action(action)
 
         else:
-            # print(self.global_goal.pose.position)
-            # print("stop moving: "+str(self.distance))
             self.stop_moving()
             return
 
@@ -167,14 +166,12 @@ class NN_tb3():
         action_space = {0: [0.2, 0], 1: [0.15, 0.75], 2: [
             0.15, -0.75], 3: [0.0, 1.5], 4: [0.0, -1.5]}
         # action_space = {0: [0.2,0], 1: [0.15,0.35], 2: [0.15,-0.35], 3: [0.0,0.75], 4: [0.0,-0.75]}
-        # print(action)
         twist = Twist()
         twist.linear.x = action_space[action][0]
         twist.angular.z = action_space[action][1]
 
-        print("action "+str(action)+": "+str(action_space[action]))
-        print("twist: "+str([twist.linear.x, twist.angular.z]))
-        # print((sample))
+        # print("action "+str(action)+": "+str(action_space[action]))
+        # print("twist: "+str([twist.linear.x, twist.angular.z]))
         self.pub_twist.publish(twist)
 
     def on_shutdown(self):
