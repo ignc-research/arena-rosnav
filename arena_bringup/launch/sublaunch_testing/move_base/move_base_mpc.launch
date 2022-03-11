@@ -12,7 +12,8 @@
     <rosparam file="$(find conventional)/config/$(arg model)/costmap_common_params.yaml" command="load" ns="local_costmap" />
     <rosparam file="$(find conventional)/config/$(arg model)/local_costmap_params.yaml" command="load" />
     <rosparam file="$(find conventional)/config/$(arg model)/global_costmap_params.yaml" command="load" />
-    <rosparam file="$(find mpc_local_planner_examples)/cfg/diff_drive/mpc_local_planner_params_minimum_time.yaml" command="load" />
+    <rosparam file="$(find conventional)/config/$(arg model)/mpc_local_planner_params_minimum_time.yaml" command="load" />
+    <!-- <rosparam file="$(find mpc_local_planner_examples)/cfg/diff_drive/mpc_local_planner_params_minimum_time.yaml" command="load" /> -->
 
     <!-- planner params -->
     <rosparam file="$(find conventional)/config/$(arg model)/base_local_planner_params.yaml" command="load" />
