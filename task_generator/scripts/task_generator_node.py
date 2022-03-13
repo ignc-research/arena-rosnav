@@ -90,8 +90,10 @@ class TaskGenerator:
         if info is not None:
             if info == "End":
                 # communicates to launch_arena (if used) the end of the simulation
-                
-                subprocess.Popen("rosnode kill --all", shell=True)
+                print("SENDING END MESSAGE")
+                self.end_msg = Bool()
+                self.end_msg.data = True
+                self.pub.publish(self.end_msg)
                 rospy.signal_shutdown("Finished all episodes of the current scenario")
             else:
                 self.curr_goal_pos_ = info['robot_goal_pos']

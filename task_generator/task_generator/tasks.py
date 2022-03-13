@@ -328,6 +328,7 @@ class ScenerioTask(ABSTask):
             else:
                 info["new_scenerio_loaded"] = False
                 self.obstacles_manager.move_all_obstacles_to_start_pos_tween2()
+                return "End"
             # reset robot
             robot_data = self._scenerios_data[self._idx_curr_scene]["robot"]
             robot_start_pos = robot_data["start_pos"]
@@ -351,6 +352,7 @@ class ScenerioTask(ABSTask):
                 print(f"Scenario '{scenerio_name}' loaded")
                 print(f"======================================================")
                 # use can set "repeats" to a non-positive value to disable the scenerio
+                
                 if scenerio_data["repeats"] > 0:
                     # set obstacles
                     self.obstacles_manager.remove_obstacles()
@@ -607,7 +609,8 @@ class ScenarioTask(ABSTask):
         self.reset_count = 0
 
     def reset(self):
-        if self.scenario.resets >= self.reset_count:
+        print(self.scenario.repeats, self.reset_count)
+        if self.scenario.repeats >= self.reset_count:
             self.reset_count += 1
             info = {}
             with self._map_lock:
@@ -630,7 +633,7 @@ class ScenarioTask(ABSTask):
                 # fill info dict
                 if self.reset_count == 1:
                     info["new_scenerio_loaded"] = True
-                else:
+                else:   
                     info["new_scenerio_loaded"] = False
                 info["robot_goal_pos"] = self.scenario.robotGoal
                 info["num_repeats_curr_scene"] = self.reset_count
