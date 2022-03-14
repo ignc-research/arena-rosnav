@@ -31,7 +31,7 @@ class recorder():
         #'''
         self.waypoint_generator = rospy.get_param("waypoint_generator")
         self.record_only_planner = rospy.get_param("record_only_planner")
-        self.scenario = rospy.get_param("scenario_file").replace(".json","").replace("eval/","")
+        self.scenario = rospy.get_param("scenario_file").replace(".json","").replace("eval/","").replace('eval_mar_2022/','')
         ''' #for debugging:
         self.waypoint_generator = True# rospy.get_param("waypoint_generator")
         self.record_only_planner = True#rospy.get_param("record_only_planner")
