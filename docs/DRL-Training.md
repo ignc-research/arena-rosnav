@@ -32,6 +32,7 @@ As a fundament for our Deep Reinforcement Learning approaches, [StableBaselines3
       - [Test Agents in Main Simulation](#test-agents-in-main-simulation)
       - [Test Agents in Training Simulation](#test-agents-in-training-simulation)
         - [Sequential Evaluation of multiple Agents](#sequential-evaluation-of-multiple-agents)
+    - [Pipeline Components](#pipeline-components)
     - [Important Directories](#important-directories)
 
 ### Quick Start
@@ -452,6 +453,10 @@ For automatic testing of several agents in a sequence, one can specify a list co
 
 - Guaranteed execution of each agent is currently only provided with the _start_training.launch_ as simulation launcher
 - `--load` flag has to be set _None_, otherwise the script will only consider the agent provided with the flag.
+
+### Pipeline Components
+
+![drl_training_modules](../img/drl_training_modules.png)
 
 ### Important Directories
 
