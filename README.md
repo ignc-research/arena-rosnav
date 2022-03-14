@@ -1,4 +1,3 @@
-
 # Arena-Rosnav (IROS 21)
 
 **Note:**
@@ -69,6 +68,36 @@ Alternatively, refer to [Installation.md](docs/Installation.md) for detailed exp
 We provide a Docker file to run our code on other operating systems. Please refer to [Docker.md](docs/Docker.md) for more information.
 
 ## 2. Usage
+
+#### Robots
+
+We support different robots:
+|<img width="250" src="./img/robots/turtlebot3-burger.jpg">|<img width="250" src="./img/robots/jackal.jpg">|<img width="250"  src="./img/robots/ridgeback.jpg">|<img width="250" src="./img/robots/agv-ota.png">|
+|:--: | :--:| :--:| :--:|
+| _turtlebot3_burger_ | _jackal_ | _ridgeback_ | _agv-ota_ |
+
+| <img width="250" src="./img/robots/rto.jpg"> | <img width="250" src="./img/robots/youbot.jpg"> | <img width="250"  src="./img/robots/turtlebot3_waffle_pi.jpg"> | <img width="250" src="./img/robots/cob4.jpg"> |
+| :------------------------------------------: | :---------------------------------------------: | :------------------------------------------------------------: | :-------------------------------------------: |
+|               _Robotino(rto)_                |                    _youbot_                     |                     _turtlebot3_waffle_pi_                     |              _Car-O-Bot4 (cob4)_              |
+
+All robots are equipped with a laser scanner. The robots differ in size, laser-range etc. See below table for more detailed information on each robot:
+
+| Name                   | Max Speed (v*x) [\_m/s*] | Max Speed (v*y) [\_m/s*] | Max Rotational Speed (θ*y) [\_rad/s*] | Radius [_m_] | Emergency-Stop¹ | Laser-range [_m_] | Holonomic² |
+| :--------------------- | :----------------------: | :----------------------: | :-----------------------------------: | :----------: | :-------------: | :---------------: | :--------: |
+| _turtlebot3-burger_    |           0.22           |           0.0            |                 2.84                  |    0.113     |      True       |        3.5        |   False    |
+| _jackal_               |           2.0            |           0.0            |                  4.0                  |    0.267     |      True       |       30.0        |   False    |
+| _ridgeback_            |           1.1            |           0.5            |                  2.0                  |    0.625     |      True       |       10.0        |    True    |
+| _agv-ota_              |           0.5            |           0.0            |                  0.4                  |    0.629     |      True       |        5.0        |   False    |
+| _rto_                  |           2.78           |           2.78           |                  1.0                  |    0.225     |      False      |        5.6        |    True    |
+| _youbot_               |           0.8            |           0.8            |                  1.2                  |    0.347     |      False      |        5.6        |    True    |
+| _turtlebot3_waffle_pi_ |           0.26           |           0.0            |                 1.82                  |    0.208     |      False      |        3.5        |   False    |
+| _Car-O-Bot4 (cob4)_    |           1.1            |           0.2            |                  0.8                  |     0.36     |      True       |       29.5        |    True    |
+
+For additional / more detailed information about each robot:
+
+- [See the parameters needed for the **Navigation stack**](arena_navigation/arena_local_planer/model_based/conventional/config)
+- [See additional robot parameters like laser min/max [_rad_]](https://github.com/ignc-research/arena-rosnav-3D/wiki/Laser-scanner-parameters)
+- See [_HERE_](arena_navigation/arena_local_planer/learning_based/arena_local_planner_drl/configs) for the definition of the robots action_spaces (needed for rl-based-training)
 
 ### DRL Training
 

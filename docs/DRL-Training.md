@@ -221,7 +221,7 @@ Following hyperparameters can be adapted:
 |-----|-----|
 | agent*name | Unique agent identifier (set by the training script)
 | robot | Robot name to load robot specific .yaml file containing its settings. (set by the training script)
-| actions_in_observationspace | When set true, actions will be appended to the observation space and thus will be available as an additional input feature to learn on.
+| actions_in_observationspace | When set true, actions will be appended to the observation space and thus will be available as an additional input feature to learn on. Noticeable performance improvements when utilizing reward function that incorporates robot velocity.
 | normalize | If observations are normalized before fed to the network
 | train_max_steps_per_episode | Max timesteps per training episode
 | eval_max_steps_per_episode | Max timesteps per evaluation episode
