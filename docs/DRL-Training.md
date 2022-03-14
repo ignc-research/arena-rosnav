@@ -197,7 +197,7 @@ A third terminal is needed in order to start rviz for visualization.
 roslaunch arena_bringup visualization_training.launch ns:=*ENV NAME*
 ```
 
-**Note**: The training environments start with prefix \_sim\__ and end with the index. For example: \_sim_1_, _sim_2_ and so on. The evaluation environment which is used during the periodical benchmarking in training can be shown with `ns:=eval_sim`.
+**Note**: The training environments start with prefix _sim_ and end with the index. For example: _sim_1_, _sim_2_ and so on. The evaluation environment which is used during the periodical benchmarking in training can be shown with `ns:=eval_sim`.
 
 **Ending a training session**
 
@@ -219,7 +219,7 @@ The training script will consider the hyperparameter yaml file which was specifi
 Following hyperparameters can be adapted:
 |Parameter|Description|
 |-----|-----|
-| agent*name | Unique agent identifier (set by the training script)
+| agent_name | Unique agent identifier (set by the training script)
 | robot | Robot name to load robot specific .yaml file containing its settings. (set by the training script)
 | actions_in_observationspace | When set true, actions will be appended to the observation space and thus will be available as an additional input feature to learn on. Noticeable performance improvements when utilizing reward function that incorporates robot velocity.
 | normalize | If observations are normalized before fed to the network
@@ -227,7 +227,7 @@ Following hyperparameters can be adapted:
 | eval_max_steps_per_episode | Max timesteps per evaluation episode
 | goal_radius | Radius of the goal
 | task_mode | Mode tasks will be generated in (custom, random, staged). In custom mode one can place obstacles manually via Rviz. In random mode there's a fixed number of obstacles which are spawned randomly distributed on the map after each episode. In staged mode the training curriculum will be used to spawn obstacles. ([more info](#training-curriculum))
-| batch_size | Batch size (n_envs * n_steps)
+| batch_size | Batch size (n_envs \* n_steps)
 | gamma | Discount factor
 | n_steps | The number of steps to run for each environment per update (set automatically by training script depending on batch_size and n_envs)
 | ent_coef | Entropy coefficient for the loss calculation
