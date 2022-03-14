@@ -1,12 +1,13 @@
-obstacle_range: 2.5
+obstacle_range: 3.5
 raytrace_range: 3.0
 
 footprint: [[-0.21, -0.21], [-0.21, 0.21], [0.21, 0.21], [0.21, -0.21]]
 # radius: 0.267 from (0.21**2+0.21**2)**(1/2)
-footprint_padding: 0.1
 
-inflater_layer:
- inflation_radius: 0.30
+
+
+inflation_radius: 8.0
+cost scaling factor: 7.58
 
 
 map_type: costmap

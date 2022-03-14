@@ -4,22 +4,22 @@ DWAPlannerROS:
   # and https://www.robotshop.com/media/files/content/f/fto/pdf/festo-robotino-mobile-robotic-datasheet.pdf
 
   # Robot Configuration Parameters
-  max_vel_x: 2.78
-  min_vel_x: -2.78
+  max_vel_x: 0.8
+  min_vel_x: 0.0
 
-  max_vel_y: 2.78
-  min_vel_y: -2.78
+  max_vel_y: 0.8
+  min_vel_y: 0.1
 
   # The velocity when robot is moving in a straight line
-  max_vel_trans: 2.78
-  min_vel_trans: 1.39
+  max_vel_trans: 0.8
+  min_vel_trans: .1
 
-  max_vel_theta: 1.0
-  min_vel_theta: 0.5
+  max_rot_vel: 1.2
+  min_rot_vel: 0.1
 
   acc_lim_x: 2.5
   acc_lim_y: 2.5
-  acc_lim_theta: 3.2
+  acc_lim_th: 3.2
 
   # Goal Tolerance Parametes
   xy_goal_tolerance: 0.05
