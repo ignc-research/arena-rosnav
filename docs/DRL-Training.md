@@ -406,6 +406,7 @@ roslaunch arena_bringup start_training.launch num_envs:=1 map_folder_name:=map1 
 **Note**:
 
 - The `train_mode` parameter determines if the simulation will run in emulated real time (where `step_size` and `update_rate` determine the simulation speed) or in the manipulating time stepping modus (via _/step_world_ rostopic).
+- Make sure that you start the simulation with the matching robot model for the agent
 
 </br>
 
@@ -440,7 +441,6 @@ python run_agent.py --load DRL_LOCAL_PLANNER_2021_03_22__19_33 -s obstacle_map1_
 **Notes**:
 
 - The `--log` flag should only be set with _start_training.launch_ as simulation launcher as it requires the dedicated plan manager to control the episodes in order to log correct statistics.
-- _When running start_arena_flatland.launch_: Make sure that `drl_mode` is activated in [plan_fsm_param.yaml](../arena_bringup/launch/plan_fsm_param.yaml)
 - Make sure that the simulation speed doesn't overlap the agent's action calculation time (an obvious indicator: same action gets published multiple times successively and thus the agent moves unreasonably)
 - If your agent was trained with normalized observations, it's necessary to provide the _vec_normalize.pkl_
 
