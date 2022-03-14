@@ -11,7 +11,7 @@
   <param name="world_path" value="$(find simulator_setup)/maps/$(arg map_folder_name)/map.world.yaml" /> -->
 
 
-  <arg name="model" default="rto_real"      doc="model type [burger, jackal, ridgeback, agvota, rto, rto_real]"/>
+  <arg name="model" default="burger"      doc="model type [burger, jackal, ridgeback, agvota, rto, rto_real]"/>
   <param name="model" value="$(arg model)" />
 
   <arg name="local_planner" default="rosnav"   doc="local-planer type [teb, dwa, mpc, rlca, cadrl, arena, rosnav]"/>
