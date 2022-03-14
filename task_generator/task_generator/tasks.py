@@ -315,9 +315,15 @@ class ScenerioTask(ABSTask):
         self._num_repeats_curr_scene = -1
         # The times of current scenerio need to be repeated
         self._max_repeats_curr_scene = 0
+        self.data = self._scenerios_data[0]
+        self.count=-1
 
     def reset(self):
         info = {}
+        self.count += 1
+        if self.count >= self.data['repeats']:
+            return "End"
+        print('NOTE', self.count)
         with self._map_lock:
             if (
                 self._idx_curr_scene == -1
@@ -328,7 +334,7 @@ class ScenerioTask(ABSTask):
             else:
                 info["new_scenerio_loaded"] = False
                 self.obstacles_manager.move_all_obstacles_to_start_pos_tween2()
-                return "End"
+            print('TEST', self.count, self.data['repeats'])
             # reset robot
             robot_data = self._scenerios_data[self._idx_curr_scene]["robot"]
             robot_start_pos = robot_data["start_pos"]
@@ -609,7 +615,7 @@ class ScenarioTask(ABSTask):
         self.reset_count = 0
 
     def reset(self):
-        print(self.scenario.repeats, self.reset_count)
+        print('TEST', self.scenario.repeats, self.reset_count)
         if self.scenario.repeats >= self.reset_count:
             self.reset_count += 1
             info = {}

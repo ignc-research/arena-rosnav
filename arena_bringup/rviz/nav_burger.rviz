@@ -4,18 +4,17 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded:
+        - /robot1
         - /robot1/burger1
         - /robot1/Goal Pose1
         - /Global Plan1/teb1
         - /Sensors1/LaserScan1
-        - /obstacles1
         - /obstacles1/dynamic1
         - /obstacles1/dynamic1/11
         - /obstacles1/dynamic1/21
         - /obstacles1/dynamic1/31
         - /obstacles1/dynamic1/41
         - /obstacles1/dynamic1/51
-        - /Goal Pose1
       Splitter Ratio: 0.4374079406261444
     Tree Height: 523
   - Class: rviz/Selection
@@ -55,18 +54,10 @@ Visualization Manager:
     - Class: rviz/Group
       Displays:
         - Class: rviz/TF
-          Enabled: true
+          Enabled: false
           Frame Timeout: 15
           Frames:
             All Enabled: false
-            base_footprint:
-              Value: true
-            laser_link:
-              Value: true
-            map:
-              Value: true
-            odom:
-              Value: true
           Marker Alpha: 1
           Marker Scale: 1
           Name: TF
@@ -74,13 +65,9 @@ Visualization Manager:
           Show Axes: true
           Show Names: true
           Tree:
-            map:
-              odom:
-                base_footprint:
-                  laser_link:
-                    {}
+            {}
           Update Interval: 0
-          Value: true
+          Value: false
         - Class: rviz/MarkerArray
           Enabled: true
           Marker Topic: /flatland_server/debug/model/burger
@@ -614,7 +601,7 @@ Visualization Manager:
               Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_05
               Name: 5
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -622,7 +609,7 @@ Visualization Manager:
               Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_06
               Name: 6
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -630,7 +617,7 @@ Visualization Manager:
               Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_07
               Name: 7
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -638,7 +625,7 @@ Visualization Manager:
               Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_08
               Name: 8
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -646,7 +633,7 @@ Visualization Manager:
               Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_09
               Name: 9
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -1285,10 +1272,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 21.93924903869629
+      Scale: 84.88072967529297
       Target Frame: <Fixed Frame>
-      X: -2.541106700897217
-      Y: 3.074556350708008
+      X: 9.94761848449707
+      Y: 11.359070777893066
     Saved: ~
 Window Geometry:
   Displays:

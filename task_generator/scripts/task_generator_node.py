@@ -89,6 +89,7 @@ class TaskGenerator:
         # clear_costmaps()
         if info is not None:
             if info == "End":
+                print(info)
                 # communicates to launch_arena (if used) the end of the simulation
                 print("SENDING END MESSAGE")
                 self.end_msg = Bool()
