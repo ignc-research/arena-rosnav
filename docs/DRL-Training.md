@@ -1,13 +1,14 @@
 # DRL Agent Training
 
-As a fundament for our Deep Reinforcement Learning approaches [StableBaselines3](https://stable-baselines3.readthedocs.io/en/master/index.html) was used.
+As a fundament for our Deep Reinforcement Learning approaches, [StableBaselines3](https://stable-baselines3.readthedocs.io/en/master/index.html) was used.
 
 **Features included so far:**
 
 - Simple handling of the training script through program parameters
+- Choose between different robot models
 - Choose a predefined Deep Neural Network
 - Create your own custom Multilayer Perceptron via program parameters
-- Networks will get trained, evaluated and saved
+- Networks will be trained, evaluated and saved
 - Load your trained agent to continue training
 - Optionally log training and evaluation data
 - Enable and modify a custom training curriculum
@@ -28,7 +29,9 @@ As a fundament for our Deep Reinforcement Learning approaches [StableBaselines3]
     - [Reward Functions](#reward-functions)
     - [Training Curriculum](#training-curriculum)
     - [Run the trained Agent](#run-the-trained-agent)
-      - [Sequential Evaluation of multiple Agents](#sequential-evaluation-of-multiple-agents)
+      - [Test Agents in Main Simulation](#test-agents-in-main-simulation)
+      - [Test Agents in Training Simulation](#test-agents-in-training-simulation)
+        - [Sequential Evaluation of multiple Agents](#sequential-evaluation-of-multiple-agents)
     - [Important Directories](#important-directories)
 
 ### Quick Start
@@ -36,7 +39,7 @@ As a fundament for our Deep Reinforcement Learning approaches [StableBaselines3]
 - In one terminnal, start the arena simulation:
 
 ```bash
-roslaunch arena_bringup start_arena_flatland.launch  train_mode:=true 	use_viz:=true  task_mode:=random
+roslaunch arena_bringup start_arena_flatland.launch  train_mode:=true 	use_viz:=true
 ```
 
 - In a second terminal, run the train script:
@@ -44,8 +47,10 @@ roslaunch arena_bringup start_arena_flatland.launch  train_mode:=true 	use_viz:=
 ```bash
 workon rosnav
 roscd arena_local_planner_drl
-python scripts/training/train_agent.py --agent MLP_ARENA2D
+python scripts/training/train_agent.py --agent AGENT_22
 ```
+
+This will start a single simulation environment with our custom network architecture "_AGENT_22_". As default robot model, the turtlebot3 model is used.
 
 ### Training Script
 
@@ -204,34 +209,41 @@ Training script will be terminated
 
 ### Hyperparameters
 
-You can modify the hyperparameters in the upper section of the training script which is located at:
+The training script will consider the hyperparameter yaml file which was specified with the `--config` flag. The default configuration file is named `default.yaml` and can be found at:
 
-```
-/arena_ws/src/arena-rosnav/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/scripts/training/train_agent.py
+```bash
+~/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/configs/hyperparameters/default.json
 ```
 
 Following hyperparameters can be adapted:
 |Parameter|Description|
 |-----|-----|
-| robot | Robot name to load robot specific .yaml file containing its settings.
+| agent*name | Unique agent identifier (set by the training script)
+| robot | Robot name to load robot specific .yaml file containing its settings. (set by the training script)
+| actions_in_observationspace | When set true, actions will be appended to the observation space and thus will be available as an additional input feature to learn on.
+| normalize | If observations are normalized before fed to the network
+| train_max_steps_per_episode | Max timesteps per training episode
+| eval_max_steps_per_episode | Max timesteps per evaluation episode
+| goal_radius | Radius of the goal
+| task_mode | Mode tasks will be generated in (custom, random, staged). In custom mode one can place obstacles manually via Rviz. In random mode there's a fixed number of obstacles which are spawned randomly distributed on the map after each episode. In staged mode the training curriculum will be used to spawn obstacles. ([more info](#training-curriculum))
+| batch_size | Batch size (n_envs * n_steps)
 | gamma | Discount factor
-| n*steps | The number of steps to run for each environment per update
+| n_steps | The number of steps to run for each environment per update (set automatically by training script depending on batch_size and n_envs)
 | ent_coef | Entropy coefficient for the loss calculation
-| learning_rate | The learning rate, it can be a function of the current progress remaining (from 1 to 0) (i.e. batch size is n_steps \* n_env where n_env is number of environment copies running in parallel)
+| learning_rate | The learning rate, it can be a function of the current progress remaining (from 1 to 0) (i.e. batch size is n_steps and n_env where n_env is number of environment copies running in parallel)
 | vf_coef | Value function coefficient for the loss calculation
 | max_grad_norm | The maximum value for the gradient clipping
 | gae_lambda | Factor for trade-off of bias vs variance for Generalized Advantage Estimator
-| batch_size | Minibatch size
+| m_batch_size | Minibatch size
 | n_epochs | Number of epoch when optimizing the surrogate loss
 | clip_range | Clipping parameter, it can be a function of the current progress remaining (from 1 to 0).
-| reward_fnc | Number of the reward function (defined in *../rl*agent/utils/reward.py*)
+| reward_fnc | Number of the reward function (defined in \*../rl_agent/utils/reward.py\*)
 | discrete_action_space | If robot uses discrete action space
-| task_mode | Mode tasks will be generated in (custom, random, staged). In custom mode one can place obstacles manually via Rviz. In random mode there's a fixed number of obstacles which are spawned randomly distributed on the map after each episode. In staged mode the training curriculum will be used to spawn obstacles. ([more info](#training-curriculum))
-| curr_stage | When "staged" training is activated which stage to start the training with.
+| curr_stage | When "staged" training is activated: which stage to start the training with.
 
 ([more information on PPO implementation of SB3](https://stable-baselines3.readthedocs.io/en/master/modules/ppo.html))
 
-**Note**: For now further parameters like _max_steps_per_episode_ or _goal_radius_ have to be changed inline (where FlatlandEnv gets instantiated). _n_eval_episodes_ which will take place after _eval_freq_ timesteps can be changed also (where EvalCallback gets instantiated).
+**Note**: For now further parameters like the threshold type for the curriculum or the number of eval episodes need to be specified inline in the training script.
 
 ### Reward Functions
 
@@ -328,7 +340,7 @@ At present, one can chose between five reward functions which can be set in the 
 | <img src="https://latex.codecogs.com/gif.latex?r_{p}^{t}" title="r_{p}^{t}" />   | progress reward               | <img src="https://latex.codecogs.com/gif.latex?\text{diff}_{robot,x}^t&space;=&space;d(p_{robot}^{t-1},&space;p_{x}^{t-1})&space;-&space;d(p_{robot}^t,&space;p_{x}^t)" title="\text{diff}_{robot,x}^t = d(p_{robot}^{t-1}, p_{x}^{t-1}) - d(p_{robot}^t, p_{x}^t)" /> <img src="https://latex.codecogs.com/gif.latex?r_{p}^{t}&space;=&space;\begin{cases}&space;0.3&space;*&space;\text{diff}_{robot,goal}^t&space;&&space;\text{&space;if&space;}&space;\text{diff}_{robot,goal}^t&space;>&space;0\\&space;0.4&space;*&space;\text{diff}_{robot,goal}^t&space;&&space;\text{&space;otherwise&space;}&space;\end{cases}" title="r_{p}^{t} = \begin{cases} 0.3 * \text{diff}_{robot,goal}^t & \text{ if } \text{diff}_{robot,goal}^t > 0\\ 0.4 * \text{diff}_{robot,goal}^t & \text{ otherwise } \end{cases}" />                                                                                                                                                                                                                                                                                  |
 | <img src="https://latex.codecogs.com/gif.latex?r_{fg}^{t}" title="r_{fg}^{t}" /> | following global plan reward  | <img src="https://latex.codecogs.com/gif.latex?r_{fg}^{t}&space;=&space;\begin{cases}&space;\begin{aligned}&space;0.1&space;*&space;vel_{linear}^{t}&space;&&space;\text{&space;if&space;}&space;\min_{wp&space;\in&space;G}d(p_{wp}^t,&space;p_{r}^t)&space;<&space;0.5&space;\text{m}&space;\\&space;0&space;&&space;\text{&space;otherwise&space;}&space;\end{aligned}&space;\end{cases}" title="r_{fg}^{t} = \begin{cases} \begin{aligned} 0.1 * vel_{linear}^{t} & \text{ if } \min_{wp \in G}d(p_{wp}^t, p_{r}^t) < 0.5 \text{m} \\ 0 & \text{ otherwise } \end{aligned} \end{cases}" />                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | <img src="https://latex.codecogs.com/gif.latex?r_{dg}" title="r_{dg}" />         | distance to globalplan reward | <img src="https://latex.codecogs.com/gif.latex?r_{dg}&space;=&space;\begin{cases}&space;\begin{aligned}&space;0.2*&space;\text{diff}_{robot,&space;wp}^{t}&space;&&space;\text{&space;if&space;}\min_{wp&space;\in&space;G}d(p_{r}^t,&space;p_{wp}^t):&space;\text{diff}_{robot,&space;wp}^{t}&space;>&space;0&space;\\&space;0.3*&space;\text{diff}_{robot,&space;wp}^{t}&space;&&space;\text{&space;if&space;}&space;\min_{wp&space;\in&space;G}d(p_{r}^t,&space;p_{wp}^t):&space;\text{diff}_{robot,&space;wp}^{t}&space;<=&space;0&space;\\&space;0&space;&&space;\text{&space;if&space;}&space;\min_{o&space;\in&space;O}d(p_{r}^t,&space;p_{o}^t)&space;<&space;D_s&space;\end{aligned}&space;\end{cases}" title="r_{dg} = \begin{cases} \begin{aligned} 0.2* \text{diff}_{robot, wp}^{t} & \text{ if }\min_{wp \in G}d(p_{r}^t, p_{wp}^t): \text{diff}_{robot, wp}^{t} > 0 \\ 0.3* \text{diff}_{robot, wp}^{t} & \text{ if } \min_{wp \in G}d(p_{r}^t, p_{wp}^t): \text{diff}_{robot, wp}^{t} <= 0 \\ 0 & \text{ if } \min_{o \in O}d(p_{r}^t, p_{o}^t) < D_s \end{aligned} \end{cases}" /> |
-| <img src="https://latex.codecogs.com/gif.latex?r_{dc}^t" title="r_{dc}^t" />     | direction change reward       | <img src="https://latex.codecogs.com/gif.latex?r_{dc}^t&space;=&space;-&space;\frac{\left&space;|&space;vel_{angular}^{t-1}&space;-&space;vel_{angular}^{t}&space;\right&space;|^{4}}{2500}" title="r_{dc}^t = - \frac{\left | vel_{angular}^{t-1} - vel_{angular}^{t} \right |^{4}}{2500}" /> |
+| <img src="https://latex.codecogs.com/gif.latex?r_{dc}^t" title="r_{dc}^t" />     | direction change reward       | <img src="https://latex.codecogs.com/gif.latex?r_{dc}^t&space;=&space;-&space;\frac{\left&space;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | &space;vel*{angular}^{t-1}&space;-&space;vel*{angular}^{t}&space;\right&space; | ^{4}}{2500}" title="r\_{dc}^t = - \frac{\left | vel*{angular}^{t-1} - vel*{angular}^{t} \right | ^{4}}{2500}" /> |
 
   </td>
 
@@ -337,9 +349,11 @@ At present, one can chose between five reward functions which can be set in the 
 
 ### Training Curriculum
 
-For the purpose of speeding up the training an exemplary training currucilum was implemented. But what exactly is a training curriculum you may ask. We basically divide the training process in difficulty levels, here the so called _stages_, in which the agent will meet an arbitrary number of obstacles depending on its learning progress. Different metrics can be taken into consideration to measure an agents performance.
+For the purpose of speeding up the training, an exemplary training currucilum was implemented. But what exactly is a training curriculum you may ask. We basically divide the training process in difficulty levels, here the so called _stages_, in which the agent will meet an arbitrary number of obstacles depending on its learning progress. Different metrics can be taken into consideration to measure an agents performance.
 
-In our implementation a reward threshold or a certain percentage of successful episodes must be reached to trigger the next stage. The statistics of each evaluation run is calculated and considered. Moreover when a new best mean reward was reached the model will be saved automatically.
+In our implementation a reward threshold or a certain percentage of successful episodes must be reached to trigger the next stage. The statistics of each evaluation run is calculated and considered. Moreover, when a new best mean reward was reached, the model will be saved automatically.
+
+Currently, the threshold type and respective values can be set in the following line: [click here](https://github.com/ignc-research/arena-rosnav/blob/a7c17cbbf172afc1421a7943fce8f0ba986dbead/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/scripts/training/train_agent.py#L70)
 
 Exemplary training curriculum:
 | Stage | Static Obstacles | Dynamic Obstacles |
@@ -355,28 +369,38 @@ For an explicit example, [click here](/arena-rosnav/arena_navigation/arena_local
 
 ### Run the trained Agent
 
-Now that you've trained your agent you surely want to deploy and evaluate it. For that purpose we've implemented a specific task mode in which you can specify your scenarios in a .json file. The agent will then be challenged according to the scenarios defined in the file. Please refer to https://github.com/ignc-research/arena-scenario-gui/ in order to read about the process of creating custom scenarios.
+Now that you've trained your agent, you surely want to deploy and evaluate it. For that purpose we've implemented a specific task mode in which you can specify your scenarios in a .json file. The agent will then be challenged according to the scenarios defined in the file. Please refer to https://github.com/ignc-research/arena-scenario-gui/ in order to read about the process of creating custom scenarios.
 Moreover, you can test your agent on custom maps in randomly generated scenarios with a predefined number of dynamic obstacles.
 
 As with the training script, one can start the testing simulation environment with either one of two launch scripts:
 
 - [start_arena_flatland.launch](/arena-rosnav/arena_bringup/launch/start_arena_flatland.launch):
-  - Allows for evaluation in continuous simulation time (emulates real time) as well as in controlled time stepping with four different subgoal modes, consisting of 3 intermediate planner approaches (_spatial horizon, timed A-star, simple sample_) with the DRL agent acting as the local planner.
-  - Episode information can be logged via _rosbag_ (refer to [document](/arena-rosnav/docs/eval_25042021.md))
+  - Allows for evaluation in continuous simulation time (emulates real time) as well as in controlled time stepping with our hierarichal navigation stack, consisting of a global planner, intermediate planner and with the DRL agent acting as the local planner.
+  - Episode information can be logged with the _use_recorder_ flag
 - [start_training.launch](../arena_bringup/launch/start_training.launch):
-  - Starts an evaluation environment in continuous simulation time (emulates real time) as well as in controlled time stepping with either the spatial horizon intermediate planner or the end goal being the only subgoal.
-  - One can test multiple agents sequentially with _run_script.py_. This feature is only realized with this launch file, as _start_arena_flatland.launch_ starts an own plan manager which interfers with the plan manager of the run script. Both plan managers have their own goal radius and thus might detect an end of episode differently. This can mess up the logged statistics.
+  - Starts an evaluation environment in continuous simulation time (emulates real time) as well as in controlled time stepping with either the spatial horizon intermediate planner (train_mode == false) or the end goal being the only subgoal (train_mode == true).
+  - One can test multiple agents sequentially with _run_script.py_. This feature is only realized with this launch file, as _start_arena_flatland.launch_ starts an own plan manager which interfers with the plan manager of the run script. Both plan managers have their own goal radius and thus might detect an end of episode differently. This potentially adulterates the logged statistics.
   - Episode information can optionally be logged in a csv file by setting the `--log` flag for the run script dedicated plan manager to control the episodes.
 
-</br>
+#### Test Agents in Main Simulation
+
+The deployment can be simply initiated through one command:
+
+```shell
+# Start the simulation with one of the launch files
+roslaunch arena_bringup start_arena_flatland.launch map_file:="map1"  disable_scenario:="false" scenario_file:="eval/obstacle_map1_obs20.json" local_planner:="rosnav" model:="burger" agent_name:="burger"
+```
+
+**Note**:
+You need to adjust the parameters of the command according to your desired deployment configuration.
+
+#### Test Agents in Training Simulation
 
 Firstly, you need to start the _simulation environment_:
 
 ```shell
 # Start the simulation with one of the launch files
-roslaunch arena_bringup start_arena_flatland.launch map_file:="map1"  disable_scenario:="false" scenario_file:="eval/obstacle_map1_obs20.json"
-
-roslaunch arena_bringup start_training.launch num_envs:=1 map_folder_name:=map1 train_mode:=false
+roslaunch arena_bringup start_training.launch num_envs:=1 map_folder_name:=map1 train_mode:=false model:=burger
 ```
 
 **Note**:
@@ -385,10 +409,10 @@ roslaunch arena_bringup start_training.launch num_envs:=1 map_folder_name:=map1 
 
 </br>
 
-Then, run the `run_agent.py` script with the desired scenario file:
+Then, run the `run_agent.py` script with the desired agent and scenario file:
 
 ```shell
-python run_agent.py --load DRL_LOCAL_PLANNER_2021_03_22__19_33 --scenario obstacle_map1_obs20
+python run_agent.py --load burger --scenario obstacle_map1_obs20
 ```
 
 **Generic program call**:
@@ -420,7 +444,7 @@ python run_agent.py --load DRL_LOCAL_PLANNER_2021_03_22__19_33 -s obstacle_map1_
 - Make sure that the simulation speed doesn't overlap the agent's action calculation time (an obvious indicator: same action gets published multiple times successively and thus the agent moves unreasonably)
 - If your agent was trained with normalized observations, it's necessary to provide the _vec_normalize.pkl_
 
-#### Sequential Evaluation of multiple Agents
+##### Sequential Evaluation of multiple Agents
 
 For automatic testing of several agents in a sequence, one can specify a list containing an arbitrary number of agent names in [run_script.py](/arena-rosnav/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/scripts/deployment/run_agent.py).
 
