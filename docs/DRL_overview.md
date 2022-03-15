@@ -1,9 +1,8 @@
 # Welcome to the Overview Page for DRL in Rosnav!
 
-## Table of Contents
+**Table of Contents**
 
-- [Welcome to the Overview Page for DRL in Rosnav!](#welcome-to-the-overview-page-for-drl-in-rosnav)
-  - [Table of Contents](#table-of-contents)
+- [Welcome to the Overview Page for DRL in Rosnav!](#welcome-to-the-overview-page-for-drl-in-rosnav) - [Table of Contents](#table-of-contents)
   - [Prerequisites](#prerequisites)
   - [General Introduction to the Training and Deployment Pipeline](#general-introduction-to-the-training-and-deployment-pipeline)
   - [DRL Training on GPU Servers](#drl-training-on-gpu-servers)
@@ -26,9 +25,11 @@
 
 ## Implementation of new Robot Models
 
-[Follow this link to learn more about the implementation of new robot models](drl/new_robot_models.md)
+[Follow this link to learn more about the implementation of new robot models.](drl/new_robot_models.md)
 
 ## Implementation of new Network Architectures
+
+[Follow this link to learn more about the implementation of new network architectures.](drl/new_network_architectures.md)
 
 ## Useful Tips for Training
 
