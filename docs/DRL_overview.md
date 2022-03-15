@@ -1,4 +1,4 @@
-# Welcome to the Overview Page for DRL in Rosnav!
+# Welcome to the Overview Page for DRL in Arena-Rosnav-2D!
 
 **Table of Contents**
 
@@ -36,3 +36,5 @@
 [Follow this link to learn more about useful tips for DRL training in Rosnav.](drl/training_tips.md)
 
 ## Test your Agent in Arena-Rosnav-3D
+
+[Follow this link to learn more about deploying a trained DRL agent in Arena-Rosnav-3D.](drl/test_agent_in_3d.md)
