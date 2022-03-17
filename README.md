@@ -1,7 +1,18 @@
 # All-in-One Planner
-In this branch a drl planner called All-In-One Planner is developed which chooses from a given list of local planners in each iteration. The goal is to combine the strengths of drl planners and classical planners like TEB / MPC.
+In this branch a drl planner called All-In-One Planner (AIO) is developed which chooses from a given list of local planners in each iteration. The goal is to combine the strengths of drl planners and classical planners like TEB / MPC.
 
-In order to use it ZeroMQ, TQDM, joblib and cython needs to be installed into the virtual environment.
+![](img/Qualy_AIO_s+d.gif)
+
+### Fully trained AIO planners:
+1. Turtlebot3 : AIO s+d and AIO fx3
+2. Jackal: AIO s+d
+3. RTO: AIO s+d
+4. Youbot: AIO s+d
+
+# Installation
+Please note that this branch was developed for Ubuntu 18 and ROS Melodic. For more details please refer to the installation readme in this branch.
+
+Additionally, a few python packages have to be installed into the virtual environment: ZeroMQ, TQDM and joblib
 
 ```bash
 workon rosnav
@@ -19,51 +30,76 @@ git checkout drl_all_in_one_planner_johannes
 Don't forget to execute catkin_make again.
 
 
-# Training an agent
-1. In the first terminal execute
+# Training
+Currently 4 robot models are supported for training: burger (Turtlebot3), youbot, rto_real and jackal. Addtional robot models can be added in the simulator_setup/robot folder. An AIO planner can be defined through its config file. AIO config files are placed  in
 ```bash
-workon rosnav
-roslaunch arena_bringup start_training.launch num_envs:=$num_envs
+cd catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/configs/all_in_one_hyperparameters/agent_parameters/aio_configs
 ```
-2. In a second terminal execute
-```bash
-workon rosnav
-roscd arena_local_planner_drl/
+Here you can also find examples from existing AIO planners. Here is an annoted example:
+```json
+{
+ "models": {
+   "drl": ["turtlebot3-burger"], # DRL-Rosnav planners (have to be placed in agents/rosnav-agents)
+   "drl_names": ["rosnav-drl"], # Name of DRL planners (only for logging & visualization)
+   "model_based": [ # List of all model-based planners specified b their config file (have to be placed in configs/base_local_planner_parameters)
+     "teb_static_obst.yaml"
+   ],
+   "model_based_names": [
+     "teb"
+   ]
+ },
+ "update_global_plan_frequency": 9, # global planner update interval in multiple of 100ms
+ "all_in_one_planner_frequency": 3, # AIO planner update interval in multiple of 100ms
+ "observation_space": { # Observation space information
+   "laser_range": "full", # Can be full or reduced
+   "laser_stack_size": 3, # Number of consecutive laser scans that are used
+   "add_robot_velocity": true,
+   "use_dynamic_scan": false
+ }
+}
 ```
-and then
-```bash
-python3 scripts/training/train_all_in_one_agent.py --agent AGENT_13 --n_envs $num_envs --tb --eval_log --agent_name all_in_one_teb_rlca_drl4_rule03_policy13 --all_in_one_config all_in_one_default.json
-```
-* --tb enables tensorboard logging (tensorboard needs to be installed)
-* --eval_log enables saving the evaluation episode results to a seperate file.
-* --agent needs to specify a neural network architecture for a new agent. You can select from the architectures defined in ~/arena-rosnav/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/scripts/custom_policy.py that is 'MLP_ARENA2D' or 'AGENT_x' with x in [1,20].
-* --load defines wether to load an already trained agent (and continue training) or to create a new one
-* --agent_name defines the name / version of an all_in_one_planner. If load is set this has to match an all-in-one agent in ~/arena-rosnav/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/agents
-* --all_in_one_config specifies the name of the config file placed in /arena-rosnav/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/configs/all_in_one_hyperparameters/. Here the local planners can be specified (currently rlca, drl agents, a move base planner (not recommended) and teb). If
-```bash
-"run_all_agents_each_iteration": true
-```
-all local planners are executed in each iteration and their velocity commands are part of the observation space. If it is set to false only the selected local planner will be executed in each iteration.
+Currently integrated local planners:
+1. DRL-based local planners: Rosnav-DRL, Arena-DRL (only Burger), RLCA (only Burger)
+2. Model-based local planners: TEB, TEB with Obstacle Tracking, DWA, MPC, eBand (and local planners that implement the ROS base_local_planner interface)
 
-3. To visualize the training execute
-```bash
-roslaunch arena_bringup visualization_training.launch use_rviz:=true rviz_file:=allinone_train
+During training with multiprocessing it is recommended to use the setting
+```json
+"models": {
+  "use_drl_servers": 1,
+}
 ```
+This only uses one copy of DRL-Rosnav, which saves a lot of GPU memory.
+
+### Training a new AIO agent:
+
+```bash
+cd catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/scripts/training
+sh tmux_train.sh $num_envs $aio_config_filename $hyperparam_filename $pre_train_dataset_file $robot_model $neural_network_architecture
+```
+
+1. pre_train_dataset_file: Filename of the pre-training dataset. Has to be placed in the folder agents/aio-agents/2. pretrained_aio_agents. How new pre-training can be created is expounded in the next section
+2. neural_network_architecture: Network architectures are name as AGENT_$(nn_number) and placed in the file scripts/all_in_one_policies.py. The selected NN architecture has to match the observation space of the AIO planner
+
+
+### Generate new Pre-Training Dataset
+```bash
+cd catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/scripts/training
+sh tmux_create_expert_dataset.sh $number_samples $num_envs $robot_model $pretrain_config $use_dnamic_scan
+```
+1. number_samples: Size of pre-training Dataset
+2. num_envs: Number of environments used to generate the Dataset
+3. robot_model: Name of robot model (supported: (Turtlebot3), youbot, rto_real and jackal)
+4. pretrain_config: Name of Pre-Training AIO config. Has to be the same as the AIO config file except that 'use_dnamic_scan' has to be set true.
+5. use_dnamic_scan: Boolean wether the AIO planner will use the dynamic / static scan laser division
+
 
 # Evaluate agents
-1. Start ros
+AIO and all integrated local planners can be evaluated. During evaluation the behavior can be observed manually. Furthermore, a variety of metrics are automatically recorded and saved at the end.
+
 ```bash
-workon rosnav
-roslaunch arena_bringup start_training.launch num_envs:=1
+cd catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/scripts/training
+sh tmux_eval.sh $robot_model
 ```
-2. Start all in one planner.
-```bash
-workon rosnav
-roscd arena_local_planner_drl/
-python3 scripts/training/evaluate_all_in_one_agent.py
-```
-The agents which should be evaluated are specified in the evaluate_all_in_one_agent.py file (line 13-14). As benchmark there are "random", "rlca_only", "teb_only" and "drl_only". The results are stored at /arena-rosnav/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/evaluation_logs.
-3. To visualize
-```bash
-roslaunch arena_bringup visualization_training.launch use_rviz:=true ns:=eval_sim rviz_file:=allinone_evalsim
-```
+The evluation settings like name of the evluation, the map, the planners and number of episodes can be set in the file scripts/training/evaluate_all_in_one_planner.py
+
+The results of the evaluation will be saved to the evaluation_log/ folder.
