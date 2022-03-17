@@ -1,5 +1,5 @@
 # All-in-One Planner
-In this branch a drl planner called All-In-One Planner (AIO) is developed which chooses from a given list of local planners in each iteration. The goal is to combine the strengths of drl planners and classical planners like TEB / MPC.
+In this branch, a hybrid local planning approach named All-in-One planner is developed that aims to combine the strengths of traditional and learning-based planning methods. The All-in-One planner consists of a Deep-Reinforcement-Learning-based control switch that selects between different planners based on sensor data observations. Multiple state-of-the-art planners were integrated.
 
 ![](img/Qualy_AIO_s+d.gif)
 
@@ -36,7 +36,7 @@ Currently 4 robot models are supported for training: burger (Turtlebot3), youbot
 cd catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/configs/all_in_one_hyperparameters/agent_parameters/aio_configs
 ```
 Here you can also find examples from existing AIO planners. Here is an annoted example:
-```json
+```yaml
 {
  "models": {
    "drl": ["turtlebot3-burger"], # DRL-Rosnav planners (have to be placed in agents/rosnav-agents)
