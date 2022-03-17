@@ -3,6 +3,7 @@ from typing import Callable, Dict, List, Optional, Tuple, Type, Union
 
 import gym
 import rospkg
+import rospy
 import torch as th
 import yaml
 
@@ -12,8 +13,11 @@ from stable_baselines3.common.torch_layers import BaseFeaturesExtractor
 
 _RS = 2  # robot state size
 
-ROBOT_SETTING_PATH = rospkg.RosPack().get_path('simulator_setup')
-yaml_ROBOT_SETTING_PATH = os.path.join(ROBOT_SETTING_PATH, 'robot', 'myrobot.model.yaml')
+robot_model = rospy.get_param("robot_model")
+ROBOT_SETTING_PATH = rospkg.RosPack().get_path("simulator_setup")
+yaml_ROBOT_SETTING_PATH = os.path.join(
+    ROBOT_SETTING_PATH, "robot", f"{robot_model}.model.yaml"
+)
 
 with open(yaml_ROBOT_SETTING_PATH, 'r') as fd:
     robot_data = yaml.safe_load(fd)

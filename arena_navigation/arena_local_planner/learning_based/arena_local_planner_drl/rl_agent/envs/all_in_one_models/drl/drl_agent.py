@@ -63,7 +63,7 @@ class DrlAgent(ModelBase):
     def reset(self):
         pass
 
-    def _shift_scan(self, scan:np.ndarray):
+    def _shift_scan(self, scan: np.ndarray):
         # old angle: {min: 0, max: 6.28318977356, increment: 0.0175019223243}
         # new angle: {min: -1.5707963267948966, max: 4.694936014, increment:  0.017453292}
         sub_array = np.hsplit(scan, 4)

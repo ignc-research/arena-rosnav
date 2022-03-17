@@ -15,7 +15,7 @@
   <arg name="robot_model" default="myrobot" />
 
    <!-- Robot specific args -->
-  <arg name='radius' default='0.113' if="$(eval arg('robot_model') == 'burger')"/>
+  <arg name='radius' default='0.2552' if="$(eval arg('robot_model') == 'burger')"/>
   <arg name='speed' default='0.22' if="$(eval arg('robot_model') == 'burger')"/>
   <arg name='radius' default='0.267' if="$(eval arg('robot_model') == 'jackal')"/>
   <arg name='speed' default='2.0' if="$(eval arg('robot_model') == 'jackal')"/>
