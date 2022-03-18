@@ -166,7 +166,7 @@
                 },
                 "dynamic_obs_7": {
                     "obstacle_radius": 0.3,
-                    "linear_velocity": 0.2,
+                    "linear_velocity": 0.1,
                     "type": "circle",
                     "start_pos": [
                         0.38,
