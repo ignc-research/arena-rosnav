@@ -6,28 +6,41 @@ additionalArguments:
     name: network_type
     
 scenarios:
-  # - robot: youbot
-  #   map_files:
+
 
   - robot: burger
     map_files:
       - map_file: small_warehouse
-        scenario: eval_mar_2022/small_warehouse_obs10_r15.json
+        scenario: eval_mar_2022/small_warehouse_obs05.json
       - map_file: map2
-        scenario: eval_mar_2022/map2_obs10_r15.json
+        scenario: eval_mar_2022/map2_obs05.json
       - map_file: map5
-        scenario: eval_mar_2022/map5_obs10_r15.json
+        scenario: eval_mar_2022/map5_obs05.json
+  - robot: jackal
+    map_files:
       - map_file: small_warehouse
-        scenario: eval_mar_2022/small_warehouse_obs10_r20.json
+        scenario: eval_mar_2022/small_warehouse_obs05.json
       - map_file: map2
-        scenario: eval_mar_2022/map2_obs10_r20.json
+        scenario: eval_mar_2022/map2_obs05.json
       - map_file: map5
-        scenario: eval_mar_2022/map5_obs10_r20.json
+        scenario: eval_mar_2022/map5_obs05.json
       - map_file: small_warehouse
         scenario: eval_mar_2022/small_warehouse_obs10.json
       - map_file: map2
         scenario: eval_mar_2022/map2_obs10.json
       - map_file: map5
         scenario: eval_mar_2022/map5_obs10.json
-  # - robot: jackal
-  #   map_files:
+  - robot: youbot
+    map_files:
+      - map_file: small_warehouse
+        scenario: eval_mar_2022/small_warehouse_obs05.json
+      - map_file: map2
+        scenario: eval_mar_2022/map2_obs05.json
+      - map_file: map5
+        scenario: eval_mar_2022/map5_obs05.json
+      - map_file: small_warehouse
+        scenario: eval_mar_2022/small_warehouse_obs10.json
+      - map_file: map2
+        scenario: eval_mar_2022/map2_obs10.json
+      - map_file: map5
+        scenario: eval_mar_2022/map5_obs10.json

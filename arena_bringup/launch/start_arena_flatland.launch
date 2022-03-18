@@ -91,7 +91,7 @@
 
   <!-- data recorder -->
   <group if="$(eval arg('use_recorder') == true)">
-    <node pkg="arena_evaluation" name="data_recorder_node" type="data_recorder_node.py" />
+    <node pkg="arena-evaluation" name="data_recorder_node" type="data_recorder_node.py" />
     <param name="local_planner" value="$(arg local_planner)"/>
     <param name="waypoint_generator" value="$(arg waypoint_generator)"/>
     <param name="record_only_planner" value="$(arg record_only_planner)"/>
