@@ -20,8 +20,8 @@ git clone https://github.com/ignc-research/arena-rosnav -b noetic-devel
 cd arena-rosnav && rosws update
 source $HOME/.${CURSHELL}rc 
 source `which virtualenvwrapper.sh` && workon rosnav 
-cd $HOME/arena_ws/src/forks/arena-tools && git clone https://gitlab.com/LIRS_Projects/LIRS-WCT lirs-wct && cd lirs-wct && sudo ./deploy.sh
-cd $HOME/arena_ws/src/forks/arena-tools && mv lirs-wct/lirs_wct_console/build/lirs_wct_console .
+# cd $HOME/arena_ws/src/forks/arena-tools && git clone https://gitlab.com/LIRS_Projects/LIRS-WCT lirs-wct && cd lirs-wct && sudo ./deploy.sh
+# cd $HOME/arena_ws/src/forks/arena-tools && mv lirs-wct/lirs_wct_console/build/lirs_wct_console .
 cd $HOME/arena_ws/src/forks/stable-baselines3 && pip install e .
 cd $HOME/arena_ws
 
