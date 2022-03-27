@@ -99,13 +99,13 @@ For additional / more detailed information about each robot:
 - [See additional robot parameters like laser min/max [_rad_]](https://github.com/ignc-research/arena-rosnav-3D/wiki/Laser-scanner-parameters)
 - See [_HERE_](arena_navigation/arena_local_planer/learning_based/arena_local_planner_drl/configs) for the definition of the robots action_spaces (needed for rl-based-training)
 
-### DRL Training
+## DRL Training
 
-Please refer to [DRL-Training.md](docs/DRL-Training.md) for detailed explanations about agent, policy and training setups.
+Please refer to [DRL-Overview.md](docs/DRL_overview.md) for detailed explanations about agent, policy, and training setup. Addtionally, useful tips and information about the training are provided.
 
-### Scenario Creation with the [arena-scenario-gui](https://github.com/ignc-research/arena-scenario-gui/)
+### Scenario Creation with [arena-tools](https://github.com/ignc-research/arena-tools/)
 
-To create complex, collaborative scenarios for training and/or evaluation purposes, please refer to the repo [arena-scenario-gui](https://github.com/ignc-research/arena-scenario-gui/). This application provides you with an user interface to easily create complex scenarios with multiple dynamic and static obstacles by drawing and other simple UI elements like dragging and dropping. This will save you a lot of time in creating complex scenarios for you individual use cases.
+To create complex, collaborative scenarios for training and/or evaluation purposes, please refer to the repo [arena-tools](https://github.com/ignc-research/arena-tools). This application provides you with an user interface to easily create complex scenarios with multiple dynamic and static obstacles by drawing and other simple UI elements like dragging and dropping. This will save you a lot of time in creating complex scenarios for you individual use cases.
 
 # IROS21 information
 
