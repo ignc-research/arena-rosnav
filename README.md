@@ -25,7 +25,7 @@ Train DRL agents on ROS compatible simulations for autonomous navigation in high
 - Testing a variety of planners (learning based and model based) within specific scenarios in test mode
 - Modular structure for extension of new functionalities and approaches
 
-# Start Guide
+## Start Guide
 
 We recommend starting with the [start guide](https://github.com/ignc-research/arena-rosnav/blob/local_planner_subgoalmode/docs/guide.md) which contains all information you need to know to start off with this project including installation on **Linux and Windows** as well as tutorials to start with.
 
@@ -68,8 +68,15 @@ Alternatively, refer to [Installation.md](docs/Installation.md) for detailed exp
 We provide a Docker file to run our code on other operating systems. Please refer to [Docker.md](docs/Docker.md) for more information.
 
 ## 2. Usage
+### DRL Training
 
-#### Robots
+Please refer to [DRL-Overview.md](docs/DRL_overview.md) for detailed explanations about agent, policy, and training setup. Addtionally, useful tips and information about the training are provided.
+
+### Scenario Creation with [arena-tools](https://github.com/ignc-research/arena-tools/)
+
+To create complex, collaborative scenarios for training and/or evaluation purposes, please refer to the repo [arena-tools](https://github.com/ignc-research/arena-tools). This application provides you with an user interface to easily create complex scenarios with multiple dynamic and static obstacles by drawing and other simple UI elements like dragging and dropping. This will save you a lot of time in creating complex scenarios for you individual use cases.
+
+### Robots
 
 We support different robots:
 |<img width="250" src="./img/robots/turtlebot3-burger.jpg">|<img width="250" src="./img/robots/jackal.jpg">|<img width="250"  src="./img/robots/ridgeback.jpg">|<img width="250" src="./img/robots/agv-ota.png">|
@@ -99,13 +106,6 @@ For additional / more detailed information about each robot:
 - [See additional robot parameters like laser min/max [_rad_]](https://github.com/ignc-research/arena-rosnav-3D/wiki/Laser-scanner-parameters)
 - See [_HERE_](arena_navigation/arena_local_planer/learning_based/arena_local_planner_drl/configs) for the definition of the robots action_spaces (needed for rl-based-training)
 
-## DRL Training
-
-Please refer to [DRL-Overview.md](docs/DRL_overview.md) for detailed explanations about agent, policy, and training setup. Addtionally, useful tips and information about the training are provided.
-
-### Scenario Creation with [arena-tools](https://github.com/ignc-research/arena-tools/)
-
-To create complex, collaborative scenarios for training and/or evaluation purposes, please refer to the repo [arena-tools](https://github.com/ignc-research/arena-tools). This application provides you with an user interface to easily create complex scenarios with multiple dynamic and static obstacles by drawing and other simple UI elements like dragging and dropping. This will save you a lot of time in creating complex scenarios for you individual use cases.
 
 # IROS21 information
 
