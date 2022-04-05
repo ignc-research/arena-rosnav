@@ -3,7 +3,7 @@
   <param name="use_sim_time" value="true"/>
 
   <arg name="train_mode" default="false"/>
-  <arg name="model" default="burger" doc="model type [burger, jackal, ridgeback, agvota, rto, rto_real]"/>
+  <arg name="model" default="burger" doc="model type [burger, jackal, ridgeback, agvota, rto, rto_real, dingo]"/>
   <!--husy does not yet work-->
   <param name="train_mode" value="$(arg train_mode)" />
   <arg name="use_recorder" default="false"/>
@@ -86,6 +86,8 @@
   <arg name='speed' default='0.8' if="$(eval arg('model') == 'youbot')"/>
   <arg name='radius' default='0.208' if="$(eval arg('model') == 'waffle_pi')"/>
   <arg name='speed' default='0.26' if="$(eval arg('model') == 'waffle_pi')"/>
+  <arg name='radius' default='0.378' if="$(eval arg('model') == 'dingo')"/>
+  <arg name='speed' default='0.13' if="$(eval arg('model') == 'dingo')"/>
   <param name="radius" value="$(arg radius)"/>
   <param name="speed" value="$(arg speed)"/>
 

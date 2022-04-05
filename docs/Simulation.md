@@ -1,22 +1,24 @@
 ## Simulation
 
 # Robots
-Arena rosnav incluedes four different robots. 
+Arena rosnav incluedes five different robots.
 + [*turtlebot3-burger*](https://emanual.robotis.com/docs/en/platform/turtlebot3/simulation/#gazebo-simulation)
 + [*jackal*](https://www.clearpathrobotics.com/assets/guides/melodic/jackal/simulation.html)
 + [*ridgeback*](https://www.clearpathrobotics.com/assets/guides/melodic/ridgeback/simulation.html)
 + [*agvota*](https://github.com/inomuh/agv)
++ [*dingo*](https://www.clearpathrobotics.com/assets/guides/melodic/dingo/simulation.html)
 
 
 All robots are equipt with a laser scanner. The robots differ in size, laser-range etc. See below tabel for more detailed information on each robot:
 
 
 | Name  | Max Speed (v_x) [_m/s_]  | Max Speed (v_y) [_m/s_]  | Max Rotational Speed (_θ_) [_rad/s_]  | Radius [_m_] | Emergency-Stop¹ | Laser-range [_m_] | Holonomic² |
-| :--- | :---:|  :---: |:---: |:---: |:---:|   :---:| :---:| 
+| :--- | :---:|  :---: |:---: |:---: |:---:|   :---:| :---:|
 | *turtlebot3-burger* | 0.22 | 0.0  | 2.84  | 0.113 | False | 3.5  | False |
 | *jackal*            | 2.0  | 0.0  | 4.0  | 0.267 | False | 30.0 | False |
 | *ridgeback*         | 1.1  | 0.5  | 2.0  | 0.625 | False | 10.0 | True  |
 | *agvota*           | 0.5  | 0.0  | 0.4  | 0.629 | False | 5.0  | False |
+| *dingo*            | 1.3  | 0.0  | 4.0  | 0.278 | False | 30.0 | False |
 
 For additional / more detailed information about each robot:
 
@@ -32,4 +34,4 @@ roslaunch arena_bringup start_arena_flatland.launch model:=ridgeback
 ```
 ¹ *Stops moving when an object has been detected in the safety zone of the robot*
 
-² *For _holonomic_ robots `vel_y = 0`; they are not able to drive directly to their left or right, but have to drive on a circular trejectory to their reach navigation goal*  
+² *For _holonomic_ robots `vel_y = 0`; they are not able to drive directly to their left or right, but have to drive on a circular trejectory to their reach navigation goal*

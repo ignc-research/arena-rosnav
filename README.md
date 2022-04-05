@@ -3,7 +3,7 @@
 ---
 Major differences to `local_planner_subgoalmode` branch are:
 + Usage of `ros-noetic`
-+ Full support of the following robots with realistic parameters: `turtlebot3_burger`, `ridgeback`, `jackal`, `agvota` _(see [here](docs/Simulation.md#Robots) for detailed description of their usage)_
++ Full support of the following robots with realistic parameters: `turtlebot3_burger`, `ridgeback`, `jackal`, `agvota`, `dingo` _(see [here](docs/Simulation.md#Robots) for detailed description of their usage)_
 
     THIS INCLUDES:
     - Full support of the planers `teb`, `dwa`, `mpc`, `cadrl`, `rlca`, `arena`
@@ -16,13 +16,13 @@ Major differences to `local_planner_subgoalmode` branch are:
 ---
 
 # Arena-Rosnav (IROS 21)
-A flexible, high-performance 2D simulator with configurable agents, multiple sensors, and benchmark scenarios for testing robotic navigation. 
+A flexible, high-performance 2D simulator with configurable agents, multiple sensors, and benchmark scenarios for testing robotic navigation.
 
 Arena-Rosnav uses Flatland as the core simulator and is a modular high-level library for end-to-end experiments in embodied AI -- defining embodied AI tasks (e.g. navigation, obstacle avoidance, behavior cloning), training agents (via imitation or reinforcement learning, or no learning at all using conventional approaches like DWA, TEB or MPC), and benchmarking their performance on the defined tasks using standard metrics.
 
 
 | <img width="400" height="400" src="/img/rosnav1.gif"> | <img width="400" height="400" src="/img/rosnav2.gif"> |
-|:--:| :--:| 
+|:--:| :--:|
 | *Training Stage* | *Deployment Stage* |
 
 
@@ -38,7 +38,7 @@ Train DRL agents on ROS compatible simulations for autonomous navigation in high
 * Modular structure for extension of new functionalities and approaches
 
 # Start Guide
-We recommend starting with the [start guide](https://github.com/ignc-research/arena-rosnav/blob/local_planner_subgoalmode/docs/guide.md) which contains all information you need to know to start off with this project including installation on **Linux and Windows** as well as tutorials to start with. 
+We recommend starting with the [start guide](https://github.com/ignc-research/arena-rosnav/blob/local_planner_subgoalmode/docs/guide.md) which contains all information you need to know to start off with this project including installation on **Linux and Windows** as well as tutorials to start with.
 
 * For Mac, please refer to our [Docker](https://github.com/ignc-research/arena-rosnav/blob/local_planner_subgoalmode/docs/Docker.md).
 
@@ -52,7 +52,7 @@ sudo apt-get update && sudo apt-get upgrade
 wget https://raw.githubusercontent.com/ignc-research/arena-rosnav/noetic-devel/setup.sh -O - | bash
 ```
 
-Create a virtual environment 
+Create a virtual environment
 ```bash
 source ~/.bashrc && mkvirtualenv --python=python3.8 rosnav
 ```
@@ -63,7 +63,7 @@ Install further dependencies (you can take a look at the script [here](https://r
 wget https://raw.githubusercontent.com/ignc-research/arena-rosnav/noetic-devel/setup2.sh -O - | bash
 source ~/.bashrc && workon rosnav
 ```
-Now everything should be set up. You can start the simulation with: 
+Now everything should be set up. You can start the simulation with:
 ```bash
 roslaunch arena_bringup start_arena_flatland.launch
 ```
