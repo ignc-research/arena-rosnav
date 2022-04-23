@@ -36,7 +36,7 @@ arena_tools_path = (
     Path(__file__).parent / ".." / ".." / ".." / "forks" / "arena-tools"
 )
 sys.path.append(str(arena_tools_path))
-from ArenaScenario import *
+# from ArenaScenario import *
 
 
 class StopReset(Exception):
@@ -92,12 +92,12 @@ class RandomTask(ABSTask):
                             (
                                 start_pos.x,
                                 start_pos.y,
-                                self.robot_manager.ROBOT_RADIUS,
+                                self.robot_manager.ROBOT_RADIUS*4,
                             ),
                             (
                                 goal_pos.x,
                                 goal_pos.y,
-                                self.robot_manager.ROBOT_RADIUS,
+                                self.robot_manager.ROBOT_RADIUS*4,
                             ),
                         ]
                     )
