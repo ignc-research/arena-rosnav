@@ -1,0 +1,15 @@
+<launch>
+
+  <arg name="ns"/>
+  <arg name="type"/>
+  <arg name="indoor_prob" />
+
+  <!-- start map generator node -->
+  <node pkg="simulator_setup" name="map_generator_node" type="map_generator_node.py" ns="$(arg ns)">
+    <param name="ns" value="$(arg ns)" />
+    <param name="map_type" value="$(arg type)" />
+    <param name="indoor_prob" value="$(arg indoor_prob)" />
+    <remap from="/clock" to="/$(arg ns)/clock"/>
+  </node>
+
+</launch>
