@@ -150,7 +150,7 @@ class RobotManager:
         self,
         start_pos: Union[Pose2D, None] = None,
         goal_pos: Union[Pose2D, None] = None,
-        min_dist=1,
+        min_dist=10,
     ):
         """set up start position and the goal postion. Path validation checking will be conducted. If it failed, an
         exception will be raised.
