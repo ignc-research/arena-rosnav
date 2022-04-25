@@ -79,7 +79,7 @@ class RandomTask(ABSTask):
     def reset(self):
         """[summary]"""
         with self._map_lock:
-            max_fail_times = 3
+            max_fail_times = 10
             fail_times = 0
             while fail_times < max_fail_times:
                 try:
