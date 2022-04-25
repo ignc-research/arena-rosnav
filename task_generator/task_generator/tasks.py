@@ -663,7 +663,7 @@ def get_scenario_file_format(path: str):
         return "scenerio"
 
 
-def get_predefined_task(self,
+def get_predefined_task(
     ns: str, mode="random", start_stage: int = 1, PATHS: dict = None
 ):
 
@@ -734,7 +734,8 @@ def get_predefined_task(self,
         # load map parameters
         json_path = Path(PATHS["scenario"])
         assert json_path.is_file() and json_path.suffix == ".json"
-        map_params = json.load(json_path.open())["scenarios"]
+        map_params = json.load(json_path.open())
+        print(json_path)
         numb_dyn_obst = map_params["numb_dynamic_obstacles"]
         numb_static_obst = map_params["numb_static_obstacles"]
         map_type = map_params['type']
@@ -744,7 +745,7 @@ def get_predefined_task(self,
             indoor_prob = 0
         
         # start map generator node
-        self.start_map_generator_node(map_type, indoor_prob)
+        start_map_generator_node(ns,map_type, indoor_prob)
 
         # register random obstacles
         numb_obst = numb_static_obst + numb_dyn_obst
@@ -758,13 +759,13 @@ def get_predefined_task(self,
         print("random eval tasks requested")
     return task
 
-def start_map_generator_node(self, map_type: str, indoor_prob: float):
+def start_map_generator_node(ns,map_type: str, indoor_prob: float):
     package = 'simulator_setup'
     launch_file = 'map_generator.launch'
-    arg1 = "ns:=" + self.ns
+    arg1 = "ns:=" + ns
     arg2 = "type:=" + map_type
     arg3 = "indoor_prob:=" + str(indoor_prob)
 
     # Use subprocess to execute .launch file
     import subprocess
-    self._global_planner_process = subprocess.Popen(["roslaunch", package, launch_file, arg1, arg2, arg3])
+    global_planner_process = subprocess.Popen(["roslaunch", package, launch_file, arg1, arg2, arg3])
