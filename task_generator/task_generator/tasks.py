@@ -663,7 +663,7 @@ def get_scenario_file_format(path: str):
         return "scenerio"
 
 
-def get_predefined_task(
+def get_predefined_task(self,
     ns: str, mode="random", start_stage: int = 1, PATHS: dict = None
 ):
 
@@ -728,4 +728,43 @@ def get_predefined_task(
             task = ScenerioTask(
                 obstacles_manager, robot_manager, PATHS["scenario"]
             )
+    if mode == "random_eval":
+        rospy.set_param("/task_mode", "random_eval")
+
+        # load map parameters
+        json_path = Path(PATHS["scenario"])
+        assert json_path.is_file() and json_path.suffix == ".json"
+        map_params = json.load(json_path.open())["scenarios"]
+        numb_dyn_obst = map_params["numb_dynamic_obstacles"]
+        numb_static_obst = map_params["numb_static_obstacles"]
+        map_type = map_params['type']
+        if map_type == 'mixed':
+            indoor_prob = map_params['indoor_prob']
+        else:
+            indoor_prob = 0
+        
+        # start map generator node
+        self.start_map_generator_node(map_type, indoor_prob)
+
+        # register random obstacles
+        numb_obst = numb_static_obst + numb_dyn_obst
+        if numb_obst != 0:
+            prob_dyn_obst = float(numb_dyn_obst) / numb_obst
+        else:
+            prob_dyn_obst = 1
+        obstacles_manager.register_random_obstacles(numb_obst, prob_dyn_obst)
+
+        task = RandomTask(obstacles_manager, robot_manager)
+        print("random eval tasks requested")
     return task
+
+def start_map_generator_node(self, map_type: str, indoor_prob: float):
+    package = 'simulator_setup'
+    launch_file = 'map_generator.launch'
+    arg1 = "ns:=" + self.ns
+    arg2 = "type:=" + map_type
+    arg3 = "indoor_prob:=" + str(indoor_prob)
+
+    # Use subprocess to execute .launch file
+    import subprocess
+    self._global_planner_process = subprocess.Popen(["roslaunch", package, launch_file, arg1, arg2, arg3])
