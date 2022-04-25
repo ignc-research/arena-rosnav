@@ -13,14 +13,14 @@ class TaskGenerator:
         #
         self.sr = rospy.Publisher('/scenario_reset', Int16, queue_size=1)
         self.nr = 0
-        mode = rospy.get_param("~task_mode")
+        self.mode = rospy.get_param("~task_mode")
         
         
         scenarios_json_path = rospy.get_param("~scenarios_json_path")
        
         paths = {"scenario": scenarios_json_path}
   
-        self.task = get_predefined_task("",mode, PATHS=paths)
+        self.task = get_predefined_task("",self.mode, PATHS=paths)
        
 
 
@@ -36,7 +36,7 @@ class TaskGenerator:
         robot_odom_topic_name = rospy.get_param(
             "robot_odom_topic_name", "odom")
         
-        auto_reset = auto_reset and mode == "scenario"
+        auto_reset = auto_reset and self.mode == "scenario"
         self.curr_goal_pos_ = None
         
         self.pub = rospy.Publisher('End_of_scenario', Bool, queue_size=10)
