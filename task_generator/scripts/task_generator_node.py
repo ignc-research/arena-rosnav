@@ -36,7 +36,7 @@ class TaskGenerator:
         robot_odom_topic_name = rospy.get_param(
             "robot_odom_topic_name", "odom")
         
-        auto_reset = auto_reset and self.mode == "scenario"
+        auto_reset = auto_reset and self.mode in ["scenario","random_eval"]
         self.curr_goal_pos_ = None
         
         self.pub = rospy.Publisher('End_of_scenario', Bool, queue_size=10)
