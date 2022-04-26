@@ -121,7 +121,7 @@ class RandomEvalTask(ABSTask):
 
     def reset(self):
         """[summary]"""
-        if self.max_repeats >= self.num_repeats:
+        if self.max_repeats >= self.num_repeats: # robot runs 1 episode more than specified for recording purposes
             self.num_repeats += 1
             info = {}
             with self._map_lock:
