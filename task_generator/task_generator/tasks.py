@@ -119,10 +119,12 @@ class RandomEvalTask(ABSTask):
         self.max_repeats = repeats
         self.num_repeats = 0
 
-    def reset(self):
+    def reset(self, new_map):
         """[summary]"""
         if self.max_repeats >= self.num_repeats: # robot runs 1 episode more than specified for recording purposes
             self.num_repeats += 1
+            self.obstacles_manager.update_map(new_map.map)
+            self.robot_manager.update_map(new_map.map)
             info = {}
             with self._map_lock:
                 max_fail_times = 10
