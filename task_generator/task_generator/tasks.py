@@ -799,7 +799,7 @@ def get_predefined_task(
             indoor_prob = 0
         
         # start map generator node
-        start_map_generator_node(ns,map_type, indoor_prob)
+        start_map_generator_node(map_type, indoor_prob)
 
         # register random obstacles
         numb_obst = numb_static_obst + numb_dyn_obst
@@ -813,13 +813,12 @@ def get_predefined_task(
         print("random eval tasks requested")
     return task
 
-def start_map_generator_node(ns,map_type: str, indoor_prob: float):
+def start_map_generator_node(map_type: str, indoor_prob: float):
     package = 'simulator_setup'
     launch_file = 'map_generator.launch'
-    arg1 = "ns:=" + ns
-    arg2 = "type:=" + map_type
-    arg3 = "indoor_prob:=" + str(indoor_prob)
+    arg1 = "type:=" + map_type
+    arg2 = "indoor_prob:=" + str(indoor_prob)
 
     # Use subprocess to execute .launch file
     import subprocess
-    global_planner_process = subprocess.Popen(["roslaunch", package, launch_file, arg1, arg2, arg3])
+    global_planner_process = subprocess.Popen(["roslaunch", package, launch_file, arg1, arg2])
