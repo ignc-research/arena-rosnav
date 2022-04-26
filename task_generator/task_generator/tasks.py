@@ -108,6 +108,55 @@ class RandomTask(ABSTask):
             if fail_times == max_fail_times:
                 raise Exception("reset error!")
 
+class RandomEvalTask(ABSTask):
+    """Evertime the start position and end position of the robot is reset."""
+
+    def __init__(
+        self,repeats:int, obstacles_manager: ObstaclesManager, robot_manager: RobotManager
+    ):
+        super().__init__(obstacles_manager, robot_manager)
+
+        self.max_repeats = repeats
+        self.num_repeats = 0
+
+    def reset(self):
+        """[summary]"""
+        if self.max_repeats >= self.num_repeats:
+            self.num_repeats += 1
+            info = {}
+            with self._map_lock:
+                max_fail_times = 10
+                fail_times = 0
+                while fail_times < max_fail_times:
+                    try:
+                        (
+                            start_pos,
+                            goal_pos,
+                        ) = self.robot_manager.set_start_pos_goal_pos()
+                        self.obstacles_manager.reset_pos_obstacles_random(
+                            forbidden_zones=[
+                                (
+                                    start_pos.x,
+                                    start_pos.y,
+                                    self.robot_manager.ROBOT_RADIUS*4,
+                                ),
+                                (
+                                    goal_pos.x,
+                                    goal_pos.y,
+                                    self.robot_manager.ROBOT_RADIUS*4,
+                                ),
+                            ]
+                        )
+                        info["robot_goal_pos"] = goal_pos
+                        break
+                    except rospy.ServiceException as e:
+                        rospy.logwarn(repr(e))
+                        fail_times += 1
+                if fail_times == max_fail_times:
+                    raise Exception("reset error!")
+            return info
+        else:
+            return 'End'
 
 class ManualTask(ABSTask):
     """randomly spawn obstacles and user can mannually set the goal postion of the robot"""
@@ -736,6 +785,7 @@ def get_predefined_task(
         assert json_path.is_file() and json_path.suffix == ".json"
         map_params = json.load(json_path.open())
         print(json_path)
+        repeats = map_params["repeats"]
         numb_dyn_obst = map_params["numb_dynamic_obstacles"]
         numb_static_obst = map_params["numb_static_obstacles"]
         map_type = map_params['type']
@@ -755,7 +805,7 @@ def get_predefined_task(
             prob_dyn_obst = 1
         obstacles_manager.register_random_obstacles(numb_obst, prob_dyn_obst)
 
-        task = RandomTask(obstacles_manager, robot_manager)
+        task = RandomEvalTask(repeats, obstacles_manager, robot_manager)
         print("random eval tasks requested")
     return task
 
