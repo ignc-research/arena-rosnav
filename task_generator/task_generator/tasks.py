@@ -147,7 +147,7 @@ class RandomEvalTask(ABSTask):
                                 ),
                             ]
                         )
-                        info["robot_goal_pos"] = goal_pos
+                        info["robot_goal_pos"] = [goal_pos.x,goal_pos.y,goal_pos.theta]
                         break
                     except rospy.ServiceException as e:
                         rospy.logwarn(repr(e))
