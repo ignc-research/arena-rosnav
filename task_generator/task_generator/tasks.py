@@ -788,7 +788,6 @@ def get_predefined_task(
         json_path = Path(PATHS["scenario"])
         assert json_path.is_file() and json_path.suffix == ".json"
         map_params = json.load(json_path.open())
-        print(json_path)
         repeats = map_params["repeats"]
         numb_dyn_obst = map_params["numb_dynamic_obstacles"]
         numb_static_obst = map_params["numb_static_obstacles"]
@@ -822,3 +821,6 @@ def start_map_generator_node(map_type: str, indoor_prob: float):
     # Use subprocess to execute .launch file
     import subprocess
     global_planner_process = subprocess.Popen(["roslaunch", package, launch_file, arg1, arg2])
+    rospy.loginfo("".join(["="]*80))
+    rospy.loginfo("MAP GENERATOR STARTED")
+    rospy.loginfo("".join(["="]*80))
