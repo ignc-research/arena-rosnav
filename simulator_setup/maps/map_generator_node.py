@@ -35,20 +35,20 @@ class MapGenerator:
 
         # initialize occupancy grid
         self.occupancy_grid = OccupancyGrid()
-        self.ns = rospy.get_param("~ns")
         self.map_type = rospy.get_param("~map_type")
         self.indoor_prob = rospy.get_param("~indoor_prob")
 
         # self.generate_initial_map() # initial random map generation (before first episode)
-        rospy.Subscriber("/" + self.ns + '/map', OccupancyGrid, self.get_occupancy_grid)
-        # generate new random map for the next episode when entering new episode
-        rospy.Service("/" + self.ns + '/new_map', GetMapWithSeed, self.new_episode_callback)
+        rospy.Subscriber('/map', OccupancyGrid, self.get_occupancy_grid)
 
-        self.mappub = rospy.Publisher("/" + self.ns + '/map', OccupancyGrid, queue_size=1)
+        # generate new random map for the next episode when entering new episode
+        rospy.Service('/new_map', GetMapWithSeed, self.new_episode_callback)
+
+        self.mappub = rospy.Publisher('/map', OccupancyGrid, queue_size=1)
 
         # initialize yaml files
         map_dir = os.path.join(rospkg.RosPack().get_path('simulator_setup'), 'maps')
-        create_yaml_files('random_map', map_dir, self.resolution, self.ns)
+        create_yaml_files('random_map', map_dir, self.resolution)
 
     # a bit cheating: copy OccupancyGrid meta data from map_server of initial map
     def get_occupancy_grid(self, occgrid_msg):
@@ -70,7 +70,7 @@ class MapGenerator:
             indoor_prob=self.indoor_prob,
             seed=0
         )
-        make_image(map, self.ns)
+        make_image(map)
         rospy.loginfo("Initial random map generated.")
 
     def generate_mapdata(self, seed: int = 0):  # generate random map data array for occupancy grid
@@ -89,7 +89,7 @@ class MapGenerator:
             indoor_prob=self.indoor_prob,
             seed=seed
         )
-        make_image(map, self.ns)
+        make_image(map)
         map = np.flip(map, axis=0)
         # map currently [0,1] 2D np array needs to be flattened for publishing OccupancyGrid.data
         map = (map * 100).flatten()

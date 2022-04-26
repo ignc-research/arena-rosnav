@@ -6,51 +6,51 @@ import yaml
 from PIL import Image
 
 
-def create_yaml_files(map_name, dir_path, resolution, ns: str):
+def create_yaml_files(map_name, dir_path, resolution):
     empty_yaml = {
-        "image": "{1}_{0}.png".format("empty_map", ns),
+        "image": "{0}.png".format("empty_map"),
         "resolution": resolution,
         "origin": [0.0, 0.0, 0.0],  # [-x,-y,0.0]
         "negate": 0,
         "occupied_thresh": 0.65,
         "free_thresh": 0.196}
     map_yaml = {
-        "image": "{1}_{0}.png".format(map_name, ns),
+        "image": "{0}.png".format(map_name),
         "resolution": resolution,
         "origin": [0.0, 0.0, 0.0],  # [-x,-y,0.0]
         "negate": 0,
         "occupied_thresh": 0.65,
         "free_thresh": 0.196}
 
-    with open(dir_path + "/{0}/{1}_map.yaml".format(map_name, ns), 'w') as outfile:
+    with open(dir_path + "/{0}/map.yaml".format(map_name), 'w') as outfile:
         yaml.dump(map_yaml, outfile, sort_keys=False, default_flow_style=None)
-    with open(dir_path + "/{0}/{1}_empty.yaml".format(map_name, ns), 'w') as outfile:
+    with open(dir_path + "/{0}/_empty.yaml".format(map_name), 'w') as outfile:
         yaml.dump(empty_yaml, outfile, sort_keys=False, default_flow_style=None)
 
     world_yaml_properties = {"properties": {"velocity_iterations": 10, "position_iterations": 10}}
     world_yaml_layers = {"layers": [
-        {"name": "static", "map": "{}_empty.yaml".format(ns), "color": [0, 1, 0, 1]},
-        {"name": "dynamic", "map": "{}_empty.yaml".format(ns), "color": [0, 1, 0, 1]}
+        {"name": "static", "map": "empty.yaml", "color": [0, 1, 0, 1]},
+        {"name": "dynamic", "map": "empty.yaml", "color": [0, 1, 0, 1]}
     ]}
     world_layers_properties = {"properties": {"velocity_iterations": 10, "position_iterations": 10}}
     world_layer_layers = {"layers": [
-        {"name": "static", "map": "{}_map.yaml".format(ns), "color": [0, 1, 0, 1]},
-        {"name": "dynamic", "map": "{}_map.yaml".format(ns), "color": [0, 1, 0, 1]}]}
+        {"name": "static", "map": "map.yaml", "color": [0, 1, 0, 1]},
+        {"name": "dynamic", "map": "map.yaml", "color": [0, 1, 0, 1]}]}
 
-    with open(dir_path + "/{0}/{1}_map.world.yaml".format(map_name, ns), 'w') as outfile:
+    with open(dir_path + "/{0}/map.world.yaml".format(map_name), 'w') as outfile:
         yaml.dump(world_yaml_properties, outfile, sort_keys=False,
                   default_flow_style=False)  # somehow the first part must be with default_flow_style=False
         yaml.dump(world_yaml_layers, outfile, sort_keys=False,
                   default_flow_style=None)  # 2nd part must be with default_flow_style=None
 
-    with open(dir_path + "/{0}/{1}_map_layer.yaml".format(map_name, ns), 'w') as outfile:
+    with open(dir_path + "/{0}/map_layer.yaml".format(map_name), 'w') as outfile:
         yaml.dump(world_layers_properties, outfile, sort_keys=False,
                   default_flow_style=False)  # somehow the first part must be with default_flow_style=False
         yaml.dump(world_layer_layers, outfile, sort_keys=False,
                   default_flow_style=None)  # 2nd part must be with default_flow_style=None
 
 
-def make_image(map, ns: str):  # create PNG file from occupancy map (1:occupied, 0:free) and the necessary yaml files
+def make_image(map):  # create PNG file from occupancy map (1:occupied, 0:free) and the necessary yaml files
     img = Image.fromarray(((map - 1) ** 2 * 255).astype('uint8'))  # monochromatic image
     imgrgb = img.convert('RGB')
     map_name = "random_map"
@@ -60,17 +60,17 @@ def make_image(map, ns: str):  # create PNG file from occupancy map (1:occupied,
         os.mkdir(dir_path + "/" + map_name)  # create directory based on mapname where this script is located
     except:
         pass
-    imgrgb.save(dir_path + "/{0}/{1}_{0}.png".format(map_name, ns))  # save map in map directory
+    imgrgb.save(dir_path + "/{0}/{0}.png".format(map_name))  # save map in map directory
 
-    create_empty_map(map.shape[0], map.shape[1], map_name, dir_path, ns)
+    create_empty_map(map.shape[0], map.shape[1], map_name, dir_path)
 
 
-def create_empty_map(height, width, map_name, dir_path, ns: str):
+def create_empty_map(height, width, map_name, dir_path):
     map = np.tile(1, [height, width])
     map[slice(1, height - 1), slice(1, width - 1)] = 0
     img = Image.fromarray(((map - 1) ** 2 * 255).astype('uint8'))  # monochromatic image
     imgrgb = img.convert('RGB')
-    imgrgb.save(dir_path + "/{0}/{2}_{1}.png".format(map_name, "empty_map", ns))  # save map in map directory
+    imgrgb.save(dir_path + "/{0}/{1}.png".format(map_name, "empty_map"))  # save map in map directory
 
 
 def initialize_map(height, width,
