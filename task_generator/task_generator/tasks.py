@@ -31,6 +31,7 @@ from pedsim_msgs.msg import LineObstacles
 from pedsim_msgs.msg import LineObstacle
 
 import sys
+import random
 
 arena_tools_path = (
     Path(__file__).parent / ".." / ".." / ".." / "forks" / "arena-tools"
@@ -119,8 +120,9 @@ class RandomEvalTask(ABSTask):
         self.max_repeats = repeats
         self.num_repeats = 0
 
-    def reset(self, new_map):
+    def reset(self, new_map, seed):
         """[summary]"""
+        random.seed(seed) # fix task generation at reset with seed
         if self.max_repeats >= self.num_repeats: # robot runs 1 episode more than specified for recording purposes
             self.num_repeats += 1
             self.obstacles_manager.update_map(new_map.map)
