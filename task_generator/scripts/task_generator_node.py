@@ -8,6 +8,10 @@ from task_generator.tasks import get_predefined_task
 from std_msgs.msg import Int16, Bool
 # for clearing costmap
 from clear_costmap import clear_costmaps
+from simulator_setup.srv import * # GetMapWithSeedRequest srv
+from pathlib import Path
+import json
+
 class TaskGenerator:
     def __init__(self):
         #
@@ -22,7 +26,18 @@ class TaskGenerator:
   
         self.task = get_predefined_task("",self.mode, PATHS=paths)
        
+        # random eval init
+        if self.mode == "random_eval":
+            # load random eval params
+            json_path = Path(paths["scenario"])
+            assert json_path.is_file() and json_path.suffix == ".json"
+            random_eval_config = json.load(json_path.open())
+            self.seed = random_eval_config["seed"]
+            self.random_eval_repeats = random_eval_config["repeats"]
 
+            # set up get random map service
+            self._request_new_map = rospy.ServiceProxy("/new_map", GetMapWithSeed)  
+            # self._request_new_map = rospy.ServiceProxy("/" + self.ns + "/new_map", GetMapWithSeed)  
 
         # if auto_reset is set to true, the task generator will automatically reset the task
         # this can be activated only when the mode set to 'ScenarioTask'
@@ -85,7 +100,16 @@ class TaskGenerator:
 
     def reset_task(self):
         self.start_time_=rospy.get_time()
-        info = self.task.reset()
+        if self.mode == "random_eval":
+            # change seed per current episode
+            seed = (self.nr % self.random_eval_repeats) * self.seed 
+            # get new map from map generator node
+            request = GetMapWithSeedRequest(seed=seed)
+            new_map = self._request_new_map(request)
+            # reset task and hand over new map for map update and seed for the task generation
+            info = self.task.reset(new_map,seed)
+        else:
+            info = self.task.reset()
         clear_costmaps()
         if info is not None:
             if info == "End":
