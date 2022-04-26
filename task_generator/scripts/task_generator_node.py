@@ -86,7 +86,7 @@ class TaskGenerator:
     def reset_task(self):
         self.start_time_=rospy.get_time()
         info = self.task.reset()
-        # clear_costmaps()
+        clear_costmaps()
         if info is not None:
             if info == "End":
                 print(info)
