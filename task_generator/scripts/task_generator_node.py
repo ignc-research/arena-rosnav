@@ -118,7 +118,7 @@ class TaskGenerator:
                 self.new_map = self.request_new_map(seed)
                 # reset task and hand over new map for map update and seed for the task generation
                 info = self.task.reset(self.new_map,seed)
-            else:
+            else: # self termination
                 subprocess.call(["killall","-9","rosmaster"]) # apt-get install psmisc necessary
                 sys.exit()
         else:
