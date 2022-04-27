@@ -1,7 +1,9 @@
 #! /usr/bin/env python3
 
 import rospy
+import rosservice
 import subprocess
+import time
 from std_srvs.srv import EmptyResponse
 from nav_msgs.msg import Odometry
 from task_generator.tasks import get_predefined_task
@@ -36,8 +38,16 @@ class TaskGenerator:
             self.random_eval_repeats = random_eval_config["repeats"]
 
             # set up get random map service
-            self._request_new_map = rospy.ServiceProxy("/new_map", GetMapWithSeed)  
-            # self._request_new_map = rospy.ServiceProxy("/" + self.ns + "/new_map", GetMapWithSeed)  
+            self.request_new_map = rospy.ServiceProxy('/new_map', GetMapWithSeed)  
+            # self.request_new_map = rospy.ServiceProxy("/" + self.ns + "/new_map", GetMapWithSeed)
+            service_name = '/new_map'
+            service_list = rosservice.get_service_list()
+            max_tries = 10
+            for i in range(max_tries):
+                if service_name in service_list:
+                    break
+                else:
+                    time.sleep(1)
 
         # if auto_reset is set to true, the task generator will automatically reset the task
         # this can be activated only when the mode set to 'ScenarioTask'
@@ -101,13 +111,16 @@ class TaskGenerator:
     def reset_task(self):
         self.start_time_=rospy.get_time()
         if self.mode == "random_eval":
-            # change seed per current episode
-            seed = (self.nr % self.random_eval_repeats) * self.seed 
-            # get new map from map generator node
-            request = GetMapWithSeedRequest(seed=seed)
-            new_map = self._request_new_map(request)
-            # reset task and hand over new map for map update and seed for the task generation
-            info = self.task.reset(new_map,seed)
+            if self.random_eval_repeats >= self.nr: 
+                # change seed per current episode
+                seed = (self.nr % self.random_eval_repeats) * self.seed 
+                # get new map from map generator node
+                self.new_map = self.request_new_map(seed)
+                # reset task and hand over new map for map update and seed for the task generation
+                info = self.task.reset(self.new_map,seed)
+            else:
+                subprocess.call(["killall","-9","rosmaster"]) # apt-get install psmisc necessary
+                sys.exit()
         else:
             info = self.task.reset()
         clear_costmaps()
