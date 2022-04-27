@@ -185,7 +185,7 @@
   </node>
 
   <!-- launch map generator if training with random map-->
-  <group if="$(eval arg('map_file') == 'random_map')">
+  <!-- <group if="$(eval arg('map_file') == 'random_map')">
     <node pkg="simulator_setup" name="map_generator_node" type="map_generator_node.py" />
-  </group>
+  </group> -->
 </launch>
