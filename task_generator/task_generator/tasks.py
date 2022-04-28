@@ -247,7 +247,9 @@ class StagedRandomTask(RandomTask):
         dynamic_obstacles = self._stages[self._curr_stage]["dynamic"]
 
         self.obstacles_manager.register_random_static_obstacles(
-            self._stages[self._curr_stage]["static"]
+            self._stages[self._curr_stage]["static"],
+            num_vertices_min=2,
+            num_vertices_max=4,
         )
         self.obstacles_manager.register_random_dynamic_obstacles(
             self._stages[self._curr_stage]["dynamic"],

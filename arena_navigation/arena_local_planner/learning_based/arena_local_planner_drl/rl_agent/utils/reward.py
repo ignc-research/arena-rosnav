@@ -46,6 +46,7 @@ class RewardCalculator:
             "rule_03": RewardCalculator._cal_reward_rule_03,
             "rule_04": RewardCalculator._cal_reward_rule_04,
             "rule_05": RewardCalculator._cal_reward_rule_05,
+            "barn": RewardCalculator._cal_reward_rule_barn,
         }
         self.cal_func = self._cal_funcs[rule]
 
@@ -218,6 +219,38 @@ class RewardCalculator:
         self._reward_collision(laser_scan, punishment=10)
         self._reward_goal_approached(
             goal_in_robot_frame, reward_factor=0.4, penalty_factor=0.6
+        )
+        self.last_action = self._curr_action
+
+    def _cal_reward_rule_barn(
+        self,
+        laser_scan: np.ndarray,
+        goal_in_robot_frame: Tuple[float, float],
+        *args,
+        **kwargs
+    ):
+        self._curr_action = kwargs["action"]
+        self._set_current_dist_to_globalplan(
+            kwargs["global_plan"], kwargs["robot_pose"]
+        )
+        # self._reward_following_global_plan(self._curr_action)
+        if laser_scan.min() > self.safe_dist:
+            # self._reward_distance_global_plan(
+            #     reward_factor=0.2,
+            #     penalty_factor=0.3,
+            # )
+            self._reward_abrupt_vel_change(vel_idx=0, factor=1.0)
+            self._reward_abrupt_vel_change(vel_idx=-1, factor=0.5)
+            if self.holonomic:
+                self._reward_abrupt_vel_change(vel_idx=1, factor=0.5)
+            self._reward_reverse_drive(self._curr_action, 0.0001)
+        else:
+            self.last_dist_to_path = None
+        self._reward_goal_reached(goal_in_robot_frame, reward=20)
+        self._reward_safe_dist(laser_scan, punishment=0.025)
+        self._reward_collision(laser_scan, punishment=10)
+        self._reward_goal_approached(
+            goal_in_robot_frame, reward_factor=0.5, penalty_factor=0.7
         )
         self.last_action = self._curr_action
 
