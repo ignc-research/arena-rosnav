@@ -136,7 +136,7 @@ class RandomEvalTask(ABSTask):
                         (
                             start_pos,
                             goal_pos,
-                        ) = self.robot_manager.set_start_pos_goal_pos()
+                        ) = self.robot_manager.set_start_pos_goal_pos() # TODO: min_dist from config
                         self.obstacles_manager.reset_pos_obstacles_random(
                             forbidden_zones=[
                                 (
