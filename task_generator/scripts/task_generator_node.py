@@ -113,7 +113,7 @@ class TaskGenerator:
         if self.mode == "random_eval":
             if self.random_eval_repeats >= self.nr: 
                 # change seed per current episode
-                seed = (self.random_eval_repeats / (1 + self.nr/100)) * self.seed 
+                seed = (self.random_eval_repeats * (1 + self.nr)) * self.seed 
                 # get new map from map generator node
                 self.new_map = self.request_new_map(seed)
                 # reset task and hand over new map for map update and seed for the task generation
