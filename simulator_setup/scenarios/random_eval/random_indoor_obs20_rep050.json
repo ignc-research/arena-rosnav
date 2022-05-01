@@ -1,0 +1,7 @@
+{
+    "repeats": 50,
+    "seed": 1,
+    "type": "indoor",
+    "numb_dynamic_obstacles": 20,
+    "numb_static_obstacles": 0
+  }
