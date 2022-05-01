@@ -22,7 +22,7 @@ class MapGenerator:
         self.resolution = 0.2
 
         # indoor map parameter
-        self.corridor_radius = 4
+        self.corridor_radius = 6
         self.iterations = 50
         self.room_number = 3
         self.room_width = 10
