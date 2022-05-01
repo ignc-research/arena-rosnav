@@ -31,12 +31,13 @@ from pedsim_msgs.msg import LineObstacles
 from pedsim_msgs.msg import LineObstacle
 
 import sys
+import random
 
 arena_tools_path = (
     Path(__file__).parent / ".." / ".." / ".." / "forks" / "arena-tools"
 )
 sys.path.append(str(arena_tools_path))
-from ArenaScenario import *
+# from ArenaScenario import *
 
 
 class StopReset(Exception):
@@ -79,7 +80,7 @@ class RandomTask(ABSTask):
     def reset(self):
         """[summary]"""
         with self._map_lock:
-            max_fail_times = 3
+            max_fail_times = 10
             fail_times = 0
             while fail_times < max_fail_times:
                 try:
@@ -92,12 +93,12 @@ class RandomTask(ABSTask):
                             (
                                 start_pos.x,
                                 start_pos.y,
-                                self.robot_manager.ROBOT_RADIUS,
+                                self.robot_manager.ROBOT_RADIUS*4,
                             ),
                             (
                                 goal_pos.x,
                                 goal_pos.y,
-                                self.robot_manager.ROBOT_RADIUS,
+                                self.robot_manager.ROBOT_RADIUS*4,
                             ),
                         ]
                     )
@@ -108,6 +109,58 @@ class RandomTask(ABSTask):
             if fail_times == max_fail_times:
                 raise Exception("reset error!")
 
+class RandomEvalTask(ABSTask):
+    """Evertime the start position and end position of the robot is reset."""
+
+    def __init__(
+        self,repeats:int, obstacles_manager: ObstaclesManager, robot_manager: RobotManager
+    ):
+        super().__init__(obstacles_manager, robot_manager)
+
+        self.max_repeats = repeats
+        self.num_repeats = 0
+
+    def reset(self, new_map, seed):
+        """[summary]"""
+        random.seed(seed) # fix task generation at reset with seed
+        if self.max_repeats >= self.num_repeats: # robot runs 1 episode more than specified for recording purposes
+            self.num_repeats += 1
+            self.obstacles_manager.update_map(new_map.map)
+            self.robot_manager.update_map(new_map.map)
+            info = {}
+            with self._map_lock:
+                max_fail_times = 10
+                fail_times = 0
+                while fail_times < max_fail_times:
+                    try:
+                        (
+                            start_pos,
+                            goal_pos,
+                        ) = self.robot_manager.set_start_pos_goal_pos() # TODO: min_dist from config
+                        self.obstacles_manager.reset_pos_obstacles_random(
+                            forbidden_zones=[
+                                (
+                                    start_pos.x,
+                                    start_pos.y,
+                                    self.robot_manager.ROBOT_RADIUS*4,
+                                ),
+                                (
+                                    goal_pos.x,
+                                    goal_pos.y,
+                                    self.robot_manager.ROBOT_RADIUS*4,
+                                ),
+                            ]
+                        )
+                        info["robot_goal_pos"] = [goal_pos.x,goal_pos.y,goal_pos.theta]
+                        break
+                    except rospy.ServiceException as e:
+                        rospy.logwarn(repr(e))
+                        fail_times += 1
+                if fail_times == max_fail_times:
+                    raise Exception("reset error!")
+            return info
+        else:
+            return 'End'
 
 class ManualTask(ABSTask):
     """randomly spawn obstacles and user can mannually set the goal postion of the robot"""
@@ -315,9 +368,15 @@ class ScenerioTask(ABSTask):
         self._num_repeats_curr_scene = -1
         # The times of current scenerio need to be repeated
         self._max_repeats_curr_scene = 0
+        self.data = self._scenerios_data[0]
+        self.count=-1
 
     def reset(self):
         info = {}
+        self.count += 1
+        if self.count >= self.data['repeats']:
+            return "End"
+        print('NOTE', self.count)
         with self._map_lock:
             if (
                 self._idx_curr_scene == -1
@@ -328,6 +387,7 @@ class ScenerioTask(ABSTask):
             else:
                 info["new_scenerio_loaded"] = False
                 self.obstacles_manager.move_all_obstacles_to_start_pos_tween2()
+            print('TEST', self.count, self.data['repeats'])
             # reset robot
             robot_data = self._scenerios_data[self._idx_curr_scene]["robot"]
             robot_start_pos = robot_data["start_pos"]
@@ -351,6 +411,7 @@ class ScenerioTask(ABSTask):
                 print(f"Scenario '{scenerio_name}' loaded")
                 print(f"======================================================")
                 # use can set "repeats" to a non-positive value to disable the scenerio
+                
                 if scenerio_data["repeats"] > 0:
                     # set obstacles
                     self.obstacles_manager.remove_obstacles()
@@ -607,36 +668,41 @@ class ScenarioTask(ABSTask):
         self.reset_count = 0
 
     def reset(self):
-        self.reset_count += 1
-        info = {}
-        with self._map_lock:
-            # reset pedsim agents
-            if self.pedsim_manager != None:
-                self.pedsim_manager.resetAllPeds()
+        print('TEST', self.scenario.repeats, self.reset_count)
+        if self.scenario.repeats >= self.reset_count:
+            self.reset_count += 1
+            info = {}
+            with self._map_lock:
+                # reset pedsim agents
+                if self.pedsim_manager != None:
+                    self.pedsim_manager.resetAllPeds()
 
-            # reset robot
-            self.robot_manager.set_start_pos_goal_pos(
-                Pose2D(
-                    self.scenario.robotPosition[0],
-                    self.scenario.robotPosition[1],
-                    0,
-                ),
-                Pose2D(
-                    self.scenario.robotGoal[0], self.scenario.robotGoal[1], 0
-                ),
-            )
+                # reset robot
+                self.robot_manager.set_start_pos_goal_pos(
+                    Pose2D(
+                        self.scenario.robotPosition[0],
+                        self.scenario.robotPosition[1],
+                        0,
+                    ),
+                    Pose2D(
+                        self.scenario.robotGoal[0], self.scenario.robotGoal[1], 0
+                    ),
+                )
 
-            # fill info dict
-            if self.reset_count == 1:
-                info["new_scenerio_loaded"] = True
-            else:
-                info["new_scenerio_loaded"] = False
-            info["robot_goal_pos"] = self.scenario.robotGoal
-            info["num_repeats_curr_scene"] = self.reset_count
-            info[
-                "max_repeats_curr_scene"
-            ] = 1000  # todo: implement max number of repeats for scenario
-        return info
+                # fill info dict
+                if self.reset_count == 1:
+                    info["new_scenerio_loaded"] = True
+                else:   
+                    info["new_scenerio_loaded"] = False
+                info["robot_goal_pos"] = self.scenario.robotGoal
+                info["num_repeats_curr_scene"] = self.reset_count
+                info[
+                    "max_repeats_curr_scene"
+                ] = 1000  # todo: implement max number of repeats for scenario
+            return info
+            
+        else:
+            return 'End'
 
 
 def get_scenario_file_format(path: str):
@@ -715,4 +781,46 @@ def get_predefined_task(
             task = ScenerioTask(
                 obstacles_manager, robot_manager, PATHS["scenario"]
             )
+    if mode == "random_eval":
+        rospy.set_param("/task_mode", "random_eval")
+
+        # load map parameters
+        json_path = Path(PATHS["scenario"])
+        assert json_path.is_file() and json_path.suffix == ".json"
+        map_params = json.load(json_path.open())
+        repeats = map_params["repeats"]
+        numb_dyn_obst = map_params["numb_dynamic_obstacles"]
+        numb_static_obst = map_params["numb_static_obstacles"]
+        map_type = map_params['type']
+        if map_type == 'mixed':
+            indoor_prob = map_params['indoor_prob']
+        else:
+            indoor_prob = 0
+        
+        # start map generator node
+        start_map_generator_node(map_type, indoor_prob)
+
+        # register random obstacles
+        numb_obst = numb_static_obst + numb_dyn_obst
+        if numb_obst != 0:
+            prob_dyn_obst = float(numb_dyn_obst) / numb_obst
+        else:
+            prob_dyn_obst = 1
+        obstacles_manager.register_random_obstacles(numb_obst, prob_dyn_obst)
+
+        task = RandomEvalTask(repeats, obstacles_manager, robot_manager)
+        print("random eval tasks requested")
     return task
+
+def start_map_generator_node(map_type: str, indoor_prob: float):
+    package = 'simulator_setup'
+    launch_file = 'map_generator.launch'
+    arg1 = "type:=" + map_type
+    arg2 = "indoor_prob:=" + str(indoor_prob)
+
+    # Use subprocess to execute .launch file
+    import subprocess
+    global_planner_process = subprocess.Popen(["roslaunch", package, launch_file, arg1, arg2])
+    rospy.loginfo("".join(["="]*80))
+    rospy.loginfo("MAP GENERATOR STARTED")
+    rospy.loginfo("".join(["="]*80))

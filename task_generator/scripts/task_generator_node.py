@@ -1,29 +1,53 @@
 #! /usr/bin/env python3
 
-from logging import setLogRecordFactory
 import rospy
+import rosservice
+import subprocess
 import time
-from std_srvs.srv import Empty, EmptyResponse
+from std_srvs.srv import EmptyResponse
 from nav_msgs.msg import Odometry
 from task_generator.tasks import get_predefined_task
-from std_msgs.msg import Int16
+from std_msgs.msg import Int16, Bool
 # for clearing costmap
 from clear_costmap import clear_costmaps
+from simulator_setup.srv import * # GetMapWithSeedRequest srv
+from pathlib import Path
+import json
+
 class TaskGenerator:
     def __init__(self):
         #
         self.sr = rospy.Publisher('/scenario_reset', Int16, queue_size=1)
         self.nr = 0
-        mode = rospy.get_param("~task_mode")
+        self.mode = rospy.get_param("~task_mode")
         
         
         scenarios_json_path = rospy.get_param("~scenarios_json_path")
        
         paths = {"scenario": scenarios_json_path}
   
-        self.task = get_predefined_task("",mode, PATHS=paths)
+        self.task = get_predefined_task("",self.mode, PATHS=paths)
        
+        # random eval init
+        if self.mode == "random_eval":
+            # load random eval params
+            json_path = Path(paths["scenario"])
+            assert json_path.is_file() and json_path.suffix == ".json"
+            random_eval_config = json.load(json_path.open())
+            self.seed = random_eval_config["seed"]
+            self.random_eval_repeats = random_eval_config["repeats"]
 
+            # set up get random map service
+            self.request_new_map = rospy.ServiceProxy('/new_map', GetMapWithSeed)  
+            # self.request_new_map = rospy.ServiceProxy("/" + self.ns + "/new_map", GetMapWithSeed)
+            service_name = '/new_map'
+            service_list = rosservice.get_service_list()
+            max_tries = 10
+            for i in range(max_tries):
+                if service_name in service_list:
+                    break
+                else:
+                    time.sleep(1)
 
         # if auto_reset is set to true, the task generator will automatically reset the task
         # this can be activated only when the mode set to 'ScenarioTask'
@@ -32,16 +56,18 @@ class TaskGenerator:
         # if the distance between the robot and goal_pos is smaller than this value, task will be reset
         self.timeout_= rospy.get_param("~timeout")
         self.timeout_= self.timeout_*60             # sec
-        self.start_time_=time.time()                # sec
+        self.start_time_=rospy.get_time()           # sec
         self.delta_ = rospy.get_param("~delta")
         robot_odom_topic_name = rospy.get_param(
             "robot_odom_topic_name", "odom")
         
-        auto_reset = auto_reset and mode == "scenario"
+        auto_reset = auto_reset and self.mode in ["scenario","random_eval"]
         self.curr_goal_pos_ = None
         
+        self.pub = rospy.Publisher('End_of_scenario', Bool, queue_size=10)
         
         if auto_reset:
+
             rospy.loginfo(
                 "Task Generator is set to auto_reset mode, Task will be automatically reset as the robot approaching the goal_pos")
             self.reset_task()
@@ -65,7 +91,7 @@ class TaskGenerator:
         if self.err_g < self.delta_:
             print(self.err_g)
             self.reset_task()
-        if(time.time()-self.start_time_>self.timeout_):
+        if rospy.get_time()-self.start_time_>self.timeout_:
             print("timeout")
             self.reset_task()
 
@@ -83,12 +109,32 @@ class TaskGenerator:
 
 
     def reset_task(self):
-        self.start_time_=time.time()
-        info = self.task.reset()
-        
-        # clear_costmaps()
+        self.start_time_=rospy.get_time()
+        if self.mode == "random_eval":
+            if self.random_eval_repeats >= self.nr: 
+                # change seed per current episode
+                seed = (self.random_eval_repeats * (1 + self.nr)) * self.seed 
+                # get new map from map generator node
+                self.new_map = self.request_new_map(seed)
+                # reset task and hand over new map for map update and seed for the task generation
+                info = self.task.reset(self.new_map,seed)
+            else: # self termination
+                subprocess.call(["killall","-9","rosmaster"]) # apt-get install psmisc necessary
+                sys.exit()
+        else:
+            info = self.task.reset()
+        clear_costmaps()
         if info is not None:
-            self.curr_goal_pos_ = info['robot_goal_pos']
+            if info == "End":
+                print(info)
+                # communicates to launch_arena (if used) the end of the simulation
+                print("SENDING END MESSAGE")
+                self.end_msg = Bool()
+                self.end_msg.data = True
+                self.pub.publish(self.end_msg)
+                rospy.signal_shutdown("Finished all episodes of the current scenario")
+            else:
+                self.curr_goal_pos_ = info['robot_goal_pos']
         rospy.loginfo("".join(["="]*80))
         rospy.loginfo("goal reached and task reset!")
         rospy.loginfo("".join(["="]*80))

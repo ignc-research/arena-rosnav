@@ -142,7 +142,7 @@ class RobotManager:
     def set_start_pos_random(self):
         start_pos = Pose2D()
         start_pos.x, start_pos, start_pos.theta = get_random_pos_on_map(
-            self._free_space_indices, self.map, self.ROBOT_RADIUS
+            self._free_space_indices, self.map, self.ROBOT_RADIUS*4
         )
         self.move_robot(start_pos)
 
@@ -150,7 +150,7 @@ class RobotManager:
         self,
         start_pos: Union[Pose2D, None] = None,
         goal_pos: Union[Pose2D, None] = None,
-        min_dist=1,
+        min_dist=10,
     ):
         """set up start position and the goal postion. Path validation checking will be conducted. If it failed, an
         exception will be raised.
@@ -184,7 +184,7 @@ class RobotManager:
                     start_pos_.y,
                     start_pos_.theta,
                 ) = get_random_pos_on_map(
-                    self._free_space_indices, self.map, self.ROBOT_RADIUS * 2
+                    self._free_space_indices, self.map, self.ROBOT_RADIUS * 4
                 )
             else:
                 start_pos_ = start_pos
@@ -195,7 +195,7 @@ class RobotManager:
                     goal_pos_.y,
                     goal_pos_.theta,
                 ) = get_random_pos_on_map(
-                    self._free_space_indices, self.map, self.ROBOT_RADIUS * 2
+                    self._free_space_indices, self.map, self.ROBOT_RADIUS * 4
                 )
             else:
                 goal_pos_ = goal_pos
@@ -208,6 +208,14 @@ class RobotManager:
                 continue
             # move the robot to the start pos
             self.move_robot(start_pos_)
+
+            # wait for aio global planner
+            if self.planer == 'aio':
+                rospy.wait_for_service("/global_planner/makeGlobalPlan")
+            else:
+                # Make sure move_base is ready to take goals/make plan
+                rospy.wait_for_service("/move_base/make_plan")
+                
             try:
                 # publish the goal, if the gobal plath planner can't generate a path, a, exception will be raised.
                 self.publish_goal(goal_pos_.x, goal_pos_.y, goal_pos_.theta)
@@ -259,6 +267,10 @@ class RobotManager:
         goal.pose.orientation.x = quaternion[1]
         goal.pose.orientation.y = quaternion[2]
         goal.pose.orientation.z = quaternion[3]
+
+        if rospy.get_param("_dedicated_train_launch", default=False):
+            rospy.wait_for_service("/move_base/make_plan")
+
         self._goal_pub.publish(goal)
         # self._validate_path()
         if self.planer in ["teb", "dwa", "mpc"]:
