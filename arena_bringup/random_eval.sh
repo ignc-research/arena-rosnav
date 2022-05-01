@@ -18,18 +18,26 @@ export DISPLAY=$(cat /etc/resolv.conf | grep nameserver | awk '{print $2}'):0
 
 workon rosnav
 # rep10
-roslaunch arena_bringup start_arena_flatland.launch map_file:="random_map" task_mode:="random_eval" local_planner:="teb" scenario_file:="random_eval/indoor_obs20_rep10.json" use_recorder:="true"
-roslaunch arena_bringup start_arena_flatland.launch map_file:="random_map" task_mode:="random_eval" local_planner:="mpc" scenario_file:="random_eval/indoor_obs20_rep10.json" use_recorder:="true"
-roslaunch arena_bringup start_arena_flatland.launch map_file:="random_map" task_mode:="random_eval" local_planner:="dwa" scenario_file:="random_eval/indoor_obs20_rep10.json" use_recorder:="true"
+roslaunch arena_bringup start_arena_flatland.launch map_file:="random_map" task_mode:="random_eval" local_planner:="teb" scenario_file:="random_eval/random_indoort_obs20_rep010.json" use_recorder:="true"
+roslaunch arena_bringup start_arena_flatland.launch map_file:="random_map" task_mode:="random_eval" local_planner:="mpc" scenario_file:="random_eval/random_indoort_obs20_rep010.json" use_recorder:="true"
+roslaunch arena_bringup start_arena_flatland.launch map_file:="random_map" task_mode:="random_eval" local_planner:="dwa" scenario_file:="random_eval/random_indoort_obs20_rep010.json" use_recorder:="true"
+roslaunch arena_bringup start_arena_flatland.launch map_file:="random_map" task_mode:="random_eval" local_planner:="rosnav" scenario_file:="random_eval/random_indoort_obs20_rep010.json" use_recorder:="true"
+roslaunch arena_bringup start_arena_flatland.launch map_file:="random_map" task_mode:="random_eval" local_planner:="rlca" scenario_file:="random_eval/random_indoort_obs20_rep010.json" use_recorder:="true"
 # rep30
-roslaunch arena_bringup start_arena_flatland.launch map_file:="random_map" task_mode:="random_eval" local_planner:="teb" scenario_file:="random_eval/indoor_obs20_rep30.json" use_recorder:="true"
-roslaunch arena_bringup start_arena_flatland.launch map_file:="random_map" task_mode:="random_eval" local_planner:="mpc" scenario_file:="random_eval/indoor_obs20_rep30.json" use_recorder:="true"
-roslaunch arena_bringup start_arena_flatland.launch map_file:="random_map" task_mode:="random_eval" local_planner:="dwa" scenario_file:="random_eval/indoor_obs20_rep30.json" use_recorder:="true"
+roslaunch arena_bringup start_arena_flatland.launch map_file:="random_map" task_mode:="random_eval" local_planner:="teb" scenario_file:="random_eval/random_indoort_obs20_rep030.json" use_recorder:="true"
+roslaunch arena_bringup start_arena_flatland.launch map_file:="random_map" task_mode:="random_eval" local_planner:="mpc" scenario_file:="random_eval/random_indoort_obs20_rep030.json" use_recorder:="true"
+roslaunch arena_bringup start_arena_flatland.launch map_file:="random_map" task_mode:="random_eval" local_planner:="dwa" scenario_file:="random_eval/random_indoort_obs20_rep030.json" use_recorder:="true"
+roslaunch arena_bringup start_arena_flatland.launch map_file:="random_map" task_mode:="random_eval" local_planner:="rosnav" scenario_file:="random_eval/random_indoort_obs20_rep030.json" use_recorder:="true"
+roslaunch arena_bringup start_arena_flatland.launch map_file:="random_map" task_mode:="random_eval" local_planner:="rlca" scenario_file:="random_eval/random_indoort_obs20_rep030.json" use_recorder:="true"
 # rep50
-roslaunch arena_bringup start_arena_flatland.launch map_file:="random_map" task_mode:="random_eval" local_planner:="teb" scenario_file:="random_eval/indoor_obs20_rep50.json" use_recorder:="true"
-roslaunch arena_bringup start_arena_flatland.launch map_file:="random_map" task_mode:="random_eval" local_planner:="mpc" scenario_file:="random_eval/indoor_obs20_rep50.json" use_recorder:="true"
-roslaunch arena_bringup start_arena_flatland.launch map_file:="random_map" task_mode:="random_eval" local_planner:="dwa" scenario_file:="random_eval/indoor_obs20_rep50.json" use_recorder:="true"
+roslaunch arena_bringup start_arena_flatland.launch map_file:="random_map" task_mode:="random_eval" local_planner:="teb" scenario_file:="random_eval/random_indoort_obs20_rep050.json" use_recorder:="true"
+roslaunch arena_bringup start_arena_flatland.launch map_file:="random_map" task_mode:="random_eval" local_planner:="mpc" scenario_file:="random_eval/random_indoort_obs20_rep050.json" use_recorder:="true"
+roslaunch arena_bringup start_arena_flatland.launch map_file:="random_map" task_mode:="random_eval" local_planner:="dwa" scenario_file:="random_eval/random_indoort_obs20_rep050.json" use_recorder:="true"
+roslaunch arena_bringup start_arena_flatland.launch map_file:="random_map" task_mode:="random_eval" local_planner:="rosnav" scenario_file:="random_eval/random_indoort_obs20_rep050.json" use_recorder:="true"
+roslaunch arena_bringup start_arena_flatland.launch map_file:="random_map" task_mode:="random_eval" local_planner:="rlca" scenario_file:="random_eval/random_indoort_obs20_rep050.json" use_recorder:="true"
 # rep100
-roslaunch arena_bringup start_arena_flatland.launch map_file:="random_map" task_mode:="random_eval" local_planner:="teb" scenario_file:="random_eval/indoor_obs20_rep100.json" use_recorder:="true"
-roslaunch arena_bringup start_arena_flatland.launch map_file:="random_map" task_mode:="random_eval" local_planner:="mpc" scenario_file:="random_eval/indoor_obs20_rep100.json" use_recorder:="true"
-roslaunch arena_bringup start_arena_flatland.launch map_file:="random_map" task_mode:="random_eval" local_planner:="dwa" scenario_file:="random_eval/indoor_obs20_rep100.json" use_recorder:="true"
+roslaunch arena_bringup start_arena_flatland.launch map_file:="random_map" task_mode:="random_eval" local_planner:="teb" scenario_file:="random_eval/random_indoort_obs20_rep100.json" use_recorder:="true"
+roslaunch arena_bringup start_arena_flatland.launch map_file:="random_map" task_mode:="random_eval" local_planner:="mpc" scenario_file:="random_eval/random_indoort_obs20_rep100.json" use_recorder:="true"
+roslaunch arena_bringup start_arena_flatland.launch map_file:="random_map" task_mode:="random_eval" local_planner:="dwa" scenario_file:="random_eval/random_indoort_obs20_rep100.json" use_recorder:="true"
+roslaunch arena_bringup start_arena_flatland.launch map_file:="random_map" task_mode:="random_eval" local_planner:="rosnav" scenario_file:="random_eval/random_indoort_obs20_rep100.json" use_recorder:="true"
+roslaunch arena_bringup start_arena_flatland.launch map_file:="random_map" task_mode:="random_eval" local_planner:="rlca" scenario_file:="random_eval/random_indoort_obs20_rep100.json" use_recorder:="true"
