@@ -37,7 +37,7 @@ arena_tools_path = (
     Path(__file__).parent / ".." / ".." / ".." / "forks" / "arena-tools"
 )
 sys.path.append(str(arena_tools_path))
-# from ArenaScenario import *
+from ArenaScenario import *
 
 
 class StopReset(Exception):

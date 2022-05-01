@@ -2,7 +2,7 @@
   <param name="use_sim_time" value="true"/>
 
   <arg name="train_mode" default="false"/>
-  <arg name="model" default="jackal"      doc="model type [burger, jackal, ridgeback, agvota, rto, rto_real]"/>
+  <arg name="model" default="burger"      doc="model type [burger, jackal, ridgeback, agvota, rto, rto_real]"/>
   <!--husy does not yet work-->
   <param name="train_mode" value="$(arg train_mode)" />
   <arg name="use_recorder" default="false"/>
@@ -11,7 +11,7 @@
 
   <arg name="local_planner" default="teb"   doc="local-planer type [teb, dwa, mpc, rlca, cadrl, arena, rosnav]"/>
   <!-- Rosnav agent name -->
-  <arg name="agent_name" default="$(arg model)"     doc = "DRL agent name to be deployed" unless="$(eval arg('local_planner') == 'rosnav')"/>
+  <arg name="agent_name" default="$(arg model)"     doc = "DRL agent name to be deployed"/>
   <arg name="waypoint_generator" default="classic"/>
   <arg name="rviz_file" default="nav"/>
   <arg name="disable_scenario" default="false"/>
@@ -88,13 +88,12 @@
   <param name="speed" value="$(arg speed)"/>
 
   <!-- data recorder -->
-  <param name="local_planner"  value="$(arg local_planner)"/>
-  <param name="waypoint_generator"  value="$(arg waypoint_generator)"/>
-  <param name="record_only_planner"  value="$(arg record_only_planner)"/>
-  <param name="scenario_file"  value="$(arg scenario_file)"/>
-  <param name="requestID"  value="$(arg requestID)"/>
   <group if="$(eval arg('use_recorder') == true)">
-    <node pkg="arena_evaluation" name="data_recorder_node" type="data_recorder_node.py" />
+    <node pkg="arena-evaluation" name="data_recorder_node" type="data_recorder_node.py" />
+    <param name="local_planner" value="$(arg local_planner)"/>
+    <param name="waypoint_generator" value="$(arg waypoint_generator)"/>
+    <param name="record_only_planner" value="$(arg record_only_planner)"/>
+    <param name="scenario_file" value="$(arg scenario_file)"/>
   </group>
 
   <!-- use simulator-->
@@ -184,7 +183,7 @@
   </node>
 
   <!-- launch map generator if training with random map-->
-  <group if="$(eval arg('map_file') == 'random_map')">
+  <!-- <group if="$(eval arg('map_file') == 'random_map')">
     <node pkg="simulator_setup" name="map_generator_node" type="map_generator_node.py" />
-  </group>
+  </group> -->
 </launch>
