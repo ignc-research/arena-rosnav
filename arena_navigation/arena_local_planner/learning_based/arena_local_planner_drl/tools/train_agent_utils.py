@@ -15,7 +15,7 @@ from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.utils import set_random_seed
 
 
-from ..rl_agent.envs.flatland_gym_env import (
+from rl_agent.envs.flatland_gym_env import (
     FlatlandEnv,
 )
 
