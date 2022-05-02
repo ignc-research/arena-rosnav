@@ -142,12 +142,12 @@ class RandomEvalTask(ABSTask):
                                 (
                                     start_pos.x,
                                     start_pos.y,
-                                    self.robot_manager.ROBOT_RADIUS*4,
+                                    self.robot_manager.ROBOT_RADIUS*10,
                                 ),
                                 (
                                     goal_pos.x,
                                     goal_pos.y,
-                                    self.robot_manager.ROBOT_RADIUS*4,
+                                    self.robot_manager.ROBOT_RADIUS*10,
                                 ),
                             ]
                         )
