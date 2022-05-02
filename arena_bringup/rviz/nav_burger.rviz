@@ -8,7 +8,6 @@ Panels:
         - /robot1/Goal Pose1
         - /Sensors1/LaserScan1
         - /obstacles1/dynamic1/101
-        - /GlobalPath_movebase1
       Splitter Ratio: 0.4374079406261444
     Tree Height: 525
   - Class: rviz/Selection
@@ -1546,10 +1545,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 30.005077362060547
+      Scale: 24.138216018676758
       Target Frame: <Fixed Frame>
-      X: 9.955299377441406
-      Y: 10.833157539367676
+      X: 10.570011138916016
+      Y: 10.251694679260254
     Saved: ~
 Window Geometry:
   Displays:
