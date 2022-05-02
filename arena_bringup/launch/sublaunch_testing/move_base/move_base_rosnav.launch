@@ -28,6 +28,11 @@
   <!-- <rosparam file="$(find arena_bringup)/launch/plan_fsm_param.yaml" command="load" /> ns="fsm" -->
   <!-- </node> -->
 
+  <!-- spacial_horizon -->
+  <node pkg="arena_spacial_horizon" type="spacial_horizon_node" name="spacial_horizon_node" output="screen">
+    <rosparam file="$(find conventional)/config/$(arg model)/plan_fsm_param.yaml" command="load" />
+  </node>
+
   <!-- scan mapping, because training and real scan calibration may differ
   <include file="$(find arena_bringup)/launch/map_scan.launch">
   </include> -->
