@@ -1294,7 +1294,7 @@ Visualization Manager:
       Marker Topic: /flatland_server/debug/model/obstacle__random_dynamic_09
       Name: dyn obs 09
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -1302,7 +1302,7 @@ Visualization Manager:
       Marker Topic: /flatland_server/debug/model/obstacle__random_dynamic_10
       Name: dyn obs 10
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -1310,7 +1310,7 @@ Visualization Manager:
       Marker Topic: /flatland_server/debug/model/obstacle__random_dynamic_08
       Name: dyn obs 08
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -1318,7 +1318,7 @@ Visualization Manager:
       Marker Topic: /flatland_server/debug/model/obstacle__random_dynamic_11
       Name: dyn obs 11
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -1326,7 +1326,7 @@ Visualization Manager:
       Marker Topic: /flatland_server/debug/model/obstacle__random_dynamic_12
       Name: dyn obs 12
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -1334,7 +1334,7 @@ Visualization Manager:
       Marker Topic: /flatland_server/debug/model/obstacle__random_dynamic_13
       Name: dyn obs 13
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -1342,7 +1342,7 @@ Visualization Manager:
       Marker Topic: /flatland_server/debug/model/obstacle__random_dynamic_14
       Name: dyn obs 14
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -1350,7 +1350,7 @@ Visualization Manager:
       Marker Topic: /flatland_server/debug/model/obstacle__random_dynamic_15
       Name: dyn obs 15
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -1358,7 +1358,7 @@ Visualization Manager:
       Marker Topic: /flatland_server/debug/model/obstacle__random_dynamic_16
       Name: dyn obs 16
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -1366,7 +1366,7 @@ Visualization Manager:
       Marker Topic: /flatland_server/debug/model/obstacle__random_dynamic_17
       Name: dyn obs 17
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -1374,7 +1374,7 @@ Visualization Manager:
       Marker Topic: /flatland_server/debug/model/obstacle__random_dynamic_18
       Name: dyn obs 18
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -1382,7 +1382,7 @@ Visualization Manager:
       Marker Topic: /flatland_server/debug/model/obstacle__random_dynamic_19
       Name: dyn obs 19
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Alpha: 1
@@ -1545,7 +1545,7 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 24.138216018676758
+      Scale: 17.63897132873535
       Target Frame: <Fixed Frame>
       X: 10.570011138916016
       Y: 10.251694679260254
