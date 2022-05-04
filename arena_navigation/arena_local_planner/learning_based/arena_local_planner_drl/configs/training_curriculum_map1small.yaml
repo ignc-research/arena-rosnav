@@ -27,6 +27,12 @@
 8:
   static: 24
   dynamic: 0
+9:
+  static: 30
+  dynamic: 0
+10:
+  static: 34
+  dynamic: 0
 
 # 1:
 #   static: 0

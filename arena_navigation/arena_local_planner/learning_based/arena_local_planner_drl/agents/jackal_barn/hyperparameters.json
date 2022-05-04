@@ -9,7 +9,7 @@
     "train_max_steps_per_episode": 200,
     "eval_max_steps_per_episode": 300,
     "goal_radius": 0.7,
-    "curr_stage": 1,
+    "curr_stage": 3,
     "batch_size": 19200,
     "gamma": 0.99,
     "n_steps": 19200,

@@ -51,19 +51,11 @@ def main():
     # when debug run on one process only
     if not args.debug and ns_for_nodes:
         env = SubprocVecEnv(
-            [
-                make_envs(args, ns_for_nodes, i, params=params, PATHS=PATHS)
-                for i in range(args.n_envs)
-            ],
+            [make_envs(args, ns_for_nodes, i, params=params, PATHS=PATHS) for i in range(args.n_envs)],
             start_method="fork",
         )
     else:
-        env = DummyVecEnv(
-            [
-                make_envs(args, ns_for_nodes, i, params=params, PATHS=PATHS)
-                for i in range(args.n_envs)
-            ]
-        )
+        env = DummyVecEnv([make_envs(args, ns_for_nodes, i, params=params, PATHS=PATHS) for i in range(args.n_envs)])
 
     # threshold settings for training curriculum
     # type can be either 'succ' or 'rew'
@@ -77,9 +69,7 @@ def main():
     )
 
     # stop training on reward threshold callback
-    stoptraining_cb = StopTrainingOnRewardThreshold(
-        treshhold_type="succ", threshold=0.95, verbose=1
-    )
+    stoptraining_cb = StopTrainingOnRewardThreshold(treshhold_type="succ", threshold=0.95, verbose=1)
 
     # instantiate eval environment
     # take task_manager from first sim (currently evaluation only provided for single process)
@@ -109,7 +99,7 @@ def main():
         eval_env=eval_env,
         train_env=env,
         n_eval_episodes=100,
-        eval_freq=22500,
+        eval_freq=15000,
         log_path=PATHS["eval"],
         best_model_save_path=PATHS["model"],
         deterministic=True,
@@ -123,9 +113,7 @@ def main():
         model = PPO(
             "MlpPolicy",
             env,
-            policy_kwargs=dict(
-                net_arch=args.net_arch, activation_fn=get_act_fn(args.act_fn)
-            ),
+            policy_kwargs=dict(net_arch=args.net_arch, activation_fn=get_act_fn(args.act_fn)),
             gamma=params["gamma"],
             n_steps=params["n_steps"],
             ent_coef=params["ent_coef"],
@@ -140,9 +128,7 @@ def main():
             verbose=1,
         )
     elif args.agent is not None:
-        agent: Union[
-            Type[BaseAgent], Type[ActorCriticPolicy]
-        ] = AgentFactory.instantiate(args.agent)
+        agent: Union[Type[BaseAgent], Type[ActorCriticPolicy]] = AgentFactory.instantiate(args.agent)
         if isinstance(agent, BaseAgent):
             model = PPO(
                 agent.type.value,
@@ -180,8 +166,7 @@ def main():
             )
         else:
             raise TypeError(
-                f"Registered agent class {args.agent} is neither of type"
-                "'BaseAgent' or 'ActorCriticPolicy'!"
+                f"Registered agent class {args.agent} is neither of type" "'BaseAgent' or 'ActorCriticPolicy'!"
             )
     else:
         # load flag
