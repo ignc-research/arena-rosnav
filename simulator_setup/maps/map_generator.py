@@ -252,7 +252,7 @@ def create_indoor_map(height, width, corridor_radius, iterations, room_number, r
     return map
 
 
-def create_outdoor_map(height, width, obstacle_number, obstacle_extra_radius, room_number, room_width, room_height):
+def create_outdoor_map(height, width, obstacle_number, obstacle_extra_radius):
     map = initialize_map(height, width, type="outdoor")
     for i in range(obstacle_number):
         random_position = sample(map, obstacle_extra_radius)
@@ -277,8 +277,7 @@ def create_random_map(height, width, corridor_radius, iterations, obstacle_numbe
                                 no_overlap)
         return map
     else:
-        map = create_outdoor_map(height, width, obstacle_number, obstacle_extra_radius, room_number, room_width,
-                                 room_height)
+        map = create_outdoor_map(height, width, obstacle_number, obstacle_extra_radius)
         return map
 
 
