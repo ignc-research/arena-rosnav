@@ -101,6 +101,7 @@ liblua5.2-dev \
 screen \
 python3.6 \
 python3.6-dev \
+python3.6-pip \
 libpython3.6-dev \
 python3-catkin-pkg-modules \
 python3-rospkg-modules \
