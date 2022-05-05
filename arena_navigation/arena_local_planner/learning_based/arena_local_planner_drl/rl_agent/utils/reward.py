@@ -171,7 +171,7 @@ class RewardCalculator:
         else:
             self.last_dist_to_path = None
         self._reward_goal_reached(goal_in_robot_frame, reward=20)
-        self._reward_safe_dist(laser_scan, punishment=0.025)
+        self._reward_safe_dist(laser_scan, punishment=0.0025)
         self._reward_collision(laser_scan, punishment=10)
         self._reward_goal_approached(goal_in_robot_frame, reward_factor=0.5, penalty_factor=0.7)
         self.last_action = self._curr_action
