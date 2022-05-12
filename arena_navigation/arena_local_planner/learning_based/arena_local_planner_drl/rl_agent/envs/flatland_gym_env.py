@@ -153,7 +153,7 @@ class FlatlandEnv(gym.Env):
         Args:
             robot_yaml_path (str): [description]
         """
-        self._robot_radius = rospy.get_param("radius") + 0.075
+        self._robot_radius = rospy.get_param("radius") + 0.25
         with open(robot_yaml_path, "r") as fd:
             robot_data = yaml.safe_load(fd)
 
