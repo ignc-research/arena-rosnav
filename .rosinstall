@@ -19,6 +19,11 @@
     version: master
 
 - git:
+    local-name: ../forks/marl/stable-baselines3
+    uri: https://github.com/ignc-research/stable-baselines3
+    version: marl
+
+- git:
     local-name: ../forks/navigation/local_planner/teb
     uri: https://github.com/rst-tu-dortmund/teb_local_planner
     version: melodic-devel

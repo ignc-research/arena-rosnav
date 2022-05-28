@@ -2,6 +2,7 @@ import argparse
 import os
 import numpy as np
 
+from rl_agent.model.agent_factory import AgentFactory
 from tools.custom_mlp_utils import get_net_arch
 
 
@@ -19,11 +20,6 @@ def training_args(parser):
         help="disables multiprocessing in order to debug",
     )
     group = parser.add_mutually_exclusive_group(required=True)
-
-    import rl_agent.model.custom_policy
-    import rl_agent.model.custom_sb3_policy
-    from rl_agent.model.agent_factory import AgentFactory
-
     group.add_argument(
         "--agent",
         type=str,
@@ -61,19 +57,12 @@ def training_args(parser):
         "--tb", action="store_true", help="enables tensorboard logging"
     )
 
+
 def marl_training_args(parser):
     parser.add_argument(
         "--robots", type=int, default=1, help="number of robots"
     )
 
-def parse_marl_training_args(args=None, ignore_unknown=False):
-    """parser for training script"""
-    arg_populate_funcs = [training_args, custom_mlp_args, marl_training_args]
-    arg_check_funcs = [process_training_args]
-
-    return parse_various_args(
-        args, arg_populate_funcs, arg_check_funcs, ignore_unknown
-    )
 
 def run_agent_args(parser):
     parser.add_argument(
@@ -181,6 +170,16 @@ def process_run_agent_args(parsed_args):
 def parse_training_args(args=None, ignore_unknown=False):
     """parser for training script"""
     arg_populate_funcs = [training_args, custom_mlp_args]
+    arg_check_funcs = [process_training_args]
+
+    return parse_various_args(
+        args, arg_populate_funcs, arg_check_funcs, ignore_unknown
+    )
+
+
+def parse_marl_training_args(args=None, ignore_unknown=False):
+    """parser for training script"""
+    arg_populate_funcs = [training_args, custom_mlp_args, marl_training_args]
     arg_check_funcs = [process_training_args]
 
     return parse_various_args(
