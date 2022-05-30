@@ -5,22 +5,25 @@ from typing import List, Tuple, Dict, Any, Union, Callable
 import numpy as np
 import rospy
 
+from arena_marl.marl_agent.utils.supersuit_utils import MarkovVectorEnv_patched
+# from stable_baselines3.common.vec_env import VecEnv
+
 from gym import spaces
 from pettingzoo import *
-from pettingzoo.utils import wrappers, from_parallel, to_parallel
+from pettingzoo.utils import from_parallel, to_parallel
 import supersuit as ss
-from stable_baselines3.common.vec_env import VecEnv
+# 
+#
 
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.rl_agent.training_agent_wrapper import TrainingDRLAgent
 from task_generator.task_generator.marl_tasks import get_MARL_task
 
 from flatland_msgs.srv import StepWorld, StepWorldRequest
 
-from rl_agent.utils.supersuit_utils import *
+# from marl_agent.utils.supersuit_utils import *
 # from rl_agent.utils.supersuit_utils import MarkovVectorEnv_patched
 
-
-def env_fn(**kwargs: Dict[str, Any]) -> VecEnv:
+def env_fn(**kwargs: Dict[str, Any]): # -> VecEnv:
     """
     The env function wraps the environment in 3 wrappers by default. These
     wrappers contain logic that is common to many pettingzoo environments.

@@ -9,7 +9,7 @@ from typing import Tuple
 class RewardCalculator:
     def __init__(
         self,
-        holonomic: float,
+        holonomic: bool,
         robot_radius: float,
         safe_dist: float,
         goal_radius: float,

@@ -16,7 +16,7 @@ from nav_msgs.srv import GetMap
 from std_msgs.msg import Bool
 
 from .obstacles_manager import ObstaclesManager
-from .robot_manager import RobotManager
+from .marl_robot_manager import RobotManager
 
 
 class ABSMARLTask(ABC):

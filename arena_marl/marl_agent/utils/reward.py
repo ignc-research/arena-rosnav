@@ -5,8 +5,9 @@ import scipy.spatial
 from geometry_msgs.msg import Pose2D
 from typing import Dict, Tuple, Union
 
+from rl_agent.utils.reward import RewardCalculator
 
-class RewardCalculator:
+class RewardCalculator(RewardCalculator):
     def __init__(
         self,
         robot_radius: float,

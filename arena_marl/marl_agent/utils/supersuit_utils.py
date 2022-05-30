@@ -5,7 +5,6 @@ import numpy as np
 import rospy
 # from stable_baselines3.common.vec_env import VecNormalize
 from supersuit.vector import ConcatVecEnv, MarkovVectorEnv
-from supersuit.vector.sb3_vector_wrapper import SB3VecEnvWrapper
 
 
 class MarkovVectorEnv_patched(MarkovVectorEnv):
@@ -54,7 +53,7 @@ def vec_env_create(
     num_cpus: int,
     num_vec_envs: int,
     PATHS: dict,
-) -> SB3VecEnvWrapper:
+):
     """Function which vectorizes a given environment function in multiple parallel environments.
 
     Args:
@@ -69,6 +68,7 @@ def vec_env_create(
         SB3VecEnvWrapper: Vectorized environments following the SB3 VecEnv API. Each each robot in an environment \
             poses as an environment in the vector.
     """
+    import supersuit.vector.sb3_vector_wrapper as sb3vw
     env_list_fns = [
         partial(
             env_fn,
@@ -87,4 +87,4 @@ def vec_env_create(
     num_cpus = min(num_cpus, num_vec_envs)
     rospy.init_node("train_env", disable_signals=False, anonymous=True)
     vec_env = ConcatVecEnv(env_list_fns, observation_space, action_space)
-    return SB3VecEnvWrapper(vec_env)
+    return sb3vw.SB3VecEnvWrapper(vec_env)

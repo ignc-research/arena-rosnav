@@ -1,4 +1,5 @@
 robot:
+  holonomic: False
   discrete_actions:
     - name: move_forward
       linear: 0.30

@@ -13,7 +13,7 @@ rospy.set_param("/num_robots", 8)
 
 from rl_agent.training_agent_wrapper import TrainingDRLAgent
 from scripts.deployment.drl_agent_node import DeploymentDRLAgent
-from rl_agent.envs.pettingzoo_env import FlatlandPettingZooEnv
+from marl_agent.envs.pettingzoo_env import FlatlandPettingZooEnv
 
 from nav_msgs.srv import GetMap
 

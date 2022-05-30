@@ -16,11 +16,11 @@ from stable_baselines3.common.policies import ActorCriticPolicy
 from stable_baselines3.common.utils import set_random_seed
 
 
-from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.rl_agent.envs.flatland_gym_env import (
+from rl_agent.envs.flatland_gym_env import (
     FlatlandEnv,
 )
-from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.rl_agent.model.agent_factory import AgentFactory
-from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.rl_agent.model.base_agent import BaseAgent
+from rl_agent.model.agent_factory import AgentFactory
+from rl_agent.model.base_agent import BaseAgent
 from tools.custom_mlp_utils import get_act_fn
 
 """ 

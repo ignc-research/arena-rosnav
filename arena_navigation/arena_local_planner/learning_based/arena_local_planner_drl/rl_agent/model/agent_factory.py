@@ -2,7 +2,7 @@ from typing import Callable, Type, Union
 
 from stable_baselines3.common.policies import BasePolicy
 
-from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.rl_agent.model.base_agent import BaseAgent
+from rl_agent.model.base_agent import BaseAgent
 from rl_agent.utils.sb3agent_format_check import check_format
 
 
