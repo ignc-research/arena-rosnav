@@ -1,3 +1,4 @@
+from warnings import warn
 from typing import Callable, Type, Union
 
 from stable_baselines3.common.policies import BasePolicy
@@ -24,7 +25,11 @@ class AgentFactory:
         """
 
         def inner_wrapper(wrapped_class) -> Callable:
-            assert name not in cls.registry, f"Agent '{name}' already exists!"
+            if name in cls.registry:
+                warn(
+                    f"Try to register agent: '{name}' although an entry already exists. "
+                    "Register entry will be overwritten if there exists another architecture with the same id."
+                )
             assert issubclass(wrapped_class, BaseAgent) or issubclass(
                 wrapped_class, BasePolicy
             ), f"Wrapped class {wrapped_class.__name__} is neither of type 'BaseAgent' nor 'BasePolicy!'"
@@ -54,7 +59,7 @@ class AgentFactory:
         """
         assert name in cls.registry, f"Agent '{name}' is not registered!"
         agent_class = cls.registry[name]
-        
+
         if issubclass(agent_class, BaseAgent):
             return agent_class(**kwargs)
         else:
