@@ -3,6 +3,7 @@ from typing import Callable
 
 import numpy as np
 import rospy
+
 # from stable_baselines3.common.vec_env import VecNormalize
 from supersuit.vector import ConcatVecEnv, MarkovVectorEnv
 
@@ -12,11 +13,7 @@ class MarkovVectorEnv_patched(MarkovVectorEnv):
 
     def step(self, actions):
         agent_set = set(self.par_env.agents)
-        act_dict = {
-            agent: actions[i]
-            for i, agent in enumerate(self.par_env.possible_agents)
-            if agent in agent_set
-        }
+        act_dict = {agent: actions[i] for i, agent in enumerate(self.par_env.possible_agents) if agent in agent_set}
         observations, rewards, dones, infos = self.par_env.step(act_dict)
 
         # adds last observation to info where user can get it
@@ -40,8 +37,7 @@ class MarkovVectorEnv_patched(MarkovVectorEnv):
         else:
             observations = self.concat_obs(observations)
         assert (
-            self.black_death
-            or self.par_env.agents == self.par_env.possible_agents
+            self.black_death or self.par_env.agents == self.par_env.possible_agents
         ), "MarkovVectorEnv does not support environments with varying numbers of active agents unless black_death is set to True"
         return observations, rews, dns, infs
 
@@ -69,6 +65,7 @@ def vec_env_create(
             poses as an environment in the vector.
     """
     import supersuit.vector.sb3_vector_wrapper as sb3vw
+
     env_list_fns = [
         partial(
             env_fn,
@@ -80,7 +77,7 @@ def vec_env_create(
         for i in range(1, num_vec_envs + 1)
     ]
     env = env_list_fns[0]()
-    action_space = env.observation_space
+    action_space = env.action_space
     observation_space = env.observation_space
     metadata = env.metadata
 

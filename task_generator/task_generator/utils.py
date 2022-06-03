@@ -30,7 +30,11 @@ def get_random_pos_on_map(free_space_indices, map_: OccupancyGrid, safe_dist: fl
 
     def is_pos_valid(x_in_meters, y_in_meters):
         for forbidden_zone in forbidden_zones:
-            if (x_in_meters-forbidden_zone[0])**2+(y_in_meters-forbidden_zone[1])**2 < (forbidden_zone[2]+safe_dist)**2:
+            if (
+                forbidden_zone
+                and (x_in_meters - forbidden_zone[0]) ** 2 + (y_in_meters - forbidden_zone[1]) ** 2
+                < (forbidden_zone[2] + safe_dist) ** 2
+            ):
                 return False
 
         # in pixel
@@ -48,8 +52,7 @@ def get_random_pos_on_map(free_space_indices, map_: OccupancyGrid, safe_dist: fl
                 try:
                     value = map_.data[index]
                 except IndexError:
-                    print("IndexError: index: %d, map_length: %d" %
-                          (index, len(map_.data)))
+                    print("IndexError: index: %d, map_length: %d" % (index, len(map_.data)))
                     return False
                 if value != 0:
 
@@ -57,7 +60,8 @@ def get_random_pos_on_map(free_space_indices, map_: OccupancyGrid, safe_dist: fl
         return True
 
     assert len(free_space_indices) == 2 and len(free_space_indices[0]) == len(
-        free_space_indices[1]), "free_space_indices is not correctly setup"
+        free_space_indices[1]
+    ), "free_space_indices is not correctly setup"
     if forbidden_zones is None:
         forbidden_zones = []
 
@@ -66,7 +70,7 @@ def get_random_pos_on_map(free_space_indices, map_: OccupancyGrid, safe_dist: fl
     n_check_failed = 0
     x_in_meters, y_in_meters = None, None
     while not pos_valid:
-        idx = random.randint(0, n_freespace_cells-1)
+        idx = random.randint(0, n_freespace_cells - 1)
         # in cells
         y_in_cells, x_in_cells = free_space_indices[0][idx], free_space_indices[1][idx]
         # convert x, y in meters
@@ -76,8 +80,7 @@ def get_random_pos_on_map(free_space_indices, map_: OccupancyGrid, safe_dist: fl
         if not pos_valid:
             n_check_failed += 1
             if n_check_failed > 100:
-                raise Exception(
-                    "cann't find any no-occupied space please check the map information")
+                raise Exception("cann't find any no-occupied space please check the map information")
         # in radius
     theta = random.uniform(-math.pi, math.pi)
 

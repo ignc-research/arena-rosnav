@@ -57,36 +57,20 @@ class RobotManager:
         self.step_size = rospy.get_param("step_size")
 
         self._get_robot_config(robot_yaml_path)
-        robot_yaml_path = (
-            self._generate_robot_config_with_adjusted_topics()
-            if MARL
-            else robot_yaml_path
-        )
+        robot_yaml_path = self._generate_robot_config_with_adjusted_topics() if MARL else robot_yaml_path
 
         # setup proxy to handle  services provided by flatland
         rospy.wait_for_service(f"{self.ns_prefix}move_model", timeout=timeout)
         rospy.wait_for_service(f"{self.ns_prefix}spawn_model", timeout=timeout)
 
-        self._srv_move_model = rospy.ServiceProxy(
-            f"{self.ns_prefix}move_model", MoveModel
-        )
-        self._srv_spawn_model = rospy.ServiceProxy(
-            f"{self.ns_prefix}spawn_model", SpawnModel
-        )
+        self._srv_move_model = rospy.ServiceProxy(f"{self.ns_prefix}move_model", MoveModel)
+        self._srv_spawn_model = rospy.ServiceProxy(f"{self.ns_prefix}spawn_model", SpawnModel)
         # it's only needed in training mode to send the clock signal.
-        self._step_world = rospy.ServiceProxy(
-            f"{self.ns_prefix}step_world", StepWorld
-        )
+        self._step_world = rospy.ServiceProxy(f"{self.ns_prefix}step_world", StepWorld)
 
         # publisher
-        goal_topic = (
-            f"{self.ns_prefix}{self.ROBOT_NAME}/goal"
-            if MARL
-            else f"{self.ns_prefix}goal"
-        )
-        self._goal_pub = rospy.Publisher(
-            f"{goal_topic}", PoseStamped, queue_size=1, latch=True
-        )
+        goal_topic = f"{self.ns_prefix}{self.ROBOT_NAME}/goal" if MARL else f"{self.ns_prefix}goal"
+        self._goal_pub = rospy.Publisher(f"{goal_topic}", PoseStamped, queue_size=1, latch=True)
 
         self.update_map(map_)
         self._spawn_robot(robot_yaml_path)
@@ -108,16 +92,11 @@ class RobotManager:
         Args:
             robot_yaml_path ([type]): [description]
         """
+        self.ROBOT_NAME = os.path.basename(robot_yaml_path).split(".")[0]
+        self.ROBOT_RADIUS = rospy.get_param("radius")
         with open(robot_yaml_path, "r") as f:
             self._robot_data = yaml.safe_load(f)
-            # get robot radius
-            for body in self._robot_data["bodies"]:
-                if body["name"] == "base_footprint":
-                    for footprint in body["footprints"]:
-                        if footprint["type"] == "circle":
-                            self.ROBOT_RADIUS = footprint.setdefault(
-                                "radius", 0.2
-                            )
+
             # get laser_update_rate
             for plugin in self._robot_data["plugins"]:
                 if plugin["type"] == "Laser":
@@ -135,16 +114,12 @@ class RobotManager:
             e.g.: sim_1/myrobot/scan
         - The yaml files are temporarily dumped into *../simulator_setup/tmp_robot_configs*
         """
-        self._robot_data["bodies"][0]["name"] = (
-            self.ROBOT_NAME + "_" + self._robot_data["bodies"][0]["name"]
-        )
+        self._robot_data["bodies"][0]["name"] = self.ROBOT_NAME + "_" + self._robot_data["bodies"][0]["name"]
 
         for plugin in self._robot_data["plugins"]:
             if plugin["type"] == "DiffDrive":
                 plugin["body"] = self._robot_data["bodies"][0]["name"]
-                plugin["odom_frame_id"] = (
-                    self.ROBOT_NAME + "_" + plugin["odom_frame_id"]
-                )
+                plugin["odom_frame_id"] = self.ROBOT_NAME + "_" + plugin["odom_frame_id"]
                 plugin["odom_pub"] = self.ROBOT_NAME + "/" + plugin["odom_pub"]
                 # plugin["twist_sub"] = (
                 #     self.ROBOT_NAME + "/" + plugin["twist_sub"]
@@ -155,9 +130,7 @@ class RobotManager:
                 plugin["body"] = self._robot_data["bodies"][0]["name"]
                 plugin["frame"] = self.ROBOT_NAME + "_" + plugin["frame"]
 
-        tmp_folder_path = os.path.join(
-            rospkg.RosPack().get_path("simulator_setup"), "tmp_robot_configs"
-        )
+        tmp_folder_path = os.path.join(rospkg.RosPack().get_path("simulator_setup"), "tmp_robot_configs")
         os.makedirs(tmp_folder_path, exist_ok=True)
         tmp_config_name = self.ns + self.ROBOT_NAME + ".robot_config.yaml"
         tmp_config_path = os.path.join(tmp_folder_path, tmp_config_name)
@@ -193,9 +166,7 @@ class RobotManager:
             # assert self.step_size * \
             #     self.LASER_UPDATE_RATE == 1, f"TO run the traning successfully, make sure the laser_update_rate*step_size == 1 \
             #     \n\tcurrent step_size:\t {self.step_size}\n\tcurrent laser's update rate:\t {self.LASER_UPDATE_RATE} "
-            for _ in range(
-                math.ceil(1 / (self.step_size * self.LASER_UPDATE_RATE))
-            ):
+            for _ in range(math.ceil(1 / (self.step_size * self.LASER_UPDATE_RATE))):
                 self._step_world()
 
     def set_start_pos_random(self):
@@ -240,11 +211,7 @@ class RobotManager:
 
             if start_pos is None:
                 start_pos_ = Pose2D()
-                (
-                    start_pos_.x,
-                    start_pos_.y,
-                    start_pos_.theta,
-                ) = get_random_pos_on_map(
+                (start_pos_.x, start_pos_.y, start_pos_.theta,) = get_random_pos_on_map(
                     self._free_space_indices,
                     self.map,
                     self.ROBOT_RADIUS * 2,
@@ -259,16 +226,11 @@ class RobotManager:
                     goal_pos_.x,
                     goal_pos_.y,
                     goal_pos_.theta,
-                ) = get_random_pos_on_map(
-                    self._free_space_indices, self.map, self.ROBOT_RADIUS * 2
-                )
+                ) = get_random_pos_on_map(self._free_space_indices, self.map, self.ROBOT_RADIUS * 2)
             else:
                 goal_pos_ = goal_pos
 
-            if (
-                dist(start_pos_.x, start_pos_.y, goal_pos_.x, goal_pos_.y)
-                < min_dist
-            ):
+            if dist(start_pos_.x, start_pos_.y, goal_pos_.x, goal_pos_.y) < min_dist:
                 i_try += 1
                 continue
             # move the robot to the start pos
