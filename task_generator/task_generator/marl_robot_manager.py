@@ -92,7 +92,6 @@ class RobotManager:
         Args:
             robot_yaml_path ([type]): [description]
         """
-        self.ROBOT_NAME = os.path.basename(robot_yaml_path).split(".")[0]
         self.ROBOT_RADIUS = rospy.get_param("radius")
         with open(robot_yaml_path, "r") as f:
             self._robot_data = yaml.safe_load(f)
@@ -121,9 +120,7 @@ class RobotManager:
                 plugin["body"] = self._robot_data["bodies"][0]["name"]
                 plugin["odom_frame_id"] = self.ROBOT_NAME + "_" + plugin["odom_frame_id"]
                 plugin["odom_pub"] = self.ROBOT_NAME + "/" + plugin["odom_pub"]
-                # plugin["twist_sub"] = (
-                #     self.ROBOT_NAME + "/" + plugin["twist_sub"]
-                # )
+                plugin["twist_sub"] = self.ROBOT_NAME + "/" + plugin.get("twist_sub", "cmd_vel")
 
             elif plugin["type"] == "Laser":
                 plugin["topic"] = self.ROBOT_NAME + "/" + plugin["topic"]
