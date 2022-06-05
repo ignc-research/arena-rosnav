@@ -33,6 +33,7 @@ jupyter = "^1.0.0"
 
 [tool.poetry.dev-dependencies]
 pdoc3 = "^0.10.0"
+black = {version = "^22.3.0", allow-prereleases = true}
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

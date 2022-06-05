@@ -61,6 +61,8 @@
   <arg name="obs_vel" default="0.3" />
   <!-- if it's false flatland server will not publish any debug related infomation and you will not able to visuzalize e.g robot, dynamic obstacles  -->
 
+  <!-- If observations contain the previous actions -->
+  <arg name="actions_in_obs" default="true" />
 
   <!--  PARAMS DON'T CHANGE THEM  -->
   <param name="update_rate" value="$(arg update_rate)" />
@@ -76,6 +78,7 @@
   <param name="viz_pub_rate" value="$(arg viz_pub_rate)"/>
   <param name="robot_action_rate"     value="5"/>
   <param name="laser_update_rate"     value="10"/>
+  <param name="actions_in_obs" value="$(arg actions_in_obs)" />
 
 
   <!-- map server-->
@@ -87,6 +90,14 @@
   <group if="$(eval arg('train_mode') == false)">
   <!-- makes sure that action's will be published according to sim time in eval mode-->
     <node name="action_publisher" pkg="arena_local_planner_drl" type="action_publisher.py"/>
+  </group>
+
+  <!-- visualization -->
+  <group if="$(eval arg('show_viz') == true)">
+  <!-- makes sure that action's will be published according to sim time in eval mode-->
+    <include file="$(find arena_bringup)/launch/visualization_training.launch" >
+      <arg name="rviz_file" value="nav_MARL"/>
+    </include>
   </group>
 
   <!-- set the log format -->
