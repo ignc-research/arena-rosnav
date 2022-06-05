@@ -92,14 +92,6 @@
     <node name="action_publisher" pkg="arena_local_planner_drl" type="action_publisher.py"/>
   </group>
 
-  <!-- visualization -->
-  <group if="$(eval arg('show_viz') == true)">
-  <!-- makes sure that action's will be published according to sim time in eval mode-->
-    <include file="$(find arena_bringup)/launch/visualization_training.launch" >
-      <arg name="rviz_file" value="nav_MARL"/>
-    </include>
-  </group>
-
   <!-- set the log format -->
   <env name="ROSCONSOLE_FORMAT" value="[${severity} ${time} ${logger}]: ${message}" />
   <include file="$(find arena_bringup)/launch/sublaunch_training/marl_single_env_training.launch">
