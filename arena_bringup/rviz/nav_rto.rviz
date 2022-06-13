@@ -4,12 +4,17 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded:
+<<<<<<< HEAD
         - /robot1
         - /robot1/my_robot1
         - /robot1/Goal Pose1
         - /Global Plan1/teb1
         - /Sensors1/LaserScan1
         - /obstacles1
+=======
+        - /Global Plan1/teb1
+        - /Sensors1/LaserScan1
+>>>>>>> origin/noetic-devel
         - /obstacles1/dynamic1/301
       Splitter Ratio: 0.4374079406261444
     Tree Height: 787
@@ -54,6 +59,7 @@ Visualization Manager:
           Frame Timeout: 15
           Frames:
             All Enabled: false
+<<<<<<< HEAD
             eval_sim_odom:
               Value: true
             map:
@@ -105,6 +111,15 @@ Visualization Manager:
             sim_8_laser_link:
               Value: true
             sim_8_odom:
+=======
+            base_footprint:
+              Value: true
+            laser_link:
+              Value: true
+            map:
+              Value: true
+            odom:
+>>>>>>> origin/noetic-devel
               Value: true
           Marker Alpha: 1
           Marker Scale: 1
@@ -114,6 +129,7 @@ Visualization Manager:
           Show Names: true
           Tree:
             map:
+<<<<<<< HEAD
               eval_sim_odom:
                 {}
               sim_1_odom:
@@ -147,6 +163,11 @@ Visualization Manager:
               sim_8_odom:
                 sim_8_base_footprint:
                   sim_8_laser_link:
+=======
+              odom:
+                base_footprint:
+                  laser_link:
+>>>>>>> origin/noetic-devel
                     {}
           Update Interval: 0
           Value: true
@@ -183,7 +204,11 @@ Visualization Manager:
           Marker Topic: /flatland_server/debug/layer/static
           Name: static_layer
           Namespaces:
+<<<<<<< HEAD
             {}
+=======
+            "": true
+>>>>>>> origin/noetic-devel
           Queue Size: 100
           Value: true
         - Alpha: 0.699999988079071
@@ -200,22 +225,38 @@ Visualization Manager:
           Class: rviz/Map
           Color Scheme: map
           Draw Behind: false
+<<<<<<< HEAD
           Enabled: false
+=======
+          Enabled: true
+>>>>>>> origin/noetic-devel
           Name: Global_costmap
           Topic: /move_base/global_costmap/costmap
           Unreliable: false
           Use Timestamp: false
+<<<<<<< HEAD
           Value: false
+=======
+          Value: true
+>>>>>>> origin/noetic-devel
         - Alpha: 0.699999988079071
           Class: rviz/Map
           Color Scheme: costmap
           Draw Behind: false
+<<<<<<< HEAD
           Enabled: false
+=======
+          Enabled: true
+>>>>>>> origin/noetic-devel
           Name: Local_costmap
           Topic: /move_base/local_costmap/costmap
           Unreliable: false
           Use Timestamp: false
+<<<<<<< HEAD
           Value: false
+=======
+          Value: true
+>>>>>>> origin/noetic-devel
       Enabled: true
       Name: Map
     - Class: rviz/Group
@@ -640,15 +681,26 @@ Visualization Manager:
           Displays:
             - Class: rviz/MarkerArray
               Enabled: true
+<<<<<<< HEAD
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_00
               Name: 0
               Namespaces:
                 "": true
+=======
+              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_00
+              Name: 0
+              Namespaces:
+                {}
+>>>>>>> origin/noetic-devel
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
+<<<<<<< HEAD
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_01
+=======
+              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_01
+>>>>>>> origin/noetic-devel
               Name: 1
               Namespaces:
                 "": true
@@ -656,7 +708,11 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
+<<<<<<< HEAD
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_02
+=======
+              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_02
+>>>>>>> origin/noetic-devel
               Name: 2
               Namespaces:
                 "": true
@@ -664,7 +720,11 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
+<<<<<<< HEAD
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_03
+=======
+              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_03
+>>>>>>> origin/noetic-devel
               Name: 3
               Namespaces:
                 "": true
@@ -672,7 +732,11 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
+<<<<<<< HEAD
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_04
+=======
+              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_04
+>>>>>>> origin/noetic-devel
               Name: 4
               Namespaces:
                 "": true
@@ -683,28 +747,50 @@ Visualization Manager:
               Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_05
               Name: 5
               Namespaces:
+<<<<<<< HEAD
                 {}
+=======
+                "": true
+>>>>>>> origin/noetic-devel
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
+<<<<<<< HEAD
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_06
               Name: 6
               Namespaces:
                 "": true
+=======
+              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_06
+              Name: 6
+              Namespaces:
+                {}
+>>>>>>> origin/noetic-devel
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
+<<<<<<< HEAD
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_07
               Name: 7
               Namespaces:
                 "": true
+=======
+              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_07
+              Name: 7
+              Namespaces:
+                {}
+>>>>>>> origin/noetic-devel
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
+<<<<<<< HEAD
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_08
+=======
+              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_08
+>>>>>>> origin/noetic-devel
               Name: 8
               Namespaces:
                 {}
@@ -712,7 +798,11 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
+<<<<<<< HEAD
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_09
+=======
+              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_09
+>>>>>>> origin/noetic-devel
               Name: 9
               Namespaces:
                 {}
@@ -720,7 +810,11 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
+<<<<<<< HEAD
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_10
+=======
+              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_10
+>>>>>>> origin/noetic-devel
               Name: 10
               Namespaces:
                 {}
@@ -728,7 +822,11 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
+<<<<<<< HEAD
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_11
+=======
+              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_11
+>>>>>>> origin/noetic-devel
               Name: 11
               Namespaces:
                 {}
@@ -736,7 +834,11 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
+<<<<<<< HEAD
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_13
+=======
+              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_13
+>>>>>>> origin/noetic-devel
               Name: 12
               Namespaces:
                 {}
@@ -744,7 +846,11 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
+<<<<<<< HEAD
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_13
+=======
+              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_13
+>>>>>>> origin/noetic-devel
               Name: 13
               Namespaces:
                 {}
@@ -752,7 +858,11 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
+<<<<<<< HEAD
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_15
+=======
+              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_15
+>>>>>>> origin/noetic-devel
               Name: 14
               Namespaces:
                 {}
@@ -760,7 +870,11 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
+<<<<<<< HEAD
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_14
+=======
+              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_14
+>>>>>>> origin/noetic-devel
               Name: 15
               Namespaces:
                 {}
@@ -768,7 +882,11 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
+<<<<<<< HEAD
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_16
+=======
+              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_16
+>>>>>>> origin/noetic-devel
               Name: 16
               Namespaces:
                 {}
@@ -776,7 +894,11 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
+<<<<<<< HEAD
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_17
+=======
+              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_17
+>>>>>>> origin/noetic-devel
               Name: 17
               Namespaces:
                 {}
@@ -784,7 +906,11 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
+<<<<<<< HEAD
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_18
+=======
+              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_018
+>>>>>>> origin/noetic-devel
               Name: 18
               Namespaces:
                 {}
@@ -792,7 +918,11 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
+<<<<<<< HEAD
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_19
+=======
+              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_019
+>>>>>>> origin/noetic-devel
               Name: 19
               Namespaces:
                 {}
@@ -800,7 +930,11 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
+<<<<<<< HEAD
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_20
+=======
+              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_020
+>>>>>>> origin/noetic-devel
               Name: 20
               Namespaces:
                 {}
@@ -808,7 +942,11 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
+<<<<<<< HEAD
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_21
+=======
+              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_021
+>>>>>>> origin/noetic-devel
               Name: 21
               Namespaces:
                 {}
@@ -816,7 +954,11 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
+<<<<<<< HEAD
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_22
+=======
+              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_022
+>>>>>>> origin/noetic-devel
               Name: 22
               Namespaces:
                 {}
@@ -824,7 +966,11 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
+<<<<<<< HEAD
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_23
+=======
+              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_023
+>>>>>>> origin/noetic-devel
               Name: 23
               Namespaces:
                 {}
@@ -832,7 +978,11 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
+<<<<<<< HEAD
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_24
+=======
+              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_024
+>>>>>>> origin/noetic-devel
               Name: 24
               Namespaces:
                 {}
@@ -840,7 +990,11 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
+<<<<<<< HEAD
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_25
+=======
+              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_025
+>>>>>>> origin/noetic-devel
               Name: 25
               Namespaces:
                 {}
@@ -848,7 +1002,11 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
+<<<<<<< HEAD
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_26
+=======
+              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_026
+>>>>>>> origin/noetic-devel
               Name: 26
               Namespaces:
                 {}
@@ -856,7 +1014,11 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
+<<<<<<< HEAD
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_27
+=======
+              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_027
+>>>>>>> origin/noetic-devel
               Name: 27
               Namespaces:
                 {}
@@ -864,7 +1026,11 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
+<<<<<<< HEAD
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_28
+=======
+              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_028
+>>>>>>> origin/noetic-devel
               Name: 28
               Namespaces:
                 {}
@@ -872,7 +1038,11 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
+<<<<<<< HEAD
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_29
+=======
+              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_029
+>>>>>>> origin/noetic-devel
               Name: 29
               Namespaces:
                 {}
@@ -880,7 +1050,11 @@ Visualization Manager:
               Value: true
             - Class: rviz/MarkerArray
               Enabled: true
+<<<<<<< HEAD
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_30
+=======
+              Marker Topic: /flatland_server/debug/model/obstacle_dynamic_with_traj_030
+>>>>>>> origin/noetic-devel
               Name: 30
               Namespaces:
                 {}
@@ -1286,6 +1460,37 @@ Visualization Manager:
       Topic: /subgoal
       Unreliable: false
       Value: true
+<<<<<<< HEAD
+=======
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/LaserScan
+      Color: 255; 255; 255
+      Color Transformer: Intensity
+      Decay Time: 0
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Min Color: 0; 0; 0
+      Name: LaserScan
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.10000000149011612
+      Style: Squares
+      Topic: /scan
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: true
+>>>>>>> origin/noetic-devel
   Enabled: true
   Global Options:
     Background Color: 0; 0; 0
@@ -1334,10 +1539,17 @@ Visualization Manager:
 Window Geometry:
   Displays:
     collapsed: false
+<<<<<<< HEAD
   Height: 1016
   Hide Left Dock: false
   Hide Right Dock: false
   QMainWindow State: 000000ff00000000fd0000000400000000000002120000039efc0200000005fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000003be0000025d00000198000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000003d0000039e000000c900ffffff000000010000010f00000270fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000002800000270000000a400fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004a00000003efc0100000002fb0000000800540069006d00650000000000000004a0000004f300fffffffb0000000800540069006d00650100000000000004500000000000000000000005680000039e00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+=======
+  Height: 116
+  Hide Left Dock: false
+  Hide Right Dock: false
+  QMainWindow State: 000000ff00000000fd0000000400000000000002120000039efc0200000005fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000003be0000025d00000198000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000003d0000039e000000c900ffffff000000010000010f00000270fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000002800000270000000a400fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004a00000003efc0100000002fb0000000800540069006d00650000000000000004a0000004f300fffffffb0000000800540069006d00650100000000000004500000000000000000000005200000039e00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+>>>>>>> origin/noetic-devel
   Selection:
     collapsed: false
   Time:
@@ -1346,6 +1558,11 @@ Window Geometry:
     collapsed: false
   Views:
     collapsed: false
+<<<<<<< HEAD
   Width: 1920
   X: 1920
+=======
+  Width: 1848
+  X: 72
+>>>>>>> origin/noetic-devel
   Y: 27

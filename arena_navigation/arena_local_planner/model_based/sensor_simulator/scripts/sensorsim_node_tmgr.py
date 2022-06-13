@@ -39,7 +39,6 @@ class sensor():
 
 
     def cb_reset(self,msg):
-        # print(msg)
         # collect static and dynamic obstacles
         self.n_reset += 1
         self.obst_topics_dyn = []
@@ -69,11 +68,7 @@ class sensor():
         self.update_obstacle_odom()
         print("======================================== " + "reset:" + str(self.n_reset))
         print("dynamic obstacles:", len(self.obst_topics_dyn))
-        for topic in self.obst_topics_dyn:
-            print(topic)
-        print("static obstacles:", len(self.obst_topics_static))
-        for topic in self.obst_topics_static:
-            print(topic)
+
         
               
     def pub_odom(self,event):
@@ -87,6 +82,7 @@ class sensor():
     def fill_cluster(self):
         
         for topic in self.obstacles_dyn:
+            
             if topic in self.obstacles_dyn:
                 tmp_point = Point()
                 tmp_point.x = self.obstacles_dyn[topic][0].x
@@ -113,13 +109,10 @@ class sensor():
                 self.cluster.mean_points.append(tmp_point)
                 self.cluster.velocities.append(tmp_vel)
                 self.cluster.labels.append(self.obstacles_static[topic][3])
-        
-        # print(self.cluster)
     
-    def cb_marker(self, msg):
+    def cb_marker(self, msg, topic=None):
 
         if self.update_cluster:
-            # print(topic)
             if type(msg)==MarkerArray:
                 v = Vector3()
                 m = msg.markers[0]
@@ -148,8 +141,7 @@ class sensor():
                         label = topic.replace("/flatland_server/debug/model/obstacle_circle_static_", "")
                         label = int(label) 
                     self.obstacles_static[topic] = [pos, r, v, label]
-            else:
-                print(msg)
+                
 
 
 

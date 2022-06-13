@@ -1,0 +1,168 @@
+
+
+# subgoal mode selection
+subgoal_mode: &subgoal_mode 0                       # 0: spacial_horizon 1:timed_astar 2: simple sample 3: goal subgoal
+
+
+# ------------------------------------------------------------------------------------------------------
+# other main parameters (not relevant for this evaluation)
+subgoal_pub_period: &subgoal_pub_period 0.5             # sec
+goal_tolerance: &goal_tolerance 0.2
+subgoal_tolerance: &subgoal_tolerance 0.2
+
+planning_time_horizon: &planning_time_horizon 3.0       # sec look ahead time
+planning_horizen: &planning_horizen 1.0                # m   look ahead distance
+sensor_range: &sensor_range 5.6                         # m   laser sensor range (raytrace range)
+
+#max_vel: &max_vel 2.0                                 # m/s   robot max vel
+max_vel: &max_vel 0.8                                 # m/s   robot max vel
+max_acc: &max_acc 1.25                                  # m/s^2 srobot max acc
+max_jerk: &max_jerk 4.0                                 # m/s^3 robot max jerk 
+
+avg_vel: &avg_vel 0.8                                   # m/s for timed_astar action set 
+#min_vel: &min_vel 0.3                                 # m/s for timed_astar action set 
+min_vel: &min_vel 0.08                                 # m/s for timed_astar action set
+
+
+#robot_radius: &robot_radius 0.3                         # m
+robot_radius: &robot_radius 0.347                        # m
+#obstacle_radius: &obstacle_radius 0.4                   # m
+obstacle_radius: &obstacle_radius 0.150                   # m
+obstacles_inflation: &obstacles_inflation 0.05           # m
+obstacle_name: &obstacle_name obstacle_dynamic_with_traj
+use_drl: &use_drl true                                  # true:  cmd_vel is published by drl or others; 
+                                                        # false: cmd_vel is published by traj tracker in plan_fsm
+# ----------------------------------------------------------------------------------
+# 1. FSM parameters (fsm/)
+fsm/goal_tolerance: *goal_tolerance
+fsm/subgoal_tolerance: *subgoal_tolerance
+fsm/subgoal_pub_period: *subgoal_pub_period
+fsm/replan_time_thresh: 0.5
+fsm/subgoal_drl_mode: *subgoal_mode
+fsm/planning_horizen: *planning_horizen
+fsm/use_drl: *use_drl
+
+# ----------------------------------------------------------------------------------
+# 2. Plan manager parameter (plan_manager/)
+plan_manager/max_vel: *max_vel
+plan_manager/max_acc: *max_acc
+plan_manager/max_jerk: *max_jerk
+plan_manager/feasibility_tolerance: 0.05
+plan_manager/control_points_distance: 0.4
+plan_manager/use_distinctive_trajs: true
+plan_manager/local_time_horizon: *planning_time_horizon
+plan_manager/dynamic_obstacle_name: obstacle_dynamic_with_traj
+
+
+# ----------------------------------------------------------------------------------
+# 3. dynamic obstacle
+dynamic_obstacle/sensor_range: *sensor_range
+dynamic_obstacle/prediction_forward_time: 0.5
+dynamic_obstacle/obstacle_radius: *obstacle_radius
+dynamic_obstacle/inflation_radius: 0.1
+
+# 4. Timed astar parameters (timed_astar/)
+timed_astar/allocate_num: 10000
+timed_astar/goal_tolerance: *goal_tolerance
+
+timed_astar/robot_radius: *robot_radius
+timed_astar/obstacle_radius: *obstacle_radius
+
+timed_astar/max_vel: *max_vel
+timed_astar/avg_vel: *avg_vel
+timed_astar/min_vel: *min_vel
+timed_astar/max_rot_vel: 1.2   #rad/s
+
+timed_astar/time_horizon: *planning_time_horizon
+timed_astar/time_resolution: 0.2
+timed_astar/resolution: 0.1
+
+timed_astar/num_sample_edge: 10
+timed_astar/sensor_range: *sensor_range
+timed_astar/safe_time: 1.0
+
+
+# 5. Bspline optimizer for local traj (optimization/)
+optimization/lambda_smooth: 1.0
+optimization/lambda_collision: 1.5
+optimization/lambda_feasibility: 0.1
+optimization/lambda_fitness: 1.0
+optimization/dist0: 0.5
+optimization/swarm_clearance: 0.1
+optimization/max_vel: *max_vel
+optimization/max_acc_: *max_acc
+optimization/order_: 3
+
+
+
+
+
+
+# ----------------------------------------------------------------------------------
+# 6.Global planner are isolated from other part, do not change these tuned parameters #
+# Global planner: kinodynamic Astar (kino_astar/)
+kino_astar/allocate_num: 100000    # allocated memory num for search
+kino_astar/horizon: 100.0          # planning horizon, here as global planner we make it big
+kino_astar/max_vel: 3.0            # maxum velocity of motion primitive, doesn't matter the value is big, as long as it explore effectively
+kino_astar/max_acc: 4.0
+kino_astar/w_time: 10.0            # for calculating g-cost
+kino_astar/max_tau: 0.6            # delta_time
+kino_astar/init_max_tau: 0.8       # init delta_time
+kino_astar/goal_tolerance: 0.5     # goal tolerance
+kino_astar/vel_margin: 0.0         # [no use]
+kino_astar/resolution_astar: 0.1   # (meter)
+kino_astar/time_resolution: 0.8    # (sec)
+kino_astar/lambda_heu: 0.1         # coeff for heuritic
+kino_astar/check_num: 5            # for collision check of each action
+
+
+# Global planner: global traj bspline optimization (optimization_ESDF/)
+optimization_ESDF/order: 3
+optimization_ESDF/dist0: 0.5
+optimization_ESDF/max_vel: 3.0
+optimization_ESDF/max_acc: 4.0
+optimization_ESDF/lambda1: 10.0     # smooth
+optimization_ESDF/lambda2: 5.0      # distance
+optimization_ESDF/lambda3: 0.00001  # feasibility
+optimization_ESDF/lambda4: 0.01     # endpoint
+optimization_ESDF/lambda5: 1.5      # guide [no need]
+optimization_ESDF/lambda6: 10.0     #       [no need]
+optimization_ESDF/lambda7: 100.0    # waypoint 
+optimization_ESDF/max_iteration_num1: 2
+optimization_ESDF/max_iteration_num2: 300
+optimization_ESDF/max_iteration_num3: 200
+optimization_ESDF/max_iteration_num4: 200
+optimization_ESDF/max_iteration_time1: 0.0001
+optimization_ESDF/max_iteration_time2: 0.005
+optimization_ESDF/max_iteration_time3: 0.003
+optimization_ESDF/max_iteration_time4: 0.003
+
+# ----------------------------------------------------------------------------------
+# 7. Mapping (sdf_map/) 
+sdf_map/frame_id: map
+#sdf_map/resolution: 0.05
+sdf_map/use_occ_esdf: true
+
+# local_update_range (meter)
+sdf_map/min_ray_length: 0.1
+sdf_map/max_ray_length: *sensor_range
+sdf_map/local_update_range_x: *sensor_range
+sdf_map/local_update_range_y: *sensor_range
+
+# inflations (meter)
+sdf_map/obstacles_inflation: *obstacles_inflation
+sdf_map/local_bound_inflate: 0.0
+
+# occupancy generation
+sdf_map/p_hit: 0.52
+sdf_map/p_miss: 0.15
+sdf_map/p_min: 0.10
+sdf_map/p_max: 0.75
+sdf_map/p_occ: 0.70
+
+# local map margin for cell/index
+sdf_map/local_map_margin: 0 
+
+# performance test
+sdf_map/show_occ_time: false
+sdf_map/show_esdf_time: false

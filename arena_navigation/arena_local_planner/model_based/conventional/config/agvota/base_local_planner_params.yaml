@@ -1,29 +1,17 @@
-#base_local_planner
-TrajectoryPlannerROS:
-  holonomic_robot: false
-  dwa: true
-
-  heading_scoring: false
-  heading_lookahead: 1.0
-
-  max_vel_x: 0.12 #0.12
-  min_vel_x: 0.09
-  max_vel_theta: 0.08
-  min_in_place_vel_theta: 0.04
-  escape_vel: -0.09
-
-  acc_lim_theta: 0.02
-  acc_lim_x: 0.12
-  acc_lim_y: 0.12
-
+<<<<<<< HEAD
 #dwa_local_planner
 DWAPlannerROS:
+=======
+#base_local_planner
+TrajectoryPlannerROS:
+>>>>>>> origin/noetic-devel
   holonomic_robot: false
   dwa: true
 
   heading_scoring: false
   heading_lookahead: 1.0
 
+<<<<<<< HEAD
   acc_lim_x: 0.5
   acc_lim_y: 0.0
   acc_lim_th: 0.3
@@ -83,3 +71,14 @@ DWAPlannerROS:
   prune_plan: true
   #	Defines whether or not to eat up the plan as the robot moves along the path. If set to true, points will fall off the end of the plan once the robot moves 1 meter past them.  default: true
   global_frame_id: map
+=======
+  max_vel_x: 0.5 #0.12
+  min_vel_x: 0.09
+  max_vel_theta: 0.4
+  min_in_place_vel_theta: 0.04
+  escape_vel: -0.5
+
+  acc_lim_theta: 0.3
+  acc_lim_x: 0.5
+  acc_lim_y: 0.0
+>>>>>>> origin/noetic-devel

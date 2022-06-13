@@ -11,4 +11,3 @@ local_costmap:
   width: 3
   height: 3
   resolution: 0.05
-  

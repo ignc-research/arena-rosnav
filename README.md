@@ -3,7 +3,16 @@
 **Note:**
 For our 3D version using Gazebo as simulation platform, please visit our [arena-rosnav-3D repo](https://github.com/ignc-research/arena-rosnav-3D)
 
-A flexible, high-performance 2D simulator with configurable agents, multiple sensors, and benchmark scenarios for testing robotic navigation.
+- Full support of the following robots with realistic parameters: `turtlebot3_burger`, `ridgeback`, `jackal`, `agvota`, `dingo` _(see [here](docs/Simulation.md#Robots) for detailed description of their usage)_
+
+  THIS INCLUDES:
+
+  - Full support of the planers `teb`, `dwa`, `mpc`, `cadrl`, `rlca`, `arena`
+  - Realistic flatland models for each robot
+  - Defined action space for each Robot (for _rl-training_)
+
+- Support of the planer `arena`
+- Setting of navigation goal automatically for all planers in `testing` mode
 
 A flexible, high-performance 2D simulator with configurable agents, multiple sensors, and benchmark scenarios for testing robotic navigation.
 
@@ -68,6 +77,7 @@ Alternatively, refer to [Installation.md](docs/Installation.md) for detailed exp
 We provide a Docker file to run our code on other operating systems. Please refer to [Docker.md](docs/Docker.md) for more information.
 
 ## 2. Usage
+
 ### DRL Training
 
 Please refer to [DRL-Overview.md](docs/DRL_overview.md) for detailed explanations about agent, policy, and training setup. Addtionally, useful tips and information about the training are provided.
@@ -105,7 +115,6 @@ For additional / more detailed information about each robot:
 - [See the parameters needed for the **Navigation stack**](arena_navigation/arena_local_planer/model_based/conventional/config)
 - [See additional robot parameters like laser min/max [_rad_]](https://github.com/ignc-research/arena-rosnav-3D/wiki/Laser-scanner-parameters)
 - See [_HERE_](arena_navigation/arena_local_planer/learning_based/arena_local_planner_drl/configs) for the definition of the robots action_spaces (needed for rl-based-training)
-
 
 # IROS21 information
 

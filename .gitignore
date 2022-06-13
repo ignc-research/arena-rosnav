@@ -54,3 +54,4 @@ __pycache__/
 #dolphin
 .directory
 
+/**/__pycache__

@@ -1,0 +1,23 @@
+local_costmap:
+  map_type: costmap
+
+  global_frame: odom
+  robot_base_frame: base_footprint
+
+  # params are from https://github.com/pal-robotics/pal_navigation_cfg_public/blob/master/pal_navigation_cfg_pmb2/config/base/common/local_costmap_public_sim.yaml
+  update_frequency: 5.0
+  publish_frequency: 1.0
+  transform_tolerance: 0.5
+
+  static_map: false
+  rolling_window: true
+  width: 4
+  height: 4
+  resolution: 0.025
+
+  robot_radius: 0.275
+
+  inflation_layer:
+    enabled: true
+    inflation_radius: 0.55
+    cost_scaling_factor: 5.0

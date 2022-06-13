@@ -69,7 +69,9 @@ def main():
     )
 
     # stop training on reward threshold callback
-    stoptraining_cb = StopTrainingOnRewardThreshold(treshhold_type="succ", threshold=0.95, verbose=1)
+    stoptraining_cb = StopTrainingOnRewardThreshold(
+        treshhold_type="succ", threshold=0.95, verbose=1
+    )
 
     # instantiate eval environment
     # take task_manager from first sim (currently evaluation only provided for single process)

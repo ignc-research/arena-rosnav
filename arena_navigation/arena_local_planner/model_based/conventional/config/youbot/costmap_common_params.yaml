@@ -1,0 +1,15 @@
+# from https://github.com/youbot/youbot_navigation/blob/hydro-devel/youbot_navigation_common/config/costmap_common_params.yaml
+map_type: costmap
+transform_tolerance: 0.2
+obstacle_range: 2.5
+raytrace_range: 3.0
+inflation_radius: 2.
+
+observation_sources: base_scan
+
+footprint: [[-0.285, 0.285], [-0.285, -0.285], [0.285, -0.285], [0.285, 0.285]]
+
+
+base_scan: {sensor_frame: laser_link, data_type: LaserScan, topic: scan,
+            marking: true,
+            clearing: true}

@@ -1,4 +1,5 @@
 
+<!-- <?xml version="1.0" encoding="UTF-8"?> -->
 <launch>
     <arg name="train_mode"/>
     <arg name="global_frame_id"   />

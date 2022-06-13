@@ -1,0 +1,10 @@
+# params are from https://github.com/dietriro/rto_core/tree/noetic-devel/rto_navigation/config
+# and https://www.robotshop.com/media/files/content/f/fto/pdf/festo-robotino-mobile-robotic-datasheet.pdf
+
+obstacle_range: 2.5
+raytrace_range: 3.0
+#footprint: [[x0, y0], [x1, y1], ... [xn, yn]]
+robot_radius: 0.225
+inflation_radius: 0.4
+observation_sources: scan
+scan: {sensor_frame: laser_link, data_type: LaserScan, topic: scan, marking: true, clearing: true}

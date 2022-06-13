@@ -26,9 +26,7 @@ class RobotManager:
     is managed
     """
 
-    def __init__(
-        self, ns: str, map_: OccupancyGrid, robot_yaml_path: str, timeout=20
-    ):
+    def __init__(self, ns: str, map_: OccupancyGrid, robot_yaml_path: str, timeout=20):
         """[summary]
 
         Args:
@@ -47,24 +45,16 @@ class RobotManager:
         rospy.wait_for_service(f"{self.ns_prefix}move_model", timeout=timeout)
         rospy.wait_for_service(f"{self.ns_prefix}spawn_model", timeout=timeout)
         # rospy.wait_for_service('step_world', timeout=20)
-        self._srv_move_model = rospy.ServiceProxy(
-            f"{self.ns_prefix}move_model", MoveModel
-        )
-        self._srv_spawn_model = rospy.ServiceProxy(
-            f"{self.ns_prefix}spawn_model", SpawnModel
-        )
+        self._srv_move_model = rospy.ServiceProxy(f"{self.ns_prefix}move_model", MoveModel)
+        self._srv_spawn_model = rospy.ServiceProxy(f"{self.ns_prefix}spawn_model", SpawnModel)
         # it's only needed in training mode to send the clock signal.
-        self._step_world = rospy.ServiceProxy(
-            f"{self.ns_prefix}step_world", StepWorld
-        )
+        self._step_world = rospy.ServiceProxy(f"{self.ns_prefix}step_world", StepWorld)
 
         # publisher
         # publish the start position of the robot
         # self._initialpose_pub = rospy.Publisher(
         #     'initialpose', PoseWithCovarianceStamped, queue_size=1)
-        self._goal_pub = rospy.Publisher(
-            f"{self.ns_prefix}goal", PoseStamped, queue_size=1, latch=True
-        )
+        self._goal_pub = rospy.Publisher(f"{self.ns_prefix}goal", PoseStamped, queue_size=1, latch=True)
 
         self.update_map(map_)
         self._spawn_robot(robot_yaml_path)
@@ -80,9 +70,7 @@ class RobotManager:
         self._static_obstacle_name_list = []
 
         # Incl. for direct goal publishing in test mode
-        self.pub_mvb_goal = rospy.Publisher(
-            "/move_base_simple/goal", PoseStamped, queue_size=1, latch=True
-        )
+        self.pub_mvb_goal = rospy.Publisher("/move_base_simple/goal", PoseStamped, queue_size=1, latch=True)
         self.planer = rospy.get_param("local_planner")
 
     def _spawn_robot(self, robot_yaml_path: str):
@@ -134,9 +122,7 @@ class RobotManager:
             # assert self.step_size * \
             #     self.LASER_UPDATE_RATE == 1, f"TO run the traning successfully, make sure the laser_update_rate*step_size == 1 \
             #     \n\tcurrent step_size:\t {self.step_size}\n\tcurrent laser's update rate:\t {self.LASER_UPDATE_RATE} "
-            for _ in range(
-                math.ceil(1 / (self.step_size * self.LASER_UPDATE_RATE))
-            ):
+            for _ in range(math.ceil(1 / (self.step_size * self.LASER_UPDATE_RATE))):
                 self._step_world()
 
     def set_start_pos_random(self):
@@ -183,9 +169,7 @@ class RobotManager:
                     start_pos_.x,
                     start_pos_.y,
                     start_pos_.theta,
-                ) = get_random_pos_on_map(
-                    self._free_space_indices, self.map, self.ROBOT_RADIUS * 2
-                )
+                ) = get_random_pos_on_map(self._free_space_indices, self.map, self.ROBOT_RADIUS * 2)
             else:
                 start_pos_ = start_pos
             if goal_pos is None:
@@ -194,20 +178,24 @@ class RobotManager:
                     goal_pos_.x,
                     goal_pos_.y,
                     goal_pos_.theta,
-                ) = get_random_pos_on_map(
-                    self._free_space_indices, self.map, self.ROBOT_RADIUS * 2
-                )
+                ) = get_random_pos_on_map(self._free_space_indices, self.map, self.ROBOT_RADIUS * 2)
             else:
                 goal_pos_ = goal_pos
 
-            if (
-                dist(start_pos_.x, start_pos_.y, goal_pos_.x, goal_pos_.y)
-                < min_dist
-            ):
+            if dist(start_pos_.x, start_pos_.y, goal_pos_.x, goal_pos_.y) < min_dist:
                 i_try += 1
                 continue
             # move the robot to the start pos
             self.move_robot(start_pos_)
+
+            # wait for aio global planner
+            if self.planer == "aio":
+                rospy.wait_for_service("/global_planner/makeGlobalPlan")
+            else:
+                # Make sure move_base is ready to take goals/make plan
+                if not rospy.get_param("_dedicated_train_launch", default=False):
+                    rospy.wait_for_service("/move_base/make_plan")
+
             try:
                 # publish the goal, if the gobal plath planner can't generate a path, a, exception will be raised.
                 self.publish_goal(goal_pos_.x, goal_pos_.y, goal_pos_.theta)
@@ -231,9 +219,7 @@ class RobotManager:
         """
 
         with self._global_path_con:
-            self._global_path_con.wait_for(
-                predicate=self._new_global_path_generated, timeout=0.1
-            )
+            self._global_path_con.wait_for(predicate=self._new_global_path_generated, timeout=0.1)
             if not self._new_global_path_generated:
                 raise rospy.ServiceException(
                     "can not generate a path with the given start position and the goal position of the robot"
@@ -259,6 +245,10 @@ class RobotManager:
         goal.pose.orientation.x = quaternion[1]
         goal.pose.orientation.y = quaternion[2]
         goal.pose.orientation.z = quaternion[3]
+
+        if not rospy.get_param("_dedicated_train_launch", default=False):
+            rospy.wait_for_service("/move_base/make_plan")
+
         self._goal_pub.publish(goal)
         # self._validate_path()
         if self.planer in ["teb", "dwa", "mpc"]:
@@ -267,10 +257,7 @@ class RobotManager:
     def _global_path_callback(self, global_path: Path):
         with self._global_path_con:
             self._global_path = global_path
-            if (
-                self._old_global_path_timestamp is None
-                or global_path.header.stamp > self._old_global_path_timestamp
-            ):
+            if self._old_global_path_timestamp is None or global_path.header.stamp > self._old_global_path_timestamp:
                 self._new_global_path_generated = True
             self._global_path_con.notify()
 

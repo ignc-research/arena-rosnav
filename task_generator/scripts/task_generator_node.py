@@ -1,12 +1,11 @@
 #! /usr/bin/env python3
 
-from logging import setLogRecordFactory
 import rospy
-import time
-from std_srvs.srv import Empty, EmptyResponse
+import subprocess
+from std_srvs.srv import EmptyResponse
 from nav_msgs.msg import Odometry
 from task_generator.tasks import get_predefined_task
-from std_msgs.msg import Int16
+from std_msgs.msg import Int16, Bool
 # for clearing costmap
 from clear_costmap import clear_costmaps
 class TaskGenerator:
@@ -32,7 +31,7 @@ class TaskGenerator:
         # if the distance between the robot and goal_pos is smaller than this value, task will be reset
         self.timeout_= rospy.get_param("~timeout")
         self.timeout_= self.timeout_*60             # sec
-        self.start_time_=time.time()                # sec
+        self.start_time_=rospy.get_time()           # sec
         self.delta_ = rospy.get_param("~delta")
         robot_odom_topic_name = rospy.get_param(
             "robot_odom_topic_name", "odom")
@@ -40,8 +39,10 @@ class TaskGenerator:
         auto_reset = auto_reset and mode == "scenario"
         self.curr_goal_pos_ = None
         
+        self.pub = rospy.Publisher('End_of_scenario', Bool, queue_size=10)
         
         if auto_reset:
+
             rospy.loginfo(
                 "Task Generator is set to auto_reset mode, Task will be automatically reset as the robot approaching the goal_pos")
             self.reset_task()
@@ -65,7 +66,7 @@ class TaskGenerator:
         if self.err_g < self.delta_:
             print(self.err_g)
             self.reset_task()
-        if(time.time()-self.start_time_>self.timeout_):
+        if rospy.get_time()-self.start_time_>self.timeout_:
             print("timeout")
             self.reset_task()
 
@@ -83,12 +84,20 @@ class TaskGenerator:
 
 
     def reset_task(self):
-        self.start_time_=time.time()
+        self.start_time_=rospy.get_time()
         info = self.task.reset()
-        
         # clear_costmaps()
         if info is not None:
-            self.curr_goal_pos_ = info['robot_goal_pos']
+            if info == "End":
+                print(info)
+                # communicates to launch_arena (if used) the end of the simulation
+                print("SENDING END MESSAGE")
+                self.end_msg = Bool()
+                self.end_msg.data = True
+                self.pub.publish(self.end_msg)
+                rospy.signal_shutdown("Finished all episodes of the current scenario")
+            else:
+                self.curr_goal_pos_ = info['robot_goal_pos']
         rospy.loginfo("".join(["="]*80))
         rospy.loginfo("goal reached and task reset!")
         rospy.loginfo("".join(["="]*80))

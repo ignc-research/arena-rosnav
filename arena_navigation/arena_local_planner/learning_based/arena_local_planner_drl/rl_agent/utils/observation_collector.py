@@ -51,7 +51,7 @@ class ObservationCollector:
             lidar_range (float): [description]
         """
         self.ns = ns
-        if ns is None or ns == "":
+        if ns is None or not ns:
             self.ns_prefix = ""
         else:
             self.ns_prefix = "/" + ns + "/"

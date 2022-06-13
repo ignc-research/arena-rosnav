@@ -1,9 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <launch>
-<!-- map folder -->
-  <!-- <arg name="ns_prefix"       value="sim" />
+  <!-- map folder -->
+  <!-- <arg name="ns_prefix" value="sim" />
 
-  <arg name="train_mode"      default="true" />
-  <arg name="num_envs"        default="1" />
+  <arg name="train_mode" default="true" />
+  <arg name="num_envs" default="1" />
   <arg name="map_folder_name" default="map_empty" />
 
   <rosparam file="$(find arena_bringup)/launch/start_flatland.yaml" command="load" />
@@ -14,9 +15,9 @@
   <arg name="model" default="burger"      doc="model type [burger, jackal, ridgeback, agvota, rto, rto_real]"/>
   <param name="model" value="$(arg model)" />
 
-  <arg name="local_planner" default="rosnav"   doc="local-planer type [teb, dwa, mpc, rlca, cadrl, arena, rosnav]"/>
+  <arg name="local_planner" default="rosnav" doc="local-planer type [teb, dwa, mpc, rlca, cadrl, arena, rosnav]"/>
   <param name="local_planner" value="$(arg local_planner)"/>
-  
+
   <!-- Robot specific args -->
   <arg name='radius' default='0.113' if="$(eval arg('model') == 'burger')"/>
   <arg name='speed' default='0.22' if="$(eval arg('model') == 'burger')"/>
@@ -35,21 +36,21 @@
   <arg name='radius' default='0.36' if="$(eval arg('model') == 'cob4')"/>
   <arg name='speed' default='1.1' if="$(eval arg('model') == 'cob4')"/>
   <arg name='radius' default='0.347' if="$(eval arg('model') == 'youbot')"/>
-  <arg name='speed' default='0.8' if="$(eval arg('model') == 'youbot')"/>  
+  <arg name='speed' default='0.8' if="$(eval arg('model') == 'youbot')"/>
   <param name="radius" value="$(arg radius)"/>
   <param name="speed" value="$(arg speed)"/>
 
   <!-- Here are the argument that may be frequently changed -->
   <arg name="ns_prefix" default="sim" />
   <arg name="num_envs" default="1" />
-  
+
   <!-- train mode  -->
-  <arg name="train_mode"       default="true"/>
+  <arg name="train_mode" default="true"/>
 
   <!-- To make the training more efficient make sure this step_size*laser_update_rate == 1  -->
   <arg name="step_size" default="0.01"/>
   <arg name="update_rate" default="250"/>
-  <arg name="show_viz"  default="true"/>
+  <arg name="show_viz" default="true"/>
   <arg name="viz_pub_rate" default="30" />
 
   <!-- the folder name under the path simulator_setup/maps  -->
@@ -65,14 +66,15 @@
   <param name="use_sim_time" value="true" />
   <param name="train_mode" value="$(arg train_mode)" />
   <param name="num_envs" value="$(arg num_envs)" />
-  <param name="step_size" value="$(arg step_size)" /> 
-  <param name="obs_vel" value="$(arg obs_vel)" /> 
+  <param name="step_size" value="$(arg step_size)" />
+  <param name="obs_vel" value="$(arg obs_vel)" />
   <arg name="map_path" default="$(find simulator_setup)/maps/$(arg map_folder_name)/map.yaml" />
   <param name="world_path" value="$(find simulator_setup)/maps/$(arg map_folder_name)/map.world.yaml" />
   <param name="show_viz" value="$(arg show_viz)"/>
   <param name="viz_pub_rate" value="$(arg viz_pub_rate)"/>
   <param name="robot_action_rate"     value="5"/>
   <param name="laser_update_rate"     value="10"/>
+  <param name="_dedicated_train_launch" value="true" />
 
 
   <!-- map server-->
@@ -82,7 +84,7 @@
   </node>
 
   <group if="$(eval arg('train_mode') == false)">
-  <!-- makes sure that action's will be published according to sim time in eval mode-->
+    <!-- makes sure that action's will be published according to sim time in eval mode-->
     <node name="action_publisher" pkg="arena_local_planner_drl" type="action_publisher.py"/>
   </group>
 

@@ -154,28 +154,6 @@ class RewardCalculator:
         self._reward_goal_approached(goal_in_robot_frame, reward_factor=0.4, penalty_factor=0.6)
         self.last_action = self._curr_action
 
-    def _cal_reward_rule_barn(self, laser_scan: np.ndarray, goal_in_robot_frame: Tuple[float, float], *args, **kwargs):
-        self._curr_action = kwargs["action"]
-        self._set_current_dist_to_globalplan(kwargs["global_plan"], kwargs["robot_pose"])
-        # self._reward_following_global_plan(self._curr_action)
-        # if laser_scan.min() > self.safe_dist:
-        # self._reward_distance_global_plan(
-        #     reward_factor=0.2,
-        #     penalty_factor=0.3,
-        # )
-        # else:
-        #     self.last_dist_to_path = None
-        self._reward_abrupt_vel_change(vel_idx=0, factor=1.1)
-        self._reward_abrupt_vel_change(vel_idx=-1, factor=0.55)
-        if self.holonomic:
-            self._reward_abrupt_vel_change(vel_idx=1, factor=0.55)
-        self._reward_reverse_drive(self._curr_action, 0.0001)
-        self._reward_goal_reached(goal_in_robot_frame, reward=15)
-        self._reward_safe_dist(laser_scan, punishment=0.005)
-        self._reward_collision(laser_scan, punishment=15)
-        self._reward_goal_approached(goal_in_robot_frame, reward_factor=0.5, penalty_factor=0.7)
-        self.last_action = self._curr_action
-
     def _set_current_dist_to_globalplan(self, global_plan: np.ndarray, robot_pose: Pose2D):
         if global_plan is not None and len(global_plan) != 0:
             self._curr_dist_to_path, idx = self.get_min_dist2global_kdtree(global_plan, robot_pose)

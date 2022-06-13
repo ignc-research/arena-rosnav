@@ -25,7 +25,11 @@ void SpacialHorizon::init(ros::NodeHandle &nh)
     ros::NodeHandle public_nh;  // sim1/goal
     goal_sub_ = public_nh.subscribe("goal", 1, &SpacialHorizon::goalCallback,this);
     odom_sub_ = public_nh.subscribe("odom", 1, &SpacialHorizon::odomCallback, this);
+<<<<<<< HEAD
     // amcl_pose_sub_ = public_nh.subscribe("amcl_pose", 1, &SpacialHorizon::amcl_poseCallback, this);
+=======
+    
+>>>>>>> origin/noetic-devel
     initialPose_sub_ = public_nh.subscribe("initialpose", 0, &SpacialHorizon::handle_initial_pose, this);
 
     subgoal_DRL_pub_  = public_nh.advertise<geometry_msgs::PoseStamped>("subgoal",10);
@@ -96,8 +100,6 @@ bool SpacialHorizon::getSubgoalSpacialHorizon(Eigen::Vector2d &subgoal){
         return true;
     }
 
-    getGlobalPath_MoveBase();
-
     // select the nearst waypoint on global path
     int subgoal_id=0;
 
@@ -125,13 +127,21 @@ bool SpacialHorizon::getSubgoalSpacialHorizon(Eigen::Vector2d &subgoal){
 
 void SpacialHorizon::updateSubgoalDRLCallback(const ros::TimerEvent &e){
     //if there's no goal
-    if(!have_goal_) return;
+    if(!have_goal_) return; 
     
     // get subgoal
     bool subgoal_success=false;
     Eigen::Vector2d subgoal;
 
     subgoal_success=getSubgoalSpacialHorizon(subgoal);
+            
+    // if to far away from subgoal -> recompute global path and subgoal
+    double dist_to_subgoal=(odom_pos_-subgoal).norm();
+    if(dist_to_subgoal > planning_horizen_ + 1.0){
+        std::cout<< "[Spacial Horizon]: To far away from subgoal! Recomputing global path" << std::endl;
+        getGlobalPath_MoveBase();
+        subgoal_success=getSubgoalSpacialHorizon(subgoal);
+    }
 
     // std::cout<<subgoal_success<<std::endl;
 
@@ -180,9 +190,14 @@ void SpacialHorizon::getGlobalPath_MoveBase(){
 
 void SpacialHorizon::fillPathRequest(nav_msgs::GetPlan::Request &request){
 	request.start.header.frame_id ="map";
-	request.start.pose.position.x = odom_pos_[0];//x coordinate of the initial position
-	request.start.pose.position.y = odom_pos_[1];//y coordinate of the initial position
-	request.start.pose.orientation.w = 1.0;//direction
+    // if(is_real){
+    //     request.start.pose.position.x = initial_pose_[0];//x coordinate of the initial position
+    //     request.start.pose.position.y = initial_pose_[1];//y coordinate of the initial position
+    // }else{
+    request.start.pose.position.x = odom_pos_[0];//x coordinate of the initial position
+    request.start.pose.position.y = odom_pos_[1];//y coordinate of the initial position
+    // }
+    request.start.pose.orientation.w = 1.0;//direction
 	request.goal.header.frame_id = "map";
 	request.goal.pose.position.x = end_pos_[0];//End point coordinates
 	request.goal.pose.position.y = end_pos_[1];

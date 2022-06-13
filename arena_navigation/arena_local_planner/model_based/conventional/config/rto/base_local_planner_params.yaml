@@ -1,0 +1,15 @@
+TrajectoryPlannerROS:
+
+  # params are from https://github.com/dietriro/rto_core/tree/noetic-devel/rto_navigation/config
+  # and https://www.robotshop.com/media/files/content/f/fto/pdf/festo-robotino-mobile-robotic-datasheet.pdf
+
+  max_vel_x: 2.78
+  min_vel_x: -2.78
+  max_vel_theta: 1.0
+  min_in_place_vel_theta: 0.4
+
+  acc_lim_theta: 3.2
+  acc_lim_x: 2.5
+  acc_lim_y: 2.5
+
+  holonomic_robot: true

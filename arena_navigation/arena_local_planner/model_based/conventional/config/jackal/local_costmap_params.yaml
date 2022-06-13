@@ -9,6 +9,10 @@ local_costmap:
    rolling_window: true
    width: 10.0
    height: 10.0
+<<<<<<< HEAD
    resolution: 0.05
    inflation_layer:
       inflation_radius: 0.2 # 0.0 Localdeki alanlar
+=======
+   resolution: 0.05
+>>>>>>> origin/noetic-devel

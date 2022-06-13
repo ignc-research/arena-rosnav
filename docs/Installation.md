@@ -68,14 +68,14 @@ sudo apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31
 
 ```
 sudo apt update
-sudo apt install ros-melodic-desktop-full
+sudo apt install ros-noetic-desktop-full
 ```
 
 - Environment Setup
 
 ```
-echo "source /opt/ros/melodic/setup.zsh" >> ~/.zshrc
-source ~/.zshrc
+echo "source /opt/ros/noetic/setup.bash" >> ~/.bashrc
+source ~/.bashrc
 ```
 
 - Dependencies for building packages
@@ -93,25 +93,25 @@ rosdep update
 
 - Install additional pkgs
 
-```
+```bash
 sudo apt-get update && sudo apt-get install -y \
-libqt4-dev \
 libopencv-dev \
 liblua5.2-dev \
 screen \
-python3.6 \
-python3.6-dev \
-python3.6-pip \
-libpython3.6-dev \
-python3-catkin-pkg-modules \
+python3-rosdep \
+python3-rosinstall \
+python3-rosinstall-generator \
+build-essential \
 python3-rospkg-modules \
-python3-empy \
-python3-setuptools \
-ros-melodic-navigation \
-ros-melodic-teb-local-planner \
-ros-melodic-mpc-local-planner \
+ros-noetic-navigation \
+ros-noetic-teb-local-planner \
+ros-noetic-mpc-local-planner \
 libarmadillo-dev \
-ros-melodic-nlopt \
+ros-noetic-nlopt \
+ros-noetic-turtlebot3-description \
+ros-noetic-turtlebot3-navigation \
+ros-noetic-lms1xx \
+ros-noetic-velodyne-description
 ```
 
 #### 1.2. Prepare virtual environment & install python packages
@@ -134,27 +134,34 @@ cd $HOME
 mkdir python_env   # create a venv folder in your home directory
 ```
 
-- Add exports into your .zshrc (if you use bash change the last line to bashrc instead of zshrc):
+- Add exports into your .bashrc (if you use zsh change the last line to bashrc instead of bashrc):
 
 ```
 echo "export WORKON_HOME=$HOME/python_env   #path to your venv folder
 export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python3   #path to your python3
 export VIRTUALENVWRAPPER_VIRTUALENV=/usr/local/bin/virtualenv
-source /usr/local/bin/virtualenvwrapper.sh" >> ~/.zshrc
+source /usr/local/bin/virtualenvwrapper.sh" >> ~/.bashrc
+source ~/.bashrc
 ```
 
 - Create a new venv
 
+<<<<<<< HEAD
 Note: You might need to restart your terminal at this point.
 
+=======
+
+> > > > > > > origin/noetic-devel
+
 ```
-mkvirtualenv --python=python3.6 rosnav
+mkvirtualenv --python=python3.8 rosnav
 workon rosnav
 ```
 
 - Install packages inside your venv (venv always activated!):
 
 ```
+<<<<<<< HEAD
 pip install --extra-index-url https://rospypi.github.io/simple/ rospy rosbag tf tf2_ros --ignore-installed
 pip install pyyaml catkin_pkg netifaces pathlib
 ```
@@ -165,20 +172,30 @@ pip install pyyaml catkin_pkg netifaces pathlib
 pip install stable-baselines3
 ```
 
+=======
+pip3 install --extra-index-url https://rospypi.github.io/simple/ rospy rosbag tf tf2_ros --ignore-installed
+pip3 install pyyaml catkin_pkg netifaces pathlib filelock pyqt5 mpi4py torch lxml scipy defusedxml aliyun-fc2
+
+```
+
+>>>>>>> origin/noetic-devel
+
 #### 1.3. Install arena-rosnav repo
 
 - Create a arena_ws and clone this repo into your arena_ws
 
 ```
+
 cd $HOME
 mkdir -p arena_ws/src && cd arena_ws/src
-git clone https://github.com/ignc-research/arena-rosnav
+git clone https://github.com/ignc-research/arena-rosnav -b noetic-devel
 
 cd arena-rosnav && rosws update
 source $HOME/.zshrc
 cd ../..
 catkin_make -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=/usr/bin/python3
 source devel/setup.zsh
+
 ```
 
 Note: if you use bash replace zsh with bash in the commands
@@ -189,43 +206,55 @@ The official ros only support tf2 with python2. In order to make the _tf_ work i
 and do some additional configurations for the convenience . You can simply run it with
 
 ```
+
 cd $HOME/arena_ws/src/arena-rosnav
 ./geometry2_install.sh
+
 ```
 
 If the command failed to compile:
 
 ```
+
 cd $HOME/geometry2_ws
 catkin_make -DPYTHON_EXECUTABLE=/usr/bin/python3
+
 ```
 
 - Set python path in .zshrc (or .bashrc if you use that)
 
 ```
+
 nano ~/.zshrc
+
 ```
 
 Add these lines below "source/opt/ros/melodic/setup.zsh"
 
 ```
+
 source /$HOME/arena_ws/devel/setup.zsh
 export PYTHONPATH=$HOME/arena_ws/src/arena-rosnav:${PYTHONPATH}
 export PYTHONPATH=$HOME/geometry2_ws/devel/lib/python3/dist-packages:${PYTHONPATH}
+
 ```
 
 Add this line above "source/opt/ros/melodic/setup.zsh"
 
 ```
+
 export PYTHONPATH=""
+
 ```
 
 - Install CADRL dependencies (venv always activated!)
 
 ```
+
 workon rosnav
 cd $HOME/arena_ws/src/arena-rosnav/arena_navigation/arena_local_planner/model_based/cadrl_ros
 pip install -r requirements_cadrl.txt
+
 ```
 
 If you encounter errors, e.g. specific versions not found, please manually install the packages with an available version.
@@ -234,6 +263,7 @@ You only need this to run our cadrl node, if you dont plan to use it, skip this 
 - Inside forks/stable-baselines3
 
 ```
+
 pip install -e .
 
 ```
@@ -241,7 +271,9 @@ pip install -e .
 - inside arena_ws:
 
 ```
+
 catkin_make -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=/usr/bin/python3
+
 ```
 
 ## Update after developing flatland code
@@ -249,15 +281,19 @@ catkin_make -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=/usr/bin/python3
 After changes inside the forks/flatland folder you should do the following steps to fetch the latest version:
 
 ```
+
 cd $HOME/arena_ws/src/arena-rosnav
 rosws update
+
 ```
 
 pull latest ignc-flatland version
 
 ```
+
 cd $HOME/arena_ws/src/forks/flatland
 git pull
+
 ```
 
 # Error Handling
@@ -266,14 +302,24 @@ if you encounter the error "world path not given", it is probably because you ha
 In that case go to the arena-rosnav folder and do
 
 ```
+
 rosws update
+
 ```
 
 Subsequently, go to the forks/stable_baselines3 folder and do:
 
 ```
+
 pip install -e .
+
 ```
+source $HOME/.bashrc
+cd ../..
+catkin_make -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=/usr/bin/python3 -DCMAKE_CXX_STANDARD=14
+```
+
+Note: if you use bash replace bash with bash in the commands
 
 # Training with GPU RTX 3090
 

@@ -1,0 +1,34 @@
+DWAPlannerROS:
+  # Robot Configuration Parameters
+  acc_lim_x: 10.0
+  acc_lim_th: 20.0
+
+  max_vel_x: 2.0
+  min_vel_x: -0.1
+  max_vel_y: 0.0
+  min_vel_y: 0.0
+  max_vel_trans: 2.0
+  max_rot_vel: 1.57
+  min_rot_vel: 0.14
+
+  theta_stopped_vel: 2.0
+  trans_stopped_vel: 0.1
+
+  sim_time: 2.0
+  sim_granularity: 0.02
+  angular_sim_granularity: 0.02
+  vx_samples: 6
+  controller_frequency:
+    20.0
+
+    #Oscillation Prevention Parameters
+  oscillation_reset_dist: 0.05 #How far the robot must travel in meters before oscillation flags are reset (double, default: 0.05)
+  escape_reset_dist: 0.1
+  escape_reset_theta: 0.1
+  # prune_plan: true
+
+  path_distance_bias: 94.0
+  goal_distance_bias: 24.0
+  occdist_scale: 0.1
+  forward_point_distance: 0.355
+

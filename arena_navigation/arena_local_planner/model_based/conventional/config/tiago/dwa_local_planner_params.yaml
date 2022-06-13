@@ -1,0 +1,49 @@
+base_local_planner: dwa_local_planner/DWAPlannerROS
+
+DWAPlannerROS:
+  # params are from https://github.com/pal-robotics/pal_navigation_cfg_public/blob/master/pal_navigation_cfg_pmb2/config/base/dwa/local_planner.yaml
+  acc_lim_th: 1.5
+  acc_lim_x: 0.8
+  acc_lim_y: 0.0
+
+  max_vel_x: 1.5
+  min_vel_x: 0
+
+  max_vel_y: 0.0
+  min_vel_y: 0.0
+
+  max_vel_trans: 1.5
+  min_vel_trans: 0.1
+
+  max_vel_theta: 2.0
+  min_vel_theta: 0.4
+
+  sim_time: 1.7
+  sim_granularity: 0.025
+
+  goal_distance_bias: 24.0
+  path_distance_bias: 32.0
+  occdist_scale: 0.01
+
+  stop_time_buffer: 0.2
+  oscillation_reset_dist: 0.1
+
+  forward_point_distance: 0.325
+
+  scaling_speed: 1.0
+  max_scaling_factor: 0.2
+
+  vx_samples: 10
+  vy_samples: 0
+  vtheta_samples: 20
+
+  sim_period: 0.1
+
+  xy_goal_tolerance: 0.2
+  yaw_goal_tolerance: 0.2
+
+  theta_stopped_vel: 0.01
+  trans_stopped_vel: 0.01
+
+  meter_scoring: true
+  publish_cost_grid: true

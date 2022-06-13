@@ -1,21 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <launch>
   <param name="use_sim_time" value="true"/>
 
   <arg name="train_mode" default="false"/>
-  <arg name="model" default="jackal"      doc="model type [burger, jackal, ridgeback, agvota, rto, rto_real]"/>
+  <arg name="model" default="burger" doc="model type [burger, jackal, ridgeback, agvota, rto, rto_real, dingo]"/>
   <!--husy does not yet work-->
   <param name="train_mode" value="$(arg train_mode)" />
   <arg name="use_recorder" default="false"/>
   <arg name="record_only_planner" default="true"/>
   <arg name="requestID"       default="user1"/>
 
-  <arg name="local_planner" default="teb"   doc="local-planer type [teb, dwa, mpc, rlca, cadrl, arena, rosnav]"/>
+  <arg name="local_planner" default="teb" doc="local-planer type [teb, dwa, mpc, rlca, arena, rosnav]"/>
   <!-- Rosnav agent name -->
-  <arg name="agent_name" default="$(arg model)"     doc = "DRL agent name to be deployed" unless="$(eval arg('local_planner') == 'rosnav')"/>
+  <arg name="agent_name" default="$(arg model)"     doc = "DRL agent name to be deployed" unless="$(eval arg('local_planner') != 'rosnav')"/>
   <arg name="waypoint_generator" default="classic"/>
   <arg name="rviz_file" default="nav"/>
   <arg name="disable_scenario" default="false"/>
-  <arg name="scenario_file" default="eval/obstacle_map1_obs10.json" doc="[scenario2.json, empty_map.json, test_scenario.json (pesim)]"/>
+  <arg name="scenario_file" default="test_scenario.json" doc="[scenario2.json, empty_map.json, test_scenario.json (pesim), eval_feb_2022/small_warehouse_obs05.json]"/>
   <arg name="reset" default="true"/>
   <arg name="enable_pedsim" default="true"/>
   <arg name="task_mode" default="scenario" doc="[random, manual, staged, scenario]"/>
@@ -26,10 +27,10 @@
   <arg name="show_viz" default="true"/>
   <arg name="viz_pub_rate" default="30" />
   <arg name="use_rviz" default="true"/>
-  
+
   <param name="local_planner" value="$(arg local_planner)"/>
   <param name="model" value="$(arg model)" />
-  <param name="agent_name" value="$(arg agent_name)" />
+  <param name="agent_name" value="$(arg agent_name)" unless="$(eval arg('local_planner') != 'rosnav')"/>
   <param name="update_rate" value="$(arg update_rate)" />
   <param name="step_size" value="$(arg step_size)" />
   <param name="show_viz" value="$(arg show_viz)"/>
@@ -83,7 +84,11 @@
   <arg name='radius' default='0.36' if="$(eval arg('model') == 'cob4')"/>
   <arg name='speed' default='1.1' if="$(eval arg('model') == 'cob4')"/>
   <arg name='radius' default='0.347' if="$(eval arg('model') == 'youbot')"/>
-  <arg name='speed' default='0.8' if="$(eval arg('model') == 'youbot')"/>  
+  <arg name='speed' default='0.8' if="$(eval arg('model') == 'youbot')"/>
+  <arg name='radius' default='0.208' if="$(eval arg('model') == 'waffle_pi')"/>
+  <arg name='speed' default='0.26' if="$(eval arg('model') == 'waffle_pi')"/>
+  <arg name='radius' default='0.378' if="$(eval arg('model') == 'dingo')"/>
+  <arg name='speed' default='0.13' if="$(eval arg('model') == 'dingo')"/>
   <param name="radius" value="$(arg radius)"/>
   <param name="speed" value="$(arg speed)"/>
 
@@ -94,7 +99,11 @@
   <param name="scenario_file"  value="$(arg scenario_file)"/>
   <param name="requestID"  value="$(arg requestID)"/>
   <group if="$(eval arg('use_recorder') == true)">
-    <node pkg="arena_evaluation" name="data_recorder_node" type="data_recorder_node.py" />
+    <node pkg="arena-evaluation" name="data_recorder_node" type="data_recorder_node.py" />
+    <param name="local_planner" value="$(arg local_planner)"/>
+    <param name="waypoint_generator" value="$(arg waypoint_generator)"/>
+    <param name="record_only_planner" value="$(arg record_only_planner)"/>
+    <param name="scenario_file" value="$(arg scenario_file)"/>
   </group>
 
   <!-- use simulator-->
@@ -127,8 +136,8 @@
     <arg name="task_mode" value="$(arg task_mode)"/>
   </include>
 
-  <!-- <include file="$(find arena_bringup)/launch/sublaunch_testing/sensor_sim.launch" unless="$(eval arg('disable_scenario') or arg('train_mode'))">
-  </include> -->
+  <include file="$(find arena_bringup)/launch/sublaunch_testing/sensor_sim.launch" unless="$(eval arg('train_mode'))">
+  </include>
 
 
 
