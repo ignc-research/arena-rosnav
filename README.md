@@ -1,26 +1,25 @@
-# Arena-Rosnav (IROS 21)
+# Arena-Rosnav (IEEE IROS 21)
+If you find this code useful, please cite our paper:
+```
+@inproceedings{kastner2021arena,
+  title={Arena-Rosnav: Towards Deployment of Deep-Reinforcement-Learning-Based Obstacle Avoidance into Conventional Autonomous Navigation Systems},
+  author={K{\"a}stner, Linh and Buiyan, Teham and Jiao, Lei and Le, Tuan Anh and Zhao, Xinlin and Shen, Zhengcheng and Lambrecht, Jens},
+  booktitle={2021 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)},
+  pages={6456--6463},
+  organization={IEEE}
+}
+```
 
 **Note:**
 For our 3D version using Gazebo as simulation platform, please visit our [arena-rosnav-3D repo](https://github.com/ignc-research/arena-rosnav-3D)
 
-- Full support of the following robots with realistic parameters: `turtlebot3_burger`, `ridgeback`, `jackal`, `agvota`, `dingo` _(see [here](docs/Simulation.md#Robots) for detailed description of their usage)_
 
-  THIS INCLUDES:
-
-  - Full support of the planers `teb`, `dwa`, `mpc`, `cadrl`, `rlca`, `arena`
-  - Realistic flatland models for each robot
-  - Defined action space for each Robot (for _rl-training_)
-
-- Support of the planer `arena`
-- Setting of navigation goal automatically for all planers in `testing` mode
-
-A flexible, high-performance 2D simulator with configurable agents, multiple sensors, and benchmark scenarios for testing robotic navigation.
-
-Arena-Rosnav uses Flatland as the core simulator and is a modular high-level library for end-to-end experiments in embodied AI -- defining embodied AI tasks (e.g. navigation, obstacle avoidance, behavior cloning), training agents (via imitation or reinforcement learning, or no learning at all using conventional approaches like DWA, TEB or MPC), and benchmarking their performance on the defined tasks using standard metrics.
+This reporsitory includes the code for our paper [Arena-rosnav](https://arxiv.org/abs/2104.03616). Arena-rosnav is a flexible, high-performance 2D simulator with configurable agents, multiple sensors, and benchmark scenarios for testing robotic navigation. Arena-Rosnav uses Flatland as the core simulator and is a modular high-level library for end-to-end experiments in embodied AI -- defining embodied AI tasks (e.g. navigation, obstacle avoidance, behavior cloning), training agents (via imitation or reinforcement learning, or no learning at all using conventional approaches like DWA, TEB or MPC), and benchmarking their performance on the defined tasks using standard metrics.
 
 | <img width="400" height="400" src="/img/rosnav1.gif"> | <img width="400" height="400" src="/img/rosnav2.gif"> |
 | :---------------------------------------------------: | :---------------------------------------------------: |
 |                   _Training Stage_                    |                  _Deployment Stage_                   |
+
 
 ## What is this repository for?
 
