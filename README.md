@@ -11,7 +11,7 @@ If you find this code useful, please cite our paper:
 ```
 
 **Note:**
-For our 3D version using Gazebo as simulation platform, please visit our [arena-rosnav-3D repo](https://github.com/ignc-research/arena-rosnav-3D)
+This reporsitory is part of [arena-bench](https://github.com/ignc-research/arena-bench). Please also check out our most recent [paper](https://arxiv.org/abs/2206.05728) on arena-bench. For our 3D version using Gazebo as simulation platform, please visit our [arena-rosnav-3D repo](https://github.com/ignc-research/arena-rosnav-3D). 
 
 
 This reporsitory includes the code for our paper [Arena-rosnav](https://arxiv.org/abs/2104.03616). Arena-rosnav is a flexible, high-performance 2D simulator with configurable agents, multiple sensors, and benchmark scenarios for testing robotic navigation. Arena-Rosnav uses Flatland as the core simulator and is a modular high-level library for end-to-end experiments in embodied AI -- defining embodied AI tasks (e.g. navigation, obstacle avoidance, behavior cloning), training agents (via imitation or reinforcement learning, or no learning at all using conventional approaches like DWA, TEB or MPC), and benchmarking their performance on the defined tasks using standard metrics.
