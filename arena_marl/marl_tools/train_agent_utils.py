@@ -59,6 +59,7 @@ hyperparams = {
     for key in [
         "agent_name",
         "robot",
+        "actions_in_observationspace",
         "batch_size",
         "gamma",
         "n_steps",
@@ -95,9 +96,7 @@ def load_config(config_name: str) -> dict:
     return config
 
 
-def initialize_hyperparameters(
-    PATHS: dict, load_target: str, config_name: str = "default", n_envs: int = 1
-) -> dict:
+def initialize_hyperparameters(PATHS: dict, config: dict, n_envs: int) -> dict:
     """
     Write hyperparameters to json file in case agent is new otherwise load existing hyperparameters
 
@@ -107,10 +106,8 @@ def initialize_hyperparameters(
     :param n_envs: number of envs
     """
     # when building new agent
-    if load_target is None:
-        hyperparams = load_hyperparameters_json(
-            PATHS=PATHS, from_scratch=True, config_name=config_name
-        )
+    if config["resume"] is None:
+        hyperparams = load_hyperparameters_json(PATHS=PATHS, from_scratch=True)
         hyperparams["agent_name"] = PATHS["model"].split("/")[-1]
     else:
         hyperparams = load_hyperparameters_json(PATHS=PATHS)
@@ -137,9 +134,7 @@ def write_hyperparameters_json(hyperparams: dict, PATHS: dict) -> None:
         json.dump(hyperparams, target, ensure_ascii=False, indent=4)
 
 
-def load_hyperparameters_json(
-    PATHS: dict, from_scratch: bool = False, config_name: str = "default"
-) -> dict:
+def load_hyperparameters_json(PATHS: dict, from_scratch: bool = False) -> dict:
     """
     Load hyperparameters from model directory when loading - when training from scratch
     load from ../configs/hyperparameters
@@ -149,7 +144,7 @@ def load_hyperparameters_json(
     :param config_name: file name of json file when training from scratch
     """
     if from_scratch:
-        doc_location = os.path.join(PATHS.get("hyperparams"), config_name + ".json")
+        doc_location = os.path.join(PATHS.get("hyperparams"))
     else:
         doc_location = os.path.join(PATHS.get("model"), "hyperparameters.json")
 
@@ -160,9 +155,7 @@ def load_hyperparameters_json(
         return hyperparams
     else:
         if from_scratch:
-            raise FileNotFoundError(
-                "Found no '%s.json' in %s" % (config_name, PATHS.get("hyperparams"))
-            )
+            raise FileNotFoundError("Found no '%s'" % PATHS.get("hyperparams"))
         else:
             raise FileNotFoundError(
                 "Found no 'hyperparameters.json' in %s" % PATHS.get("model")
@@ -305,7 +298,21 @@ def get_agent_name(args: argparse.Namespace) -> str:
     return args.load
 
 
-def get_paths(agent_name: str, args: argparse.Namespace) -> dict:
+def get_MARL_agent_name_and_start_time() -> str:
+    """Function to get MARL agent parent dir, where seperate agents for different robots are saved"""
+    START_TIME = dt.now().strftime("%Y_%m_%d__%H_%M")
+
+    return "MARL_AGENTS_" + START_TIME, START_TIME
+
+
+def get_paths(
+    marl_dir: str,
+    robot: str,
+    agent_name: str,
+    config_params: dict,
+    curriculum: str,
+    args: argparse.Namespace,
+) -> dict:
     """
     Function to generate agent specific paths
 
@@ -313,26 +320,29 @@ def get_paths(agent_name: str, args: argparse.Namespace) -> dict:
     :param args (argparse.Namespace): Object containing the program arguments
     """
     dir = rospkg.RosPack().get_path("arena_local_planner_drl")
-
     PATHS = {
-        "model": os.path.join(dir, "agents", agent_name),
-        "tb": os.path.join(dir, "training_logs", "tensorboard", agent_name),
-        "eval": os.path.join(dir, "training_logs", "train_eval_log", agent_name),
+        "model": os.path.join(dir, "agents", marl_dir, agent_name)
+        if config_params["resume"] is None
+        else config_params["resume"],
+        "tb": os.path.join(dir, "training_logs", "tensorboard", marl_dir, agent_name),
+        "eval": os.path.join(
+            dir, "training_logs", "train_eval_log", marl_dir, agent_name
+        ),
         "robot_setting": os.path.join(
             rospkg.RosPack().get_path("simulator_setup"),
             "robot",
-            "myrobot" + ".model.yaml",
+            robot + ".model.yaml",
         ),
-        "hyperparams": os.path.join(dir, "configs", "hyperparameters"),
+        "hyperparams": os.path.join(
+            dir, "configs", "hyperparameters", config_params["hyperparameter_file"]
+        ),
         "robot_as": os.path.join(
-            dir, "configs", "action_spaces", "default_settings.yaml"
+            dir, "configs", "action_spaces", "default_settings_" + robot + ".yaml"
         ),
-        "curriculum": os.path.join(
-            dir, "configs", "training_curriculums", "training_curriculum.yaml"
-        ),
+        "curriculum": os.path.join(dir, "configs", "training_curriculums", curriculum),
     }
     # check for mode
-    if args.load is None:
+    if config_params["resume"] is None:
         os.makedirs(PATHS["model"])
     elif not os.path.isfile(
         os.path.join(PATHS["model"], agent_name + ".zip")

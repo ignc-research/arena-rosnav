@@ -39,12 +39,13 @@ from arena_marl.marl_agent.utils.supersuit_utils import (
 
 # from tools.argsparser import parse_marl_training_args
 from marl_tools.train_agent_utils import (
-    get_agent_name,
+    get_MARL_agent_name_and_start_time,
     get_paths,
     choose_agent_model,
     load_config,
     initialize_hyperparameters,
 )
+from marl_tools import train_agent_utils
 from typing import List
 
 import os, sys, rospy, time
@@ -119,39 +120,51 @@ def main(args):
     # load configuration
     config = load_config(args.config)
 
-    paths_dict = {}
+    robots = {}
+    MARL_NAME, START_TIME = get_MARL_agent_name_and_start_time()
 
-    # generate agent name and model specific paths
-    AGENT_NAME = get_agent_name(args)
-    PATHS = get_paths(AGENT_NAME, args)
+    for robot in config["robots"].items():
+        # generate agent name and model specific paths
+        robot_name, config_params = robot
+        if config_params["resume"] is None:
+            agent_name = robot_name + "_" + START_TIME
+        else:
+            agent_name = config_params["resume"].split("/")[-1]
 
-    # initialize hyperparameters (save to/ load from json)
-    params = initialize_hyperparameters(
-        PATHS=PATHS,
-        load_target=args.load,
-        config_name=args.config,
-        n_envs=args.n_envs,
-    )
+        paths = train_agent_utils.get_paths(
+            MARL_NAME,
+            robot_name,
+            agent_name,
+            config_params,
+            config["training_curriculum"],
+            args,
+        )
+        # initialize hyperparameters (save to/ load from json)
+        params = train_agent_utils.initialize_hyperparameters(
+            PATHS=paths,
+            config=config_params,
+            n_envs=config["n_envs"],
+        )
 
-    env = vec_env_create(
-        env_fn,
-        instantiate_drl_agents,
-        num_robots=args.robots,
-        num_cpus=cpu_count() - 1,
-        num_vec_envs=args.n_envs,
-        PATHS=PATHS,
-    )
+        env = vec_env_create(
+            env_fn,
+            instantiate_drl_agents,
+            num_robots=config_params["num_robots"],
+            num_cpus=cpu_count() - 1,
+            num_vec_envs=config["n_envs"],
+            PATHS=paths,
+        )
 
-    env = VecNormalize(
-        env,
-        training=True,
-        norm_obs=True,
-        norm_reward=True,
-        clip_reward=15,
-        clip_obs=15,
-    )
+        env = VecNormalize(
+            env,
+            training=True,
+            norm_obs=True,
+            norm_reward=True,
+            clip_reward=15,
+            clip_obs=15,
+        )
 
-    model = choose_agent_model(AGENT_NAME, PATHS, args, env, params)
+        model = choose_agent_model(agent_name, paths, args, env, params)
 
     # set num of timesteps to be generated
     n_timesteps = 40000000 if args.n is None else args.n
