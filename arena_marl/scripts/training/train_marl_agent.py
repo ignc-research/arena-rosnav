@@ -123,6 +123,7 @@ def main(args):
     robots = {}
     MARL_NAME, START_TIME = get_MARL_agent_name_and_start_time()
 
+    # create seperate model instances for each robot
     for robot in config["robots"].items():
         # generate agent name and model specific paths
         robot_name, config_params = robot
@@ -164,22 +165,35 @@ def main(args):
             clip_obs=15,
         )
 
+        # TODO: add support for new config setup
         model = choose_agent_model(agent_name, paths, args, env, params)
+
+        # add configuration for one robot to robots dictionary
+        robots[robot_name] = {
+            "model": model,
+            "env": env,
+            "n_envs": config["n_envs"],
+            "config_params": config_params,
+            "params": params,
+            "paths": paths,
+        }
 
     # set num of timesteps to be generated
     n_timesteps = 40000000 if args.n is None else args.n
 
     start = time.time()
     try:
-        model.learn(
+        robots[robot_name][model].learn(
             total_timesteps=n_timesteps,
             reset_num_timesteps=True,
+            # Übergib einfach das dict für den aktuellen roboter
             callback=get_evalcallback(
-                train_env=env,
-                num_robots=args.robots,
-                num_envs=args.n_envs,
-                task_mode=params["task_mode"],
-                PATHS=PATHS,
+                robots[robot_name],
+                # train_env=env,
+                # num_robots=args.robots,
+                # num_envs=args.n_envs,
+                # task_mode=params["task_mode"],
+                # PATHS=paths,
             ),
         )
     except KeyboardInterrupt:
@@ -188,18 +202,19 @@ def main(args):
     # update the timesteps the model has trained in total
     # update_total_timesteps_json(n_timesteps, PATHS)
 
-    model.env.close()
+    robots[robot_name][model].env.close()
     print(f"Time passed: {time.time() - start}s")
     print("Training script will be terminated")
     sys.exit()
 
 
 def get_evalcallback(
-    train_env: VecEnv,
-    num_robots: int,
-    num_envs: int,
-    task_mode: str,
-    PATHS: dict,
+    agent: dict,
+    # train_env: VecEnv,
+    # num_robots: int,
+    # num_envs: int,
+    # task_mode: str,
+    # PATHS: dict,
 ) -> MarlEvalCallback:
     """Function which generates an evaluation callback with an evaluation environment.
 
@@ -214,11 +229,11 @@ def get_evalcallback(
         MarlEvalCallback: [description]
     """
     eval_env = env_fn(
-        num_agents=num_robots,
+        num_agents=agent["config_params"]["num_robots"],
         ns="eval_sim",
         agent_list_fn=instantiate_drl_agents,
         max_num_moves_per_eps=700,
-        PATHS=PATHS,
+        PATHS=agent["paths"],
     )
 
     eval_env = VecNormalize(
@@ -231,20 +246,20 @@ def get_evalcallback(
     )
 
     return MarlEvalCallback(
-        train_env=train_env,
+        train_env=agent["env"],
         eval_env=eval_env,
-        num_robots=num_robots,
+        num_robots=agent["config_params"]["num_robots"],
         n_eval_episodes=40,
         eval_freq=20000,
         deterministic=True,
-        log_path=PATHS["eval"],
-        best_model_save_path=PATHS["model"],
+        log_path=agent["paths"]["eval"],
+        best_model_save_path=agent["paths"]["model"],
         callback_on_eval_end=InitiateNewTrainStage(
-            n_envs=num_envs,
+            n_envs=agent["n_envs"],
             treshhold_type="succ",
             upper_threshold=0.8,
             lower_threshold=0.6,
-            task_mode=task_mode,
+            task_mode=agent["params"]["task_mode"],
             verbose=1,
         ),
         callback_on_new_best=StopTrainingOnRewardThreshold(
