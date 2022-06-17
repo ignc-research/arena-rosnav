@@ -5,6 +5,8 @@ from datetime import datetime as dt
 import gym
 import json
 import os, rospy
+
+import yaml
 import rosnode
 import rospkg
 import time
@@ -83,7 +85,22 @@ HYPERPARAM_KEYS = {
 }
 
 
-def initialize_hyperparameters(PATHS: dict, load_target: str, config_name: str = "default", n_envs: int = 1) -> dict:
+def load_config(config_name: str) -> dict:
+    """
+    Load config parameters from config file
+    """
+    config_location = os.path.join(
+        rospkg.RosPack().get_path("arena_local_planner_drl"), "configs", config_name
+    )
+    with open(config_location, "r", encoding="utf-8") as target:
+        config = yaml.load(target, Loader=yaml.FullLoader)
+
+    return config
+
+
+def initialize_hyperparameters(
+    PATHS: dict, load_target: str, config_name: str = "default", n_envs: int = 1
+) -> dict:
     """
     Write hyperparameters to json file in case agent is new otherwise load existing hyperparameters
 
@@ -94,7 +111,9 @@ def initialize_hyperparameters(PATHS: dict, load_target: str, config_name: str =
     """
     # when building new agent
     if load_target is None:
-        hyperparams = load_hyperparameters_json(PATHS=PATHS, from_scratch=True, config_name=config_name)
+        hyperparams = load_hyperparameters_json(
+            PATHS=PATHS, from_scratch=True, config_name=config_name
+        )
         hyperparams["robot"] = rospy.get_param("model", "not specified")
         hyperparams["agent_name"] = PATHS["model"].split("/")[-1]
     else:
@@ -133,7 +152,9 @@ def write_hyperparameters_json(hyperparams: dict, PATHS: dict) -> None:
         json.dump(hyperparams, target, ensure_ascii=False, indent=4)
 
 
-def load_hyperparameters_json(PATHS: dict, from_scratch: bool = False, config_name: str = "default") -> dict:
+def load_hyperparameters_json(
+    PATHS: dict, from_scratch: bool = False, config_name: str = "default"
+) -> dict:
     """
     Load hyperparameters from model directory when loading - when training from scratch
     load from ../configs/hyperparameters
@@ -154,9 +175,13 @@ def load_hyperparameters_json(PATHS: dict, from_scratch: bool = False, config_na
         return hyperparams
     else:
         if from_scratch:
-            raise FileNotFoundError("Found no '%s.json' in %s" % (config_name, PATHS.get("hyperparams")))
+            raise FileNotFoundError(
+                "Found no '%s.json' in %s" % (config_name, PATHS.get("hyperparams"))
+            )
         else:
-            raise FileNotFoundError("Found no 'hyperparameters.json' in %s" % PATHS.get("model"))
+            raise FileNotFoundError(
+                "Found no 'hyperparameters.json' in %s" % PATHS.get("model")
+            )
 
 
 def update_total_timesteps_json(timesteps: int, PATHS: dict) -> None:
@@ -173,7 +198,9 @@ def update_total_timesteps_json(timesteps: int, PATHS: dict) -> None:
         curr_timesteps = int(hyperparams["n_timesteps"]) + timesteps
         hyperparams["n_timesteps"] = curr_timesteps
     except Exception:
-        raise Warning("Parameter 'total_timesteps' not found or not of type Integer in 'hyperparameter.json'!")
+        raise Warning(
+            "Parameter 'total_timesteps' not found or not of type Integer in 'hyperparameter.json'!"
+        )
     else:
         with open(doc_location, "w", encoding="utf-8") as target:
             json.dump(hyperparams, target, ensure_ascii=False, indent=4)
@@ -189,11 +216,16 @@ def print_hyperparameters(hyperparams: dict) -> None:
 
 def check_hyperparam_format(loaded_hyperparams: dict, PATHS: dict) -> None:
     if set(HYPERPARAM_KEYS.keys()) != set(loaded_hyperparams.keys()):
-        missing_keys = set(HYPERPARAM_KEYS.keys()).difference(set(loaded_hyperparams.keys()))
-        redundant_keys = set(loaded_hyperparams.keys()).difference(set(HYPERPARAM_KEYS.keys()))
+        missing_keys = set(HYPERPARAM_KEYS.keys()).difference(
+            set(loaded_hyperparams.keys())
+        )
+        redundant_keys = set(loaded_hyperparams.keys()).difference(
+            set(HYPERPARAM_KEYS.keys())
+        )
         if missing_keys.difference(set(["actions_in_observationspace"])):
             raise AssertionError(
-                f"unmatching keys, following keys missing: {missing_keys} \n" f"following keys unused: {redundant_keys}"
+                f"unmatching keys, following keys missing: {missing_keys} \n"
+                f"following keys unused: {redundant_keys}"
             )
 
         warnings.warn(
@@ -211,7 +243,9 @@ def check_hyperparam_format(loaded_hyperparams: dict, PATHS: dict) -> None:
         raise TypeError("Parameter 'actions_in_observationspace' has to be a boolean!")
 
 
-def update_hyperparam_model(model: PPO, PATHS: dict, params: dict, n_envs: int = 1) -> None:
+def update_hyperparam_model(
+    model: PPO, PATHS: dict, params: dict, n_envs: int = 1
+) -> None:
     """
     Updates parameter of loaded PPO agent when it was manually changed in the configs yaml.
 
@@ -251,13 +285,17 @@ def update_hyperparam_model(model: PPO, PATHS: dict, params: dict, n_envs: int =
 
 
 def check_batch_size(n_envs: int, batch_size: int, mn_batch_size: int) -> None:
-    assert batch_size > mn_batch_size, f"Mini batch size {mn_batch_size} is bigger than batch size {batch_size}"
+    assert (
+        batch_size > mn_batch_size
+    ), f"Mini batch size {mn_batch_size} is bigger than batch size {batch_size}"
 
     assert (
         batch_size % mn_batch_size == 0
     ), f"Batch size {batch_size} isn't divisible by mini batch size {mn_batch_size}"
 
-    assert batch_size % n_envs == 0, f"Batch size {batch_size} isn't divisible by n_envs {n_envs}"
+    assert (
+        batch_size % n_envs == 0
+    ), f"Batch size {batch_size} isn't divisible by n_envs {n_envs}"
 
     assert (
         batch_size % mn_batch_size == 0
@@ -276,7 +314,18 @@ def get_agent_name(args: argparse.Namespace) -> str:
     START_TIME = dt.now().strftime("%Y_%m_%d__%H_%M")
 
     if args.custom_mlp:
-        return "MLP_B_" + args.body + "_P_" + args.pi + "_V_" + args.vf + "_" + args.act_fn + "_" + START_TIME
+        return (
+            "MLP_B_"
+            + args.body
+            + "_P_"
+            + args.pi
+            + "_V_"
+            + args.vf
+            + "_"
+            + args.act_fn
+            + "_"
+            + START_TIME
+        )
     if args.load is None:
         return args.agent + "_" + START_TIME
     return args.load
@@ -302,17 +351,22 @@ def get_paths(agent_name: str, args: argparse.Namespace) -> dict:
             f"{robot_model}.model.yaml",
         ),
         "hyperparams": os.path.join(dir, "configs", "hyperparameters"),
-        "robot_as": os.path.join(dir, "configs", f"default_settings_{robot_model}.yaml"),
-        "curriculum": os.path.join(dir, "configs", "training_curriculum_map1small.yaml"),
+        "robot_as": os.path.join(
+            dir, "configs", "action_spaces", f"default_settings_{robot_model}.yaml"
+        ),
+        "curriculum": os.path.join(
+            dir, "configs", "training_curriculums", "training_curriculum_map1small.yaml"
+        ),
     }
     # check for mode
     if args.load is None:
         os.makedirs(PATHS["model"])
-    elif not os.path.isfile(os.path.join(PATHS["model"], agent_name + ".zip")) and not os.path.isfile(
-        os.path.join(PATHS["model"], "best_model.zip")
-    ):
+    elif not os.path.isfile(
+        os.path.join(PATHS["model"], agent_name + ".zip")
+    ) and not os.path.isfile(os.path.join(PATHS["model"], "best_model.zip")):
         raise FileNotFoundError(
-            "Couldn't find model named %s.zip' or 'best_model.zip' in '%s'" % (agent_name, PATHS["model"])
+            "Couldn't find model named %s.zip' or 'best_model.zip' in '%s'"
+            % (agent_name, PATHS["model"])
         )
     # evaluation log enabled
     if args.eval_log:
@@ -394,7 +448,9 @@ def make_envs(
     return _init
 
 
-def wait_for_nodes(with_ns: bool, n_envs: int, timeout: int = 30, nodes_per_ns: int = 3) -> None:
+def wait_for_nodes(
+    with_ns: bool, n_envs: int, timeout: int = 30, nodes_per_ns: int = 3
+) -> None:
     """
     Checks for timeout seconds if all nodes to corresponding namespace are online.
 
@@ -404,9 +460,13 @@ def wait_for_nodes(with_ns: bool, n_envs: int, timeout: int = 30, nodes_per_ns: 
     :param nodes_per_ns: (int) usual number of nodes per ns
     """
     if with_ns:
-        assert with_ns and n_envs >= 1, f"Illegal number of environments parsed: {n_envs}"
+        assert (
+            with_ns and n_envs >= 1
+        ), f"Illegal number of environments parsed: {n_envs}"
     else:
-        assert not with_ns and n_envs == 1, f"Simulation setup isn't compatible with the given number of envs"
+        assert (
+            not with_ns and n_envs == 1
+        ), f"Simulation setup isn't compatible with the given number of envs"
 
     for i in range(n_envs):
         for k in range(timeout):
@@ -416,9 +476,13 @@ def wait_for_nodes(with_ns: bool, n_envs: int, timeout: int = 30, nodes_per_ns: 
             if len(namespaces) >= nodes_per_ns:
                 break
 
-            warnings.warn(f"Check if all simulation parts of namespace '{ns}' are running properly")
+            warnings.warn(
+                f"Check if all simulation parts of namespace '{ns}' are running properly"
+            )
             warnings.warn(f"Trying to connect again..")
-            assert k < timeout - 1, f"Timeout while trying to connect to nodes of '{ns}'"
+            assert (
+                k < timeout - 1
+            ), f"Timeout while trying to connect to nodes of '{ns}'"
 
             time.sleep(1)
 

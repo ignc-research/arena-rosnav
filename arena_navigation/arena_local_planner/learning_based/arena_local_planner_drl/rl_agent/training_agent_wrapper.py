@@ -12,6 +12,7 @@ robot_model = rospy.get_param("model")
 DEFAULT_ACTION_SPACE = os.path.join(
     rospkg.RosPack().get_path("arena_local_planner_drl"),
     "configs",
+    "action_spaces",
     f"default_settings_{robot_model}.yaml",
 )
 
@@ -24,7 +25,7 @@ class TrainingDRLAgent(BaseDRLAgent):
         hyperparameter_path: str,
         action_space_path: str = DEFAULT_ACTION_SPACE,
         *args,
-        **kwargs
+        **kwargs,
     ) -> None:
         """DRL Agent Wrapper Class for training.
 
@@ -66,7 +67,7 @@ class TrainingDRLAgent(BaseDRLAgent):
             hyperparameter_path=hyperparameter_path,
             action_space_path=action_space_path,
             *args,
-            **kwargs
+            **kwargs,
         )
 
     def setup_agent(self) -> None:

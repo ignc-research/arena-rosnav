@@ -14,8 +14,11 @@ from stable_baselines3.common.evaluation import evaluate_policy
 
 from rl_agent.envs.flatland_gym_env import FlatlandEnv
 from task_generator.task_generator.tasks import StopReset
-from tools.argsparser import parse_run_agent_args
-from tools.train_agent_utils import load_hyperparameters_json, print_hyperparameters
+from marl_tools.argsparser import parse_run_agent_args
+from marl_tools.train_agent_utils import (
+    load_hyperparameters_json,
+    print_hyperparameters,
+)
 
 ### AGENT LIST ###
 AGENTS = [

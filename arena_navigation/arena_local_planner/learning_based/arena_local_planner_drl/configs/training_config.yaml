@@ -1,0 +1,27 @@
+# Hardware specifc configurations
+# number of parallel environments
+n_envs: 1
+# gpu yes or no
+no_gpu: false
+
+robots:
+  jackal:
+    # number of robots of this type
+    num_robots: 2
+    # name of hyperparameter file located in the configs/hyperparameters directory
+    hyperparameter_file: "default"
+    # name of architecture defined in the Policy factory
+    architecture_name: "default"
+    # path to latest checkpoint; if provided the training will be resumed from that checkpoint
+    resume: null
+  burger:
+    # number of robots of this type
+    num_robots: 1
+    # name of hyperparameter file located in the configs/hyperparameters directory
+    hyperparameter_file: "default"
+    # name of architecture defined in the Policy factory
+    architecture_name: "default"
+    # path to latest checkpoint; if provided the training will be resumed from that checkpoint
+    resume: null
+  # add more robots as you wish
+  

@@ -20,14 +20,16 @@ from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.rl_agent.model.base_agent import (
     BaseAgent,
 )
-from tools.custom_mlp_utils import *
+from marl_tools.custom_mlp_utils import *
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.rl_agent.model.custom_policy import *
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.rl_agent.model.custom_sb3_policy import *
 
 # from tools.argsparser import parse_training_args
-from tools.staged_train_callback import InitiateNewTrainStage
-from tools.argsparser import parse_marl_training_args
+from marl_tools.staged_train_callback import InitiateNewTrainStage
 
+# remove, because we will read from yaml file
+from marl_tools.argsparser import parse_marl_training_args
+from tools.argsparser import parse_training_args
 
 from arena_marl.marl_agent.envs.pettingzoo_env import env_fn
 
@@ -36,10 +38,11 @@ from arena_marl.marl_agent.utils.supersuit_utils import (
 )
 
 # from tools.argsparser import parse_marl_training_args
-from tools.train_agent_utils import (
+from marl_tools.train_agent_utils import (
     get_agent_name,
     get_paths,
     choose_agent_model,
+    load_config,
     initialize_hyperparameters,
 )
 from typing import List
@@ -77,6 +80,7 @@ DEFAULT_HYPERPARAMETER = os.path.join(
 ROBOT_ACTION_SPACE = os.path.join(
     rospkg.RosPack().get_path("arena_local_planner_drl"),
     "configs",
+    "action_spaces",
     f"default_settings_{ROBOT_MODEL}.yaml",
 )
 
@@ -112,6 +116,11 @@ def instantiate_drl_agents(
 
 
 def main(args):
+    # load configuration
+    config = load_config(args.config)
+
+    paths_dict = {}
+
     # generate agent name and model specific paths
     AGENT_NAME = get_agent_name(args)
     PATHS = get_paths(AGENT_NAME, args)
@@ -235,6 +244,7 @@ def get_evalcallback(
 
 if __name__ == "__main__":
     set_start_method("fork")
-    args, _ = parse_marl_training_args()
+    # args, _ = parse_marl_training_args()
+    args, _ = parse_training_args()
     # rospy.init_node("train_env", disable_signals=False, anonymous=True)
     main(args)

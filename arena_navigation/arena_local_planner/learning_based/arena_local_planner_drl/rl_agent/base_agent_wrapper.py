@@ -20,6 +20,7 @@ ROOT_ROBOT_PATH = os.path.join(rospkg.RosPack().get_path("simulator_setup"), "ro
 DEFAULT_ACTION_SPACE = os.path.join(
     rospkg.RosPack().get_path("arena_local_planner_drl"),
     "configs",
+    "action_spaces",
     f"default_settings_{robot_model}.yaml",
 )
 DEFAULT_HYPERPARAMETER = os.path.join(
@@ -63,23 +64,31 @@ class BaseDRLAgent(ABC):
         self._robot_sim_ns = robot_name
 
         self.load_hyperparameters(path=hyperparameter_path)
-        robot_setting_path = os.path.join(ROOT_ROBOT_PATH, self.robot_config_name + ".model.yaml")
+        robot_setting_path = os.path.join(
+            ROOT_ROBOT_PATH, self.robot_config_name + ".model.yaml"
+        )
         self.read_setting_files(robot_setting_path, action_space_path)
         self.setup_action_space()
         self.setup_reward_calculator()
 
-        self.observation_collector = ObservationCollector(self._ns_robot, self._num_laser_beams, self._laser_range)
+        self.observation_collector = ObservationCollector(
+            self._ns_robot, self._num_laser_beams, self._laser_range
+        )
 
         # for time controlling in train mode
         self._action_frequency = 1 / rospy.get_param("/robot_action_rate")
 
         if self._is_train_mode:
             # w/o action publisher node
-            self._action_pub = rospy.Publisher(f"{self._ns_robot}/cmd_vel", Twist, queue_size=1)
+            self._action_pub = rospy.Publisher(
+                f"{self._ns_robot}/cmd_vel", Twist, queue_size=1
+            )
         else:
             # w/ action publisher node
             # (controls action rate being published on '../cmd_vel')
-            self._action_pub = rospy.Publisher(f"{self._ns_robot}/cmd_vel_pub", Twist, queue_size=1)
+            self._action_pub = rospy.Publisher(
+                f"{self._ns_robot}/cmd_vel_pub", Twist, queue_size=1
+            )
 
     @abstractmethod
     def setup_agent(self) -> None:
@@ -110,7 +119,9 @@ class BaseDRLAgent(ABC):
         import rl_agent.model.custom_policy
         import rl_agent.model.custom_sb3_policy
 
-    def read_setting_files(self, robot_setting_yaml: str, action_space_yaml: str) -> None:
+    def read_setting_files(
+        self, robot_setting_yaml: str, action_space_yaml: str
+    ) -> None:
         """Retrieves the robot radius (in 'self._robot_radius'), \
             laser scan range (in 'self._laser_range') and \
             the action space from respective yaml file.
@@ -133,7 +144,11 @@ class BaseDRLAgent(ABC):
                     laser_angle_min = plugin["angle"]["min"]
                     laser_angle_max = plugin["angle"]["max"]
                     laser_angle_increment = plugin["angle"]["increment"]
-                    self._num_laser_beams = int(round((laser_angle_max - laser_angle_min) / laser_angle_increment))
+                    self._num_laser_beams = int(
+                        round(
+                            (laser_angle_max - laser_angle_min) / laser_angle_increment
+                        )
+                    )
                     self._laser_range = plugin["range"]
 
         if self._num_laser_beams is None:
@@ -146,7 +161,9 @@ class BaseDRLAgent(ABC):
         if self._laser_range is None:
             self._laser_range = DEFAULT_LASER_RANGE
             print(
-                f"{self._robot_sim_ns}:" "Wasn't able to read the laser range." "Set to default: {DEFAULT_LASER_RANGE}"
+                f"{self._robot_sim_ns}:"
+                "Wasn't able to read the laser range."
+                "Set to default: {DEFAULT_LASER_RANGE}"
             )
 
         with open(action_space_yaml, "r") as fd:
@@ -155,8 +172,12 @@ class BaseDRLAgent(ABC):
             self._holonomic = setting_data["robot"]["holonomic"]
             self._discrete_actions = setting_data["robot"]["discrete_actions"]
             self._cont_actions = {
-                "linear_range": setting_data["robot"]["continuous_actions"]["linear_range"],
-                "angular_range": setting_data["robot"]["continuous_actions"]["angular_range"],
+                "linear_range": setting_data["robot"]["continuous_actions"][
+                    "linear_range"
+                ],
+                "angular_range": setting_data["robot"]["continuous_actions"][
+                    "angular_range"
+                ],
             }
 
     def _get_robot_name_from_params(self):
@@ -173,7 +194,9 @@ class BaseDRLAgent(ABC):
 
         if self._agent_params["discrete_action_space"]:
             # self._discrete_actions is a list, each element is a dict with the keys ["name", 'linear','angular']
-            assert not self._holonomic, "Discrete action space currently not supported for holonomic robots"
+            assert (
+                not self._holonomic
+            ), "Discrete action space currently not supported for holonomic robots"
 
             self.action_space = spaces.Discrete(len(self._discrete_actions))
         else:
@@ -313,7 +336,11 @@ class BaseDRLAgent(ABC):
             action (np.ndarray):
                 Action in [linear velocity, angular velocity]
         """
-        action_msg = self._get_hol_action_msg(action) if self._holonomic else self._get_nonhol_action_msg(action)
+        action_msg = (
+            self._get_hol_action_msg(action)
+            if self._holonomic
+            else self._get_nonhol_action_msg(action)
+        )
         self._action_pub.publish(action_msg)
 
     def _get_disc_action(self, action: int) -> np.ndarray:
@@ -334,7 +361,9 @@ class BaseDRLAgent(ABC):
         )
 
     def _get_hol_action_msg(self, action: np.ndarray):
-        assert len(action) == 3, "Holonomic robots require action arrays to have 3 entries."
+        assert (
+            len(action) == 3
+        ), "Holonomic robots require action arrays to have 3 entries."
         action_msg = Twist()
         action_msg.linear.x = action[0]
         action_msg.linear.y = action[1]
@@ -342,7 +371,9 @@ class BaseDRLAgent(ABC):
         return action_msg
 
     def _get_nonhol_action_msg(self, action: np.ndarray):
-        assert len(action) == 2, "Non-holonomic robots require action arrays to have 2 entries."
+        assert (
+            len(action) == 2
+        ), "Non-holonomic robots require action arrays to have 2 entries."
         action_msg = Twist()
         action_msg.linear.x = action[0]
         action_msg.angular.z = action[1]

@@ -5,6 +5,8 @@ from datetime import datetime as dt
 import gym
 import json
 import os
+
+import yaml
 import rosnode
 import rospkg
 import time
@@ -21,7 +23,7 @@ from rl_agent.envs.flatland_gym_env import (
 )
 from rl_agent.model.agent_factory import AgentFactory
 from rl_agent.model.base_agent import BaseAgent
-from tools.custom_mlp_utils import get_act_fn
+from marl_tools.custom_mlp_utils import get_act_fn
 
 """ 
 Dict containing agent specific hyperparameter keys (for documentation and typing validation purposes)
@@ -80,6 +82,19 @@ hyperparams = {
 }
 
 
+def load_config(config_name: str) -> dict:
+    """
+    Load config parameters from config file
+    """
+    config_location = os.path.join(
+        rospkg.RosPack().get_path("arena_local_planner"), "configs", config_name
+    )
+    with open(config_location, "r", encoding="utf-8") as target:
+        config = yaml.load(target, Loader=yaml.FullLoader)
+
+    return config
+
+
 def initialize_hyperparameters(
     PATHS: dict, load_target: str, config_name: str = "default", n_envs: int = 1
 ) -> dict:
@@ -102,9 +117,7 @@ def initialize_hyperparameters(
 
     # dynamically adapt n_steps according to batch size and n envs
     # then update .json
-    check_batch_size(
-        n_envs, hyperparams["batch_size"], hyperparams["m_batch_size"]
-    )
+    check_batch_size(n_envs, hyperparams["batch_size"], hyperparams["m_batch_size"])
     hyperparams["n_steps"] = int(hyperparams["batch_size"] / n_envs)
     write_hyperparameters_json(hyperparams, PATHS)
     print_hyperparameters(hyperparams)
@@ -136,9 +149,7 @@ def load_hyperparameters_json(
     :param config_name: file name of json file when training from scratch
     """
     if from_scratch:
-        doc_location = os.path.join(
-            PATHS.get("hyperparams"), config_name + ".json"
-        )
+        doc_location = os.path.join(PATHS.get("hyperparams"), config_name + ".json")
     else:
         doc_location = os.path.join(PATHS.get("model"), "hyperparameters.json")
 
@@ -150,8 +161,7 @@ def load_hyperparameters_json(
     else:
         if from_scratch:
             raise FileNotFoundError(
-                "Found no '%s.json' in %s"
-                % (config_name, PATHS.get("hyperparams"))
+                "Found no '%s.json' in %s" % (config_name, PATHS.get("hyperparams"))
             )
         else:
             raise FileNotFoundError(
@@ -307,17 +317,19 @@ def get_paths(agent_name: str, args: argparse.Namespace) -> dict:
     PATHS = {
         "model": os.path.join(dir, "agents", agent_name),
         "tb": os.path.join(dir, "training_logs", "tensorboard", agent_name),
-        "eval": os.path.join(
-            dir, "training_logs", "train_eval_log", agent_name
-        ),
+        "eval": os.path.join(dir, "training_logs", "train_eval_log", agent_name),
         "robot_setting": os.path.join(
             rospkg.RosPack().get_path("simulator_setup"),
             "robot",
             "myrobot" + ".model.yaml",
         ),
         "hyperparams": os.path.join(dir, "configs", "hyperparameters"),
-        "robot_as": os.path.join(dir, "configs", "default_settings.yaml"),
-        "curriculum": os.path.join(dir, "configs", "training_curriculum.yaml"),
+        "robot_as": os.path.join(
+            dir, "configs", "action_spaces", "default_settings.yaml"
+        ),
+        "curriculum": os.path.join(
+            dir, "configs", "training_curriculums", "training_curriculum.yaml"
+        ),
     }
     # check for mode
     if args.load is None:
@@ -452,9 +464,7 @@ from stable_baselines3.common.vec_env import VecNormalize
 from stable_baselines3.common.vec_env.base_vec_env import VecEnv
 
 
-def load_vec_normalize(
-    params: dict, PATHS: dict, env: VecEnv, eval_env: VecEnv
-):
+def load_vec_normalize(params: dict, PATHS: dict, env: VecEnv, eval_env: VecEnv):
     if params["normalize"]:
         load_path = os.path.join(PATHS["model"], "vec_normalize.pkl")
         if os.path.isfile(load_path):
