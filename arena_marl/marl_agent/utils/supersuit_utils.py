@@ -13,7 +13,11 @@ class MarkovVectorEnv_patched(MarkovVectorEnv):
 
     def step(self, actions):
         agent_set = set(self.par_env.agents)
-        act_dict = {agent: actions[i] for i, agent in enumerate(self.par_env.possible_agents) if agent in agent_set}
+        act_dict = {
+            agent: actions[i]
+            for i, agent in enumerate(self.par_env.possible_agents)
+            if agent in agent_set
+        }
         observations, rewards, dones, infos = self.par_env.step(act_dict)
 
         # adds last observation to info where user can get it
@@ -46,6 +50,7 @@ def vec_env_create(
     env_fn: Callable,
     agent_list_fn: Callable,
     num_robots: int,
+    task_mode: str,
     num_cpus: int,
     num_vec_envs: int,
     PATHS: dict,
@@ -56,6 +61,7 @@ def vec_env_create(
         env_fn (Callable): Function that initializes an environment with wrappers
         agent_list_fn (Callable): Object containing the program arguments
         num_robots (int): Number of robots in the environment
+        task_mode (str): Navigation task mode
         num_cpus (int): Maximal number of CPUs to use (Currently only process is used anyhow)
         num_vec_envs (int): Number of parallel environments to spawn
         PATHS (dict): Dictionary which holds hyperparameters for the experiment
@@ -71,6 +77,7 @@ def vec_env_create(
             env_fn,
             ns=f"sim_{i}",
             num_agents=num_robots,
+            task_mode=task_mode,
             agent_list_fn=agent_list_fn,
             PATHS=PATHS,
         )

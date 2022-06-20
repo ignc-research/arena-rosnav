@@ -509,7 +509,7 @@ def load_vec_normalize(params: dict, PATHS: dict, env: VecEnv, eval_env: VecEnv)
     return env, eval_env
 
 
-def choose_agent_model(AGENT_NAME, PATHS, config, env, params):
+def choose_agent_model(AGENT_NAME, PATHS, config, env, params, n_envs):
     if config["resume"] is None:
         agent: Union[
             Type[BaseAgent], Type[ActorCriticPolicy]
@@ -561,5 +561,5 @@ def choose_agent_model(AGENT_NAME, PATHS, config, env, params):
             os.path.join(config["resume"], "best_model.zip")
         ), f"Couldn't find best model in {config['resume']}"
         model = PPO.load(os.path.join(config["resume"], "best_model.zip"), env)
-        update_hyperparam_model(model, PATHS, params, config["n_envs"])
+        update_hyperparam_model(model, PATHS, params, n_envs)
     return model

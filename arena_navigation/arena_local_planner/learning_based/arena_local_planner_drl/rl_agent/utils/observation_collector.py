@@ -130,8 +130,12 @@ class ObservationCollector:
         # ApproximateTimeSynchronizer appears to be slow for training, but with real robot, own sync method doesn't accept almost any messages as synced
         # need to evaulate each possibility
         if self._ext_time_sync:
-            self._scan_sub = message_filters.Subscriber(f"{self.ns_prefix}scan", LaserScan)
-            self._robot_state_sub = message_filters.Subscriber(f"{self.ns_prefix}odom", Odometry)
+            self._scan_sub = message_filters.Subscriber(
+                f"{self.ns_prefix}scan", LaserScan
+            )
+            self._robot_state_sub = message_filters.Subscriber(
+                f"{self.ns_prefix}odom", Odometry
+            )
 
             self.ts = message_filters.ApproximateTimeSynchronizer(
                 [self._scan_sub, self._robot_state_sub],
@@ -157,16 +161,25 @@ class ObservationCollector:
 
         # self._clock_sub = rospy.Subscriber(
         #     f'{self.ns_prefix}clock', Clock, self.callback_clock, tcp_nodelay=True)
-
-        self._subgoal_sub = rospy.Subscriber(f"{self.ns_prefix}subgoal", PoseStamped, self.callback_subgoal)
-
-        self._globalplan_sub = rospy.Subscriber(f"{self.ns_prefix}globalPlan", Path, self.callback_global_plan)
+        goal_topic = (
+            f"{self.ns_prefix}subgoal"
+            if rospy.get_param("num_robots", default=1) == 1
+            else f"{self.ns_prefix}goal"
+        )
+        self._subgoal_sub = rospy.Subscriber(
+            goal_topic, PoseStamped, self.callback_subgoal
+        )
+        self._globalplan_sub = rospy.Subscriber(
+            f"{self.ns_prefix}globalPlan", Path, self.callback_global_plan
+        )
 
         # service clients
         if self._is_train_mode:
             _sim_namespace = self.ns_prefix.split("/")[1]
             self._service_name_step = f"/{_sim_namespace}/step_world"
-            self._sim_step_client = rospy.ServiceProxy(self._service_name_step, StepWorld)
+            self._sim_step_client = rospy.ServiceProxy(
+                self._service_name_step, StepWorld
+            )
 
     def get_observation_space(self):
         return self.observation_space
@@ -196,7 +209,9 @@ class ObservationCollector:
         else:
             scan = np.zeros(self._laser_num_beams, dtype=float)
 
-        rho, theta = ObservationCollector._get_goal_pose_in_robot_frame(self._subgoal, self._robot_pose)
+        rho, theta = ObservationCollector._get_goal_pose_in_robot_frame(
+            self._subgoal, self._robot_pose
+        )
 
         merged_obs = (
             np.hstack([scan, np.array([rho, theta])])
@@ -227,7 +242,9 @@ class ObservationCollector:
         y_relative = goal_pos.y - robot_pos.y
         x_relative = goal_pos.x - robot_pos.x
         rho = (x_relative ** 2 + y_relative ** 2) ** 0.5
-        theta = (np.arctan2(y_relative, x_relative) - robot_pos.theta + 4 * np.pi) % (2 * np.pi) - np.pi
+        theta = (np.arctan2(y_relative, x_relative) - robot_pos.theta + 4 * np.pi) % (
+            2 * np.pi
+        ) - np.pi
         return rho, theta
 
     def get_sync_obs(self):
@@ -274,7 +291,9 @@ class ObservationCollector:
                 if response.success:
                     break
                 if i == timeout - 1:
-                    raise TimeoutError(f"Timeout while trying to call '{self.ns_prefix}step_world'")
+                    raise TimeoutError(
+                        f"Timeout while trying to call '{self.ns_prefix}step_world'"
+                    )
                 # print("took step")
                 time.sleep(0.33)
 
@@ -310,7 +329,9 @@ class ObservationCollector:
     def callback_observation_received(self, msg_LaserScan, msg_RobotStateStamped):
         # process sensor msg
         self._scan = self.process_scan_msg(msg_LaserScan)
-        self._robot_pose, self._robot_vel = self.process_robot_state_msg(msg_RobotStateStamped)
+        self._robot_pose, self._robot_vel = self.process_robot_state_msg(
+            msg_RobotStateStamped
+        )
         self.obs_received = True
         return
 

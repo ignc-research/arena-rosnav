@@ -125,55 +125,58 @@ def main(args):
     MARL_NAME, START_TIME = get_MARL_agent_name_and_start_time()
 
     # create seperate model instances for each robot
-    for robot_name, config_params in config["robots"].items():
+    for robot_name, robot_train_params in config["robots"].items():
         # generate agent name and model specific paths
-        if config_params["resume"] is None:
+        if robot_train_params["resume"] is None:
             agent_name = robot_name + "_" + START_TIME
         else:
-            agent_name = config_params["resume"].split("/")[-1]
+            agent_name = robot_train_params["resume"].split("/")[-1]
 
         paths = train_agent_utils.get_paths(
             MARL_NAME,
             robot_name,
             agent_name,
-            config_params,
-            config["training_curriculum"],
+            robot_train_params,
+            config["training_curriculum"]["training_curriculum_file"],
             config["eval_log"],
             config["tb"],
         )
         # initialize hyperparameters (save to/ load from json)
         hyper_params = train_agent_utils.initialize_hyperparameters(
             PATHS=paths,
-            config=config_params,
+            config=robot_train_params,
             n_envs=config["n_envs"],
         )
 
         env = vec_env_create(
             env_fn,
             instantiate_drl_agents,
-            num_robots=config_params["num_robots"],
+            num_robots=robot_train_params["num_robots"],
             num_cpus=cpu_count() - 1,
             num_vec_envs=config["n_envs"],
+            task_mode=config["task_mode"],
             PATHS=paths,
         )
 
-        env = VecNormalize(
-            env,
-            training=True,
-            norm_obs=True,
-            norm_reward=True,
-            clip_reward=15,
-            clip_obs=15,
-        )
+        # env = VecNormalize(
+        #     env,
+        #     training=True,
+        #     norm_obs=True,
+        #     norm_reward=True,
+        #     clip_reward=15,
+        #     clip_obs=15,
+        # )
 
-        model = choose_agent_model(agent_name, paths, config_params, env, hyper_params)
+        model = choose_agent_model(
+            agent_name, paths, robot_train_params, env, hyper_params, config["n_envs"]
+        )
 
         # add configuration for one robot to robots dictionary
         robots[robot_name] = {
             "model": model,
             "env": env,
             "n_envs": config["n_envs"],
-            "config_params": config_params,
+            "robot_train_params": robot_train_params,
             "hyper_params": hyper_params,
             "paths": paths,
         }
@@ -189,12 +192,14 @@ def main(args):
             reset_num_timesteps=True,
             # Übergib einfach das dict für den aktuellen roboter
             callback=get_evalcallback(
-                robots[robot_name],
-                # train_env=env,
-                # num_robots=args.robots,
-                # num_envs=args.n_envs,
-                # task_mode=params["task_mode"],
-                # PATHS=paths,
+                eval_config=config["periodic_eval"],
+                curriculum_config=config["training_curriculum"],
+                stop_training_config=config["stop_training"],
+                train_env=robots[robot_name]["env"],
+                num_robots=robots[robot_name]["robot_train_params"]["num_robots"],
+                num_envs=config["n_envs"],
+                task_mode=config["task_mode"],
+                PATHS=robots[robot_name]["paths"],
             ),
         )
     except KeyboardInterrupt:
@@ -210,12 +215,14 @@ def main(args):
 
 
 def get_evalcallback(
-    agent: dict,
-    # train_env: VecEnv,
-    # num_robots: int,
-    # num_envs: int,
-    # task_mode: str,
-    # PATHS: dict,
+    eval_config: dict,
+    curriculum_config: dict,
+    stop_training_config: dict,
+    train_env: VecEnv,
+    num_robots: int,
+    num_envs: int,
+    task_mode: str,
+    PATHS: dict,
 ) -> MarlEvalCallback:
     """Function which generates an evaluation callback with an evaluation environment.
 
@@ -230,42 +237,42 @@ def get_evalcallback(
         MarlEvalCallback: [description]
     """
     eval_env = env_fn(
-        num_agents=agent["config_params"]["num_robots"],
+        num_agents=num_robots,
         ns="eval_sim",
         agent_list_fn=instantiate_drl_agents,
-        max_num_moves_per_eps=700,
-        PATHS=agent["paths"],
+        max_num_moves_per_eps=eval_config["max_num_moves_per_eps"],
+        PATHS=PATHS,
     )
 
-    eval_env = VecNormalize(
-        eval_env,
-        training=False,
-        norm_obs=True,
-        norm_reward=False,
-        clip_reward=15,
-        clip_obs=3.5,
-    )
+    # eval_env = VecNormalize(
+    #     eval_env,
+    #     training=False,
+    #     norm_obs=True,
+    #     norm_reward=False,
+    #     clip_reward=15,
+    #     clip_obs=3.5,
+    # )
 
     return MarlEvalCallback(
-        train_env=agent["env"],
+        train_env=train_env,
         eval_env=eval_env,
-        num_robots=agent["config_params"]["num_robots"],
-        n_eval_episodes=40,
-        eval_freq=20000,
+        num_robots=num_robots,
+        n_eval_episodes=eval_config["n_eval_episodes"],
+        eval_freq=eval_config["eval_freq"],
         deterministic=True,
-        log_path=agent["paths"]["eval"],
-        best_model_save_path=agent["paths"]["model"],
+        log_path=PATHS["eval"],
+        best_model_save_path=PATHS["model"],
         callback_on_eval_end=InitiateNewTrainStage(
-            n_envs=agent["n_envs"],
-            treshhold_type="succ",
-            upper_threshold=0.8,
-            lower_threshold=0.6,
-            task_mode=agent["hyper_params"]["task_mode"],
+            n_envs=num_envs,
+            treshhold_type=curriculum_config["threshold_type"],
+            upper_threshold=curriculum_config["upper_threshold"],
+            lower_threshold=curriculum_config["lower_threshold"],
+            task_mode=task_mode,
             verbose=1,
         ),
         callback_on_new_best=StopTrainingOnRewardThreshold(
-            treshhold_type="succ",
-            threshold=0.9,
+            treshhold_type=stop_training_config["threshold_type"],
+            threshold=stop_training_config["threshold"],
             verbose=1,
         ),
     )
