@@ -27,8 +27,6 @@ from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl
 # from tools.argsparser import parse_training_args
 from marl_tools.staged_train_callback import InitiateNewTrainStage
 
-# remove, because we will read from yaml file
-from marl_tools.argsparser import parse_marl_training_args
 from tools.argsparser import parse_training_args
 
 from arena_marl.marl_agent.envs.pettingzoo_env import env_fn
@@ -120,13 +118,15 @@ def main(args):
     # load configuration
     config = load_config(args.config)
 
+    # set debug_mode
+    rospy.set_param("debug_mode", config["debug_mode"])
+
     robots = {}
     MARL_NAME, START_TIME = get_MARL_agent_name_and_start_time()
 
     # create seperate model instances for each robot
-    for robot in config["robots"].items():
+    for robot_name, config_params in config["robots"].items():
         # generate agent name and model specific paths
-        robot_name, config_params = robot
         if config_params["resume"] is None:
             agent_name = robot_name + "_" + START_TIME
         else:
@@ -138,10 +138,11 @@ def main(args):
             agent_name,
             config_params,
             config["training_curriculum"],
-            args,
+            config["eval_log"],
+            config["tb"],
         )
         # initialize hyperparameters (save to/ load from json)
-        params = train_agent_utils.initialize_hyperparameters(
+        hyper_params = train_agent_utils.initialize_hyperparameters(
             PATHS=paths,
             config=config_params,
             n_envs=config["n_envs"],
@@ -165,8 +166,7 @@ def main(args):
             clip_obs=15,
         )
 
-        # TODO: add support for new config setup
-        model = choose_agent_model(agent_name, paths, args, env, params)
+        model = choose_agent_model(agent_name, paths, config_params, env, hyper_params)
 
         # add configuration for one robot to robots dictionary
         robots[robot_name] = {
@@ -174,16 +174,17 @@ def main(args):
             "env": env,
             "n_envs": config["n_envs"],
             "config_params": config_params,
-            "params": params,
+            "hyper_params": hyper_params,
             "paths": paths,
         }
 
     # set num of timesteps to be generated
-    n_timesteps = 40000000 if args.n is None else args.n
+    n_timesteps = 40000000 if config["n_timesteps"] is None else config["n_timesteps"]
 
     start = time.time()
     try:
-        robots[robot_name][model].learn(
+        model = robots[robot_name]["model"]
+        model.learn(
             total_timesteps=n_timesteps,
             reset_num_timesteps=True,
             # Übergib einfach das dict für den aktuellen roboter
@@ -259,7 +260,7 @@ def get_evalcallback(
             treshhold_type="succ",
             upper_threshold=0.8,
             lower_threshold=0.6,
-            task_mode=agent["params"]["task_mode"],
+            task_mode=agent["hyper_params"]["task_mode"],
             verbose=1,
         ),
         callback_on_new_best=StopTrainingOnRewardThreshold(

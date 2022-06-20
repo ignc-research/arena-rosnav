@@ -24,6 +24,7 @@ from rl_agent.envs.flatland_gym_env import (
 from rl_agent.model.agent_factory import AgentFactory
 from rl_agent.model.base_agent import BaseAgent
 from marl_tools.custom_mlp_utils import get_act_fn
+import rospy
 
 """ 
 Dict containing agent specific hyperparameter keys (for documentation and typing validation purposes)
@@ -116,7 +117,8 @@ def initialize_hyperparameters(PATHS: dict, config: dict, n_envs: int) -> dict:
     # then update .json
     check_batch_size(n_envs, hyperparams["batch_size"], hyperparams["m_batch_size"])
     hyperparams["n_steps"] = int(hyperparams["batch_size"] / n_envs)
-    write_hyperparameters_json(hyperparams, PATHS)
+    if not rospy.get_param("debug_mode"):
+        write_hyperparameters_json(hyperparams, PATHS)
     print_hyperparameters(hyperparams)
     return hyperparams
 
@@ -311,7 +313,8 @@ def get_paths(
     agent_name: str,
     config_params: dict,
     curriculum: str,
-    args: argparse.Namespace,
+    eval_log: bool,
+    tb: bool,
 ) -> dict:
     """
     Function to generate agent specific paths
@@ -341,27 +344,34 @@ def get_paths(
         ),
         "curriculum": os.path.join(dir, "configs", "training_curriculums", curriculum),
     }
+    rospy.get_param("/debug_mode")
+
     # check for mode
-    if config_params["resume"] is None:
-        os.makedirs(PATHS["model"])
-    elif not os.path.isfile(
-        os.path.join(PATHS["model"], agent_name + ".zip")
-    ) and not os.path.isfile(os.path.join(PATHS["model"], "best_model.zip")):
-        raise FileNotFoundError(
-            "Couldn't find model named %s.zip' or 'best_model.zip' in '%s'"
-            % (agent_name, PATHS["model"])
-        )
-    # evaluation log enabled
-    if args.eval_log:
-        if not os.path.exists(PATHS["eval"]):
-            os.makedirs(PATHS["eval"])
+    if not rospy.get_param("/debug_mode"):
+        if config_params["resume"] is None:
+            os.makedirs(PATHS["model"])
+        elif not os.path.isfile(
+            os.path.join(PATHS["model"], agent_name + ".zip")
+        ) and not os.path.isfile(os.path.join(PATHS["model"], "best_model.zip")):
+            raise FileNotFoundError(
+                "Couldn't find model named %s.zip' or 'best_model.zip' in '%s'"
+                % (agent_name, PATHS["model"])
+            )
+
+        # evaluation log enabled
+        if eval_log:
+            if not os.path.exists(PATHS["eval"]):
+                os.makedirs(PATHS["eval"])
+        else:
+            PATHS["eval"] = None
+        # tensorboard log enabled
+        if tb:
+            if not os.path.exists(PATHS["tb"]):
+                os.makedirs(PATHS["tb"])
+        else:
+            PATHS["tb"] = None
     else:
         PATHS["eval"] = None
-    # tensorboard log enabled
-    if args.tb:
-        if not os.path.exists(PATHS["tb"]):
-            os.makedirs(PATHS["tb"])
-    else:
         PATHS["tb"] = None
 
     return PATHS
@@ -499,32 +509,11 @@ def load_vec_normalize(params: dict, PATHS: dict, env: VecEnv, eval_env: VecEnv)
     return env, eval_env
 
 
-def choose_agent_model(AGENT_NAME, PATHS, args, env, params):
-    if args.custom_mlp:
-        # custom mlp flag
-        model = PPO(
-            "MlpPolicy",
-            env,
-            policy_kwargs=dict(
-                net_arch=args.net_arch, activation_fn=get_act_fn(args.act_fn)
-            ),
-            gamma=params["gamma"],
-            n_steps=params["n_steps"],
-            ent_coef=params["ent_coef"],
-            learning_rate=params["learning_rate"],
-            vf_coef=params["vf_coef"],
-            max_grad_norm=params["max_grad_norm"],
-            gae_lambda=params["gae_lambda"],
-            batch_size=params["m_batch_size"],
-            n_epochs=params["n_epochs"],
-            clip_range=params["clip_range"],
-            tensorboard_log=PATHS["tb"],
-            verbose=1,
-        )
-    elif args.agent is not None:
+def choose_agent_model(AGENT_NAME, PATHS, config, env, params):
+    if config["resume"] is None:
         agent: Union[
             Type[BaseAgent], Type[ActorCriticPolicy]
-        ] = AgentFactory.instantiate(args.agent)
+        ] = AgentFactory.instantiate(config["architecture_name"])
         if isinstance(agent, BaseAgent):
             model = PPO(
                 agent.type.value,
@@ -561,15 +550,16 @@ def choose_agent_model(AGENT_NAME, PATHS, args, env, params):
                 verbose=1,
             )
         else:
+            architecture_name = config["architecture_name"]
             raise TypeError(
-                f"Registered agent class {args.agent} is neither of type"
+                f"Registered agent class {architecture_name} is neither of type"
                 "'BaseAgent' or 'ActorCriticPolicy'!"
             )
     else:
         # load flag
-        if os.path.isfile(os.path.join(PATHS["model"], AGENT_NAME + ".zip")):
-            model = PPO.load(os.path.join(PATHS["model"], AGENT_NAME), env)
-        elif os.path.isfile(os.path.join(PATHS["model"], "best_model.zip")):
-            model = PPO.load(os.path.join(PATHS["model"], "best_model"), env)
-        update_hyperparam_model(model, PATHS, params, args.n_envs)
+        assert os.path.isfile(
+            os.path.join(config["resume"], "best_model.zip")
+        ), f"Couldn't find best model in {config['resume']}"
+        model = PPO.load(os.path.join(config["resume"], "best_model.zip"), env)
+        update_hyperparam_model(model, PATHS, params, config["n_envs"])
     return model

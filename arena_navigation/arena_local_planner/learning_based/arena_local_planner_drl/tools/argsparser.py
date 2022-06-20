@@ -14,18 +14,6 @@ def training_args(parser):
         default="training_config.yaml",
         help="name of the config file",
     )
-    parser.add_argument(
-        "--debug",
-        action="store_true",
-        help="disables multiprocessing in order to debug",
-    )
-    parser.add_argument(
-        "-log",
-        "--eval_log",
-        action="store_true",
-        help="enables storage of evaluation data",
-    )
-    parser.add_argument("--tb", action="store_true", help="enables tensorboard logging")
 
     ###########################################################################
 
@@ -82,16 +70,16 @@ def training_args(parser):
     # parser.add_argument("--tb", action="store_true", help="enables tensorboard logging")
 
 
-def marl_training_args(parser):
-    parser.add_argument("--robots", type=int, default=1, help="number of robots")
+# def marl_training_args(parser):
+#     parser.add_argument("--robots", type=int, default=1, help="number of robots")
 
 
-def parse_marl_training_args(args=None, ignore_unknown=False):
-    """parser for training script"""
-    arg_populate_funcs = [training_args, custom_mlp_args, marl_training_args]
-    arg_check_funcs = [process_training_args]
+# def parse_marl_training_args(args=None, ignore_unknown=False):
+#     """parser for training script"""
+#     arg_populate_funcs = [training_args, custom_mlp_args, marl_training_args]
+#     arg_check_funcs = [process_training_args]
 
-    return parse_various_args(args, arg_populate_funcs, arg_check_funcs, ignore_unknown)
+# return parse_various_args(args, arg_populate_funcs, arg_check_funcs, ignore_unknown)
 
 
 def run_agent_args(parser):
