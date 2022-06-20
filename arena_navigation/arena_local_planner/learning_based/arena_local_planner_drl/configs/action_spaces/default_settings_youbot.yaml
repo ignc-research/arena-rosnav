@@ -2,6 +2,7 @@
 # values from: https://github.com/youbot/youbot_navigation/blob/hydro-devel/youbot_navigation_common/config/base_local_planner_params.yaml
 # and values from here: http://www.youbot-store.com/wiki/index.php/YouBot_Detailed_Specifications
 robot:
+  radius: 0.347
   holonomic: True
   discrete_actions:
     - name: move_forward

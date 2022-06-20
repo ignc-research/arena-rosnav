@@ -1,5 +1,6 @@
 # from math import ceil, sqrt
 import math
+import rospkg
 import yaml
 import os
 import threading
@@ -26,9 +27,7 @@ class RobotManager:
     is managed
     """
 
-    def __init__(
-        self, ns: str, map_: OccupancyGrid, robot_yaml_path: str, timeout=20
-    ):
+    def __init__(self, ns: str, map_: OccupancyGrid, robot_yaml_path: str, timeout=20):
         """[summary]
 
         Args:
@@ -54,9 +53,7 @@ class RobotManager:
             f"{self.ns_prefix}spawn_model", SpawnModel
         )
         # it's only needed in training mode to send the clock signal.
-        self._step_world = rospy.ServiceProxy(
-            f"{self.ns_prefix}step_world", StepWorld
-        )
+        self._step_world = rospy.ServiceProxy(f"{self.ns_prefix}step_world", StepWorld)
 
         # publisher
         # publish the start position of the robot
@@ -99,7 +96,18 @@ class RobotManager:
             robot_yaml_path ([type]): [description]
         """
         self.ROBOT_NAME = os.path.basename(robot_yaml_path).split(".")[0]
-        self.ROBOT_RADIUS = rospy.get_param("radius")
+
+        robot_config = os.path.join(
+            rospkg.RosPack().get_path("arena_local_planner_drl"),
+            "configs",
+            "action_spaces",
+            "default_settings_" + self.ROBOT_NAME + ".yaml",
+        )
+
+        with open(robot_config, "r", encoding="utf-8") as target:
+            config = yaml.load(target, Loader=yaml.FullLoader)
+        self.ROBOT_RADIUS = config["robot"]["radius"]
+
         with open(robot_yaml_path, "r") as f:
             robot_data = yaml.safe_load(f)
 
@@ -134,9 +142,7 @@ class RobotManager:
             # assert self.step_size * \
             #     self.LASER_UPDATE_RATE == 1, f"TO run the traning successfully, make sure the laser_update_rate*step_size == 1 \
             #     \n\tcurrent step_size:\t {self.step_size}\n\tcurrent laser's update rate:\t {self.LASER_UPDATE_RATE} "
-            for _ in range(
-                math.ceil(1 / (self.step_size * self.LASER_UPDATE_RATE))
-            ):
+            for _ in range(math.ceil(1 / (self.step_size * self.LASER_UPDATE_RATE))):
                 self._step_world()
 
     def set_start_pos_random(self):
@@ -179,31 +185,20 @@ class RobotManager:
 
             if start_pos is None:
                 start_pos_ = Pose2D()
-                (
-                    start_pos_.x,
-                    start_pos_.y,
-                    start_pos_.theta,
-                ) = get_random_pos_on_map(
+                (start_pos_.x, start_pos_.y, start_pos_.theta,) = get_random_pos_on_map(
                     self._free_space_indices, self.map, self.ROBOT_RADIUS * 2
                 )
             else:
                 start_pos_ = start_pos
             if goal_pos is None:
                 goal_pos_ = Pose2D()
-                (
-                    goal_pos_.x,
-                    goal_pos_.y,
-                    goal_pos_.theta,
-                ) = get_random_pos_on_map(
+                (goal_pos_.x, goal_pos_.y, goal_pos_.theta,) = get_random_pos_on_map(
                     self._free_space_indices, self.map, self.ROBOT_RADIUS * 2
                 )
             else:
                 goal_pos_ = goal_pos
 
-            if (
-                dist(start_pos_.x, start_pos_.y, goal_pos_.x, goal_pos_.y)
-                < min_dist
-            ):
+            if dist(start_pos_.x, start_pos_.y, goal_pos_.x, goal_pos_.y) < min_dist:
                 i_try += 1
                 continue
             # move the robot to the start pos

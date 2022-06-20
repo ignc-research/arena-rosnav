@@ -67,7 +67,9 @@ class RandomMARLTask(ABSMARLTask):
                 try:
                     starts, goals = [None] * self._num_robots, [None] * self._num_robots
                     for i, manager in enumerate(self.robot_manager):
-                        start_pos, goal_pos = manager.set_start_pos_goal_pos(forbidden_zones=starts)
+                        start_pos, goal_pos = manager.set_start_pos_goal_pos(
+                            forbidden_zones=starts
+                        )
                         starts[i] = (
                             start_pos.x,
                             start_pos.y,
@@ -78,7 +80,9 @@ class RandomMARLTask(ABSMARLTask):
                             goal_pos.y,
                             manager.ROBOT_RADIUS * 1.5,
                         )
-                    self.obstacles_manager.reset_pos_obstacles_random(forbidden_zones=starts + goals)
+                    self.obstacles_manager.reset_pos_obstacles_random(
+                        forbidden_zones=starts + goals
+                    )
                     break
                 except rospy.ServiceException as e:
                     rospy.logwarn(repr(e))
@@ -122,12 +126,20 @@ class StagedMARLRandomTask(RandomMARLTask):
 
         # hyperparamters.json location
         self.json_file = os.path.join(self._PATHS.get("model"), "hyperparameters.json")
-        assert os.path.isfile(self.json_file), "Found no 'hyperparameters.json' at %s" % self.json_file
+        if not rospy.get_param("debug_mode"):
+            assert os.path.isfile(self.json_file), (
+                "Found no 'hyperparameters.json' at %s" % self.json_file
+            )
+
         self._lock_json = FileLock(self.json_file + ".lock")
 
         # subs for triggers
-        self._sub_next = rospy.Subscriber(f"{self.ns_prefix}next_stage", Bool, self.next_stage)
-        self._sub_previous = rospy.Subscriber(f"{self.ns_prefix}previous_stage", Bool, self.previous_stage)
+        self._sub_next = rospy.Subscriber(
+            f"{self.ns_prefix}next_stage", Bool, self.next_stage
+        )
+        self._sub_previous = rospy.Subscriber(
+            f"{self.ns_prefix}previous_stage", Bool, self.previous_stage
+        )
 
         self._initiate_stage()
 
@@ -138,13 +150,16 @@ class StagedMARLRandomTask(RandomMARLTask):
 
             if self.ns == "eval_sim":
                 rospy.set_param("/curr_stage", self._curr_stage)
-                with self._lock_json:
-                    self._update_curr_stage_json()
+                if not rospy.get_param("debug_mode"):
+                    with self._lock_json:
+                        self._update_curr_stage_json()
 
                 if self._curr_stage == len(self._stages):
                     rospy.set_param("/last_stage_reached", True)
         else:
-            print(f"({self.ns}) INFO: Tried to trigger next stage but already reached last one")
+            print(
+                f"({self.ns}) INFO: Tried to trigger next stage but already reached last one"
+            )
 
     def previous_stage(self, *args, **kwargs):
         if self._curr_stage > 1:
@@ -158,7 +173,9 @@ class StagedMARLRandomTask(RandomMARLTask):
                 with self._lock_json:
                     self._update_curr_stage_json()
         else:
-            print(f"({self.ns}) INFO: Tried to trigger previous stage but already reached first one")
+            print(
+                f"({self.ns}) INFO: Tried to trigger previous stage but already reached first one"
+            )
 
     def _initiate_stage(self):
         self._remove_obstacles()
@@ -166,8 +183,12 @@ class StagedMARLRandomTask(RandomMARLTask):
         static_obstacles = self._stages[self._curr_stage]["static"]
         dynamic_obstacles = self._stages[self._curr_stage]["dynamic"]
 
-        self.obstacles_manager.register_random_static_obstacles(self._stages[self._curr_stage]["static"])
-        self.obstacles_manager.register_random_dynamic_obstacles(self._stages[self._curr_stage]["dynamic"])
+        self.obstacles_manager.register_random_static_obstacles(
+            self._stages[self._curr_stage]["static"]
+        )
+        self.obstacles_manager.register_random_dynamic_obstacles(
+            self._stages[self._curr_stage]["dynamic"]
+        )
 
         print(
             f"({self.ns}) Stage {self._curr_stage}:"
@@ -183,7 +204,10 @@ class StagedMARLRandomTask(RandomMARLTask):
                 self._stages, dict
             ), "'training_curriculum.yaml' has wrong fromat! Has to encode dictionary!"
         else:
-            raise FileNotFoundError("Couldn't find 'training_curriculum.yaml' in %s " % self._PATHS.get("curriculum"))
+            raise FileNotFoundError(
+                "Couldn't find 'training_curriculum.yaml' in %s "
+                % self._PATHS.get("curriculum")
+            )
 
     def _update_curr_stage_json(self):
         with open(self.json_file, "r") as file:
@@ -191,7 +215,9 @@ class StagedMARLRandomTask(RandomMARLTask):
         try:
             hyperparams["curr_stage"] = self._curr_stage
         except Exception as e:
-            raise Warning(f" {e} \n Parameter 'curr_stage' not found in 'hyperparameters.json'!")
+            raise Warning(
+                f" {e} \n Parameter 'curr_stage' not found in 'hyperparameters.json'!"
+            )
         else:
             with open(self.json_file, "w", encoding="utf-8") as target:
                 json.dump(hyperparams, target, ensure_ascii=False, indent=4)
@@ -215,7 +241,7 @@ def get_mode(mode: str) -> ARENA_TASKS:
 def get_MARL_task(
     ns: str,
     mode: str,
-    robot_names: List[str],
+    robot_ids: List[str],
     PATHS: dict,
     start_stage: int = 1,
 ) -> ABSMARLTask:
@@ -225,7 +251,7 @@ def get_MARL_task(
         ns (str): Environments' ROS namespace. There should only be one env per ns.
         mode (str): avigation task mode for the agents. Modes to chose from: ['random', 'staged']. \
             Defaults to "random".
-        robot_names (List[str]): List containing all robots' names in order to address the right namespaces.
+        robot_ids (List[str]): List containing all robots' names in order to address the right namespaces.
         start_stage (int, optional): Starting difficulty level for the learning curriculum. Defaults to 1.
         PATHS (dict, optional): Dictionary containing program related paths. Defaults to None.
 
@@ -236,7 +262,7 @@ def get_MARL_task(
     Returns:
         ABSMARLTask: A task manager instance.
     """
-    assert type(robot_names) is list
+    assert type(robot_ids) is list
 
     task_mode = get_mode(mode)
 
@@ -249,16 +275,19 @@ def get_MARL_task(
 
     # robot's yaml file is needed to get its configurations etc.
     robot_model = rospy.get_param("model")
-    base_robot_yaml = os.path.join(models_folder_path, "robot", f"{robot_model}.model.yaml")
+    base_robot_yaml = os.path.join(
+        models_folder_path, "robot", f"{robot_model}.model.yaml"
+    )
 
     robot_manager = [
         RobotManager(
             ns=ns,
             map_=map_response.map,
             robot_yaml_path=base_robot_yaml,
-            robot_name=name,
+            robot_type=robot_model,
+            robot_id=name,
         )
-        for name in robot_names
+        for name in robot_ids
     ]
 
     obstacles_manager = ObstaclesManager(ns, map_response.map)
@@ -272,7 +301,9 @@ def get_MARL_task(
         task = RandomMARLTask(obstacles_manager, robot_manager)
     if task_mode == ARENA_TASKS.STAGED:
         rospy.set_param("/task_mode", "staged")
-        task = StagedMARLRandomTask(ns, obstacles_manager, robot_manager, start_stage, PATHS)
+        task = StagedMARLRandomTask(
+            ns, obstacles_manager, robot_manager, start_stage, PATHS
+        )
     if task_mode == ARENA_TASKS.SCENARIO:
         raise NotImplementedError
     return task

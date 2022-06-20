@@ -1,5 +1,6 @@
 #  TODO: @Tuan adjust the discrete actions
 robot:
+  radius: 0.27
   holonomic: False
   discrete_actions:
     - name: move_forward

@@ -34,7 +34,8 @@ class RobotManager:
         ns: str,
         map_: OccupancyGrid,
         robot_yaml_path: str,
-        robot_name: str = "myrobot",
+        robot_type: str,
+        robot_id: str = "myrobot",
         timeout=20,
     ) -> None:
         """[summary]
@@ -51,26 +52,39 @@ class RobotManager:
         self.ns = ns
         self.ns_prefix = "" if ns == "" else "/" + ns + "/"
 
-        self.ROBOT_NAME = robot_name
+        self.robot_id = robot_id
+        self.robot_type = robot_type
 
         self.is_training_mode = rospy.get_param("/train_mode")
         self.step_size = rospy.get_param("step_size")
 
         self._get_robot_config(robot_yaml_path)
-        robot_yaml_path = self._generate_robot_config_with_adjusted_topics() if MARL else robot_yaml_path
+        robot_yaml_path = (
+            self._generate_robot_config_with_adjusted_topics()
+            if MARL
+            else robot_yaml_path
+        )
 
         # setup proxy to handle  services provided by flatland
         rospy.wait_for_service(f"{self.ns_prefix}move_model", timeout=timeout)
         rospy.wait_for_service(f"{self.ns_prefix}spawn_model", timeout=timeout)
 
-        self._srv_move_model = rospy.ServiceProxy(f"{self.ns_prefix}move_model", MoveModel)
-        self._srv_spawn_model = rospy.ServiceProxy(f"{self.ns_prefix}spawn_model", SpawnModel)
+        self._srv_move_model = rospy.ServiceProxy(
+            f"{self.ns_prefix}move_model", MoveModel
+        )
+        self._srv_spawn_model = rospy.ServiceProxy(
+            f"{self.ns_prefix}spawn_model", SpawnModel
+        )
         # it's only needed in training mode to send the clock signal.
         self._step_world = rospy.ServiceProxy(f"{self.ns_prefix}step_world", StepWorld)
 
         # publisher
-        goal_topic = f"{self.ns_prefix}{self.ROBOT_NAME}/goal" if MARL else f"{self.ns_prefix}goal"
-        self._goal_pub = rospy.Publisher(f"{goal_topic}", PoseStamped, queue_size=1, latch=True)
+        goal_topic = (
+            f"{self.ns_prefix}{self.robot_id}/goal" if MARL else f"{self.ns_prefix}goal"
+        )
+        self._goal_pub = rospy.Publisher(
+            f"{goal_topic}", PoseStamped, queue_size=1, latch=True
+        )
 
         self.update_map(map_)
         self._spawn_robot(robot_yaml_path)
@@ -82,7 +96,7 @@ class RobotManager:
     def _spawn_robot(self, robot_yaml_path: str) -> None:
         request = SpawnModelRequest()
         request.yaml_path = robot_yaml_path
-        request.name = self.ROBOT_NAME
+        request.name = self.robot_id
         request.ns = self.ns
         self._srv_spawn_model(request)
 
@@ -92,7 +106,16 @@ class RobotManager:
         Args:
             robot_yaml_path ([type]): [description]
         """
-        self.ROBOT_RADIUS = rospy.get_param("radius")
+        robot_config = os.path.join(
+            rospkg.RosPack().get_path("arena_local_planner_drl"),
+            "configs",
+            "action_spaces",
+            "default_settings_" + self.robot_type + ".yaml",
+        )
+        with open(robot_config, "r", encoding="utf-8") as target:
+            config = yaml.load(target, Loader=yaml.FullLoader)
+        self.ROBOT_RADIUS = config["robot"]["radius"]
+
         with open(robot_yaml_path, "r") as f:
             self._robot_data = yaml.safe_load(f)
 
@@ -113,23 +136,29 @@ class RobotManager:
             e.g.: sim_1/myrobot/scan
         - The yaml files are temporarily dumped into *../simulator_setup/tmp_robot_configs*
         """
-        self._robot_data["bodies"][0]["name"] = self.ROBOT_NAME + "_" + self._robot_data["bodies"][0]["name"]
+        self._robot_data["bodies"][0]["name"] = (
+            self.robot_id + "_" + self._robot_data["bodies"][0]["name"]
+        )
 
         for plugin in self._robot_data["plugins"]:
             if plugin["type"] == "DiffDrive":
                 plugin["body"] = self._robot_data["bodies"][0]["name"]
-                plugin["odom_frame_id"] = self.ROBOT_NAME + "_" + plugin["odom_frame_id"]
-                plugin["odom_pub"] = self.ROBOT_NAME + "/" + plugin["odom_pub"]
-                plugin["twist_sub"] = self.ROBOT_NAME + "/" + plugin.get("twist_sub", "cmd_vel")
+                plugin["odom_frame_id"] = self.robot_id + "_" + plugin["odom_frame_id"]
+                plugin["odom_pub"] = self.robot_id + "/" + plugin["odom_pub"]
+                plugin["twist_sub"] = (
+                    self.robot_id + "/" + plugin.get("twist_sub", "cmd_vel")
+                )
 
             elif plugin["type"] == "Laser":
-                plugin["topic"] = self.ROBOT_NAME + "/" + plugin["topic"]
+                plugin["topic"] = self.robot_id + "/" + plugin["topic"]
                 plugin["body"] = self._robot_data["bodies"][0]["name"]
-                plugin["frame"] = self.ROBOT_NAME + "_" + plugin["frame"]
+                plugin["frame"] = self.robot_id + "_" + plugin["frame"]
 
-        tmp_folder_path = os.path.join(rospkg.RosPack().get_path("simulator_setup"), "tmp_robot_configs")
+        tmp_folder_path = os.path.join(
+            rospkg.RosPack().get_path("simulator_setup"), "tmp_robot_configs"
+        )
         os.makedirs(tmp_folder_path, exist_ok=True)
-        tmp_config_name = self.ns + self.ROBOT_NAME + ".robot_config.yaml"
+        tmp_config_name = self.ns + self.robot_id + ".robot_config.yaml"
         tmp_config_path = os.path.join(tmp_folder_path, tmp_config_name)
 
         with open(tmp_config_path, "w") as fd:
@@ -151,7 +180,7 @@ class RobotManager:
         # call service move_model
 
         srv_request = MoveModelRequest()
-        srv_request.name = self.ROBOT_NAME
+        srv_request.name = self.robot_id
         srv_request.pose = pose
 
         # call service
@@ -219,11 +248,9 @@ class RobotManager:
 
             if goal_pos is None:
                 goal_pos_ = Pose2D()
-                (
-                    goal_pos_.x,
-                    goal_pos_.y,
-                    goal_pos_.theta,
-                ) = get_random_pos_on_map(self._free_space_indices, self.map, self.ROBOT_RADIUS * 2)
+                (goal_pos_.x, goal_pos_.y, goal_pos_.theta,) = get_random_pos_on_map(
+                    self._free_space_indices, self.map, self.ROBOT_RADIUS * 2
+                )
             else:
                 goal_pos_ = goal_pos
 

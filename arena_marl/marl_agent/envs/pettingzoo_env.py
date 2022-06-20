@@ -6,16 +6,20 @@ import numpy as np
 import rospy
 
 from arena_marl.marl_agent.utils.supersuit_utils import MarkovVectorEnv_patched
+
 # from stable_baselines3.common.vec_env import VecEnv
 
 from gym import spaces
 from pettingzoo import *
 from pettingzoo.utils import from_parallel, to_parallel
 import supersuit as ss
-# 
+
+#
 #
 
-from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.rl_agent.training_agent_wrapper import TrainingDRLAgent
+from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.rl_agent.training_agent_wrapper import (
+    TrainingDRLAgent,
+)
 from task_generator.task_generator.marl_tasks import get_MARL_task
 
 from flatland_msgs.srv import StepWorld, StepWorldRequest
@@ -23,7 +27,8 @@ from flatland_msgs.srv import StepWorld, StepWorldRequest
 # from marl_agent.utils.supersuit_utils import *
 # from rl_agent.utils.supersuit_utils import MarkovVectorEnv_patched
 
-def env_fn(**kwargs: Dict[str, Any]): # -> VecEnv:
+
+def env_fn(**kwargs: Dict[str, Any]):  # -> VecEnv:
     """
     The env function wraps the environment in 3 wrappers by default. These
     wrappers contain logic that is common to many pettingzoo environments.
@@ -46,9 +51,7 @@ class FlatlandPettingZooEnv(ParallelEnv):
     def __init__(
         self,
         num_agents: int,
-        agent_list_fn: Callable[
-            [int, str, str, str, str], List[TrainingDRLAgent]
-        ],
+        agent_list_fn: Callable[[int, str, str, str, str], List[TrainingDRLAgent]],
         PATHS: dict,
         ns: str = None,
         task_mode: str = "staged",
@@ -92,7 +95,7 @@ class FlatlandPettingZooEnv(ParallelEnv):
         self.task_manager = get_MARL_task(
             ns=ns,
             mode=task_mode,
-            robot_names=self._robot_sim_ns,
+            robot_ids=self._robot_sim_ns,
             PATHS=PATHS,
         )
 
@@ -232,9 +235,7 @@ class FlatlandPettingZooEnv(ParallelEnv):
             rewards[agent], reward_infos[agent] = reward, reward_info
 
         # dones & infos
-        dones, infos = self._get_dones(reward_infos), self._get_infos(
-            reward_infos
-        )
+        dones, infos = self._get_dones(reward_infos), self._get_infos(reward_infos)
 
         # remove done agents from the active agents list
         self.agents = [agent for agent in self.agents if not dones[agent]]
@@ -248,9 +249,7 @@ class FlatlandPettingZooEnv(ParallelEnv):
             elif agent not in self.agents:
                 if agent not in infos:
                     infos[agent] = {}
-                infos[agent][
-                    "terminal_observation"
-                ] = self.terminal_observation[agent]
+                infos[agent]["terminal_observation"] = self.terminal_observation[agent]
 
         return merged_obs, rewards, dones, infos
 
@@ -276,9 +275,7 @@ class FlatlandPettingZooEnv(ParallelEnv):
         except rospy.ServiceException as e:
             rospy.logdebug("step Service call failed: %s" % e)
 
-    def _get_dones(
-        self, reward_infos: Dict[str, Dict[str, Any]]
-    ) -> Dict[str, bool]:
+    def _get_dones(self, reward_infos: Dict[str, Dict[str, Any]]) -> Dict[str, bool]:
         """Extracts end flags from the reward information dictionary.
 
         Args:

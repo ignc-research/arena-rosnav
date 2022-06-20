@@ -1,4 +1,5 @@
 robot:
+  radius: 0.629
   holonomic: False
   discrete_actions:
     - name: move_forward

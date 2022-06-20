@@ -1,5 +1,6 @@
 # TODO: The discrete actions have not been changed (from burger here)
 robot:
+  radius: 0.208
   holonomic: False
   discrete_actions:
     - name: move_forward

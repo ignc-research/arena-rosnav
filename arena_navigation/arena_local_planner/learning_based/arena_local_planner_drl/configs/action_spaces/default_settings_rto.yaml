@@ -1,5 +1,6 @@
 # TODO: The discrete actions have not been changed (from ridgeback here)
 robot:
+  radius: 0.225
   holonomic: True
   discrete_actions:
     - name: move_forward
