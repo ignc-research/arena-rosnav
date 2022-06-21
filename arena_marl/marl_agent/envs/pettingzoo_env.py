@@ -77,17 +77,20 @@ class FlatlandPettingZooEnv(ParallelEnv):
         """
         self._ns = "" if ns is None or not ns else f"{ns}/"
         self._is_train_mode = rospy.get_param("/train_mode")
-        self.metadata = {"render.modes": ["human"], "name": "rps_v2"}
+        self.metadata = {}
 
-        self.agent_list = agent_list_fn(num_agents, ns=ns, **(agent_list_kwargs or {}))
+        self.agent_list: List[TrainingDRLAgent] = agent_list_fn(
+            num_agents, ns=ns, **(agent_list_kwargs or {})
+        )
 
         self.agents = []
+        # list containing the unique robot namespaces
+        # used as identifier
         self.possible_agents = [a._robot_sim_ns for a in self.agent_list]
         self.agent_name_mapping = dict(
             zip(self.possible_agents, list(range(len(self.possible_agents))))
         )
         self.agent_object_mapping = dict(zip(self.possible_agents, self.agent_list))
-        self._robot_sim_ns = [a._robot_sim_ns for a in self.agent_list]
         self.terminal_observation = {}
 
         self._validate_agent_list()
@@ -96,7 +99,7 @@ class FlatlandPettingZooEnv(ParallelEnv):
         self.task_manager = get_MARL_task(
             ns=ns,
             mode=task_mode,
-            robot_ids=self._robot_sim_ns,
+            robot_ids=[a._robot_sim_ns for a in self.agent_list],
             PATHS=PATHS,
         )
 
@@ -274,7 +277,7 @@ class FlatlandPettingZooEnv(ParallelEnv):
             response = self._sim_step_client(request)
             rospy.logdebug("step service=", response)
         except rospy.ServiceException as e:
-            rospy.logdebug("step Service call failed: %s" % e)
+            rospy.logdebug(f"step Service call failed: {e}")
 
     def _get_dones(self, reward_infos: Dict[str, Dict[str, Any]]) -> Dict[str, bool]:
         """Extracts end flags from the reward information dictionary.

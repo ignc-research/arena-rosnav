@@ -55,14 +55,14 @@ robots:
     architecture_name: "AGENT_24"
     # path to latest checkpoint; if provided the training will be resumed from that checkpoint
     resume: null
-  burger:
-    # number of robots of this type
-    num_robots: 4
-    # name of hyperparameter file located in the configs/hyperparameters directory
-    hyperparameter_file: "default.json"
-    # name of architecture defined in the Policy factory
-    architecture_name: "AGENT_24"
-    # path to latest checkpoint; if provided the training will be resumed from that checkpoint
-    resume: null
+  # burger:
+  #   # number of robots of this type
+  #   num_robots: 4
+  #   # name of hyperparameter file located in the configs/hyperparameters directory
+  #   hyperparameter_file: "default.json"
+  #   # name of architecture defined in the Policy factory
+  #   architecture_name: "AGENT_24"
+  #   # path to latest checkpoint; if provided the training will be resumed from that checkpoint
+  #   resume: null
   # add more robots as you wish
   
