@@ -8,22 +8,14 @@ from rl_agent.base_agent_wrapper import BaseDRLAgent
 
 from geometry_msgs.msg import Twist
 
-robot_model = rospy.get_param("model")
-DEFAULT_ACTION_SPACE = os.path.join(
-    rospkg.RosPack().get_path("arena_local_planner_drl"),
-    "configs",
-    "action_spaces",
-    f"default_settings_{robot_model}.yaml",
-)
-
 
 class TrainingDRLAgent(BaseDRLAgent):
     def __init__(
         self,
         ns: str,
-        robot_name: str,
+        robot_model: str,
+        robot_ns: str,
         hyperparameter_path: str,
-        action_space_path: str = DEFAULT_ACTION_SPACE,
         *args,
         **kwargs,
     ) -> None:
@@ -52,7 +44,7 @@ class TrainingDRLAgent(BaseDRLAgent):
         Args:
             ns (str, optional):
                 Agent name (directory has to be of the same name). Defaults to None.
-            robot_name (str, optional):
+            robot_ns (str, optional):
                 Robot specific ROS namespace extension. Defaults to None.
             hyperparameter_path (str, optional):
                 Path to json file containing defined hyperparameters.
@@ -63,9 +55,9 @@ class TrainingDRLAgent(BaseDRLAgent):
         """
         super().__init__(
             ns=ns,
-            robot_name=robot_name,
+            robot_model=robot_model,
+            robot_ns=robot_ns,
             hyperparameter_path=hyperparameter_path,
-            action_space_path=action_space_path,
             *args,
             **kwargs,
         )

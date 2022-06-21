@@ -56,6 +56,7 @@ class FlatlandPettingZooEnv(ParallelEnv):
         ns: str = None,
         task_mode: str = "staged",
         max_num_moves_per_eps: int = 1000,
+        agent_list_kwargs: Dict[str, Any] = None,
     ) -> None:
         """Initialization method for the Arena-Rosnav Pettingzoo Environment.
 
@@ -74,19 +75,19 @@ class FlatlandPettingZooEnv(ParallelEnv):
             - action_spaces
             - observation_spaces
         """
-        self._ns = "" if ns is None or ns == "" else ns + "/"
+        self._ns = "" if ns is None or not ns else f"{ns}/"
         self._is_train_mode = rospy.get_param("/train_mode")
         self.metadata = {"render.modes": ["human"], "name": "rps_v2"}
 
-        agent_list = agent_list_fn(num_agents, ns=ns)
+        self.agent_list = agent_list_fn(num_agents, ns=ns, **(agent_list_kwargs or {}))
 
         self.agents = []
-        self.possible_agents = [a._robot_sim_ns for a in agent_list]
+        self.possible_agents = [a._robot_sim_ns for a in self.agent_list]
         self.agent_name_mapping = dict(
             zip(self.possible_agents, list(range(len(self.possible_agents))))
         )
-        self.agent_object_mapping = dict(zip(self.possible_agents, agent_list))
-        self._robot_sim_ns = [a._robot_sim_ns for a in agent_list]
+        self.agent_object_mapping = dict(zip(self.possible_agents, self.agent_list))
+        self._robot_sim_ns = [a._robot_sim_ns for a in self.agent_list]
         self.terminal_observation = {}
 
         self._validate_agent_list()

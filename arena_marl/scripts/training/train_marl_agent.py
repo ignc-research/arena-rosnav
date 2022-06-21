@@ -1,13 +1,13 @@
 import sys
+import os, sys, rospy, time
+
 from datetime import time
 from functools import partial
 from typing import Callable, List
 from multiprocessing import cpu_count
 
-import numpy as np
 import rospy
 import rospkg
-import os
 from multiprocessing import cpu_count, set_start_method
 
 # from stable_baselines3 import PPO
@@ -30,7 +30,6 @@ from marl_tools.staged_train_callback import InitiateNewTrainStage
 from tools.argsparser import parse_training_args
 
 from arena_marl.marl_agent.envs.pettingzoo_env import env_fn
-
 from arena_marl.marl_agent.utils.supersuit_utils import (
     vec_env_create,
 )
@@ -44,9 +43,6 @@ from marl_tools.train_agent_utils import (
     initialize_hyperparameters,
 )
 from marl_tools import train_agent_utils
-from typing import List
-
-import os, sys, rospy, time
 
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import (
@@ -55,46 +51,34 @@ from stable_baselines3.common.vec_env import (
     VecNormalize,
 )
 from stable_baselines3.common.callbacks import (
-    EvalCallback,
     StopTrainingOnRewardThreshold,
     MarlEvalCallback,
 )
-from stable_baselines3.common.policies import BasePolicy
 
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.tools.train_agent_utils import *
 
 from rl_agent.training_agent_wrapper import TrainingDRLAgent
-from scripts.deployment.drl_agent_node import DeploymentDRLAgent
-
-from nav_msgs.srv import GetMap
-
-
-ROBOT_MODEL = rospy.get_param("model")
-DEFAULT_HYPERPARAMETER = os.path.join(
-    rospkg.RosPack().get_path("arena_local_planner_drl"),
-    "configs",
-    "hyperparameters",
-    "default.json",
-)
-ROBOT_ACTION_SPACE = os.path.join(
-    rospkg.RosPack().get_path("arena_local_planner_drl"),
-    "configs",
-    "action_spaces",
-    f"default_settings_{ROBOT_MODEL}.yaml",
-)
+from task_generator.task_generator.marl_tasks import get_MARL_task
 
 
 def instantiate_drl_agents(
     num_robots: int = 1,
+    existing_robots: int = 0,
+    robot_model: str = "burger",
     ns: str = None,
     robot_name_prefix: str = "robot",
-    hyperparameter_path: str = DEFAULT_HYPERPARAMETER,
-    action_space_path: str = ROBOT_ACTION_SPACE,
+    hyperparameter_path: str = os.path.join(
+        rospkg.RosPack().get_path("arena_local_planner_drl"),
+        "configs",
+        "hyperparameters",
+        "default.json",
+    ),
 ) -> List[TrainingDRLAgent]:
     """Function which generates a list agents which handle the ROS connection.
 
     Args:
         num_robots (int, optional): Number of robots in the environment. Defaults to 1.
+        robot_model (str, optional): Model of the robot. Defaults to "burger".
         ns (str, optional): Name of the namespace (used for ROS topics). Defaults to None.
         robot_name_prefix (str, optional): Name with which to prefix robots in the ROS environment. Defaults to "robot".
         hyperparameter_path (str, optional): Path where to load hyperparameters from. Defaults to DEFAULT_HYPERPARAMETER.
@@ -106,11 +90,11 @@ def instantiate_drl_agents(
     return [
         TrainingDRLAgent(
             ns=ns,
-            robot_name=robot_name_prefix + str(i + 1),
+            robot_model=robot_model,
+            robot_ns=robot_name_prefix + str(i + 1),
             hyperparameter_path=hyperparameter_path,
-            action_space_path=action_space_path,
         )
-        for i in range(num_robots)
+        for i in range(existing_robots, existing_robots + num_robots)
     ]
 
 
@@ -121,16 +105,17 @@ def main(args):
     # set debug_mode
     rospy.set_param("debug_mode", config["debug_mode"])
 
-    robots = {}
+    robots, existing_robots = {}, 0
     MARL_NAME, START_TIME = get_MARL_agent_name_and_start_time()
 
     # create seperate model instances for each robot
     for robot_name, robot_train_params in config["robots"].items():
         # generate agent name and model specific paths
-        if robot_train_params["resume"] is None:
-            agent_name = robot_name + "_" + START_TIME
-        else:
-            agent_name = robot_train_params["resume"].split("/")[-1]
+        agent_name = (
+            robot_train_params["resume"].split("/")[-1]
+            if robot_train_params["resume"]
+            else f"{robot_name}_{START_TIME}"
+        )
 
         paths = train_agent_utils.get_paths(
             MARL_NAME,
@@ -141,6 +126,7 @@ def main(args):
             config["eval_log"],
             config["tb"],
         )
+
         # initialize hyperparameters (save to/ load from json)
         hyper_params = train_agent_utils.initialize_hyperparameters(
             PATHS=paths,
@@ -156,7 +142,14 @@ def main(args):
             num_vec_envs=config["n_envs"],
             task_mode=config["task_mode"],
             PATHS=paths,
+            agent_list_kwargs={
+                "existing_robots": existing_robots,
+                "robot_model": robot_name,
+            },
+            max_num_moves_per_eps=config["max_num_moves_per_eps"],
         )
+
+        existing_robots += robot_train_params["num_robots"]
 
         # env = VecNormalize(
         #     env,

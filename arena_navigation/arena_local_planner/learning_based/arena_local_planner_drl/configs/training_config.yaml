@@ -3,7 +3,7 @@ debug_mode: true
 
 # Hardware specifc configurations
 # number of parallel environments
-n_envs: 1
+n_envs: 2
 # gpu yes or no
 no_gpu: false
 
@@ -13,6 +13,7 @@ no_gpu: false
 task_mode: "staged"
 # number of simulation timesteps
 n_timesteps: 40000000
+max_num_moves_per_eps: 1000
 
 periodic_eval:
   # max number of steps per episode
@@ -51,17 +52,17 @@ robots:
     # name of hyperparameter file located in the configs/hyperparameters directory
     hyperparameter_file: "default.json"
     # name of architecture defined in the Policy factory
-    architecture_name: "AGENT_23"
+    architecture_name: "AGENT_24"
     # path to latest checkpoint; if provided the training will be resumed from that checkpoint
-    resume: "/home/tuananhroman/catkin_ws_marl/src/arena-rosnav/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/agents/jackal"
-  # burger:
-  #   # number of robots of this type
-  #   num_robots: 1
-  #   # name of hyperparameter file located in the configs/hyperparameters directory
-  #   hyperparameter_file: "default"
-  #   # name of architecture defined in the Policy factory
-  #   architecture_name: "default"
-  #   # path to latest checkpoint; if provided the training will be resumed from that checkpoint
-  #   resume: null
+    resume: null
+  burger:
+    # number of robots of this type
+    num_robots: 4
+    # name of hyperparameter file located in the configs/hyperparameters directory
+    hyperparameter_file: "default.json"
+    # name of architecture defined in the Policy factory
+    architecture_name: "AGENT_24"
+    # path to latest checkpoint; if provided the training will be resumed from that checkpoint
+    resume: null
   # add more robots as you wish
   

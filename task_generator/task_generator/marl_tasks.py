@@ -107,7 +107,7 @@ class StagedMARLRandomTask(RandomMARLTask):
     ) -> None:
         super().__init__(obstacles_manager, robot_manager)
         self.ns = ns
-        self.ns_prefix = "" if ns == "" else "/" + ns + "/"
+        self.ns_prefix = f"/{ns}/" if ns else ""
 
         self._curr_stage = start_stage
         self._stages = {}
@@ -131,7 +131,7 @@ class StagedMARLRandomTask(RandomMARLTask):
                 "Found no 'hyperparameters.json' at %s" % self.json_file
             )
 
-        self._lock_json = FileLock(self.json_file + ".lock")
+        self._lock_json = FileLock(f"{self.json_file}.lock")
 
         # subs for triggers
         self._sub_next = rospy.Subscriber(

@@ -54,12 +54,15 @@ def vec_env_create(
     num_cpus: int,
     num_vec_envs: int,
     PATHS: dict,
+    agent_list_kwargs: dict,
+    max_num_moves_per_eps: int,
 ):
     """Function which vectorizes a given environment function in multiple parallel environments.
 
     Args:
         env_fn (Callable): Function that initializes an environment with wrappers
         agent_list_fn (Callable): Object containing the program arguments
+        robot_model (str): Name of the robot model
         num_robots (int): Number of robots in the environment
         task_mode (str): Navigation task mode
         num_cpus (int): Maximal number of CPUs to use (Currently only process is used anyhow)
@@ -80,6 +83,8 @@ def vec_env_create(
             task_mode=task_mode,
             agent_list_fn=agent_list_fn,
             PATHS=PATHS,
+            agent_list_kwargs=agent_list_kwargs,
+            max_num_moves_per_eps=max_num_moves_per_eps,
         )
         for i in range(1, num_vec_envs + 1)
     ]

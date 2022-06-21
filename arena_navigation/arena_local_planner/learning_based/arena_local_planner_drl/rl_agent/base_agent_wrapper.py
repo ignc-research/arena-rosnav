@@ -17,12 +17,6 @@ from rl_agent.utils.reward import RewardCalculator
 
 robot_model = rospy.get_param("model")
 ROOT_ROBOT_PATH = os.path.join(rospkg.RosPack().get_path("simulator_setup"), "robot")
-DEFAULT_ACTION_SPACE = os.path.join(
-    rospkg.RosPack().get_path("arena_local_planner_drl"),
-    "configs",
-    "action_spaces",
-    f"default_settings_{robot_model}.yaml",
-)
 DEFAULT_HYPERPARAMETER = os.path.join(
     rospkg.RosPack().get_path("arena_local_planner_drl"),
     "configs",
@@ -37,37 +31,46 @@ class BaseDRLAgent(ABC):
     def __init__(
         self,
         ns: str = None,
-        robot_name: str = None,
+        robot_model: str = "burger",
+        robot_ns: str = None,
         hyperparameter_path: str = DEFAULT_HYPERPARAMETER,
-        action_space_path: str = DEFAULT_ACTION_SPACE,
-        *args,
-        **kwargs,
     ) -> None:
         """[summary]
 
         Args:
             ns (str, optional):
                 Agent name (directory has to be of the same name). Defaults to None.
-            robot_name (str, optional):
+            robot_model (str, optional):
+                Robot model name. Defaults to "burger".
+            robot_ns (str, optional):
                 Robot specific ROS namespace extension. Defaults to None.
             hyperparameter_path (str, optional):
                 Path to json file containing defined hyperparameters.
                 Defaults to DEFAULT_HYPERPARAMETER.
-            action_space_path (str, optional):
-                Path to yaml file containing action space settings.
-                Defaults to DEFAULT_ACTION_SPACE.
         """
         self._is_train_mode = rospy.get_param("/train_mode")
 
-        self._ns = "" if ns is None or ns == "" else ns + "/"
-        self._ns_robot = self._ns if robot_name is None else self._ns + robot_name
-        self._robot_sim_ns = robot_name
+        self._ns = "" if ns is None or not ns else f"{ns}/"
+        self._ns_robot = self._ns if robot_ns is None else self._ns + robot_ns
+        self._robot_sim_ns = robot_ns
+
+        self.robot_model = robot_model
+
+        robot_setting_path = os.path.join(
+            ROOT_ROBOT_PATH, f"{self.robot_model}.model.yaml"
+        )
+
+        action_space_path = os.path.join(
+            rospkg.RosPack().get_path("arena_local_planner_drl"),
+            "configs",
+            "action_spaces",
+            f"default_settings_{self.robot_model}.yaml",
+        )
 
         self.load_hyperparameters(path=hyperparameter_path)
-        robot_setting_path = os.path.join(
-            ROOT_ROBOT_PATH, self.robot_config_name + ".model.yaml"
-        )
         self.read_setting_files(robot_setting_path, action_space_path)
+        # self._check_robot_type_from_params()
+
         self.setup_action_space()
         self.setup_reward_calculator()
 
@@ -134,9 +137,12 @@ class BaseDRLAgent(ABC):
         """
         self._num_laser_beams = None
         self._laser_range = None
+
         with open(action_space_yaml, "r", encoding="utf-8") as target:
             config = yaml.load(target, Loader=yaml.FullLoader)
+
         self._robot_radius = config["robot"]["radius"] * 1.05
+
         with open(robot_setting_yaml, "r") as fd:
             robot_data = yaml.safe_load(fd)
 
@@ -182,12 +188,16 @@ class BaseDRLAgent(ABC):
                 ],
             }
 
-    def _get_robot_name_from_params(self):
+    def _check_robot_type_from_params(self):
         """Retrives the agent-specific robot name from the dictionary loaded\
-            from respective 'hyperparameter.json'.    
+            from respective 'hyperparameter.json' and compares it to the provided
+            robot model from initialization.    
         """
         assert self._agent_params and self._agent_params["robot"]
-        self.robot_config_name = self._agent_params["robot"]
+        assert self.robot_model == self._agent_params["robot"], (
+            "Robot model in hyperparameter.json is not the same as the parsed model!"
+            f"({self.robot_model} != {self._agent_params['robot']})"
+        )
 
     def setup_action_space(self) -> None:
         """Sets up the action space. (spaces.Box)"""
