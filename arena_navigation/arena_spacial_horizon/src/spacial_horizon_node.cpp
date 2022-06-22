@@ -25,11 +25,6 @@ void SpacialHorizon::init(ros::NodeHandle &nh)
     ros::NodeHandle public_nh;  // sim1/goal
     goal_sub_ = public_nh.subscribe("goal", 1, &SpacialHorizon::goalCallback,this);
     odom_sub_ = public_nh.subscribe("odom", 1, &SpacialHorizon::odomCallback, this);
-<<<<<<< HEAD
-    // amcl_pose_sub_ = public_nh.subscribe("amcl_pose", 1, &SpacialHorizon::amcl_poseCallback, this);
-=======
-    
->>>>>>> origin/noetic-devel
     initialPose_sub_ = public_nh.subscribe("initialpose", 0, &SpacialHorizon::handle_initial_pose, this);
 
     subgoal_DRL_pub_  = public_nh.advertise<geometry_msgs::PoseStamped>("subgoal",10);

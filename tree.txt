@@ -1,0 +1,131 @@
+CURRENT STRUCTURE
+
+.
+├── arena_bringup
+        Package mit allen Launch dateien
+        Unterschiede in 2D und 3D
+├── arena_navigation
+│   ├── all_in_one_global_planner_interface
+        ONLY IN 3D
+│   ├── arena_fake_localization
+            GLEICH
+│   ├── arena_intermediate_planner
+            GLEICH
+│   ├── arena_local_planner
+│   │   ├── env
+            ONLY IN 2D
+│   │   ├── evaluation
+            ONLY IN 2D
+│   │   ├── learning_based
+│   │   │   ├── all_in_one_3rd_party
+                ONLY IN 3D
+│   │   │   ├── all_in_one_planner
+                ONLY IN 3D
+│   │   │   ├── arena_local_planner_drl
+│   │   │   │   ├── agents
+│   │   │   │   │   ├── guldenring
+                        ONLY IN 3D
+│   │   │   │   │   ├── navrep
+                        ONLY IN 3D
+│   │   │   │   │   └── rosnav
+                        ONLY IN 3D
+                    AGENTS ONLY IN 2D
+│   │   │   │   ├── configs
+                    SMALL DIFFERENCES
+│   │   │   │   ├── rl_agent
+                    SMALL DIFFERENCES
+│   │   │   │   ├── scripts
+                    SMALL DIFFERENCES
+│   │   │   │   ├── setup.py
+                    SMALL DIFFERENCES
+│   │   │   │   ├── tools
+                    SMALL DIFFERENCES
+│   │   │   │   └── training_logs
+                    GLEICH
+│   │   │   ├── arena_ros
+                    SMALL DIFFERENCES
+│   │   │   └── rl_collision_avoidance
+                    SMALL DIFFERENCES
+│   │   ├── model_based
+│   │       ├── all_in_one_local_planner_interface
+                ONLY IN 3D
+│   │   │   ├── cadrl_ros
+                SMALL DIFFERENCES
+│   │   │   ├── conventional
+                SMALL DIFFERENCES
+│   │   │   ├── crowdnav_ros
+                ONLY IN 2D
+│   │   │   ├── empty.txt
+│   │   │   ├── obstacle_publisher
+                ONLY IN 2D
+│   │   │   ├── rlca_ros
+                ONLY IN 2D
+│   │   │   ├── sarl_star
+                ONLY IN 2D
+│   │   │   └── sensor_simulator
+                SMALL DIFFERENCES
+│   │   ├── README.md
+            ONLY IN 2D
+│   │   └── template
+            ONLY IN 2D
+│   ├── arena_mapping
+            GLEICH
+│   ├── arena_path_search
+            GLEICH
+│   ├── arena_plan_manager
+            GLEICH
+│   ├── arena_plan_msgs
+            GLEICH
+│   ├── arena_spacial_horizon
+            GLEICH
+│   ├── arena_traj_planner
+            GLEICH
+│   ├── emergency break
+            ONLY IN 2D
+│   └── observations
+            GLEICH
+├── docs
+    Dokumentation - Unterschiedlich in 2D und 3D
+├── docker
+    ONLY IN 3D
+├── gui
+    ONLY IN 2D
+├── img
+    Images for Readme
+├── README.md
+    Unterschiedlich
+├── arena-rosnav-3D_gui.py
+    ONLY IN 3D
+├── sim_2_real
+    ONLY IN 3D
+├── simulator_setup
+│   ├── advanced_configs.yaml
+        ONLY IN 2D
+│   ├── dynamic_obstacles
+        GLEICH
+│   ├── include
+        ONLY IN 3D
+│   ├── maps
+        SMALL DIFFERENCES
+│   ├── obstacles
+        SMALL DIFFERENCES
+│   ├── robot
+        MAJOR DIFFERENCES
+│   ├── saftey_distance_parameter_none.yaml
+        ONLY IN 2D
+│   ├── saftey_distance_parameter.yaml
+        ONLY IN 2D
+│   ├── scenarios
+        MAJOR DIFFERENCES
+│   └── worlds
+        ONLY IN 3D
+├── state_provider
+    ONLY IN 2D
+├── task_generator
+    MAJOR DIFFERENCES
+├── training-on-GPU-server.md
+    ONLY IN 2D
+└── utils
+    SMALL DIFFERENCES
+
+482 directories, 2911 files
