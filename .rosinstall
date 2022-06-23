@@ -31,5 +31,5 @@
 #     uri: https://github.com/jackal/jackal.git
 - git:
     local-name: ../forks/arena-evaluation
-    uri: https://github.com/ignc-research/arena-evaluation
+    uri: https://github.com/flameryx/arena-evaluation
     version: main
