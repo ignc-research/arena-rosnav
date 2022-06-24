@@ -2,25 +2,16 @@ import sys
 import os, sys, rospy, time
 
 from datetime import time
-from functools import partial
-from typing import Callable, List
 from multiprocessing import cpu_count
 
 import rospy
-import rospkg
 from multiprocessing import cpu_count, set_start_method
 
 # from stable_baselines3 import PPO
 # from supersuit.vector import MakeCPUAsyncConstructor, ConcatVecEnv
 # from supersuit.vector.sb3_vector_wrapper import SB3VecEnvWrapper
 
-from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.rl_agent.model.agent_factory import (
-    AgentFactory,
-)
-from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.rl_agent.model.base_agent import (
-    BaseAgent,
-)
-from marl_tools.custom_mlp_utils import *
+# from marl_tools.custom_mlp_utils import *
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.rl_agent.model.custom_policy import *
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.rl_agent.model.custom_sb3_policy import *
 
@@ -44,12 +35,6 @@ from marl_tools.train_agent_utils import (
 )
 from marl_tools import train_agent_utils
 
-from stable_baselines3 import PPO
-from stable_baselines3.common.vec_env import (
-    SubprocVecEnv,
-    DummyVecEnv,
-    VecNormalize,
-)
 from stable_baselines3.common.callbacks import (
     StopTrainingOnRewardThreshold,
     MarlEvalCallback,
@@ -57,45 +42,7 @@ from stable_baselines3.common.callbacks import (
 
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.tools.train_agent_utils import *
 
-from rl_agent.training_agent_wrapper import TrainingDRLAgent
-from task_generator.task_generator.marl_tasks import get_MARL_task
-
-
-def instantiate_drl_agents(
-    num_robots: int = 1,
-    existing_robots: int = 0,
-    robot_model: str = "burger",
-    ns: str = None,
-    robot_name_prefix: str = "robot",
-    hyperparameter_path: str = os.path.join(
-        rospkg.RosPack().get_path("arena_local_planner_drl"),
-        "configs",
-        "hyperparameters",
-        "default.json",
-    ),
-) -> List[TrainingDRLAgent]:
-    """Function which generates a list agents which handle the ROS connection.
-
-    Args:
-        num_robots (int, optional): Number of robots in the environment. Defaults to 1.
-        robot_model (str, optional): Model of the robot. Defaults to "burger".
-        ns (str, optional): Name of the namespace (used for ROS topics). Defaults to None.
-        robot_name_prefix (str, optional): Name with which to prefix robots in the ROS environment. Defaults to "robot".
-        hyperparameter_path (str, optional): Path where to load hyperparameters from. Defaults to DEFAULT_HYPERPARAMETER.
-        action_space_path (str, optional): Path where to load action spaces from. Defaults to DEFAULT_ACTION_SPACE.
-
-    Returns:
-        List[TrainingDRLAgent]: List containing _num\_robots_ agent classes.
-    """
-    return [
-        TrainingDRLAgent(
-            ns=ns,
-            robot_model=robot_model,
-            robot_ns=robot_name_prefix + str(i + 1),
-            hyperparameter_path=hyperparameter_path,
-        )
-        for i in range(existing_robots, existing_robots + num_robots)
-    ]
+from marl_agent.utils.utils import instantiate_train_drl_agents
 
 
 def main(args):
@@ -136,7 +83,7 @@ def main(args):
 
         env = vec_env_create(
             env_fn,
-            instantiate_drl_agents,
+            instantiate_train_drl_agents,
             num_robots=robot_train_params["num_robots"],
             num_cpus=cpu_count() - 1,
             num_vec_envs=config["n_envs"],
@@ -232,7 +179,7 @@ def get_evalcallback(
     eval_env = env_fn(
         num_agents=num_robots,
         ns="eval_sim",
-        agent_list_fn=instantiate_drl_agents,
+        agent_list_fn=instantiate_train_drl_agents,
         max_num_moves_per_eps=eval_config["max_num_moves_per_eps"],
         PATHS=PATHS,
     )

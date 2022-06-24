@@ -3,7 +3,7 @@ debug_mode: true
 
 # Hardware specifc configurations
 # number of parallel environments
-n_envs: 2
+n_envs: 1
 # gpu yes or no
 no_gpu: false
 

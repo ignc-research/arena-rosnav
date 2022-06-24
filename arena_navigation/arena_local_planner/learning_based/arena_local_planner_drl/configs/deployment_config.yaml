@@ -3,7 +3,7 @@ debug_mode: true
 
 # Hardware specifc configurations
 # number of parallel environments
-n_envs: 2
+n_envs: 1
 # gpu yes or no
 no_gpu: false
 
@@ -54,7 +54,7 @@ robots:
     # name of architecture defined in the Policy factory
     architecture_name: "AGENT_24"
     # path to latest checkpoint; if provided the training will be resumed from that checkpoint
-    resume: null
+    resume: "/home/ignc/catkin_ws/src/arena-rosnav/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl/agents/jackal"
   # burger:
   #   # number of robots of this type
   #   num_robots: 4

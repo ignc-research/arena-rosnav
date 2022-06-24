@@ -89,7 +89,7 @@ def load_config(config_name: str) -> dict:
     Load config parameters from config file
     """
     config_location = os.path.join(
-        rospkg.RosPack().get_path("arena_local_planner"), "configs", config_name
+        rospkg.RosPack().get_path("arena_local_planner_drl"), "configs", config_name
     )
     with open(config_location, "r", encoding="utf-8") as target:
         config = yaml.load(target, Loader=yaml.FullLoader)
