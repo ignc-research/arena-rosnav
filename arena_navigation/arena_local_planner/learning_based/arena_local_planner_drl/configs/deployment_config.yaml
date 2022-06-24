@@ -1,0 +1,68 @@
+# in debug_mode no agent directories will be created and no models will be saved
+debug_mode: true
+
+# Hardware specifc configurations
+# number of parallel environments
+n_envs: 2
+# gpu yes or no
+no_gpu: false
+
+
+### Global configuration that applies to all robots
+# navigation task mode, chose from "random" or "staged"
+task_mode: "staged"
+# number of simulation timesteps
+n_timesteps: 40000000
+max_num_moves_per_eps: 1000
+
+periodic_eval:
+  # max number of steps per episode
+  max_num_moves_per_eps: 1000
+  # number of evaluation episodes
+  n_eval_episodes: 100
+  # evaluation frequency, evaluation after every n_envs * 20000 timesteps
+  eval_freq: 20000
+
+### training_curriculum
+# threshold metric to be considered during evaluation
+# can be either "succ" (success rate) or "rew" (reward)
+training_curriculum:
+  # file for the robot's learning curriculum
+  training_curriculum_file: "training_curriculum.yaml"
+  threshold_type: "succ"
+  upper_threshold: 0.8
+  lower_threshold: 0.6
+
+### stop training on threshold
+# stops training when last stage reached and threshold satisfied
+stop_training:
+  threshold_type: "succ"
+  threshold: 0.9
+
+
+# save evaluation stats during training in log file
+eval_log: false
+# use tensorboard
+tb: false
+
+robots:
+  jackal:
+    # number of robots of this type
+    num_robots: 2
+    # name of hyperparameter file located in the configs/hyperparameters directory
+    hyperparameter_file: "default.json"
+    # name of architecture defined in the Policy factory
+    architecture_name: "AGENT_24"
+    # path to latest checkpoint; if provided the training will be resumed from that checkpoint
+    resume: null
+  # burger:
+  #   # number of robots of this type
+  #   num_robots: 4
+  #   # name of hyperparameter file located in the configs/hyperparameters directory
+  #   hyperparameter_file: "default.json"
+  #   # name of architecture defined in the Policy factory
+  #   architecture_name: "AGENT_24"
+  #   # path to latest checkpoint; if provided the training will be resumed from that checkpoint
+  #   resume: null
+  # add more robots as you wish
+  
