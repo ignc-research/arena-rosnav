@@ -1,27 +1,20 @@
 """PettingZoo Environment for Single-/Multi Agent Reinforcement Learning"""
-from time import sleep
-from typing import List, Tuple, Dict, Any, Union, Callable
-
 import numpy as np
 import rospy
-
-from arena_marl.marl_agent.utils.supersuit_utils import MarkovVectorEnv_patched
-
-# from stable_baselines3.common.vec_env import VecEnv
-
+from time import sleep
+from typing import List, Tuple, Dict, Any, Union, Callable
 from gym import spaces
 from pettingzoo import *
 from pettingzoo.utils import from_parallel, to_parallel
+from warnings import warn
+
 import supersuit as ss
 
-#
-#
-
+from arena_marl.marl_agent.utils.supersuit_utils import MarkovVectorEnv_patched
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.rl_agent.training_agent_wrapper import (
     TrainingDRLAgent,
 )
 from task_generator.task_generator.marl_tasks import get_MARL_task
-
 from flatland_msgs.srv import StepWorld, StepWorldRequest
 
 # from marl_agent.utils.supersuit_utils import *
@@ -111,6 +104,7 @@ class FlatlandPettingZooEnv(ParallelEnv):
             )
 
         self._max_num_moves = max_num_moves_per_eps
+        self.action_provided, self.curr_actions = False, {}
 
     def observation_space(self, agent: str) -> spaces.Box:
         """Returns specific agents' observation space.
@@ -155,9 +149,11 @@ class FlatlandPettingZooEnv(ParallelEnv):
         Returns:
             Dict[str, np.ndarray]: Observations dictionary in {_agent name_: _respective observations_}.
         """
-        self.agents = self.possible_agents[:]
-        self.num_moves = 0
-        self.terminal_observation = {}
+        self.agents, self.num_moves, self.terminal_observation = (
+            self.possible_agents[:],
+            0,
+            {},
+        )
 
         # reset the reward calculator
         for agent in self.agents:
@@ -175,6 +171,7 @@ class FlatlandPettingZooEnv(ParallelEnv):
             for agent in self.agents
         }
 
+        self.action_provided, self.curr_actions = False, {}
         return observations
 
     def step(
@@ -235,6 +232,74 @@ class FlatlandPettingZooEnv(ParallelEnv):
             # rewards and infos
             reward, reward_info = self.agent_object_mapping[agent].get_reward(
                 action=actions[agent], obs_dict=_dict
+            )
+            rewards[agent], reward_infos[agent] = reward, reward_info
+
+        # dones & infos
+        dones, infos = self._get_dones(reward_infos), self._get_infos(reward_infos)
+
+        # remove done agents from the active agents list
+        self.agents = [agent for agent in self.agents if not dones[agent]]
+
+        for agent in self.possible_agents:
+            # agent is done in this episode
+            if agent in dones and dones[agent]:
+                self.terminal_observation[agent] = merged_obs[agent]
+                infos[agent]["terminal_observation"] = merged_obs[agent]
+            # agent is done since atleast last episode
+            elif agent not in self.agents:
+                if agent not in infos:
+                    infos[agent] = {}
+                infos[agent]["terminal_observation"] = self.terminal_observation[agent]
+
+        return merged_obs, rewards, dones, infos
+
+    def apply_action(self, actions: np.ndarray) -> None:
+        """_summary_
+
+        Args:
+            action (np.ndarray): _description_
+
+        Returns:
+            _type_: _description_
+        """
+        if self.action_provided:
+            warn(
+                "Disobeyed method order. Called 'apply_action' multiple times without retrieving states."
+            )
+
+        # If a user passes in actions with no agents, then just return empty observations, etc.
+        if not actions:
+            self.agents = []
+            return {}, {}, {}, {}
+
+        # actions
+        for agent in self.possible_agents:
+            if agent in actions:
+                self.agent_object_mapping[agent].publish_action(actions[agent])
+            else:
+                noop = np.zeros(shape=self.action_space(agent).shape)
+                self.agent_object_mapping[agent].publish_action(noop)
+
+        self.num_moves += 1
+        self.action_provided, self.curr_actions = True, actions
+
+    def get_states(
+        self,
+    ) -> Tuple[
+        Dict[str, np.ndarray], Dict[str, float], Dict[str, bool], Dict[str, Any]
+    ]:
+        assert self.action_provided, "No actions provided"
+        merged_obs, rewards, reward_infos = {}, {}, {}
+
+        for agent in self.curr_actions:
+            # observations
+            merged, _dict = self.agent_object_mapping[agent].get_observations()
+            merged_obs[agent] = merged
+
+            # rewards and infos
+            reward, reward_info = self.agent_object_mapping[agent].get_reward(
+                action=self.curr_actions[agent], obs_dict=_dict
             )
             rewards[agent], reward_infos[agent] = reward, reward_info
 
