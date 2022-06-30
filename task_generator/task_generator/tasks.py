@@ -789,8 +789,16 @@ def get_predefined_task(
         assert json_path.is_file() and json_path.suffix == ".json"
         map_params = json.load(json_path.open())
         repeats = map_params["repeats"]
-        numb_dyn_obst = map_params["numb_dynamic_obstacles"]
-        numb_static_obst = map_params["numb_static_obstacles"]
+        
+        scenario_file = rospy.get_param("/scenario_file")
+
+        if scenario_file == "random_eval/random_indoor_project_scenario.json":
+            numb_dyn_obst = rospy.get_param("/num_dynamic_obs")
+            numb_static_obst = rospy.get_param("/num_static_obs")
+        else:
+            numb_dyn_obst = map_params["numb_dynamic_obstacles"]
+            numb_static_obst = map_params["numb_static_obstacles"]
+
         map_type = map_params['type']
         if map_type == 'mixed':
             indoor_prob = map_params['indoor_prob']

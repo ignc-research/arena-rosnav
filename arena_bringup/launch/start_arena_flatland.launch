@@ -19,6 +19,8 @@
   <arg name="reset" default="true"/>
   <arg name="enable_pedsim" default="true"/>
   <arg name="task_mode" default="scenario" doc="[random, manual, staged, scenario]"/>
+  <arg name="num_dynamic_obs" default="0"/>
+  <arg name="num_static_obs" default="0"/>
 
   <!-- To make the training more efficient make sure this step_size*laser_update_rate == 1  -->
   <arg name="step_size" default="0.01"/>
@@ -126,6 +128,8 @@
     <arg name="auto_reset" value="$(arg reset)"/>
     <arg name="timeout" value="$(arg timeout)"/>
     <arg name="task_mode" value="$(arg task_mode)"/>
+    <arg name="num_dynamic_obs" value="$(arg num_dynamic_obs)"/>
+    <arg name="num_static_obs" value="$(arg num_static_obs)"/>
   </include>
 
   <include file="$(find arena_bringup)/launch/sublaunch_testing/sensor_sim.launch" unless="$(eval arg('train_mode'))">
