@@ -310,6 +310,7 @@ class FlatlandEnv(gym.Env):
 
         # info
         info = {}
+        
 
         if done:
             info["done_reason"] = reward_info["done_reason"]
@@ -319,6 +320,8 @@ class FlatlandEnv(gym.Env):
             done = True
             info["done_reason"] = 0
             info["is_success"] = 0
+
+        
 
         # for logging
         if self._extended_eval and done:

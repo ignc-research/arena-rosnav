@@ -21,6 +21,12 @@
   <arg name="task_mode" default="scenario" doc="[random, manual, staged, scenario]"/>
   <arg name="num_dynamic_obs" default="0"/>
   <arg name="num_static_obs" default="0"/>
+  <arg name="min_dyn_radius" default="0.2" />
+  <arg name="max_dyn_radius" default="0.3" />
+  <arg name="min_dyn_vel" default="0.3" />
+  <arg name="max_dyn_vel" default="0.3" />
+  <arg name="min_static_radius" default="0.5" />
+  <arg name="max_static_radius" default="2" />
 
   <!-- To make the training more efficient make sure this step_size*laser_update_rate == 1  -->
   <arg name="step_size" default="0.01"/>
@@ -130,6 +136,12 @@
     <arg name="task_mode" value="$(arg task_mode)"/>
     <arg name="num_dynamic_obs" value="$(arg num_dynamic_obs)"/>
     <arg name="num_static_obs" value="$(arg num_static_obs)"/>
+    <arg name="min_dyn_radius" value="$(arg min_dyn_radius)" />
+    <arg name="max_dyn_radius" value="$(arg max_dyn_radius)" />
+    <arg name="min_static_radius" value="$(arg min_static_radius)" />
+    <arg name="max_static_radius" value="$(arg max_static_radius)" />
+    <arg name="min_dyn_vel" value="$(arg min_dyn_vel)" />
+    <arg name="max_dyn_vel" value="$(arg max_dyn_vel)" />
   </include>
 
   <include file="$(find arena_bringup)/launch/sublaunch_testing/sensor_sim.launch" unless="$(eval arg('train_mode'))">

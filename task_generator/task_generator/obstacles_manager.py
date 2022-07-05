@@ -19,7 +19,6 @@ import rospkg
 import shutil
 from .utils import generate_freespace_indices, get_random_pos_on_map
 
-
 class ObstaclesManager:
     """
     A manager class using flatland provided services to spawn, move and delete obstacles.
@@ -138,11 +137,25 @@ class ObstaclesManager:
             linear_velocity: the maximum linear velocity
         """
         num_dynamic_obstalces = int(num_obstacles*p_dynamic)
-        max_linear_velocity = rospy.get_param("/obs_vel")
+        linear_velocity = rospy.get_param("/obs_vel")
+
+
+        # Ricardo new line
+        min_dyn_vel = rospy.get_param("/obstacles/dynamic/min_vel")
+        max_dyn_vel = rospy.get_param("/obstacles/dynamic/max_vel")  
+        min_dyn_radius = rospy.get_param("/obstacles/dynamic/min_radius")
+        max_dyn_radius = rospy.get_param("/obstacles/dynamic/max_radius") 
+        min_static_radius = rospy.get_param("/obstacles/static/min_radius")
+        max_static_radius = rospy.get_param("/obstacles/static/max_radius") 
+
+        random_dyn_vel = random.uniform(min_dyn_vel, max_dyn_vel)
+
+        #----------------------------------------------------
+
         self.register_random_dynamic_obstacles(
-            num_dynamic_obstalces, max_linear_velocity)
+            num_dynamic_obstalces, random_dyn_vel, min_obstacle_radius=min_dyn_radius, max_obstacle_radius=max_dyn_radius)
         self.register_random_static_obstacles(
-            num_obstacles-num_dynamic_obstalces)
+            num_obstacles-num_dynamic_obstalces, min_obstacle_radius=min_static_radius, max_obstacle_radius=max_static_radius)
         rospy.loginfo(
             f"Registed {num_dynamic_obstalces} dynamic obstacles and {num_obstacles-num_dynamic_obstalces} static obstacles")
 

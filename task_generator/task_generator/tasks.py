@@ -793,8 +793,8 @@ def get_predefined_task(
         scenario_file = rospy.get_param("/scenario_file")
 
         if scenario_file == "random_eval/random_indoor_project_scenario.json":
-            numb_dyn_obst = rospy.get_param("/num_dynamic_obs")
-            numb_static_obst = rospy.get_param("/num_static_obs")
+            numb_dyn_obst = rospy.get_param("/obstacles/dynamic/number")
+            numb_static_obst = rospy.get_param("/obstacles/static/number")
         else:
             numb_dyn_obst = map_params["numb_dynamic_obstacles"]
             numb_static_obst = map_params["numb_static_obstacles"]

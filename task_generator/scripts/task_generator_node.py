@@ -20,11 +20,25 @@ class TaskGenerator:
         self.sr = rospy.Publisher('/scenario_reset', Int16, queue_size=1)
         self.nr = 0
         self.mode = rospy.get_param("~task_mode")
+        # Ricardo new line
         self.num_dynamic_obs = rospy.get_param("~num_dynamic_obs")
         self.num_static_obs = rospy.get_param("~num_static_obs")
-        rospy.set_param("/num_static_obs", self.num_static_obs)
-        rospy.set_param("/num_dynamic_obs", self.num_dynamic_obs)
-        
+        self.min_static_radius = rospy.get_param("~min_static_radius")
+        self.max_static_radius = rospy.get_param("~max_static_radius")
+        self.min_dyn_radius = rospy.get_param("~min_dyn_radius")
+        self.max_dyn_radius = rospy.get_param("~max_dyn_radius")
+        self.min_dyn_vel = rospy.get_param("~min_dyn_vel")
+        self.max_dyn_vel = rospy.get_param("~max_dyn_vel")
+
+        rospy.set_param("/obstacles/static/number", self.num_static_obs)
+        rospy.set_param("/obstacles/static/min_radius", self.min_static_radius)
+        rospy.set_param("/obstacles/static/max_radius", self.max_static_radius)
+        rospy.set_param("/obstacles/dynamic/number", self.num_dynamic_obs)
+        rospy.set_param("/obstacles/dynamic/min_radius", self.min_dyn_radius)
+        rospy.set_param("/obstacles/dynamic/max_radius", self.max_dyn_radius)
+        rospy.set_param("/obstacles/dynamic/min_vel", self.min_dyn_vel)
+        rospy.set_param("/obstacles/dynamic/max_vel", self.max_dyn_vel)
+        #---------------------------------------------------------------
         
         scenarios_json_path = rospy.get_param("~scenarios_json_path")
        
