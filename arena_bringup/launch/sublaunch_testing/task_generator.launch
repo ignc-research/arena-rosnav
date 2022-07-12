@@ -14,6 +14,7 @@
     <arg name="max_static_radius" default="2" />
     <arg name="min_dyn_vel" default="0.3" />
     <arg name="max_dyn_vel" default="0.3" />
+    <arg name="scenario_file" default="empty_map.json" />
     <!--  ************** minute  ***************  -->
 
     <!--  ************** task generator  ***************  -->
@@ -31,5 +32,6 @@
         <param name="max_dyn_vel" value="$(arg max_dyn_vel)"/>
         <param name="min_static_radius" value="$(arg min_static_radius)"/>
         <param name="max_static_radius" value="$(arg max_static_radius)" />
+        <param name="scenario_file" value="$(arg scenario_file)" />
     </node>
 </launch>

@@ -93,12 +93,12 @@ class RandomTask(ABSTask):
                             (
                                 start_pos.x,
                                 start_pos.y,
-                                self.robot_manager.ROBOT_RADIUS*4,
+                                self.robot_manager.ROBOT_RADIUS*2,
                             ),
                             (
                                 goal_pos.x,
                                 goal_pos.y,
-                                self.robot_manager.ROBOT_RADIUS*4,
+                                self.robot_manager.ROBOT_RADIUS*2,
                             ),
                         ]
                     )
@@ -142,12 +142,12 @@ class RandomEvalTask(ABSTask):
                                 (
                                     start_pos.x,
                                     start_pos.y,
-                                    self.robot_manager.ROBOT_RADIUS*10,
+                                    self.robot_manager.ROBOT_RADIUS * 2,
                                 ),
                                 (
                                     goal_pos.x,
                                     goal_pos.y,
-                                    self.robot_manager.ROBOT_RADIUS*10,
+                                    self.robot_manager.ROBOT_RADIUS * 2,
                                 ),
                             ]
                         )
@@ -790,7 +790,7 @@ def get_predefined_task(
         map_params = json.load(json_path.open())
         repeats = map_params["repeats"]
         
-        scenario_file = rospy.get_param("/scenario_file")
+        scenario_file = rospy.get_param("~scenario_file")
 
         if scenario_file == "random_eval/random_indoor_project_scenario.json":
             numb_dyn_obst = rospy.get_param("/obstacles/dynamic/number")

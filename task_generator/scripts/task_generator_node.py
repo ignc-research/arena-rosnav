@@ -1,5 +1,6 @@
 #! /usr/bin/env python3
 
+from tokenize import String
 import rospy
 import rosservice
 import subprocess
@@ -7,12 +8,16 @@ import time
 from std_srvs.srv import EmptyResponse
 from nav_msgs.msg import Odometry
 from task_generator.tasks import get_predefined_task
-from std_msgs.msg import Int16, Bool
+from std_msgs.msg import Int16, Bool, String
 # for clearing costmap
 from clear_costmap import clear_costmaps
 from simulator_setup.srv import * # GetMapWithSeedRequest srv
 from pathlib import Path
 import json
+import sys
+from sensor_msgs.msg import LaserScan
+from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.rl_agent.envs.flatland_gym_env import FlatlandEnv
+import numpy as np
 
 class TaskGenerator:
     def __init__(self):
@@ -21,6 +26,7 @@ class TaskGenerator:
         self.nr = 0
         self.mode = rospy.get_param("~task_mode")
         # Ricardo new line
+        self.laser_scan = LaserScan()
         self.num_dynamic_obs = rospy.get_param("~num_dynamic_obs")
         self.num_static_obs = rospy.get_param("~num_static_obs")
         self.min_static_radius = rospy.get_param("~min_static_radius")
@@ -38,6 +44,8 @@ class TaskGenerator:
         rospy.set_param("/obstacles/dynamic/max_radius", self.max_dyn_radius)
         rospy.set_param("/obstacles/dynamic/min_vel", self.min_dyn_vel)
         rospy.set_param("/obstacles/dynamic/max_vel", self.max_dyn_vel)
+
+        self.done_reason_pub = rospy.Publisher("/done_reason", String, queue_size=10)
         #---------------------------------------------------------------
         
         scenarios_json_path = rospy.get_param("~scenarios_json_path")
@@ -102,17 +110,35 @@ class TaskGenerator:
                 
         self.err_g = 100
         
-
+    
 
     def goal_reached(self,event):
-
         if self.err_g < self.delta_:
             print(self.err_g)
+
+            self.done_reason_pub.publish("goal reached")
+
             self.reset_task()
         if rospy.get_time()-self.start_time_>self.timeout_:
             print("timeout")
+
+            self.done_reason_pub.publish("timeout")
+
             self.reset_task()
 
+        # if len(self.laser_scan.ranges) > 0:
+        #     laser_scan = self.laser_scan.ranges.astype(np.float32)
+        # # laser_scan = self.laser_scan.ranges
+        #     robot_radius = rospy.get_param("/radius")
+
+        #     print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+        #     print(laser_scan)
+        #     if min(laser_scan) <= robot_radius:
+        #         print("collision")
+
+        #         self.done_reason_pub.publish("collision")
+        #         self.reset_task()
+        
 
     # def clear_costmaps(self):
     #     bashCommand = "rosservice call /move_base/clear_costmaps"

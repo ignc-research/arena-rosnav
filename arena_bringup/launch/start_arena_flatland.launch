@@ -110,7 +110,8 @@
   <include file="$(find arena_bringup)/launch/sublaunch_testing/flatland_simulator.launch">
     <arg name="show_viz" value="$(arg show_viz)"/>
     <arg name="use_rviz" value="$(arg use_rviz)"/>
-    <arg name="rviz_file" value="$(arg rviz_file)_$(arg model)"/>
+    <!-- <arg name="rviz_file" value="$(arg rviz_file)_$(arg model)"/> -->
+    <arg name="rviz_file" value="$(arg rviz_file)_burger"/>
     <arg name="model" value="$(arg model)"/>
   </include>
 
@@ -131,6 +132,7 @@
   <arg name="timeout" default="3.0"/>
   <include file="$(find arena_bringup)/launch/sublaunch_testing/task_generator.launch" unless="$(eval arg('disable_scenario') or arg('train_mode'))">
     <arg name="scenarios_json_path" value="$(find simulator_setup)/scenarios/$(arg scenario_file)"/>
+    <arg name="scenario_file" value="$(arg scenario_file)"/>
     <arg name="auto_reset" value="$(arg reset)"/>
     <arg name="timeout" value="$(arg timeout)"/>
     <arg name="task_mode" value="$(arg task_mode)"/>
