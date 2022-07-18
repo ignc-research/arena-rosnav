@@ -16,7 +16,6 @@ from pathlib import Path
 import json
 import sys
 from sensor_msgs.msg import LaserScan
-from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.rl_agent.envs.flatland_gym_env import FlatlandEnv
 import numpy as np
 
 class TaskGenerator:
@@ -87,7 +86,7 @@ class TaskGenerator:
         robot_odom_topic_name = rospy.get_param(
             "robot_odom_topic_name", "odom")
         
-        auto_reset = auto_reset and self.mode in ["scenario","random_eval"]
+        auto_reset = auto_reset and self.mode in ["scenario","random_eval","project_eval"]
         self.curr_goal_pos_ = None
         
         self.pub = rospy.Publisher('End_of_scenario', Bool, queue_size=10)
@@ -166,6 +165,7 @@ class TaskGenerator:
                 subprocess.call(["killall","-9","rosmaster"]) # apt-get install psmisc necessary
                 sys.exit()
         else:
+            print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
             info = self.task.reset()
         clear_costmaps()
         if info is not None:

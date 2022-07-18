@@ -79,6 +79,7 @@ class RandomTask(ABSTask):
 
     def reset(self):
         """[summary]"""
+        info = {}
         with self._map_lock:
             max_fail_times = 10
             fail_times = 0
@@ -102,12 +103,14 @@ class RandomTask(ABSTask):
                             ),
                         ]
                     )
+                    info["robot_goal_pos"] = [goal_pos.x,goal_pos.y,goal_pos.theta]
                     break
                 except rospy.ServiceException as e:
                     rospy.logwarn(repr(e))
                     fail_times += 1
             if fail_times == max_fail_times:
                 raise Exception("reset error!")
+        return info
 
 class RandomEvalTask(ABSTask):
     """Evertime the start position and end position of the robot is reset."""
@@ -781,6 +784,45 @@ def get_predefined_task(
             task = ScenerioTask(
                 obstacles_manager, robot_manager, PATHS["scenario"]
             )
+
+    if mode == "project_eval":
+        rospy.set_param("/task_mode", "project_eval")
+
+        # load map parameters
+        json_path = Path(PATHS["scenario"])
+        assert json_path.is_file() and json_path.suffix == ".json"
+        map_params = json.load(json_path.open())
+        repeats = map_params["repeats"]
+        
+        scenario_file = rospy.get_param("~scenario_file")
+
+        if scenario_file == "random_eval/random_indoor_project_scenario.json":
+            numb_dyn_obst = rospy.get_param("/obstacles/dynamic/number")
+            numb_static_obst = rospy.get_param("/obstacles/static/number")
+        else:
+            numb_dyn_obst = map_params["numb_dynamic_obstacles"]
+            numb_static_obst = map_params["numb_static_obstacles"]
+
+        map_type = map_params['type']
+        if map_type == 'mixed':
+            indoor_prob = map_params['indoor_prob']
+        else:
+            indoor_prob = 0
+        
+        # start map generator node
+        #start_map_generator_node(map_type, indoor_prob)
+
+        # register random obstacles
+        numb_obst = numb_static_obst + numb_dyn_obst
+        if numb_obst != 0:
+            prob_dyn_obst = float(numb_dyn_obst) / numb_obst
+        else:
+            prob_dyn_obst = 1
+        obstacles_manager.register_random_obstacles(numb_obst, prob_dyn_obst)
+
+        task = RandomTask(obstacles_manager, robot_manager)
+        print("project eval tasks requested")
+    
     if mode == "random_eval":
         rospy.set_param("/task_mode", "random_eval")
 
