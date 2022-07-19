@@ -551,11 +551,12 @@ class ObstaclesManager:
             #---------------------
         else:
             f["type"] = "polygon"
-            f["points"] = []
+            f["points"] = [3]
             # random_num_vert = random.randint(
             #     min_obstacle_vert, max_obstacle_vert)
             radius = random.uniform(
                 min_obstacle_radius, max_obstacle_radius)
+            
             # When we send the request to ask flatland server to respawn the object with polygon, it will do some checks
             # one important assert is that the minimum distance should be above this value
             # https://github.com/erincatto/box2d/blob/75496a0a1649f8ee6d2de6a6ab82ee2b2a909f42/include/box2d/b2_common.h#L65

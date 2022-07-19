@@ -130,19 +130,6 @@ class TaskGenerator:
             self.done_reason_pub.publish("timeout")
 
             self.reset_task()
-
-        # if len(self.laser_scan.ranges) > 0:
-        #     laser_scan = self.laser_scan.ranges.astype(np.float32)
-        # # laser_scan = self.laser_scan.ranges
-        #     robot_radius = rospy.get_param("/radius")
-
-        #     print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-        #     print(laser_scan)
-        #     if min(laser_scan) <= robot_radius:
-        #         print("collision")
-
-        #         self.done_reason_pub.publish("collision")
-        #         self.reset_task()
         
 
     # def clear_costmaps(self):
