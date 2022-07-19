@@ -73,44 +73,51 @@ class RandomTask(ABSTask):
     """Evertime the start position and end position of the robot is reset."""
 
     def __init__(
-        self, obstacles_manager: ObstaclesManager, robot_manager: RobotManager
+        self, repeats:int, obstacles_manager: ObstaclesManager, robot_manager: RobotManager
     ):
         super().__init__(obstacles_manager, robot_manager)
 
+        self.max_repeats = repeats
+        self.num_repeats = 0
+
     def reset(self):
         """[summary]"""
-        info = {}
-        with self._map_lock:
-            max_fail_times = 10
-            fail_times = 0
-            while fail_times < max_fail_times:
-                try:
-                    (
-                        start_pos,
-                        goal_pos,
-                    ) = self.robot_manager.set_start_pos_goal_pos()
-                    self.obstacles_manager.reset_pos_obstacles_random(
-                        forbidden_zones=[
-                            (
-                                start_pos.x,
-                                start_pos.y,
-                                self.robot_manager.ROBOT_RADIUS*2,
-                            ),
-                            (
-                                goal_pos.x,
-                                goal_pos.y,
-                                self.robot_manager.ROBOT_RADIUS*2,
-                            ),
-                        ]
-                    )
-                    info["robot_goal_pos"] = [goal_pos.x,goal_pos.y,goal_pos.theta]
-                    break
-                except rospy.ServiceException as e:
-                    rospy.logwarn(repr(e))
-                    fail_times += 1
-            if fail_times == max_fail_times:
-                raise Exception("reset error!")
-        return info
+        if self.max_repeats > self.num_repeats: # robot runs 1 episode more than specified for recording purposes
+            self.num_repeats += 1
+            info = {}
+            with self._map_lock:
+                max_fail_times = 10
+                fail_times = 0
+                while fail_times < max_fail_times:
+                    try:
+                        (
+                            start_pos,
+                            goal_pos,
+                        ) = self.robot_manager.set_start_pos_goal_pos()
+                        self.obstacles_manager.reset_pos_obstacles_random(
+                            forbidden_zones=[
+                                (
+                                    start_pos.x,
+                                    start_pos.y,
+                                    self.robot_manager.ROBOT_RADIUS*2,
+                                ),
+                                (
+                                    goal_pos.x,
+                                    goal_pos.y,
+                                    self.robot_manager.ROBOT_RADIUS*2,
+                                ),
+                            ]
+                        )
+                        info["robot_goal_pos"] = [goal_pos.x,goal_pos.y,goal_pos.theta]
+                        break
+                    except rospy.ServiceException as e:
+                        rospy.logwarn(repr(e))
+                        fail_times += 1
+                if fail_times == max_fail_times:
+                    raise Exception("reset error!")
+            return info
+        else:
+            return 'End'
 
 class RandomEvalTask(ABSTask):
     """Evertime the start position and end position of the robot is reset."""
@@ -761,7 +768,7 @@ def get_predefined_task(
     if mode == "random":
         rospy.set_param("/task_mode", "random")
         obstacles_manager.register_random_obstacles(20, 0.4)
-        task = RandomTask(obstacles_manager, robot_manager)
+        task = RandomTask(100, obstacles_manager, robot_manager)
         print("random tasks requested")
     if mode == "manual":
         rospy.set_param("/task_mode", "manual")
@@ -796,7 +803,7 @@ def get_predefined_task(
         
         scenario_file = rospy.get_param("~scenario_file")
 
-        if scenario_file == "random_eval/random_indoor_project_scenario.json":
+        if scenario_file == "project_eval/scenario_1.json":
             numb_dyn_obst = rospy.get_param("/obstacles/dynamic/number")
             numb_static_obst = rospy.get_param("/obstacles/static/number")
         else:
@@ -820,7 +827,7 @@ def get_predefined_task(
             prob_dyn_obst = 1
         obstacles_manager.register_random_obstacles(numb_obst, prob_dyn_obst)
 
-        task = RandomTask(obstacles_manager, robot_manager)
+        task = RandomTask(repeats, obstacles_manager, robot_manager)
         print("project eval tasks requested")
     
     if mode == "random_eval":
@@ -834,7 +841,7 @@ def get_predefined_task(
         
         scenario_file = rospy.get_param("~scenario_file")
 
-        if scenario_file == "random_eval/random_indoor_project_scenario.json":
+        if scenario_file == "project_eval/scenario_1.json":
             numb_dyn_obst = rospy.get_param("/obstacles/dynamic/number")
             numb_static_obst = rospy.get_param("/obstacles/static/number")
         else:

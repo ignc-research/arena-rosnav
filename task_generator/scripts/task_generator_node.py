@@ -74,6 +74,12 @@ class TaskGenerator:
                 else:
                     time.sleep(1)
 
+        elif self.mode == "project_eval":
+            json_path = Path(paths["scenario"])
+            assert json_path.is_file() and json_path.suffix == ".json"
+            project_eval_config = json.load(json_path.open())
+            self.project_eval_repeats = project_eval_config["repeats"]
+
         # if auto_reset is set to true, the task generator will automatically reset the task
         # this can be activated only when the mode set to 'ScenarioTask'
         auto_reset = rospy.get_param("~auto_reset")
@@ -164,8 +170,13 @@ class TaskGenerator:
             else: # self termination
                 subprocess.call(["killall","-9","rosmaster"]) # apt-get install psmisc necessary
                 sys.exit()
+
+        elif self.mode == "project_eval":
+            if self.project_eval_repeats <= self.nr:
+                subprocess.call(["killall","-9","rosmaster"]) # apt-get install psmisc necessary
+                sys.exit()
+            info = self.task.reset()
         else:
-            print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
             info = self.task.reset()
         clear_costmaps()
         if info is not None:
