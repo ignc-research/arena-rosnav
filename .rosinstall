@@ -1,7 +1,7 @@
 - git:
     local-name: ../forks/flatland
     uri: https://github.com/ignc-research/flatland
-    version: dev_multi_lei
+    version: thesis_duc
 - git:
     local-name: ../forks/stable-baselines3
     uri: https://github.com/ignc-research/stable-baselines3
