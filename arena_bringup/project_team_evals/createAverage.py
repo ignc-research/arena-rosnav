@@ -2,6 +2,7 @@ import pandas as pd
 import glob
 import sys
 import warnings
+import pathlib as pl
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 class RecordedAverage:
@@ -29,6 +30,13 @@ class RecordedAverage:
     def createAverages():
         commandLineArguments = sys.argv
         pathToCSV = commandLineArguments[1]
+        outputPath = "{}/CSVaverages/".format(pathToCSV)
+        print("")
+        print(outputPath)
+        print("")
+        path = pl.Path(outputPath)
+        path.mkdir(parents=True)
+
 
         if(len(commandLineArguments) != 2):
             print("Wrong command line arguments. Please specify the path to the directory containing the CSV files")
@@ -47,7 +55,7 @@ class RecordedAverage:
         
             csvAverage = RecordedAverage.calculateCSVAverage(RecordedAverage.episodeAverages)
 
-            csvFilename = "{}averages.csv".format(pathToCSV)
+            csvFilename = "{}/averages.csv".format(outputPath)
             with open(csvFilename, 'a') as f:
                 csvAverage.to_csv(f, mode='a', header=f.tell()==0, index=False)
             
