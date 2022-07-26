@@ -435,6 +435,8 @@ def make_envs(
                 PATHS.get("eval"),
                 info_keywords=("done_reason", "is_success"),
             )
+        
+        print("333333333333333333333333333333333333333333333333333333333333333333333333")
         env.seed(seed + rank)
         return env
 

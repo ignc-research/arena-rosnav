@@ -1,16 +1,10 @@
-<launch>
-
-  <!-- <arg name="ns"/> -->
-  <arg name="type"/>
-  <arg name="indoor_prob" />
-
-  <!-- start map generator node -->
-  <!-- <node pkg="simulator_setup" name="map_generator_node" type="map_generator_node.py" ns="$(arg ns)"> -->
-  <node pkg="simulator_setup" name="map_generator_node" type="map_generator_node.py">
-    <!-- <param name="ns" value="$(arg ns)" /> -->
-    <param name="map_type" value="$(arg type)" />
-    <param name="indoor_prob" value="$(arg indoor_prob)" />
-    <!-- <remap from="/clock" to="/$(arg ns)/clock"/> -->
-  </node>
-
-</launch>
+properties:
+  velocity_iterations: 10
+  position_iterations: 10
+layers:
+- name: static
+  map: map.yaml
+  color: [0, 1, 0, 1]
+- name: dynamic
+  map: map.yaml
+  color: [0, 1, 0, 1]

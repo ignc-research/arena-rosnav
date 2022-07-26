@@ -1,5 +1,6 @@
 #! /usr/bin/env python3
 
+from tokenize import String
 import rospy
 import rosservice
 import subprocess
@@ -7,12 +8,15 @@ import time
 from std_srvs.srv import EmptyResponse
 from nav_msgs.msg import Odometry
 from task_generator.tasks import get_predefined_task
-from std_msgs.msg import Int16, Bool
+from std_msgs.msg import Int16, Bool, String
 # for clearing costmap
 from clear_costmap import clear_costmaps
 from simulator_setup.srv import * # GetMapWithSeedRequest srv
 from pathlib import Path
 import json
+import sys
+from sensor_msgs.msg import LaserScan
+import numpy as np
 
 class TaskGenerator:
     def __init__(self):
@@ -20,7 +24,28 @@ class TaskGenerator:
         self.sr = rospy.Publisher('/scenario_reset', Int16, queue_size=1)
         self.nr = 0
         self.mode = rospy.get_param("~task_mode")
-        
+        # Ricardo new line
+        self.laser_scan = LaserScan()
+        self.num_dynamic_obs = rospy.get_param("~num_dynamic_obs")
+        self.num_static_obs = rospy.get_param("~num_static_obs")
+        self.min_static_radius = rospy.get_param("~min_static_radius")
+        self.max_static_radius = rospy.get_param("~max_static_radius")
+        self.min_dyn_radius = rospy.get_param("~min_dyn_radius")
+        self.max_dyn_radius = rospy.get_param("~max_dyn_radius")
+        self.min_dyn_vel = rospy.get_param("~min_dyn_vel")
+        self.max_dyn_vel = rospy.get_param("~max_dyn_vel")
+
+        rospy.set_param("/obstacles/static/number", self.num_static_obs)
+        rospy.set_param("/obstacles/static/min_radius", self.min_static_radius)
+        rospy.set_param("/obstacles/static/max_radius", self.max_static_radius)
+        rospy.set_param("/obstacles/dynamic/number", self.num_dynamic_obs)
+        rospy.set_param("/obstacles/dynamic/min_radius", self.min_dyn_radius)
+        rospy.set_param("/obstacles/dynamic/max_radius", self.max_dyn_radius)
+        rospy.set_param("/obstacles/dynamic/min_vel", self.min_dyn_vel)
+        rospy.set_param("/obstacles/dynamic/max_vel", self.max_dyn_vel)
+
+        self.done_reason_pub = rospy.Publisher("/done_reason", String, queue_size=10)
+        #---------------------------------------------------------------
         
         scenarios_json_path = rospy.get_param("~scenarios_json_path")
        
@@ -49,6 +74,12 @@ class TaskGenerator:
                 else:
                     time.sleep(1)
 
+        elif self.mode == "project_eval":
+            json_path = Path(paths["scenario"])
+            assert json_path.is_file() and json_path.suffix == ".json"
+            project_eval_config = json.load(json_path.open())
+            self.project_eval_repeats = project_eval_config["repeats"]
+
         # if auto_reset is set to true, the task generator will automatically reset the task
         # this can be activated only when the mode set to 'ScenarioTask'
         auto_reset = rospy.get_param("~auto_reset")
@@ -61,7 +92,7 @@ class TaskGenerator:
         robot_odom_topic_name = rospy.get_param(
             "robot_odom_topic_name", "odom")
         
-        auto_reset = auto_reset and self.mode in ["scenario","random_eval"]
+        auto_reset = auto_reset and self.mode in ["scenario","random_eval","project_eval"]
         self.curr_goal_pos_ = None
         
         self.pub = rospy.Publisher('End_of_scenario', Bool, queue_size=10)
@@ -84,17 +115,22 @@ class TaskGenerator:
                 
         self.err_g = 100
         
-
+    
 
     def goal_reached(self,event):
-
         if self.err_g < self.delta_:
             print(self.err_g)
+
+            self.done_reason_pub.publish("goal reached")
+
             self.reset_task()
         if rospy.get_time()-self.start_time_>self.timeout_:
             print("timeout")
-            self.reset_task()
 
+            self.done_reason_pub.publish("timeout")
+
+            self.reset_task()
+        
 
     # def clear_costmaps(self):
     #     bashCommand = "rosservice call /move_base/clear_costmaps"
@@ -121,6 +157,12 @@ class TaskGenerator:
             else: # self termination
                 subprocess.call(["killall","-9","rosmaster"]) # apt-get install psmisc necessary
                 sys.exit()
+
+        elif self.mode == "project_eval":
+            if self.project_eval_repeats <= self.nr:
+                subprocess.call(["killall","-9","rosmaster"]) # apt-get install psmisc necessary
+                sys.exit()
+            info = self.task.reset()
         else:
             info = self.task.reset()
         clear_costmaps()

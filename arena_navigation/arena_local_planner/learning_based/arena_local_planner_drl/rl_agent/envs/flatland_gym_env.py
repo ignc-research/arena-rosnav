@@ -311,6 +311,7 @@ class FlatlandEnv(gym.Env):
         # info
         info = {}
 
+
         if done:
             info["done_reason"] = reward_info["done_reason"]
             info["is_success"] = reward_info["is_success"]
@@ -319,6 +320,8 @@ class FlatlandEnv(gym.Env):
             done = True
             info["done_reason"] = 0
             info["is_success"] = 0
+
+
 
         # for logging
         if self._extended_eval and done:
@@ -404,6 +407,7 @@ class FlatlandEnv(gym.Env):
 
 if __name__ == "__main__":
 
+    done_reason_pub = rospy.Publisher("done_reason", String, queue_size=10, latch=True)
     rospy.init_node("flatland_gym_env", anonymous=True, disable_signals=False)
     print("start")
 
@@ -415,7 +419,7 @@ if __name__ == "__main__":
 
     # init env
     obs = flatland_env.reset()
-
+    
     # run model
     n_steps = 200
     for _ in range(n_steps):
@@ -423,5 +427,15 @@ if __name__ == "__main__":
         action = flatland_env.action_space.sample()
 
         obs, rewards, done, info = flatland_env.step(action)
+
+        done_reason_str = ""
+        if info["done_reason"] == 1:
+            done_reason_str = "collision with obstacle"
+        elif info["done_reason"] == 2:
+            done_reason_str = "goal reached"
+        else:
+            done_reason_str = "exceeded max steps"
+
+        done_reason_pub.publish(done_reason_str)
 
         time.sleep(0.1)

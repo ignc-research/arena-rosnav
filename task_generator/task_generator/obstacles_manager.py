@@ -13,12 +13,11 @@ from nav_msgs.msg import OccupancyGrid
 from geometry_msgs.msg import Pose2D
 import numpy as np
 from rospy.rostime import Time
-from std_msgs.msg import Empty
+from std_msgs.msg import Empty, Int32, String
 import rospy
 import rospkg
 import shutil
 from .utils import generate_freespace_indices, get_random_pos_on_map
-
 
 class ObstaclesManager:
     """
@@ -138,13 +137,35 @@ class ObstaclesManager:
             linear_velocity: the maximum linear velocity
         """
         num_dynamic_obstalces = int(num_obstacles*p_dynamic)
-        max_linear_velocity = rospy.get_param("/obs_vel")
+        linear_velocity = rospy.get_param("/obs_vel")
+
+
+        # Ricardo new line
+        min_dyn_vel = rospy.get_param("/obstacles/dynamic/min_vel")
+        max_dyn_vel = rospy.get_param("/obstacles/dynamic/max_vel")  
+        min_dyn_radius = rospy.get_param("/obstacles/dynamic/min_radius")
+        max_dyn_radius = rospy.get_param("/obstacles/dynamic/max_radius") 
+        min_static_radius = rospy.get_param("/obstacles/static/min_radius")
+        max_static_radius = rospy.get_param("/obstacles/static/max_radius") 
+
+        random_dyn_vel = random.uniform(min_dyn_vel, max_dyn_vel)
+
+        #----------------------------------------------------
+
         self.register_random_dynamic_obstacles(
-            num_dynamic_obstalces, max_linear_velocity)
+            num_dynamic_obstalces, random_dyn_vel, min_obstacle_radius=min_dyn_radius, max_obstacle_radius=max_dyn_radius)
         self.register_random_static_obstacles(
-            num_obstacles-num_dynamic_obstalces)
+            num_obstacles-num_dynamic_obstalces, min_obstacle_radius=min_static_radius, max_obstacle_radius=max_static_radius)
         rospy.loginfo(
             f"Registed {num_dynamic_obstalces} dynamic obstacles and {num_obstacles-num_dynamic_obstalces} static obstacles")
+
+        # Ricardo new line
+        dynamic_num_pub = rospy.Publisher("obstacles/dynamic/number", Int32, queue_size=10, latch=True)
+        dynamic_num_pub.publish(Int32(num_dynamic_obstalces))
+
+        static_num_pub = rospy.Publisher("obstacles/static/number", Int32, queue_size=10, latch=True)
+        static_num_pub.publish(Int32(num_obstacles - num_dynamic_obstalces))
+        #------------------------
 
     def register_random_dynamic_obstacles(self, num_obstacles: int, linear_velocity=0.3, angular_velocity_max=math.pi/6, min_obstacle_radius=0.2, max_obstacle_radius=0.3):
         """register dynamic obstacles with circle shape.
@@ -158,12 +179,35 @@ class ObstaclesManager:
             min_obstacle_radius (float, optional): the minimum radius of the obstacle. Defaults to 0.5.
             max_obstacle_radius (float, optional): the maximum radius of the obstacle. Defaults to 0.5.
         """
+
+        # Ricardo new line
+        dynamic_speed_list = []
+        dynamic_form_list = []
+        dynamic_size_list = []
+        #------------------
+
         for _ in range(num_obstacles):
             model_path = self._generate_random_obstacle_yaml(
                 True, linear_velocity=linear_velocity, angular_velocity_max=angular_velocity_max,
-                min_obstacle_radius=min_obstacle_radius, max_obstacle_radius=max_obstacle_radius)
+                min_obstacle_radius=min_obstacle_radius, max_obstacle_radius=max_obstacle_radius,
+                # Ricardo new line
+                dynamic_form_list=dynamic_form_list, dynamic_size_list=dynamic_size_list, dynamic_speed_list=dynamic_speed_list
+                #----------------------
+                )
             self.register_obstacles(1, model_path)
             os.remove(model_path)
+
+        
+        # Ricardo new line
+        dynamic_speed_pub = rospy.Publisher("obstacles/dynamic/speed", String, queue_size=10, latch=True)
+        dynamic_speed_pub.publish(",".join(dynamic_speed_list))
+
+        dynamic_form_pub = rospy.Publisher("obstacles/dynamic/form", String, queue_size=10, latch=True)
+        dynamic_form_pub.publish(",".join(dynamic_form_list))
+
+        dynamic_size_pub = rospy.Publisher("obstacles/dynamic/radius", String, queue_size=10, latch=True)
+        dynamic_size_pub.publish(",".join(dynamic_size_list))
+        #----------------------
 
     def register_random_static_obstacles(self, num_obstacles: int, num_vertices_min=3, num_vertices_max=5, min_obstacle_radius=0.5, max_obstacle_radius=2):
         """register static obstacles with polygon shape.
@@ -175,12 +219,32 @@ class ObstaclesManager:
             min_obstacle_radius (float, optional): the minimum radius of the obstacle. Defaults to 0.5.
             max_obstacle_radius (float, optional): the maximum radius of the obstacle. Defaults to 2.
         """
+
+        # Ricardo new line
+        static_form_list = []
+        static_size_list = []
+        #------------------
+
         for _ in range(num_obstacles):
             num_vertices = random.randint(num_vertices_min, num_vertices_max)
             model_path = self._generate_random_obstacle_yaml(
-                False, num_vertices=num_vertices, min_obstacle_radius=min_obstacle_radius, max_obstacle_radius=max_obstacle_radius)
+                False, num_vertices=num_vertices, min_obstacle_radius=min_obstacle_radius, max_obstacle_radius=max_obstacle_radius,
+                # Ricardo new line
+                static_form_list=static_form_list, static_size_list=static_size_list
+                #-----------------------
+                )
             self.register_obstacles(1, model_path)
             os.remove(model_path)
+
+        # Ricardo new line
+        static_form_pub = rospy.Publisher("obstacles/static/form", String, queue_size=10, latch=True)
+        static_form_pub.publish(",".join(static_form_list))
+
+        static_size_pub = rospy.Publisher("obstacles/static/radius", String, queue_size=10, latch=True)
+        static_size_pub.publish(",".join(static_size_list))
+        #--------------------------
+
+
 
     def register_static_obstacle_polygon(self, vertices: np.ndarray):
         """register static obstacle with polygon shape
@@ -425,7 +489,15 @@ class ObstaclesManager:
                                        angular_velocity_max=math.pi/4,
                                        num_vertices=3,
                                        min_obstacle_radius=0.5,
-                                       max_obstacle_radius=1.5):
+                                       max_obstacle_radius=1.5,
+                                       # Ricardo new line
+                                       dynamic_speed_list=[],
+                                       dynamic_form_list=[],
+                                       dynamic_size_list=[],
+                                       static_form_list=[],
+                                       static_size_list=[]
+                                       #----------------------
+                                       ):
         """generate a yaml file describing the properties of the obstacle.
         The dynamic obstacles have the shape of circle,which moves with a constant linear velocity and angular_velocity_max
 
@@ -472,17 +544,28 @@ class ObstaclesManager:
             f["type"] = "circle"
             f["radius"] = random.uniform(
                 min_obstacle_radius, max_obstacle_radius)
+
+            # Ricardo new line
+            dynamic_form_list.append(f["type"])
+            dynamic_size_list.append(str(f["radius"]))
+            #---------------------
         else:
             f["type"] = "polygon"
-            f["points"] = []
+            f["points"] = [3]
             # random_num_vert = random.randint(
             #     min_obstacle_vert, max_obstacle_vert)
             radius = random.uniform(
                 min_obstacle_radius, max_obstacle_radius)
+            
             # When we send the request to ask flatland server to respawn the object with polygon, it will do some checks
             # one important assert is that the minimum distance should be above this value
             # https://github.com/erincatto/box2d/blob/75496a0a1649f8ee6d2de6a6ab82ee2b2a909f42/include/box2d/b2_common.h#L65
             POINTS_MIN_DIST = 0.005*1.1
+            
+            # Ricardo new line
+            static_form_list.append(f["type"])
+            static_size_list.append(str(radius))
+            #-----------------------
 
             def min_dist_check_passed(points):
                 points_1_x_2 = points[None, ...]
@@ -512,6 +595,10 @@ class ObstaclesManager:
             random_move['angular_velocity_max'] = angular_velocity_max
             random_move['body'] = 'random'
             dict_file['plugins'].append(random_move)
+
+            # Ricardo new line
+            dynamic_speed_list.append(str(linear_velocity))
+            #-----------------------
 
         with open(yaml_path, 'w') as fd:
             yaml.dump(dict_file, fd)

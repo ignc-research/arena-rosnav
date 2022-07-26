@@ -96,3 +96,11 @@ To test the different **Waypoint Generators**, follow the steps in [waypoint_eva
 * Flatland: http://flatland-simulator.readthedocs.io
 * ROS navigation stack: http://wiki.ros.org/navigation
 * Pedsim: https://github.com/srl-freiburg/pedsim_ros
+
+
+# Project Development Documents
+* Meeting Notes: https://docs.google.com/document/d/1NBcZhdpxB9kyAPClOfiQxdxeVTuQ8pWK1DP5Q850lUw/edit?usp=sharing
+* DNN Training Plan: https://docs.google.com/document/d/1YKxl1FWyFsXeQaIvmKIu87BOzYhcOEunVvVOVf5gQQc/edit?usp=sharing
+
+
+

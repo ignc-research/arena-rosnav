@@ -1,0 +1,506 @@
+... logging to /home/flameryx/.ros/log/165498da-fdea-11ec-92f6-270d676cc97c/roslaunch-ark-45304.log
+Checking log directory for disk usage. This may take a while.
+Press Ctrl-C to interrupt
+Done checking log file disk usage. Usage is <1GB.
+]2;/home/flameryx/arena_ws/src/arena-rosnav-noetic-devel-branch/arena_bringup/launch/start_arena_flatland.launch
+[1mstarted roslaunch server http://localhost:43573/[0m
+
+SUMMARY
+========
+
+PARAMETERS
+ * /action_frequency: 10
+ * /agent_name: ridgeback
+ * /inter_planner/astar/allocate_num: 100000
+ * /inter_planner/astar/lambda_heu: 0.1
+ * /inter_planner/astar/resolution_astar: 0.1
+ * /inter_planner/astar/time_resolution: 0.8
+ * /inter_planner/b_spline/control_points_distance: 0.5
+ * /inter_planner/b_spline/feasibility_tolerance: 0.05
+ * /inter_planner/b_spline/max_acc: 2.0
+ * /inter_planner/b_spline/max_jerk: 4.0
+ * /inter_planner/b_spline/max_vel: 3.0
+ * /inter_planner/b_spline/planning_horizon: 7.5
+ * /inter_planner/global_planner/dist_next_wp: 3.0
+ * /inter_planner/global_planner/dist_tolerance: 1.0
+ * /inter_planner/global_planner/rou_thresh: 15.0
+ * /inter_planner/global_planner/use_astar: True
+ * /inter_planner/global_planner/use_kino_astar: True
+ * /inter_planner/global_planner/use_oneshot: True
+ * /inter_planner/global_planner/use_optimization_astar: True
+ * /inter_planner/global_planner/use_optimization_esdf: True
+ * /inter_planner/kino_astar/allocate_num: 100000
+ * /inter_planner/kino_astar/check_num: 5
+ * /inter_planner/kino_astar/horizon: 30
+ * /inter_planner/kino_astar/init_max_tau: 0.8
+ * /inter_planner/kino_astar/lambda_heu: 0.1
+ * /inter_planner/kino_astar/max_acc: 2.0
+ * /inter_planner/kino_astar/max_tau: 0.6
+ * /inter_planner/kino_astar/max_vel: 3.0
+ * /inter_planner/kino_astar/resolution_astar: 0.1
+ * /inter_planner/kino_astar/time_resolution: 0.8
+ * /inter_planner/kino_astar/w_time: 10.0
+ * /inter_planner/optimization_ESDF/algorithm1: 15
+ * /inter_planner/optimization_ESDF/algorithm2: 11
+ * /inter_planner/optimization_ESDF/dist0: 0.4
+ * /inter_planner/optimization_ESDF/lambda1: 10.0
+ * /inter_planner/optimization_ESDF/lambda2: 5.0
+ * /inter_planner/optimization_ESDF/lambda3: 1e-05
+ * /inter_planner/optimization_ESDF/lambda4: 0.01
+ * /inter_planner/optimization_ESDF/lambda5: 1.5
+ * /inter_planner/optimization_ESDF/lambda6: 10.0
+ * /inter_planner/optimization_ESDF/lambda7: 100.0
+ * /inter_planner/optimization_ESDF/max_acc: 2.0
+ * /inter_planner/optimization_ESDF/max_iteration_num1: 2
+ * /inter_planner/optimization_ESDF/max_iteration_num2: 300
+ * /inter_planner/optimization_ESDF/max_iteration_num3: 200
+ * /inter_planner/optimization_ESDF/max_iteration_num4: 200
+ * /inter_planner/optimization_ESDF/max_iteration_time1: 0.0001
+ * /inter_planner/optimization_ESDF/max_iteration_time2: 0.005
+ * /inter_planner/optimization_ESDF/max_iteration_time3: 0.003
+ * /inter_planner/optimization_ESDF/max_iteration_time4: 0.003
+ * /inter_planner/optimization_ESDF/max_vel: 3.0
+ * /inter_planner/optimization_ESDF/order: 3
+ * /inter_planner/optimization_astar/dist0: 0.5
+ * /inter_planner/optimization_astar/lambda_collision: 0.5
+ * /inter_planner/optimization_astar/lambda_feasibility: 0.1
+ * /inter_planner/optimization_astar/lambda_fitness: 1.0
+ * /inter_planner/optimization_astar/lambda_smooth: 1.0
+ * /inter_planner/optimization_astar/max_acc: 2.0
+ * /inter_planner/optimization_astar/max_vel: 3.0
+ * /inter_planner/optimization_astar/order: 3
+ * /inter_planner/sdf_map/frame_id: map
+ * /inter_planner/sdf_map/local_bound_inflate: 0.0
+ * /inter_planner/sdf_map/local_map_margin: 50.0
+ * /inter_planner/sdf_map/local_update_range_x: 10.0
+ * /inter_planner/sdf_map/local_update_range_y: 10.0
+ * /inter_planner/sdf_map/max_ray_length: 10.0
+ * /inter_planner/sdf_map/min_ray_length: 0.5
+ * /inter_planner/sdf_map/obstacles_inflation: 0.3
+ * /inter_planner/sdf_map/p_hit: 0.55
+ * /inter_planner/sdf_map/p_max: 0.8
+ * /inter_planner/sdf_map/p_min: 0.12
+ * /inter_planner/sdf_map/p_miss: 0.2
+ * /inter_planner/sdf_map/p_occ: 0.7
+ * /inter_planner/sdf_map/resolution: 0.05
+ * /inter_planner/sdf_map/show_esdf_time: False
+ * /inter_planner/sdf_map/show_occ_time: False
+ * /inter_planner/sdf_map/use_occ_esdf: True
+ * /laser_update_rate: 10
+ * /local_planner: rosnav
+ * /map_file: random_map
+ * /map_layer_path: /home/flameryx/ar...
+ * /map_server/frame_id: map
+ * /model: ridgeback
+ * /move_base/global_costmap/footprint: [[0.48, -0.4], [0...
+ * /move_base/global_costmap/footprint_padding: 0.1
+ * /move_base/global_costmap/global_frame: map
+ * /move_base/global_costmap/height: 40.0
+ * /move_base/global_costmap/inflater_layer/inflation_radius: 0.25
+ * /move_base/global_costmap/map_type: costmap
+ * /move_base/global_costmap/meter_scoring: True
+ * /move_base/global_costmap/observation_sources: scan
+ * /move_base/global_costmap/obstacle_range: 2.5
+ * /move_base/global_costmap/origin_x: -20.0
+ * /move_base/global_costmap/origin_y: -20.0
+ * /move_base/global_costmap/origin_z: 0.0
+ * /move_base/global_costmap/publish_frequency: 5.0
+ * /move_base/global_costmap/publish_voxel_map: False
+ * /move_base/global_costmap/raytrace_range: 3.0
+ * /move_base/global_costmap/resolution: 0.05
+ * /move_base/global_costmap/robot_base_frame: base_footprint
+ * /move_base/global_costmap/rolling_window: False
+ * /move_base/global_costmap/scan/clearing: True
+ * /move_base/global_costmap/scan/data_type: LaserScan
+ * /move_base/global_costmap/scan/marking: True
+ * /move_base/global_costmap/scan/max_obstacle_height: 2.0
+ * /move_base/global_costmap/scan/min_obstacle_height: -2.0
+ * /move_base/global_costmap/scan/obstacle_range: 2.5
+ * /move_base/global_costmap/scan/raytrace_range: 3.0
+ * /move_base/global_costmap/scan/sensor_frame: laser_link
+ * /move_base/global_costmap/scan/topic: scan
+ * /move_base/global_costmap/static_map: True
+ * /move_base/global_costmap/transform_tolerance: 0.5
+ * /move_base/global_costmap/update_frequency: 20.0
+ * /move_base/global_costmap/width: 40.0
+ * /move_base/global_costmap/z_resolution: 1
+ * /move_base/global_costmap/z_voxels: 2
+ * /move_base/local_costmap/footprint: [[0.48, -0.4], [0...
+ * /move_base/local_costmap/footprint_padding: 0.1
+ * /move_base/local_costmap/global_frame: odom
+ * /move_base/local_costmap/height: 10.0
+ * /move_base/local_costmap/inflater_layer/inflation_radius: 0.25
+ * /move_base/local_costmap/map_type: costmap
+ * /move_base/local_costmap/meter_scoring: True
+ * /move_base/local_costmap/observation_sources: scan
+ * /move_base/local_costmap/obstacle_range: 2.5
+ * /move_base/local_costmap/origin_z: 0.0
+ * /move_base/local_costmap/publish_frequency: 5.0
+ * /move_base/local_costmap/publish_voxel_map: False
+ * /move_base/local_costmap/raytrace_range: 3.0
+ * /move_base/local_costmap/resolution: 0.05
+ * /move_base/local_costmap/robot_base_frame: base_footprint
+ * /move_base/local_costmap/rolling_window: True
+ * /move_base/local_costmap/scan/clearing: True
+ * /move_base/local_costmap/scan/data_type: LaserScan
+ * /move_base/local_costmap/scan/marking: True
+ * /move_base/local_costmap/scan/max_obstacle_height: 2.0
+ * /move_base/local_costmap/scan/min_obstacle_height: -2.0
+ * /move_base/local_costmap/scan/obstacle_range: 2.5
+ * /move_base/local_costmap/scan/raytrace_range: 3.0
+ * /move_base/local_costmap/scan/sensor_frame: laser_link
+ * /move_base/local_costmap/scan/topic: scan
+ * /move_base/local_costmap/static_map: False
+ * /move_base/local_costmap/transform_tolerance: 0.5
+ * /move_base/local_costmap/update_frequency: 20.0
+ * /move_base/local_costmap/width: 10.0
+ * /move_base/local_costmap/z_resolution: 1
+ * /move_base/local_costmap/z_voxels: 2
+ * /obs_vel: 0.3
+ * /pedsim_simulator/pedsim_update_rate: 30.0
+ * /pedsim_simulator/scene_file: /home/flameryx/ar...
+ * /pedsim_simulator/simulation_factor: 1.0
+ * /radius: 0.625
+ * /record_only_planner: True
+ * /robot_action_rate: 5
+ * /rosdistro: noetic
+ * /rosversion: 1.15.14
+ * /scenario_file: random_eval/rando...
+ * /show_viz: True
+ * /single_env: True
+ * /spacial_horizon_node/avg_vel: 1.1
+ * /spacial_horizon_node/dynamic_obstacle/inflation_radius: 0.1
+ * /spacial_horizon_node/dynamic_obstacle/obstacle_radius: 0.15
+ * /spacial_horizon_node/dynamic_obstacle/prediction_forward_time: 0.5
+ * /spacial_horizon_node/dynamic_obstacle/sensor_range: 3.5
+ * /spacial_horizon_node/fsm/goal_tolerance: 0.2
+ * /spacial_horizon_node/fsm/planning_horizen: 1.0
+ * /spacial_horizon_node/fsm/replan_time_thresh: 0.5
+ * /spacial_horizon_node/fsm/subgoal_drl_mode: 0
+ * /spacial_horizon_node/fsm/subgoal_pub_period: 0.5
+ * /spacial_horizon_node/fsm/subgoal_tolerance: 0.2
+ * /spacial_horizon_node/fsm/use_drl: True
+ * /spacial_horizon_node/goal_tolerance: 0.2
+ * /spacial_horizon_node/kino_astar/allocate_num: 100000
+ * /spacial_horizon_node/kino_astar/check_num: 5
+ * /spacial_horizon_node/kino_astar/goal_tolerance: 0.5
+ * /spacial_horizon_node/kino_astar/horizon: 100.0
+ * /spacial_horizon_node/kino_astar/init_max_tau: 0.8
+ * /spacial_horizon_node/kino_astar/lambda_heu: 0.1
+ * /spacial_horizon_node/kino_astar/max_acc: 4.0
+ * /spacial_horizon_node/kino_astar/max_tau: 0.6
+ * /spacial_horizon_node/kino_astar/max_vel: 3.0
+ * /spacial_horizon_node/kino_astar/resolution_astar: 0.1
+ * /spacial_horizon_node/kino_astar/time_resolution: 0.8
+ * /spacial_horizon_node/kino_astar/vel_margin: 0.0
+ * /spacial_horizon_node/kino_astar/w_time: 10.0
+ * /spacial_horizon_node/max_acc: 2.5
+ * /spacial_horizon_node/max_jerk: 4.0
+ * /spacial_horizon_node/max_vel: 1.1
+ * /spacial_horizon_node/min_vel: 0.08
+ * /spacial_horizon_node/obstacle_name: obstacle_dynamic_...
+ * /spacial_horizon_node/obstacle_radius: 0.15
+ * /spacial_horizon_node/obstacles_inflation: 0.05
+ * /spacial_horizon_node/optimization/dist0: 0.5
+ * /spacial_horizon_node/optimization/lambda_collision: 1.5
+ * /spacial_horizon_node/optimization/lambda_feasibility: 0.1
+ * /spacial_horizon_node/optimization/lambda_fitness: 1.0
+ * /spacial_horizon_node/optimization/lambda_smooth: 1.0
+ * /spacial_horizon_node/optimization/max_acc_: 2.5
+ * /spacial_horizon_node/optimization/max_vel: 1.1
+ * /spacial_horizon_node/optimization/order_: 3
+ * /spacial_horizon_node/optimization/swarm_clearance: 0.1
+ * /spacial_horizon_node/optimization_ESDF/dist0: 0.5
+ * /spacial_horizon_node/optimization_ESDF/lambda1: 10.0
+ * /spacial_horizon_node/optimization_ESDF/lambda2: 5.0
+ * /spacial_horizon_node/optimization_ESDF/lambda3: 1e-05
+ * /spacial_horizon_node/optimization_ESDF/lambda4: 0.01
+ * /spacial_horizon_node/optimization_ESDF/lambda5: 1.5
+ * /spacial_horizon_node/optimization_ESDF/lambda6: 10.0
+ * /spacial_horizon_node/optimization_ESDF/lambda7: 100.0
+ * /spacial_horizon_node/optimization_ESDF/max_acc: 4.0
+ * /spacial_horizon_node/optimization_ESDF/max_iteration_num1: 2
+ * /spacial_horizon_node/optimization_ESDF/max_iteration_num2: 300
+ * /spacial_horizon_node/optimization_ESDF/max_iteration_num3: 200
+ * /spacial_horizon_node/optimization_ESDF/max_iteration_num4: 200
+ * /spacial_horizon_node/optimization_ESDF/max_iteration_time1: 0.0001
+ * /spacial_horizon_node/optimization_ESDF/max_iteration_time2: 0.005
+ * /spacial_horizon_node/optimization_ESDF/max_iteration_time3: 0.003
+ * /spacial_horizon_node/optimization_ESDF/max_iteration_time4: 0.003
+ * /spacial_horizon_node/optimization_ESDF/max_vel: 3.0
+ * /spacial_horizon_node/optimization_ESDF/order: 3
+ * /spacial_horizon_node/plan_manager/control_points_distance: 0.4
+ * /spacial_horizon_node/plan_manager/dynamic_obstacle_name: obstacle_dynamic_...
+ * /spacial_horizon_node/plan_manager/feasibility_tolerance: 0.05
+ * /spacial_horizon_node/plan_manager/local_time_horizon: 3.0
+ * /spacial_horizon_node/plan_manager/max_acc: 2.5
+ * /spacial_horizon_node/plan_manager/max_jerk: 4.0
+ * /spacial_horizon_node/plan_manager/max_vel: 1.1
+ * /spacial_horizon_node/plan_manager/use_distinctive_trajs: True
+ * /spacial_horizon_node/planning_horizen: 1.0
+ * /spacial_horizon_node/planning_time_horizon: 3.0
+ * /spacial_horizon_node/robot_radius: 0.625
+ * /spacial_horizon_node/sdf_map/frame_id: map
+ * /spacial_horizon_node/sdf_map/local_bound_inflate: 0.0
+ * /spacial_horizon_node/sdf_map/local_map_margin: 0
+ * /spacial_horizon_node/sdf_map/local_update_range_x: 3.5
+ * /spacial_horizon_node/sdf_map/local_update_range_y: 3.5
+ * /spacial_horizon_node/sdf_map/max_ray_length: 3.5
+ * /spacial_horizon_node/sdf_map/min_ray_length: 0.1
+ * /spacial_horizon_node/sdf_map/obstacles_inflation: 0.05
+ * /spacial_horizon_node/sdf_map/p_hit: 0.52
+ * /spacial_horizon_node/sdf_map/p_max: 0.75
+ * /spacial_horizon_node/sdf_map/p_min: 0.1
+ * /spacial_horizon_node/sdf_map/p_miss: 0.15
+ * /spacial_horizon_node/sdf_map/p_occ: 0.7
+ * /spacial_horizon_node/sdf_map/show_esdf_time: False
+ * /spacial_horizon_node/sdf_map/show_occ_time: False
+ * /spacial_horizon_node/sdf_map/use_occ_esdf: True
+ * /spacial_horizon_node/sensor_range: 3.5
+ * /spacial_horizon_node/subgoal_mode: 0
+ * /spacial_horizon_node/subgoal_pub_period: 0.5
+ * /spacial_horizon_node/subgoal_tolerance: 0.2
+ * /spacial_horizon_node/timed_astar/allocate_num: 10000
+ * /spacial_horizon_node/timed_astar/avg_vel: 1.1
+ * /spacial_horizon_node/timed_astar/goal_tolerance: 0.2
+ * /spacial_horizon_node/timed_astar/max_rot_vel: 2.0
+ * /spacial_horizon_node/timed_astar/max_vel: 1.1
+ * /spacial_horizon_node/timed_astar/min_vel: 0.08
+ * /spacial_horizon_node/timed_astar/num_sample_edge: 10
+ * /spacial_horizon_node/timed_astar/obstacle_radius: 0.15
+ * /spacial_horizon_node/timed_astar/resolution: 0.1
+ * /spacial_horizon_node/timed_astar/robot_radius: 0.625
+ * /spacial_horizon_node/timed_astar/safe_time: 1.0
+ * /spacial_horizon_node/timed_astar/sensor_range: 3.5
+ * /spacial_horizon_node/timed_astar/time_horizon: 3.0
+ * /spacial_horizon_node/timed_astar/time_resolution: 0.2
+ * /spacial_horizon_node/use_drl: True
+ * /speed: 1.1
+ * /step_size: 0.01
+ * /task_generator_node/auto_reset: True
+ * /task_generator_node/delta: 1.0
+ * /task_generator_node/max_dyn_radius: 0.3
+ * /task_generator_node/max_dyn_vel: 0.3
+ * /task_generator_node/max_static_radius: 2
+ * /task_generator_node/min_dyn_radius: 0.2
+ * /task_generator_node/min_dyn_vel: 0.3
+ * /task_generator_node/min_static_radius: 0.5
+ * /task_generator_node/num_dynamic_obs: 0
+ * /task_generator_node/num_static_obs: 0
+ * /task_generator_node/scenarios_json_path: /home/flameryx/ar...
+ * /task_generator_node/task_mode: random_eval
+ * /task_generator_node/timeout: 3.0
+ * /train_mode: False
+ * /update_rate: 500
+ * /use_rviz: True
+ * /use_sim_time: True
+ * /viz_pub_rate: 30
+ * /waypoint_generator: classic
+ * /world_path: /home/flameryx/ar...
+
+NODES
+  /
+    DRL_local_planner (arena_local_planner_drl/drl_agent_node.py)
+    action_publisher (arena_local_planner_drl/action_publisher.py)
+    data_recorder_node (arena-evaluation/data_recorder_node.py)
+    flatland_rviz (rviz/rviz)
+    flatland_server (flatland_server/flatland_server)
+    inter_planner (arena_intermediate_planner/arena_intermediate_planner)
+    map_server (map_server/map_server)
+    map_to_odom_tfpublisher (tf2_ros/static_transform_publisher)
+    move_base (move_base/move_base)
+    pedsim_simulator (pedsim_simulator/pedsim_simulator)
+    spacial_horizon_node (arena_spacial_horizon/spacial_horizon_node)
+    spawn_model (rosservice/rosservice)
+    task_generator_node (task_generator/task_generator_node.py)
+  /sensorsim/
+    sensorsim_node (sensor_simulator/sensorsim_node_tmgr.py)
+Spacial Horizon node started
+start
+[0m[ INFO] [1657194238.818823241]: waitForService: Service [/static_map] has not been advertised, waiting...[0m
+[0m[ INFO] [1657194239.024459477, 0.690000000]: waitForService: Service [/static_map] is now available.[0m
+[0m[ INFO] [1657194239.025387825, 0.690000000]: Is stacic map available: True[0m
+use_occ_esdf: 1
+x_size: 20
+y_size: 20
+x_origin: 0
+y_origin: 0
+x_size_pix: 100
+y_size_pix: 100
+x_map_max_idx: 99
+y_map_max_idx: 99
+x_local_update_range_: 10
+y_local_update_range_: 10
+hit: 0.200671
+miss: -1.38629
+min log: -1.99243
+max: 1.38629
+thresh log: 0.847298
+dist_next_wp_=3
+lambda_heu_:0.1
+origin_: 0 0
+map size: 20 20
+origin_: 0 0
+map size: 20 20
+[0m[ INFO] [1657194238.773566699]: Simulation params: world_yaml_file(/home/flameryx/arena_ws/src/arena-rosnav-noetic-devel-branch/simulator_setup/maps/random_map/map.world.yaml), map_layer_yaml_file(/home/flameryx/arena_ws/src/arena-rosnav-noetic-devel-branch/simulator_setup/maps/random_map/map_layer.yaml), map_file(random_map), update_rate(500.000000), step_size(0.010000) show_viz(true), viz_pub_rate(30.000000)[0m
+[0m[ INFO] [1657194238.774772238]: Initialized[0m
+[0m[ INFO] [1657194238.774790183]: Initializing...[0m
+[0m[ INFO] [1657194238.872994770]: Loading layer "static" from path="/home/flameryx/arena_ws/src/arena-rosnav-noetic-devel-branch/simulator_setup/maps/random_map/empty.yaml"[0m
+[0m[ INFO] [1657194238.873211584]: layer "static" loading image from path="/home/flameryx/arena_ws/src/arena-rosnav-noetic-devel-branch/simulator_setup/maps/random_map/empty_map.png"[0m
+[0m[ INFO] [1657194238.873945766]: Layer "static" loaded[0m
+[0m[ INFO] [1657194238.874029936]: Loading layer "dynamic" from path="/home/flameryx/arena_ws/src/arena-rosnav-noetic-devel-branch/simulator_setup/maps/random_map/empty.yaml"[0m
+[0m[ INFO] [1657194238.874169386]: layer "dynamic" loading image from path="/home/flameryx/arena_ws/src/arena-rosnav-noetic-devel-branch/simulator_setup/maps/random_map/empty_map.png"[0m
+[0m[ INFO] [1657194238.874533889]: Layer "dynamic" loaded[0m
+[0m[ INFO] [1657194238.874548281]: Leaving active layer "dynamic"[0m
+[0m[ INFO] [1657194238.874556727]: Leaving active layer "static"[0m
+[0m[ INFO] [1657194238.874579652]: World loaded[0m
+[0m[ INFO] [1657194238.876210544]: Visualizing layer/static[0m
+[0m[ INFO] [1657194238.880976182]: Model spawning service ready to go[0m
+[0m[ INFO] [1657194238.881001036]: Model deleting service ready to go[0m
+[0m[ INFO] [1657194238.881011719]: Model moving service ready to go[0m
+[0m[ INFO] [1657194238.881025749]: Simulation loop started[0m
+[0m[ INFO] [1657194239.085483961, 1.000000000]: Loading model from path="/home/flameryx/arena_ws/src/arena-rosnav-noetic-devel-branch/simulator_setup/robot/ridgeback.model.yaml"[0m
+[0m[ INFO] [1657194239.092952682, 1.000000000]: Model Plugin "diff_drive" type "DiffDrive" model "ridgeback" loaded[0m
+[0m[ INFO] [1657194239.093255453, 1.000000000]: Laser plugin loaded with 13 threads[0m
+[0m[ INFO] [1657194239.093649039, 1.000000000]: Model Plugin "static_laser" type "Laser" model "ridgeback" loaded[0m
+[0m[ INFO] [1657194239.093731937, 1.000000000]: Model Plugin "tf_publisher" type "ModelTfPublisher" model "ridgeback" loaded[0m
+[0m[ INFO] [1657194239.093804055, 1.000000000]: Model "ridgeback" loaded[0m
+[0m[ INFO] [1657194239.273669572, 1.890000000]: Loading model from path="/home/flameryx/arena_ws/src/arena-rosnav-noetic-devel-branch/simulator_setup/tmp_random_obstacles/_random_dynamic.model.yaml"[0m
+[0m[ INFO] [1657194239.275742803, 1.890000000]: Model Plugin "RandomMove Plugin" type "RandomMove" model "obstacle__random_dynamic_00" loaded[0m
+[0m[ INFO] [1657194239.275782702, 1.890000000]: Model "obstacle__random_dynamic_00" loaded[0m
+[0m[ INFO] [1657194239.320592395, 2.070000000]: Loading model from path="/home/flameryx/arena_ws/src/arena-rosnav-noetic-devel-branch/simulator_setup/tmp_random_obstacles/_random_dynamic.model.yaml"[0m
+[0m[ INFO] [1657194239.321193837, 2.070000000]: Model Plugin "RandomMove Plugin" type "RandomMove" model "obstacle__random_dynamic_01" loaded[0m
+[0m[ INFO] [1657194239.321359214, 2.070000000]: Model "obstacle__random_dynamic_01" loaded[0m
+[0m[ INFO] [1657194239.367893013, 2.270000000]: Loading model from path="/home/flameryx/arena_ws/src/arena-rosnav-noetic-devel-branch/simulator_setup/tmp_random_obstacles/_random_dynamic.model.yaml"[0m
+[0m[ INFO] [1657194239.368413843, 2.270000000]: Model Plugin "RandomMove Plugin" type "RandomMove" model "obstacle__random_dynamic_02" loaded[0m
+[0m[ INFO] [1657194239.368479566, 2.270000000]: Model "obstacle__random_dynamic_02" loaded[0m
+[0m[ INFO] [1657194239.403680985, 2.450000000]: Loading model from path="/home/flameryx/arena_ws/src/arena-rosnav-noetic-devel-branch/simulator_setup/tmp_random_obstacles/_random_dynamic.model.yaml"[0m
+[0m[ INFO] [1657194239.404005805, 2.450000000]: Model Plugin "RandomMove Plugin" type "RandomMove" model "obstacle__random_dynamic_03" loaded[0m
+[0m[ INFO] [1657194239.404045057, 2.450000000]: Model "obstacle__random_dynamic_03" loaded[0m
+[0m[ INFO] [1657194239.443913860, 2.640000000]: Loading model from path="/home/flameryx/arena_ws/src/arena-rosnav-noetic-devel-branch/simulator_setup/tmp_random_obstacles/_random_dynamic.model.yaml"[0m
+[0m[ INFO] [1657194239.444248211, 2.640000000]: Model Plugin "RandomMove Plugin" type "RandomMove" model "obstacle__random_dynamic_04" loaded[0m
+[0m[ INFO] [1657194239.444287507, 2.640000000]: Model "obstacle__random_dynamic_04" loaded[0m
+[0m[ INFO] [1657194239.479906532, 2.820000000]: Loading model from path="/home/flameryx/arena_ws/src/arena-rosnav-noetic-devel-branch/simulator_setup/tmp_random_obstacles/_random_dynamic.model.yaml"[0m
+[0m[ INFO] [1657194239.480229607, 2.820000000]: Model Plugin "RandomMove Plugin" type "RandomMove" model "obstacle__random_dynamic_05" loaded[0m
+[0m[ INFO] [1657194239.480280552, 2.820000000]: Model "obstacle__random_dynamic_05" loaded[0m
+[0m[ INFO] [1657194239.519929199, 3.020000000]: Loading model from path="/home/flameryx/arena_ws/src/arena-rosnav-noetic-devel-branch/simulator_setup/tmp_random_obstacles/_random_dynamic.model.yaml"[0m
+[0m[ INFO] [1657194239.520261909, 3.020000000]: Model Plugin "RandomMove Plugin" type "RandomMove" model "obstacle__random_dynamic_06" loaded[0m
+[0m[ INFO] [1657194239.520303547, 3.020000000]: Model "obstacle__random_dynamic_06" loaded[0m
+[0m[ INFO] [1657194239.558089568, 3.200000000]: Loading model from path="/home/flameryx/arena_ws/src/arena-rosnav-noetic-devel-branch/simulator_setup/tmp_random_obstacles/_random_dynamic.model.yaml"[0m
+[0m[ INFO] [1657194239.558607131, 3.200000000]: Model Plugin "RandomMove Plugin" type "RandomMove" model "obstacle__random_dynamic_07" loaded[0m
+[0m[ INFO] [1657194239.558671908, 3.200000000]: Model "obstacle__random_dynamic_07" loaded[0m
+[0m[ INFO] [1657194239.599998406, 3.420000000]: Loading model from path="/home/flameryx/arena_ws/src/arena-rosnav-noetic-devel-branch/simulator_setup/tmp_random_obstacles/_random_dynamic.model.yaml"[0m
+[0m[ INFO] [1657194239.600433163, 3.420000000]: Model Plugin "RandomMove Plugin" type "RandomMove" model "obstacle__random_dynamic_08" loaded[0m
+[0m[ INFO] [1657194239.600502068, 3.420000000]: Model "obstacle__random_dynamic_08" loaded[0m
+[0m[ INFO] [1657194239.640034101, 3.620000000]: Loading model from path="/home/flameryx/arena_ws/src/arena-rosnav-noetic-devel-branch/simulator_setup/tmp_random_obstacles/_random_dynamic.model.yaml"[0m
+[0m[ INFO] [1657194239.640355245, 3.620000000]: Model Plugin "RandomMove Plugin" type "RandomMove" model "obstacle__random_dynamic_09" loaded[0m
+[0m[ INFO] [1657194239.640404473, 3.620000000]: Model "obstacle__random_dynamic_09" loaded[0m
+[0m[ INFO] [1657194239.676684870, 3.770000000]: Loading model from path="/home/flameryx/arena_ws/src/arena-rosnav-noetic-devel-branch/simulator_setup/tmp_random_obstacles/_random_dynamic.model.yaml"[0m
+[0m[ INFO] [1657194239.676973423, 3.770000000]: Model Plugin "RandomMove Plugin" type "RandomMove" model "obstacle__random_dynamic_10" loaded[0m
+[0m[ INFO] [1657194239.677032374, 3.770000000]: Model "obstacle__random_dynamic_10" loaded[0m
+[0m[ INFO] [1657194239.716775454, 3.970000000]: Loading model from path="/home/flameryx/arena_ws/src/arena-rosnav-noetic-devel-branch/simulator_setup/tmp_random_obstacles/_random_dynamic.model.yaml"[0m
+[0m[ INFO] [1657194239.717283121, 3.970000000]: Model Plugin "RandomMove Plugin" type "RandomMove" model "obstacle__random_dynamic_11" loaded[0m
+[0m[ INFO] [1657194239.717352389, 3.970000000]: Model "obstacle__random_dynamic_11" loaded[0m
+[0m[ INFO] [1657194239.757426186, 4.140000000]: Loading model from path="/home/flameryx/arena_ws/src/arena-rosnav-noetic-devel-branch/simulator_setup/tmp_random_obstacles[INFO] [1657194239.234577, 1.700000]: ================================================================================
+[INFO] [1657194239.235636, 1.700000]: MAP GENERATOR STARTED
+[INFO] [1657194239.236255, 1.700000]: ================================================================================
+[INFO] [1657194240.049862, 5.520000]: Registed 20 dynamic obstacles and 0 static obstacles
+random eval tasks requested
+[INFO] [1657194250.071469, 55.250000]: Task Generator is set to auto_reset mode, Task will be automatically reset as the robot approaching the goal_pos
+[0m[ INFO] [1657194238.775302267]: :	Spacial_Horizon successfully loaded for namespace	/[0m
+[0m[ INFO] [1657194239.364705117, 2.250000000]: global_costmap: Using plugin "static_layer"[0m
+[0m[ INFO] [1657194239.369341396, 2.270000000]: Requesting the map...[0m
+[0m[ INFO] [1657194239.532970512, 3.080000000]: Resizing costmap to 100 X 100 at 0.200000 m/pix[0m
+[0m[ INFO] [1657194239.552057962, 3.180000000]: Received a 100 X 100 map at 0.200000 m/pix[0m
+[0m[ INFO] [1657194239.555090337, 3.190000000]: global_costmap: Using plugin "obstacle_layer"[0m
+[0m[ INFO] [1657194239.557936691, 3.200000000]:     Subscribed to Topics: scan[0m
+[0m[ INFO] [1657194239.574566511, 3.290000000]: global_costmap: Using plugin "inflation_layer"[0m
+[0m[ INFO] [1657194239.625357390, 3.540000000]: local_costmap: Using plugin "obstacle_layer"[0m
+[0m[ INFO] [1657194239.628583049, 3.560000000]:     Subscribed to Topics: scan[0m
+[0m[ INFO] [1657194239.651105258, 3.670000000]: local_costmap: Using plugin "inflation_layer"[0m
+[0m[ INFO] [1657194239.690471664, 3.830000000]: Created local_planner base_local_planner/TrajectoryPlannerROS[0m
+[0m[ INFO] [1657194239.695312160, 3.860000000]: Sim period is set to 0.05[0m
+[0m[ INFO] [1657194239.778371803, 4.240000000]: Recovery behavior will clear layer 'obstacles'[0m
+[0m[ INFO] [1657194239.783593219, 4.270000000]: Recovery behavior will clear layer 'obstacles'[0m
+[0m[ INFO] [1657194239.851779940, 4.600000000]: odom received![0m
+[0m[ INFO] [1657194238.930072282]: rviz version 1.14.14[0m
+[0m[ INFO] [1657194238.930099127]: compiled against Qt version 5.12.8[0m
+[0m[ INFO] [1657194238.930107138]: compiled against OGRE version 1.9.0 (Ghadamon)[0m
+[0m[ INFO] [1657194238.938564979]: Forcing OpenGl version 0.[0m
+[0m[ INFO] [1657194239.392486385, 2.390000000]: Stereo is NOT SUPPORTED[0m
+[0m[ INFO] [1657194239.392523922, 2.390000000]: OpenGL device: NV124[0m
+[0m[ INFO] [1657194239.392535713, 2.390000000]: OpenGl version: 4,3 (GLSL 4,3) limited to GLSL 1.4 on Mesa system.[0m
+[0m[ INFO] [1657194239.910083292, 4.890000000]: SpawnModelTool::SetMovingModelColor[0m
+[0m[ INFO] [1657194239.964255931, 5.140000000]: Creating 1 swatches[0m
+[0m[ INFO] [1657194239.964958544, 5.150000000]: Creating 1 swatches[0m
+[0m[ INFO] [1657194239.965582203, 5.150000000]: Creating 1 swatches[0m
+======================================== reset:0
+dynamic obstacles: 0
+... logging to /home/flameryx/.ros/log/165498da-fdea-11ec-92f6-270d676cc97c/roslaunch-ark-45573.log
+Checking log directory for disk usage. This may take a while.
+Press Ctrl-C to interrupt
+Done checking log file disk usage. Usage is <1GB.
+]2;/home/flameryx/arena_ws/src/arena-rosnav-noetic-devel-branch/simulator_setup/maps/map_generator.launch
+[1mstarted roslaunch server http://localhost:44749/[0m
+
+SUMMARY
+========
+
+PARAMETERS
+ * /map_generator_node/indoor_prob: 0
+ * /map_generator_node/map_type: indoor
+ * /rosdistro: noetic
+ * /rosversion: 1.15.14
+
+NODES
+  /
+    map_generator_node (simulator_setup/map_generator_node.py)
+
+[1mROS_MASTER_URI=http://localhost:11311[0m
+]2;/home/flameryx/arena_ws/src/arena-rosnav-noetic-devel-branch/simulator_setup/maps/map_generator.launch http://localhost:11311
+[1mprocess[map_generator_node-1]: started with pid [45619][0m
+[map_generator_node-1] killing on exit
+shutting down processing monitor...
+... shutting down processing monitor complete
+[1mdone[0m
+
+auto-starting new master
+[1mprocess[master]: started with pid [45312][0m
+[1mROS_MASTER_URI=http://localhost:11311[0m
+]2;/home/flameryx/arena_ws/src/arena-rosnav-noetic-devel-branch/arena_bringup/launch/start_arena_flatland.launch http://localhost:11311
+[1msetting /run_id to 165498da-fdea-11ec-92f6-270d676cc97c[0m
+[1mprocess[rosout-1]: started with pid [45322][0m
+started core service [/rosout]
+[1mprocess[data_recorder_node-2]: started with pid [45329][0m
+[1mprocess[flatland_server-3]: started with pid [45330][0m
+[1mprocess[spawn_model-4]: started with pid [45331][0m
+[1mprocess[flatland_rviz-5]: started with pid [45332][0m
+[1mprocess[map_server-6]: started with pid [45333][0m
+[1mprocess[map_to_odom_tfpublisher-7]: started with pid [45334][0m
+[1mprocess[task_generator_node-8]: started with pid [45335][0m
+[1mprocess[sensorsim/sensorsim_node-9]: started with pid [45336][0m
+[1mprocess[move_base-10]: started with pid [45357][0m
+[1mprocess[spacial_horizon_node-11]: started with pid [45359][0m
+[1mprocess[DRL_local_planner-12]: started with pid [45360][0m
+[1mprocess[action_publisher-13]: started with pid [45369][0m
+[1mprocess[inter_planner-14]: started with pid [45386][0m
+[1mprocess[pedsim_simulator-15]: started with pid [45392][0m
+[1m[spawn_model-4] process has finished cleanly
+log file: /home/flameryx/.ros/log/165498da-fdea-11ec-92f6-270d676cc97c/spawn_model-4*.log[0m
+[pedsim_simulator-15] killing on exit
+[action_publisher-13] killing on exit
+[DRL_local_planner-12] killing on exit
+[spacial_horizon_node-11] killing on exit
+[move_base-10] killing on exit
+[sensorsim/sensorsim_node-9] killing on exit
+[task_generator_node-8] killing on exit
+[map_to_odom_tfpublisher-7] killing on exit
+[map_server-6] killing on exit
+[flatland_rviz-5] killing on exit
+[flatland_server-3] killing on exit
+[data_recorder_node-2] killing on exit
+[rosout-1] killing on exit
+[master] killing on exit
+shutting down processing monitor...
+... shutting down processing monitor complete
+[1mdone[0m
