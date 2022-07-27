@@ -7,7 +7,7 @@ import subprocess
 import time
 from std_srvs.srv import EmptyResponse
 from nav_msgs.msg import Odometry
-from task_generator.tasks import get_predefined_task
+#from ..task_generator.tasks import get_predefined_task
 from std_msgs.msg import Int16, Bool, String
 # for clearing costmap
 from clear_costmap import clear_costmaps
@@ -17,6 +17,14 @@ import json
 import sys
 from sensor_msgs.msg import LaserScan
 import numpy as np
+import os
+import inspect
+
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0, parentdir) 
+
+from task_generator.tasks import get_predefined_task
 
 class TaskGenerator:
     def __init__(self):
