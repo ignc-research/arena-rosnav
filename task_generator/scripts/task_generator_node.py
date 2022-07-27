@@ -7,7 +7,6 @@ import subprocess
 import time
 from std_srvs.srv import EmptyResponse
 from nav_msgs.msg import Odometry
-#from ..task_generator.tasks import get_predefined_task
 from std_msgs.msg import Int16, Bool, String
 # for clearing costmap
 from clear_costmap import clear_costmaps
