@@ -29,7 +29,11 @@
   <arg name="max_static_radius" default="2" />
 
   <!-- To make the training more efficient make sure this step_size*laser_update_rate == 1  -->
+  <!-- Faster -->
   <arg name="step_size" default="0.1"/>
+  <!-- Normal speed -->
+  <!-- <arg name="step_size" default="0.01"/> -->
+
   <arg name="update_rate" default="5000"/>
   <arg name="show_viz" default="true"/>
   <arg name="viz_pub_rate" default="500" />

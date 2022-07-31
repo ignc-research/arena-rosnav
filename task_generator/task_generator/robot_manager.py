@@ -142,7 +142,7 @@ class RobotManager:
     def set_start_pos_random(self):
         start_pos = Pose2D()
         start_pos.x, start_pos, start_pos.theta = get_random_pos_on_map(
-            self._free_space_indices, self.map, self.ROBOT_RADIUS*2
+            self._free_space_indices, self.map, self.ROBOT_RADIUS*15
         )
         self.move_robot(start_pos)
 
@@ -184,7 +184,7 @@ class RobotManager:
                     start_pos_.y,
                     start_pos_.theta,
                 ) = get_random_pos_on_map(
-                    self._free_space_indices, self.map, self.ROBOT_RADIUS * 2
+                    self._free_space_indices, self.map, self.ROBOT_RADIUS * 10
                 )
             else:
                 start_pos_ = start_pos
@@ -195,7 +195,7 @@ class RobotManager:
                     goal_pos_.y,
                     goal_pos_.theta,
                 ) = get_random_pos_on_map(
-                    self._free_space_indices, self.map, self.ROBOT_RADIUS * 2
+                    self._free_space_indices, self.map, self.ROBOT_RADIUS * 10
                 )
             else:
                 goal_pos_ = goal_pos

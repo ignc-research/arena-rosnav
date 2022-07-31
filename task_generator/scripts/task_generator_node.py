@@ -55,11 +55,11 @@ class TaskGenerator:
         #---------------------------------------------------------------
         
         scenarios_json_path = rospy.get_param("~scenarios_json_path")
-       
+
         paths = {"scenario": scenarios_json_path}
-  
+
         self.task = get_predefined_task("",self.mode, PATHS=paths)
-       
+
         # random eval init
         if self.mode == "random_eval":
             # load random eval params

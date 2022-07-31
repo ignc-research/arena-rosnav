@@ -317,11 +317,16 @@ class ObstaclesManager:
             active_obstacle_rate (float): a parameter change the number of the obstacles within the map
             forbidden_zones (list): a list of tuples with the format (x,y,r),where the the obstacles should not be reset.
         """
+
         active_obstacle_names = random.sample(self.obstacle_name_list, int(
             len(self.obstacle_name_list) * active_obstacle_rate))
         non_active_obstacle_names = set(
             self.obstacle_name_list) - set(active_obstacle_names)
 
+        print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+        print(active_obstacle_names)
+        print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+        
         # non_active obstacles will be moved to outside of the map
         resolution = self.map.info.resolution
         pos_non_active_obstacle = Pose2D()
@@ -335,7 +340,7 @@ class ObstaclesManager:
             move_model_request.name = obstacle_name
             # TODO 0.2 is the obstacle radius. it should be set automatically in future.
             move_model_request.pose.x, move_model_request.pose.y, move_model_request.pose.theta = get_random_pos_on_map(
-                self._free_space_indices, self.map, 0.2, forbidden_zones)
+                self._free_space_indices, self.map, 0.5, forbidden_zones)
 
             self._srv_move_model(move_model_request)
 

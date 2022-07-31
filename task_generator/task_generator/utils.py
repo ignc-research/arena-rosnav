@@ -25,7 +25,7 @@ def get_random_pos_on_map(free_space_indices, map_: OccupancyGrid, safe_dist: fl
         map (OccupancyGrid): map proviced by the ros map service
         forbidden_zones (list of 3 elementary tuple(x,y,r)): a list of zones which is forbidden
     Returns:
-       x_in_meters,y_in_meters,theta
+        x_in_meters,y_in_meters,theta
     """
 
     def is_pos_valid(x_in_meters, y_in_meters):
@@ -49,7 +49,7 @@ def get_random_pos_on_map(free_space_indices, map_: OccupancyGrid, safe_dist: fl
                     value = map_.data[index]
                 except IndexError:
                     print("IndexError: index: %d, map_length: %d" %
-                          (index, len(map_.data)))
+                        (index, len(map_.data)))
                     return False
                 if value != 0:
 

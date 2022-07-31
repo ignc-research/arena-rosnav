@@ -81,6 +81,7 @@ class RandomTask(ABSTask):
         self.num_repeats = 0
 
     def reset(self):
+        print(self.robot_manager.ROBOT_RADIUS)
         """[summary]"""
         if self.max_repeats > self.num_repeats: # robot runs 1 episode more than specified for recording purposes
             self.num_repeats += 1
