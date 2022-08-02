@@ -8,8 +8,8 @@ min_dyn_vel="0.1"
 max_dyn_vel="0.5"
 min_dyn_radius="0.2"
 max_dyn_radius="0.5"
-min_static_radius="0.2"
-max_static_radius="0.4"
+min_static_num_vertices="0.2"
+max_static_num_vertices="0.4"
 
 for planner in "${local_planners[@]}"; 
 do for robot in "${robot_models[@]}";
