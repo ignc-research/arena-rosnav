@@ -102,5 +102,6 @@ To test the different **Waypoint Generators**, follow the steps in [waypoint_eva
 * Meeting Notes: https://docs.google.com/document/d/1NBcZhdpxB9kyAPClOfiQxdxeVTuQ8pWK1DP5Q850lUw/edit?usp=sharing
 * DNN Training Plan: https://docs.google.com/document/d/1YKxl1FWyFsXeQaIvmKIu87BOzYhcOEunVvVOVf5gQQc/edit?usp=sharing
 * Evaluation results: https://tubcloud.tu-berlin.de/s/M9NYDab8rNmW6fo
-
+* Data cleaning and averaging documentation: https://docs.google.com/document/d/1wnSkf4kGXR5Ys6JaabEjhCIjnBhBzP5OJ4b5gNaIeqU/edit
+* Data Evaluation documentation: https://docs.google.com/document/d/1SPvT0NHOQxZ0XChhOHRyoYz3w4AdqJyWJVIgmLazaD0/edit 
 
