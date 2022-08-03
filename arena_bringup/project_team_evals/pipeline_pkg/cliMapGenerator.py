@@ -14,7 +14,7 @@ class MapGenerator():
         self.height = int(args.height)
         self.width = int(args.width)
         self.path = args.save_path
-        self.map_type = args.map_type
+        self.map_type = args.map_type.lower()
         self.num_obstacles = int(args.num_obstacles)
         self.num_maps = int(args.num_maps)
         self.map_res = float(args.map_res)
