@@ -78,8 +78,9 @@ class MapGenerator:
             map_array = self.getCurrentMap()
             if map_array is not None:
                 self.make_image(map_array, path, map_name)
-                self.create_yaml_files(path / map_name)
-                info(f"Map {map_name} generated at {path / map_name}")
+                map_path = path / map_name
+                self.create_yaml_files(map_path)
+                info(f"Map {map_name} generated at {map_path}")
 
     def getCurrentMap(self) -> np.ndarray:
         map_type = self.map_type
