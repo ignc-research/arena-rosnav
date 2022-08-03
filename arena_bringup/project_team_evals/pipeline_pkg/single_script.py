@@ -1,4 +1,5 @@
 import os
+import os.path as path
 from pathlib import Path
 
 dirname = os.path.dirname(__file__)
@@ -8,13 +9,11 @@ maps_path = Path(dirname) / "maps"
 
 # create dir if not exists
 maps_path.mkdir(parents=True, exist_ok=True)
-maps_path = str(maps_path)
-
 
 width = 100
 height = 100
 map_type = "indoor"
-num_maps = 3
+num_maps = 1
 map_res = 0.5
 maps_path = "./maps"
 iterations = 50
@@ -25,12 +24,23 @@ corridor_width = 3
 generate_maps_command = f"python3 cliMapGenerator.py --width {width} --height {height} --map_type {map_type} --num_maps {num_maps} --map_res {map_res} --save_path {maps_path} --iterations {iterations} --num_obstacles {num_obstacles} --obstacle_size {obstacle_size} --corridor_width {corridor_width}"
 os.system(generate_maps_command)
 
+simulator_setup_maps_path =  path.abspath(path.join(__file__ ,"../../../../simulator_setup/maps"))
+os.system(f"cp -a ./maps/. {simulator_setup_maps_path}")
+
 #----------------------------------------------------------
 
 # Run simulations and record data
+simulator_setup_map_files = os.listdir(simulator_setup_maps_path)
+map_files = []
+for file in simulator_setup_map_files:
+    if "map" not in file and file != "config.yaml":
+        map_files.append(file)
+        
+print(map_files)
+
 local_planners = ["dwa"]
 robot_models = ["burger"]
-generated_maps = os.listdir(maps_path)
+generated_maps = map_files
 num_dynamic_obs = ["5"]
 num_static_obs = ["3"]
 
@@ -43,7 +53,7 @@ for planner in local_planners:
         for num_dyn in num_dynamic_obs:
             for num_static in num_static_obs:
                 for gen_map in generated_maps:
-                    roslaunch_command = f""" roslaunch arena_bringup start_arena_flatland.launch model:={robot} num_dynamic_obs:={num_dyn} num_static_obs:={num_static} min_dyn_vel:={dyn_obs_velocity[0]} max_dyn_vel:={dyn_obs_velocity[1]} min_dyn_radius:={dyn_obs_radius[0]} max_dyn_radius:={dyn_obs_radius[1]} min_static_num_vertices:={static_obs_vertices[0]} max_static_num_vertices:={static_obs_vertices[1]} local_planner:={planner} map_file:={gen_map} task_mode:="project_eval" scenario_file:="project_eval/scenario_1.json" use_recorder:="true" data_records_path:={maps_path} show_rviz:="false" use_rviz:="false" """
+                    roslaunch_command = f""" roslaunch arena_bringup start_arena_flatland.launch model:={robot} num_dynamic_obs:={num_dyn} num_static_obs:={num_static} min_dyn_vel:={dyn_obs_velocity[0]} max_dyn_vel:={dyn_obs_velocity[1]} min_dyn_radius:={dyn_obs_radius[0]} max_dyn_radius:={dyn_obs_radius[1]} min_static_num_vertices:={static_obs_vertices[0]} max_static_num_vertices:={static_obs_vertices[1]} local_planner:={planner} map_file:={gen_map} task_mode:="project_eval" scenario_file:="project_eval/scenario_1.json" use_recorder:="true" show_rviz:="false" use_rviz:="false" """
                     os.system(roslaunch_command)
 
 #----------------------------------------------------------

@@ -100,7 +100,7 @@ class MapGenerator:
             "free_thresh": 0.196,
         }
 
-        with open(str(map_folder / f"{map_name}.map.yaml"), "w") as outfile:
+        with open(str(map_folder / f"map.yaml"), "w") as outfile:
             yaml.dump(map_yaml, outfile, sort_keys=False, default_flow_style=None)
 
         # create map.world.yaml
@@ -112,7 +112,7 @@ class MapGenerator:
             "layers": [{"name": "static", "map": "map.yaml", "color": [0, 1, 0, 1]}]
         }
 
-        with open(str(map_folder / f"{map_name}.map.world.yaml"), "w") as outfile:
+        with open(str(map_folder / f"map.world.yaml"), "w") as outfile:
             # somehow the first part must be with default_flow_style=False
             yaml.dump(world_yaml_properties, outfile, sort_keys=False, default_flow_style=False)
             # 2nd part must be with default_flow_style=None
