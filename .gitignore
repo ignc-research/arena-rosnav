@@ -54,3 +54,6 @@ __pycache__/
 #dolphin
 .directory
 
+# intellij idea
+.idea/
+
