@@ -1,12 +1,35 @@
-import numpy as np
 import os
-import yaml
-import pathlib
-from pathlib import Path
 import re
-from typing import List
+import sys
+import yaml
+import logging
+import pathlib
+import numpy as np
 from PIL import Image
+from typing import List
+from pathlib import Path
 from argparse import ArgumentParser
+
+
+# Logger setup
+def init_info(_log):
+    """
+    Initialize a logger.
+    """
+    _log.setLevel(logging.INFO)
+    _log.addHandler(logging.StreamHandler(sys.stderr))
+    _formatter = logging.Formatter(f"main: %(message)s")
+    for _handler in _log.handlers:
+        _handler.setFormatter(_formatter)
+    return _log.info
+
+
+_log = None
+if "info" not in locals():  # if info is not defined
+    _log = logging.getLogger(__name__)
+    info = init_info(_log)
+
+info("Logger initialized")
 
 
 class MapGenerator:
@@ -47,7 +70,7 @@ class MapGenerator:
 
     def generateMaps(self):
         # generate maps
-        path = pathlib.Path(self.path)
+        path = Path(self.path)
 
         # create new maps with appropriate names
         map_names = self.getMapNames()
