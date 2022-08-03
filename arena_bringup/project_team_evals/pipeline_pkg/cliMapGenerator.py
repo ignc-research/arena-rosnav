@@ -264,7 +264,6 @@ class MapGenerator:
 
 
 if __name__ == "__main__":
-
     dirname = os.path.dirname(__file__)
     output_path = Path(dirname) / "maps"
 
