@@ -23,292 +23,292 @@ class MapGenerator(QtWidgets.QMainWindow):
         super().__init__(**kwargs)
 
         # add graphicsscene and graphicsview
-        self.scene = QtWidgets.QGraphicsScene()
-        self.view = QtWidgets.QGraphicsView(self.scene)
-        self.view.setDragMode(QtWidgets.QGraphicsView.DragMode.ScrollHandDrag)
-        self.view.setSceneRect(-1000, -1000, 2000, 2000)
-        self.view.fitInView(QtCore.QRectF(-1.5, -1.5, 100, 100),
-                            mode=QtCore.Qt.AspectRatioMode.KeepAspectRatio)
-        self.view.setHorizontalScrollBarPolicy(
-            QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        # self.scene = QtWidgets.QGraphicsScene()
+        # self.view = QtWidgets.QGraphicsView(self.scene)
+        # self.view.setDragMode(QtWidgets.QGraphicsView.DragMode.ScrollHandDrag)
+        # self.view.setSceneRect(-1000, -1000, 2000, 2000)
+        # self.view.fitInView(QtCore.QRectF(-1.5, -1.5, 100, 100),
+        #                     mode=QtCore.Qt.AspectRatioMode.KeepAspectRatio)
+        # self.view.setHorizontalScrollBarPolicy(
+        #     QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
-        self.setup_ui()
-        self.updateWidgetsFromSelectedType(self.type_dropdown.currentIndex())
-        self.showPreview()
+        # self.setup_ui()
+        # self.updateWidgetsFromSelectedType(self.type_dropdown.currentIndex())
+        # self.showPreview()
 
-    def setup_ui(self):
-        self.setWindowTitle("Map Generator")
-        self.resize(1100, 600)
-        self.move(100, 100)
-        icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap('icon.png'),
-                       QtGui.QIcon.Selected, QtGui.QIcon.On)
-        self.setWindowIcon(icon)
-        layout_index = 0
+    # def setup_ui(self):
+    #     self.setWindowTitle("Map Generator")
+    #     self.resize(1100, 600)
+    #     self.move(100, 100)
+    #     icon = QtGui.QIcon()
+    #     icon.addPixmap(QtGui.QPixmap('icon.png'),
+    #                    QtGui.QIcon.Selected, QtGui.QIcon.On)
+    #     self.setWindowIcon(icon)
+    #     layout_index = 0
 
-        # set central widget
-        central_widget = QtWidgets.QWidget()
-        central_widget.setLayout(QtWidgets.QGridLayout())
-        self.setCentralWidget(central_widget)
+    #     # set central widget
+    #     central_widget = QtWidgets.QWidget()
+    #     central_widget.setLayout(QtWidgets.QGridLayout())
+    #     self.setCentralWidget(central_widget)
 
-        # splitter
-        self.splitter = QtWidgets.QSplitter()
-        self.centralWidget().layout().addWidget(self.splitter)
+    #     # splitter
+    #     self.splitter = QtWidgets.QSplitter()
+    #     self.centralWidget().layout().addWidget(self.splitter)
 
-        # left side frame
-        frame = QtWidgets.QFrame()
-        frame.setFrameStyle(QtWidgets.QFrame.Shape.Box |
-                            QtWidgets.QFrame.Shadow.Raised)
-        frame.setLayout(QtWidgets.QGridLayout())
-        frame.setSizePolicy(QtWidgets.QSizePolicy.Policy.Maximum,
-                            QtWidgets.QSizePolicy.Policy.Maximum)
-        self.splitter.addWidget(frame)
+    #     # left side frame
+    #     frame = QtWidgets.QFrame()
+    #     frame.setFrameStyle(QtWidgets.QFrame.Shape.Box |
+    #                         QtWidgets.QFrame.Shadow.Raised)
+    #     frame.setLayout(QtWidgets.QGridLayout())
+    #     frame.setSizePolicy(QtWidgets.QSizePolicy.Policy.Maximum,
+    #                         QtWidgets.QSizePolicy.Policy.Maximum)
+    #     self.splitter.addWidget(frame)
 
-        # width
-        # label
-        width_label = QtWidgets.QLabel("### Width")
-        width_label.setTextFormat(QtCore.Qt.TextFormat.MarkdownText)
-        frame.layout().addWidget(width_label, layout_index,
-                                 0, QtCore.Qt.AlignmentFlag.AlignLeft)
-        # spinbox
-        self.width_spin_box = QtWidgets.QSpinBox()
-        self.width_spin_box.setRange(1, 10000)
-        self.width_spin_box.setValue(101)
-        self.width_spin_box.setSingleStep(1)
-        self.width_spin_box.setFixedSize(150, 30)
-        self.width_spin_box.valueChanged.connect(self.showPreview)
-        frame.layout().addWidget(self.width_spin_box, layout_index,
-                                 1, QtCore.Qt.AlignmentFlag.AlignRight)
-        layout_index += 1
+    #     # width
+    #     # label
+    #     width_label = QtWidgets.QLabel("### Width")
+    #     width_label.setTextFormat(QtCore.Qt.TextFormat.MarkdownText)
+    #     frame.layout().addWidget(width_label, layout_index,
+    #                              0, QtCore.Qt.AlignmentFlag.AlignLeft)
+    #     # spinbox
+    #     self.width_spin_box = QtWidgets.QSpinBox()
+    #     self.width_spin_box.setRange(1, 10000)
+    #     self.width_spin_box.setValue(101)
+    #     self.width_spin_box.setSingleStep(1)
+    #     self.width_spin_box.setFixedSize(150, 30)
+    #     self.width_spin_box.valueChanged.connect(self.showPreview)
+    #     frame.layout().addWidget(self.width_spin_box, layout_index,
+    #                              1, QtCore.Qt.AlignmentFlag.AlignRight)
+    #     layout_index += 1
 
-        # height
-        # label
-        height_label = QtWidgets.QLabel("### Height")
-        height_label.setTextFormat(QtCore.Qt.TextFormat.MarkdownText)
-        frame.layout().addWidget(height_label, layout_index,
-                                 0, QtCore.Qt.AlignmentFlag.AlignLeft)
-        # spinbox
-        self.height_spin_box = QtWidgets.QSpinBox()
-        self.height_spin_box.setRange(1, 10000)
-        self.height_spin_box.setValue(101)
-        self.height_spin_box.setSingleStep(1)
-        self.height_spin_box.setFixedSize(150, 30)
-        self.height_spin_box.valueChanged.connect(self.showPreview)
-        frame.layout().addWidget(self.height_spin_box, layout_index,
-                                 1, QtCore.Qt.AlignmentFlag.AlignRight)
-        layout_index += 1
+    #     # height
+    #     # label
+    #     height_label = QtWidgets.QLabel("### Height")
+    #     height_label.setTextFormat(QtCore.Qt.TextFormat.MarkdownText)
+    #     frame.layout().addWidget(height_label, layout_index,
+    #                              0, QtCore.Qt.AlignmentFlag.AlignLeft)
+    #     # spinbox
+    #     self.height_spin_box = QtWidgets.QSpinBox()
+    #     self.height_spin_box.setRange(1, 10000)
+    #     self.height_spin_box.setValue(101)
+    #     self.height_spin_box.setSingleStep(1)
+    #     self.height_spin_box.setFixedSize(150, 30)
+    #     self.height_spin_box.valueChanged.connect(self.showPreview)
+    #     frame.layout().addWidget(self.height_spin_box, layout_index,
+    #                              1, QtCore.Qt.AlignmentFlag.AlignRight)
+    #     layout_index += 1
 
-        # type
-        # label
-        type_label = QtWidgets.QLabel("### Type")
-        type_label.setTextFormat(QtCore.Qt.TextFormat.MarkdownText)
-        frame.layout().addWidget(type_label, layout_index,
-                                 0, QtCore.Qt.AlignmentFlag.AlignLeft)
-        # dropdown
-        self.type_dropdown = QtWidgets.QComboBox()
-        for map_type in MapType:
-            self.type_dropdown.insertItem(
-                map_type.value, map_type.name.lower())
-        self.type_dropdown.setFixedSize(150, 30)
-        self.type_dropdown.currentIndexChanged.connect(self.handleTypeChanged)
-        frame.layout().addWidget(self.type_dropdown, layout_index,
-                                 1, QtCore.Qt.AlignmentFlag.AlignRight)
-        layout_index += 1
+    #     # type
+    #     # label
+    #     type_label = QtWidgets.QLabel("### Type")
+    #     type_label.setTextFormat(QtCore.Qt.TextFormat.MarkdownText)
+    #     frame.layout().addWidget(type_label, layout_index,
+    #                              0, QtCore.Qt.AlignmentFlag.AlignLeft)
+    #     # dropdown
+    #     self.type_dropdown = QtWidgets.QComboBox()
+    #     for map_type in MapType:
+    #         self.type_dropdown.insertItem(
+    #             map_type.value, map_type.name.lower())
+    #     self.type_dropdown.setFixedSize(150, 30)
+    #     self.type_dropdown.currentIndexChanged.connect(self.handleTypeChanged)
+    #     frame.layout().addWidget(self.type_dropdown, layout_index,
+    #                              1, QtCore.Qt.AlignmentFlag.AlignRight)
+    #     layout_index += 1
 
-        # corridor width
-        # label
-        self.corridor_width_label = QtWidgets.QLabel("### Corridor Width")
-        self.corridor_width_label.setTextFormat(
-            QtCore.Qt.TextFormat.MarkdownText)
-        frame.layout().addWidget(self.corridor_width_label,
-                                 layout_index, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
-        # spinbox
-        self.corridor_width_spin_box = QtWidgets.QSpinBox()
-        self.corridor_width_spin_box.setRange(0, 1000)
-        self.corridor_width_spin_box.setValue(3)
-        self.corridor_width_spin_box.setSingleStep(1)
-        self.corridor_width_spin_box.setFixedSize(150, 30)
-        self.corridor_width_spin_box.valueChanged.connect(self.showPreview)
-        frame.layout().addWidget(self.corridor_width_spin_box,
-                                 layout_index, 1, QtCore.Qt.AlignmentFlag.AlignRight)
-        layout_index += 1
+    #     # corridor width
+    #     # label
+    #     self.corridor_width_label = QtWidgets.QLabel("### Corridor Width")
+    #     self.corridor_width_label.setTextFormat(
+    #         QtCore.Qt.TextFormat.MarkdownText)
+    #     frame.layout().addWidget(self.corridor_width_label,
+    #                              layout_index, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
+    #     # spinbox
+    #     self.corridor_width_spin_box = QtWidgets.QSpinBox()
+    #     self.corridor_width_spin_box.setRange(0, 1000)
+    #     self.corridor_width_spin_box.setValue(3)
+    #     self.corridor_width_spin_box.setSingleStep(1)
+    #     self.corridor_width_spin_box.setFixedSize(150, 30)
+    #     self.corridor_width_spin_box.valueChanged.connect(self.showPreview)
+    #     frame.layout().addWidget(self.corridor_width_spin_box,
+    #                              layout_index, 1, QtCore.Qt.AlignmentFlag.AlignRight)
+    #     layout_index += 1
 
-        # iterations
-        # label
-        self.iterations_label = QtWidgets.QLabel("### Iterations")
-        self.iterations_label.setTextFormat(QtCore.Qt.TextFormat.MarkdownText)
-        frame.layout().addWidget(self.iterations_label, layout_index,
-                                 0, QtCore.Qt.AlignmentFlag.AlignLeft)
-        # spinbox
-        self.iterations_spin_box = QtWidgets.QSpinBox()
-        self.iterations_spin_box.setRange(0, 1000)
-        self.iterations_spin_box.setValue(100)
-        self.iterations_spin_box.setSingleStep(1)
-        self.iterations_spin_box.setFixedSize(150, 30)
-        self.iterations_spin_box.valueChanged.connect(self.showPreview)
-        frame.layout().addWidget(self.iterations_spin_box, layout_index,
-                                 1, QtCore.Qt.AlignmentFlag.AlignRight)
-        layout_index += 1
+    #     # iterations
+    #     # label
+    #     self.iterations_label = QtWidgets.QLabel("### Iterations")
+    #     self.iterations_label.setTextFormat(QtCore.Qt.TextFormat.MarkdownText)
+    #     frame.layout().addWidget(self.iterations_label, layout_index,
+    #                              0, QtCore.Qt.AlignmentFlag.AlignLeft)
+    #     # spinbox
+    #     self.iterations_spin_box = QtWidgets.QSpinBox()
+    #     self.iterations_spin_box.setRange(0, 1000)
+    #     self.iterations_spin_box.setValue(100)
+    #     self.iterations_spin_box.setSingleStep(1)
+    #     self.iterations_spin_box.setFixedSize(150, 30)
+    #     self.iterations_spin_box.valueChanged.connect(self.showPreview)
+    #     frame.layout().addWidget(self.iterations_spin_box, layout_index,
+    #                              1, QtCore.Qt.AlignmentFlag.AlignRight)
+    #     layout_index += 1
 
-        # obstacles
-        # label
-        self.obstacles_label = QtWidgets.QLabel("### Obstacles")
-        self.obstacles_label.setTextFormat(QtCore.Qt.TextFormat.MarkdownText)
-        frame.layout().addWidget(self.obstacles_label, layout_index,
-                                 0, QtCore.Qt.AlignmentFlag.AlignLeft)
-        # spinbox
-        self.obstacles_spin_box = QtWidgets.QSpinBox()
-        self.obstacles_spin_box.setRange(0, 1000)
-        self.obstacles_spin_box.setValue(20)
-        self.obstacles_spin_box.setSingleStep(1)
-        self.obstacles_spin_box.setFixedSize(150, 30)
-        self.obstacles_spin_box.valueChanged.connect(self.showPreview)
-        frame.layout().addWidget(self.obstacles_spin_box, layout_index,
-                                 1, QtCore.Qt.AlignmentFlag.AlignRight)
-        layout_index += 1
+    #     # obstacles
+    #     # label
+    #     self.obstacles_label = QtWidgets.QLabel("### Obstacles")
+    #     self.obstacles_label.setTextFormat(QtCore.Qt.TextFormat.MarkdownText)
+    #     frame.layout().addWidget(self.obstacles_label, layout_index,
+    #                              0, QtCore.Qt.AlignmentFlag.AlignLeft)
+    #     # spinbox
+    #     self.obstacles_spin_box = QtWidgets.QSpinBox()
+    #     self.obstacles_spin_box.setRange(0, 1000)
+    #     self.obstacles_spin_box.setValue(20)
+    #     self.obstacles_spin_box.setSingleStep(1)
+    #     self.obstacles_spin_box.setFixedSize(150, 30)
+    #     self.obstacles_spin_box.valueChanged.connect(self.showPreview)
+    #     frame.layout().addWidget(self.obstacles_spin_box, layout_index,
+    #                              1, QtCore.Qt.AlignmentFlag.AlignRight)
+    #     layout_index += 1
 
-        # obstacle size
-        # label
-        self.obstacle_size_label = QtWidgets.QLabel("### Obstacle Size")
-        self.obstacle_size_label.setTextFormat(
-            QtCore.Qt.TextFormat.MarkdownText)
-        frame.layout().addWidget(self.obstacle_size_label,
-                                 layout_index, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
-        # spinbox
-        self.obstacle_size_spin_box = QtWidgets.QSpinBox()
-        self.obstacle_size_spin_box.setRange(0, 1000)
-        self.obstacle_size_spin_box.setValue(2)
-        self.obstacle_size_spin_box.setSingleStep(1)
-        self.obstacle_size_spin_box.setFixedSize(150, 30)
-        self.obstacle_size_spin_box.valueChanged.connect(self.showPreview)
-        frame.layout().addWidget(self.obstacle_size_spin_box,
-                                 layout_index, 1, QtCore.Qt.AlignmentFlag.AlignRight)
-        layout_index += 1
+    #     # obstacle size
+    #     # label
+    #     self.obstacle_size_label = QtWidgets.QLabel("### Obstacle Size")
+    #     self.obstacle_size_label.setTextFormat(
+    #         QtCore.Qt.TextFormat.MarkdownText)
+    #     frame.layout().addWidget(self.obstacle_size_label,
+    #                              layout_index, 0, QtCore.Qt.AlignmentFlag.AlignLeft)
+    #     # spinbox
+    #     self.obstacle_size_spin_box = QtWidgets.QSpinBox()
+    #     self.obstacle_size_spin_box.setRange(0, 1000)
+    #     self.obstacle_size_spin_box.setValue(2)
+    #     self.obstacle_size_spin_box.setSingleStep(1)
+    #     self.obstacle_size_spin_box.setFixedSize(150, 30)
+    #     self.obstacle_size_spin_box.valueChanged.connect(self.showPreview)
+    #     frame.layout().addWidget(self.obstacle_size_spin_box,
+    #                              layout_index, 1, QtCore.Qt.AlignmentFlag.AlignRight)
+    #     layout_index += 1
 
-        # line
-        line = Line()
-        frame.layout().addWidget(line, layout_index, 0, 1, -1)
-        layout_index += 1
+    #     # line
+    #     line = Line()
+    #     frame.layout().addWidget(line, layout_index, 0, 1, -1)
+    #     layout_index += 1
 
-        # number of maps
-        # label
-        number_of_maps_label = QtWidgets.QLabel("### Number of Maps")
-        number_of_maps_label.setTextFormat(QtCore.Qt.TextFormat.MarkdownText)
-        frame.layout().addWidget(number_of_maps_label, layout_index,
-                                 0, QtCore.Qt.AlignmentFlag.AlignLeft)
-        # spinbox
-        self.number_of_maps_spin_box = QtWidgets.QSpinBox()
-        self.number_of_maps_spin_box.setRange(0, 1000)
-        self.number_of_maps_spin_box.setValue(5)
-        self.number_of_maps_spin_box.setSingleStep(1)
-        self.number_of_maps_spin_box.setFixedSize(150, 30)
-        self.number_of_maps_spin_box.valueChanged.connect(
-            self.numberOfMapsChanged)
-        frame.layout().addWidget(self.number_of_maps_spin_box,
-                                 layout_index, 1, QtCore.Qt.AlignmentFlag.AlignRight)
-        layout_index += 1
+    #     # number of maps
+    #     # label
+    #     number_of_maps_label = QtWidgets.QLabel("### Number of Maps")
+    #     number_of_maps_label.setTextFormat(QtCore.Qt.TextFormat.MarkdownText)
+    #     frame.layout().addWidget(number_of_maps_label, layout_index,
+    #                              0, QtCore.Qt.AlignmentFlag.AlignLeft)
+    #     # spinbox
+    #     self.number_of_maps_spin_box = QtWidgets.QSpinBox()
+    #     self.number_of_maps_spin_box.setRange(0, 1000)
+    #     self.number_of_maps_spin_box.setValue(5)
+    #     self.number_of_maps_spin_box.setSingleStep(1)
+    #     self.number_of_maps_spin_box.setFixedSize(150, 30)
+    #     self.number_of_maps_spin_box.valueChanged.connect(
+    #         self.numberOfMapsChanged)
+    #     frame.layout().addWidget(self.number_of_maps_spin_box,
+    #                              layout_index, 1, QtCore.Qt.AlignmentFlag.AlignRight)
+    #     layout_index += 1
 
-        # resolution
-        # label
-        resolution_label = QtWidgets.QLabel("### Map Resolution")
-        resolution_label.setTextFormat(QtCore.Qt.TextFormat.MarkdownText)
-        frame.layout().addWidget(resolution_label, layout_index,
-                                 0, QtCore.Qt.AlignmentFlag.AlignLeft)
-        # spinbox
-        self.resolution_spin_box = QtWidgets.QDoubleSpinBox()
-        self.resolution_spin_box.setRange(0, 1000)
-        self.resolution_spin_box.setValue(0.5)
-        self.resolution_spin_box.setSingleStep(0.01)
-        self.resolution_spin_box.setFixedSize(150, 30)
-        frame.layout().addWidget(self.resolution_spin_box, layout_index,
-                                 1, QtCore.Qt.AlignmentFlag.AlignRight)
-        layout_index += 1
+    #     # resolution
+    #     # label
+    #     resolution_label = QtWidgets.QLabel("### Map Resolution")
+    #     resolution_label.setTextFormat(QtCore.Qt.TextFormat.MarkdownText)
+    #     frame.layout().addWidget(resolution_label, layout_index,
+    #                              0, QtCore.Qt.AlignmentFlag.AlignLeft)
+    #     # spinbox
+    #     self.resolution_spin_box = QtWidgets.QDoubleSpinBox()
+    #     self.resolution_spin_box.setRange(0, 1000)
+    #     self.resolution_spin_box.setValue(0.5)
+    #     self.resolution_spin_box.setSingleStep(0.01)
+    #     self.resolution_spin_box.setFixedSize(150, 30)
+    #     frame.layout().addWidget(self.resolution_spin_box, layout_index,
+    #                              1, QtCore.Qt.AlignmentFlag.AlignRight)
+    #     layout_index += 1
 
-        # folder
-        folder_label = QtWidgets.QLabel("Save to Folder:")
-        frame.layout().addWidget(folder_label, layout_index,
-                                 0, QtCore.Qt.AlignmentFlag.AlignLeft)
-        browse_button = QtWidgets.QPushButton("Browse...")
-        browse_button.clicked.connect(self.onBrowseClicked)
-        frame.layout().addWidget(browse_button, layout_index,
-                                 1, QtCore.Qt.AlignmentFlag.AlignRight)
-        layout_index += 1
-        self.folder_edit = QtWidgets.QLineEdit("Please select folder")
-        # set default path to simulator_setup/maps if it exists
-        sim_setup_path = get_ros_package_path("simulator_setup")
-        if sim_setup_path != "":
-            self.folder_edit.setText(os.path.join(sim_setup_path, "maps"))
-        frame.layout().addWidget(self.folder_edit, layout_index, 0, 1, -1)
-        layout_index += 1
+    #     # folder
+    #     folder_label = QtWidgets.QLabel("Save to Folder:")
+    #     frame.layout().addWidget(folder_label, layout_index,
+    #                              0, QtCore.Qt.AlignmentFlag.AlignLeft)
+    #     browse_button = QtWidgets.QPushButton("Browse...")
+    #     browse_button.clicked.connect(self.onBrowseClicked)
+    #     frame.layout().addWidget(browse_button, layout_index,
+    #                              1, QtCore.Qt.AlignmentFlag.AlignRight)
+    #     layout_index += 1
+    #     self.folder_edit = QtWidgets.QLineEdit("Please select folder")
+    #     # set default path to simulator_setup/maps if it exists
+    #     sim_setup_path = get_ros_package_path("simulator_setup")
+    #     if sim_setup_path != "":
+    #         self.folder_edit.setText(os.path.join(sim_setup_path, "maps"))
+    #     frame.layout().addWidget(self.folder_edit, layout_index, 0, 1, -1)
+    #     layout_index += 1
 
-        # generate maps button
-        self.generate_maps_button = QtWidgets.QPushButton("Generate 5 maps")
-        self.generate_maps_button.clicked.connect(self.onGenerateMapsClicked)
-        frame.layout().addWidget(self.generate_maps_button, layout_index, 0, 1, -1)
-        layout_index += 1
+    #     # generate maps button
+    #     self.generate_maps_button = QtWidgets.QPushButton("Generate 5 maps")
+    #     self.generate_maps_button.clicked.connect(self.onGenerateMapsClicked)
+    #     frame.layout().addWidget(self.generate_maps_button, layout_index, 0, 1, -1)
+    #     layout_index += 1
 
-        # generate maps result label
-        self.result_label = QtWidgets.QLabel("")
-        self.result_label.setMaximumHeight(50)
-        frame.layout().addWidget(self.result_label, layout_index, 0, 1, -1)
-        layout_index += 1
+    #     # generate maps result label
+    #     self.result_label = QtWidgets.QLabel("")
+    #     self.result_label.setMaximumHeight(50)
+    #     frame.layout().addWidget(self.result_label, layout_index, 0, 1, -1)
+    #     layout_index += 1
 
-        # generate maps result label animation
-        self.result_label_animation = QtCore.QPropertyAnimation(
-            self, b"text_color", self)
-        self.result_label_animation.setDuration(250)
-        self.result_label_animation.setLoopCount(2)
-        self.result_label_animation.setStartValue(QtGui.QColor(255, 255, 255))
-        self.result_label_animation.setEndValue(QtGui.QColor(0, 0, 0))
+    #     # generate maps result label animation
+    #     self.result_label_animation = QtCore.QPropertyAnimation(
+    #         self, b"text_color", self)
+    #     self.result_label_animation.setDuration(250)
+    #     self.result_label_animation.setLoopCount(2)
+    #     self.result_label_animation.setStartValue(QtGui.QColor(255, 255, 255))
+    #     self.result_label_animation.setEndValue(QtGui.QColor(0, 0, 0))
 
-        # right side graphicsview
-        self.splitter.addWidget(self.view)
+    #     # right side graphicsview
+    #     self.splitter.addWidget(self.view)
 
-        # set splitter sizes
-        self.splitter.setSizes([300, 700])
+    #     # set splitter sizes
+    #     self.splitter.setSizes([300, 700])
 
-    def handleTypeChanged(self):
-        self.showPreview()
-        self.updateWidgetsFromSelectedType(self.type_dropdown.currentIndex())
+    # def handleTypeChanged(self):
+    #     self.showPreview()
+    #     self.updateWidgetsFromSelectedType(self.type_dropdown.currentIndex())
 
-    def getTextColor(self) -> QtGui.QColor:
-        return self.result_label.palette().text().color()
+    # def getTextColor(self) -> QtGui.QColor:
+    #     return self.result_label.palette().text().color()
 
-    def setTextColor(self, color: QtGui.QColor):
-        palette = self.result_label.palette()
-        palette.setColor(self.result_label.foregroundRole(), color)
-        self.result_label.setPalette(palette)
+    # def setTextColor(self, color: QtGui.QColor):
+    #     palette = self.result_label.palette()
+    #     palette.setColor(self.result_label.foregroundRole(), color)
+    #     self.result_label.setPalette(palette)
 
-    # text color property
-    text_color = QtCore.pyqtProperty(QtGui.QColor, getTextColor, setTextColor)
+    # # text color property
+    # text_color = QtCore.pyqtProperty(QtGui.QColor, getTextColor, setTextColor)
 
-    def numberOfMapsChanged(self, value):
-        s = f"Generate {value} maps"
-        self.generate_maps_button.setText(s)
+    # def numberOfMapsChanged(self, value):
+    #     s = f"Generate {value} maps"
+    #     self.generate_maps_button.setText(s)
 
-    def getMapNames(self) -> List[str]:
-        '''
-        Generate simple map names that don't exist yet in the form of f"map{index}".
-        Search the maps folder for already existing maps in this format. Get the highest index and then
-        start counting from there.
-        '''
-        folder = pathlib.Path(self.folder_edit.text())
-        map_folders = [p for p in folder.iterdir() if p.is_dir()]
-        names = [p.parts[-1] for p in map_folders]
-        # get only the names that are in the form of f"map{index}"
-        prefix = "map"
-        pat = re.compile(f"{prefix}\d+$", flags=re.ASCII)
-        filtered_names = [name for name in names if pat.match(name) != None]
-        # get the max index that already exists
-        max_index = 0
-        if len(filtered_names) > 0:
-            max_index = max([int(name[len(prefix):])
-                            for name in filtered_names])
-        number_of_maps = self.number_of_maps_spin_box.value()
-        # generate new names beginning with the max index
-        return [f"map{i}" for i in range(max_index+1, max_index+1+number_of_maps)]
+    # def getMapNames(self) -> List[str]:
+    #     '''
+    #     Generate simple map names that don't exist yet in the form of f"map{index}".
+    #     Search the maps folder for already existing maps in this format. Get the highest index and then
+    #     start counting from there.
+    #     '''
+    #     folder = pathlib.Path(self.folder_edit.text())
+    #     map_folders = [p for p in folder.iterdir() if p.is_dir()]
+    #     names = [p.parts[-1] for p in map_folders]
+    #     # get only the names that are in the form of f"map{index}"
+    #     prefix = "map"
+    #     pat = re.compile(f"{prefix}\d+$", flags=re.ASCII)
+    #     filtered_names = [name for name in names if pat.match(name) != None]
+    #     # get the max index that already exists
+    #     max_index = 0
+    #     if len(filtered_names) > 0:
+    #         max_index = max([int(name[len(prefix):])
+    #                         for name in filtered_names])
+    #     number_of_maps = self.number_of_maps_spin_box.value()
+    #     # generate new names beginning with the max index
+    #     return [f"map{i}" for i in range(max_index+1, max_index+1+number_of_maps)]
 
-    def onGenerateMapsClicked(self):
+    def onGenerateMapsClicked(self, width, height):
         # generate maps
         height = self.height_spin_box.value()
         width = self.width_spin_box.value()
@@ -384,61 +384,61 @@ class MapGenerator(QtWidgets.QMainWindow):
             xpm.append(line)
         return xpm
 
-    def showPreview(self):
-        '''
-        Generate an example map with the current settings and display it.
-        '''
-        # clear scene
-        items = self.scene.items()
-        for item in items:
-            self.scene.removeItem(item)
+    # def showPreview(self):
+    #     '''
+    #     Generate an example map with the current settings and display it.
+    #     '''
+    #     # clear scene
+    #     items = self.scene.items()
+    #     for item in items:
+    #         self.scene.removeItem(item)
 
-        # generate a map
-        map_array = self.getCurrentMap()
+    #     # generate a map
+    #     map_array = self.getCurrentMap()
 
-        if map_array is None:
-            return
+    #     if map_array is None:
+    #         return
 
-        # add map to the scene
-        # generate XPM data from array
-        xpm = self.getXpmFromNdarray(map_array)
-        # get pixmap from XPM data
-        pixmap = QtGui.QPixmap(xpm)
-        pixmap_item = QtWidgets.QGraphicsPixmapItem(pixmap)
-        # add to scene
-        self.scene.addItem(pixmap_item)
-        # adjust view
-        height = self.height_spin_box.value()
-        width = self.width_spin_box.value()
-        self.view.fitInView(QtCore.QRectF(-5, -5, width + 5, height +
-                            (height / 3)), mode=QtCore.Qt.AspectRatioMode.KeepAspectRatio)
+    #     # add map to the scene
+    #     # generate XPM data from array
+    #     xpm = self.getXpmFromNdarray(map_array)
+    #     # get pixmap from XPM data
+    #     pixmap = QtGui.QPixmap(xpm)
+    #     pixmap_item = QtWidgets.QGraphicsPixmapItem(pixmap)
+    #     # add to scene
+    #     self.scene.addItem(pixmap_item)
+    #     # adjust view
+    #     height = self.height_spin_box.value()
+    #     width = self.width_spin_box.value()
+    #     self.view.fitInView(QtCore.QRectF(-5, -5, width + 5, height +
+    #                         (height / 3)), mode=QtCore.Qt.AspectRatioMode.KeepAspectRatio)
 
-    def onBrowseClicked(self):
-        path = QtWidgets.QFileDialog.getExistingDirectory(
-            self, "Select Maps Folder", str(pathlib.Path.home()))
-        if os.path.exists(path):
-            self.folder_edit.setText(path)
+    # def onBrowseClicked(self):
+    #     path = QtWidgets.QFileDialog.getExistingDirectory(
+    #         self, "Select Maps Folder", str(pathlib.Path.home()))
+    #     if os.path.exists(path):
+    #         self.folder_edit.setText(path)
 
-    def updateWidgetsFromSelectedType(self, index):
-        map_type = MapType(index)
-        if map_type == MapType.INDOOR:
-            self.corridor_width_label.show()
-            self.corridor_width_spin_box.show()
-            self.iterations_label.show()
-            self.iterations_spin_box.show()
-            self.obstacles_label.hide()
-            self.obstacles_spin_box.hide()
-            self.obstacle_size_label.hide()
-            self.obstacle_size_spin_box.hide()
-        elif map_type == MapType.OUTDOOR:
-            self.corridor_width_label.hide()
-            self.corridor_width_spin_box.hide()
-            self.iterations_label.hide()
-            self.iterations_spin_box.hide()
-            self.obstacles_label.show()
-            self.obstacles_spin_box.show()
-            self.obstacle_size_label.show()
-            self.obstacle_size_spin_box.show()
+    # def updateWidgetsFromSelectedType(self, index):
+    #     map_type = MapType(index)
+    #     if map_type == MapType.INDOOR:
+    #         self.corridor_width_label.show()
+    #         self.corridor_width_spin_box.show()
+    #         self.iterations_label.show()
+    #         self.iterations_spin_box.show()
+    #         self.obstacles_label.hide()
+    #         self.obstacles_spin_box.hide()
+    #         self.obstacle_size_label.hide()
+    #         self.obstacle_size_spin_box.hide()
+    #     elif map_type == MapType.OUTDOOR:
+    #         self.corridor_width_label.hide()
+    #         self.corridor_width_spin_box.hide()
+    #         self.iterations_label.hide()
+    #         self.iterations_spin_box.hide()
+    #         self.obstacles_label.show()
+    #         self.obstacles_spin_box.show()
+    #         self.obstacle_size_label.show()
+    #         self.obstacle_size_spin_box.show()
 
     def create_yaml_files(self, map_folder_path: pathlib.Path):
         '''
@@ -613,6 +613,25 @@ class MapGenerator(QtWidgets.QMainWindow):
 
 
 if __name__ == "__main__":
+    
+    width = ""
+    height = ""
+    type = ""
+    num_maps = ""
+    map_res = ""
+    save_path = ""
+    
+    # Indoor only values
+    corridor_width = ""
+    iterations = ""
+    
+    # Outdoor only values
+    obstacles = ""
+    obstacle_size = ""
+
+    
+    
+    
     app = QtWidgets.QApplication([])
 
     widget = MapGenerator()
