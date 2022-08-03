@@ -9,7 +9,7 @@ from PIL import Image
 from typing import List
 from pathlib import Path
 from argparse import ArgumentParser
-
+from uuid import uuid4 as uuid
 
 # Logger setup
 def init_info(_log):
@@ -47,39 +47,18 @@ class MapGenerator:
         self.iterations = int(args.iterations)
         self.obstacle_size = int(args.obstacle_size)
 
-    def getMapNames(self) -> List[str]:
-        """
-        Generate simple map names that don't exist yet in the form of f"map{index}".
-        Search the maps folder for already existing maps in this format. Get the highest index and then
-        start counting from there.
-        """
-        folder = pathlib.Path(self.path)
-        map_folders = [p for p in folder.iterdir() if p.is_dir()]
-        names = [p.parts[-1] for p in map_folders]
-        # get only the names that are in the form of f"map{index}"
-        prefix = "map"
-        pat = re.compile(f"{prefix}\d+$", flags=re.ASCII)
-        filtered_names = [name for name in names if pat.match(name) != None]
-        # get the max index that already exists
-        max_index = 0
-        if len(filtered_names) > 0:
-            max_index = max([int(name[len(prefix) :]) for name in filtered_names])
-        number_of_maps = self.num_maps
-        # generate new names beginning with the max index
-        return [f"map{i}" for i in range(max_index + 1, max_index + 1 + number_of_maps)]
-
     def generateMaps(self):
         # generate maps
         path = Path(self.path)
 
         # create new maps with appropriate names
-        map_names = self.getMapNames()
-        for map_name in map_names:
+        for num_map in range(self.num_maps):
+            map_name = str(uuid())            
             map_array = self.getCurrentMap()
             if map_array is not None:
                 self.make_image(map_array, path, map_name)
                 map_path = path / map_name
-                self.create_yaml_files(map_path)
+                self.create_yaml_files(map_path, map_name)
                 info(f"Map {map_name} generated at {map_path}")
 
     def getCurrentMap(self) -> np.ndarray:
@@ -103,7 +82,7 @@ class MapGenerator:
 
         return map_array
 
-    def create_yaml_files(self, map_folder_path: pathlib.Path):
+    def create_yaml_files(self, map_folder_path: pathlib.Path, map_name):
         """
         Create the files map.yaml (ROS) and map.wordl.yaml (Flatland) for the map.
         map_folder_path: path to folder for this map e.g.: /home/user/catkin_ws/src/arena-rosnav/simulator_setup/maps/mymap
@@ -121,7 +100,7 @@ class MapGenerator:
             "free_thresh": 0.196,
         }
 
-        with open(str(map_folder / "map.yaml"), "w") as outfile:
+        with open(str(map_folder / f"{map_name}.map.yaml"), "w") as outfile:
             yaml.dump(map_yaml, outfile, sort_keys=False, default_flow_style=None)
 
         # create map.world.yaml
@@ -133,7 +112,7 @@ class MapGenerator:
             "layers": [{"name": "static", "map": "map.yaml", "color": [0, 1, 0, 1]}]
         }
 
-        with open(str(map_folder / "map.world.yaml"), "w") as outfile:
+        with open(str(map_folder / f"{map_name}.map.world.yaml"), "w") as outfile:
             # somehow the first part must be with default_flow_style=False
             yaml.dump(world_yaml_properties, outfile, sort_keys=False, default_flow_style=False)
             # 2nd part must be with default_flow_style=None
