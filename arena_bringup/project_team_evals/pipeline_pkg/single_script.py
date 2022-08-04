@@ -7,7 +7,6 @@ dirname = os.path.dirname(__file__)
 # Generate maps
 maps_path = Path(dirname) / "maps"
 
-# create dir if not exists
 maps_path.mkdir(parents=True, exist_ok=True)
 
 width = 100
@@ -24,7 +23,7 @@ corridor_width = 3
 generate_maps_command = f"python3 cliMapGenerator.py --width {width} --height {height} --map_type {map_type} --num_maps {num_maps} --map_res {map_res} --save_path {maps_path} --iterations {iterations} --num_obstacles {num_obstacles} --obstacle_size {obstacle_size} --corridor_width {corridor_width}"
 os.system(generate_maps_command)
 
-simulator_setup_maps_path =  path.abspath(path.join(__file__ ,"../../../../simulator_setup/maps"))
+simulator_setup_maps_path =  path.abspath(path.join(__file__ , "../../../../simulator_setup/maps"))
 os.system(f"cp -a ./maps/. {simulator_setup_maps_path}")
 
 #----------------------------------------------------------
@@ -35,7 +34,7 @@ map_files = []
 for file in simulator_setup_map_files:
     if "map" not in file and file != "config.yaml":
         map_files.append(file)
-        
+    
 print(map_files)
 
 local_planners = ["dwa"]
