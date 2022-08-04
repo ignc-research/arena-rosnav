@@ -10,7 +10,7 @@ from collections import Counter
 from scipy import spatial
 from pathlib import Path
 from collections import namedtuple
-#from distance_between import Distance
+from distance_between import Distance
 import progressbar 
 from tqdm import tqdm
 

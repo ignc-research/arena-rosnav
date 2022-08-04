@@ -36,6 +36,7 @@ class MapGenerator:
     def __init__(self, args, **kwargs):
         super().__init__(**kwargs)
 
+        self.map_name = args.map_name
         self.height = int(args.height)
         self.width = int(args.width)
         self.path = args.save_path
@@ -53,7 +54,7 @@ class MapGenerator:
 
         # create new maps with appropriate names
         for num_map in range(self.num_maps):
-            map_name = str(uuid())            
+            map_name = self.map_name           
             map_array = self.getCurrentMap()
             if map_array is not None:
                 self.make_image(map_array, path, map_name)
@@ -277,6 +278,14 @@ if __name__ == "__main__":
 
     parser = ArgumentParser()
     parser.add_argument(
+        "--map_name",
+        action="store",
+        dest="map_name",
+        default=str(uuid()),
+        help="Name of the map",
+        required=False,
+    )
+    parser.add_argument(
         "--width",
         action="store",
         dest="width",
@@ -289,7 +298,7 @@ if __name__ == "__main__":
         action="store",
         dest="height",
         default=100,
-        help="Width of the map",
+        help="Height of the map",
         required=False,
     )
     parser.add_argument(
@@ -297,7 +306,7 @@ if __name__ == "__main__":
         action="store",
         dest="map_type",
         default="indoor",
-        help="Width of the map",
+        help="Type of the map (indoor or outdoor)",
         required=False,
     )
     parser.add_argument(
@@ -305,7 +314,7 @@ if __name__ == "__main__":
         action="store",
         dest="num_maps",
         default=10,
-        help="Width of the map",
+        help="Say how many maps you want to create",
         required=False,
     )
     parser.add_argument(
@@ -313,7 +322,7 @@ if __name__ == "__main__":
         action="store",
         dest="map_res",
         default=0.5,
-        help="Width of the map",
+        help="Resolution of the maps",
         required=False,
     )
     parser.add_argument(
@@ -321,7 +330,7 @@ if __name__ == "__main__":
         action="store",
         dest="save_path",
         default=default_save_path,
-        help="Width of the map",
+        help="Path where the maps will be created",
         required=False,
     )
     parser.add_argument(

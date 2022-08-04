@@ -1,5 +1,10 @@
 import os.path as path
 from pathlib import Path
 
-two_up =  path.abspath(path.join(__file__ ,"../.."))
-print(two_up)
+dirname = path.dirname(__file__)
+image_path = path.join(dirname, "../../../../arena-rosnav/simulator_setup/maps") 
+csv_path = path.join(dirname, "../project_recordings")
+
+print(dirname)
+print(image_path)
+print(csv_path)
