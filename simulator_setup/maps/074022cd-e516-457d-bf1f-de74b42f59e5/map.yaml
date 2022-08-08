@@ -1,0 +1,6 @@
+image: 074022cd-e516-457d-bf1f-de74b42f59e5.png
+resolution: 0.5
+origin: [0.0, 0.0, 0.0]
+negate: 0
+occupied_thresh: 0.65
+free_thresh: 0.196

@@ -1,0 +1,6 @@
+image: daa59cba-e1ba-49c8-b654-108b56547fb3.png
+resolution: 0.5
+origin: [0.0, 0.0, 0.0]
+negate: 0
+occupied_thresh: 0.65
+free_thresh: 0.196

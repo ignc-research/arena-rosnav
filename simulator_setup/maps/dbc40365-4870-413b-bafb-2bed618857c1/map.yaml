@@ -1,0 +1,6 @@
+image: dbc40365-4870-413b-bafb-2bed618857c1.png
+resolution: 0.5
+origin: [0.0, 0.0, 0.0]
+negate: 0
+occupied_thresh: 0.65
+free_thresh: 0.196

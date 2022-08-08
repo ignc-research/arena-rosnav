@@ -1,0 +1,6 @@
+image: 72358ef3-ccbc-4793-801b-3cecb0345726.png
+resolution: 0.5
+origin: [0.0, 0.0, 0.0]
+negate: 0
+occupied_thresh: 0.65
+free_thresh: 0.196
