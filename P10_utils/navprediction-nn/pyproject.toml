@@ -1,0 +1,30 @@
+[tool.poetry]
+name = "navprediction"
+version = "0.1.0"
+description = "TU project"
+authors = ["Amer Jazaerli <hi@amer.sh>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+h5py = "^3.7.0"
+matplotlib = "^3.5.2"
+numpy = "^1.23.1"
+argparse = "^1.4.0"
+torch = "^1.12.0"
+torchvision = "^0.13.0"
+tqdm = "^4.64.0"
+torchmetrics = "^0.9.3"
+PyYAML = "^6.0"
+captcha = "^0.4"
+fs = "^2.4.16"
+wandb = "^0.13.1"
+
+[tool.poetry.dev-dependencies]
+black = {extras = ["d"], version = "^22.6.0"}
+pytest = "^7.1.2"
+pytest-cov = "^3.0.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

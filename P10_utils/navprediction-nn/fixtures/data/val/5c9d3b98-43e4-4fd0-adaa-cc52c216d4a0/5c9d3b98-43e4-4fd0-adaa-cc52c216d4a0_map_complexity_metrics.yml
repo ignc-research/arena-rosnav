@@ -1,0 +1,8 @@
+angle_info_mean: 360.0
+distance_avg: 0.02031
+distance_norm: 1.0
+distance_var: 0.0
+entropy_ratio: 0.0052939140928615
+map_size: 1250.0
+num_obs_cv2: 2
+occupancy_ratio: 0.4436
