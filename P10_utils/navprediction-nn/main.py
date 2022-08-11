@@ -14,7 +14,7 @@ from pathlib import Path, PosixPath
 from torchmetrics import Precision, Recall
 from torchvision.transforms import transforms
 from torch.utils.data import DataLoader, Dataset
-from torch.nn import TransformerEncoder, TransformerEncoderLayer
+from x_transformers import ViTransformerWrapper, Encoder
 
 
 # %% Dataset
@@ -236,55 +236,34 @@ class NavModel(torch.nn.Module):
         super().__init__()
         self.name = "NavModel"
 
-        # 150 x 150 = 22500
-        self.img_layer_1 = torch.nn.Linear(22500, 5000)
-        self.img_bn_1 = torch.nn.BatchNorm1d(5000)
-        self.img_layer_2 = torch.nn.Linear(5000, 2000)
-        self.img_bn_2 = torch.nn.BatchNorm1d(2000)
-        self.img_layer_3 = torch.nn.Linear(2000, 1000)
-        self.img_bn_3 = torch.nn.BatchNorm1d(1000)
-        self.img_layer_4 = torch.nn.Linear(1000, 500)
-        self.img_layer_5 = torch.nn.Linear(500, 50)
+        self.encoder = ViTransformerWrapper(
+            image_size=150,
+            patch_size=5,
+            channels=1,
+            attn_layers=Encoder(
+                dim=100,
+                depth=6,
+                heads=12,
+            ),
+            num_classes=None,
+            dropout=0.0,
+            post_emb_norm=False,
+            emb_dropout=0.0,
+        ).to(device)
 
         self.meta_layer_1 = torch.nn.Linear(55, 35)
         self.meta_layer_2 = torch.nn.Linear(35, 25)
         self.meta_layer_3 = torch.nn.Linear(25, 20)
 
-        self.mix_layer_1 = torch.nn.Linear(70, 30)
-        self.mix_layer_2 = torch.nn.Linear(30, 20)
-        self.mix_layer_3 = torch.nn.Linear(20, 10)
-        self.mix_layer_4 = torch.nn.Linear(10, 3)
-
-        self.img_transformer_encoder_layer = TransformerEncoderLayer(
-            d_model=2000, nhead=20, dropout=0.1, dim_feedforward=2048
-        )
-        self.img_transformer_encoder = TransformerEncoder(
-            self.img_transformer_encoder_layer, num_layers=3
-        )
-
-        self.mix_transformer_encoder_layer = TransformerEncoderLayer(
-            d_model=70, nhead=14
-        )
-        self.mix_transformer_encoder = TransformerEncoder(
-            self.mix_transformer_encoder_layer, num_layers=4
-        )
+        self.mix_layer_1 = torch.nn.Linear(120, 60)
+        self.mix_layer_2 = torch.nn.Linear(60, 3)
 
     def forward(self, image: torch.Tensor, metadata: torch.Tensor) -> torch.Tensor:
-        img = image.view(image.size(0), -1)  # flatten image
-        img = self.img_layer_1(img)
-        img = torch.nn.functional.relu(img)
-        img = self.img_bn_1(img)
-        img = self.img_layer_2(img)
-        img = torch.nn.functional.relu(img)
-        img = self.img_bn_2(img)
-        img = self.img_transformer_encoder(img)  #
-        img = self.img_layer_3(img)
-        img = torch.nn.functional.relu(img)
-        img = self.img_bn_3(img)
-        img = self.img_layer_4(img)
-        img = torch.nn.functional.relu(img)
-        img = self.img_layer_5(img)
-        img = torch.nn.functional.relu(img)
+        # To flatten the image tensor use the following line
+        # img = image.view(image.size(0), -1)
+
+        img = image.unsqueeze(1)  # add channel dimension
+        img = self.encoder(img)
 
         meta = metadata.view(metadata.size(0), -1)  # flatten metadata
         meta = self.meta_layer_1(meta)
@@ -293,17 +272,11 @@ class NavModel(torch.nn.Module):
         meta = torch.nn.functional.relu(meta)
         meta = self.meta_layer_3(meta)
 
-        mix = torch.cat((img, meta), dim=1)  # concatenate image and metadata
+        mix = torch.cat((img, meta), dim=1)  # (100 + 20) concatenate image and metadata
 
-        mix = self.mix_transformer_encoder(mix)  # transformer encoder
-        mix = torch.nn.functional.relu(mix)
         mix = self.mix_layer_1(mix)
         mix = torch.nn.functional.relu(mix)
         mix = self.mix_layer_2(mix)
-        mix = torch.nn.functional.relu(mix)
-        mix = self.mix_layer_3(mix)
-        mix = torch.nn.functional.relu(mix)
-        mix = self.mix_layer_4(mix)
 
         return mix
 
@@ -338,7 +311,7 @@ class Evaluator:
 
     def __str__(self) -> str:
         return (
-            f"\tMSE: {self.mse/ self.update_count :.4f}\n"
+            f"\tMSE: {self.mse / self.update_count :.4f}\n"
             f"\tValLoss: {self.loss / self.update_count:.4f}\n"
         )
 
@@ -368,12 +341,12 @@ class Evaluator:
 
 # %% Optimizer
 def optimizer(_model: torch.nn.Module) -> torch.optim.Optimizer:
-    return torch.optim.Adam(
-        _model.parameters(),
-        lr=config["lr"],
-        weight_decay=config["weight_decay"],
-        amsgrad=True,
-    )
+    """
+    AdamW is a stochastic optimization method that modifies the typical implementation of weight decay in Adam,
+    by decoupling weight decay from the gradient update.
+    source: https://paperswithcode.com/method/adamw#:~:text=AdamW
+    """
+    return torch.optim.AdamW(_model.parameters(), lr=config["lr"])
 
 
 # %% Criterion
@@ -460,9 +433,7 @@ if __name__ == "__main__":
     parser.add_argument("--random_seed", help="Random seed", type=int, default=42)
     parser.add_argument("--batch_size", help="Batch size", type=int, default=128)
     parser.add_argument("--epochs", help="Number of epochs", type=int, default=10)
-    parser.add_argument("--lr", help="Learning rate", type=float, default=0.001)
-    parser.add_argument("--momentum", help="Momentum", type=float, default=0.9)
-    parser.add_argument("--weight_decay", help="Weight decay", type=float, default=0.0)
+    parser.add_argument("--lr", help="Learning rate", type=float, default=3e-4)
     parser.add_argument("--num_workers", help="Number of workers", type=int, default=0)
 
     args = parser.parse_args()
@@ -515,9 +486,7 @@ if __name__ == "__main__":
     # TODO: based on nothing lr and momentum. I pulled those values out of my *head*.
     config = {
         "lr": args.lr,
-        "momentum": args.momentum,
         "epochs": args.epochs,
-        "weight_decay": args.weight_decay,
         "seed": args.random_seed,
     }
 
