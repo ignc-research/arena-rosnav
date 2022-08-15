@@ -98,6 +98,7 @@
     <param name="waypoint_generator" value="$(arg waypoint_generator)"/>
     <param name="record_only_planner" value="$(arg record_only_planner)"/>
     <param name="scenario_file" value="$(arg scenario_file)"/>
+    <param name="map_file" value="$(arg map_file)" />
   </group>
 
   <!-- use simulator-->
