@@ -58,11 +58,8 @@ class RecordedAverage:
         global pathToImageFolder
         pathToImageFolder = args.image_path
         
-        print("path to the directory containing the CSV files:", pathToCSV)  
-        
         # stored the path where the output should be written to
         outputPath = "{}/CSVaverages/".format(pathToCSV)
-        print("outputpath",outputPath)
 
         # creates the output path in the file system in case it does not exist yet
         path = pl.Path(outputPath)
@@ -70,7 +67,7 @@ class RecordedAverage:
         
         csv_name = args.csv_name
         # iterates through all csv files in the specified path
-        print('dircret csv access {}/{}'.format(pathToCSV,csv_name))
+
         for fileName in glob.glob('{}/{}'.format(pathToCSV,csv_name)):
             print("Currently working on:",fileName)
             RecordedAverage.episodeAverages = CSVFormat.returnOutputDataFrame()
@@ -103,8 +100,6 @@ class RecordedAverage:
         return worldComplexityData
 
     def combineAveragesAndWorldComplexity(averagesData, outputPath):
-        print("in combineAveragesAndWorldComplexity")
-        print(averagesData)
         # calculate world complexity of each map and append it to a dataframe
         global pathToImageFolder
         worldComplexityDf = pd.DataFrame()
@@ -396,20 +391,14 @@ class RecordedAverage:
             print("expected", expectedColumnNames)
             print("expected number of columns", len(expectedColumnNames))
             print("actual number of columns", len(csvColumnNames))
-            for columnName in expectedColumnNames:
-                if(not(columnName in csvColumnNames)):
-                    print(columnName)
             return False
         return True    
 
 if __name__ == "__main__":
 
     dirname = os.path.dirname(os.path.abspath(__file__))
-    print("dir name", dirname)
     image_path = "{}/maps".format(dirname) 
-    print("image_path", image_path)
     csv_path = "{}/sims_data_records".format(dirname)
-    print("csv_path", csv_path)
 
     parser = ArgumentParser()
     parser.add_argument(
