@@ -1,0 +1,6 @@
+image: dda0220f-613c-4121-810c-25d246fe1d62.png
+resolution: 0.5
+origin: [0.0, 0.0, 0.0]
+negate: 0
+occupied_thresh: 0.65
+free_thresh: 0.196
