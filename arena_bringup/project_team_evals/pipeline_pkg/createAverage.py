@@ -18,7 +18,7 @@ class CSVFormat:
     notUsedColumnList = ["laser_scan", "robot_lin_vel_x", "robot_lin_vel_y","robot_ang_vel","robot_orientation","robot_pos_x","robot_pos_y","action",
                    "episode", "form_dynamic_obs", "form_static_obs", 
                    "local_planner","robot_model","map"]
-    arrayColumns = ["size_dynamic_obs", "speed_dynamic_obs","size_static_obs"]
+    arrayColumns = ["size_dynamic_obs", "speed_dynamic_obs","num_vertices_static_obs"]
  
     def returnOriginalCSVColumnList():
         
@@ -34,9 +34,9 @@ class CSVFormat:
         speed_dynamic_obs_column = [append_str + str(sub) for sub in lst]
         append_str = "size_dynamic_obs_"
         size_dynamic_obs_column = [append_str + str(sub) for sub in lst]
-        append_str = "size_static_obs_"
-        size_static_obs_column = [append_str + str(sub) for sub in lst]
-        return CSVFormat.basicColumnList + CSVFormat.robotList + CSVFormat.plannerList + size_static_obs_column + size_dynamic_obs_column + speed_dynamic_obs_column
+        append_str = "num_vertices_static_obs_"
+        num_vertices_static_obs_column = [append_str + str(sub) for sub in lst]
+        return CSVFormat.basicColumnList + CSVFormat.robotList + CSVFormat.plannerList + num_vertices_static_obs_column + size_dynamic_obs_column + speed_dynamic_obs_column
     
     def returnOutputDataFrame():
         columnList = CSVFormat.returnOutputColumnList()
@@ -212,10 +212,10 @@ class RecordedAverage:
             for column in size_dynamic_obs_column:
                 obstacle_Metrics.update({column : row.loc[column]})
 
-            append_str = "size_static_obs_"
-            size_static_obs_column = [append_str + str(sub) for sub in lst]
+            append_str = "num_vertices_static_obs_"
+            num_vertices_static_obs_column = [append_str + str(sub) for sub in lst]
 
-            for column in size_static_obs_column:
+            for column in num_vertices_static_obs_column:
                 obstacle_Metrics.update({column : row.loc[column]})
 
 
@@ -361,13 +361,13 @@ class RecordedAverage:
         # Droppings ize_dynamic_obs  out of Data Frame "data"
         data=data.drop(columns="size_dynamic_obs")
         
-        # refactor size_static_obs
-        dataFrame_size_static_obs = RecordedAverage.extractArray(data, "size_static_obs")
-        # Dropping size_static_obs  out of Data Frame "data"
-        data=data.drop(columns="size_static_obs")
+        # refactor num_vertices_static_obs
+        dataFrame_num_vertices_static_obs = RecordedAverage.extractArray(data, "num_vertices_static_obs")
+        # Dropping num_vertices_static_obs  out of Data Frame "data"
+        data=data.drop(columns="num_vertices_static_obs")
         
         # Merges all Data Frames togehter
-        data = pd.concat([data, dataFrame_Speed_dynamic_obs, dataFrame_size_dynamic_obs, dataFrame_size_static_obs], axis=1)
+        data = pd.concat([data, dataFrame_Speed_dynamic_obs, dataFrame_size_dynamic_obs, dataFrame_num_vertices_static_obs], axis=1)
 
         # Creates dataFrame with all the averages
         dataFrame_averages = pd.DataFrame(data.mean().to_dict(),index=[data.index.values[-1]])
