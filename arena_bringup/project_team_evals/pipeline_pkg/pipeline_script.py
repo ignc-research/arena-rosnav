@@ -12,9 +12,9 @@ parser.add_argument(
     "--num_maps",
     action="store",
     dest="num_maps",
-    default=3,
+    default=10,
     help="How many maps do you want to create",
-    required=True,
+    required=False,
 )
 
 parser.add_argument(

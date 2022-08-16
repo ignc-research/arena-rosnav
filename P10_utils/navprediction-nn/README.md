@@ -19,8 +19,7 @@ The dataset is a collection of maps and their corresponding navigation metrics a
 In the code, the map is termed as `img` and the navigation metrics are termed as `meta` or `metadata`
 , while the navigation goals are termed as `target`.
 
-- YAML files structure is one level deep, key value pairs where the value is always a float. 
-The keys always named using snake case.
+- YAML files structure is one level deep, key value pairs where the value is always a float. The keys always named using snake case.
 - We use UUID4 as the map identifier. Additionally, every file is named as `<uuid>_<file-name>.yml`.
 - The total number of metric parameters (`metadata`) is `55` and the total number of goals (`target`) is `3`.
 - Target parameters are stored in the `<UUID4>_performance_metrics.yml`.
@@ -132,10 +131,9 @@ poetry run python main.py \
 poetry run python main.py  --help
 ```
 
-```bash
+```man
 usage: main.py [-h] [--train] [--data_root DATA_ROOT] [--log_level {DEBUG,INFO,WARNING,ERROR,CRITICAL}] [--random_seed RANDOM_SEED]
-               [--batch_size BATCH_SIZE] [--epochs EPOCHS] [--lr LR] [--momentum MOMENTUM] [--weight_decay WEIGHT_DECAY]
-               [--num_workers NUM_WORKERS]
+               [--batch_size BATCH_SIZE] [--epochs EPOCHS] [--lr LR] [--num_workers NUM_WORKERS]
 
 Navigation prediction experiment
 
@@ -152,9 +150,6 @@ options:
                         Batch size
   --epochs EPOCHS       Number of epochs
   --lr LR               Learning rate
-  --momentum MOMENTUM   Momentum
-  --weight_decay WEIGHT_DECAY
-                        Weight decay
   --num_workers NUM_WORKERS
                         Number of workers
 ```
