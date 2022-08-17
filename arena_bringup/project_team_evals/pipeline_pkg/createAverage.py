@@ -156,8 +156,8 @@ class RecordedAverage:
 
 
         csvFilename = "{}/CombinedAverages.csv".format(outputPath)
-        with open(csvFilename, 'w') as f:
-            combinedDataFrame.to_csv(f, mode='w', header=f.tell()==0, index=False)
+        with open(csvFilename, 'a') as f:
+            combinedDataFrame.to_csv(f, mode='a', header=f.tell()==0, index=False)
         RecordedAverage.createDirectoryOutput(combinedDataFrame, outputPath)
 
 
