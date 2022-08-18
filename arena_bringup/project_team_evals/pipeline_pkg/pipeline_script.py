@@ -101,8 +101,8 @@ for i in range(num_maps):
     
      #---------------------------------------------------------
     # Calculate map world complexity of new map #-------------
-    world_complexity_command = f"python3 world_complexity.py --folders_path maps"
-    os.system(world_complexity_command)
+    # world_complexity_command = f"python3 world_complexity.py --folders_path maps"
+    # os.system(world_complexity_command)
       
     
     #---------------------------------------------------------
