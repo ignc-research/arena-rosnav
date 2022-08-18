@@ -58,12 +58,9 @@ for i in range(num_maps):
     # Generate maps #-----------------------------------------
 
     map_name = str(uuid())
-    # width = randint(80, 150)
-    # height = randint(80, 150)
-    width = 80
-    height = 80
-    #map_type = choice(["indoor", "outdoor"])
-    map_type = "indoor"
+    width = randint(80, 150)
+    height = randint(80, 150)
+    map_type = choice(["indoor", "outdoor"])
     num_maps_to_generate = 1
     map_res = 0.5
     iterations = randint(80, 200)
