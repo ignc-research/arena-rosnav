@@ -5,6 +5,7 @@ import glob
 import os
 from argparse import ArgumentParser
 from find_edge import edge
+from pathlib import Path
 
 class Filter:
     def filterImages(self, inputs, output):
@@ -18,13 +19,32 @@ class Filter:
             bg = cv2.morphologyEx(image, cv2.MORPH_DILATE, se)
             out_gray = cv2.divide(image, bg, scale=255)
             out_binary = cv2.threshold(out_gray, 0, 255, cv2.THRESH_OTSU)[1]
+            border = self.rectangle(out_binary)
             if not output == None:
                 output_path = os.path.join(output, fileBase)
-                cv2.imwrite(output_path, out_binary)
+                cv2.imwrite(output_path, border)
                 print("filterd file:", fileBase)
                 print(
                     "----------------------------------------------------------------------------------"
                 )
+
+    def rectangle(self, image ):
+        row, col = image.shape[:2]
+        bottom = image[row-2:row, 0:col]
+        mean = cv2.mean(bottom)[0]
+        bordersize = 10
+        border = cv2.copyMakeBorder(
+            image,
+            top=bordersize,
+            bottom=bordersize,
+            left=bordersize,
+            right=bordersize,
+            borderType=cv2.BORDER_CONSTANT,
+            value=[0, 255, 0]
+           # Scalar(0,255,0),
+        )
+
+        return border
 
 
 def main():

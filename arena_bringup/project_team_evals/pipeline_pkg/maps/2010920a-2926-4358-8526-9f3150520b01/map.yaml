@@ -1,0 +1,6 @@
+image: 2010920a-2926-4358-8526-9f3150520b01.png
+resolution: 0.5
+origin: [0.0, 0.0, 0.0]
+negate: 0
+occupied_thresh: 0.65
+free_thresh: 0.196

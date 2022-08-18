@@ -1,0 +1,6 @@
+image: b7144dfc-9f52-47de-aca2-6b3419e44deb.png
+resolution: 0.5
+origin: [0.0, 0.0, 0.0]
+negate: 0
+occupied_thresh: 0.65
+free_thresh: 0.196

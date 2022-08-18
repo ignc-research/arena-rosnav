@@ -1,0 +1,6 @@
+image: ffb0f442-652d-4018-b54b-45060cf3683f.png
+resolution: 0.5
+origin: [0.0, 0.0, 0.0]
+negate: 0
+occupied_thresh: 0.65
+free_thresh: 0.196

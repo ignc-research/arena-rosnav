@@ -121,7 +121,7 @@ for i in range(num_maps):
 
     # Data cleaning, analysis and map complexity calculation
     # data_records_path = "../../../../forks/arena-evaluation/01_recording/project_recordings"
-
+    os.system("python3 createAverage.py --csv_name /{}/{}*.csv".format(map_name,map_name))
     # # create dir if not exists
     # # data_records_path.mkdir(parents=True, exist_ok=True)
     # # data_records_path = str(data_records_path)

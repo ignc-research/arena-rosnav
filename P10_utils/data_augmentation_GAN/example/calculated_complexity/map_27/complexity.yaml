@@ -1,10 +1,10 @@
 AngleInfo:
   mean: 165.0
-Entropy: 0.1728358146487194
-MapSize: 4500.0
+Entropy: 0.08106002917167601
+MapSize: 5780.0
 MaxEntropy: 2.321928094887362
-NumObs_Cv2: 18
-OccupancyRatio: 0.4244888888888889
+NumObs_Cv2: 17
+OccupancyRatio: 0.5519377162629757
 distance(normalized): 0.6
-distance.avg: 0.01265
-distance.variance: 1.0e-05
+distance.avg: 0.01255
+distance.variance: 7.683e-06
