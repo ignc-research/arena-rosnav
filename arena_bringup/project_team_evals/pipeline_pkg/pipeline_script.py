@@ -4,9 +4,10 @@ from uuid import uuid4 as uuid
 from pathlib import Path
 from argparse import ArgumentParser
 from random import randint, choice
-
+import cv2
 
 # Create and parse cli arguments #------------------
+
 parser = ArgumentParser()
 parser.add_argument(
     "--num_maps",
@@ -51,6 +52,7 @@ records_path = "../../../../forks/arena-evaluation/01_recording/project_recordin
 
 #---------------------------------------------------
 # Pipeline loop #-----------------------------------
+
 for i in range(num_maps):
     
     # Generate maps #-----------------------------------------
@@ -68,10 +70,7 @@ for i in range(num_maps):
 
     generate_maps_command = f"python3 cliMapGenerator.py --map_name {map_name} --width {width} --height {height} --map_type {map_type} --num_maps {num_maps_to_generate} --map_res {map_res} --save_path {maps_path} --iterations {iterations} --num_obstacles {num_obstacles} --obstacle_size {obstacle_size} --corridor_width {corridor_width}"
     os.system(generate_maps_command)
-
-    # Copy new generated map to local maps folder
-    os.system("cp -R " + maps_path + "/" + map_name + " maps")
-
+    
     #---------------------------------------------------------
     # Run simulations and record data #-----------------------
 
@@ -93,8 +92,30 @@ for i in range(num_maps):
                 roslaunch_command = f""" roslaunch arena_bringup start_arena_flatland.launch model:={robot} num_dynamic_obs:={num_dyn_obs} num_static_obs:={num_static_obs} min_dyn_vel:={dyn_obs_velocity[0]} max_dyn_vel:={dyn_obs_velocity[1]} min_dyn_radius:={dyn_obs_radius[0]} max_dyn_radius:={dyn_obs_radius[1]} min_static_num_vertices:={static_obs_vertices[0]} max_static_num_vertices:={static_obs_vertices[1]} local_planner:={planner} map_file:={map_name} task_mode:="project_eval" scenario_file:="project_eval/scenario_1.json" use_recorder:="true" show_rviz:="false" use_rviz:="false" """
                 os.system(roslaunch_command)
 
+
+    # Copy new generated map to local maps folder
+    os.system(f"mv {maps_path}/{map_name} maps")
+    
     # Copy recorded data for the new map to local sims_data_records folder
-    os.system("cp -R " + records_path + "/" + map_name + " sims_data_records")
+    os.system(f"mv {records_path}/{map_name} sims_data_records")
+    
+     #---------------------------------------------------------
+    # Calculate map world complexity of new map #-------------
+    world_complexity_command = f"python3 world_complexity.py --folders_path maps"
+    os.system(world_complexity_command)
+      
+    
+    #---------------------------------------------------------
+    # Add padding to map image to 150x150 pixels #------------
+    
+    image_path = f"maps/{map_name}/{map_name}.png"
+    img_file = cv2.imread(image_path)
+    
+    width_padding = 150 - width
+    height_padding = 150 - height
+    image = cv2.copyMakeBorder(img_file, height_padding, 0, width_padding, 0, cv2.BORDER_CONSTANT)
+    
+    cv2.imwrite(image_path, image)
 
     #---------------------------------------------------------
 
