@@ -33,3 +33,7 @@
     local-name: ../forks/arena-evaluation
     uri: https://github.com/flameryx/arena-evaluation
     version: main
+-git:
+    local-name: ../forks/arena-dnn-data-recorder
+    uri: https://github.com/flameryx/arena-dnn-data-recorder.git
+    version: master
