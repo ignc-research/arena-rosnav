@@ -58,9 +58,12 @@ for i in range(num_maps):
     # Generate maps #-----------------------------------------
 
     map_name = str(uuid())
-    width = randint(80, 150)
-    height = randint(80, 150)
-    map_type = choice(["indoor", "outdoor"])
+    # width = randint(80, 150)
+    # height = randint(80, 150)
+    width = 80
+    height = 80
+    #map_type = choice(["indoor", "outdoor"])
+    map_type = "indoor"
     num_maps_to_generate = 1
     map_res = 0.5
     iterations = randint(80, 200)
@@ -70,6 +73,18 @@ for i in range(num_maps):
 
     generate_maps_command = f"python3 cliMapGenerator.py --map_name {map_name} --width {width} --height {height} --map_type {map_type} --num_maps {num_maps_to_generate} --map_res {map_res} --save_path {maps_path} --iterations {iterations} --num_obstacles {num_obstacles} --obstacle_size {obstacle_size} --corridor_width {corridor_width}"
     os.system(generate_maps_command)
+    
+    #---------------------------------------------------------
+    # Add padding to map image to 150x150 pixels #------------
+    
+    image_path = f"{maps_path}/{map_name}/{map_name}.png"
+    img_file = cv2.imread(image_path)
+    
+    width_padding = 150 - width
+    height_padding = 150 - height
+    image = cv2.copyMakeBorder(img_file, height_padding, 0, width_padding, 0, cv2.BORDER_CONSTANT)
+    
+    cv2.imwrite(image_path, image)
     
     #---------------------------------------------------------
     # Run simulations and record data #-----------------------
@@ -98,34 +113,9 @@ for i in range(num_maps):
     
     # Copy recorded data for the new map to local sims_data_records folder
     os.system(f"mv {records_path}/{map_name} sims_data_records")
-    
-     #---------------------------------------------------------
-    # Calculate map world complexity of new map #-------------
-    # world_complexity_command = f"python3 world_complexity.py --folders_path maps"
-    # os.system(world_complexity_command)
-      
-    
+        
     #---------------------------------------------------------
-    # Add padding to map image to 150x150 pixels #------------
-    
-    image_path = f"maps/{map_name}/{map_name}.png"
-    img_file = cv2.imread(image_path)
-    
-    width_padding = 150 - width
-    height_padding = 150 - height
-    image = cv2.copyMakeBorder(img_file, height_padding, 0, width_padding, 0, cv2.BORDER_CONSTANT)
-    
-    cv2.imwrite(image_path, image)
-    #---------------------------------------------------------
-
-    # Data cleaning, analysis and map complexity calculation
-    # data_records_path = "../../../../forks/arena-evaluation/01_recording/project_recordings"
+    # Data cleaning, analysis and map complexity calculation #
     os.system("python3 createAverage.py --csv_name /{}/{}*.csv".format(map_name,map_name))
-    # # create dir if not exists
-    # # data_records_path.mkdir(parents=True, exist_ok=True)
-    # # data_records_path = str(data_records_path)
-
-    # avg_command = f"python3 createAverage.py --image_path {maps_path} --csv_path {data_records_path}"
-    # os.system(avg_command)
-
+    
     #----------------------------------------------------------
