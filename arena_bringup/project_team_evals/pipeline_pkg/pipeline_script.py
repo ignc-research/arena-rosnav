@@ -116,7 +116,6 @@ for i in range(num_maps):
     image = cv2.copyMakeBorder(img_file, height_padding, 0, width_padding, 0, cv2.BORDER_CONSTANT)
     
     cv2.imwrite(image_path, image)
-
     #---------------------------------------------------------
 
     # Data cleaning, analysis and map complexity calculation
