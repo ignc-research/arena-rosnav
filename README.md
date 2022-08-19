@@ -105,5 +105,6 @@ To test the different **Waypoint Generators**, follow the steps in [waypoint_eva
 * Data cleaning and averaging documentation: https://docs.google.com/document/d/1wnSkf4kGXR5Ys6JaabEjhCIjnBhBzP5OJ4b5gNaIeqU/edit
 * Data Evaluation documentation: https://docs.google.com/document/d/1SPvT0NHOQxZ0XChhOHRyoYz3w4AdqJyWJVIgmLazaD0/edit 
 * GAN(Generative adversarial network ) to generating more datasets: https://docs.google.com/document/d/1v8u9lKD0Fgt-JtaukYYYL__YiurIB4fq6G6mkfVzO3U/edit?usp=sharing
+
 * Bo lei Dnn architecture: https://docs.google.com/document/d/10phP5erh2vA7CvgqYxBrE1kq1_yE2FcTzYrTwhbn43w/edit
 
