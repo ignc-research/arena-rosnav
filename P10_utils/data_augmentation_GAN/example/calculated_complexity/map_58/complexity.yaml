@@ -7,4 +7,4 @@ NumObs_Cv2: 15
 OccupancyRatio: 0.5174048442906574
 distance(normalized): 0.5
 distance.avg: 0.01147
-distance.variance: 7.111e-06
+distance.variance: 1.0e-05
