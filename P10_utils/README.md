@@ -12,9 +12,10 @@ The arguments are as follows:
 - --image_path: path of dataset.
   - for generating the maps, there is in the folder data_augmentation_GAN, a folder with dataset. you can use this as a dataset or use your own maps in .png format. all maps (images) should be in one folder.
 - --output_path: path of the output folder.
+- --map_num: The number of map to be generated. 
 ### Example:
 ```bash
-python data_augmentation_GAN/gan.py --image_path /path/to/dataset --output_path /path/to/output
+python data_augmentation_GAN/gan.py --image_path /path/to/dataset --output_path /path/to/output --map_num 20
 ```
 ## Filter of maps
 Second step is to filter the generated maps. to filter the maps, the script `filter.py` should be used. 
