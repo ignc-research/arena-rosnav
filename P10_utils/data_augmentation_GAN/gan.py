@@ -1,4 +1,7 @@
 
+'''
+@author Niloufar Khorsandi
+'''
 import matplotlib.pyplot as plt
 import tensorflow as tf
 import numpy as np
@@ -7,6 +10,8 @@ from IPython import display
 import time
 import os
 from argparse import ArgumentParser
+from tensorflow.keras.models import load_model
+import uuid
 
 
 class Gan:
@@ -122,7 +127,7 @@ class Gan:
             generated_images = generatorModel(noise, training=True)
 
             real_output = discriminatorModel(images, training=True)
-            fake_output = discriminatorModel(generated_images, training=True)
+            fake_output = discriminatorModel(generated_images, training=False)
 
             gen_loss = self.lossGen(fake_output, crossEntropy)
             disc_loss = self.lossDis(real_output, fake_output, crossEntropy)
@@ -172,15 +177,21 @@ class Gan:
             self.save_output(generatorModel, epoch + 1, seed, output)
 
             if (epoch + 1) % 15 == 0:
-                checkpoint.save(file_prefix=checkpoint_prefix)
+              #  checkpoint.save(file_prefix=checkpoint_prefix)
+                pass
+
+
 
             print(f"Generating time for map {epoch + 1} is {time.time()-start}")
-
+       # generatorModel.save('/home/nilou/arena_ws/src/arena-rosnav/P10_utils/data_augmentation_GAN/trained_model.h5')
         display.clear_output(wait=True)
-        self.save_output(generatorModel, epochs, seed, output)
+       # self.save_output(generatorModel, epochs, seed, output)
+
+
 
     def save_output(self, model, epoch, test_input, output):
-        predictions = model(test_input, training=False)
+        predictions = model(test_input, training=True)
+        map_name = uuid.uuid1()
         # predictions = predictions.numpy().reshape(16,64,64,1)
         fig = plt.figure(figsize=(1.5, 1.5))
         # print(predictions)
@@ -196,7 +207,7 @@ class Gan:
                 (predictions[i] * 127.5 + 127.5).numpy().astype(np.uint8), cmap="gray"
             )
             plt.axis("off")
-        path = os.path.join(output, f"map_{epoch}.png")
+        path = os.path.join(output, f"{map_name}.png")
         plt.savefig(path)
         # plt.show()
 
@@ -220,6 +231,16 @@ def main():
         help="location to store the generated images.",
         required=True,
     )
+
+    parser.add_argument(
+        "--map_num",
+        action="store",
+        dest="map_num",
+        default=None,
+        help="Number of maps that should be generated.",
+        required=True,
+    )
+
     args = parser.parse_args()
 
     images = []
@@ -234,7 +255,8 @@ def main():
         .shuffle(60000)
     )
 
-    generatorModel = Gan().generator()
+    #generatorModel = Gan().generator()
+    generatorModel = load_model('/home/nilou/arena_ws/src/arena-rosnav/P10_utils/data_augmentation_GAN/trained_model.h5')
     noise = tf.random.normal([1, 1])
     generated_image = generatorModel(noise, training=False)
 
@@ -254,7 +276,7 @@ def main():
     generator_optimizer = tf.keras.optimizers.Adam(1e-4)
     discriminator_optimizer = tf.keras.optimizers.Adam(1e-4)
 
-    checkpoint_dir = "./training_checkpoints"
+    checkpoint_dir = "/home/nilou/arena_ws/src/arena-rosnav/P10_utils/data_augmentation_GAN/training_checkpoints"
     checkpoint_prefix = os.path.join(checkpoint_dir, "ckpt")
     checkpoint = tf.train.Checkpoint(
         generator_optimizer=generator_optimizer,
@@ -265,7 +287,7 @@ def main():
 
     results_dir = "output/"
 
-    EPOCHS = 200
+    EPOCHS = int(args.map_num)
     noise_dims = 1
     num_egs_to_generate = 1
     seed = tf.random.normal([num_egs_to_generate, noise_dims])
@@ -286,11 +308,7 @@ def main():
         args.output_path,
     )
 
-    while True:
-        new_image = generatorModel(tf.random.normal([1, 128]), training=False)
-        plt.imshow(new_image[0, :, :, :])
-        plt.axis("off")
-        plt.show()
+
 
 
 if __name__ == "__main__":
