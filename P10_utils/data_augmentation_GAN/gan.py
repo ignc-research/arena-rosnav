@@ -256,7 +256,8 @@ def main():
     )
 
     #generatorModel = Gan().generator()
-    generatorModel = load_model('/home/nilou/arena_ws/src/arena-rosnav/P10_utils/data_augmentation_GAN/trained_model.h5')
+    #generatorModel = load_model('/home/nilou/arena_ws/src/arena-rosnav/P10_utils/data_augmentation_GAN/trained_model.h5')
+    generatorModel = load_model('./trained_model.h5')
     noise = tf.random.normal([1, 1])
     generated_image = generatorModel(noise, training=False)
 
@@ -276,7 +277,8 @@ def main():
     generator_optimizer = tf.keras.optimizers.Adam(1e-4)
     discriminator_optimizer = tf.keras.optimizers.Adam(1e-4)
 
-    checkpoint_dir = "/home/nilou/arena_ws/src/arena-rosnav/P10_utils/data_augmentation_GAN/training_checkpoints"
+    #checkpoint_dir = "/home/nilou/arena_ws/src/arena-rosnav/P10_utils/data_augmentation_GAN/training_checkpoints"
+    checkpoint_dir = "./training_checkpoints"
     checkpoint_prefix = os.path.join(checkpoint_dir, "ckpt")
     checkpoint = tf.train.Checkpoint(
         generator_optimizer=generator_optimizer,
