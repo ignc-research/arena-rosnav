@@ -1,6 +1,0 @@
-image: b80cbed1-19e5-46fc-a7e2-1c00128ca605.png
-resolution: 0.5
-origin: [0.0, 0.0, 0.0]
-negate: 0
-occupied_thresh: 0.65
-free_thresh: 0.196
