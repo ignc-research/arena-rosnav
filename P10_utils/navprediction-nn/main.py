@@ -233,7 +233,7 @@ class NavModel(torch.nn.Module):
             channels=1,
             attn_layers=Encoder(
                 dim=100,
-                depth=6,
+                depth=3,
                 heads=12,
             ),
             num_classes=None,

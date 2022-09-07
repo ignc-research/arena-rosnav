@@ -8,7 +8,7 @@ of a robot moving from one point to another in a given map.
 ## Prerequisites
 - Python ~= 3.10.4
 - poetry ~= 1.1.14
-- CUDA enabled NVIDIA GPU
+- CUDA enabled NVIDIA GPU with at least 10GiB of memory
 - CUDA Toolkit Version: 11.7 
 - This code was tested on Ubuntu 22.04.1 LTS only. (jammy)
 
