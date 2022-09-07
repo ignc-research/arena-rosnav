@@ -2,11 +2,10 @@ import logging
 import sys
 from functools import wraps
 from time import time
+from rich.logging import RichHandler
 
 
-def new_logger(
-    module_name: str = None, level: str = "INFO", stream=sys.stdout
-) -> logging.Logger:
+def new_logger(module_name: str = None, level: str = "INFO", stream=sys.stdout) -> logging.Logger:
     """Initialize logger with level and return logger"""
 
     if module_name is None:
@@ -21,9 +20,10 @@ def new_logger(
     }
 
     logging.basicConfig(
-        stream=stream,
         level=levels[level],
         format=f"{module_name}: %(message)s",
+        datefmt="[%X]",
+        handlers=[RichHandler()],
     )
 
     return logging.getLogger(module_name)
