@@ -22,6 +22,7 @@ wandb = "^0.13.1"
 vit-pytorch = "^0.35.8"
 x-transformers = "^0.33.1"
 rich = "^12.5.1"
+torchinfo = "^1.7.0"
 
 [tool.poetry.dev-dependencies]
 black = {extras = ["d"], version = "^22.6.0"}

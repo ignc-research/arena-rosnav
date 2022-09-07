@@ -672,6 +672,14 @@ python-versions = ">=3.7.0"
 typing-extensions = "*"
 
 [[package]]
+name = "torchinfo"
+version = "1.7.0"
+description = "Model summary in PyTorch, based off of the original torchsummary."
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[[package]]
 name = "torchmetrics"
 version = "0.9.3"
 description = "PyTorch native Metrics"
@@ -825,7 +833,7 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "c88b5a5e74d22d41c06d38b0b13e857e8411556f3715344729e7efcba848442d"
+content-hash = "c199d5145107ecf2dd20e1762367ebfc3f2fca1244b65a3d31d0433cd823e93d"
 
 [metadata.files]
 aiohttp = [
@@ -1660,6 +1668,10 @@ torch = [
     {file = "torch-1.12.1-cp39-cp39-win_amd64.whl", hash = "sha256:f00c721f489089dc6364a01fd84906348fe02243d0af737f944fddb36003400d"},
     {file = "torch-1.12.1-cp39-none-macosx_10_9_x86_64.whl", hash = "sha256:bfec2843daa654f04fda23ba823af03e7b6f7650a873cdb726752d0e3718dada"},
     {file = "torch-1.12.1-cp39-none-macosx_11_0_arm64.whl", hash = "sha256:69fe2cae7c39ccadd65a123793d30e0db881f1c1927945519c5c17323131437e"},
+]
+torchinfo = [
+    {file = "torchinfo-1.7.0-py3-none-any.whl", hash = "sha256:23d8771d965e50cdd242327ea4669b20978db0235da46ad7889be1b321598fea"},
+    {file = "torchinfo-1.7.0.tar.gz", hash = "sha256:24cf949cc65d3926638e845e0aa949feb65f3025c58a8b8e084969bd42e30c0b"},
 ]
 torchmetrics = [
     {file = "torchmetrics-0.9.3-py3-none-any.whl", hash = "sha256:3babb9e75d223512621af69a84eabf52b621a4f768b83f86701d66d09abed80b"},
