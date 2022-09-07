@@ -8,6 +8,7 @@ import torchvision
 import argparse as ap
 import wandb as wandb
 from PIL import Image
+from torch import nn
 from tqdm.auto import tqdm
 from util import new_logger
 from typing import Union, Dict
@@ -15,7 +16,7 @@ from pathlib import Path, PosixPath
 from torchmetrics import Precision, Recall
 from torchvision.transforms import transforms
 from torch.utils.data import DataLoader, Dataset
-from x_transformers import ViTransformerWrapper, Encoder
+from x_transformers import ViTransformerWrapper, TransformerWrapper, Encoder, Decoder
 
 
 # %% Dataset
@@ -77,6 +78,11 @@ class CustomDataset(Dataset):
             meta -= self.mean_std["meta_min"]
             meta /= self.mean_std["meta_max"]
 
+            # scale to [0, 1]
+            # meta = (meta - self.mean_std["meta_min"]) / (
+            #     self.mean_std["meta_max"] - self.mean_std["meta_min"]
+            # )
+
         return img, meta, target
 
     def load_datapoint(self, idx: int) -> Dict[str, torch.Tensor]:
@@ -114,14 +120,12 @@ class CustomDataset(Dataset):
                 transforms.Normalize(
                     mean=self.mean_std["img_mean"],
                     std=self.mean_std["img_std"],
-                    inplace=False,
+                    inplace=True,
                 ),
                 # random vertical flip
                 transforms.RandomVerticalFlip(p=0.5),
                 # random horizontal flip
                 transforms.RandomHorizontalFlip(p=0.5),
-                # random rotation
-                transforms.RandomRotation(degrees=(-5, 5)),
             ]
         )
 
@@ -235,45 +239,70 @@ class NavModel(torch.nn.Module):
                 dim=100,
                 depth=3,
                 heads=12,
+                dropout=0.2,
             ),
             num_classes=None,
-            dropout=0.0,
+            dropout=0.1,
             post_emb_norm=False,
             emb_dropout=0.0,
         ).to(device)
 
-        self.meta_layer_1 = torch.nn.Linear(55, 35)
-        self.meta_layer_2 = torch.nn.Linear(35, 25)
-        self.meta_layer_3 = torch.nn.Linear(25, 20)
+        self.meta_encoder = Encoder(
+            dim=55,
+            depth=3,
+            heads=8,
+            dropout=0.2,
+        ).to(device)
 
-        self.mix_layer_1 = torch.nn.Linear(120, 60)
-        self.mix_layer_2 = torch.nn.Linear(60, 3)
+        # sigmoid activation for collision_rate and success_rate
+        self.sigmoid = torch.nn.Sigmoid()
+
+        # fully connected layers sequence for mixed input
+        self.fc = nn.Sequential(
+            nn.Linear(100 + 55, 100),
+            nn.ReLU(),
+            nn.Dropout(0.1),
+            nn.Linear(100, 80),
+            nn.ReLU(),
+            nn.Linear(80, 70),
+            nn.ReLU(),
+            nn.Linear(70, 60),
+            nn.ReLU(),
+            nn.Linear(60, 40),
+            nn.ReLU(),
+            nn.Dropout(0.1),
+            nn.Linear(40, 30),
+            nn.ReLU(),
+            nn.Linear(30, 20),
+            nn.ReLU(),
+            nn.Linear(20, 15),
+            nn.ReLU(),
+            nn.Dropout(0.1),
+            nn.Linear(15, 10),
+            nn.ReLU(),
+            nn.Linear(10, 5),
+            nn.ReLU(),
+            nn.Linear(5, 3),
+        ).to(device)
 
     def forward(self, image: torch.Tensor, metadata: torch.Tensor) -> torch.Tensor:
         # To flatten the image tensor use the following line
         # img = image.view(image.size(0), -1)
 
         img = self.encoder(image)
+        meta = self.meta_encoder(self.sigmoid(metadata).unsqueeze(1))
 
-        meta = metadata.view(metadata.size(0), -1)  # flatten metadata
-        meta = self.meta_layer_1(meta)
-        meta = torch.nn.functional.relu(meta)
-        meta = self.meta_layer_2(meta)
-        meta = torch.nn.functional.relu(meta)
-        meta = self.meta_layer_3(meta)
+        mix = torch.cat((img, meta.squeeze(1)), dim=1)  # (100 + 20) concatenate image and metadata
+        output = self.fc(mix)
 
-        mix = torch.cat((img, meta), dim=1)  # (100 + 20) concatenate image and metadata
+        # apply sigmoid activation to collision_rate and success_rate
+        output[:, 0] = self.sigmoid(output[:, 0])
+        output[:, 2] = self.sigmoid(output[:, 2])
 
-        mix = self.mix_layer_1(mix)
-        mix = torch.nn.functional.relu(mix)
-        mix = self.mix_layer_2(mix)
-
-        return mix
+        return output
 
 
 # %% Evaluation Metrics
-
-
 class Evaluator:
     def __init__(
         self,
@@ -281,10 +310,13 @@ class Evaluator:
         device: torch.device = None,
     ):
         self.mse = 0.0  # mean squared error
-        self.loss = 0.0  # loss
+        self.val_loss = 0.0  # loss
         self.update_count = 0
         self.device = device
         self.criterion = criterion
+        self.collision_rate_mse = 0
+        self.episode_duration_mse = 0
+        self.success_rate_mse = 0
 
         assert self.criterion is not None, "Criterion not set"
         assert self.device is not None, "Device not set"
@@ -295,20 +327,29 @@ class Evaluator:
 
     def update(self, preds: torch.Tensor, _target: torch.Tensor):
         self.mse += self._mse(preds, _target).item()
-        self.loss += self.criterion(preds.sigmoid(), _target.float()).item()
+        self.collision_rate_mse += self._mse(preds[:, 0], _target[:, 0]).item()
+        self.episode_duration_mse += self._mse(preds[:, 1], _target[:, 1]).item()
+        self.success_rate_mse += self._mse(preds[:, 2], _target[:, 2]).item()
+        self.val_loss += self.criterion(preds.sigmoid(), _target.float()).item()
 
         self.update_count += 1
 
     def __str__(self) -> str:
         return (
             f"\tMSE: {self.mse / self.update_count :.4f}\n"
-            f"\tValLoss: {self.loss / self.update_count:.4f}\n"
+            f"\tValidation Loss: {self.val_loss / self.update_count :.4f}\n"
+            f"\tCollision Rate MSE: {self.collision_rate_mse / self.update_count :.4f}\n"
+            f"\tEpisode Duration MSE: {self.episode_duration_mse / self.update_count :.4f}\n"
+            f"\tSuccess Rate MSE: {self.success_rate_mse / self.update_count :.4f}\n"
         )
 
     def get(self) -> Dict[str, float]:
         return {
             "mse": self.mse / self.update_count,
-            "val_loss": self.loss / self.update_count,
+            "val_loss": self.val_loss / self.update_count,
+            "collision_rate_mse": self.collision_rate_mse / self.update_count,
+            "episode_duration_mse": self.episode_duration_mse / self.update_count,
+            "success_rate_mse": self.success_rate_mse / self.update_count,
         }
 
     def evaluate(self, _model, _loader):
@@ -357,11 +398,12 @@ def train(
 ):
     _evaluator = Evaluator(criterion=_criterion, device=_device)
     _model.to(_device)
-
+    extra_log = {}
     for _epoch in tqdm(range(_epochs), desc=f"Epochs", unit="epoch", dynamic_ncols=True):
         # Training
         _model.train()  # set model to training mode
         train_loss = 0.0
+        bn = 0  # number of batches
         for img, meta, target in tqdm(
             _train_loader,
             total=len(_train_loader),
@@ -376,10 +418,37 @@ def train(
             _optimizer = optimizer(_model)
             _optimizer.zero_grad()
             _pred = _model.forward(img, meta)  # forward pass
+
+            # log target and prediction to wandb for reference
+            if bn % 100 == 0:  # log every 100 batches
+                target_keys = [
+                    "target_collision_rate",
+                    "target_episode_duration",
+                    "target_success_rate",
+                ]
+                pred_keys = [
+                    "pred_collision_rate",
+                    "pred_episode_duration",
+                    "pred_success_rate",
+                ]
+
+                batch_size = img.shape[0]  # get the batch size
+                rand = np.random.randint(0, batch_size)  # get a random index
+
+                target_values = target[rand].detach().cpu().numpy()
+                pred_values = _pred[rand].detach().cpu().numpy()
+
+                for i in range(len(target_keys)):
+                    extra_log[target_keys[i]] = target_values[i]
+                    extra_log[pred_keys[i]] = pred_values[i]
+
+                log.info(f"Sample ({bn}): {extra_log}")
+
             loss = _criterion(_pred, target)
             loss.backward()  # Compute the gradients
             _optimizer.step()  # Update the weights
             train_loss += loss.item()  # Accumulate the loss
+            bn += 1  # Increment the batch number
 
         # Validation
         __metrics = _evaluator.evaluate(_model, _val_loader)
@@ -444,9 +513,7 @@ if __name__ == "__main__":
     # %% Logging
 
     log = new_logger(
-        module_name=f"{__name__}".replace("__", ""),
         level=args.log_level,
-        stream=sys.stdout,
     )
 
     log.info(f"Arguments: {args}")
