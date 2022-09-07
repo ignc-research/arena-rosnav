@@ -88,8 +88,8 @@ class CustomDataset(Dataset):
         # convert PIL.Image to grayscale image
         img = img.convert("L")
 
-        # convert images to tensor
-        image = torch.from_numpy(np.array(img, dtype=np.float32))
+        # convert PIL.Image to torch.Tensor
+        image = transforms.ToTensor()(img)
 
         # load metadata from yaml files
         meta_dict = self.load_metadata(_dir)
@@ -253,8 +253,7 @@ class NavModel(torch.nn.Module):
         # To flatten the image tensor use the following line
         # img = image.view(image.size(0), -1)
 
-        img = image.unsqueeze(1)  # add channel dimension
-        img = self.encoder(img)
+        img = self.encoder(image)
 
         meta = metadata.view(metadata.size(0), -1)  # flatten metadata
         meta = self.meta_layer_1(meta)
