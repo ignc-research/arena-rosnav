@@ -1,3 +1,4 @@
+import os
 import re
 import sys
 import yaml
@@ -29,9 +30,7 @@ class CustomDataset(Dataset):
         _log=None,
     ):
         self.mean_std = None
-        assert type(data_root) in [
-            PosixPath
-        ], f"Source type {type(data_root)} not supported"
+        assert type(data_root) in [PosixPath], f"Source type {type(data_root)} not supported"
 
         self.source = data_root
         self.img_transform = img_transform
@@ -100,9 +99,7 @@ class CustomDataset(Dataset):
 
         # concatenate performance_metrics and other_metadata
         other_metadata = torch.from_numpy(np.array(other_metadata, dtype=np.float32))
-        performance_metrics = torch.from_numpy(
-            np.array(performance_metrics, dtype=np.float32)
-        )
+        performance_metrics = torch.from_numpy(np.array(performance_metrics, dtype=np.float32))
 
         return {
             "image": image,
@@ -131,9 +128,7 @@ class CustomDataset(Dataset):
         self.meta_transform = transforms.Compose(
             [
                 transforms.Normalize(
-                    mean=torch.tensor(self.mean_std["meta_mean"])
-                    .unsqueeze(0)
-                    .unsqueeze(0),
+                    mean=torch.tensor(self.mean_std["meta_mean"]).unsqueeze(0).unsqueeze(0),
                     std=(
                         torch.tensor(self.mean_std["meta_std"])
                         + 1e-8  # add small value to avoid division by zero
@@ -168,9 +163,7 @@ class CustomDataset(Dataset):
 
         # extract performance metrics from metadata
         performance_metrics = ["collision_rate", "episode_duration", "success_rate"]
-        performance_metrics_dict = {
-            k: v for k, v in metadata.items() if k in performance_metrics
-        }
+        performance_metrics_dict = {k: v for k, v in metadata.items() if k in performance_metrics}
 
         # Get other metadata from metadata
         other_metadata = [k for k in metadata.keys() if k not in performance_metrics]
@@ -194,9 +187,7 @@ class CustomDataset(Dataset):
         meta_max = None
         meta_min = None
 
-        for img, meta, _ in tqdm(
-            _loader, desc="Calculating mean and std", unit="batch"
-        ):
+        for img, meta, _ in tqdm(_loader, desc="Calculating mean and std", unit="batch"):
             # calculate mean and std of an image batch
             img_mean += img.mean().sum()
             img_std += img.std().sum()
@@ -368,9 +359,7 @@ def train(
     _evaluator = Evaluator(criterion=_criterion, device=_device)
     _model.to(_device)
 
-    for _epoch in tqdm(
-        range(_epochs), desc=f"Epochs", unit="epoch", dynamic_ncols=True
-    ):
+    for _epoch in tqdm(range(_epochs), desc=f"Epochs", unit="epoch", dynamic_ncols=True):
         # Training
         _model.train()  # set model to training mode
         train_loss = 0.0
@@ -397,9 +386,7 @@ def train(
         __metrics = _evaluator.evaluate(_model, _val_loader)
 
         log.debug(
-            f"\n\nMetrics:\n"
-            f"\tTrainLoss: {train_loss / len(_train_loader):.8f}\n"
-            f"{__metrics}"
+            f"\n\nMetrics:\n" f"\tTrainLoss: {train_loss / len(_train_loader):.8f}\n" f"{__metrics}"
         )
 
         _logs = {
@@ -410,6 +397,13 @@ def train(
             _logs[f"{k}"] = v
 
         _wandb_run.log(_logs, step=_epoch)
+
+        # Save model checkpoint every 10 epochs
+        if _epoch % 10 == 0:
+            # mkdir if not exists
+            if not os.path.exists(config["checkpoint_dir"]):
+                os.makedirs(config["checkpoint_dir"])
+            torch.save(_model.state_dict(), f"{config['checkpoint_dir']}/model_{_epoch}.pth")
 
 
 # %% Execution starts here
@@ -435,6 +429,12 @@ if __name__ == "__main__":
     parser.add_argument("--epochs", help="Number of epochs", type=int, default=10)
     parser.add_argument("--lr", help="Learning rate", type=float, default=3e-4)
     parser.add_argument("--num_workers", help="Number of workers", type=int, default=0)
+    parser.add_argument(
+        "--checkpoint_dir",
+        help="Checkpoint directory",
+        type=str,
+        default=str(cwd / "checkpoints"),
+    )
 
     args = parser.parse_args()
     args.data_root = Path(args.data_root)
@@ -488,6 +488,7 @@ if __name__ == "__main__":
         "lr": args.lr,
         "epochs": args.epochs,
         "seed": args.random_seed,
+        "checkpoint_dir": args.checkpoint_dir,
     }
 
     # %% wandb setup
