@@ -5,12 +5,17 @@
 This project is a neural network that predicts the success rate 
 of a robot moving from one point to another in a given map.
 
+
+## Architecture
+
+
+
 ## Prerequisites
 - Python ~= 3.10.4
 - poetry ~= 1.1.14
-- CUDA enabled NVIDIA GPU with at least 10GiB of memory
+- CUDA enabled NVIDIA GPU with at least 11GiB of memory
 - CUDA Toolkit Version: 11.7 
-- This code was tested on Ubuntu 22.04.1 LTS only. (jammy)
+- Tested on Ubuntu 22.04.1 LTS. (jammy)
 
 ## About the dataset
 

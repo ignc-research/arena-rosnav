@@ -11,6 +11,7 @@ from PIL import Image
 from torch import nn
 from tqdm.auto import tqdm
 from util import new_logger
+from torchinfo import summary
 from typing import Union, Dict
 from pathlib import Path, PosixPath
 from torchmetrics import Precision, Recall
@@ -79,9 +80,9 @@ class CustomDataset(Dataset):
             meta /= self.mean_std["meta_max"]
 
             # scale to [0, 1]
-            # meta = (meta - self.mean_std["meta_min"]) / (
-            #     self.mean_std["meta_max"] - self.mean_std["meta_min"]
-            # )
+            meta = (meta - self.mean_std["meta_min"]) / (
+                self.mean_std["meta_max"] - self.mean_std["meta_min"]
+            )
 
         return img, meta, target
 
@@ -101,7 +102,13 @@ class CustomDataset(Dataset):
         meta_dict = self.load_metadata(_dir)
 
         other_metadata = list(meta_dict["other_metadata"].values())
-        performance_metrics = list(meta_dict["performance_metrics"].values())
+
+        performance_metrics_dict = meta_dict["performance_metrics"]
+
+        # keep success_rate in performance_metrics and remove everything else
+        performance_metrics = [
+            performance_metrics_dict["success_rate"],
+        ]
 
         # concatenate performance_metrics and other_metadata
         other_metadata = torch.from_numpy(np.array(other_metadata, dtype=np.float32))
@@ -239,67 +246,79 @@ class NavModel(torch.nn.Module):
                 dim=100,
                 depth=3,
                 heads=12,
-                dropout=0.2,
+                dropout=0.1,
             ),
             num_classes=None,
             dropout=0.1,
             post_emb_norm=False,
-            emb_dropout=0.0,
+            emb_dropout=0.1,
         ).to(device)
 
         self.meta_encoder = Encoder(
             dim=55,
-            depth=3,
+            depth=6,
             heads=8,
-            dropout=0.2,
+            dropout=0.1,
         ).to(device)
 
         # sigmoid activation for collision_rate and success_rate
         self.sigmoid = torch.nn.Sigmoid()
 
-        # fully connected layers sequence for mixed input
         self.fc = nn.Sequential(
-            nn.Linear(100 + 55, 100),
+            nn.TransformerEncoderLayer(d_model=155, nhead=31, batch_first=True, dropout=0.1),
+            nn.Linear(155, 100),
             nn.ReLU(),
-            nn.Dropout(0.1),
+            nn.TransformerEncoderLayer(d_model=100, nhead=10, batch_first=True, dropout=0.1),
+            nn.Linear(100, 100),
+            nn.ReLU(),
+            nn.Dropout(0.2),
+            nn.TransformerEncoderLayer(d_model=100, nhead=10, batch_first=True, dropout=0.1),
             nn.Linear(100, 80),
             nn.ReLU(),
+            nn.TransformerEncoderLayer(d_model=80, nhead=10, batch_first=True, dropout=0.1),
             nn.Linear(80, 70),
             nn.ReLU(),
+            nn.TransformerEncoderLayer(d_model=70, nhead=10, batch_first=True, dropout=0.1),
             nn.Linear(70, 60),
             nn.ReLU(),
+            nn.TransformerEncoderLayer(d_model=60, nhead=10, batch_first=True, dropout=0.1),
             nn.Linear(60, 40),
             nn.ReLU(),
-            nn.Dropout(0.1),
-            nn.Linear(40, 30),
-            nn.ReLU(),
-            nn.Linear(30, 20),
-            nn.ReLU(),
-            nn.Linear(20, 15),
-            nn.ReLU(),
-            nn.Dropout(0.1),
-            nn.Linear(15, 10),
-            nn.ReLU(),
-            nn.Linear(10, 5),
-            nn.ReLU(),
-            nn.Linear(5, 3),
+            nn.TransformerEncoderLayer(d_model=40, nhead=10, batch_first=True),
+            nn.Linear(40, 1),
+            nn.TransformerEncoderLayer(d_model=1, nhead=1, batch_first=True),
         ).to(device)
+        # fully connected layers sequence for mixed input
 
     def forward(self, image: torch.Tensor, metadata: torch.Tensor) -> torch.Tensor:
         # To flatten the image tensor use the following line
         # img = image.view(image.size(0), -1)
 
         img = self.encoder(image)
-        meta = self.meta_encoder(self.sigmoid(metadata).unsqueeze(1))
+        meta = self.meta_encoder(metadata.unsqueeze(1))
 
         mix = torch.cat((img, meta.squeeze(1)), dim=1)  # (100 + 20) concatenate image and metadata
         output = self.fc(mix)
 
-        # apply sigmoid activation to collision_rate and success_rate
-        output[:, 0] = self.sigmoid(output[:, 0])
-        output[:, 2] = self.sigmoid(output[:, 2])
-
         return output
+
+
+# %% Criterion
+
+
+class RMSELoss(torch.nn.Module):
+    def __init__(self):
+        super(RMSELoss, self).__init__()
+
+    def forward(self, x, y):
+        mseloss = nn.MSELoss()
+        eps = 1e-6  # to avoid division by zero
+        loss = torch.sqrt(mseloss(x, y) + eps)
+        return loss
+
+
+def criterion():
+    return RMSELoss()
 
 
 # %% Evaluation Metrics
@@ -310,26 +329,23 @@ class Evaluator:
         device: torch.device = None,
     ):
         self.mse = 0.0  # mean squared error
+        self.rmse = 0.0  # root mean squared error
         self.val_loss = 0.0  # loss
         self.update_count = 0
         self.device = device
         self.criterion = criterion
-        self.collision_rate_mse = 0
-        self.episode_duration_mse = 0
-        self.success_rate_mse = 0
 
         assert self.criterion is not None, "Criterion not set"
         assert self.device is not None, "Device not set"
 
         self._mse = torch.nn.MSELoss()  # Mean Squared Error (MSE).
+        self._rmse = RMSELoss()  # Root Mean Squared Error (RMSE).
         self._precision = Precision().to(self.device)
         self._recall = Recall().to(self.device)
 
     def update(self, preds: torch.Tensor, _target: torch.Tensor):
         self.mse += self._mse(preds, _target).item()
-        self.collision_rate_mse += self._mse(preds[:, 0], _target[:, 0]).item()
-        self.episode_duration_mse += self._mse(preds[:, 1], _target[:, 1]).item()
-        self.success_rate_mse += self._mse(preds[:, 2], _target[:, 2]).item()
+        self.rmse += self._rmse(preds, _target).item()
         self.val_loss += self.criterion(preds.sigmoid(), _target.float()).item()
 
         self.update_count += 1
@@ -337,19 +353,15 @@ class Evaluator:
     def __str__(self) -> str:
         return (
             f"\tMSE: {self.mse / self.update_count :.4f}\n"
+            f"\tRMSE: {self.rmse / self.update_count :.4f}\n"
             f"\tValidation Loss: {self.val_loss / self.update_count :.4f}\n"
-            f"\tCollision Rate MSE: {self.collision_rate_mse / self.update_count :.4f}\n"
-            f"\tEpisode Duration MSE: {self.episode_duration_mse / self.update_count :.4f}\n"
-            f"\tSuccess Rate MSE: {self.success_rate_mse / self.update_count :.4f}\n"
         )
 
     def get(self) -> Dict[str, float]:
         return {
             "mse": self.mse / self.update_count,
+            "rmse": self.rmse / self.update_count,
             "val_loss": self.val_loss / self.update_count,
-            "collision_rate_mse": self.collision_rate_mse / self.update_count,
-            "episode_duration_mse": self.episode_duration_mse / self.update_count,
-            "success_rate_mse": self.success_rate_mse / self.update_count,
         }
 
     def evaluate(self, _model, _loader):
@@ -380,12 +392,6 @@ def optimizer(_model: torch.nn.Module) -> torch.optim.Optimizer:
     return torch.optim.AdamW(_model.parameters(), lr=config["lr"])
 
 
-# %% Criterion
-def criterion():
-    # HuberLoss
-    return torch.nn.HuberLoss(reduction="mean")
-
-
 # %% Training Function
 def train(
     _criterion,
@@ -398,7 +404,6 @@ def train(
 ):
     _evaluator = Evaluator(criterion=_criterion, device=_device)
     _model.to(_device)
-    extra_log = {}
     for _epoch in tqdm(range(_epochs), desc=f"Epochs", unit="epoch", dynamic_ncols=True):
         # Training
         _model.train()  # set model to training mode
@@ -419,30 +424,14 @@ def train(
             _optimizer.zero_grad()
             _pred = _model.forward(img, meta)  # forward pass
 
-            # log target and prediction to wandb for reference
-            if bn % 100 == 0:  # log every 100 batches
-                target_keys = [
-                    "target_collision_rate",
-                    "target_episode_duration",
-                    "target_success_rate",
-                ]
-                pred_keys = [
-                    "pred_collision_rate",
-                    "pred_episode_duration",
-                    "pred_success_rate",
-                ]
-
+            if bn % 10 == 0:
                 batch_size = img.shape[0]  # get the batch size
-                rand = np.random.randint(0, batch_size)  # get a random index
-
-                target_values = target[rand].detach().cpu().numpy()
-                pred_values = _pred[rand].detach().cpu().numpy()
-
-                for i in range(len(target_keys)):
-                    extra_log[target_keys[i]] = target_values[i]
-                    extra_log[pred_keys[i]] = pred_values[i]
-
-                log.info(f"Sample ({bn}): {extra_log}")
+                random_sample = np.random.randint(0, batch_size)
+                log.info(f"target: {target[random_sample].detach().cpu().numpy()[0]:.2f}")
+                log.info(f"  pred: {_pred[random_sample].detach().cpu().numpy()[0]:.2f}")
+                log.info(
+                    f" error: {target[random_sample].detach().cpu().numpy()[0] - _pred[random_sample].detach().cpu().numpy()[0]:.2f}"
+                )
 
             loss = _criterion(_pred, target)
             loss.backward()  # Compute the gradients
@@ -464,6 +453,7 @@ def train(
         for k, v in __metrics.get().items():
             _logs[f"{k}"] = v
 
+        log.info(_logs)
         _wandb_run.log(_logs, step=_epoch)
 
         # Save model checkpoint every 10 epochs
@@ -495,7 +485,7 @@ if __name__ == "__main__":
     parser.add_argument("--random_seed", help="Random seed", type=int, default=42)
     parser.add_argument("--batch_size", help="Batch size", type=int, default=128)
     parser.add_argument("--epochs", help="Number of epochs", type=int, default=10)
-    parser.add_argument("--lr", help="Learning rate", type=float, default=3e-4)
+    parser.add_argument("--lr", help="Learning rate", type=float, default=4e-3)
     parser.add_argument("--num_workers", help="Number of workers", type=int, default=0)
     parser.add_argument(
         "--checkpoint_dir",
@@ -507,13 +497,13 @@ if __name__ == "__main__":
     args = parser.parse_args()
     args.data_root = Path(args.data_root)
 
-    assert args.train or args.test, "Either train or test must be specified"
     assert args.data_root.is_dir(), "data_root must be a directory"
 
     # %% Logging
 
     log = new_logger(
         level=args.log_level,
+        module_name=f"{__name__}".replace("__", ""),
     )
 
     log.info(f"Arguments: {args}")
@@ -571,12 +561,14 @@ if __name__ == "__main__":
 
     # %% Start training
 
-    train(
-        _model=NavModel(),
-        _train_loader=train_loader,
-        _val_loader=val_loader,
-        _criterion=criterion(),
-        _wandb_run=run,
-        _device=device,
-        _epochs=args.epochs,
-    )
+    if args.train:
+        log.info("Training model...")
+        train(
+            _model=NavModel(),
+            _train_loader=train_loader,
+            _val_loader=val_loader,
+            _criterion=criterion(),
+            _wandb_run=run,
+            _device=device,
+            _epochs=args.epochs,
+        )
