@@ -8,6 +8,7 @@ import torchvision
 import argparse as ap
 import wandb as wandb
 from PIL import Image
+from matplotlib import pyplot as plt
 from torch import nn
 from tqdm.auto import tqdm
 from util import new_logger
@@ -471,7 +472,10 @@ if __name__ == "__main__":
 
     # %% Parse arguments
     parser = ap.ArgumentParser(description="Navigation prediction experiment")
-    parser.add_argument("--train", action="store_true", help="Train model")
+    # --train and --analyze are mutually exclusive
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument("--train", action="store_true", help="Train model")
+    group.add_argument("--analyze", action="store_true", help="Analyze data")
     parser.add_argument(
         "--data_root", help="Path to data root", type=str, default=str(cwd / "data")
     )
@@ -562,7 +566,7 @@ if __name__ == "__main__":
     # %% Start training
 
     if args.train:
-        log.info("Training model...")
+        log.info("=== Training ===")
         train(
             _model=NavModel(),
             _train_loader=train_loader,
@@ -572,3 +576,16 @@ if __name__ == "__main__":
             _device=device,
             _epochs=args.epochs,
         )
+    # %% Start analysis
+    if args.analyze:
+        log.info("=== Analysis ===")
+        # Plot the distribution of success_rates
+        success_rates = [x[2].item() for x in train_set]
+        # %%
+        n, bins, patches = plt.hist(success_rates, bins="auto", alpha=1, color="#f07c8e")
+        plt.xlim(xmin=0)
+        plt.grid(axis="y", alpha=0.5)
+        plt.title("Distribution of success rates")
+        plt.xlabel("Success rate")
+        plt.ylabel("Frequency")
+        plt.show()
