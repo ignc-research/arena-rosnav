@@ -1,6 +1,8 @@
 import os
 import re
 import sys
+import seaborn as sns
+import pandas as pd
 import yaml
 import torch
 import numpy as np
@@ -581,11 +583,46 @@ if __name__ == "__main__":
         log.info("=== Analysis ===")
         # Plot the distribution of success_rates
         success_rates = [x[2].item() for x in train_set]
+
+        # success_rates as pd dataframe
+        sr_df = pd.DataFrame(success_rates, columns=["success_rate"])
+        sr_df["success_rate"] = sr_df["success_rate"].apply(lambda x: round(x, 2))
+
         # %%
-        n, bins, patches = plt.hist(success_rates, bins="auto", alpha=1, color="#f07c8e")
-        plt.xlim(xmin=0)
-        plt.grid(axis="y", alpha=0.5)
-        plt.title("Distribution of success rates")
-        plt.xlabel("Success rate")
-        plt.ylabel("Frequency")
+        ax = plt.gca()
+        plt.style.use("seaborn")
+        ax.grid(False)
+
+        # Plot KDE on top of histogram
+        sns.histplot(success_rates, ax=ax, alpha=0.6, bins=18, kde=True)
+        ax.set_xlabel("Success rate")
+        ax.set_yticklabels([])
+        ax.set_ylabel("")
+        ax.set_title("Distribution of success rates")
+        ax.tick_params(left=False, bottom=False)
+
+        q = [0.2, 0.5, 0.8]
+
+        # Plot percentiles as vertical lines on the histogram for each percentile
+        for i in q:
+            ax.axvline(
+                sr_df["success_rate"].quantile(i),
+                color="#a50f15",
+                linestyle=":",
+                alpha=0.5,
+            )
+            ax.text(
+                sr_df["success_rate"].quantile(i),
+                # set height of text to 0.5 times the height of the histogram
+                (ax.get_ylim()[1] * 0.1) * i,
+                f"{i*10:.0f}th pctl",
+                color="#a50f15",
+                horizontalalignment="center",
+                verticalalignment="bottom",
+            )
+
+        # Remove spines
+        for s in ["top", "right"]:
+            ax.spines[s].set_visible(False)
+
         plt.show()
