@@ -9,12 +9,13 @@ import torchvision
 import argparse as ap
 import wandb as wandb
 from PIL import Image
-from matplotlib import pyplot as plt
 from torch import nn
 from tqdm.auto import tqdm
 from util import new_logger
+from torchinfo import summary
 from typing import Union, Dict
 from pathlib import Path, PosixPath
+from matplotlib import pyplot as plt
 from torchmetrics import Precision, Recall
 from torchvision.transforms import transforms
 from torch.utils.data import DataLoader, Dataset
@@ -592,6 +593,17 @@ if __name__ == "__main__":
         )
     # %% Start analysis
     if args.analyze:
+        log.info("=== Model Summary ===")
+        model = NavModel()
+
+        img = None
+        meta = None
+        for img, meta, target in val_loader:
+            img = img.to(device)
+            meta = meta.to(device)
+            break
+        summary(model, [img.shape, meta.shape])
+
         log.info("=== Analysis ===")
         local_target_metrics = ["success_rate", "collision_rate", "episode_duration"]
         train_set = CustomDataset(
