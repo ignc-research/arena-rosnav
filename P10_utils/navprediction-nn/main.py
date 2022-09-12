@@ -670,6 +670,9 @@ if __name__ == "__main__":
 
             plt.show()
 
+            # Save plot in assets/plots folder
+            fig.savefig(f"assets/plots/{col}.png", dpi=300)
+
         plot_distribution(df, "success_rate", "Distribution of success rates".title(), xlim=(0, 1))
         plot_distribution(df, "collision_rate", "Distribution of collision rates".title(), xlim=(0, 1))
         plot_distribution(df, "episode_duration", "Distribution of episode durations".title())

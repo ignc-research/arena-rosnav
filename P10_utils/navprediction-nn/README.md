@@ -31,6 +31,18 @@ In the code, the map is termed as `img` and the navigation metrics are termed as
 - The image dimensions are `150x150` and the image is stored as a `PNG` file.
 - The map image files always have the postfix `_map.png`. 
 
+## Dataset analysis
+
+The dataset contains 3 performance metrics for each map. The metrics are: 
+- `success_rate`
+- `collision_rate`
+- `episode_duration`
+
+We found that the `success_rate`, `collision_rate`, and `episode_duration` are not evenly distributed. Hence,
+the model learn the distribution of the dataset and not the actual performance of the robot to minimize the loss.
+
+<img src="assets/plots/success_rate.png" width="500" height="500"><img src="assets/plots/collision_rate.png" width="500" height="500"><img src="assets/plots/episode_duration.png" width="500" height="500"> \
+
 ### Dataset structure
 
 ```
