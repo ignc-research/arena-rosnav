@@ -139,17 +139,32 @@ In the code, the map is termed as `img` and the navigation metrics are termed as
 - The image dimensions are `150x150` and the image is stored as a `PNG` file.
 - The map image files always have the postfix `_map.png`. 
 
-## Dataset analysis
+## Analysis
 
 The dataset contains 3 performance metrics for each map. The metrics are: 
 - `success_rate`
 - `collision_rate`
 - `episode_duration`
 
-We found that the `success_rate`, `collision_rate`, and `episode_duration` are not evenly distributed. Hence,
-the model learn the distribution of the dataset and not the actual performance of the robot to minimize the loss.
+We found that the `success_rate`, `collision_rate`, and `episode_duration` are not evenly distributed. This is shown in the following figures.
 
 <img src="assets/plots/success_rate.png" width="500"><img src="assets/plots/collision_rate.png" width="500"><img src="assets/plots/episode_duration.png" width="500" >
+
+To simplify debugging process, we decided to use the `success_rate` as the target and to exclude the `collision_rate` 
+and `episode_duration`. After several epochs, the model predictions of the `success_rate` converged to a value in the range of 80% to 
+90% for the `success_rate` metric. This is due to the model is not able to generalize well,
+one possibility is that it's easier for the model to learn the distribution of `success_rate` than to predict 
+the behavior of the robot due to the uneven distribution of the dataset. Notice (figure: Distribution of Success Rate) 
+the `success_rate` distribution is skewed towards the right. So to minimize the error, it is enough to guess a value around 85% everytime.
+As a try to mitigate this problem, we used RMSE as the loss function instead of MSE to penalize the model for smaller errors. 
+However, the results were not satisfactory.
+
+![rmse and mse](assets/rmse-mse.png) RMSE (Root Mean Squared Error) and MSE (Mean Squared Error) for the `success_rate` metric.
+
+![Training .vs validation loss](assets/train_val_loss.png) Note: At the beginning of the training loss is lower than the validation loss. This is because the validation 
+loss is calculated on the entire validation set after each epoch, while the training loss is calculated on a batch of the training set
+during each epoch.
+
 
 ### Dataset structure
 
