@@ -1,7 +1,6 @@
 # Navigation robot prediction project
 
 ## Introduction
-
 This project is a neural network that predicts the success rate 
 of a robot moving from one point to another in a given map.
 
@@ -167,7 +166,8 @@ during each epoch.
 
 
 ### Dataset structure
-
+The dataset is stored in the `data` directory. The `data` directory contains 3 subdirectories: `train`, `val`, and `test`.
+The `train` directory contains 80% of the dataset, the `val` directory contains 10% of the dataset, and the `test` directory contains 10% of the dataset.
 ```
 .
 └── data
@@ -198,34 +198,27 @@ during each epoch.
 ```
 
 ## Setup
-
 Configure the project with environment variables:
-
 ```bash
 cp env.example .env
 ```
 
 Set up your wandb API key to the .env file:
-
 ```toml
 # Your wandb api key here. Get it from https://wandb.ai/authorize
 WANDB_API_KEY="<your-api-key>"
 ```
 
-
 Creating virtualenv:
-
 ```bash
 poetry env use python3.10
 ```
 
 Verify virtualenv:
-
 ```bash
 poetry env info
 ```
 The output should look something like this:
-
 ```bash
 Virtualenv
 Python:         3.10.6
@@ -240,13 +233,11 @@ Python:   /usr
 ```
 
 Then install dependencies:
-    
 ```bash
 poetry install
 ```
 
 ## Usage
-
 Make sure to activate the virtualenv:
 
 ```bash
@@ -255,7 +246,6 @@ poetry env info # should show the virtualenv info
 ```
 
 To train the model, run:
-
 ```bash
 poetry run python main.py \
   --train \
@@ -266,11 +256,9 @@ poetry run python main.py \
 ```
 
 ### More about the available arguments
-
 ```bash
 poetry run python main.py  --help
 ```
-
 ```man
 usage: main.py [-h] (--train | --analyze) [--data_root DATA_ROOT] [--log_level {DEBUG,INFO,WARNING,ERROR,CRITICAL}]
                [--random_seed RANDOM_SEED] [--batch_size BATCH_SIZE] [--epochs EPOCHS] [--lr LR] [--num_workers NUM_WORKERS]
@@ -299,16 +287,13 @@ options:
 ```
 
 ## Unit tests
-
 To run unit tests, run:
-
 ```bash
 poetry run pytest
 ```
 
 ## Makefile
 Check the available commands in the Makefile.
-
 For example, to run the unit tests:
 ```bash
 make test
@@ -318,3 +303,5 @@ Or to install the dependencies:
 ```bash
 make install
 ```
+
+Open the Makefile to see all the available commands.
