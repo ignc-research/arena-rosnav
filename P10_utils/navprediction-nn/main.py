@@ -1,6 +1,5 @@
 import os
 import re
-import sys
 import seaborn as sns
 import pandas as pd
 import yaml
@@ -14,13 +13,12 @@ from matplotlib import pyplot as plt
 from torch import nn
 from tqdm.auto import tqdm
 from util import new_logger
-from torchinfo import summary
 from typing import Union, Dict
 from pathlib import Path, PosixPath
 from torchmetrics import Precision, Recall
 from torchvision.transforms import transforms
 from torch.utils.data import DataLoader, Dataset
-from x_transformers import ViTransformerWrapper, TransformerWrapper, Encoder, Decoder
+from x_transformers import ViTransformerWrapper, Encoder
 
 
 # %% Dataset
@@ -33,10 +31,23 @@ class CustomDataset(Dataset):
         img_transform=None,
         meta_transform=None,
         _log=None,
+        # This is a list of performance metrics to use as targets
+        # In this case, we can use success_rate, collision_rate, and episode_duration, or any combination of them.
+        # NOTE: The order of the list is important, as it determines the order of the targets in the output tensor.
+        target_metrics: list = None,
     ):
+        self.mean_std_path = data_root / "mean_std_cache.yaml"
+        if target_metrics is None:
+            target_metrics = ["success_rate"]
         self.mean_std = None
         assert type(data_root) in [PosixPath], f"Source type {type(data_root)} not supported"
+        # target_metrics must be a subset of [success_rate, collision_rate, episode_duration]
+        assert len(target_metrics) > 0, "target_metrics must have at least one element"
+        assert all(
+            [metric in ["success_rate", "collision_rate", "episode_duration"] for metric in target_metrics]
+        ), "target_metrics must be a subset of [success_rate, collision_rate, episode_duration]"
 
+        self.target_metrics = target_metrics
         self.source = data_root
         self.img_transform = img_transform
         self.meta_transform = meta_transform
@@ -47,9 +58,7 @@ class CustomDataset(Dataset):
 
         # Count number of directories in data_root directory and set length
         # Match UUID4 directories
-        uuid4_pattern = re.compile(
-            r"^[0-9a-f]{8}-[0-9a-f]{4}-[4][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
-        )
+        uuid4_pattern = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[4][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")
 
         # delete directories that do not match UUID4 pattern
         dirs = [d for d in all_dirs if uuid4_pattern.match(d.name) is not None]
@@ -58,7 +67,15 @@ class CustomDataset(Dataset):
         self.len = len(self.dirs)
 
         self.log.info(f"Found {self.len} datapoints in {data_root}")
-        self.mean_std = self.calc_mean_std()
+
+        # load mean and std from cache
+        if self.mean_std_path.exists():
+            with open(self.mean_std_path, "r") as f:
+                self.mean_std = yaml.safe_load(f)
+        else:
+            self.log.info("No mean and std cache found, calculating...")
+            self.mean_std = self.calc_mean_std()
+            self.log.info("Done calculating mean and std")
 
     def __len__(self):
         return self.len
@@ -83,9 +100,7 @@ class CustomDataset(Dataset):
             meta /= self.mean_std["meta_max"]
 
             # scale to [0, 1]
-            meta = (meta - self.mean_std["meta_min"]) / (
-                self.mean_std["meta_max"] - self.mean_std["meta_min"]
-            )
+            meta = (meta - self.mean_std["meta_min"]) / (self.mean_std["meta_max"] - self.mean_std["meta_min"])
 
         return img, meta, target
 
@@ -109,9 +124,7 @@ class CustomDataset(Dataset):
         performance_metrics_dict = meta_dict["performance_metrics"]
 
         # keep success_rate in performance_metrics and remove everything else
-        performance_metrics = [
-            performance_metrics_dict["success_rate"],
-        ]
+        performance_metrics = [performance_metrics_dict[metric] for metric in self.target_metrics]
 
         # concatenate performance_metrics and other_metadata
         other_metadata = torch.from_numpy(np.array(other_metadata, dtype=np.float32))
@@ -143,10 +156,7 @@ class CustomDataset(Dataset):
             [
                 transforms.Normalize(
                     mean=torch.tensor(self.mean_std["meta_mean"]).unsqueeze(0).unsqueeze(0),
-                    std=(
-                        torch.tensor(self.mean_std["meta_std"])
-                        + 1e-8  # add small value to avoid division by zero
-                    )
+                    std=(torch.tensor(self.mean_std["meta_std"]) + 1e-8)  # add small value to avoid division by zero
                     .unsqueeze(0)
                     .unsqueeze(0),
                     inplace=False,
@@ -225,7 +235,7 @@ class CustomDataset(Dataset):
         meta_mean /= self.len
         meta_std /= self.len
 
-        return {
+        results = {
             "img_mean": img_mean.tolist(),
             "img_std": img_std.tolist(),
             "meta_mean": meta_mean.tolist(),
@@ -233,6 +243,12 @@ class CustomDataset(Dataset):
             "meta_max": meta_max.item(),
             "meta_min": meta_min.item(),
         }
+
+        # save mean and std to yaml file
+        with open(self.mean_std_path, "w") as f:
+            yaml.dump(results, f)
+
+        return results
 
 
 # %% Dummy Model
@@ -445,9 +461,7 @@ def train(
         # Validation
         __metrics = _evaluator.evaluate(_model, _val_loader)
 
-        log.debug(
-            f"\n\nMetrics:\n" f"\tTrainLoss: {train_loss / len(_train_loader):.8f}\n" f"{__metrics}"
-        )
+        log.debug(f"\n\nMetrics:\n" f"\tTrainLoss: {train_loss / len(_train_loader):.8f}\n" f"{__metrics}")
 
         _logs = {
             f"train_loss": train_loss / len(_train_loader),
@@ -478,9 +492,7 @@ if __name__ == "__main__":
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--train", action="store_true", help="Train model")
     group.add_argument("--analyze", action="store_true", help="Analyze data")
-    parser.add_argument(
-        "--data_root", help="Path to data root", type=str, default=str(cwd / "data")
-    )
+    parser.add_argument("--data_root", help="Path to data root", type=str, default=str(cwd / "data"))
     parser.add_argument(
         "--log_level",
         help="Log level",
@@ -581,61 +593,83 @@ if __name__ == "__main__":
     # %% Start analysis
     if args.analyze:
         log.info("=== Analysis ===")
+        local_target_metrics = ["success_rate", "collision_rate", "episode_duration"]
+        train_set = CustomDataset(
+            data_root=args.data_root / "train",
+            _log=log,
+            target_metrics=local_target_metrics,
+        )
         # Plot the distribution of success_rates
-        success_rates = [x[2].item() for x in train_set]
+        metrics = [x[2].numpy() for x in train_set]
 
         # success_rates as pd dataframe
-        sr_df = pd.DataFrame(success_rates, columns=["success_rate"])
-        sr_df["success_rate"] = sr_df["success_rate"].apply(lambda x: round(x, 2))
+        df = pd.DataFrame(metrics, columns=local_target_metrics)
+        df["success_rate"] = df["success_rate"].apply(lambda x: round(x, 2))
+        df["collision_rate"] = df["collision_rate"].apply(lambda x: round(x, 2))
+        df["episode_duration"] = df["episode_duration"].apply(lambda x: round(x, 2))
 
         # %%
 
-        # Plot the distribution of success_rates
-        ax = plt.gca()
-        color_palette = sns.color_palette("ocean_r", 3)
+        def plot_distribution(_df, col, title, xlim=None):
+            color_palette = sns.color_palette("rocket_r", 5)
+            # Plot the distribution of success_rates
+            ax = plt.gca()
+            ax.grid(False)
 
-        ax.grid(False)
-        # Plot KDE on top of histogram
-        sns.histplot(
-            success_rates,
-            ax=ax,
-            alpha=0.6,
-            bins=18,
-            kde=True,
-            color=color_palette[0],
-        )
-        sns.set_theme(style="whitegrid")
-        ax.set_xlabel("Success rate")
-        ax.set_yticklabels([])
-        ax.set_ylabel("")
-        ax.set_title("Distribution of success rates")
-        ax.tick_params(left=False, bottom=False)
-        ax.spines.left.set_visible(False)
+            # set x-axis min and max
+            if xlim:
+                ax.set_xlim(xlim)
 
-        # set plot size
-        fig = plt.gcf()
-        fig.set_size_inches(8, 8)
+            # Plot KDE on top of histogram
+            sns.set_theme(style="whitegrid")
 
-        # Calculate percentiles and annotate plot
-        q = [0.2, 0.5, 0.8]
-
-        # Plot percentiles as vertical lines on the histogram for each percentile
-        for i in q:
-            ax.axvline(
-                sr_df["success_rate"].quantile(i), linestyle=":", alpha=0.5, color=color_palette[2]
-            )
-            ax.text(
-                sr_df["success_rate"].quantile(i),
-                # set height of text to 0.5 times the height of the histogram
-                (ax.get_ylim()[1] * 0.1) * i,
-                f"{i*10:.0f}th pctl",
-                color=color_palette[1],
-                horizontalalignment="center",
-                verticalalignment="bottom",
+            xlabel = col.replace("_", " ").title()
+            ax.set_xlabel(xlabel)
+            ax.set_yticklabels([])
+            ax.set_ylabel("")
+            ax.set_title(title)
+            ax.tick_params(left=False, bottom=False)
+            ax.spines.left.set_visible(False)
+            sns.histplot(
+                _df[col],
+                ax=ax,
+                alpha=0.6,
+                bins=18,
+                kde=True,
+                color=color_palette[0],
             )
 
-        # Remove spines
-        for s in ["top", "right"]:
-            ax.spines[s].set_visible(False)
+            # set plot size
+            fig = plt.gcf()
+            fig.set_size_inches(8, 8)
 
-        plt.show()
+            # Calculate percentiles and annotate plot
+            q = [0.2, 0.5, 0.8]
+
+            # Plot percentiles as vertical lines on the histogram for each percentile
+            for i in q:
+                ax.axvline(
+                    _df[col].quantile(i),
+                    linestyle=":",
+                    alpha=0.5,
+                    color=color_palette[2],
+                )
+                ax.text(
+                    _df[col].quantile(i),
+                    # set height of text to 0.5 times the height of the histogram
+                    (ax.get_ylim()[1] * 0.1) * i,
+                    f"{i*10:.0f}th pctl",
+                    color=color_palette[1],
+                    horizontalalignment="center",
+                    verticalalignment="bottom",
+                )
+
+            # Remove spines
+            for s in ["top", "right"]:
+                ax.spines[s].set_visible(False)
+
+            plt.show()
+
+        plot_distribution(df, "success_rate", "Distribution of success rates".title(), xlim=(0, 1))
+        plot_distribution(df, "collision_rate", "Distribution of collision rates".title(), xlim=(0, 1))
+        plot_distribution(df, "episode_duration", "Distribution of episode durations".title())
