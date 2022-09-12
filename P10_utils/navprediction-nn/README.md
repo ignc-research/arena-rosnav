@@ -257,14 +257,16 @@ poetry run python main.py  --help
 ```
 
 ```man
-usage: main.py [-h] [--train] [--data_root DATA_ROOT] [--log_level {DEBUG,INFO,WARNING,ERROR,CRITICAL}] [--random_seed RANDOM_SEED]
-               [--batch_size BATCH_SIZE] [--epochs EPOCHS] [--lr LR] [--num_workers NUM_WORKERS]
+usage: main.py [-h] (--train | --analyze) [--data_root DATA_ROOT] [--log_level {DEBUG,INFO,WARNING,ERROR,CRITICAL}]
+               [--random_seed RANDOM_SEED] [--batch_size BATCH_SIZE] [--epochs EPOCHS] [--lr LR] [--num_workers NUM_WORKERS]
+               [--checkpoint_dir CHECKPOINT_DIR]
 
 Navigation prediction experiment
 
 options:
   -h, --help            show this help message and exit
   --train               Train model
+  --analyze             Analyze data
   --data_root DATA_ROOT
                         Path to data root
   --log_level {DEBUG,INFO,WARNING,ERROR,CRITICAL}
@@ -277,6 +279,8 @@ options:
   --lr LR               Learning rate
   --num_workers NUM_WORKERS
                         Number of workers
+  --checkpoint_dir CHECKPOINT_DIR
+                        Checkpoint directory
 ```
 
 ## Unit tests
