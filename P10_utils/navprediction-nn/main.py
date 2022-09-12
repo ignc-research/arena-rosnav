@@ -258,6 +258,9 @@ class NavModel(torch.nn.Module):
         super().__init__()
         self.name = "NavModel"
 
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        assert self.device == torch.device("cuda"), "GPU is not available"
+
         self.encoder = ViTransformerWrapper(
             image_size=150,
             patch_size=5,
@@ -272,14 +275,14 @@ class NavModel(torch.nn.Module):
             dropout=0.1,
             post_emb_norm=False,
             emb_dropout=0.1,
-        ).to(device)
+        ).to(self.device)
 
         self.meta_encoder = Encoder(
             dim=55,
             depth=6,
             heads=8,
             dropout=0.1,
-        ).to(device)
+        ).to(self.device)
 
         # sigmoid activation for collision_rate and success_rate
         self.sigmoid = torch.nn.Sigmoid()
@@ -307,7 +310,7 @@ class NavModel(torch.nn.Module):
             nn.TransformerEncoderLayer(d_model=40, nhead=10, batch_first=True),
             nn.Linear(40, 1),
             nn.TransformerEncoderLayer(d_model=1, nhead=1, batch_first=True),
-        ).to(device)
+        ).to(self.device)
         # fully connected layers sequence for mixed input
 
     def forward(self, image: torch.Tensor, metadata: torch.Tensor) -> torch.Tensor:

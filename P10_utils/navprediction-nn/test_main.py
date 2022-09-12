@@ -9,6 +9,9 @@ from main import CustomDataset, NavModel
 cwd = Path(__file__).parent
 val_dir = cwd / "fixtures" / "data" / "val"
 
+# set the default device of pytorch to cuda
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 
 def custom_dataset():
     assert val_dir.exists(), "Data directory does not exist"
@@ -25,7 +28,7 @@ class TestMain(TestCase):
         Test loading a batch of data from disk.
         """
         datapoint = custom_dataset().load_datapoint(idx=1)
-        assert datapoint["image"].shape == (150, 150)
+        assert datapoint["image"].shape == torch.Size([1, 150, 150])
         assert len(datapoint["metadata"].shape) == 1, "metadata should be a vector"
         assert datapoint["image"].dtype == torch.float32
         assert datapoint["metadata"].dtype == torch.float32
@@ -74,10 +77,10 @@ class TestMain(TestCase):
 
         for img, meta, target in val_loader:
             # forward pass
-            output = model(img, meta)
+            output = model(img.to(device), meta.to(device))
 
             # assert that output is a tensor
-            self.assertTrue(isinstance(output, torch.Tensor))
+            self.assertTrue(isinstance(output, torch.Tensor), "output is a tensor")
 
             break  # only run once
 
@@ -96,16 +99,8 @@ class TestMain(TestCase):
 
     def test_init_transformers(self):
         val_set = custom_dataset()
-        print(
-            f"\nimg before normalization -> Max: {val_set[0][0].max():.2f}/ Min: {val_set[0][0].min():.2f}"
-        )
-        print(
-            f"\nmeta before normalization -> Max: {val_set[0][1].max():.2f}/ Min: {val_set[0][1].min():.2f}"
-        )
+        print(f"\nimg before normalization -> Max: {val_set[0][0].max():.2f}/ Min: {val_set[0][0].min():.2f}")
+        print(f"\nmeta before normalization -> Max: {val_set[0][1].max():.2f}/ Min: {val_set[0][1].min():.2f}")
         val_set.init_transformers()
-        print(
-            f"\nimg after normalization -> Max: {val_set[0][0].max():.2f}/ Min: {val_set[0][0].min():.2f}"
-        )
-        print(
-            f"\nmeta after normalization -> Max: {val_set[0][1].max():.2f}/ Min: {val_set[0][1].min():.2f}"
-        )
+        print(f"\nimg after normalization -> Max: {val_set[0][0].max():.2f}/ Min: {val_set[0][0].min():.2f}")
+        print(f"\nmeta after normalization -> Max: {val_set[0][1].max():.2f}/ Min: {val_set[0][1].min():.2f}")
