@@ -290,3 +290,10 @@ To run unit tests, run:
 ```bash
 poetry run pytest
 ```
+
+## Makefile
+Check the available commands in the Makefile.
+
+```bash
+cat Makefile
+```
