@@ -7,7 +7,7 @@ of a robot moving from one point to another in a given map.
 
 
 ## Model architecture (Bird's eye view)
-<img src="assets/navpredict_model.png" height="500" alt="The over all architecture">
+<img src="assets/navpredict_model.png" width="900" alt="The over all architecture">
 
 
 ### Model summary
@@ -309,6 +309,12 @@ poetry run pytest
 ## Makefile
 Check the available commands in the Makefile.
 
+For example, to run the unit tests:
 ```bash
-cat Makefile
+make test
+```
+
+Or to install the dependencies:
+```bash
+make install
 ```
