@@ -228,7 +228,7 @@ The output should look something like this:
 
 ```bash
 Virtualenv
-Python:         3.10.4
+Python:         3.10.6
 Implementation: CPython
 Path:           /home/<USER>/.cache/pypoetry/virtualenvs/navprediction-AuqfrZ_x-py3.10
 Valid:          True
