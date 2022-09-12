@@ -589,34 +589,47 @@ if __name__ == "__main__":
         sr_df["success_rate"] = sr_df["success_rate"].apply(lambda x: round(x, 2))
 
         # %%
-        ax = plt.gca()
-        plt.style.use("seaborn")
-        ax.grid(False)
 
+        # Plot the distribution of success_rates
+        ax = plt.gca()
+        color_palette = sns.color_palette("ocean_r", 3)
+
+        ax.grid(False)
         # Plot KDE on top of histogram
-        sns.histplot(success_rates, ax=ax, alpha=0.6, bins=18, kde=True)
+        sns.histplot(
+            success_rates,
+            ax=ax,
+            alpha=0.6,
+            bins=18,
+            kde=True,
+            color=color_palette[0],
+        )
+        sns.set_theme(style="whitegrid")
         ax.set_xlabel("Success rate")
         ax.set_yticklabels([])
         ax.set_ylabel("")
         ax.set_title("Distribution of success rates")
         ax.tick_params(left=False, bottom=False)
+        ax.spines.left.set_visible(False)
 
+        # set plot size
+        fig = plt.gcf()
+        fig.set_size_inches(8, 8)
+
+        # Calculate percentiles and annotate plot
         q = [0.2, 0.5, 0.8]
 
         # Plot percentiles as vertical lines on the histogram for each percentile
         for i in q:
             ax.axvline(
-                sr_df["success_rate"].quantile(i),
-                color="#a50f15",
-                linestyle=":",
-                alpha=0.5,
+                sr_df["success_rate"].quantile(i), linestyle=":", alpha=0.5, color=color_palette[2]
             )
             ax.text(
                 sr_df["success_rate"].quantile(i),
                 # set height of text to 0.5 times the height of the histogram
                 (ax.get_ylim()[1] * 0.1) * i,
                 f"{i*10:.0f}th pctl",
-                color="#a50f15",
+                color=color_palette[1],
                 horizontalalignment="center",
                 verticalalignment="bottom",
             )
