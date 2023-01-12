@@ -336,6 +336,10 @@ class ObstaclesManager:
         pos_non_active_obstacle.y = self.map.info.origin.position.y - \
             resolution * self.map.info.width
 
+
+        robot_radius = rospy.get_param("radius")
+        dynamic_obstacle_max_radius = rospy.get_param("obstacles/dynamic/max_radius")
+
         for obstacle_name in active_obstacle_names:
             move_model_request = MoveModelRequest()
             move_model_request.name = obstacle_name
@@ -343,6 +347,11 @@ class ObstaclesManager:
             move_model_request.pose.x, move_model_request.pose.y, move_model_request.pose.theta = get_random_pos_on_map(
                 self._free_space_indices, self.map, 0.5, forbidden_zones)
 
+            # avoids that static obstacles will be spawned next to each other creating clots that can result in certain areas of the map to be 
+            # not accessible by the robot
+            forbidden_zones.append((move_model_request.pose.x,move_model_request.pose.y,2+dynamic_obstacle_max_radius)) #robot_radius*2
+            
+            
             self._srv_move_model(move_model_request)
 
         for non_active_obstacle_name in non_active_obstacle_names:
