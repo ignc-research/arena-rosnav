@@ -11,7 +11,7 @@ If you find this code useful, please cite our paper:
 ```
 
 # **Important Updates (01/03/2023)!:**
-We have restructured and improved and extended the whole codebase substantially. Therefore, we created a new organization at [Aren-Rosnav](https://github.com/Arena-Rosnav). Please have a look at our new organization, which contains an improved version of the 2D arena-rosnav along with a variety of other modules. As of 01/03/2023, this repository is not actively maintained anymore. 
+We have restructured, improved, and extended the whole codebase substantially. Therefore, we created a new organization at [Aren-Rosnav](https://github.com/Arena-Rosnav). Please have a look at our new organization, which contains an improved version of the 2D arena-rosnav along with a variety of other modules. As of 01/03/2023, this repository is not actively maintained anymore. 
 
 ## Description
 **Note:**
