@@ -10,6 +10,10 @@ If you find this code useful, please cite our paper:
 }
 ```
 
+# **Important Updates (01/03/2023)!:**
+We have restructured and improved and extended the whole codebase substantially. Therefore, we created a new organization at [Aren-Rosnav](https://github.com/Arena-Rosnav). Please have a look at our new organization, which contains an improved version of the 2D arena-rosnav along with a variety of other modules. As of 01/03/2023, this repository is not actively maintained anymore. 
+
+## Description
 **Note:**
 This reporsitory is part of [arena-bench](https://github.com/ignc-research/arena-bench). Please also check out our most recent [paper](https://arxiv.org/abs/2206.05728) on arena-bench. For our 3D version using Gazebo as simulation platform, please visit our [arena-rosnav-3D repo](https://github.com/ignc-research/arena-rosnav-3D). 
 
