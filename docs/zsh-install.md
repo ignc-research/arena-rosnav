@@ -24,4 +24,17 @@ Finally,
 ```
 source $HOME/.zshrc
 ```
-and follow the setup wizard
+and follow the setup wizard.
+
+Note that you have to install VIM if you dont have it yet:
+
+```
+sudo apt-get update
+sudo apt-get -y install vim
+```
+or
+
+```
+sudo apt update
+sudo apt -y install vim
+```
